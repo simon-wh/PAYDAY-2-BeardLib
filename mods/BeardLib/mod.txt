@@ -1,0 +1,24 @@
+{
+	"name" : "BeardLib",
+	"description" : "",
+	"author" : "LASTBULLET_GREAT BIG BUSHY BEARD",
+	"contact" : "simon@lastbullet.net",
+	"priority" : 500,
+	"hooks" : [
+		{ "hook_id" : "core/lib/managers/coresequencemanager", "script_path" : "BeardLibCore.lua" },
+		{ "hook_id" : "core/lib/system/coresystem", "script_path" : "CoreSystem.lua" },
+		{ "hook_id" : "core/lib/managers/viewport/environment/coreenvironmentmanager", "script_path" : "BeardLibCore.lua" },
+		{ "hook_id" : "core/lib/managers/viewport/corescriptviewport", "script_path" : "BeardLibCore.lua" },
+		{ "hook_id" : "core/lib/utils/dev/freeflight/corefreeflightmodifier", "script_path" : "BeardLibCore.lua" },
+		{ "hook_id" : "core/lib/utils/dev/freeflight/corefreeflight", "script_path" : "BeardLibCore.lua" },
+		{ "hook_id" : "lib/managers/menu/menuscenemanager", "script_path" : "BeardLibCore.lua" },
+		{ "hook_id" : "lib/managers/menu/menuinput", "script_path" : "BeardLibCore.lua" },
+		{ "hook_id" : "core/lib/setups/coresetup", "script_path" : "BeardLibCore.lua" }
+	],
+	"updates" : [
+		{
+			"revision" : 1,
+			"identifier" : "beardlib"
+		}
+	]
+}

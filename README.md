@@ -1,3 +1,3 @@
 # PAYDAY-2-BeardLib
 
-%TBD%
+Easy Payday 2 script file manipulation through LUA.
