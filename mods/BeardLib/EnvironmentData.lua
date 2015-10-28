@@ -47,7 +47,9 @@
 					BeardLib.nodes[BeardLib.EnvMenu] = nil
 				end
 				BeardLib.EnvCreatedMenus = {}
-				BeardLib:PopulateEnvMenu()
+                if BeardLib.EditorEnabled then
+                    BeardLib:PopulateEnvMenu()
+                end
 			end
 		--end
 		BeardLib.current_env = tostring(path:key())

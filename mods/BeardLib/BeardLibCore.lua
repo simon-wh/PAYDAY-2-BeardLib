@@ -11,6 +11,7 @@ if not _G.BeardLib then
 	BeardLib.JsonPath = BeardLib.JsonPathName .. "/"
 	BeardLib.CurrentViewportNo = 0
 	BeardLib.ScriptExceptions = BeardLib.ScriptExceptions or {}
+    BeardLib.EditorEnabled = true
 end
 
 BeardLib.dofiles = {
@@ -86,10 +87,7 @@ BeardLib.KeyMinMax = {
 	["color2_scale"] = {min = -15, max = 15},
 	["color0_scale"] = {min = -15, max = 15},
 	["color1_scale"] = {min = -15, max = 15}
-
-
 }
-
 
 function BeardLib:PopulateMenuNode(Key, Params, MenuID)
 	local node = BeardLib.EnvNode
@@ -174,7 +172,7 @@ end
 function BeardLib:EnvUpdate(handler, viewport, scene, script_viewport)
 	if BeardLib.NewEnvData then
 		for key, data in pairs(BeardLib.NewEnvData) do
-			if script_viewport and not data[tostring(script_viewport.__name)] or not script_viewport then
+			if handler:get_value(key) ~= data.value then
 				local parts = string.split(data.path, "-")
 				local val_to_save
 				if type(data.value) == "number" then
@@ -209,9 +207,6 @@ function BeardLib:EnvUpdate(handler, viewport, scene, script_viewport)
 					BeardLib.ModdedData[prev_meta] = BeardLib.ModdedData[prev_meta] or {}
 					BeardLib.ModdedData[prev_meta][parts[1]] = val_to_save
 				end
-                if script_viewport then
-                    data[tostring(script_viewport.__name)] = true
-                end
 			end
 		end
 		--BeardLib.NewEnvData = nil
@@ -372,7 +367,9 @@ if Hooks then
 	end)
 
 	Hooks:Add("MenuManagerSetupCustomMenus", "Base_SetupBeardLibMenu", function( menu_manager, nodes )
-		MenuHelper:NewMenu( BeardLib.EnvMenu )
+        if BeardLib.EditorEnabled then
+            MenuHelper:NewMenu( BeardLib.EnvMenu )
+        end
 		BeardLib.nodes = nodes
 	end)
 	
@@ -484,7 +481,9 @@ if Hooks then
 		end]]--
 	end
 	Hooks:Add("MenuManagerBuildCustomMenus", "Base_BuildBeardLibMenu", function( menu_manager, nodes )
-		BeardLib:PopulateEnvMenu()
+		if BeardLib.EditorEnabled then
+            BeardLib:PopulateEnvMenu()
+        end
 	end)
 	
 	Hooks:Register("BeardLibCreateCustomMenus")

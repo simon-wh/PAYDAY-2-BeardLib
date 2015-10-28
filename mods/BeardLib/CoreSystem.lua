@@ -6,6 +6,7 @@ Hooks:Register("BeardLibEnvironmentScriptData")
 getmetatable(PackageManager).script_data = function(PackManager, extension, filepath, ...)
 	--log("script_data")
 	local data, arg1, arg2, arg3, arg4
+    
 	if (BeardLib and BeardLib.ScriptExceptions and not BeardLib.ScriptExceptions[filepath:key()]) or not BeardLib or not (BeardLib and BeardLib.ScriptExceptions) then
 		data, arg1, arg2, arg3, arg4 = (PackManager:_script_data(extension, filepath, ...))
 	end
