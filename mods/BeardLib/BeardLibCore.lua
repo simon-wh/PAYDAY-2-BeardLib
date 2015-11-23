@@ -12,13 +12,18 @@ if not _G.BeardLib then
 	BeardLib.CurrentViewportNo = 0
 	BeardLib.ScriptExceptions = BeardLib.ScriptExceptions or {}
     BeardLib.EditorEnabled = true
+    BeardLib.hooks_directory = "Hooks/"
+    BeardLib.class_directory = "Classes/"
+    BeardLib.ScriptDataProcessors = {}
+    
 end
 
-BeardLib.dofiles = {
+BeardLib.classes = {
 	"EnvironmentData.lua",
 	"SequenceData.lua",
 	"MenuHelperPlus.lua",
-	"UnitPropertiesItem.lua"
+	"UnitPropertiesItem.lua",
+    "utils.lua"
 }
 
 BeardLib.hook_files = {
@@ -28,39 +33,36 @@ BeardLib.hook_files = {
 	["core/lib/setups/coresetup"] = "CoreSetup.lua",
 	["core/lib/utils/dev/freeflight/corefreeflightmodifier"] = "CoreFreeFlightModifier.lua",
 	["core/lib/utils/dev/freeflight/corefreeflight"] = "CoreFreeFlight.lua",
+	["core/lib/system/coresystem"] = "CoreSystem.lua",
 	--["core/lib/managers/viewport/environment/coreenvironmentmanager"] = "CoreEnvironmentManager.lua"
 }
 
-function table.merge(og_table, new_table)
-	for i, data in pairs(new_table) do
-		if type(data) == "table" and og_table[i] then
-			og_table[i] = table.merge(og_table[i], data)
-		else
-			og_table[i] = data
-		end
-	end
-	return og_table
-end
-
-if not BeardLib.setup then
-	for p, d in pairs(BeardLib.dofiles) do
-		dofile(ModPath .. d)
-	end
-	--BeardLib:Load_options()
-	--dofile(ModPath .. BeardLib.writeoptions)
-	BeardLib.setup = true
-	--log(tostring(file.DirectoryExists( BeardLib.JsonPathName )))
-	if not file.GetFiles(BeardLib.JsonPath) then
+function BeardLib:init()
+    if not file.GetFiles(BeardLib.JsonPath) then
 		log("Create Folder")
 		os.execute("mkdir " .. BeardLib.JsonPathName)
 	end
+    
+    --implement creation of script data class instances
+    --BeardLib.ScriptDataProcessors["base"] = ScriptDataProcessorBase:new()
+end
+
+if not BeardLib.setup then
+	for _, class in pairs(BeardLib.classes) do
+		dofile(BeardLib.mod_path .. BeardLib.class_directory .. class)
+	end
+	--BeardLib:Load_options()
+	--dofile(ModPath .. BeardLib.writeoptions)
+    BeardLib:init()
+	BeardLib.setup = true
+	--log(tostring(file.DirectoryExists( BeardLib.JsonPathName )))
 end
 
 if RequiredScript then
 	local requiredScript = RequiredScript:lower()
     log(requiredScript)
 	if BeardLib.hook_files[requiredScript] then
-		dofile( ModPath .. BeardLib.hook_files[requiredScript] )
+		dofile( BeardLib.mod_path .. BeardLib.hooks_directory .. BeardLib.hook_files[requiredScript] )
 	end
 end
 
@@ -88,6 +90,51 @@ BeardLib.KeyMinMax = {
 	["color0_scale"] = {min = -15, max = 15},
 	["color1_scale"] = {min = -15, max = 15}
 }
+
+function BeardLib:ShouldGetScriptData(filepath, extension)
+    if (BeardLib and BeardLib.ScriptExceptions and BeardLib.ScriptExceptions[filepath:key()]) then
+        return false
+    end
+    
+    return true
+end
+
+Hooks:Register("BeardLibProcessScriptData")
+Hooks:Register("BeardLibSequenceScriptData")
+Hooks:Register("BeardLibEnvironmentScriptData")
+function BeardLib:ProcessScriptData(PackManager, filepath, extension, data)
+    if extension == Idstring("environment") then
+		BeardLib.CurrentEnvKey = filepath:key()
+		for i, env_modifier in pairs(BeardLib.EnvMods) do
+			if not env_modifier.sorted then
+				table.sort(env_modifier, function(a, b) 
+					return a.priority < b.priority
+				end)
+				env_modifier.sorted = true
+			end
+		end
+		Hooks:Call("BeardLibEnvironmentScriptData", PackManager, filepath, data)
+	elseif extension == Idstring("sequence_manager") then
+		for i, seq_modifier in pairs(BeardLib.sequence_mods) do
+			if not seq_modifier.sorted then
+				table.sort(seq_modifier, function(a, b) 
+					return a.priority < b.priority
+				end)
+				seq_modifier.sorted = true
+			end
+		end
+		Hooks:Call("BeardLibSequenceScriptData", PackManager, extension, filepath, data)
+	elseif extension == Idstring("menu") then
+		if MenuHelperPlus and MenuHelperPlus:GetMenuDataFromHashedFilepath(filepath:key()) then
+			log("Give NewData")
+			data = MenuHelperPlus:GetMenuDataFromHashedFilepath(filepath:key())
+		end
+	end
+    
+    Hooks:Call("BeardLibProcessScriptData", PackManager, filepath, extension, data)
+    
+    return data
+end
 
 function BeardLib:PopulateMenuNode(Key, Params, MenuID)
 	local node = BeardLib.EnvNode
