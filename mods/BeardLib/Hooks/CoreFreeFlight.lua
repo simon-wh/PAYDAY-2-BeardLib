@@ -14,7 +14,6 @@ local FREEFLIGHT_HEADER_TEXT = "FREEFLIGHT, PRESS 'F' OR 'C'"
 local DESELECTED = Color(0.5, 0.5, 0.5)
 local SELECTED = Color(1, 1, 1)
 
-
 function FreeFlight:_setup_modifiers()
 	local FFM = CoreFreeFlightModifier.FreeFlightModifier
 	local IFFM = CoreFreeFlightModifier.InfiniteFreeFlightModifier

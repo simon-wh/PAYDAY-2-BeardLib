@@ -8,3 +8,11 @@ function table.merge(og_table, new_table)
 	end
 	return og_table
 end
+
+function string.key(str)
+    local ids = Idstring(str)
+    local key = ids:key()
+    
+    
+    return tostring(key)
+end

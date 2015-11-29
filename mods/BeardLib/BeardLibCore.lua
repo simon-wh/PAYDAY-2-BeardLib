@@ -14,11 +14,12 @@ if not _G.BeardLib then
     BeardLib.EditorEnabled = true
     BeardLib.hooks_directory = "Hooks/"
     BeardLib.class_directory = "Classes/"
-    BeardLib.ScriptDataProcessors = {}
+    BeardLib.ScriptData = {}
     
 end
 
 BeardLib.classes = {
+    "ScriptData.lua",
 	"EnvironmentData.lua",
 	"SequenceData.lua",
 	"MenuHelperPlus.lua",
@@ -44,7 +45,16 @@ function BeardLib:init()
 	end
     
     --implement creation of script data class instances
-    --BeardLib.ScriptDataProcessors["base"] = ScriptDataProcessorBase:new()
+    BeardLib.ScriptData.Sequence = SequenceData:new("BeardLibBaseSequenceDataProcessor")
+    BeardLib.ScriptData.Environment = EnvironmentData:new("BeardLibBaseEnvironmentDataProcessor")
+end
+
+function BeardLib:LoadJsonMods()
+    if file.GetFiles(BeardLib.JsonPath) then
+		for _, path in pairs(file.GetFiles(BeardLib.JsonPath)) do
+			--BeardLib:LoadScriptDataModFromJson(BeardLib.JsonPath .. path)
+		end
+	end
 end
 
 if not BeardLib.setup then
@@ -99,31 +109,11 @@ function BeardLib:ShouldGetScriptData(filepath, extension)
     return true
 end
 
+Hooks:Register("BeardLibPreProcessScriptData")
 Hooks:Register("BeardLibProcessScriptData")
-Hooks:Register("BeardLibSequenceScriptData")
-Hooks:Register("BeardLibEnvironmentScriptData")
 function BeardLib:ProcessScriptData(PackManager, filepath, extension, data)
     if extension == Idstring("environment") then
 		BeardLib.CurrentEnvKey = filepath:key()
-		for i, env_modifier in pairs(BeardLib.EnvMods) do
-			if not env_modifier.sorted then
-				table.sort(env_modifier, function(a, b) 
-					return a.priority < b.priority
-				end)
-				env_modifier.sorted = true
-			end
-		end
-		Hooks:Call("BeardLibEnvironmentScriptData", PackManager, filepath, data)
-	elseif extension == Idstring("sequence_manager") then
-		for i, seq_modifier in pairs(BeardLib.sequence_mods) do
-			if not seq_modifier.sorted then
-				table.sort(seq_modifier, function(a, b) 
-					return a.priority < b.priority
-				end)
-				seq_modifier.sorted = true
-			end
-		end
-		Hooks:Call("BeardLibSequenceScriptData", PackManager, extension, filepath, data)
 	elseif extension == Idstring("menu") then
 		if MenuHelperPlus and MenuHelperPlus:GetMenuDataFromHashedFilepath(filepath:key()) then
 			log("Give NewData")
@@ -131,6 +121,7 @@ function BeardLib:ProcessScriptData(PackManager, filepath, extension, data)
 		end
 	end
     
+    Hooks:Call("BeardLibPreProcessScriptData", PackManager, filepath, extension, data)
     Hooks:Call("BeardLibProcessScriptData", PackManager, filepath, extension, data)
     
     return data
@@ -379,18 +370,9 @@ function BeardLib:MODIDEnteredCallback()
 	local file = io.open(fileName, "w+")
 	file:write(json.encode(JsonData))
 	file:close()
-	
 end
 
 if Hooks then
-	Hooks:Add("BeardLibSequencePostInit", "BeardLibInitiateJsonMods", function()
-		if file.GetFiles(BeardLib.JsonPath) then
-			for _, path in pairs(file.GetFiles(BeardLib.JsonPath)) do
-				BeardLib:LoadScriptDataModFromJson(BeardLib.JsonPath .. path)
-			end
-		end
-	end)
-
 	if MenuSceneManager then
 		Hooks:PostHook(MenuSceneManager, "_setup_gui", "BeardLibCreateWorkspace", function(ply)
 			BeardLib:SetupWorkspace()

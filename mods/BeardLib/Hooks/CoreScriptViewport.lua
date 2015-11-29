@@ -1,5 +1,4 @@
 core:module("CoreScriptViewport")
-log("script viewport")
 _ScriptViewport = _ScriptViewport or CoreScriptViewport._ScriptViewport
 
 local BeardLib = _G.BeardLib
