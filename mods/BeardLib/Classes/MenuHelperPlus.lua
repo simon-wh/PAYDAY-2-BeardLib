@@ -51,50 +51,6 @@ function MenuHelperPlus:NewMenu(Params)
 	if Params.MergeData then
 		table.merge(self.Menus[Params.Id].menu_data, Params.MergeData)
 	end
-	
-	--[[BeardLib.AddedMenus[Idstring("gamedata/menus/editor_menu"):key()] = {
-		{
-			_meta = "menu",
-			id = "editor_menu",
-			[1] = {
-				_meta = "default_node",
-				name = "editor_main"
-			},
-			[2] = {
-				[1] = {
-					_meta = "default_item",
-					name = "resume_game"
-				},
-				[2] = {
-					_meta = "item",
-					callback = "exit_freeflight_menu",
-					name = "resume_game",
-					text_id = "menu_resume_game"
-				},
-				_meta = "node",
-				align_line = 0.75,
-				back_callback = "resume_game",
-				gui_class = "MenuNodeMainGui",
-				menu_components = "",
-				modifier = "PauseMenu",
-				name = "editor_main",
-				--refresh = "PauseMenu",
-				topic_id = "menu_ingame_menu"
-			}
-		}
-	}
-	MenuCallbackHandler.exit_freeflight_menu = function(this, item)
-		managers.menu:close_menu("menu_editor")
-	end
-	local menu_editor = {
-		name = "menu_editor",
-		id = "editor_menu",
-		content_file = "gamedata/menus/editor_menu",
-		callback_handler = MenuCallbackHandler:new(),
-		input = "MenuInput",
-		renderer = "MenuRenderer"
-	}
-	menu_manager:register_menu(menu_editor)]]--
 end
 
 function MenuHelperPlus:AddNode(MenuName, Params)

@@ -4,10 +4,9 @@ ScriptData = ScriptData or CoreClass.class()
 
 function ScriptData:init(id)
     self._id = id
-    self._type = "base"
+    self._type = "Base"
     self._mods = {}
     self._extension = nil
-    self._sorted = false
     self:AddHooks()
 end
 
@@ -21,58 +20,73 @@ function ScriptData:ProcessScriptData(data, path, extension)
     
 end
 
-function ScriptData:CreateMod(ModID, path, data, extension)
-    local pathK = path:key()
-    
-    if self._type ~= nil then
-        self._sorted = false
-    
-        self._mods[pathK] = self._mods[pathK] or {}
-        self._mods[pathK][ModID] = self._mods[pathK][ModID] or {}
-        
-        self._mods[pathK][ModID].name = ModID
-        self._mods[pathK][ModID].priority = data.priority or 0
-        table.merge(self._mods[pathK][ModID], data)
-    else
-        local extK = extension:key()
-        self._sorted = false
-        
-        self._mods[pathK] = self._mods[pathK] or {}
-        self._mods[pathK][extK] = self._mods[pathK][extK] or {}
-        
-        self._mods[pathK][extK][ModID] = self._mods[pathK][extK][ModID] or {}
-        
-        self._mods[pathK][extK][ModID].name = ModID
-        self._mods[pathK][extK][ModID].priority = data.priority or 0
-        table.merge(self._mods[pathK][extK][ModID], data)
+function ScriptData:CreateMod(data)
+    if not data then
+        BeardLib:log("Mod cannot be created without any data")
+        return
     end
+
+    local ModID = data.ID
+    local pathK = data.file:key()
+    local extK = data.extension and data.extension:key() or nil
     
+    self._sorted = false
+
+    self._mods[ModID] = self._mods[ModID] or {}
+    
+    self._mods[ModID].ID = ModID
+    self._mods[ModID].priority = data.priority or 0
+    self._mods[ModID].file_key = pathK
+    self._mods[ModID].extension_key = extK
+    
+    table.merge(self._mods[ModID], data)
 end
 
-function ScriptData:IsModRegistered(ModID, path, extension)
-    if self._mods[path:key()] and (self._mods[path:key()][ModID] or (self._mods[path:key()][extension:key()] and self._mods[path:key()][extension:key()][ModID])) then
+function ScriptData:IsModRegistered(ModID)
+    if self._mods[ModID] and self._mods[ModID].file_key then
         return true
     end
     
     return false
 end
 
-function ScriptData:SortMods()
-    for i, path_mod in pairs(self._mods) do
-        for i, extension_mod in pairs(path_mod) do
-            table.sort(extension_mod, function(a, b) 
-                return a.priority < b.priority
-            end)
-        end
-	end
+function ScriptData:GetScriptDataMods(fileKey, extKey)
+    local mods = {}
     
-    self._sorted = true
+    for ID, mod in pairs(self._mods) do
+        if mod.file_key == fileKey and (self._extension ~= nil or mod.extension_key == extKey) then
+            mods[ID] = mod
+        end
+    end
+    
+    table.sort(mods, function(a, b) 
+		return a.priority < b.priority
+	end)
+    
+    return mods
 end
 
 function ScriptData:ParseJsonData(section_data)
-
+    if not section_data then 
+        return
+    end
+    local ModID = section_data.ID
+    
+    if not ModID then
+        return
+    end
+    
+    self._mods[ModID] = self._mods[ModID] or {}
+    table.merge(self._mods[ModID], section_data)
 end
 
-function ScriptData:WriteJsonData(ModID)
-
+function ScriptData:WriteJsonData(ModID, save_path)
+    local file = io.open(save_path, "w+")
+    local mod_table = self._mods[ModID]
+    local write_tbl = {
+        [self._type] = {
+            mod_table
+        }
+    }
+    file:write(json.encode(write_tbl))
 end

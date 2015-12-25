@@ -15,7 +15,7 @@ if not _G.BeardLib then
     BeardLib.hooks_directory = "Hooks/"
     BeardLib.class_directory = "Classes/"
     BeardLib.ScriptData = {}
-    
+    BeardLib._replace_script_data = {}
 end
 
 BeardLib.classes = {
@@ -40,32 +40,69 @@ BeardLib.hook_files = {
 
 function BeardLib:init()
     if not file.GetFiles(BeardLib.JsonPath) then
-		log("Create Folder")
 		os.execute("mkdir " .. BeardLib.JsonPathName)
 	end
     
     --implement creation of script data class instances
     BeardLib.ScriptData.Sequence = SequenceData:new("BeardLibBaseSequenceDataProcessor")
     BeardLib.ScriptData.Environment = EnvironmentData:new("BeardLibBaseEnvironmentDataProcessor")
+    
+    self:LoadJsonMods()
 end
 
 function BeardLib:LoadJsonMods()
     if file.GetFiles(BeardLib.JsonPath) then
 		for _, path in pairs(file.GetFiles(BeardLib.JsonPath)) do
-			--BeardLib:LoadScriptDataModFromJson(BeardLib.JsonPath .. path)
+			BeardLib:LoadScriptDataModFromJson(BeardLib.JsonPath .. path)
 		end
 	end
+end
+
+local searchTypes = {
+    "Vector3",
+    "Rotation",
+    "Color",
+    "callback"
+}
+
+function BeardLib:ParseJsonTypes(json_data)
+    for i, data in pairs(json_data) do
+        if type(data) == "table" then
+            self:ParseJsonTypes(data)
+        elseif type(data) == "string" then
+            for _, typ in pairs(searchTypes) do
+                if string.find(data, typ) then
+                    local new_value = loadstring("return " .. data)
+                    json_data[i] = new_value()
+                    break
+                end
+            end
+        end
+    end
+end
+
+function BeardLib:LoadScriptDataModFromJson(path)
+    local file = io.open(path, 'r')
+    if not file then
+        return
+    end 
+    local data = json.decode(file:read("*all"))
+    self:ParseJsonTypes(data)
+    for i, tbl in pairs(data) do
+        if BeardLib.ScriptData[i] then
+            for no, mod_data in pairs(tbl) do
+                BeardLib.ScriptData[i]:ParseJsonData(mod_data)
+            end
+        end
+    end
 end
 
 if not BeardLib.setup then
 	for _, class in pairs(BeardLib.classes) do
 		dofile(BeardLib.mod_path .. BeardLib.class_directory .. class)
 	end
-	--BeardLib:Load_options()
-	--dofile(ModPath .. BeardLib.writeoptions)
     BeardLib:init()
 	BeardLib.setup = true
-	--log(tostring(file.DirectoryExists( BeardLib.JsonPathName )))
 end
 
 if RequiredScript then
@@ -76,15 +113,9 @@ if RequiredScript then
 	end
 end
 
-function BeardLib:log(string)
-	log("BeardLib: " .. string)
+function BeardLib:log(str)
+	log("[BeardLib] " .. str)
 end
-
---[[if not BeardLib.hook_setup then
-	Hooks:Register("BeardLibSequencePostInit")
-	Hooks:Register("BeardLibSequenceScriptData")
-	BeardLib.hook_setup = true
-end]]--
 
 BeardLib.KeyMinMax = {
 	["ambient_scale"] = {min = -0.99, max = 0.99},
@@ -116,15 +147,64 @@ function BeardLib:ProcessScriptData(PackManager, filepath, extension, data)
 		BeardLib.CurrentEnvKey = filepath:key()
 	elseif extension == Idstring("menu") then
 		if MenuHelperPlus and MenuHelperPlus:GetMenuDataFromHashedFilepath(filepath:key()) then
-			log("Give NewData")
 			data = MenuHelperPlus:GetMenuDataFromHashedFilepath(filepath:key())
 		end
 	end
+    
+    if self._replace_script_data[filepath:key()] and self._replace_script_data[filepath:key()][extension:key()] then
+        log("Replace: " .. tostring(filepath:key()))
+        SaveTable(data, "BeforeData.txt")
+        local replacementPath = self._replace_script_data[filepath:key()][extension:key()]
+        local file = io.open(replacementPath, 'r')
+        if file then
+            data = json.decode(file:read("*all"))
+        end
+        self:ScriptDataToValidTable(data)
+        SaveTable(data, "AfterData.txt")
+    end
     
     Hooks:Call("BeardLibPreProcessScriptData", PackManager, filepath, extension, data)
     Hooks:Call("BeardLibProcessScriptData", PackManager, filepath, extension, data)
     
     return data
+end
+
+local scriptDataConversion = {
+    ["position"] = "Vector3",
+    ["rotation"] = "Rotation"
+
+}
+-- Need to do quaternion to euler converison
+function BeardLib:ScriptDataToValidTable(scriptData)
+    for i, data in pairs(scriptData) do 
+        if type(data) == "table" and data["$values"] and scriptDataConversion[i] then
+            local newValue = loadstring("return " .. scriptDataConversion[i] .. "( " .. table.concat(data["$values"], ",") .. ")")
+            scriptData[i] = newValue()
+        elseif i == "$type" then
+            scriptData[i] = nil
+        elseif type(data) == "table" then
+            self:ScriptDataToValidTable(data)
+        end
+        
+        --[[if type(data) == "table" then
+            local count = 0
+            for _, _ in pairs(data) do
+                count = count + 1
+            end
+            if count == 0 then
+                scriptData[i] = nil
+            end
+        end]]--
+    end
+end
+
+function BeardLib:ReplaceScriptData(replacementPath, path, extension)
+    self._replace_script_data[path:key()] = self._replace_script_data[path:key()] or {}
+    if self._replace_script_data[path:key()][extension:key()] then
+        BeardLib:log("Filepath already replaced") --make better error string
+    end
+    
+    self._replace_script_data[path:key()][extension:key()] = replacementPath
 end
 
 function BeardLib:PopulateMenuNode(Key, Params, MenuID)
@@ -252,24 +332,14 @@ function BeardLib:EnvUpdate(handler, viewport, scene, script_viewport)
 end
 
 function BeardLib:update(t, dt)
-	if managers.viewport and managers.viewport:viewports() and (not BeardLib.AddedCallback or BeardLib.CurrentViewports ~= #managers.viewport:viewports()) then
+	--if managers.viewport and managers.viewport:viewports() and BeardLib.CurrentViewports ~= #managers.viewport:viewports() then
+	if managers.viewport and managers.viewport:viewports() then
 		for _, viewport in pairs(managers.viewport:viewports()) do
 			viewport:set_environment_editor_callback(callback(BeardLib, BeardLib, "EnvUpdate"))
 		end
-		BeardLib.AddedCallback = true
-		BeardLib.CurrentViewports = #managers.viewport:viewports()
-		log("Viewports updated")
-	end
-	BeardLib.CurrentHeistTime = BeardLib.CurrentHeistTime or 0
-	if managers.game_play_central and managers.game_play_central._heist_timer and managers.game_play_central._heist_timer.running then
-		BeardLib.AddedCallback = BeardLib.CurrentHeistTime ~= 0 and true or false
-		BeardLib.CurrentHeistTime = Application:time() - managers.game_play_central._heist_timer.start_time + managers.game_play_central._heist_timer.offset_time
-		
-		--[[BeardLib.NewEnvData = BeardLib.NewEnvData or {}
-		BeardLib.NewEnvData["3c084f67b1da34be"] = {value = 10 * BeardLib.CurrentHeistTime, skip_save = true, path = "sky_orientation/rotation"}
-		local t = os.date ("*t")]]--
-		--log(t.hour .. ":" .. t.min .. ":" .. t.sec)
-		
+		--BeardLib.AddedCallback = true
+		--BeardLib.CurrentViewports = #managers.viewport:viewports()
+		--log("Viewports updated")
 	end
 
 end

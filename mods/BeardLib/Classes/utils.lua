@@ -12,7 +12,5 @@ end
 function string.key(str)
     local ids = Idstring(str)
     local key = ids:key()
-    
-    
     return tostring(key)
 end

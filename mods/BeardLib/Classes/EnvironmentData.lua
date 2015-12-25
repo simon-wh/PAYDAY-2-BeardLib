@@ -3,6 +3,7 @@ EnvironmentData = EnvironmentData or class(ScriptData)
 function EnvironmentData:init(ID)
     self.super.init(self, ID)
     self._extension = Idstring("environment")
+    self._type = "Environment"
 end
 
 function EnvironmentData:AddHooks()
@@ -30,43 +31,35 @@ function EnvironmentData:AddHooks()
     end)
 end
 
-function EnvironmentData:CreateMod(ModID, path, data, extension)
-    self.super.CreateMod(self, ModID, path, data, extension)
-    
-    local pathK = path:key()
-    
-    self._mods[pathK][ModID].NewGroups = self._mods[pathK][ModID].NewGroups or {}
-    self._mods[pathK][ModID].ParamMods = self._mods[pathK][ModID].ParamMods or {}
-end
-
-function EnvironmentData:AddParamMods(ModID, path, params)
+function EnvironmentData:AddParamMods(ModID, params)
     if not self:IsModRegistered(ModID, path) then
         BeardLib:log("ERROR: Must create mod before attempting to add modifications (" .. ModID .. ")")
         return
     end
-    
-    self._mods[path:key()][ModID].ParamMods:merge(params)
+    self._mods[ModID].ParamMods = self._mods[ModID].ParamMods or {}
+    self._mods[ModID].ParamMods:merge(params)
 end
 
-function EnvironmentData:AddParamMod(ModID, filepath, paramPath, newValue)
+function EnvironmentData:AddParamMod(ModID, paramPath, newValue)
     if not self:IsModRegistered(ModID, filepath) then
         BeardLib:log("ERROR: Must create mod before attempting to add modifications (" .. ModID .. ")")
         return
     end
-    
-    self._mods[filepath:key()][ModID].ParamMods[paramPath] = newValue
+    self._mods[ModID].ParamMods = self._mods[ModID].ParamMods or {}
+    self._mods[ModID].ParamMods[paramPath] = newValue
 end
 
-function EnvironmentData:AddNewGroup(ModID, filepath, groupPath, data)
-    if not self:IsModRegistered(ModID, filepath) then
+function EnvironmentData:AddNewGroup(ModID, groupPath, data)
+    if not self:IsModRegistered(ModID) then
         BeardLib:log("ERROR: Must create mod before attempting to add modifications (" .. ModID .. ")")
         return
     end
-    self._mods[filepath:key()][ModID].NewGroups[groupPath] = data
+    self._mods[ModID].NewGroups = self._mods[ModID].NewGroups or {}
+    self._mods[ModID].NewGroups[groupPath] = data
 end
 
-function EnvironmentData:AddNewParam(ModID, filepath, groupPath, name, value)
-    if not self:IsModRegistered(ModID, filepath) then
+function EnvironmentData:AddNewParam(ModID, groupPath, name, value)
+    if not self:IsModRegistered(ModID) then
         BeardLib:log("ERROR: Must create mod before attempting to add modifications (" .. ModID .. ")")
         return
     end
@@ -77,24 +70,12 @@ function EnvironmentData:AddNewParam(ModID, filepath, groupPath, name, value)
         value = value
     }
     
-    self._mods[filepath:key()][ModID].NewGroups[groupPath] = param
-end
-
-function EnvironmentData:SortMods()
-    for i, env_modifier in pairs(self._mods) do
-        table.sort(env_modifier, function(a, b) 
-			return a.priority < b.priority
-		end)
-	end
-    self._sorted = true
+    self._mods[ModID].NewGroups = self._mods[ModID].NewGroups or {}
+    self._mods[ModID].NewGroups[groupPath] = param
 end
 
 function EnvironmentData:ProcessScriptData(data, path, extension, name)
-    if not self._sorted then
-        self:SortMods()
-    end
-    
-    local mods = self._mods[path:key()]
+    local mods = self:GetScriptDataMods(path:key(), extension:key())
     
     for _, sub_data in ipairs(data) do
         if sub_data._meta == "param" then
@@ -135,17 +116,3 @@ function EnvironmentData:CreateNewEnvGroup(data, newgroup)
     local max_value = table.maxn(data)
     data[max_value + 1] = newgroup
 end
-
---[[function EnvironmentData:_load_env_data(data_path, env_data, raw_data)
-    for _, sub_raw_data in ipairs(raw_data) do
-        if sub_raw_data._meta == "param" then
-            local next_data_path = data_path and data_path .. "/" .. sub_raw_data.key or sub_raw_data.key
-            local next_data_path_key = Idstring(next_data_path):key()
-            env_data[next_data_path_key] = {value = sub_raw_data.value, path = next_data_path, display_name = raw_data._meta .. "/" .. sub_raw_data.key}
-            --self:PopulateMenuNode(raw_data._meta, sub_raw_data, next_data_path_key)
-        else
-            local next_data_path = data_path and data_path .. "/" .. sub_raw_data._meta or sub_raw_data._meta
-            self:_load_env_data(next_data_path, env_data, sub_raw_data)
-        end
-    end
-end]]--

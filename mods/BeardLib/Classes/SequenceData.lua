@@ -2,69 +2,45 @@ SequenceData = SequenceData or class(ScriptData)
 
 function SequenceData:init(ID)
     self.super.init(self, ID)
-    self._type = "sequence"
+    self._type = "Sequence"
     self._extension = Idstring("sequence_manager")
 end
 
-function SequenceData:CreateMod(ModID, path, data, extension)
-    self.super.CreateMod(self, ModID, path, data, extension)
-    local pathK = path:key()
-    
-    self._mods[pathK][ModID].SequenceMods = self._mods[pathK][ModID].SequenceMods or {}
-    self._mods[pathK][ModID].NewSequences = self._mods[pathK][ModID].NewSequences or {}
-end
 	
-function SequenceData:AddSequenceMod(ModID, SequenceFile, SequenceName, data)
-    local seqK = SequenceFile:key()
-    
-    if not self:IsModRegistered() then
+function SequenceData:AddSequenceMod(ModID, SequenceName, data)
+    if not self:IsModRegistered(ModID) then
 		BeardLib:log("ERROR: SequenceMod ID: " .. ModID .. " not registered")
 		return
 	end
-    
-	if self._mods[seqK][ModID].SequenceMods[SequenceName] then
-		table.merge(self._mods[seqK][ModID].SequenceMods[SequenceName], Data)
-	else
-		self._mods[seqK][ModID].SequenceMods[SequenceName] = Data
-	end
+    self._mods[ModID].SequenceMods = self._mods[ModID].SequenceMods or {}
+    self._mods[ModID].SequenceMods[SequenceName] = self._mods[ModID].SequenceMods[SequenceName] or {}
+    table.merge(self._mods[ModID].SequenceMods[SequenceName], Data)
 end
 	
-function SequenceData:AddSequence(ModID, Data, SequenceFile)
-    local seqK = SequenceFile:key()
-    
-    if not self:IsModRegistered() then
+function SequenceData:AddSequence(ModID, data)
+    if not self:IsModRegistered(ModID) then
 		BeardLib:log("ERROR: SequenceMod ID: " .. ModID .. " not registered")
 		return
 	end
-    
-    local new_sequence = {}
-    
-    new_sequence:merge(Data)
-    
-    table.insert(self._mods[seqK][ModID].NewSequences, new_sequence)
-	--self._mods[seqK][ModID].new_data[(#self._mods[seqK][ModID].new_data) + 1] = Data
+    self._mods[ModID].NewSequences = self._mods[ModID].NewSequences or {}
+    table.insert(self._mods[seqK][ModID].NewSequences, data)
 end
 
 function SequenceData:ProcessScriptData(data, path, extension)
     if extension ~= self._extension then
         return
     end
-
-    if not self._sorted then
-        self:SortMods()
-    end
+    
     
     local pathK = path:key()
 
-	local merge_data = self._mods[pathK]
-	if not merge_data then
-		return
-	end
+	local merge_data = self:GetScriptDataMods(pathK, extension:key())
     
 	for name, group in pairs(data) do
 		if type(group) == "table" then
 			BeardLib.CurrentGroupName = name
 			for _, mod in pairs(merge_data) do
+                log(mod.ID)
 				if type(mod) == "table" then
 					if not mod.use_callback or (mod.use_callback and mod.use_callback()) then
 						if mod.NewSequences then
@@ -80,15 +56,6 @@ function SequenceData:ProcessScriptData(data, path, extension)
 			end
 		end
 	end
-end
-
-function SequenceData:SortMods()
-    for i, seq_modifier in pairs(self._mods) do
-        table.sort(seq_modifier, function(a, b) 
-			return a.priority < b.priority
-		end)
-	end
-    self._sorted = true
 end
 		
 function SequenceData:ApplySequenceMod(group_data, SequenceMods)
