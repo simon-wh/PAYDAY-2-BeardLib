@@ -14,3 +14,37 @@ function string.key(str)
     local key = ids:key()
     return tostring(key)
 end
+
+function math.AngleToRadian(angle)
+    return angle * math.pi() / 180
+end
+
+function math.RadianToAngle(radian)
+    return radian * 180 / math.pi()
+end
+
+function math.RadiansToAngles(radians)
+    local ang = {}
+    for i = 1, #radians do
+        ang[i] = math.RadianToAngle(radians[i])
+    end
+    
+    return ang
+end
+
+function math.EulerToQuarternion(x, y, z)
+    local quad = {
+        math.cos(z / 2) * math.cos(y / 2) * math.cos(x / 2) + math.sin(z / 2) * math.sin(y / 2) * math.sin(x / 2),
+        math.sin(z / 2) * math.cos(y / 2) * math.cos(x / 2) - math.cos(z / 2) * math.sin(y / 2) * math.sin(x / 2),
+        math.cos(z / 2) * math.sin(y / 2) * math.cos(x / 2) + math.sin(z / 2) * math.cos(y / 2) * math.sin(x / 2),
+        math.cos(z / 2) * math.cos(y / 2) * math.sin(x / 2) - math.sin(z / 2) * math.sin(y / 2) * math.cos(x / 2),
+    }
+    return quad
+end
+
+function math.QuaternionToEuler(x, y, z, w)
+    local yaw = math.atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z))
+    local pitch = math.asin(2 * (w * y - z * x))
+    local roll = math.atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y))
+    return Rotation(yaw, pitch, roll)
+end

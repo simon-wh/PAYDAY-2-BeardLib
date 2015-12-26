@@ -171,7 +171,7 @@ end
 
 local scriptDataConversion = {
     ["position"] = "Vector3",
-    ["rotation"] = "Rotation"
+    ["rotation"] = "math.QuaternionToEuler"
 
 }
 -- Need to do quaternion to euler converison
