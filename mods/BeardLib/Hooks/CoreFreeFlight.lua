@@ -343,7 +343,7 @@ function FreeFlight:enable()
 		if managers.enemy then
 			managers.enemy:set_gfx_lod_enabled(false)
 		end
-		managers.menu:open_menu("menu_editor")
+		--managers.menu:open_menu("menu_editor")
 	end
 end
 
@@ -386,4 +386,10 @@ end
 function FreeFlight:_position_debug()
 	local p = self._camera_pos
 	log("CAMERA POSITION: " .. tostring(p))
+    if self._selected_unit then
+        log("Unit Pos: " .. tostring(self._selected_unit:position()))
+        log("Unit Rot: " .. tostring(self._selected_unit:rotation()))
+    end
+    
+    --self:_set_camera(Vector3(-2746.67, 27.8551, 639.16), Rotation(-90.1312, -9.9399, 4.26887e-007))
 end

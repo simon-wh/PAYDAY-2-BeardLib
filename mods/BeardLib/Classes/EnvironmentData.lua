@@ -17,12 +17,10 @@ function EnvironmentData:AddHooks()
             --Probably should make it work with multiple environments in one heist
             --Also should take data from the feeders so it is accurate
             if BeardLib.nodes then
-                MenuHelper:NewMenu( BeardLib.EnvMenu )
                 if BeardLib.nodes[BeardLib.EnvMenu] then
-                    --BeardLib.nodes[BeardLib.EnvMenu]:clean_items()
-                    BeardLib.nodes[BeardLib.EnvMenu] = nil
+                    BeardLib.nodes[BeardLib.EnvMenu]:clean_items()
                 end
-                BeardLib.EnvCreatedMenus = {}
+                
                 if BeardLib.EditorEnabled then
                     BeardLib:PopulateEnvMenu()
                 end
@@ -91,7 +89,7 @@ function EnvironmentData:ProcessScriptData(data, path, extension, name)
                 end
             end
             
-            local next_data_path_key = Idstring(next_data_path):key()
+            local next_data_path_key = next_data_path:key()
             BeardLib.env_data[next_data_path_key] = {value = sub_data.value, path = next_data_path, display_name = data._meta .. "/" .. sub_data.key}
         else
             local next_data_path = name and name .. "/" .. sub_data._meta or sub_data._meta

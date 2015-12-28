@@ -1,197 +1,200 @@
 _G.MenuHelperPlus = _G.MenuHelperPlus or {}
 
-function MenuHelperPlus:NewMenu(Params)
+function MenuHelperPlus:NewMenu(params)
 	self.Menus = self.Menus or {}
-	local CallbackHandler = CoreSerialize.string_to_classtable(Params.CallbackHandler or "MenuCallbackHandler")
-	self.Menus[Params.Id] = {
+	local callback_handler = CoreSerialize.string_to_classtable(params.callback_handler or "MenuCallbackHandler")
+	self.Menus[params.id] = {
 		menu_data = {
 			_meta = "menues",
 			[1] = {
 				_meta = "menu",
-				id = Params.Id,
+				id = params.id,
 				[1] = {
 					_meta = "default_node",
-					name = Params.InitNode.Name
+					name = params.init_node.name
 				},
 				[2] = {
 					_meta = "node",
-					align_line = Params.InitNode.AlignLine or 0.75,
-					back_callback = Params.InitNode.BackCallback,
-					gui_class = Params.InitNode.GuiClass or "MenuNodeMainGui",
-					menu_components = Params.InitNode.MenuComponents or "",
-					modifier = Params.InitNode.Modifier,
-					name = Params.InitNode.Name,
-					refresh = Params.InitNode.Refresh,
-					topic_id = Params.InitNode.TopicId
+					align_line = params.init_node.align_line or 0.75,
+					back_callback = params.init_node.back_callback,
+					gui_class = params.init_node.gui_class or "MenuNodeMainGui",
+					menu_components = params.init_node.menu_components or "",
+					modifier = params.init_node.modifier,
+					name = params.init_node.name,
+					refresh = params.init_node.refresh,
+					topic_id = params.init_node.topic_id
 				}
 			}
 		},
 		register_data = {
-			name = Params.Name,
-			id = Params.Id,
-			content_file = Params.FakePath,
-			callback_handler = CallbackHandler,
-			input = Params.Input or "MenuInput",
-			renderer = Params.Renderer or "MenuRenderer"
+			name = params.name,
+			id = params.id,
+			content_file = params.fake_path,
+			callback_handler = callback_handler,
+			input = params.input or "MenuInput",
+			renderer = params.renderer or "MenuRenderer"
 		},
-		FakePath = Params.FakePath
+		fake_path = params.fake_path
 	}
-	BeardLib.ScriptExceptions[Idstring(Params.FakePath):key()] = true
+	BeardLib.ScriptExceptions[Idstring(params.fake_path):key()] = BeardLib.ScriptExceptions[Idstring(params.fake_path):key()] or {}
+	BeardLib.ScriptExceptions[Idstring(params.fake_path):key()][Idstring("menu"):key()] = true
 	
-	if Params.InitNode.Legends then
-		for i, legend in pairs(Params.InitNode.Legends) do
-			self:CreateAndInsertLegendData(self.Menus[Params.Id].menu_data[1][2], legend)
+	if params.init_node.legends then
+		for i, legend in pairs(params.init_node.legends) do
+			self:CreateAndInsertLegendData(self.Menus[params.id].menu_data[1][2], legend)
 		end
 	end
 	
-	if Params.InitNode.MergeData then
-		table.merge(self.Menus[Params.Id].menu_data[1][2], Params.InitNode.MergeData)
+	if params.init_node.merge_data then
+		table.merge(self.Menus[params.id].menu_data[1][2], params.init_node.merge_data)
 	end
 	
-	if Params.MergeData then
-		table.merge(self.Menus[Params.Id].menu_data, Params.MergeData)
+	if params.merge_data then
+		table.merge(self.Menus[params.id].menu_data, params.merge_data)
 	end
 end
 
-function MenuHelperPlus:AddNode(MenuName, Params)
-	local RegisteredMenu = managers.menu._registered_menus[MenuName]
+function MenuHelperPlus:NewNode(Menuname, params)
+	local RegisteredMenu = managers.menu._registered_menus[Menuname or managers.menu._is_start_menu and "menu_main" or "menu_pause"]
 	if not RegisteredMenu then
 		return
 	end
 	local nodes = RegisteredMenu.logic._data._nodes
 	
-	local arugements = {
+	local paramaters = {
 		_meta = "node",
-		align_line = Params.AlignLine or 0.75,
-		back_callback = Params.BackCallback,
-		gui_class = Params.GuiClass or "MenuNodeGui",
-		menu_components = Params.MenuComponents or "",
-		modifier = Params.Modifier,
-		name = Params.Name,
-		refresh = Params.Refresh,
-		stencil_align = Params.StencilAlign or "right",
-		stencil_image = Params.StencilImage or "bg_creategame",
-		topic_id = Params.TopicID,
-		type = Params.Type,
-		update = Params.Update,
-		scene_state = Params.SceneState
+		align_line = params.align_line or 0.75,
+		back_callback = params.back_callback,
+		gui_class = params.gui_class or "MenuNodeGui",
+		menu_components = params.menu_components or "",
+		modifier = params.modifier,
+		name = params.name,
+		refresh = params.refresh,
+		stencil_align = params.stencil_align or "right",
+		stencil_image = params.stencil_image or "bg_creategame",
+		topic_id = params.topic_id,
+		type = params.type or "CoreMenuNode.MenuNode",
+		update = params.update,
+		scene_state = params.scene_state
 	}
-	if Params.MergeData then
-		table.merge(arugements, Params.MergeData)
+	if params.merge_data then
+		table.merge(paramaters, params.merge_data)
 	end
 	
-	if Params.Legends then
-		for i, legend in pairs(Params.Legends) do
-			self:CreateAndInsertLegendData(arugements, legend)
+	if params.legends then
+		for i, legend in pairs(params.legends) do
+			self:CreateAndInsertLegendData(paramaters, legend)
 		end
 	end
 	
-	local NodeClass = "CoreMenuNode.MenuNode"
-	if type then
-		NodeClass = type
-	end
-	local node_class = CoreSerialize.string_to_classtable(NodeClass)
-	local new_node = node_class:new(arugements)
+	local node_class = CoreMenuNode.MenuNode
+    if paramaters.type then
+        node_class = CoreSerialize.string_to_classtable(paramaters.type)
+    end
+	local new_node = node_class:new(paramaters)
 		
-	local callback_handler = CoreSerialize.string_to_classtable(Params.CallbackOverwrite or RegisteredMenu.callback_handler or "MenuCallbackHandler")
-	new_node:set_callback_handler(callback_handler:new())
+	local callback_handler = CoreSerialize.string_to_classtable(params.callback_overwrite or "MenuCallbackHandler")
+	new_node:set_callback_handler(params.callback_overwrite and callback_handler or RegisteredMenu.callback_handler)
 	
-	nodes[new_node.name] = new_node
+	nodes[params.name] = new_node
+    
+    return new_node
 end
 
-function MenuHelperPlus:AddLegend(MenuID, NodeName, Params)
-	local menu = self.Menus[MenuID]
+function MenuHelperPlus:AddLegend(Menuid, nodename, params)
+	local menu = self.Menus[Menuid]
 	
 	if not menu then
 		return
 	end
 	
-	menu.nodes[NodeName] = menu.nodes[NodeName] or {}
-	local max_val = table.maxn(menu.nodes[NodeName])
-	menu.nodes[NodeName][max_val + 1] = Params
+	menu.nodes[nodename] = menu.nodes[nodename] or {}
+	local max_val = table.maxn(menu.nodes[nodename])
+	menu.nodes[nodename][max_val + 1] = params
 end
 
-function MenuHelperPlus:CreateAndInsertLegendData(NodeData, Params)
-	local max_val = table.maxn(NodeData)
-	NodeData[max_val + 1] = {
+function MenuHelperPlus:CreateAndInsertLegendData(nodeData, params)
+	local max_val = table.maxn(nodeData)
+	nodeData[max_val + 1] = {
 		_meta = "legend",
-		name = Params.Name,
-		pc = Params.PC or false,
-		visible_callback = Params.VisibleCallback or nil
+		name = params.name,
+		pc = params.pc or false,
+		visible_callback = params.visible_callback or nil
 	}
 end
 
-function MenuHelperPlus:AddButton(Params)
-	local RegisteredMenu = managers.menu._registered_menus[Params.Menu]
-	if not RegisteredMenu then
-		log("Not reg data")
-		return
-	end
-	local nodes = RegisteredMenu.logic._data._nodes
-	local node = nodes[Params.Node]
+function MenuHelperPlus:GetNode(menu_name, node_name)
+    return managers.menu._registered_menus[menu_name or managers.menu._is_start_menu and "menu_main" or "menu_pause"] and managers.menu._registered_menus[menu_name or managers.menu._is_start_menu and "menu_main" or "menu_pause"].logic._data._nodes[node_name] or nil
+end
+
+function MenuHelperPlus:AddButton(params)
+	local node = params.node or self:GetNode(params.menu, params.node_name)
+	if not node then
+        --error
+        return
+    end
 	
 	local data = {
 		type = "CoreMenuItem.Item",
 	}
 
-	local params = {
-		name = Params.Id,
-		text_id = Params.Title,
-		help_id = Params.Desc,
-		callback = Params.Callback,
-		back_callback = Params.BackCallback,
-		disabled_color = Params.DisabledColour or Color(0.25, 1, 1, 1),
-		next_node = Params.NextNode,
-		localize = Params.Localize,
+	local item_params = {
+		name = params.id,
+		text_id = params.title,
+		help_id = params.desc,
+		callback = params.callback,
+		back_callback = params.back_callback,
+		disabled_color = params.disabled_colour or Color(0.25, 1, 1, 1),
+		next_node = params.next_node,
+		localize = params.localized,
+		localize_help = params.localized_help,
 	}
 
-	if Params.MergeData then
-		table.merge(params, Params.MergeData)
+	if params.merge_data then
+		table.merge(item_params, params.merge_data)
 	end
-	
-	local item = node:create_item(data, params)
+    
+	local item = node:create_item(data, item_params)
 
-	if Params.Enabled ~= nil then
-		item:set_enabled( Params.Enabled )
+	if params.enabled ~= nil then
+		item:set_enabled( params.enabled )
 	end
 
 	node:add_item(item)
 end
 
-function MenuHelperPlus:AddDivider(Params)
-	local RegisteredMenu = managers.menu._registered_menus[Params.Menu]
-	if not RegisteredMenu then
-		return
-	end
-	local nodes = RegisteredMenu.logic._data._nodes
-	local node = nodes[Params.Node]
-	
+function MenuHelperPlus:AddDivider(params)
+    local node = params.node or self:GetNode(params.menu, params.node_name)
+	if not node then
+        --error
+        return
+    end
+    
 	local data = {
 		type = "MenuItemDivider",
-		size = Params.Size or 8,
-		no_text = Params.NoText or true,
+		size = params.size or 8,
+		no_text = params.no_text or true,
 	}
 
-	local params = {
-		name = Params.id,
+	local item_params = {
+		name = params.id,
 	}
 	
-	if Params.MergeData then
-		table.merge(params, Params.MergeData)
+	if params.merge_data then
+		table.merge(item_params, params.merge_data)
 	end
 	
-	local item = node:create_item( data, params )
+	local item = node:create_item( data, item_params )
 	node:add_item(item)
 
 end
 
-function MenuHelperPlus:AddToggle(Params)
-	local RegisteredMenu = managers.menu._registered_menus[Params.Menu]
-	if not RegisteredMenu then
-		return
-	end
-	local nodes = RegisteredMenu.logic._data._nodes
-	local node = nodes[Params.Node]
+function MenuHelperPlus:AddToggle(params)
+	local node = params.node or self:GetNode(params.menu, params.node_name)
+	if not node then
+        --error
+        return
+    end
 	
 	local data = {
 		type = "CoreMenuItemToggle.ItemToggle",
@@ -225,137 +228,134 @@ function MenuHelperPlus:AddToggle(Params)
 		}
 	}
 
-	local params = {
-		name = Params.Id,
-		text_id = Params.Title,
-		help_id = Params.Desc,
-		callback = Params.Callback,
-		disabled_color = Params.DisabledColour or Color( 0.25, 1, 1, 1 ),
-		icon_by_text = Params.IconByText or false,
-		localize = Params.Localize,
+	local item_params = {
+		name = params.id,
+		text_id = params.title,
+		help_id = params.desc,
+		callback = params.callback,
+		disabled_color = params.disabled_colour or Color( 0.25, 1, 1, 1 ),
+		icon_by_text = params.icon_by_text or false,
+		localize = params.localized,
 	}
 	
-	if Params.MergeData then
-		table.merge(params, Params.MergeData)
+	if params.merge_data then
+		table.merge(item_params, params.merge_data)
 	end
 	
-	local item = menu:create_item(data, params)
-	item:set_value(Params.Value and "on" or "off")
+	local item = menu:create_item(data, item_params)
+	item:set_value(params.value and "on" or "off")
 
-	if Params.Enabled ~= nil then
-		item:set_enabled(Params.Enabled)
+	if params.enabled ~= nil then
+		item:set_enabled(params.enabled)
 	end
 	
 	node:add_item(item)
 end
 
-function MenuHelperPlus:AddSlider(Params)
-	local RegisteredMenu = managers.menu._registered_menus[Params.Menu]
-	if not RegisteredMenu then
-		return
-	end
-	local nodes = RegisteredMenu.logic._data._nodes
-	local node = nodes[Params.Node]
+function MenuHelperPlus:AddSlider(params)
+	local node = params.node or self:GetNode(params.menu, params.node_name)
+	if not node then
+        --error
+        return
+    end
 	
 	local data = {
 		type = "CoreMenuItemSlider.ItemSlider",
-		min = Params.Min or 0,
-		max = Params.Max or 10,
-		step = Params.Step or 1,
-		show_value = Params.ShowValue or false
+		min = params.min or 0,
+		max = params.max or 10,
+		step = params.step or 1,
+		show_value = params.show_value or false
 	}
 
-	local params = {
-		name = Params.Id,
-		text_id = Params.Title,
-		help_id = Params.Desc,
-		callback = Params.Callback,
-		disabled_color = Params.DisabledColour or Color( 0.25, 1, 1, 1 ),
-		localize = Params.Localize,
+	local item_params = {
+		name = params.id,
+		text_id = params.title,
+		help_id = params.desc,
+		callback = params.callback,
+		disabled_color = params.disabled_colour or Color( 0.25, 1, 1, 1 ),
+		localize = params.localized,
 	}
 
-	if Params.MergeData then
-		table.merge(params, Params.MergeData)
+	if params.merge_data then
+		table.merge(item_params, params.merge_data)
 	end
 	
-	local item = node:create_item(data, params)
-	item:set_value( math.clamp(Params.value, data.min, data.max) or data.min )
+	local item = node:create_item(data, item_params)
+	item:set_value( math.clamp(params.value, data.min, data.max) or data.min )
 	
-	if Params.Enabled ~= nil then
-		item:set_enabled( Params.Enabled )
+	if params.enabled ~= nil then
+		item:set_enabled( params.enabled )
 	end
 
 	node:add_item(item)
 end
 
-function MenuHelperPlus:AddMultipleChoice(Params)
-	local RegisteredMenu = managers.menu._registered_menus[Params.Menu]
-	if not RegisteredMenu then
-		return
-	end
-	local nodes = RegisteredMenu.logic._data._nodes
-	local node = nodes[Params.Node]
+function MenuHelperPlus:AddMultipleChoice(params)
+	local node = params.node or self:GetNode(params.menu, params.node_name)
+	if not node then
+        --error
+        return
+    end
 	
 	local data = {
 		type = "MenuItemMultiChoice"
 	}
-	for k, v in ipairs( Params.Items or {} ) do
-		table.insert( data, { _meta = "option", text_id = v, value = k } )
+	for k, v in ipairs( params.items or {} ) do
+		table.insert( data, { _meta = "option", text_id = v, value = k, localize = params.localized_items } )
 	end
 	
-	local params = {
-		name = Params.Id,
-		text_id = Params.Title,
-		help_id = Params.Desc,
-		callback = Params.Callback,
+	local item_params = {
+		name = params.id,
+		text_id = params.title,
+		help_id = params.desc,
+		callback = params.callback,
 		filter = true,
-		localize = Params.Localize,
+		localize = params.localized,
 	}
 	
-	if Params.MergeData then
-		table.merge(params, Params.MergeData)
+	if params.merge_data then
+		table.merge(item_params, params.merge_data)
 	end
 	
-	local item = node:create_item(data, params)
-	item:set_value( Params.Value or 1 )
+	local item = node:create_item(data, item_params)
+	item:set_value( params.value or 1 )
 
-	if Params.Enabled ~= nil then
-		item:set_enabled(Params.Enabled)
+	if params.enabled ~= nil then
+		item:set_enabled(params.enabled)
 	end
 
 	node:add_item(item)
 end
 
-function MenuHelperPlus:AddKeybinding(Params)
-	local RegisteredMenu = managers.menu._registered_menus[Params.Menu]
-	if not RegisteredMenu then
-		return
-	end
-	local nodes = RegisteredMenu.logic._data._nodes
-	local node = nodes[Params.Node]
+function MenuHelperPlus:AddKeybinding(params)
+	local node = params.node or self:GetNode(params.menu, params.node_name)
+	if not node then
+        --error
+        return
+    end
 	
 	local data = {
 		type = "MenuItemCustomizeController",
 	}
 
-	local params = {
-		name = Params.Id,
-		text_id = Params.Title,
-		help_id = Params.Desc,
-		connection_name = Params.ConnectionName,
-		binding = Params.Binding,
-		button = Params.Button,
-		callback = Params.Callback,
-		localize = Params.Localize,
-		localize_help = Params.HelpLocalize,
+	local item_params = {
+		name = params.id,
+		text_id = params.title,
+		help_id = params.desc,
+		connection_name = params.connection_name,
+		binding = params.binding,
+		button = params.button,
+		callback = params.callback,
+		localize = params.localized,
+		localize_help = params.help_localized,
 		is_custom_keybind = true,
 	}
 
-	if Params.MergeData then
-		table.merge(params, Params.MergeData)
+	if params.merge_data then
+		table.merge(item_params, params.merge_data)
 	end
 	
-	local item = node:create_item(data, params)
+	local item = node:create_item(data, item_params)
 
 	node:add_item(item)
 end
@@ -365,8 +365,8 @@ function MenuHelperPlus:GetMenus()
 end
 
 function MenuHelperPlus:GetMenuDataFromFilepath(FilePath)
-	for ID, Data in pairs(self.Menus) do
-		if Data.FakePath == FilePath then
+	for id, Data in pairs(self.Menus) do
+		if Data.fake_path == FilePath then
 			return Data.menu_data
 		end
 	end
@@ -375,8 +375,8 @@ end
 
 function MenuHelperPlus:GetMenuDataFromHashedFilepath(HashedFilePath)
 	if self.Menus then
-		for ID, Data in pairs(self.Menus) do
-			if Idstring(Data.FakePath):key() == HashedFilePath then
+		for id, Data in pairs(self.Menus) do
+			if Idstring(Data.fake_path):key() == HashedFilePath then
 				return Data.menu_data
 			end
 		end
@@ -387,37 +387,7 @@ end
 Hooks:Register("BeardLibMenuHelperPlusInitMenus")
 
 Hooks:Add( "BeardLibMenuHelperPlusInitMenus", "MenuHelperPlusCreateMenus", function(menu_manager) 
-	for ID, Menu in pairs(MenuHelperPlus:GetMenus()) do
+	for id, Menu in pairs(MenuHelperPlus:GetMenus()) do
 		menu_manager:register_menu(Menu.register_data)
 	end
 end)
-
---[[function MenuHelperPlus:BuildMenu(MenuID)
-	local menu = self.Menus[MenuID]
-	
-	if not menu then
-		return
-	end
-	
-	local data = {
-		_meta = "menues"
-		[1] = {
-			_meta = "menu",
-			id = MenuID,
-			[1] = {
-				_meta = "default_node",
-				name = menu.params.default_node
-			}
-		}
-	}
-	if menu.nodes then
-		local i = 1
-		for name, node in pairs(menu.nodes) do
-			i = i + 1
-			local nd = node
-			nd._meta = "node"
-			
-			data[1][i] = nd
-		end
-	end
-end]]--
