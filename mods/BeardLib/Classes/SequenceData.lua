@@ -14,7 +14,7 @@ function SequenceData:AddSequenceMod(ModID, SequenceName, data)
 	end
     self._mods[ModID].SequenceMods = self._mods[ModID].SequenceMods or {}
     self._mods[ModID].SequenceMods[SequenceName] = self._mods[ModID].SequenceMods[SequenceName] or {}
-    table.merge(self._mods[ModID].SequenceMods[SequenceName], Data)
+    table.merge(self._mods[ModID].SequenceMods[SequenceName], data)
 end
 	
 function SequenceData:AddSequence(ModID, data)
@@ -23,7 +23,7 @@ function SequenceData:AddSequence(ModID, data)
 		return
 	end
     self._mods[ModID].NewSequences = self._mods[ModID].NewSequences or {}
-    table.insert(self._mods[seqK][ModID].NewSequences, data)
+    table.insert(self._mods[ModID].NewSequences, data)
 end
 
 function SequenceData:ProcessScriptData(data, path, extension)
@@ -40,7 +40,6 @@ function SequenceData:ProcessScriptData(data, path, extension)
 		if type(group) == "table" then
 			BeardLib.CurrentGroupName = name
 			for _, mod in pairs(merge_data) do
-                log(mod.ID)
 				if type(mod) == "table" then
 					if not mod.use_callback or (mod.use_callback and mod.use_callback()) then
 						if mod.NewSequences then

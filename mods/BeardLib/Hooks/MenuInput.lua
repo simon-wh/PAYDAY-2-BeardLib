@@ -125,7 +125,7 @@ function BeardLib:CreateInputPanel(Params)
 		name = "text_input",
 		color = Color.white,
 		font = tweak_data.menu.pd2_medium_font,
-		font_size = tweak_data.menu.pd2_medium_font_size,
+		font_size = 20,
 		text = "",
 		w = 300,
 		h = 100,

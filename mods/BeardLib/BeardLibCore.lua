@@ -62,6 +62,17 @@ if not _G.BeardLib then
         "world",
         "world_cameras",
         "prefhud",
+        "objective",
+        "credits",
+        "hint",
+        "comment",
+        "dialog",
+        "dialog_index",
+        "timeline",
+        "action_message",
+        "achievment",
+        "controller_settings",
+        "binary",
     }
     
     BeardLib.script_file_from_types = {
@@ -73,18 +84,20 @@ if not _G.BeardLib then
     }
     
     BeardLib.script_file_to_types = {
-        [1] = {name = "binary", func = "ScriptSerializer:to_binary", open_type = "wb"},
-        [2] = {name = "json", func = "json.encode"},
-        [3] = {name = "generic_xml", func = "ScriptSerializer:to_generic_xml"},
-        [4] = {name = "custom_xml", func = "ScriptSerializer:to_custom_xml"},
+        [1] = {name = "binary", open_type = "wb"},
+        [2] = {name = "json"},
+        [3] = {name = "generic_xml"},
+        [4] = {name = "custom_xml"},
     }
     
     BeardLib.classes = {
         "ScriptData.lua",
         "EnvironmentData.lua",
+        "ContinentData.lua",
         "SequenceData.lua",
         "MenuHelperPlus.lua",
         "UnitPropertiesItem.lua",
+        "json_utils.lua",
         "utils.lua"
     }
 
@@ -110,6 +123,7 @@ function BeardLib:init()
     --implement creation of script data class instances
     BeardLib.ScriptData.Sequence = SequenceData:new("BeardLibBaseSequenceDataProcessor")
     BeardLib.ScriptData.Environment = EnvironmentData:new("BeardLibBaseEnvironmentDataProcessor")
+    BeardLib.ScriptData.Continent = ContinentData:new("BeardLibBaseContinentDataProcessor")
     
     self:LoadJsonMods()
 end
@@ -427,7 +441,7 @@ function BeardLib:MODIDEnteredCallback(value)
 	}
 	local fileName = BeardLib.current_filename
 	local file = io.open(fileName, "w+")
-	file:write(json.encode(JsonData))
+	file:write(json.encode_script_data(JsonData))
 	file:close()
     BeardLib.CurrentlySaving = false
 end
@@ -465,7 +479,7 @@ end
 function BeardLib:GetTypeDataTo(data, typ)
     local new_data
     if typ == "json" then
-        new_data = json.encode(data)
+        new_data = json.encode_script_data(data)
     elseif typ == "custom_xml" then
         new_data = ScriptSerializer:to_custom_xml(data)
     elseif typ == "generic_xml" then
@@ -524,8 +538,14 @@ if Hooks then
 	end)
 
 	Hooks:Add("MenuManagerSetupCustomMenus", "Base_SetupBeardLibMenu", function( menu_manager, nodes )
+        MenuCallbackHandler.BeardLibScriptDataMenuBack = function(this, item)
+            BeardLib:CreateRootItems()
+            BeardLib.current_script_path = ""
+        end
+        
         local node = MenuHelperPlus:NewNode(nil, {
             name = BeardLib.ScriptDataMenu,
+            back_callback = "BeardLibScriptDataMenuBack"
         })
         if BeardLib.EditorEnabled then
             MenuHelper:NewMenu( BeardLib.EnvMenu )
@@ -642,10 +662,33 @@ if Hooks then
         local node = MenuHelperPlus:GetNode(nil, BeardLib.ScriptDataMenu)
         node:clean_items()
         
+        local gui_class = managers.menu:active_menu().renderer:active_node_gui()
+        
+        local path_text = gui_class.safe_rect_panel:child("BeardLibPathText") or gui_class.safe_rect_panel:text({
+            name = "BeardLibPathText",
+            text = "",
+            font =  tweak_data.menu.pd2_medium_font, 
+            font_size = 25,
+            layer = 20,
+            color = Color.yellow
+        })
+        path_text:set_text(self.current_script_path)
+        local x, y, w, h = path_text:text_rect()
+        path_text:set_size(w, h)
+        path_text:set_position(0, 0)
+        
         MenuHelperPlus:AddButton({
             id = "BackToStart",
             title = "Back to the future",
             callback = "BeardLibScriptStart",
+            node = node,
+            localized = false
+        })
+
+        MenuHelperPlus:AddButton({
+            id = "OpenFolderInExplorer",
+            title = "Open In Explorer",
+            callback = "BeardLibOpenInExplorer",
             node = node,
             localized = false
         })
@@ -655,7 +698,7 @@ if Hooks then
             table.remove(up_level, #up_level)
             MenuHelperPlus:AddButton({
                 id = "UpLevel",
-                title = "UP A LEVEL...",
+                title = "UP A DIRECTORY...",
                 callback = "BeardLibFolderClick",
                 node = node,
                 localized = false,
@@ -755,6 +798,16 @@ if Hooks then
         
         log(self.current_selected_file_path)
         
+        local gui_class = managers.menu:active_menu().renderer:active_node_gui()
+        local path_text = gui_class.safe_rect_panel:child("BeardLibPathText")
+        
+        if path_text then
+            path_text:set_text(self.current_selected_file_path)
+            local x, y, w, h = path_text:text_rect()
+            path_text:set_size(w, h)
+            path_text:set_position(0, 0)
+        end
+        
         local file_parts = string.split(self.current_selected_file, "%.")
         local extension = file_parts[#file_parts]
         local selected_from = 1
@@ -817,6 +870,13 @@ if Hooks then
         end
         
         MenuCallbackHandler.BeardLibScriptStart = function(this, item)
+            local gui_class = managers.menu:active_menu().renderer:active_node_gui()
+            local path_text = gui_class.safe_rect_panel:child("BeardLibPathText")
+            
+            if path_text then
+                gui_class.safe_rect_panel:remove(path_text)
+            end
+            
             local node = MenuHelperPlus:GetNode(nil, BeardLib.ScriptDataMenu)
             node:clean_items()
         
@@ -841,11 +901,19 @@ if Hooks then
             end
         end
         
+        MenuCallbackHandler.BeardLibOpenInExplorer = function(this, item)
+            local open_path = string.gsub(BeardLib.current_script_path, "%./", "")
+            open_path = string.gsub(BeardLib.current_script_path, "/", "\\")
+            
+            os.execute("start \"\" \"" .. open_path .. "\"")
+        end
+        
         BeardLib:CreateRootItems()
     end)
     
     function BeardLib:CreateRootItems()
         local node = MenuHelperPlus:GetNode(nil, BeardLib.ScriptDataMenu)
+        node:clean_items()
         
         for i, path_data in pairs(BeardLib.script_data_paths) do
             MenuHelperPlus:AddButton({
