@@ -31,7 +31,6 @@ function SequenceData:ProcessScriptData(data, path, extension)
         return
     end
     
-    
     local pathK = path:key()
 
 	local merge_data = self:GetScriptDataMods(pathK, extension:key())

@@ -1,3 +1,13 @@
+--[[function print(str, ...)
+    local tbl = {...}
+    
+    log(str)
+    
+    for i, val in pairs(tbl) do
+        log(tostring(val))
+    end
+end]]--
+
 getmetatable(PackageManager)._script_data = getmetatable(PackageManager)._script_data or getmetatable(PackageManager).script_data
 
 getmetatable(PackageManager).script_data = function(PackManager, extension, filepath, ...)

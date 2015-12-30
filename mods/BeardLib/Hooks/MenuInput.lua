@@ -19,7 +19,7 @@ function MenuInput:BeardLibmouse_pressed(o, button, x, y)
 		if (item.TYPE == "slider" or item._parameters.input) then
 			BeardLib._current_item = item
             local title = item._parameters.text_id
-			BeardLib:CreateInputPanel({value_type = item._value and "number" or "string", value = item._value or item._parameters.string_value or "", title = item._parameters.override_title or managers.localization:exists(title) and managers.localization:text(title) or title, callback = callback(BeardLib, BeardLib, "ButtonEnteredCallback")})
+			BeardLib:CreateInputPanel({value_type = item._value and "number" or "string", value = item._value or item._parameters.string_value or "", title = item._parameters.override_title or item._parameters.localize and managers.localization:text(title) or title, callback = callback(BeardLib, BeardLib, "ButtonEnteredCallback")})
 			return true
 		end
 	elseif button == Idstring("0") then

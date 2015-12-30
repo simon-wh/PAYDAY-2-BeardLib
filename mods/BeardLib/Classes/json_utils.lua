@@ -75,7 +75,7 @@ function json.encode_script_data (v, tabs)
     end
     
     if bArray then
-        if #length > 0 then
+        if length > 0 then
             return '[\n' .. get_tabs(tabs + 1) .. table.concat(rval,',\n' .. get_tabs(tabs + 1)) .. '\n' .. get_tabs(tabs) .. ']'
         else
             return '{}'

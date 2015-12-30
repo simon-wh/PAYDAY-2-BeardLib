@@ -113,8 +113,6 @@ if not _G.BeardLib then
     }
 end
 
-
-
 function BeardLib:init()
     if not file.GetFiles(BeardLib.JsonPath) then
 		os.execute("mkdir " .. BeardLib.JsonPathName)
@@ -285,7 +283,7 @@ function BeardLib:ReplaceScriptData(replacementPath, typ, path, extension, preve
     self._replace_script_data[path:key()][extension:key()] = {path = replacementPath, load_type = typ}
 end
 
-function BeardLib:PopulateMenuNode(Key, Params, menu, menu_id)
+function BeardLib:PopulateMenuNode(Key, Params, value, node)
 	local new_display_name = string.split(Params.display_name, "/")
 	if type(Params.value) == "number" then
 		MenuHelperPlus:AddSlider({
@@ -298,12 +296,11 @@ function BeardLib:PopulateMenuNode(Key, Params, menu, menu_id)
 			desc = "",
 			callback = "BeardLibEnvCallback",
 			localized = false,
-			menu = menu,
-			node_name = menu_id,
-			value = Params.value,
+			node = node,
+			value = value,
             merge_data = {
                 path = Params.display_name,
-                path_key = Params.path:key()
+                path_key = Key
             }
 		})
 	elseif Params.value.x then
@@ -317,12 +314,11 @@ function BeardLib:PopulateMenuNode(Key, Params, menu, menu_id)
 			desc = "",
 			callback = "BeardLibEnvVectorxCallback",
 			localized = false,
-			menu = menu,
-			node_name = menu_id,
-			value = Params.value.x,
+			node = node,
+			value = value.x,
             merge_data = {
                 path = Params.display_name,
-                path_key = Params.path:key()
+                path_key = Key
             }
 		})
 		MenuHelperPlus:AddSlider({
@@ -335,12 +331,11 @@ function BeardLib:PopulateMenuNode(Key, Params, menu, menu_id)
 			desc = "",
 			callback = "BeardLibEnvVectoryCallback",
 			localized = false,
-			menu = menu,
-			node_name = menu_id,
-			value = Params.value.y,
+			node = node,
+			value = value.y,
             merge_data = {
                 path = Params.display_name,
-                path_key = Params.path:key()
+                path_key = Key
             }
 		})
 		MenuHelperPlus:AddSlider({
@@ -353,69 +348,57 @@ function BeardLib:PopulateMenuNode(Key, Params, menu, menu_id)
 			desc = "",
 			callback = "BeardLibEnvVectorzCallback",
 			localized = false,
-			menu = menu,
-			node_name = menu_id,
-			value = Params.value.z,
+			node = node,
+			value = value.z,
             merge_data = {
                 path = Params.display_name,
-                path_key = Params.path:key()
+                path_key = Key
             }
 		})
 	else
 		MenuHelperPlus:AddButton({
 			id = Params.path,
 			title = new_display_name[2],
-			desc = Params.value,
+			desc = value,
 			callback = "BeardLibEnvStringClbk",
-			menu = menu,
-			node_name = menu_id,
+			node = node,
 			localized = false,
 			localized_help = false,
 			priority = 1,
             merge_data = {
-                string_value = Params.value,
+                string_value = value,
                 path = Params.display_name,
-                path_key = Params.path:key(),
+                path_key = Key,
                 input = true
             }
 		})
 	end
 end
 
-function BeardLib:EnvUpdate(handler, viewport, scene, script_viewport)
-	if BeardLib.NewEnvData then
-		for key, data in pairs(BeardLib.NewEnvData) do
-			if handler:get_value(key) ~= data.value then
-				local val_to_save
-				if type(data.value) == "number" then
-					handler:editor_set_value(key, data.value)
-					val_to_save = data.value
-				elseif type(data.value) == "string" then
-					handler:editor_set_value(key, data.value)
-					val_to_save = data.value
-				else
-					local value = handler:get_value(key)
-					local val1, val2, val3 = (data.value.x ~= 100000 and data.value.x) or (value and value.x) or 0, (data.value.y ~= 100000 and data.value.y) or (value and value.y) or 0, (data.value.z ~= 100000 and data.value.z) or (value and value.z) or 0
-					local new_value = Vector3(val1, val2, val3)
-					handler:editor_set_value(key, new_value)
-					val_to_save = new_value
-				end
-				
-				if not data.skip_save then
-					BeardLib.ModdedData = BeardLib.ModdedData or {}
-					BeardLib.ModdedData[data.path] = BeardLib.ModdedData[data.path] or {}
-					BeardLib.ModdedData[data.path] = tostring(val_to_save)
-				end
-			end
-		end
-	end
-end
-
 function BeardLib:update(t, dt)
-	if managers.viewport and managers.viewport:viewports() then
-		for _, viewport in pairs(managers.viewport:viewports()) do
-			viewport:set_environment_editor_callback(callback(BeardLib, BeardLib, "EnvUpdate"))
-		end
+    if managers.viewport and managers.viewport:viewports() and self.NewEnvData then
+        for key, data in pairs(self.NewEnvData) do
+            for _, viewport in pairs(managers.viewport:viewports()) do
+                local handler = viewport._env_handler
+                local value = viewport:get_environment_value(key)
+                local val_to_save = data.value
+                
+                if CoreClass.type_name(value) == "Vector3" then
+                    local new_value = Vector3(data.value.x or value.x, data.value.y or value.y, data.value.z or value.z)
+                    handler:editor_set_value(key, new_value)
+                    val_to_save = new_value
+                else
+                    handler:editor_set_value(key, data.value)
+                end
+                
+                if not data.skip_save then
+                    self.ModdedData = self.ModdedData or {}
+                    self.ModdedData[data.path] = self.ModdedData[data.path] or {}
+                    self.ModdedData[data.path] = tostring(val_to_save)
+                end                
+            end
+            self.NewEnvData[key] = nil
+        end
 	end
 end
 
@@ -548,114 +531,107 @@ if Hooks then
             back_callback = "BeardLibScriptDataMenuBack"
         })
         if BeardLib.EditorEnabled then
-            MenuHelper:NewMenu( BeardLib.EnvMenu )
+            MenuHelperPlus:NewNode(nil, {
+                name = BeardLib.EnvMenu,
+                menu_components = managers.menu._is_start_menu and "player_profile menuscene_info news game_installing" or nil,
+                merge_data = {
+                    area_bg = "half",
+                    hide_bg = true
+                }
+            })
         end
 	end)
 	
-	function BeardLib:PopulateEnvMenu()
-        local menu = managers.menu._is_start_menu and "menu_main" or "menu_pause"
-    
-		MenuCallbackHandler.BeardLibEnvCallback = function(this, item)
-			BeardLib.NewEnvData = BeardLib.NewEnvData or {}
-			BeardLib.NewEnvData[item._parameters.path_key] = {value = item:value(), path = item._parameters.path}
-			BeardLib.CurrentlySaving = false
-			
-		end
-		
-		MenuCallbackHandler.BeardLibEnvVectorxCallback = function(this, item)
-			BeardLib.NewEnvData = BeardLib.NewEnvData or {}
-			BeardLib.NewEnvData[item._parameters.path_key] = {value = Vector3(item:value(), 100000, 100000), path = item._parameters.path}
-			BeardLib.CurrentlySaving = false
-		end
-		
-		MenuCallbackHandler.BeardLibEnvVectoryCallback = function(this, item)
-			BeardLib.NewEnvData = BeardLib.NewEnvData or {}
-			BeardLib.NewEnvData[item._parameters.path_key] = {value = Vector3(100000, item:value(), 100000), path = item._parameters.path}
-			BeardLib.CurrentlySaving = false
-		end
-		
-		MenuCallbackHandler.BeardLibEnvVectorzCallback = function(this, item)
-			BeardLib.NewEnvData = BeardLib.NewEnvData or {}
-			BeardLib.NewEnvData[item._parameters.path_key] = {value = Vector3(100000, 100000, item:value()), path = item._parameters.path}
-			BeardLib.CurrentlySaving = false
-		end
-		
-		MenuCallbackHandler.BeardLibEnvStringClbk = function(this, item)
-			BeardLib.NewEnvData = BeardLib.NewEnvData or {}
-            local split = string.split(item._parameters.path, "/")
-            if split[#split] == "underlay" then
-                if not managers.dyn_resource:has_resource(Idstring("scene"), Idstring(item._parameters.help_id), managers.dyn_resource.DYN_RESOURCES_PACKAGE) then
-                    managers.dyn_resource:load(Idstring("scene"), Idstring(item._parameters.help_id), managers.dyn_resource.DYN_RESOURCES_PACKAGE, nil)
+	function BeardLib:PopulateEnvMenu(feeder_list)
+        local node = MenuHelperPlus:GetNode(nil, BeardLib.EnvMenu)
+        if node then
+            node:clean_items()
+            
+            MenuCallbackHandler.SaveEnvtable = function(this, item)
+                if not BeardLib.CurrentlySaving then
+                    BeardLib.CurrentlySaving = true
+                    BeardLib:CreateInputPanel({value = "EnvModification" .. BeardLib.current_env .. ".txt", title = "Environment Mod Filename", callback = callback(BeardLib, BeardLib, "FilenameEnteredCallback")})
+                end
+                
+            end
+            MenuHelperPlus:AddButton({
+                id = "BeardLibSaveEnvTable",
+                title = "BeardLibSaveEnvTable_title",
+                callback = "SaveEnvtable",
+                node = node,
+                priority = 1
+            })
+            
+            MenuCallbackHandler.BeardLibEnvCallback = function(this, item)
+                BeardLib.NewEnvData = BeardLib.NewEnvData or {}
+                BeardLib.NewEnvData[tostring(item._parameters.path_key)] = {value = item:value(), path = item._parameters.path}
+                BeardLib.CurrentlySaving = false
+                
+            end
+            
+            MenuCallbackHandler.BeardLibEnvVectorxCallback = function(this, item)
+                BeardLib.NewEnvData = BeardLib.NewEnvData or {}
+                BeardLib.NewEnvData[tostring(item._parameters.path_key)] = {value = Vector3(item:value(), nil, nil), path = item._parameters.path}
+                BeardLib.CurrentlySaving = false
+            end
+            
+            MenuCallbackHandler.BeardLibEnvVectoryCallback = function(this, item)
+                BeardLib.NewEnvData = BeardLib.NewEnvData or {}
+                BeardLib.NewEnvData[tostring(item._parameters.path_key)] = {value = Vector3(nil, item:value(), nil), path = item._parameters.path}
+                BeardLib.CurrentlySaving = false
+            end
+            
+            MenuCallbackHandler.BeardLibEnvVectorzCallback = function(this, item)
+                BeardLib.NewEnvData = BeardLib.NewEnvData or {}
+                BeardLib.NewEnvData[tostring(item._parameters.path_key)] = {value = Vector3(nil, nil, item:value()), path = item._parameters.path}
+                BeardLib.CurrentlySaving = false
+            end
+            
+            MenuCallbackHandler.BeardLibEnvStringClbk = function(this, item)
+                BeardLib.NewEnvData = BeardLib.NewEnvData or {}
+                local split = string.split(item._parameters.path, "/")
+                if split[#split] == "underlay" then
+                    if not managers.dyn_resource:has_resource(Idstring("scene"), Idstring(item._parameters.help_id), managers.dyn_resource.DYN_RESOURCES_PACKAGE) then
+                        managers.dyn_resource:load(Idstring("scene"), Idstring(item._parameters.help_id), managers.dyn_resource.DYN_RESOURCES_PACKAGE, nil)
+                    end
+                end
+                
+                BeardLib.NewEnvData[item._parameters.path_key] = {value = item._parameters.help_id, path = item._parameters.path, key = item:name()}
+                BeardLib.CurrentlySaving = false
+            end
+            
+            local viewport = managers.viewport:first_active_viewport()
+            
+            if feeder_list and feeder_list[viewport._env_handler:get_path():key()] then
+                for key, params in pairs(feeder_list[viewport._env_handler:get_path():key()]) do
+                    local value = viewport:get_environment_value(key) or params.value
+                    local parts = string.split(params.path, "/")
+                    local menu_id = "BeardLib_" .. parts[#parts - 1]
+                    local new_node = MenuHelperPlus:GetNode(nil, menu_id)
+                    if not new_node then
+                        new_node = MenuHelperPlus:NewNode(nil, {
+                            name = menu_id,
+                            merge_data = {
+                                hide_bg = true
+                            }
+                        })
+                        managers.menu:add_back_button(new_node)
+                        MenuHelperPlus:AddButton({
+                            id = menu_id .. "button",
+                            title = parts[#parts - 1],
+                            next_node = menu_id,
+                            node = node,
+                            localized = false
+                        })
+                    end
+                    if value then
+                        BeardLib:PopulateMenuNode(key, params, value, new_node)
+                    end
                 end
             end
             
-			BeardLib.NewEnvData[item._parameters.path_key] = {value = item._parameters.help_id, path = item._parameters.path, key = item:name()}
-			BeardLib.CurrentlySaving = false
-		end
-		
-		if BeardLib.env_data then
-			
-			for key, params in pairs(BeardLib.env_data) do
-				local parts = string.split(params.path, "/")
-				local menu_id = "BeardLib_" .. parts[#parts - 1]
-				local new_node
-				if not BeardLib.EnvCreatedMenus[menu_id] then
-					new_node = MenuHelperPlus:NewNode(nil, {
-                        name = menu_id,
-                        merge_data = {
-                            hide_bg = true
-                        }
-                    })
-					MenuHelper:AddButton({
-						id = menu_id .. "button",
-						title = parts[#parts - 1],
-						next_node = menu_id,
-						menu_id = BeardLib.EnvMenu,
-						localized = false
-					})
-                    BeardLib.EnvCreatedMenus[menu_id] = true
-				end
-				BeardLib:PopulateMenuNode(key, params, menu, menu_id)
-			end
-		end
-		MenuCallbackHandler.SaveEnvtable = function(this, item)
-			if not BeardLib.CurrentlySaving then
-				BeardLib.CurrentlySaving = true
-				BeardLib:CreateInputPanel({value = "EnvModification" .. BeardLib.current_env .. ".txt", title = "Environment Mod Filename", callback = callback(BeardLib, BeardLib, "FilenameEnteredCallback")})
-			end
-			
-		end
-		MenuHelper:AddButton({
-			id = "BeardLibSaveEnvTable",
-			title = "BeardLibSaveEnvTable_title",
-			callback = "SaveEnvtable",
-			menu_id = BeardLib.EnvMenu,
-			priority = 1
-		})
-		
-		self:BuildEnvMenu(managers.menu._registered_menus[menu].logic._data._nodes)
-	end
-		
-	function BeardLib:BuildEnvMenu(nodes)
-        if not self._built_menus then
-            nodes[BeardLib.EnvMenu] = MenuHelper:BuildMenu(BeardLib.EnvMenu, {area_bg = "half"})
-            nodes[BeardLib.EnvMenu]._parameters.hide_bg = true
-            if nodes.main then
-                nodes[BeardLib.EnvMenu]._parameters.menu_components = {"player_profile", "menuscene_info", "news", "game_installing"}
-            end
+            managers.menu:add_back_button(node)
         end
-        
-		if not BeardLib.EnvButtonAdded then
-			MenuHelper:AddMenuItem( MenuHelper.menus.lua_mod_options_menu, BeardLib.EnvMenu, "BeardLibEnvMenu", "BeardLibEnvMenuHelp")
-			BeardLib.EnvButtonAdded = true
-		end
-        
-		BeardLib.EnvNode = nodes[BeardLib.EnvMenu]
-		for name, made in pairs(BeardLib.EnvCreatedMenus) do
-			if made then
-                managers.menu:add_back_button(nodes[name])
-			end
-		end
 	end
     
     function BeardLib:RefreshFilesAndFolders()
@@ -932,16 +908,27 @@ if Hooks then
     end
     
 	Hooks:Add("MenuManagerBuildCustomMenus", "Base_BuildBeardLibMenu", function( menu_manager, nodes )
-        local menu = nodes.main and "menu_main" or "menu_pause"
         MenuHelperPlus:AddButton({
             id = "BeardLibScriptDataMenu",
             title = "BeardLibScriptDataMenu_title",
-            menu = menu,
             node_name = "lua_mod_options_menu",
             next_node = BeardLib.ScriptDataMenu,
         })
-		if BeardLib.EditorEnabled then
-            BeardLib:PopulateEnvMenu()
+        
+        if BeardLib.EditorEnabled then
+            MenuCallbackHandler.BeardLibOpenEnvMenu = function(this, item)
+                if BeardLib.env_data then
+                    BeardLib:PopulateEnvMenu(BeardLib.env_data)
+                end
+            end
+            
+            MenuHelperPlus:AddButton({
+                id = "BeardLibEnvMenu",
+                title = "BeardLibEnvMenu",
+                callback = "BeardLibOpenEnvMenu",
+                node_name = "lua_mod_options_menu",
+                next_node = BeardLib.EnvMenu,
+            })
         end
 	end)
 	

@@ -8,24 +8,7 @@ end
 
 function EnvironmentData:AddHooks()
     Hooks:Add("BeardLibPreProcessScriptData", "BeardLibProcessData:" .. self._id, function(PackManager, filepath, extension, data)
-        if extension == self._extension then
-            BeardLib.env_data = {}
-            BeardLib.current_env = tostring(filepath:key())
-            
-            self:ProcessScriptData(data.data, filepath, extension)
-            
-            --Probably should make it work with multiple environments in one heist
-            --Also should take data from the feeders so it is accurate
-            if BeardLib.nodes then
-                if BeardLib.nodes[BeardLib.EnvMenu] then
-                    BeardLib.nodes[BeardLib.EnvMenu]:clean_items()
-                end
-                
-                if BeardLib.EditorEnabled then
-                    BeardLib:PopulateEnvMenu()
-                end
-            end
-        end
+        self:ProcessScriptData(data.data, filepath, extension)
     end)
 end
 
@@ -73,7 +56,14 @@ function EnvironmentData:AddNewParam(ModID, groupPath, name, value)
 end
 
 function EnvironmentData:ProcessScriptData(data, path, extension, name)
+    if extension ~= self._extension then
+        return
+    end
+
     local mods = self:GetScriptDataMods(path:key(), extension:key())
+    
+    BeardLib.env_data = BeardLib.env_data or {}
+    BeardLib.env_data[path:key()] = BeardLib.env_data[path:key()] or {}
     
     for _, sub_data in ipairs(data) do
         if sub_data._meta == "param" then
@@ -90,7 +80,7 @@ function EnvironmentData:ProcessScriptData(data, path, extension, name)
             end
             
             local next_data_path_key = next_data_path:key()
-            BeardLib.env_data[next_data_path_key] = {value = sub_data.value, path = next_data_path, display_name = data._meta .. "/" .. sub_data.key}
+            BeardLib.env_data[path:key()][next_data_path_key] = {value = sub_data.value, path = next_data_path, display_name = data._meta .. "/" .. sub_data.key}
         else
             local next_data_path = name and name .. "/" .. sub_data._meta or sub_data._meta
             

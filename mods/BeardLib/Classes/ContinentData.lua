@@ -25,7 +25,16 @@ function ContinentData:AddUnit(ModID, data)
     self._mods[ModID].NewUnits = self._mods[ModID].NewUnits or {}
     --implement different unit vars
     local new_data = {
-        
+        continent = data.continent or "world",
+        material_variation = data.material_variation or "default",
+        mesh_variation = data.mesh_variation or "default",
+        disable_shadows = data.disable_shadows or nil,
+        name = data.path,
+        name_id = data.name,
+        position = data.position or Vector3(0, 0, 0),
+        rotation = data.rotation or Rotation(0, 0, 0),
+        unit_id = data.unit_id,
+        disable_on_ai_graph = data.disable_on_ai_graph or nil
     }
     
     table.merge(new_data, data)
