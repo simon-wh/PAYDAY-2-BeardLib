@@ -1,12 +1,11 @@
 if CoreSequenceManager then
 	SequenceManager = CoreSequenceManager.SequenceManager
 	CloneClass(SequenceManager)
-	function SequenceManager.init(self, area_damage_mask, target_world_mask, beings_mask)
-		self.orig.init(self, area_damage_mask, target_world_mask, beings_mask)
-		-- I REALLY NEED A BETTER PLACE TO CALL THESE
-		Hooks:Call("BeardLibSequencePostInit")
-		Hooks:Call("BeardLibEnvironmenPostInit")
-	end
+    
+    Hooks:Register("BeardLibCreateScriptDataMods")
+    Hooks:PostHook(SequenceManager, "init", "BeardLibSequenceManagerPostInit", function() 
+        Hooks:Call("BeardLibCreateScriptDataMods")
+    end)
 	
 	MaterialElement = CoreSequenceManager.MaterialElement
 	MaterialElement.FUNC_MAP["texture"] = "set_texture"

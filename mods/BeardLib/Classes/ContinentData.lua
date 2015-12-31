@@ -58,17 +58,21 @@ function ContinentData:ProcessScriptData(data, path, extension)
         for i, static_data in pairs(statics) do
             if static_data.unit_data and static_data.unit_data.name_id then
                 for ID, mod in pairs(merge_data) do
-                    if mod.UnitMods and mod.UnitMods[static_data.unit_data.name_id] then
-                        table.merge(static_data.unit_data, mod.UnitMods[static_data.unit_data.name_id])
+                    if not mod.use_callback or (mod.use_callback and mod.use_callback()) then
+                        if mod.UnitMods and mod.UnitMods[static_data.unit_data.name_id] then
+                            table.merge(static_data.unit_data, mod.UnitMods[static_data.unit_data.name_id])
+                        end
                     end
                 end
             end
         end        
         
         for ID, mod in pairs(merge_data) do
-            if mod.NewUnits then
-                for i, new_unit in pairs(mod.NewUnits) do
-                    table.insert(statics, {unit_data = new_unit})
+            if not mod.use_callback or (mod.use_callback and mod.use_callback()) then
+                if mod.NewUnits then
+                    for i, new_unit in pairs(mod.NewUnits) do
+                        table.insert(statics, {unit_data = new_unit})
+                    end
                 end
             end
         end

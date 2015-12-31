@@ -159,8 +159,12 @@ function MenuHelperPlus:AddButton(params)
 	if params.enabled ~= nil then
 		item:set_enabled( params.enabled )
 	end
-
-	node:add_item(item)
+    
+    if params.position then
+        node:insert_item(item, params.position)
+    else
+        node:add_item(item)
+    end
 end
 
 function MenuHelperPlus:AddDivider(params)
@@ -185,7 +189,11 @@ function MenuHelperPlus:AddDivider(params)
 	end
 	
 	local item = node:create_item( data, item_params )
-	node:add_item(item)
+	if params.position then
+        node:insert_item(item, params.position)
+    else
+        node:add_item(item)
+    end
 
 end
 
@@ -242,14 +250,18 @@ function MenuHelperPlus:AddToggle(params)
 		table.merge(item_params, params.merge_data)
 	end
 	
-	local item = menu:create_item(data, item_params)
+	local item = node:create_item(data, item_params)
 	item:set_value(params.value and "on" or "off")
 
 	if params.enabled ~= nil then
 		item:set_enabled(params.enabled)
 	end
 	
-	node:add_item(item)
+	if params.position then
+        node:insert_item(item, params.position)
+    else
+        node:add_item(item)
+    end
 end
 
 function MenuHelperPlus:AddSlider(params)
@@ -287,7 +299,11 @@ function MenuHelperPlus:AddSlider(params)
 		item:set_enabled( params.enabled )
 	end
 
-	node:add_item(item)
+	if params.position then
+        node:insert_item(item, params.position)
+    else
+        node:add_item(item)
+    end
 end
 
 function MenuHelperPlus:AddMultipleChoice(params)
@@ -324,7 +340,11 @@ function MenuHelperPlus:AddMultipleChoice(params)
 		item:set_enabled(params.enabled)
 	end
 
-	node:add_item(item)
+	if params.position then
+        node:insert_item(item, params.position)
+    else
+        node:add_item(item)
+    end
 end
 
 function MenuHelperPlus:AddKeybinding(params)
@@ -357,7 +377,11 @@ function MenuHelperPlus:AddKeybinding(params)
 	
 	local item = node:create_item(data, item_params)
 
-	node:add_item(item)
+	if params.position then
+        node:insert_item(item, params.position)
+    else
+        node:add_item(item)
+    end
 end
 
 function MenuHelperPlus:GetMenus()

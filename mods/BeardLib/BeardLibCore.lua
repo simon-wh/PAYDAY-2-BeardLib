@@ -216,10 +216,6 @@ function BeardLib:ProcessScriptData(PackManager, filepath, extension, data)
     if self._replace_script_data[filepath:key()] and self._replace_script_data[filepath:key()][extension:key()] then
         log("Replace: " .. tostring(filepath:key()))
         
-        --[[if filepath == Idstring("units/payday2/architecture/str/str_ext_road") then
-            SaveTable(data, "BeforeData.txt")
-        end]]--
-        
         local replacementPathData = self._replace_script_data[filepath:key()][extension:key()]
         local fileType = replacementPathData.load_type
         local file
@@ -256,10 +252,6 @@ function BeardLib:ProcessScriptData(PackManager, filepath, extension, data)
             end
             file:close()
         end
-       
-        --[[if filepath == Idstring("units/payday2/architecture/str/str_ext_road") then
-            SaveTable(data, "AfterData.txt")
-        end]]--
        
     end
     
