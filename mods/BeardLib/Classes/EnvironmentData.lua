@@ -8,6 +8,9 @@ end
 
 function EnvironmentData:AddHooks()
     Hooks:Add("BeardLibPreProcessScriptData", "BeardLibProcessData:" .. self._id, function(PackManager, filepath, extension, data)
+        if self._extension and self._extension ~= extension then
+            return
+        end
         self:ProcessScriptData(data.data, filepath, extension)
     end)
 end
@@ -56,10 +59,6 @@ function EnvironmentData:AddNewParam(ModID, groupPath, name, value)
 end
 
 function EnvironmentData:ProcessScriptData(data, path, extension, name)
-    if extension ~= self._extension then
-        return
-    end
-
     local mods = self:GetScriptDataMods(path:key(), extension:key())
     
     BeardLib.env_data = BeardLib.env_data or {}

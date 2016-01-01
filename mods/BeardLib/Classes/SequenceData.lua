@@ -27,33 +27,32 @@ function SequenceData:AddSequence(ModID, data)
 end
 
 function SequenceData:ProcessScriptData(data, path, extension)
-    if extension ~= self._extension then
-        return
-    end
     
     local pathK = path:key()
 
 	local merge_data = self:GetScriptDataMods(pathK, extension:key())
     
-	for name, group in pairs(data) do
-		if type(group) == "table" then
-			BeardLib.CurrentGroupName = name
-			for _, mod in pairs(merge_data) do
-				if type(mod) == "table" then
-					if not mod.use_callback or (mod.use_callback and mod.use_callback()) then
-						if mod.NewSequences then
-							for i, sequence in pairs(mod.NewSequences) do
-								self:ApplyNewSequence(group, sequence)
-							end
-						end
-						if mod.SequenceMods then
-							self:ApplySequenceMod(group, mod.SequenceMods)
-						end
-					end
-				end
-			end
-		end
-	end
+    if table.size(merge_data) > 0 then
+        for name, group in pairs(data) do
+            if type(group) == "table" then
+                BeardLib.CurrentGroupName = name
+                for _, mod in pairs(merge_data) do
+                    if type(mod) == "table" then
+                        if not mod.use_callback or (mod.use_callback and mod.use_callback()) then
+                            if mod.NewSequences then
+                                for i, sequence in pairs(mod.NewSequences) do
+                                    self:ApplyNewSequence(group, sequence)
+                                end
+                            end
+                            if mod.SequenceMods then
+                                self:ApplySequenceMod(group, mod.SequenceMods)
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
 end
 		
 function SequenceData:ApplySequenceMod(group_data, SequenceMods)

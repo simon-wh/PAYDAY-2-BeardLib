@@ -12,6 +12,9 @@ end
 
 function ScriptData:AddHooks()
     Hooks:Add("BeardLibPreProcessScriptData", "BeardLibProcessData:" .. self._id, function(PackManager, filepath, extension, data)
+        if self._extension and self._extension ~= extension then
+            return
+        end
         self:ProcessScriptData(data, filepath, extension)
     end)
 end
@@ -22,7 +25,7 @@ end
 
 function ScriptData:CreateMod(data)
     if not data then
-        BeardLib:log("Mod cannot be created without any data")
+        BeardLib:log("[Error] Mod cannot be created without any data")
         return
     end
 
@@ -38,6 +41,7 @@ function ScriptData:CreateMod(data)
     self._mods[ModID].priority = data.priority or 0
     self._mods[ModID].file_key = pathK
     self._mods[ModID].extension_key = extK
+    self._mods[ModID].use_callback = data.use_callback or nil
     
     table.merge(self._mods[ModID], data)
 end
@@ -66,6 +70,10 @@ function ScriptData:GetScriptDataMods(fileKey, extKey)
     return mods
 end
 
+function ScriptData:GetMod(ModID)
+    return self._mods[ModID]
+end
+
 function ScriptData:ParseJsonData(section_data)
     if not section_data then 
         return
@@ -88,5 +96,5 @@ function ScriptData:WriteJsonData(ModID, save_path)
             mod_table
         }
     }
-    file:write(json.encode(write_tbl))
+    file:write(json.encode_script_data(write_tbl))
 end

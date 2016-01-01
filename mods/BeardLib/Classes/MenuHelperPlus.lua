@@ -1,4 +1,7 @@
+--Based off of the works by Wilko for the 'MenuHelper' in the base of BLT. Thanks to him for the basis of this code
+
 _G.MenuHelperPlus = _G.MenuHelperPlus or {}
+MenuHelperPlus.Menus = MenuHelperPlus.Menus or {}
 
 function MenuHelperPlus:NewMenu(params)
 	self.Menus = self.Menus or {}

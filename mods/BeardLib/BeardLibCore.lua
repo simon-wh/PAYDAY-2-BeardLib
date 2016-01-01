@@ -6,6 +6,7 @@ if not _G.BeardLib then
 	BeardLib.EnvMods = BeardLib.EnvMods or {} 
 	BeardLib.EnvMenu = "BeardLibEnvMenu"
 	BeardLib.ScriptDataMenu = "BeardLibScriptDataMenu"
+	BeardLib.MainMenu = "BeardLibMainMenu"
 	BeardLib.ModdedData = {}
 	BeardLib.EnvCreatedMenus = {}
 	BeardLib.JsonPathName = "BeardLibJsonMods"
@@ -505,10 +506,11 @@ if Hooks then
 		
 	Hooks:Add("LocalizationManagerPostInit", "BeardLibLocalization", function(loc)
 		LocalizationManager:add_localized_strings({
-			["BeardLibEnvMenu"] = "BeardLib Environment Mod Menu",
+			["BeardLibEnvMenu"] = "Environment Mod Menu",
 			["BeardLibEnvMenuHelp"] = "Modify the params of the current Environment",
 			["BeardLibSaveEnvTable_title"] = "Save Current modifications",
-			["BeardLibScriptDataMenu_title"] = "BeardLib ScriptData Converter"
+			["BeardLibScriptDataMenu_title"] = "ScriptData Converter",
+			["BeardLibMainMenu"] = "BeardLib Main Menu"
 		})
 	end)
 
@@ -518,10 +520,23 @@ if Hooks then
             BeardLib.current_script_path = ""
         end
         
+        local main_node = MenuHelperPlus:NewNode(nil, {
+            name = BeardLib.MainMenu
+        })
+        
         local node = MenuHelperPlus:NewNode(nil, {
             name = BeardLib.ScriptDataMenu,
             back_callback = "BeardLibScriptDataMenuBack"
         })
+        
+        
+        MenuHelperPlus:AddButton({
+            id = "BeardLibScriptDataMenu",
+            title = "BeardLibScriptDataMenu_title",
+            node = main_node,
+            next_node = BeardLib.ScriptDataMenu,
+        })
+        
         if BeardLib.EditorEnabled then
             MenuHelperPlus:NewNode(nil, {
                 name = BeardLib.EnvMenu,
@@ -531,7 +546,31 @@ if Hooks then
                     hide_bg = true
                 }
             })
+            
+            MenuCallbackHandler.BeardLibOpenEnvMenu = function(this, item)
+                if BeardLib.env_data then
+                    BeardLib:PopulateEnvMenu(BeardLib.env_data)
+                end
+            end
+            
+            MenuHelperPlus:AddButton({
+                id = "BeardLibEnvMenu",
+                title = "BeardLibEnvMenu",
+                callback = "BeardLibOpenEnvMenu",
+                node = main_node,
+                next_node = BeardLib.EnvMenu,
+            })
         end
+        
+        managers.menu:add_back_button(main_node)
+        
+        MenuHelperPlus:AddButton({
+            id = "BeardLibMainMenu",
+            title = "BeardLibMainMenu",
+            node_name = "options",
+            position = 9,
+            next_node = BeardLib.MainMenu,
+        })
 	end)
 	
 	function BeardLib:PopulateEnvMenu(feeder_list)
@@ -898,31 +937,6 @@ if Hooks then
         
         managers.menu:add_back_button(node)
     end
-    
-	Hooks:Add("MenuManagerBuildCustomMenus", "Base_BuildBeardLibMenu", function( menu_manager, nodes )
-        MenuHelperPlus:AddButton({
-            id = "BeardLibScriptDataMenu",
-            title = "BeardLibScriptDataMenu_title",
-            node_name = "lua_mod_options_menu",
-            next_node = BeardLib.ScriptDataMenu,
-        })
-        
-        if BeardLib.EditorEnabled then
-            MenuCallbackHandler.BeardLibOpenEnvMenu = function(this, item)
-                if BeardLib.env_data then
-                    BeardLib:PopulateEnvMenu(BeardLib.env_data)
-                end
-            end
-            
-            MenuHelperPlus:AddButton({
-                id = "BeardLibEnvMenu",
-                title = "BeardLibEnvMenu",
-                callback = "BeardLibOpenEnvMenu",
-                node_name = "lua_mod_options_menu",
-                next_node = BeardLib.EnvMenu,
-            })
-        end
-	end)
 	
 	Hooks:Register("BeardLibCreateCustomMenus")
 	Hooks:Register("BeardLibCreateCustomNodesAndButtons")
@@ -933,7 +947,7 @@ if Hooks then
 		Hooks:Call("BeardLibCreateCustomNodesAndButtons", menu_manager)
 	end)
 	
-	Hooks:Add( "BeardLibCreateCustomMenus", "BeardLibCreateEditorMenu", function(menu_manager) 
+	--[[Hooks:Add( "BeardLibCreateCustomMenus", "BeardLibCreateEditorMenu", function(menu_manager) 
 		MenuHelperPlus:NewMenu({
 			init_node = {
 				name = "editor_main",
@@ -970,5 +984,5 @@ if Hooks then
 			callback = "Editor_Exit",
 			localized = false
 		})
-	end)
+	end)]]--
 end
