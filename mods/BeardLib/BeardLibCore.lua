@@ -78,7 +78,7 @@ if not _G.BeardLib then
     
     BeardLib.script_file_from_types = {
         [1] = {name = "binary", func = "ScriptSerializer:from_binary", open_type = "rb"},
-        [2] = {name = "json", func = "json.decode_script_data"},
+        [2] = {name = "json", func = "json.custom_decode"},
         [3] = {name = "xml", func = "ScriptSerializer:from_xml"},
         [4] = {name = "generic_xml", func = "ScriptSerializer:from_generic_xml"},
         [5] = {name = "custom_xml", func = "ScriptSerializer:from_custom_xml"},
@@ -140,7 +140,7 @@ function BeardLib:LoadScriptDataModFromJson(path)
     if not file then
         return
     end 
-    local data = json.decode_script_data(file:read("*all"))
+    local data = json.custom_decode(file:read("*all"))
     for i, tbl in pairs(data) do
         if BeardLib.ScriptData[i] then
             for no, mod_data in pairs(tbl) do
@@ -231,7 +231,7 @@ function BeardLib:ProcessScriptData(PackManager, filepath, extension, data)
             
             local new_data
             if fileType == "json" then
-                new_data = json.decode_script_data(read_data)
+                new_data = json.custom_decode(read_data)
             elseif fileType == "xml" then
                 new_data = ScriptSerializer:from_xml(read_data)
             elseif fileType == "custom_xml" then
@@ -241,7 +241,7 @@ function BeardLib:ProcessScriptData(PackManager, filepath, extension, data)
             elseif fileType == "binary" then
                 new_data = ScriptSerializer:from_binary(read_data)
             else
-                new_data = json.decode_script_data(read_data)
+                new_data = json.custom_decode(read_data)
             end
             
             if extension == Idstring("nav_data") then
@@ -368,7 +368,7 @@ function BeardLib:PopulateMenuNode(Key, Params, value, node)
 	end
 end
 
-function BeardLib:update(t, dt)
+function BeardLib:UpdateEnvironment(t, dt)
     if managers.viewport and managers.viewport:viewports() and self.NewEnvData then
         for key, data in pairs(self.NewEnvData) do
             for _, viewport in pairs(managers.viewport:viewports()) do
@@ -384,7 +384,7 @@ function BeardLib:update(t, dt)
                     handler:editor_set_value(key, data.value)
                 end
                 
-                if not data.skip_save then
+                if data.save then
                     self.ModdedData = self.ModdedData or {}
                     self.ModdedData[data.path] = self.ModdedData[data.path] or {}
                     self.ModdedData[data.path] = tostring(val_to_save)
@@ -393,6 +393,14 @@ function BeardLib:update(t, dt)
             self.NewEnvData[key] = nil
         end
 	end
+end
+
+function BeardLib:update(t, dt)
+    self:UpdateEnvironment(t, dt)
+end
+
+function BeardLib:paused_update(t, dt)
+    self:UpdateEnvironment(t, dt)
 end
 
 function BeardLib:SavingBackCallback()
@@ -417,7 +425,7 @@ function BeardLib:MODIDEnteredCallback(value)
 	}
 	local fileName = BeardLib.current_filename
 	local file = io.open(fileName, "w+")
-	file:write(json.encode_script_data(JsonData))
+	file:write(json.custom_encode(JsonData))
 	file:close()
     BeardLib.CurrentlySaving = false
 end
@@ -438,7 +446,7 @@ function BeardLib:GetTypeDataFrom(file, typ)
     
     local new_data
     if typ == "json" then
-        new_data = json.decode_script_data(read_data)
+        new_data = json.custom_decode(read_data)
     elseif typ == "xml" then
         new_data = ScriptSerializer:from_xml(read_data)
     elseif typ == "custom_xml" then
@@ -455,7 +463,7 @@ end
 function BeardLib:GetTypeDataTo(data, typ)
     local new_data
     if typ == "json" then
-        new_data = json.encode_script_data(data)
+        new_data = json.custom_encode(data)
     elseif typ == "custom_xml" then
         new_data = ScriptSerializer:to_custom_xml(data)
     elseif typ == "generic_xml" then
@@ -496,6 +504,13 @@ function BeardLib:SaveConvertedData(value, params)
 end
 
 if Hooks then
+    Hooks:Register("GameSetupPauseUpdate")
+    if GameSetup then
+		Hooks:PostHook(GameSetup, "paused_update", "GameSetupPausedUpdateBase", function(self, t, dt)
+			Hooks:Call("GameSetupPauseUpdate", t, dt)
+		end)
+	end
+
 	Hooks:Add("MenuUpdate", "BeardLibMenuUpdate", function( t, dt )
 		BeardLib:update(t, dt)
 	end)
@@ -503,7 +518,11 @@ if Hooks then
 	Hooks:Add("GameSetupUpdate", "BeardLibGameSetupUpdate", function( t, dt )
 		BeardLib:update(t, dt)
 	end)
-		
+    
+    Hooks:Add("GameSetupPauseUpdate", "BeardLibGameSetupPausedUpdate", function(t, dt)
+        BeardLib:paused_update(t, dt)
+    end)
+    
 	Hooks:Add("LocalizationManagerPostInit", "BeardLibLocalization", function(loc)
 		LocalizationManager:add_localized_strings({
 			["BeardLibEnvMenu"] = "Environment Mod Menu",
@@ -542,8 +561,7 @@ if Hooks then
                 name = BeardLib.EnvMenu,
                 menu_components = managers.menu._is_start_menu and "player_profile menuscene_info news game_installing" or nil,
                 merge_data = {
-                    area_bg = "half",
-                    hide_bg = true
+                    area_bg = "half"
                 }
             })
             
@@ -568,7 +586,7 @@ if Hooks then
             id = "BeardLibMainMenu",
             title = "BeardLibMainMenu",
             node_name = "options",
-            position = 9,
+            position = managers.menu._is_start_menu and 9 or 7,
             next_node = BeardLib.MainMenu,
         })
 	end)
@@ -602,19 +620,19 @@ if Hooks then
             
             MenuCallbackHandler.BeardLibEnvVectorxCallback = function(this, item)
                 BeardLib.NewEnvData = BeardLib.NewEnvData or {}
-                BeardLib.NewEnvData[tostring(item._parameters.path_key)] = {value = Vector3(item:value(), nil, nil), path = item._parameters.path}
+                BeardLib.NewEnvData[tostring(item._parameters.path_key)] = {value = Vector3(item:value(), nil, nil), path = item._parameters.path, save = true}
                 BeardLib.CurrentlySaving = false
             end
             
             MenuCallbackHandler.BeardLibEnvVectoryCallback = function(this, item)
                 BeardLib.NewEnvData = BeardLib.NewEnvData or {}
-                BeardLib.NewEnvData[tostring(item._parameters.path_key)] = {value = Vector3(nil, item:value(), nil), path = item._parameters.path}
+                BeardLib.NewEnvData[tostring(item._parameters.path_key)] = {value = Vector3(nil, item:value(), nil), path = item._parameters.path, save = true}
                 BeardLib.CurrentlySaving = false
             end
             
             MenuCallbackHandler.BeardLibEnvVectorzCallback = function(this, item)
                 BeardLib.NewEnvData = BeardLib.NewEnvData or {}
-                BeardLib.NewEnvData[tostring(item._parameters.path_key)] = {value = Vector3(nil, nil, item:value()), path = item._parameters.path}
+                BeardLib.NewEnvData[tostring(item._parameters.path_key)] = {value = Vector3(nil, nil, item:value()), path = item._parameters.path, save = true}
                 BeardLib.CurrentlySaving = false
             end
             
@@ -686,7 +704,7 @@ if Hooks then
         
         MenuHelperPlus:AddButton({
             id = "BackToStart",
-            title = "Back to the future",
+            title = "Back to Shortcuts",
             callback = "BeardLibScriptStart",
             node = node,
             localized = false
@@ -780,7 +798,7 @@ if Hooks then
         
         MenuHelperPlus:AddButton({
             id = "BackToStart",
-            title = "Back to the future",
+            title = "Back to Shortcuts",
             callback = "BeardLibScriptStart",
             node = node,
             localized = false

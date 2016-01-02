@@ -56,7 +56,6 @@ function ContinentData:ProcessScriptData(data, path, extension)
 	local statics = data.statics
     
     if statics and table.size(merge_data) > 0 then
-        --SaveTable(data, "BeforeContinentData.txt")
         for i, static_data in pairs(statics) do
             if static_data.unit_data and static_data.unit_data.name_id then
                 for ID, mod in pairs(merge_data) do
@@ -82,6 +81,5 @@ function ContinentData:ProcessScriptData(data, path, extension)
                 end
             end
         end
-        --SaveTable(data, "AfterContinentData.txt")
     end
 end

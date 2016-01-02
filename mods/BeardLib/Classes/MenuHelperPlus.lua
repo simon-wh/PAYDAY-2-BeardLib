@@ -64,7 +64,7 @@ function MenuHelperPlus:NewNode(Menuname, params)
 	end
 	local nodes = RegisteredMenu.logic._data._nodes
 	
-	local paramaters = {
+	local parameters = {
 		_meta = "node",
 		align_line = params.align_line or 0.75,
 		back_callback = params.back_callback,
@@ -81,20 +81,20 @@ function MenuHelperPlus:NewNode(Menuname, params)
 		scene_state = params.scene_state
 	}
 	if params.merge_data then
-		table.merge(paramaters, params.merge_data)
+		table.merge(parameters, params.merge_data)
 	end
 	
 	if params.legends then
 		for i, legend in pairs(params.legends) do
-			self:CreateAndInsertLegendData(paramaters, legend)
+			self:CreateAndInsertLegendData(parameters, legend)
 		end
 	end
 	
 	local node_class = CoreMenuNode.MenuNode
-    if paramaters.type then
-        node_class = CoreSerialize.string_to_classtable(paramaters.type)
+    if parameters.type then
+        node_class = CoreSerialize.string_to_classtable(parameters.type)
     end
-	local new_node = node_class:new(paramaters)
+	local new_node = node_class:new(parameters)
 		
 	local callback_handler = CoreSerialize.string_to_classtable(params.callback_overwrite or "MenuCallbackHandler")
 	new_node:set_callback_handler(params.callback_overwrite and callback_handler or RegisteredMenu.callback_handler)
@@ -105,15 +105,16 @@ function MenuHelperPlus:NewNode(Menuname, params)
 end
 
 function MenuHelperPlus:AddLegend(Menuid, nodename, params)
-	local menu = self.Menus[Menuid]
-	
-	if not menu then
-		return
-	end
-	
-	menu.nodes[nodename] = menu.nodes[nodename] or {}
-	local max_val = table.maxn(menu.nodes[nodename])
-	menu.nodes[nodename][max_val + 1] = params
+	local node = MenuHelperPlus:GetNode(Menuid, nodename)
+    if not node then
+        return
+    end
+    
+    table.insert(node._legends, {
+		string_id = params.name,
+		pc = params.pc or false,
+		visible_callback = params.visible_callback or nil
+	})
 end
 
 function MenuHelperPlus:CreateAndInsertLegendData(nodeData, params)
@@ -146,7 +147,6 @@ function MenuHelperPlus:AddButton(params)
 		text_id = params.title,
 		help_id = params.desc,
 		callback = params.callback,
-		back_callback = params.back_callback,
 		disabled_color = params.disabled_colour or Color(0.25, 1, 1, 1),
 		next_node = params.next_node,
 		localize = params.localized,
@@ -168,6 +168,8 @@ function MenuHelperPlus:AddButton(params)
     else
         node:add_item(item)
     end
+    
+    return item
 end
 
 function MenuHelperPlus:AddDivider(params)
@@ -197,7 +199,7 @@ function MenuHelperPlus:AddDivider(params)
     else
         node:add_item(item)
     end
-
+    return item
 end
 
 function MenuHelperPlus:AddToggle(params)
@@ -247,6 +249,7 @@ function MenuHelperPlus:AddToggle(params)
 		disabled_color = params.disabled_colour or Color( 0.25, 1, 1, 1 ),
 		icon_by_text = params.icon_by_text or false,
 		localize = params.localized,
+		localize_help = params.localized_help,
 	}
 	
 	if params.merge_data then
@@ -265,6 +268,8 @@ function MenuHelperPlus:AddToggle(params)
     else
         node:add_item(item)
     end
+    
+    return item
 end
 
 function MenuHelperPlus:AddSlider(params)
@@ -289,6 +294,7 @@ function MenuHelperPlus:AddSlider(params)
 		callback = params.callback,
 		disabled_color = params.disabled_colour or Color( 0.25, 1, 1, 1 ),
 		localize = params.localized,
+        localize_help = params.localized_help,
 	}
 
 	if params.merge_data then
@@ -307,6 +313,8 @@ function MenuHelperPlus:AddSlider(params)
     else
         node:add_item(item)
     end
+    
+    return item
 end
 
 function MenuHelperPlus:AddMultipleChoice(params)
@@ -330,6 +338,7 @@ function MenuHelperPlus:AddMultipleChoice(params)
 		callback = params.callback,
 		filter = true,
 		localize = params.localized,
+        localize_help = params.localized_help,
 	}
 	
 	if params.merge_data then
@@ -348,6 +357,8 @@ function MenuHelperPlus:AddMultipleChoice(params)
     else
         node:add_item(item)
     end
+    
+    return item
 end
 
 function MenuHelperPlus:AddKeybinding(params)
@@ -385,6 +396,8 @@ function MenuHelperPlus:AddKeybinding(params)
     else
         node:add_item(item)
     end
+    
+    return item
 end
 
 function MenuHelperPlus:GetMenus()

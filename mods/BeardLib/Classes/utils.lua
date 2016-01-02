@@ -25,6 +25,7 @@ function math.EulerToQuarternion(x, y, z)
     return quad
 end
 
+-- Doesn't produce the same output as the game. Any help on fixing that would be appreciated.
 function math.QuaternionToEuler(x, y, z, w)
     local sqw = w * w
     local sqx = x * x

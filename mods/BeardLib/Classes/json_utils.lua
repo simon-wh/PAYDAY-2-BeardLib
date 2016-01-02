@@ -1,3 +1,15 @@
+-----------------------------------------------------------------------------
+-- JSON4Lua: JSON encoding / decoding support for the Lua language.
+-- json Module.
+-- Author: Craig Mason-Jones
+-- Homepage: http://json.luaforge.net/
+-- Version: 0.9.50
+-- This module is released under the MIT License (MIT).
+-- Please see LICENCE.txt for details.
+-- Modified by: GREAT BIG BUSHY BEARD
+-----------------------------------------------------------------------------
+
+
 local encodeString
 local isArray
 local isEncodable
@@ -32,7 +44,7 @@ end
 --- Encodes an arbitrary Lua object / variable.
 -- @param v The Lua object / variable to be JSON encoded.
 -- @return String containing the JSON encoding in internal Lua string format (i.e. not unicode)
-function json.encode_script_data (v, tabs)
+function json.custom_encode (v, tabs)
     tabs = tabs or 0
 
   -- Handle nil values
@@ -257,7 +269,7 @@ init_token_table (tt_comment_middle) "comment end"
     :link(tt_ignore)             :to (allchars)
     :link(true)                  :to "*"
 
-function json.decode_script_data (js_string)
+function json.custom_decode (js_string)
     local pos = 1 -- position in the string
     
     -- read the next byte value
