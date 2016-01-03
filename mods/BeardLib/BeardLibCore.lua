@@ -410,7 +410,7 @@ function BeardLib:UpdateEnvironment(t, dt)
                 
                 if CoreClass.type_name(value) == "Vector3" then
                     local new_value
-                    if CoreClass.type_name(value) == "number" then
+                    if CoreClass.type_name(data.value) == "number" then
                         new_value = Vector3(data.vtype == "x" and data.value or value.x, data.vtype == "y" and data.value or value.y, data.vtype == "z" and data.value or value.z)
                     else
                         new_value = Vector3(data.value.x or value.x, data.value.y or value.y, data.value.z or value.z)
@@ -660,19 +660,19 @@ if Hooks then
             
             MenuCallbackHandler.BeardLibEnvVectorxCallback = function(this, item)
                 BeardLib.NewEnvData = BeardLib.NewEnvData or {}
-                BeardLib.NewEnvData[tostring(item._parameters.path_key)] = {value = Vector3(item:value(), nil, nil), path = item._parameters.path, save = true, vtype = "x"}
+                BeardLib.NewEnvData[tostring(item._parameters.path_key)] = {value = item:value(), path = item._parameters.path, save = true, vtype = "x"}
                 BeardLib.CurrentlySaving = false
             end
             
             MenuCallbackHandler.BeardLibEnvVectoryCallback = function(this, item)
                 BeardLib.NewEnvData = BeardLib.NewEnvData or {}
-                BeardLib.NewEnvData[tostring(item._parameters.path_key)] = {value = Vector3(nil, item:value(), nil), path = item._parameters.path, save = true, vtype = "y"}
+                BeardLib.NewEnvData[tostring(item._parameters.path_key)] = {value = item:value(), path = item._parameters.path, save = true, vtype = "y"}
                 BeardLib.CurrentlySaving = false
             end
             
             MenuCallbackHandler.BeardLibEnvVectorzCallback = function(this, item)
                 BeardLib.NewEnvData = BeardLib.NewEnvData or {}
-                BeardLib.NewEnvData[tostring(item._parameters.path_key)] = {value = Vector3(nil, nil, item:value()), path = item._parameters.path, save = true, vtype = "z"}
+                BeardLib.NewEnvData[tostring(item._parameters.path_key)] = {value = item:value(), path = item._parameters.path, save = true, vtype = "z"}
                 BeardLib.CurrentlySaving = false
             end
             
@@ -691,12 +691,27 @@ if Hooks then
             
             local viewport = managers.viewport:first_active_viewport()
             
-            if feeder_list and feeder_list[viewport._env_handler:get_path():key()] then
+            if viewport and feeder_list and feeder_list[viewport._env_handler:get_path():key()] then
                 for key, params in pairs(feeder_list[viewport._env_handler:get_path():key()]) do
                     local value = viewport:get_environment_value(key) or params.value
                     local parts = string.split(params.path, "/")
                     local menu_id = "BeardLib_" .. parts[#parts - 1]
                     local new_node = MenuHelperPlus:GetNode(nil, menu_id)
+                    
+                    if not node:item(menu_id .. "button") then
+                        MenuHelperPlus:AddButton({
+                            id = menu_id .. "button",
+                            title = parts[#parts - 1],
+                            next_node = menu_id,
+                            node = node,
+                            localized = false
+                        })
+                        if new_node then
+                            new_node:clean_items()
+                            managers.menu:add_back_button(new_node)
+                        end
+                    end
+                    
                     if not new_node then
                         new_node = MenuHelperPlus:NewNode(nil, {
                             name = menu_id,
@@ -705,14 +720,9 @@ if Hooks then
                             }
                         })
                         managers.menu:add_back_button(new_node)
-                        MenuHelperPlus:AddButton({
-                            id = menu_id .. "button",
-                            title = parts[#parts - 1],
-                            next_node = menu_id,
-                            node = node,
-                            localized = false
-                        })
                     end
+                    
+                    
                     if value then
                         BeardLib:PopulateMenuNode(key, params, value, new_node)
                     end
