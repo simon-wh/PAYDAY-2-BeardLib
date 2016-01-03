@@ -2,6 +2,8 @@
 
 Easy Payday 2 script file manipulation through LUA.
 
+If you are having issues with CMD prompts constantly appearing and disappearing when you are loading look for 'if true then' in mods/BeardLib/BeardLibCore.lua and change it to 'if false then'.
+
 ## Documentation
 The main documentation can be found on the [wiki](https://github.com/GreatBigBushyBeard/PAYDAY-2-BeardLib/wiki) for this repo.
 
