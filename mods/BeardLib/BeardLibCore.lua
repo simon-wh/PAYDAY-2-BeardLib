@@ -26,7 +26,7 @@ if not _G.BeardLib then
         {path = "./", name = "PAYDAY 2"}
     }
     --Make this true if io.popen doesn't tab you out of the game, false if it does
-    if true then
+    if false then
         local handle = io.popen("wmic logicaldisk get name")
         local path = handle:read("*l")
         while (path ~= nil) do
