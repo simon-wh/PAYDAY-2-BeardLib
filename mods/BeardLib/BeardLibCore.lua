@@ -238,9 +238,7 @@ end
 Hooks:Register("BeardLibPreProcessScriptData")
 Hooks:Register("BeardLibProcessScriptData")
 function BeardLib:ProcessScriptData(PackManager, filepath, extension, data)
-    if extension == Idstring("environment") then
-		BeardLib.CurrentEnvKey = filepath:key()
-	elseif extension == Idstring("menu") then
+    if extension == Idstring("menu") then
 		if MenuHelperPlus and MenuHelperPlus:GetMenuDataFromHashedFilepath(filepath:key()) then
 			data = MenuHelperPlus:GetMenuDataFromHashedFilepath(filepath:key())
 		end
@@ -423,7 +421,6 @@ function BeardLib:UpdateEnvironment(t, dt)
                 
                 if data.save then
                     self.ModdedData = self.ModdedData or {}
-                    self.ModdedData[data.path] = self.ModdedData[data.path] or {}
                     self.ModdedData[data.path] = tostring(val_to_save)
                 end                
             end
@@ -445,12 +442,6 @@ function BeardLib:SavingBackCallback()
 end
 
 function BeardLib:FilenameEnteredCallback(value)
-	BeardLib.current_filename = value
-	BeardLib:CreateInputPanel({value = "GeneratedMod", title = "Environment Mod ID", callback = callback(BeardLib, BeardLib, "MODIDEnteredCallback"), back_callback = callback(BeardLib, BeardLib, "SavingBackCallback")})
-	
-end
-
-function BeardLib:MODIDEnteredCallback(value)
 	local JsonData = {
 		name = value,
 		Environment = {
@@ -460,11 +451,14 @@ function BeardLib:MODIDEnteredCallback(value)
 			}
 		}
 	}
-	local fileName = BeardLib.current_filename
+	local fileName = value
 	local file = io.open(fileName, "w+")
 	file:write(json.custom_encode(JsonData))
 	file:close()
-    BeardLib.CurrentlySaving = false
+end
+
+function BeardLib:MODIDEnteredCallback(value)
+	
 end
 
 function BeardLib:GetSubValues(tbl, key)
@@ -639,7 +633,7 @@ if Hooks then
             MenuCallbackHandler.SaveEnvtable = function(this, item)
                 if not BeardLib.CurrentlySaving then
                     BeardLib.CurrentlySaving = true
-                    BeardLib:CreateInputPanel({value = "EnvModification.txt", title = "Environment Mod Filename", callback = callback(BeardLib, BeardLib, "FilenameEnteredCallback")})
+                    BeardLib:CreateInputPanel({value = "EnvModification" .. tostring(BeardLib.CurrentEnvKey) .. ".txt", title = "Environment Mod Filename", callback = callback(BeardLib, BeardLib, "FilenameEnteredCallback")})
                 end
                 
             end
@@ -653,7 +647,7 @@ if Hooks then
             
             MenuCallbackHandler.BeardLibEnvCallback = function(this, item)
                 BeardLib.NewEnvData = BeardLib.NewEnvData or {}
-                BeardLib.NewEnvData[tostring(item._parameters.path_key)] = {value = item:value(), path = item._parameters.path}
+                BeardLib.NewEnvData[tostring(item._parameters.path_key)] = {value = item:value(), path = item._parameters.path, save = true}
                 BeardLib.CurrentlySaving = false
                 
             end
@@ -685,14 +679,20 @@ if Hooks then
                     end
                 end
                 
-                BeardLib.NewEnvData[item._parameters.path_key] = {value = item._parameters.help_id, path = item._parameters.path, key = item:name()}
+                BeardLib.NewEnvData[item._parameters.path_key] = {value = item._parameters.help_id, path = item._parameters.path, key = item:name(), save = true}
                 BeardLib.CurrentlySaving = false
             end
             
             local viewport = managers.viewport:first_active_viewport()
             
             if viewport and feeder_list and feeder_list[viewport._env_handler:get_path():key()] then
+                if viewport._env_handler:get_path():key() ~= BeardLib.CurrentEnvKey then
+                    BeardLib.ModdedData = {}
+                    BeardLib.CurrentEnvKey = viewport._env_handler:get_path():key()
+                end
+                
                 for key, params in pairs(feeder_list[viewport._env_handler:get_path():key()]) do
+                    
                     local value = viewport:get_environment_value(key) or params.value
                     local parts = string.split(params.path, "/")
                     local menu_id = "BeardLib_" .. parts[#parts - 1]

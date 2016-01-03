@@ -71,12 +71,12 @@ function json.custom_encode (v, tabs)
     local bArray, maxCount = isArray(v)
     if bArray then
       for i = 1,maxCount do
-        table.insert(rval, json.encode_script_data(v[i], tabs + 1))
+        table.insert(rval, json.custom_encode(v[i], tabs + 1))
       end
     else	-- An object, not an array
       for i,j in pairs(v) do
         if isEncodable(i) and isEncodable(j) then
-          table.insert(rval, '"' .. encodeString(i) .. '":' .. json.encode_script_data(j, tabs + 1))
+          table.insert(rval, '"' .. encodeString(i) .. '":' .. json.custom_encode(j, tabs + 1))
         end
       end
     end
