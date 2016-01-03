@@ -25,27 +25,59 @@ if not _G.BeardLib then
         {path = "%userprofile%/Desktop/", name = "Desktop"},
         {path = "./", name = "PAYDAY 2"}
     }
-    local handle = io.popen("wmic logicaldisk get name")
-    local path = handle:read("*l")
-    while (path ~= nil) do
-        path = handle:read("*l")
-        if path ~= nil then
-            local clean_path = (string.gsub(path,  " ", "") .. "/")
-            if string.find(clean_path, ":") then
-                table.insert(BeardLib.script_data_paths, {path = clean_path, name = clean_path})
+    --Make this true if io.popen doesn't tab you out of the game, false if it does
+    if true then
+        local handle = io.popen("wmic logicaldisk get name")
+        local path = handle:read("*l")
+        while (path ~= nil) do
+            path = handle:read("*l")
+            if path ~= nil then
+                local clean_path = (string.gsub(path,  " ", "") .. "/")
+                if string.find(clean_path, ":") then
+                    table.insert(BeardLib.script_data_paths, {path = clean_path, name = clean_path})
+                end
             end
         end
-    end
-    
-    
-    for i, path_data in pairs(BeardLib.script_data_paths) do
-        local handle = io.popen("echo " .. path_data.path)
-        path_data.path = string.gsub(handle:read("*l"),  "\\", "/")
-        if not string.ends(path_data.path, "/") then
-            path_data.path = path_data.path .. "/"
-        end
         handle:close()
-    end
+        
+        for i, path_data in pairs(BeardLib.script_data_paths) do
+            local handle = io.popen("echo " .. path_data.path)
+            path_data.path = string.gsub(handle:read("*l"),  "\\", "/")
+            if not string.ends(path_data.path, "/") then
+                path_data.path = path_data.path .. "/"
+            end
+            handle:close()
+        end
+    else
+        local user_path = string.gsub(Application:windows_user_folder(),  "\\", "/")
+        local split_user_path = string.split(user_path, "/")
+        for i = 1, 3 do
+            table.remove(split_user_path, #split_user_path)
+        end
+        user_path = table.concat(split_user_path, "/")
+        for i, path_data in pairs(BeardLib.script_data_paths) do
+            path_data.path = string.gsub(path_data.path, "%%userprofile%%", user_path)
+            if not string.ends(path_data.path, "/") then
+                path_data.path = path_data.path .. "/"
+            end
+        end
+        
+        table.insert(BeardLib.script_data_paths, {
+            path = "C:/", name = "C Drive"
+        })
+        
+        table.insert(BeardLib.script_data_paths, {
+            path = "D:/", name = "D Drive"
+        })
+        
+        table.insert(BeardLib.script_data_paths, {
+            path = "E:/", name = "E Drive"
+        })
+        
+        table.insert(BeardLib.script_data_paths, {
+            path = "F:/", name = "F Drive"
+        })
+    end    
     
     BeardLib.script_file_extensions = {
         "json",
@@ -377,7 +409,12 @@ function BeardLib:UpdateEnvironment(t, dt)
                 local val_to_save = data.value
                 
                 if CoreClass.type_name(value) == "Vector3" then
-                    local new_value = Vector3(data.value.x or value.x, data.value.y or value.y, data.value.z or value.z)
+                    local new_value
+                    if CoreClass.type_name(value) == "number" then
+                        new_value = Vector3(data.vtype == "x" and data.value or value.x, data.vtype == "y" and data.value or value.y, data.vtype == "z" and data.value or value.z)
+                    else
+                        new_value = Vector3(data.value.x or value.x, data.value.y or value.y, data.value.z or value.z)
+                    end
                     handler:editor_set_value(key, new_value)
                     val_to_save = new_value
                 else
@@ -537,6 +574,9 @@ if Hooks then
         MenuCallbackHandler.BeardLibScriptDataMenuBack = function(this, item)
             BeardLib:CreateRootItems()
             BeardLib.current_script_path = ""
+            if BeardLib.path_text then
+                BeardLib.path_text:set_visible(false)
+            end
         end
         
         local main_node = MenuHelperPlus:NewNode(nil, {
@@ -620,19 +660,19 @@ if Hooks then
             
             MenuCallbackHandler.BeardLibEnvVectorxCallback = function(this, item)
                 BeardLib.NewEnvData = BeardLib.NewEnvData or {}
-                BeardLib.NewEnvData[tostring(item._parameters.path_key)] = {value = Vector3(item:value(), nil, nil), path = item._parameters.path, save = true}
+                BeardLib.NewEnvData[tostring(item._parameters.path_key)] = {value = Vector3(item:value(), nil, nil), path = item._parameters.path, save = true, vtype = "x"}
                 BeardLib.CurrentlySaving = false
             end
             
             MenuCallbackHandler.BeardLibEnvVectoryCallback = function(this, item)
                 BeardLib.NewEnvData = BeardLib.NewEnvData or {}
-                BeardLib.NewEnvData[tostring(item._parameters.path_key)] = {value = Vector3(nil, item:value(), nil), path = item._parameters.path, save = true}
+                BeardLib.NewEnvData[tostring(item._parameters.path_key)] = {value = Vector3(nil, item:value(), nil), path = item._parameters.path, save = true, vtype = "y"}
                 BeardLib.CurrentlySaving = false
             end
             
             MenuCallbackHandler.BeardLibEnvVectorzCallback = function(this, item)
                 BeardLib.NewEnvData = BeardLib.NewEnvData or {}
-                BeardLib.NewEnvData[tostring(item._parameters.path_key)] = {value = Vector3(nil, nil, item:value()), path = item._parameters.path, save = true}
+                BeardLib.NewEnvData[tostring(item._parameters.path_key)] = {value = Vector3(nil, nil, item:value()), path = item._parameters.path, save = true, vtype = "z"}
                 BeardLib.CurrentlySaving = false
             end
             
@@ -687,9 +727,9 @@ if Hooks then
         local node = MenuHelperPlus:GetNode(nil, BeardLib.ScriptDataMenu)
         node:clean_items()
         
-        local gui_class = managers.menu:active_menu().renderer:active_node_gui()
+        local gui_class = managers.menu:active_menu().renderer
         
-        local path_text = gui_class.safe_rect_panel:child("BeardLibPathText") or gui_class.safe_rect_panel:text({
+        self.path_text = self.path_text or gui_class.safe_rect_panel:child("BeardLibPathText") or gui_class.safe_rect_panel:text({
             name = "BeardLibPathText",
             text = "",
             font =  tweak_data.menu.pd2_medium_font, 
@@ -697,10 +737,11 @@ if Hooks then
             layer = 20,
             color = Color.yellow
         })
-        path_text:set_text(self.current_script_path)
-        local x, y, w, h = path_text:text_rect()
-        path_text:set_size(w, h)
-        path_text:set_position(0, 0)
+        self.path_text:set_text(self.current_script_path)
+        self.path_text:set_visible(true)
+        local x, y, w, h = self.path_text:text_rect()
+        self.path_text:set_size(w, h)
+        self.path_text:set_position(0, 0)
         
         MenuHelperPlus:AddButton({
             id = "BackToStart",
@@ -823,14 +864,12 @@ if Hooks then
         
         log(self.current_selected_file_path)
         
-        local gui_class = managers.menu:active_menu().renderer:active_node_gui()
-        local path_text = gui_class.safe_rect_panel:child("BeardLibPathText")
-        
-        if path_text then
-            path_text:set_text(self.current_selected_file_path)
-            local x, y, w, h = path_text:text_rect()
-            path_text:set_size(w, h)
-            path_text:set_position(0, 0)
+        if self.path_text then
+            self.path_text:set_visible(true)
+            self.path_text:set_text(self.current_selected_file_path)
+            local x, y, w, h = self.path_text:text_rect()
+            self.path_text:set_size(w, h)
+            self.path_text:set_position(0, 0)
         end
         
         local file_parts = string.split(self.current_selected_file, "%.")
@@ -907,7 +946,11 @@ if Hooks then
         
             BeardLib.current_script_path = ""
             BeardLib:CreateRootItems()
-        
+            
+            if BeardLib.path_text then
+                BeardLib.path_text:set_visible(false)
+            end
+            
             local selected_node = managers.menu:active_menu().logic:selected_node()
             managers.menu:active_menu().renderer:refresh_node(selected_node)
             local selected_item = selected_node:selected_item()
