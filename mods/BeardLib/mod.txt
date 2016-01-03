@@ -18,7 +18,7 @@
 	],
 	"updates" : [
 		{
-			"revision" : 3,
+			"revision" : 6,
 			"identifier" : "beardlib"
 		}
 	]

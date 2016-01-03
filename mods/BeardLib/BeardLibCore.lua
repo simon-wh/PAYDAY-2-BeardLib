@@ -639,7 +639,7 @@ if Hooks then
             MenuCallbackHandler.SaveEnvtable = function(this, item)
                 if not BeardLib.CurrentlySaving then
                     BeardLib.CurrentlySaving = true
-                    BeardLib:CreateInputPanel({value = "EnvModification" .. BeardLib.current_env .. ".txt", title = "Environment Mod Filename", callback = callback(BeardLib, BeardLib, "FilenameEnteredCallback")})
+                    BeardLib:CreateInputPanel({value = "EnvModification.txt", title = "Environment Mod Filename", callback = callback(BeardLib, BeardLib, "FilenameEnteredCallback")})
                 end
                 
             end
