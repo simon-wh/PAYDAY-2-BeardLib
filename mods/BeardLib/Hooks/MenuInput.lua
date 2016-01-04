@@ -1,19 +1,29 @@
 CloneClass(MenuInput)
 
 function MenuInput.back(self, queue, skip_nodes)
-	self.orig.back(self, queue, skip_nodes)
-    if self._current_params and self._current_params.back_callback then
-        self._current_params.back_callback()
+    if BeardLib._caret_connected then
+        BeardLib:DestroyInputPanel()
+        if self._current_params and self._current_params.back_callback then
+            self._current_params.back_callback()
+        end
+        return
     end
-	BeardLib:DestroyInputPanel()
+	self.orig.back(self, queue, skip_nodes)
+end
+
+function MenuInput.input_item(self, item, controller, mouse_click)
+	if BeardLib._caret_connected then
+        return
+    end
+    
+    self.orig.input_item(self, item, controller, mouse_click)
 end
 
 Hooks:PreHook(MenuInput, "mouse_pressed", "BeardLibMenuInputMousePressed", function(self, o, button, x, y)
-    self.BeardLibmouse_pressed(self, o, button, x, y)
-
+    self.BeardLib_mouse_pressed(self, o, button, x, y)
 end)
 
-function MenuInput:BeardLibmouse_pressed(o, button, x, y)
+function MenuInput:BeardLib_mouse_pressed(o, button, x, y)
 	local item = self._logic:selected_item()
 	if item and button == Idstring("1") then
 		if (item.TYPE == "slider" or item._parameters.input) then
@@ -65,20 +75,26 @@ function BeardLib:key_press(o, k)
 	if k == Idstring("backspace") then
 		self._input_text = utf8.sub(self._input_text, 0, math.max(n - 1, 0))
 		self._text_input:set_text(self._input_text)
-	elseif k == Idstring("esc") then
-		if self._current_params.back_callback then
-			self._current_params.back_callback()
-		end
-		self:DestroyInputPanel()
-	elseif k == Idstring("enter") then
-        self:ButtonEnteredCallback()
-        self._current_params.callback(self._input_text, self._current_params.callback_params)
-		self:DestroyInputPanel()
 	end
+    
+    self._key_down = k
 end
 
 function BeardLib:key_release(o, k)
+    if k == self._key_down then
+        if k == Idstring("esc") then
+            self:DestroyInputPanel()
+            if self._current_params.back_callback then
+                self._current_params.back_callback()
+            end
+        elseif k == Idstring("enter") then
+            self:DestroyInputPanel()
+            self:ButtonEnteredCallback()
+            self._current_params.callback(self._input_text, self._current_params.callback_params)
+        end
+    end
     
+    self._key_down = nil
 end
 
 function BeardLib:CreateInputPanel(Params)
@@ -140,9 +156,6 @@ function BeardLib:CreateInputPanel(Params)
 end
 
 function BeardLib:DestroyInputPanel()
-	self._renaming_item = nil
-	self._rename_info_text = nil
-	
 	if self._caret_connected then
 		self._ws:disconnect_keyboard()
 		self._panel:enter_text(nil)
@@ -153,9 +166,6 @@ function BeardLib:DestroyInputPanel()
 		self._panel:remove(self._text_title)
 		self._text_title = nil
 		self.background_box = nil
-		self._text_input = nil
 		self._caret_connected = nil
-        self._current_params = nil
 	end
-	self._rename_highlight = false
 end

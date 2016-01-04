@@ -438,27 +438,29 @@ function BeardLib:paused_update(t, dt)
 end
 
 function BeardLib:SavingBackCallback()
-	BeardLib.CurrentlySaving = false
+	self.CurrentlySaving = false
 end
 
 function BeardLib:FilenameEnteredCallback(value)
-	local JsonData = {
-		name = value,
-		Environment = {
-			{
-				file_key = BeardLib.CurrentEnvKey,
-				ParamMods = BeardLib.ModdedData
-			}
-		}
-	}
-	local fileName = value
-	local file = io.open(fileName, "w+")
-	file:write(json.custom_encode(JsonData))
-	file:close()
+	BeardLib.current_filename = value		
+    BeardLib:CreateInputPanel({value = "GeneratedMod" .. BeardLib.CurrentEnvKey, title = "Environment Mod ID", callback = callback(BeardLib, BeardLib, "MODIDEnteredCallback"), back_callback = callback(BeardLib, BeardLib, "SavingBackCallback")})
 end
 
 function BeardLib:MODIDEnteredCallback(value)
-	
+	local JsonData = {
+		Environment = {
+			{
+				file_key = BeardLib.CurrentEnvKey,
+				ParamMods = BeardLib.ModdedData,
+                ID = value
+			}
+		}
+	}
+	local fileName = BeardLib.current_filename
+	local file = io.open(fileName, "w+")
+	file:write(json.custom_encode(JsonData))
+	file:close()
+    self.CurrentlySaving = false
 end
 
 function BeardLib:GetSubValues(tbl, key)
