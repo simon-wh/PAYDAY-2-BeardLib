@@ -3,12 +3,8 @@ if not _G.BeardLib then
 	BeardLib.mod_path = ModPath
 	BeardLib.save_path = SavePath
 	BeardLib.sequence_mods = BeardLib.sequence_mods or {}
-	BeardLib.EnvMods = BeardLib.EnvMods or {} 
-	BeardLib.EnvMenu = "BeardLibEnvMenu"
 	BeardLib.ScriptDataMenu = "BeardLibScriptDataMenu"
 	BeardLib.MainMenu = "BeardLibMainMenu"
-	BeardLib.ModdedData = {}
-	BeardLib.EnvCreatedMenus = {}
 	BeardLib.JsonPathName = "BeardLibJsonMods"
 	BeardLib.JsonPath = BeardLib.JsonPathName .. "/"
 	BeardLib.CurrentViewportNo = 0
@@ -17,13 +13,14 @@ if not _G.BeardLib then
     BeardLib.hooks_directory = "Hooks/"
     BeardLib.class_directory = "Classes/"
     BeardLib.ScriptData = {}
+    BeardLib.managers = {}
     BeardLib._replace_script_data = {}
     
     BeardLib.script_data_paths = {
         {path = "%userprofile%", name = "User Folder"},
         {path = "%userprofile%/Documents/", name = "Documents"},
         {path = "%userprofile%/Desktop/", name = "Desktop"},
-        {path = "./", name = "PAYDAY 2"}
+        {path = string.gsub(Application:base_path(), "\\", "/"), name = "PAYDAY 2"}
     }
     --Make this true if io.popen doesn't tab you out of the game, false if it does
     if false then
@@ -124,10 +121,12 @@ if not _G.BeardLib then
     }
     
     BeardLib.classes = {
-        "ScriptData.lua",
-        "EnvironmentData.lua",
-        "ContinentData.lua",
-        "SequenceData.lua",
+        "ScriptData/ScriptData.lua",
+        "ScriptData/EnvironmentData.lua",
+        "ScriptData/ContinentData.lua",
+        "ScriptData/SequenceData.lua",
+        "EnvironmentEditorManager.lua",
+        "EnvironmentEditorHandler.lua",
         "MenuHelperPlus.lua",
         "UnitPropertiesItem.lua",
         "json_utils.lua",
@@ -137,6 +136,9 @@ if not _G.BeardLib then
     BeardLib.hook_files = {
         ["core/lib/managers/coresequencemanager"] = "CoreSequenceManager.lua",
         ["lib/managers/menu/menuinput"] = "MenuInput.lua",
+        ["lib/managers/menu/textboxgui"] = "TextBoxGUI.lua",
+        ["lib/managers/systemmenumanager"] = "SystemMenuManager.lua",
+        ["lib/managers/dialogs/keyboardinputdialog"] = "KeyboardInputDialog.lua",
         ["core/lib/managers/viewport/corescriptviewport"] = "CoreScriptViewport.lua",
         ["core/lib/setups/coresetup"] = "CoreSetup.lua",
         ["core/lib/utils/dev/freeflight/corefreeflightmodifier"] = "CoreFreeFlightModifier.lua",
@@ -156,7 +158,39 @@ function BeardLib:init()
     BeardLib.ScriptData.Environment = EnvironmentData:new("BeardLibBaseEnvironmentDataProcessor")
     BeardLib.ScriptData.Continent = ContinentData:new("BeardLibBaseContinentDataProcessor")
     
+    BeardLib.managers.EnvironmentEditor = EnvironmentEditorManager:new()
+    
     self:LoadJsonMods()
+    self:LoadModOverridePlus()
+end
+
+function BeardLib:LoadModOverridePlus()
+    local mods = file.GetDirectories("assets/mod_overrides/")
+    if mods then
+        for _, path in pairs(mods) do
+            self:LoadModOverrideFolder("assets/mod_overrides/" .. path .. "/", "")
+        end
+    end
+end
+
+function BeardLib:LoadModOverrideFolder(directory, currentFilePath)
+    local subFolders = file.GetDirectories(directory)
+    if subFolders then
+        for _, sub_path in pairs(subFolders) do
+            self:LoadModOverrideFolder(directory .. sub_path .. "/", currentFilePath .. (currentFilePath == "" and "" or "/") .. sub_path)
+        end
+    end
+    
+    local subFiles = file.GetFiles(directory)
+    if subFiles then
+        for _, sub_file in pairs(subFiles) do
+            local file_name_split = string.split(sub_file, "%.")
+            if table.contains(self.script_file_extensions, file_name_split[2]) then
+                local fullFilepath = currentFilePath .. "/" .. file_name_split[1]
+                self:ReplaceScriptData(directory .. sub_file, #file_name_split == 2 and "binary" or file_name_split[3], fullFilepath, file_name_split[2], true, true)
+            end
+        end
+    end
 end
 
 function BeardLib:LoadJsonMods()
@@ -182,14 +216,6 @@ function BeardLib:LoadScriptDataModFromJson(path)
     end
 end
 
-if not BeardLib.setup then
-	for _, class in pairs(BeardLib.classes) do
-		dofile(BeardLib.mod_path .. BeardLib.class_directory .. class)
-	end
-    BeardLib:init()
-	BeardLib.setup = true
-end
-
 if RequiredScript then
 	local requiredScript = RequiredScript:lower()
     log(requiredScript)
@@ -201,21 +227,6 @@ end
 function BeardLib:log(str)
 	log("[BeardLib] " .. str)
 end
-
-BeardLib.KeyMinMax = {
-	["ambient_scale"] = {min = -0.99, max = 0.99},
-	["ambient_color_scale"] = {min = -50, max = 50},
-	["sun_range"] = {min = 1, max = 150000},
-	["fog_min_range"] = {min = -500, max = 1000},
-	["fog_max_range"] = {min = -500, max = 4000},
-	["ambient_falloff_scale"] = {min = -20, max = 20},
-	["sky_bottom_color_scale"] = {min = -50, max = 50},
-	["sky_top_color_scale"] = {min = -50, max = 50},
-	["sun_ray_color_scale"] = {min = -100, max = 100},
-	["color2_scale"] = {min = -15, max = 15},
-	["color0_scale"] = {min = -15, max = 15},
-	["color1_scale"] = {min = -15, max = 15}
-}
 
 function BeardLib:ShouldGetScriptData(filepath, extension)
     if (BeardLib and BeardLib.ScriptExceptions and BeardLib.ScriptExceptions[filepath:key()] and BeardLib.ScriptExceptions[filepath:key()][extension:key()]) then
@@ -279,7 +290,11 @@ function BeardLib:ProcessScriptData(PackManager, filepath, extension, data)
             end
             
             if new_data then
-                data = new_data
+                if (replacementPathData.merge) then
+                    table.merge(data, new_data)
+                else
+                    data = new_data
+                end
             end
             file:close()
         end
@@ -292,10 +307,14 @@ function BeardLib:ProcessScriptData(PackManager, filepath, extension, data)
     return data
 end
 
-function BeardLib:ReplaceScriptData(replacementPath, typ, path, extension, prevent_get)
+function BeardLib:ReplaceScriptData(replacementPath, typ, path, extension, prevent_get, merge)
     self._replace_script_data[path:key()] = self._replace_script_data[path:key()] or {}
     if self._replace_script_data[path:key()][extension:key()] then
         BeardLib:log("[ERROR] Filepath has already been replaced, continuing with overwrite")
+    end
+    log(replacementPath .. "|" .. path .. "|" .. extension)
+    if not DB:has(extension, path) then
+        prevent_get = true
     end
     
     if prevent_get then
@@ -303,164 +322,15 @@ function BeardLib:ReplaceScriptData(replacementPath, typ, path, extension, preve
         BeardLib.ScriptExceptions[path:key()][extension:key()] = true
     end
     
-    self._replace_script_data[path:key()][extension:key()] = {path = replacementPath, load_type = typ}
-end
-
-function BeardLib:PopulateMenuNode(Key, Params, value, node)
-	local new_display_name = string.split(Params.display_name, "/")
-	if type(Params.value) == "number" then
-		MenuHelperPlus:AddSlider({
-			min = BeardLib.KeyMinMax[new_display_name[2]] and BeardLib.KeyMinMax[new_display_name[2]].min or -300,
-			max = BeardLib.KeyMinMax[new_display_name[2]] and BeardLib.KeyMinMax[new_display_name[2]].max or 300,
-			step = 0.01,
-			show_value = true,
-			id = Params.path,
-			title = new_display_name[2],
-			desc = "",
-			callback = "BeardLibEnvCallback",
-			localized = false,
-			node = node,
-			value = value,
-            merge_data = {
-                path = Params.display_name,
-                path_key = Key
-            }
-		})
-	elseif Params.value.x then
-		MenuHelperPlus:AddSlider({
-			min = BeardLib.KeyMinMax[new_display_name[2]] and BeardLib.KeyMinMax[new_display_name[2]].min or -1,
-			max = BeardLib.KeyMinMax[new_display_name[2]] and BeardLib.KeyMinMax[new_display_name[2]].max or 1,
-			step = 0.01,
-			show_value = true,
-			id = Params.path .. "-x",
-			title = new_display_name[2] .. "-X",
-			desc = "",
-			callback = "BeardLibEnvVectorxCallback",
-			localized = false,
-			node = node,
-			value = value.x,
-            merge_data = {
-                path = Params.display_name,
-                path_key = Key
-            }
-		})
-		MenuHelperPlus:AddSlider({
-			min = BeardLib.KeyMinMax[new_display_name[2]] and BeardLib.KeyMinMax[new_display_name[2]].min or -1,
-			max = BeardLib.KeyMinMax[new_display_name[2]] and BeardLib.KeyMinMax[new_display_name[2]].max or 1,
-			step = 0.01,
-			show_value = true,
-			id = Params.path .. "-y",
-			title = new_display_name[2] .. "-Y",
-			desc = "",
-			callback = "BeardLibEnvVectoryCallback",
-			localized = false,
-			node = node,
-			value = value.y,
-            merge_data = {
-                path = Params.display_name,
-                path_key = Key
-            }
-		})
-		MenuHelperPlus:AddSlider({
-			min = BeardLib.KeyMinMax[new_display_name[2]] and BeardLib.KeyMinMax[new_display_name[2]].min or -1,
-			max = BeardLib.KeyMinMax[new_display_name[2]] and BeardLib.KeyMinMax[new_display_name[2]].max or 1,
-			step = 0.01,
-			show_value = true,
-			id = Params.path .. "-z",
-			title = new_display_name[2] .. "-Z",
-			desc = "",
-			callback = "BeardLibEnvVectorzCallback",
-			localized = false,
-			node = node,
-			value = value.z,
-            merge_data = {
-                path = Params.display_name,
-                path_key = Key
-            }
-		})
-	else
-		MenuHelperPlus:AddButton({
-			id = Params.path,
-			title = new_display_name[2],
-			desc = value,
-			callback = "BeardLibEnvStringClbk",
-			node = node,
-			localized = false,
-			localized_help = false,
-			priority = 1,
-            merge_data = {
-                string_value = value,
-                path = Params.display_name,
-                path_key = Key,
-                input = true
-            }
-		})
-	end
-end
-
-function BeardLib:UpdateEnvironment(t, dt)
-    if managers.viewport and managers.viewport:viewports() and self.NewEnvData then
-        for key, data in pairs(self.NewEnvData) do
-            for _, viewport in pairs(managers.viewport:viewports()) do
-                local handler = viewport._env_handler
-                local value = viewport:get_environment_value(key)
-                local val_to_save = data.value
-                
-                if CoreClass.type_name(value) == "Vector3" then
-                    local new_value
-                    if CoreClass.type_name(data.value) == "number" then
-                        new_value = Vector3(data.vtype == "x" and data.value or value.x, data.vtype == "y" and data.value or value.y, data.vtype == "z" and data.value or value.z)
-                    else
-                        new_value = Vector3(data.value.x or value.x, data.value.y or value.y, data.value.z or value.z)
-                    end
-                    handler:editor_set_value(key, new_value)
-                    val_to_save = new_value
-                else
-                    handler:editor_set_value(key, data.value)
-                end
-                
-                if data.save then
-                    self.ModdedData = self.ModdedData or {}
-                    self.ModdedData[data.path] = tostring(val_to_save)
-                end                
-            end
-            self.NewEnvData[key] = nil
-        end
-	end
+    self._replace_script_data[path:key()][extension:key()] = {path = replacementPath, load_type = typ, merge = merge}
 end
 
 function BeardLib:update(t, dt)
-    self:UpdateEnvironment(t, dt)
+    BeardLib.managers.EnvironmentEditor:update(t, dt)
 end
 
 function BeardLib:paused_update(t, dt)
-    self:UpdateEnvironment(t, dt)
-end
-
-function BeardLib:SavingBackCallback()
-	self.CurrentlySaving = false
-end
-
-function BeardLib:FilenameEnteredCallback(value)
-	BeardLib.current_filename = value		
-    BeardLib:CreateInputPanel({value = "GeneratedMod" .. BeardLib.CurrentEnvKey, title = "Environment Mod ID", callback = callback(BeardLib, BeardLib, "MODIDEnteredCallback"), back_callback = callback(BeardLib, BeardLib, "SavingBackCallback")})
-end
-
-function BeardLib:MODIDEnteredCallback(value)
-	local JsonData = {
-		Environment = {
-			{
-				file_key = BeardLib.CurrentEnvKey,
-				ParamMods = BeardLib.ModdedData,
-                ID = value
-			}
-		}
-	}
-	local fileName = BeardLib.current_filename
-	local file = io.open(fileName, "w+")
-	file:write(json.custom_encode(JsonData))
-	file:close()
-    self.CurrentlySaving = false
+    BeardLib.managers.EnvironmentEditor:paused_update(t, dt)
 end
 
 function BeardLib:GetSubValues(tbl, key)
@@ -519,7 +389,8 @@ function BeardLib:ConvertFile(file, from_i, to_i, filename_dialog)
     local new_path = file .. "." .. to_data.name
     
     if filename_dialog then
-        BeardLib:CreateInputPanel({value = new_path, title = "File name", callback = callback(self, self, "SaveConvertedData"), callback_params = {from_data = from_data, to_data = to_data, convert_data = convert_data, current_file = file}})
+        --Use system_menu dialog
+         managers.system_menu:show_keyboard_input({text = new_path, title = "File name", callback_func = callback(self, self, "SaveConvertedData", {from_data = from_data, to_data = to_data, convert_data = convert_data, current_file = file})})
     else
         BeardLib:SaveConvertedData(new_path, {from_data = from_data, to_data = to_data, convert_data = convert_data, current_file = file})
     end
@@ -527,7 +398,10 @@ function BeardLib:ConvertFile(file, from_i, to_i, filename_dialog)
     
 end
 
-function BeardLib:SaveConvertedData(value, params)
+function BeardLib:SaveConvertedData(params, success, value)
+    if not success then
+        return
+    end
     local to_file = io.open(value, params.to_data.open_type or "w+")
     local new_data = self:GetTypeDataTo(params.convert_data, params.to_data.name)
     to_file:write(new_data)
@@ -561,6 +435,7 @@ if Hooks then
 			["BeardLibEnvMenu"] = "Environment Mod Menu",
 			["BeardLibEnvMenuHelp"] = "Modify the params of the current Environment",
 			["BeardLibSaveEnvTable_title"] = "Save Current modifications",
+			["BeardLibResetEnv_title"] = "Reset Values",
 			["BeardLibScriptDataMenu_title"] = "ScriptData Converter",
 			["BeardLibMainMenu"] = "BeardLib Main Menu"
 		})
@@ -576,7 +451,8 @@ if Hooks then
         end
         
         local main_node = MenuHelperPlus:NewNode(nil, {
-            name = BeardLib.MainMenu
+            name = BeardLib.MainMenu,
+            menu_components =  managers.menu._is_start_menu and "player_profile menuscene_info news game_installing" or nil
         })
         
         local node = MenuHelperPlus:NewNode(nil, {
@@ -592,29 +468,7 @@ if Hooks then
             next_node = BeardLib.ScriptDataMenu,
         })
         
-        if BeardLib.EditorEnabled then
-            MenuHelperPlus:NewNode(nil, {
-                name = BeardLib.EnvMenu,
-                menu_components = managers.menu._is_start_menu and "player_profile menuscene_info news game_installing" or nil,
-                merge_data = {
-                    area_bg = "half"
-                }
-            })
-            
-            MenuCallbackHandler.BeardLibOpenEnvMenu = function(this, item)
-                if BeardLib.env_data then
-                    BeardLib:PopulateEnvMenu(BeardLib.env_data)
-                end
-            end
-            
-            MenuHelperPlus:AddButton({
-                id = "BeardLibEnvMenu",
-                title = "BeardLibEnvMenu",
-                callback = "BeardLibOpenEnvMenu",
-                node = main_node,
-                next_node = BeardLib.EnvMenu,
-            })
-        end
+        BeardLib.managers.EnvironmentEditor:CreateNode(main_node)
         
         managers.menu:add_back_button(main_node)
         
@@ -626,114 +480,6 @@ if Hooks then
             next_node = BeardLib.MainMenu,
         })
 	end)
-	
-	function BeardLib:PopulateEnvMenu(feeder_list)
-        local node = MenuHelperPlus:GetNode(nil, BeardLib.EnvMenu)
-        if node then
-            node:clean_items()
-            
-            MenuCallbackHandler.SaveEnvtable = function(this, item)
-                if not BeardLib.CurrentlySaving then
-                    BeardLib.CurrentlySaving = true
-                    BeardLib:CreateInputPanel({value = "EnvModification" .. tostring(BeardLib.CurrentEnvKey) .. ".txt", title = "Environment Mod Filename", callback = callback(BeardLib, BeardLib, "FilenameEnteredCallback")})
-                end
-                
-            end
-            MenuHelperPlus:AddButton({
-                id = "BeardLibSaveEnvTable",
-                title = "BeardLibSaveEnvTable_title",
-                callback = "SaveEnvtable",
-                node = node,
-                priority = 1
-            })
-            
-            MenuCallbackHandler.BeardLibEnvCallback = function(this, item)
-                BeardLib.NewEnvData = BeardLib.NewEnvData or {}
-                BeardLib.NewEnvData[tostring(item._parameters.path_key)] = {value = item:value(), path = item._parameters.path, save = true}
-                BeardLib.CurrentlySaving = false
-                
-            end
-            
-            MenuCallbackHandler.BeardLibEnvVectorxCallback = function(this, item)
-                BeardLib.NewEnvData = BeardLib.NewEnvData or {}
-                BeardLib.NewEnvData[tostring(item._parameters.path_key)] = {value = item:value(), path = item._parameters.path, save = true, vtype = "x"}
-                BeardLib.CurrentlySaving = false
-            end
-            
-            MenuCallbackHandler.BeardLibEnvVectoryCallback = function(this, item)
-                BeardLib.NewEnvData = BeardLib.NewEnvData or {}
-                BeardLib.NewEnvData[tostring(item._parameters.path_key)] = {value = item:value(), path = item._parameters.path, save = true, vtype = "y"}
-                BeardLib.CurrentlySaving = false
-            end
-            
-            MenuCallbackHandler.BeardLibEnvVectorzCallback = function(this, item)
-                BeardLib.NewEnvData = BeardLib.NewEnvData or {}
-                BeardLib.NewEnvData[tostring(item._parameters.path_key)] = {value = item:value(), path = item._parameters.path, save = true, vtype = "z"}
-                BeardLib.CurrentlySaving = false
-            end
-            
-            MenuCallbackHandler.BeardLibEnvStringClbk = function(this, item)
-                BeardLib.NewEnvData = BeardLib.NewEnvData or {}
-                local split = string.split(item._parameters.path, "/")
-                if split[#split] == "underlay" then
-                    if not managers.dyn_resource:has_resource(Idstring("scene"), Idstring(item._parameters.help_id), managers.dyn_resource.DYN_RESOURCES_PACKAGE) then
-                        managers.dyn_resource:load(Idstring("scene"), Idstring(item._parameters.help_id), managers.dyn_resource.DYN_RESOURCES_PACKAGE, nil)
-                    end
-                end
-                
-                BeardLib.NewEnvData[item._parameters.path_key] = {value = item._parameters.help_id, path = item._parameters.path, key = item:name(), save = true}
-                BeardLib.CurrentlySaving = false
-            end
-            
-            local viewport = managers.viewport:first_active_viewport()
-            
-            if viewport and feeder_list and feeder_list[viewport._env_handler:get_path():key()] then
-                if viewport._env_handler:get_path():key() ~= BeardLib.CurrentEnvKey then
-                    BeardLib.ModdedData = {}
-                    BeardLib.CurrentEnvKey = viewport._env_handler:get_path():key()
-                end
-                
-                for key, params in pairs(feeder_list[viewport._env_handler:get_path():key()]) do
-                    
-                    local value = viewport:get_environment_value(key) or params.value
-                    local parts = string.split(params.path, "/")
-                    local menu_id = "BeardLib_" .. parts[#parts - 1]
-                    local new_node = MenuHelperPlus:GetNode(nil, menu_id)
-                    
-                    if not node:item(menu_id .. "button") then
-                        MenuHelperPlus:AddButton({
-                            id = menu_id .. "button",
-                            title = parts[#parts - 1],
-                            next_node = menu_id,
-                            node = node,
-                            localized = false
-                        })
-                        if new_node then
-                            new_node:clean_items()
-                            managers.menu:add_back_button(new_node)
-                        end
-                    end
-                    
-                    if not new_node then
-                        new_node = MenuHelperPlus:NewNode(nil, {
-                            name = menu_id,
-                            merge_data = {
-                                hide_bg = true
-                            }
-                        })
-                        managers.menu:add_back_button(new_node)
-                    end
-                    
-                    
-                    if value then
-                        BeardLib:PopulateMenuNode(key, params, value, new_node)
-                    end
-                end
-            end
-            
-            managers.menu:add_back_button(node)
-        end
-	end
     
     function BeardLib:RefreshFilesAndFolders()
         local node = MenuHelperPlus:GetNode(nil, BeardLib.ScriptDataMenu)
@@ -791,7 +537,6 @@ if Hooks then
             size = 15
         })
         
-        log(self.current_script_path)
         local folders = file.GetDirectories(self.current_script_path)
         local files = file.GetFiles(self.current_script_path)
         
@@ -874,7 +619,7 @@ if Hooks then
             size = 15
         })
         
-        log(self.current_selected_file_path)
+        --log(self.current_selected_file_path)
         
         if self.path_text then
             self.path_text:set_visible(true)
@@ -1058,4 +803,12 @@ if Hooks then
 			localized = false
 		})
 	end)]]--
+end
+
+if not BeardLib.setup then
+	for _, class in pairs(BeardLib.classes) do
+		dofile(BeardLib.mod_path .. BeardLib.class_directory .. class)
+	end
+    BeardLib:init()
+	BeardLib.setup = true
 end

@@ -93,7 +93,11 @@ function json.custom_encode (v, tabs)
             return '{}'
         end
     else
-      return '{\n' .. get_tabs(tabs + 1) .. table.concat(rval,',\n' .. get_tabs(tabs + 1)) .. '\n' .. get_tabs(tabs) .. '}'
+        if length > 0 then
+            return '{\n' .. get_tabs(tabs + 1) .. table.concat(rval,',\n' .. get_tabs(tabs + 1)) .. '\n' .. get_tabs(tabs) .. '}'
+        else
+            return '{}'
+        end
     end
   end
   
@@ -138,7 +142,7 @@ function isArray(t)
       end  -- End of (k~='n')
     end -- End of k,v not an indexed pair
   end  -- End of loop across all pairs
-  return true, maxIndex
+  return false, maxIndex
 end
 
 --- Determines whether the given Lua object / table / variable can be JSON encoded. The only
