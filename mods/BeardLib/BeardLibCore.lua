@@ -5,7 +5,8 @@ if not _G.BeardLib then
 	BeardLib.sequence_mods = BeardLib.sequence_mods or {}
 	BeardLib.ScriptDataMenu = "BeardLibScriptDataMenu"
 	BeardLib.MainMenu = "BeardLibMainMenu"
-	BeardLib.JsonPathName = "BeardLibJsonMods"
+    BeardLib.JsonPathName = "BeardLibJsonMods"
+	BeardLib.MapsPath = "Maps"
 	BeardLib.JsonPath = BeardLib.JsonPathName .. "/"
 	BeardLib.CurrentViewportNo = 0
 	BeardLib.ScriptExceptions = BeardLib.ScriptExceptions or {}
@@ -127,6 +128,8 @@ if not _G.BeardLib then
         "ScriptData/SequenceData.lua",
         "EnvironmentEditorManager.lua",
         "EnvironmentEditorHandler.lua",
+        "MapEditor.lua",
+        "MenuMapEditor.lua",
         "MenuHelperPlus.lua",
         "UnitPropertiesItem.lua",
         "json_utils.lua",
@@ -143,6 +146,9 @@ if not _G.BeardLib then
         ["core/lib/setups/coresetup"] = "CoreSetup.lua",
         ["core/lib/utils/dev/freeflight/corefreeflightmodifier"] = "CoreFreeFlightModifier.lua",
         ["core/lib/utils/dev/freeflight/corefreeflight"] = "CoreFreeFlight.lua",
+        ["core/lib/managers/mission/coremissionmanager"] = "Coremissionmanager.lua",
+        ["core/lib/utils/dev/editor/coreworlddefinition"] = "Coreworlddefinition.lua",
+        ["lib/setups/gamesetup"] = "Gamesetup.lua",
         ["core/lib/system/coresystem"] = "CoreSystem.lua",
         --["core/lib/managers/viewport/environment/coreenvironmentmanager"] = "CoreEnvironmentManager.lua"
     }
@@ -150,16 +156,15 @@ end
 
 function BeardLib:init()
     if not file.GetFiles(BeardLib.JsonPath) then
-		os.execute("mkdir " .. BeardLib.JsonPathName)
+        os.execute("mkdir " .. BeardLib.JsonPathName)
+		os.execute("mkdir " .. "mods/" .. BeardLib.MapsPath)
 	end
     
     --implement creation of script data class instances
     BeardLib.ScriptData.Sequence = SequenceData:new("BeardLibBaseSequenceDataProcessor")
     BeardLib.ScriptData.Environment = EnvironmentData:new("BeardLibBaseEnvironmentDataProcessor")
     BeardLib.ScriptData.Continent = ContinentData:new("BeardLibBaseContinentDataProcessor")
-    
     BeardLib.managers.EnvironmentEditor = EnvironmentEditorManager:new()
-    
     self:LoadJsonMods()
     self:LoadModOverridePlus()
 end
@@ -327,6 +332,10 @@ end
 
 function BeardLib:update(t, dt)
     BeardLib.managers.EnvironmentEditor:update(t, dt)
+    if BeardLib.MapEditor then
+        BeardLib.MapEditor:update(t, dt)
+        BeardLib.MenuMapEditor:update(t, dt)
+    end
 end
 
 function BeardLib:paused_update(t, dt)
@@ -412,6 +421,7 @@ end
 
 if Hooks then
     Hooks:Register("GameSetupPauseUpdate")
+    Hooks:Register("GameSetupPauseUpdate")
     if GameSetup then
 		Hooks:PostHook(GameSetup, "paused_update", "GameSetupPausedUpdateBase", function(self, t, dt)
 			Hooks:Call("GameSetupPauseUpdate", t, dt)
@@ -428,8 +438,7 @@ if Hooks then
     
     Hooks:Add("GameSetupPauseUpdate", "BeardLibGameSetupPausedUpdate", function(t, dt)
         BeardLib:paused_update(t, dt)
-    end)
-    
+    end)       
 	Hooks:Add("LocalizationManagerPostInit", "BeardLibLocalization", function(loc)
 		LocalizationManager:add_localized_strings({
 			["BeardLibEnvMenu"] = "Environment Mod Menu",
@@ -442,6 +451,9 @@ if Hooks then
 	end)
 
 	Hooks:Add("MenuManagerSetupCustomMenus", "Base_SetupBeardLibMenu", function( menu_manager, nodes )
+        BeardLib.MapEditor = MapEditor:new()
+        BeardLib.MenuMapEditor = MenuMapEditor:new()    
+        
         MenuCallbackHandler.BeardLibScriptDataMenuBack = function(this, item)
             BeardLib:CreateRootItems()
             BeardLib.current_script_path = ""

@@ -37,13 +37,11 @@ getmetatable(PackageManager)._script_data = getmetatable(PackageManager)._script
 getmetatable(PackageManager).script_data = function(PackManager, extension, filepath, name_mt)
 	local data = {}
     
-	if BeardLib:ShouldGetScriptData(filepath, extension) then
-        if name_mt ~= nil then
-            data = PackManager:_script_data(extension, filepath, name_mt)
-        else
-            data = PackManager:_script_data(extension, filepath)
-        end
-	end
+    if name_mt ~= nil then
+        data = PackManager:_script_data(extension, filepath, name_mt)
+    else
+        data = PackManager:_script_data(extension, filepath)
+    end
     
     data = BeardLib:ProcessScriptData(PackManager, filepath, extension, data)
     

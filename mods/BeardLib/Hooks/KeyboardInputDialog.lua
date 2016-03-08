@@ -40,7 +40,7 @@ function KeyboardInputDialog:init(manager, data, is_title_outside)
     local text = self._panel_script._panel:child("info_area"):child("scroll_panel"):child("text")
     local e = utf8.len(text:text())
 	text:set_selection(e, e)
-    
+    text:set_h(text:parent():h())
 	self._panel_script:add_background()
 	self._panel_script:set_layer(_G.tweak_data.gui.DIALOG_LAYER)
 	self._panel_script:set_centered()
@@ -103,7 +103,7 @@ function KeyboardInputDialog:update_caret()
 	if w < 3 then
 		w = 3
 	end
-	self._caret:set_world_shape(x, y + 2, w, h - 4)
+	self._caret:set_world_shape(x, y + 2, w, text:font_size())
 	self:set_blinking(true)
 end
 
@@ -111,20 +111,11 @@ function KeyboardInputDialog:enter_text(o, s)
     if self:filter() == "number" and tonumber(s) == nil and s ~= "." then
         return
     end
-
-    if #self._data.text == self:max_count() then
+    local text = self._panel_script._panel:child("info_area"):child("scroll_panel"):child("text")
+    if text:number_of_lines() > 4 then
         return
     end
-    
-    local text = self._panel_script._panel:child("info_area"):child("scroll_panel"):child("text")
     text:replace_text(s)
-    local lbs = text:line_breaks()
-	if #lbs > 1 then
-		local s = lbs[2]
-		local e = utf8.len(text:text())
-		text:set_selection(s, e)
-		text:replace_text("")
-	end
     self:update_caret()
 end
 
@@ -168,7 +159,6 @@ function KeyboardInputDialog:update(t, dt)
         text:replace_text("")
         self._last_backspace_tick = t
         self._backspace_pressed_num = self._backspace_pressed_num + 1
-        
         self:update_caret()
     end
 end
@@ -216,7 +206,7 @@ function KeyboardInputDialog:button_pressed(button_index, success)
 	end
 	local callback_func = self._data.callback_func
 	if callback_func then
-		callback_func(success, self:text())
+		callback_func(success, self._panel_script._panel:child("info_area"):child("scroll_panel"):child("text"):text())
 	end
 end
 
