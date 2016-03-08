@@ -16,7 +16,7 @@ if not _G.BeardLib then
     BeardLib.ScriptData = {}
     BeardLib.managers = {}
     BeardLib._replace_script_data = {}
-    
+     
     BeardLib.script_data_paths = {
         {path = "%userprofile%", name = "User Folder"},
         {path = "%userprofile%/Documents/", name = "Documents"},
