@@ -1,30 +1,33 @@
 if not _G.BeardLib then
     _G.BeardLib = {}
-    BeardLib.mod_path = ModPath
-    BeardLib.save_path = SavePath
-    BeardLib.sequence_mods = BeardLib.sequence_mods or {}
-    BeardLib.ScriptDataMenu = "BeardLibScriptDataMenu"
-    BeardLib.MainMenu = "BeardLibMainMenu"
-    BeardLib.JsonPathName = "BeardLibJsonMods"
-    BeardLib.MapsPath = "Maps"
-    BeardLib.JsonPath = BeardLib.JsonPathName .. "/"
-    BeardLib.CurrentViewportNo = 0
-    BeardLib.ScriptExceptions = BeardLib.ScriptExceptions or {}
-    BeardLib.EditorEnabled = true
-    BeardLib.hooks_directory = "Hooks/"
-    BeardLib.class_directory = "Classes/"
-    BeardLib.ScriptData = {}
-    BeardLib.managers = {}
-    BeardLib._replace_script_data = {}
+    
+    local self = BeardLib
+    
+    self.mod_path = ModPath
+    self.save_path = SavePath
+    self.sequence_mods = self.sequence_mods or {}
+    self.ScriptDataMenu = "BeardLibScriptDataMenu"
+    self.MainMenu = "BeardLibMainMenu"
+    self.MapsPath = "./BeardLibMaps/"
+    self.CurrentViewportNo = 0
+    self.ScriptExceptions = self.ScriptExceptions or {}
+    self.EditorEnabled = true
+    self.hooks_directory = "Hooks/"
+    self.class_directory = "Classes/"
+    self.ScriptData = {}
+    self.managers = {}
+    self._replace_script_data = {}
+    
+    self.UnitPaths = {}
      
-    BeardLib.script_data_paths = {
+    self.script_data_paths = {
         {path = "%userprofile%", name = "User Folder"},
         {path = "%userprofile%/Documents/", name = "Documents"},
         {path = "%userprofile%/Desktop/", name = "Desktop"},
         {path = string.gsub(Application:base_path(), "\\", "/"), name = "PAYDAY 2"}
     }
     --Make this true if io.popen doesn't tab you out of the game, false if it does
-    if false then
+    --[[if false then
         local handle = io.popen("wmic logicaldisk get name")
         local path = handle:read("*l")
         while (path ~= nil) do
@@ -32,13 +35,13 @@ if not _G.BeardLib then
             if path ~= nil then
                 local clean_path = (string.gsub(path,  " ", "") .. "/")
                 if string.find(clean_path, ":") then
-                    table.insert(BeardLib.script_data_paths, {path = clean_path, name = clean_path})
+                    table.insert(self.script_data_paths, {path = clean_path, name = clean_path})
                 end
             end
         end
         handle:close()
         
-        for i, path_data in pairs(BeardLib.script_data_paths) do
+        for i, path_data in pairs(self.script_data_paths) do
             local handle = io.popen("echo " .. path_data.path)
             path_data.path = string.gsub(handle:read("*l"),  "\\", "/")
             if not string.ends(path_data.path, "/") then
@@ -46,38 +49,38 @@ if not _G.BeardLib then
             end
             handle:close()
         end
-    else
+    else]]--
         local user_path = string.gsub(Application:windows_user_folder(),  "\\", "/")
         local split_user_path = string.split(user_path, "/")
         for i = 1, 3 do
             table.remove(split_user_path, #split_user_path)
         end
         user_path = table.concat(split_user_path, "/")
-        for i, path_data in pairs(BeardLib.script_data_paths) do
+        for i, path_data in pairs(self.script_data_paths) do
             path_data.path = string.gsub(path_data.path, "%%userprofile%%", user_path)
             if not string.ends(path_data.path, "/") then
                 path_data.path = path_data.path .. "/"
             end
         end
         
-        table.insert(BeardLib.script_data_paths, {
+        table.insert(self.script_data_paths, {
             path = "C:/", name = "C Drive"
         })
         
-        table.insert(BeardLib.script_data_paths, {
+        table.insert(self.script_data_paths, {
             path = "D:/", name = "D Drive"
         })
         
-        table.insert(BeardLib.script_data_paths, {
+        table.insert(self.script_data_paths, {
             path = "E:/", name = "E Drive"
         })
         
-        table.insert(BeardLib.script_data_paths, {
+        table.insert(self.script_data_paths, {
             path = "F:/", name = "F Drive"
         })
-    end    
+    --end    
     
-    BeardLib.script_file_extensions = {
+    self.script_file_extensions = {
         "json",
         "xml",
         "generic_xml",
@@ -106,7 +109,7 @@ if not _G.BeardLib then
         "binary",
     }
     
-    BeardLib.script_file_from_types = {
+    self.script_file_from_types = {
         [1] = {name = "binary", func = "ScriptSerializer:from_binary", open_type = "rb"},
         [2] = {name = "json", func = "json.custom_decode"},
         [3] = {name = "xml", func = "ScriptSerializer:from_xml"},
@@ -114,14 +117,14 @@ if not _G.BeardLib then
         [5] = {name = "custom_xml", func = "ScriptSerializer:from_custom_xml"},
     }
     
-    BeardLib.script_file_to_types = {
+    self.script_file_to_types = {
         [1] = {name = "binary", open_type = "wb"},
         [2] = {name = "json"},
         [3] = {name = "generic_xml"},
         [4] = {name = "custom_xml"},
     }
     
-    BeardLib.classes = {
+    self.classes = {
         "ScriptData/ScriptData.lua",
         "ScriptData/EnvironmentData.lua",
         "ScriptData/ContinentData.lua",
@@ -136,14 +139,13 @@ if not _G.BeardLib then
         "utils.lua"
     }
 
-    BeardLib.hook_files = {
+    self.hook_files = {
         ["core/lib/managers/coresequencemanager"] = "CoreSequenceManager.lua",
         ["lib/managers/menu/menuinput"] = "MenuInput.lua",
         ["lib/managers/menu/textboxgui"] = "TextBoxGUI.lua",
         ["lib/managers/systemmenumanager"] = "SystemMenuManager.lua",
         ["lib/managers/dialogs/keyboardinputdialog"] = "KeyboardInputDialog.lua",
         ["core/lib/managers/viewport/corescriptviewport"] = "CoreScriptViewport.lua",
-        ["core/lib/setups/coresetup"] = "CoreSetup.lua",
         ["core/lib/utils/dev/freeflight/corefreeflightmodifier"] = "CoreFreeFlightModifier.lua",
         ["core/lib/utils/dev/freeflight/corefreeflight"] = "CoreFreeFlight.lua",
         ["core/lib/managers/mission/coremissionmanager"] = "Coremissionmanager.lua",
@@ -155,18 +157,20 @@ if not _G.BeardLib then
 end
 
 function BeardLib:init()
-    if not file.GetFiles(BeardLib.JsonPath) then
-        os.execute("mkdir " .. BeardLib.JsonPathName)
-        os.execute("mkdir " .. "mods/" .. BeardLib.MapsPath)
+    if not file.GetFiles(self.MapsPath) then
+        os.execute("mkdir " .. self.MapsPath)
     end
     
     --implement creation of script data class instances
-    BeardLib.ScriptData.Sequence = SequenceData:new("BeardLibBaseSequenceDataProcessor")
-    BeardLib.ScriptData.Environment = EnvironmentData:new("BeardLibBaseEnvironmentDataProcessor")
-    BeardLib.ScriptData.Continent = ContinentData:new("BeardLibBaseContinentDataProcessor")
-    BeardLib.managers.EnvironmentEditor = EnvironmentEditorManager:new()
-    self:LoadJsonMods()
+    self.ScriptData.Sequence = SequenceData:new("BeardLibBaseSequenceDataProcessor")
+    self.ScriptData.Environment = EnvironmentData:new("BeardLibBaseEnvironmentDataProcessor")
+    self.ScriptData.Continent = ContinentData:new("BeardLibBaseContinentDataProcessor")
+    self.managers.EnvironmentEditor = EnvironmentEditorManager:new()
+    
+    --Load ScriptData mod_overrides
     self:LoadModOverridePlus()
+    
+    self:LoadHashlist()
 end
 
 function BeardLib:LoadModOverridePlus()
@@ -176,6 +180,25 @@ function BeardLib:LoadModOverridePlus()
             self:LoadModOverrideFolder("assets/mod_overrides/" .. path .. "/", "")
         end
     end
+end
+
+function BeardLib:LoadHashlist()
+    local file = DB:open("idstring_lookup", "idstring_lookup")
+    
+    BeardLib:log("Loading Hashlist")
+    
+    if file ~= nil then
+        for line in string.gmatch(file:read(), "[%w_/]+%z") do
+            if DB:has("unit", line) then
+                table.insert(self.UnitPaths, line)
+            end
+        end
+        file:close()
+    else
+        log("nil")
+    end
+    
+    BeardLib:log("Hashlist Loaded")
 end
 
 function BeardLib:LoadModOverrideFolder(directory, currentFilePath)
@@ -192,16 +215,8 @@ function BeardLib:LoadModOverrideFolder(directory, currentFilePath)
             local file_name_split = string.split(sub_file, "%.")
             if table.contains(self.script_file_extensions, file_name_split[2]) then
                 local fullFilepath = currentFilePath .. "/" .. file_name_split[1]
-                self:ReplaceScriptData(directory .. sub_file, #file_name_split == 2 and "binary" or file_name_split[3], fullFilepath, file_name_split[2], true, true)
+                self:ReplaceScriptData(directory .. sub_file, #file_name_split == 2 and "binary" or file_name_split[3], fullFilepath, file_name_split[2], true, false)
             end
-        end
-    end
-end
-
-function BeardLib:LoadJsonMods()
-    if file.GetFiles(BeardLib.JsonPath) then
-        for _, path in pairs(file.GetFiles(BeardLib.JsonPath)) do
-            BeardLib:LoadScriptDataModFromJson(BeardLib.JsonPath .. path)
         end
     end
 end
@@ -223,7 +238,6 @@ end
 
 if RequiredScript then
     local requiredScript = RequiredScript:lower()
-    log(requiredScript)
     if BeardLib.hook_files[requiredScript] then
         dofile( BeardLib.mod_path .. BeardLib.hooks_directory .. BeardLib.hook_files[requiredScript] )
     end
@@ -261,7 +275,7 @@ function BeardLib:ProcessScriptData(PackManager, filepath, extension, data)
     end
     
     if self._replace_script_data[filepath:key()] and self._replace_script_data[filepath:key()][extension:key()] then
-        log("Replace: " .. tostring(filepath:key()))
+        BeardLib:log("Replace: " .. tostring(filepath:key()))
         
         local replacementPathData = self._replace_script_data[filepath:key()][extension:key()]
         local fileType = replacementPathData.load_type
@@ -419,7 +433,6 @@ function BeardLib:SaveConvertedData(params, success, value)
 end
 
 if Hooks then
-    Hooks:Register("GameSetupPauseUpdate")
     Hooks:Register("GameSetupPauseUpdate")
     if GameSetup then
         Hooks:PostHook(GameSetup, "paused_update", "GameSetupPausedUpdateBase", function(self, t, dt)

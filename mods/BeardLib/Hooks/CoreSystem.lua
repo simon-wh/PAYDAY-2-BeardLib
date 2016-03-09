@@ -1,4 +1,6 @@
-_G.og_idstring = Idstring
+
+--Unneeded memory usage, should only be used for dedicated editor
+--[[_G.og_idstring = Idstring
 
 function Idstring(str)
     if not str then
@@ -11,7 +13,7 @@ function Idstring(str)
     end
     
     return ids
-end
+end]]--
 
 --[[function print(str, ...)
     local tbl = {...}
@@ -37,10 +39,12 @@ getmetatable(PackageManager)._script_data = getmetatable(PackageManager)._script
 getmetatable(PackageManager).script_data = function(PackManager, extension, filepath, name_mt)
 	local data = {}
     
-    if name_mt ~= nil then
-        data = PackManager:_script_data(extension, filepath, name_mt)
-    else
-        data = PackManager:_script_data(extension, filepath)
+    if BeardLib:ShouldGetScriptData(filepath, extension) then
+        if name_mt ~= nil then
+            data = PackManager:_script_data(extension, filepath, name_mt)
+        else
+            data = PackManager:_script_data(extension, filepath)
+        end
     end
     
     data = BeardLib:ProcessScriptData(PackManager, filepath, extension, data)

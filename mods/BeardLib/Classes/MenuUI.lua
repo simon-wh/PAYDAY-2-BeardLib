@@ -269,99 +269,99 @@ function MenuUI:mouse_release( o, button, x, y )
 	self._slider_hold = nil
 end
 function MenuUI:mouse_pressed( o, button, x, y )
-if button == Idstring("0") then
-    if self._hide_panel:inside(x,y) then
-        self._hide_panel:child("text"):set_text(self._hidden and "<" or ">")
-        self._menu_panel:set_right(self._hidden and self._menu_panel:w() or 0  )
-        self._hidden = not self._hidden
-        self._hide_panel:set_left(self._menu_panel:right())
-        return
-    end
-    if self._openlist and self._menu_panel:child(self._openlist.name .. "list"):inside(x,y) then
-        for k, v in pairs(self._openlist.items) do
-            if self._openlist and self._menu_panel:child(self._openlist.name .. "list"):child("item"..k):inside(x,y) then
-                self:set_value(self._openlist, self._openlist.value)
-                self[self._openlist.callback](self, self._openlist)
+    if button == Idstring("0") then
+        if self._hide_panel:inside(x,y) then
+            self._hide_panel:child("text"):set_text(self._hidden and "<" or ">")
+            self._menu_panel:set_right(self._hidden and self._menu_panel:w() or 0  )
+            self._hidden = not self._hidden
+            self._hide_panel:set_left(self._menu_panel:right())
+            return
+        end
+        if self._openlist and self._menu_panel:child(self._openlist.name .. "list"):inside(x,y) then
+            for k, v in pairs(self._openlist.items) do
+                if self._openlist and self._menu_panel:child(self._openlist.name .. "list"):child("item"..k):inside(x,y) then
+                    self:set_value(self._openlist, self._openlist.value)
+                    self[self._openlist.callback](self, self._openlist)
+                    managers.menu_component:post_event("menu_enter")
+                    self._menu_panel:child(self._openlist.name .. "list"):set_visible(false)
+                    self._openlist = nil
+                    return
+                end
+            end
+        elseif self._openlist then
+            self._menu_panel:child(self._openlist.name .. "list"):hide()
+            self._openlist = nil
+            return
+        end
+        for _, item in pairs(self._options) do
+            if (item.type == "menu" or item.type == "browser") and item.panel:child("bg"):inside(x,y) then
+                self._menus[item.index].items_panel:show()
                 managers.menu_component:post_event("menu_enter")
-                self._menu_panel:child(self._openlist.name .. "list"):set_visible(false)
-                self._openlist = nil
+                if self._openlist then
+                    self._menu_panel:child(self._openlist.name .. "list"):hide()
+                    self._openlist = nil
+                end
+                item.visible = true
+                self._current_menu = self._menus[item.index]
+                item.panel:child("bg"):set_color(Color(0, 0.5, 1))
+                for index,parent in pairs(self._menus) do
+                    if parent ~= self._menus[item.index] then
+                        parent.items_panel:hide()
+                        parent.panel:child("bg"):set_color(Color.white)
+                        parent.visible = false
+                    end
+                end
                 return
             end
         end
-    elseif self._openlist then
-        self._menu_panel:child(self._openlist.name .. "list"):hide()
-        self._openlist = nil
-        return
-    end
-    for _, item in pairs(self._options) do
-        if (item.type == "menu" or item.type == "browser") and item.panel:child("bg"):inside(x,y) then
-            self._menus[item.index].items_panel:show()
-            managers.menu_component:post_event("menu_enter")
-            if self._openlist then
-                self._menu_panel:child(self._openlist.name .. "list"):hide()
-                self._openlist = nil
+        if self._highlighted and alive(self._highlighted.panel) and self._highlighted.panel:inside(x,y) then
+            local item = self._highlighted
+            managers.menu_component:post_event("menu_enter")           
+            if item.type == "toggle" then
+                self:set_value(item, not item.value)
             end
-            item.visible = true
-            self._current_menu = self._menus[item.index]
-            item.panel:child("bg"):set_color(Color(0, 0.5, 1))
-            for index,parent in pairs(self._menus) do
-                if parent ~= self._menus[item.index] then
-                    parent.items_panel:hide()
-                    parent.panel:child("bg"):set_color(Color.white)
-                    parent.visible = false
+            if item.callback then
+                item.callback(self, item)
+            end
+            if item.type == "slider" then
+                if item.panel:child("slider_bg"):inside(x,y) then
+                    self._slider_hold = item
+                    return
+                end
+            elseif item.type == "combo" then
+                local combo_list = self._menu_panel:child(item.name .. "list")
+                if not self._openlist and item.panel:inside(x,y) then
+                    combo_list:show()
+                    self._openlist = item
+                    return
                 end
             end
+        end
+        if not self._openlist and not self._slider_hold and not self._highlighted then
+            BeardLib.MapEditor:select_unit()
             return
         end
     end
     if self._highlighted and alive(self._highlighted.panel) and self._highlighted.panel:inside(x,y) then
         local item = self._highlighted
-        managers.menu_component:post_event("menu_enter")           
-        if item.type == "toggle" then
-            self:set_value(item, not item.value)
-        end
-        if item.callback then
-            item.callback(self, item)
-        end
-        if item.type == "slider" then
-            if item.panel:child("slider_bg"):inside(x,y) then
-                self._slider_hold = item
-                return
-            end
-        elseif item.type == "combo" then
-            local combo_list = self._menu_panel:child(item.name .. "list")
-            if not self._openlist and item.panel:inside(x,y) then
-                combo_list:show()
-                self._openlist = item
-                return
+        local wheelup = (button == Idstring("mouse wheel up") and true) or (button == Idstring("mouse wheel down") and false)
+        if wheelup ~= nil and item.type == "combo" then
+            if not self._openlist then
+                if (wheelup and (item.value - 1) ~= 0) or (not wheelup and (item.value + 1) < (#item.items + 1))  then
+                    self:set_value(item, item.value + (wheelup and -1) or (not wheelup and 1))
+                    item.callback(self, item)
+                    return
+                end
             end
         end
     end
-    if not self._openlist and not self._slider_hold and not self._highlighted then
-        BeardLib.MapEditor:select_unit()
-        return
-    end
-end
-if self._highlighted and alive(self._highlighted.panel) and self._highlighted.panel:inside(x,y) then
-    local item = self._highlighted
-    local wheelup = (button == Idstring("mouse wheel up") and true) or (button == Idstring("mouse wheel down") and false)
-    if wheelup ~= nil and item.type == "combo" then
-        if not self._openlist then
-            if (wheelup and (item.value - 1) ~= 0) or (not wheelup and (item.value + 1) < (#item.items + 1))  then
-                self:set_value(item, item.value + (wheelup and -1) or (not wheelup and 1))
-                item.callback(self, item)
-                return
-            end
+    if self._current_menu.items_panel:inside(x,y) then
+        if button == Idstring("mouse wheel down") then
+            self:scroll_down()
+        elseif button == Idstring("mouse wheel up") then
+            self:scroll_up()
         end
-    end
-end
-if self._current_menu.items_panel:inside(x,y) then
-    if button == Idstring("mouse wheel down") then
-        self:scroll_down()
-    elseif button == Idstring("mouse wheel up") then
-        self:scroll_up()
-    end
-end	
+    end	
 end
 
  
@@ -391,7 +391,7 @@ function MenuUI:set_value(item, value)
 	end
 end 
 function MenuUI:CreateItem( config ) 
-	local panel = config.parent and  self._scroll_panel:child(config.parent.."_items") or self._menu_panel
+	local panel = config.parent and self._scroll_panel:child(config.parent .. "_items") or self._menu_panel
 	local item_panel = panel:panel({ 
 		name = config.name,
       	y = 10, 

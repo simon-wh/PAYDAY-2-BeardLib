@@ -1,7 +1,7 @@
 {
 	"name" : "BeardLib",
 	"description" : "",
-	"author" : "LASTBULLET_GREAT BIG BUSHY BEARD",
+	"author" : "GREAT BIG BUSHY BEARD",
 	"contact" : "simon@lastbullet.net",
 	"priority" : 500,
 	"hooks" : [
@@ -16,8 +16,7 @@
 		{ "hook_id" : "lib/managers/dialogs/keyboardinputdialog", "script_path" : "BeardLibCore.lua" },
 		{ "hook_id" : "lib/setups/gamesetup", "script_path" : "BeardLibCore.lua"},
 		{ "hook_id" : "core/lib/utils/dev/editor/coreworlddefinition", "script_path" : "BeardLibCore.lua"},
-		{ "hook_id" : "core/lib/managers/mission/coremissionmanager", "script_path" : "BeardLibCore.lua"},
-		{ "hook_id" : "core/lib/setups/coresetup", "script_path" : "BeardLibCore.lua" }
+		{ "hook_id" : "core/lib/managers/mission/coremissionmanager", "script_path" : "BeardLibCore.lua"}
 	],
 	"updates" : [
 		{

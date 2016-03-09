@@ -383,6 +383,12 @@ function MapEditor:disable()
 	if type(managers.enemy) == "table" then
 		managers.enemy:set_gfx_lod_enabled(true)
 	end
+    
+    --Unpause Game
+    --Application:set_pause(false)
+    
+    --Show HUD
+    managers.hud:set_enabled()
 end
 function MapEditor:enable()
 	local active_vp = managers.viewport:first_active_viewport()
@@ -393,12 +399,20 @@ function MapEditor:enable()
 			self:set_camera(pos, self._start_cam:rotation())
 		end
 	end
+    
 	self._closed = true
 	self._vp:set_active(true)
 	self._con:enable()
 	if managers.enemy then
 		managers.enemy:set_gfx_lod_enabled(false)
 	end
+    
+    --Pause Game
+    --For some reason prevents camera movement
+    --Application:set_pause(true)
+    
+    --Hide HUD
+    managers.hud:set_disabled()
 end
 function MapEditor:update(t, dt)
 	local main_t = TimerManager:main():time()
