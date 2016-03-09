@@ -1,15 +1,15 @@
 if not _G.BeardLib then
-	_G.BeardLib = {}
-	BeardLib.mod_path = ModPath
-	BeardLib.save_path = SavePath
-	BeardLib.sequence_mods = BeardLib.sequence_mods or {}
-	BeardLib.ScriptDataMenu = "BeardLibScriptDataMenu"
-	BeardLib.MainMenu = "BeardLibMainMenu"
+    _G.BeardLib = {}
+    BeardLib.mod_path = ModPath
+    BeardLib.save_path = SavePath
+    BeardLib.sequence_mods = BeardLib.sequence_mods or {}
+    BeardLib.ScriptDataMenu = "BeardLibScriptDataMenu"
+    BeardLib.MainMenu = "BeardLibMainMenu"
     BeardLib.JsonPathName = "BeardLibJsonMods"
-	BeardLib.MapsPath = "Maps"
-	BeardLib.JsonPath = BeardLib.JsonPathName .. "/"
-	BeardLib.CurrentViewportNo = 0
-	BeardLib.ScriptExceptions = BeardLib.ScriptExceptions or {}
+    BeardLib.MapsPath = "Maps"
+    BeardLib.JsonPath = BeardLib.JsonPathName .. "/"
+    BeardLib.CurrentViewportNo = 0
+    BeardLib.ScriptExceptions = BeardLib.ScriptExceptions or {}
     BeardLib.EditorEnabled = true
     BeardLib.hooks_directory = "Hooks/"
     BeardLib.class_directory = "Classes/"
@@ -129,7 +129,7 @@ if not _G.BeardLib then
         "EnvironmentEditorManager.lua",
         "EnvironmentEditorHandler.lua",
         "MapEditor.lua",
-        "MenuMapEditor.lua",
+        "MenuUI.lua",
         "MenuHelperPlus.lua",
         "UnitPropertiesItem.lua",
         "json_utils.lua",
@@ -157,8 +157,8 @@ end
 function BeardLib:init()
     if not file.GetFiles(BeardLib.JsonPath) then
         os.execute("mkdir " .. BeardLib.JsonPathName)
-		os.execute("mkdir " .. "mods/" .. BeardLib.MapsPath)
-	end
+        os.execute("mkdir " .. "mods/" .. BeardLib.MapsPath)
+    end
     
     --implement creation of script data class instances
     BeardLib.ScriptData.Sequence = SequenceData:new("BeardLibBaseSequenceDataProcessor")
@@ -200,10 +200,10 @@ end
 
 function BeardLib:LoadJsonMods()
     if file.GetFiles(BeardLib.JsonPath) then
-		for _, path in pairs(file.GetFiles(BeardLib.JsonPath)) do
-			BeardLib:LoadScriptDataModFromJson(BeardLib.JsonPath .. path)
-		end
-	end
+        for _, path in pairs(file.GetFiles(BeardLib.JsonPath)) do
+            BeardLib:LoadScriptDataModFromJson(BeardLib.JsonPath .. path)
+        end
+    end
 end
 
 function BeardLib:LoadScriptDataModFromJson(path)
@@ -222,15 +222,15 @@ function BeardLib:LoadScriptDataModFromJson(path)
 end
 
 if RequiredScript then
-	local requiredScript = RequiredScript:lower()
+    local requiredScript = RequiredScript:lower()
     log(requiredScript)
-	if BeardLib.hook_files[requiredScript] then
-		dofile( BeardLib.mod_path .. BeardLib.hooks_directory .. BeardLib.hook_files[requiredScript] )
-	end
+    if BeardLib.hook_files[requiredScript] then
+        dofile( BeardLib.mod_path .. BeardLib.hooks_directory .. BeardLib.hook_files[requiredScript] )
+    end
 end
 
 function BeardLib:log(str)
-	log("[BeardLib] " .. str)
+    log("[BeardLib] " .. str)
 end
 
 function BeardLib:ShouldGetScriptData(filepath, extension)
@@ -255,10 +255,10 @@ Hooks:Register("BeardLibPreProcessScriptData")
 Hooks:Register("BeardLibProcessScriptData")
 function BeardLib:ProcessScriptData(PackManager, filepath, extension, data)
     if extension == Idstring("menu") then
-		if MenuHelperPlus and MenuHelperPlus:GetMenuDataFromHashedFilepath(filepath:key()) then
-			data = MenuHelperPlus:GetMenuDataFromHashedFilepath(filepath:key())
-		end
-	end
+        if MenuHelperPlus and MenuHelperPlus:GetMenuDataFromHashedFilepath(filepath:key()) then
+            data = MenuHelperPlus:GetMenuDataFromHashedFilepath(filepath:key())
+        end
+    end
     
     if self._replace_script_data[filepath:key()] and self._replace_script_data[filepath:key()][extension:key()] then
         log("Replace: " .. tostring(filepath:key()))
@@ -334,7 +334,6 @@ function BeardLib:update(t, dt)
     BeardLib.managers.EnvironmentEditor:update(t, dt)
     if BeardLib.MapEditor then
         BeardLib.MapEditor:update(t, dt)
-        BeardLib.MenuMapEditor:update(t, dt)
     end
 end
 
@@ -423,36 +422,35 @@ if Hooks then
     Hooks:Register("GameSetupPauseUpdate")
     Hooks:Register("GameSetupPauseUpdate")
     if GameSetup then
-		Hooks:PostHook(GameSetup, "paused_update", "GameSetupPausedUpdateBase", function(self, t, dt)
-			Hooks:Call("GameSetupPauseUpdate", t, dt)
-		end)
-	end
+        Hooks:PostHook(GameSetup, "paused_update", "GameSetupPausedUpdateBase", function(self, t, dt)
+            Hooks:Call("GameSetupPauseUpdate", t, dt)
+        end)
+    end
 
-	Hooks:Add("MenuUpdate", "BeardLibMenuUpdate", function( t, dt )
-		BeardLib:update(t, dt)
-	end)
+    Hooks:Add("MenuUpdate", "BeardLibMenuUpdate", function( t, dt )
+        BeardLib:update(t, dt)
+    end)
 
-	Hooks:Add("GameSetupUpdate", "BeardLibGameSetupUpdate", function( t, dt )
-		BeardLib:update(t, dt)
-	end)
+    Hooks:Add("GameSetupUpdate", "BeardLibGameSetupUpdate", function( t, dt )
+        BeardLib:update(t, dt)
+    end)
     
     Hooks:Add("GameSetupPauseUpdate", "BeardLibGameSetupPausedUpdate", function(t, dt)
         BeardLib:paused_update(t, dt)
     end)       
-	Hooks:Add("LocalizationManagerPostInit", "BeardLibLocalization", function(loc)
-		LocalizationManager:add_localized_strings({
-			["BeardLibEnvMenu"] = "Environment Mod Menu",
-			["BeardLibEnvMenuHelp"] = "Modify the params of the current Environment",
-			["BeardLibSaveEnvTable_title"] = "Save Current modifications",
-			["BeardLibResetEnv_title"] = "Reset Values",
-			["BeardLibScriptDataMenu_title"] = "ScriptData Converter",
-			["BeardLibMainMenu"] = "BeardLib Main Menu"
-		})
-	end)
+    Hooks:Add("LocalizationManagerPostInit", "BeardLibLocalization", function(loc)
+        LocalizationManager:add_localized_strings({
+            ["BeardLibEnvMenu"] = "Environment Mod Menu",
+            ["BeardLibEnvMenuHelp"] = "Modify the params of the current Environment",
+            ["BeardLibSaveEnvTable_title"] = "Save Current modifications",
+            ["BeardLibResetEnv_title"] = "Reset Values",
+            ["BeardLibScriptDataMenu_title"] = "ScriptData Converter",
+            ["BeardLibMainMenu"] = "BeardLib Main Menu"
+        })
+    end)
 
-	Hooks:Add("MenuManagerSetupCustomMenus", "Base_SetupBeardLibMenu", function( menu_manager, nodes )
+    Hooks:Add("MenuManagerSetupCustomMenus", "Base_SetupBeardLibMenu", function( menu_manager, nodes )
         BeardLib.MapEditor = MapEditor:new()
-        BeardLib.MenuMapEditor = MenuMapEditor:new()    
         
         MenuCallbackHandler.BeardLibScriptDataMenuBack = function(this, item)
             BeardLib:CreateRootItems()
@@ -491,7 +489,7 @@ if Hooks then
             position = managers.menu._is_start_menu and 9 or 7,
             next_node = BeardLib.MainMenu,
         })
-	end)
+    end)
     
     function BeardLib:RefreshFilesAndFolders()
         local node = MenuHelperPlus:GetNode(nil, BeardLib.ScriptDataMenu)
@@ -652,23 +650,23 @@ if Hooks then
         end
         
         MenuHelperPlus:AddMultipleChoice({
-			id = "convertfrom",
-			title = "from",
-			node = node,
-			value = selected_from,
-			items = self:GetSubValues(self.script_file_from_types, "name"),
+            id = "convertfrom",
+            title = "from",
+            node = node,
+            value = selected_from,
+            items = self:GetSubValues(self.script_file_from_types, "name"),
             localized = false,
             localized_items = false
-		})
+        })
         
         MenuHelperPlus:AddMultipleChoice({
-			id = "convertto",
-			title = "to",
-			node = node,
-			items = self:GetSubValues(self.script_file_to_types, "name"),
+            id = "convertto",
+            title = "to",
+            node = node,
+            items = self:GetSubValues(self.script_file_to_types, "name"),
             localized = false,
             localized_items = false
-		})
+        })
         
         MenuHelperPlus:AddButton({
             id = "convert",
@@ -767,60 +765,60 @@ if Hooks then
         
         managers.menu:add_back_button(node)
     end
-	
-	Hooks:Register("BeardLibCreateCustomMenus")
-	Hooks:Register("BeardLibCreateCustomNodesAndButtons")
-	
-	Hooks:Add( "MenuManagerInitialize", "BeardLibCreateMenuHooks", function(menu_manager) 
-		Hooks:Call("BeardLibCreateCustomMenus", menu_manager)
-		Hooks:Call("BeardLibMenuHelperPlusInitMenus", menu_manager)
-		Hooks:Call("BeardLibCreateCustomNodesAndButtons", menu_manager)
-	end)
-	
-	--[[Hooks:Add( "BeardLibCreateCustomMenus", "BeardLibCreateEditorMenu", function(menu_manager) 
-		MenuHelperPlus:NewMenu({
-			init_node = {
-				name = "editor_main",
-				align_node = 0.75,
-				back_callback = nil,
-				gui_class = "MenuNodeMainGui",
-				menu_components = "",
-				modifier = "PauseMenu",
-				refresh = nil,
-				topic_id = "menu_ingame_menu",
-				merge_data = nil
-			},
-			name = "menu_editor",
-			id = "editor_menu",
-			fake_path = "gamedata/menus/editor_menu",
-			callback_handler = "MenuCallbackHandler",
-			input = "MenuInput",
-			renderer = "MenuRenderer",
-			merge_data = nil
-		})
-	end)
-	
-	Hooks:Add( "BeardLibCreateCustomNodesAndButtons", "BeardLibCreateEditorMenuData", function(menu_manager)
-		MenuCallbackHandler.Editor_Exit = function(this, item)
-			managers.menu:close_menu("menu_editor")
-			setup:freeflight():disable()
-		end
-		MenuHelperPlus:AddButton({
-			menu = "menu_editor",
-			node_name = "editor_main",
-			id = "BeardLibTestButton",
-			title = "Exit Editor",
-			desc = "Exit the current instance of the editor",
-			callback = "Editor_Exit",
-			localized = false
-		})
-	end)]]--
+    
+    Hooks:Register("BeardLibCreateCustomMenus")
+    Hooks:Register("BeardLibCreateCustomNodesAndButtons")
+    
+    Hooks:Add( "MenuManagerInitialize", "BeardLibCreateMenuHooks", function(menu_manager) 
+        Hooks:Call("BeardLibCreateCustomMenus", menu_manager)
+        Hooks:Call("BeardLibMenuHelperPlusInitMenus", menu_manager)
+        Hooks:Call("BeardLibCreateCustomNodesAndButtons", menu_manager)
+    end)
+    
+    --[[Hooks:Add( "BeardLibCreateCustomMenus", "BeardLibCreateEditorMenu", function(menu_manager) 
+        MenuHelperPlus:NewMenu({
+            init_node = {
+                name = "editor_main",
+                align_node = 0.75,
+                back_callback = nil,
+                gui_class = "MenuNodeMainGui",
+                menu_components = "",
+                modifier = "PauseMenu",
+                refresh = nil,
+                topic_id = "menu_ingame_menu",
+                merge_data = nil
+            },
+            name = "menu_editor",
+            id = "editor_menu",
+            fake_path = "gamedata/menus/editor_menu",
+            callback_handler = "MenuCallbackHandler",
+            input = "MenuInput",
+            renderer = "MenuRenderer",
+            merge_data = nil
+        })
+    end)
+    
+    Hooks:Add( "BeardLibCreateCustomNodesAndButtons", "BeardLibCreateEditorMenuData", function(menu_manager)
+        MenuCallbackHandler.Editor_Exit = function(this, item)
+            managers.menu:close_menu("menu_editor")
+            setup:freeflight():disable()
+        end
+        MenuHelperPlus:AddButton({
+            menu = "menu_editor",
+            node_name = "editor_main",
+            id = "BeardLibTestButton",
+            title = "Exit Editor",
+            desc = "Exit the current instance of the editor",
+            callback = "Editor_Exit",
+            localized = false
+        })
+    end)]]--
 end
 
 if not BeardLib.setup then
-	for _, class in pairs(BeardLib.classes) do
-		dofile(BeardLib.mod_path .. BeardLib.class_directory .. class)
-	end
+    for _, class in pairs(BeardLib.classes) do
+        dofile(BeardLib.mod_path .. BeardLib.class_directory .. class)
+    end
     BeardLib:init()
-	BeardLib.setup = true
+    BeardLib.setup = true
 end

@@ -1,5 +1,5 @@
-MenuMapEditor = MenuMapEditor or class()
-function MenuMapEditor:init()
+MenuUI = MenuUI or class()
+function MenuUI:init( config )
 	local ws = managers.gui_data:create_fullscreen_workspace()   
  	ws:connect_keyboard(Input:keyboard())  
     ws:connect_mouse(Input:mouse())  
@@ -12,7 +12,8 @@ function MenuMapEditor:init()
         halign = "center", 
         align = "center",
         layer = 1000,
-        w = self._fullscreen_ws_pnl:w() / 4.5,
+        h = config.h or self._fullscreen_ws_pnl:h(),
+        w = config.w or self._fullscreen_ws_pnl:w(),
         alpha = 1
     })      
     self._scroll_panel = self._menu_panel:panel({
@@ -23,17 +24,6 @@ function MenuMapEditor:init()
         h = self._menu_panel:h() - 35,
         w = self._menu_panel:w(),
     })  
-    self._menu_panel:text({
-    	name = "unit_data",
-    	color = Color.black,
-    	y = 300,
-    	x = 4,
-    	layer = 20,
-    	visible = false,
-    	text = "Unit data: none",
-    	font = "fonts/font_medium_mf",
-    	font_size = 20,
-    })
     self._fullscreen_ws_pnl:rect({
       	name = "crosshair_vertical", 
       	w = 2,
@@ -109,16 +99,20 @@ function MenuMapEditor:init()
 	})  
 	local _,_,w,h = self._help_text:text_rect()
 	self._help_panel:set_size(w + 10,h)
-	self:CreateItems()
+	if config.create_items then
+		config.create_items(self)
+	else
+		BeardLib:log("No create items callback found")
+	end
     self._menu_closed = true
     self._fullscreen_ws_pnl:key_press(callback(self, self, "key_press"))    
     self._fullscreen_ws_pnl:key_release(callback(self, self, "key_release"))    
-    
+    return self
 end
 
  
 
-function MenuMapEditor:enable()
+function MenuUI:enable()
 	self._fullscreen_ws_pnl:set_alpha(1)
 	self._menu_closed = false
 	managers.mouse_pointer:use_mouse({
@@ -129,14 +123,15 @@ function MenuMapEditor:enable()
 	}) 	
 end
 
-function MenuMapEditor:disable()
-
+function MenuUI:disable()
 	self._fullscreen_ws_pnl:set_alpha(0)
 	self._menu_closed = true
 	self._highlighted = nil
-	for _, item in pairs(self._current_menu.children) do
-		item.highlight = false
-	end	
+	if self._current_menu then
+		for _, item in pairs(self._current_menu.children) do
+			item.highlight = false
+		end	
+	end
 	if self._openlist then
 	 	self._menu_panel:child(self._openlist.name .. "list"):set_visible(false)
 	 	self._openlist = nil
@@ -144,11 +139,11 @@ function MenuMapEditor:disable()
 	managers.mouse_pointer:remove_mouse(self._mouse_id)
 end
 
-function MenuMapEditor:key_release( o, k )
+function MenuUI:key_release( o, k )
 	self.key_pressed = nil
 end
  
-function MenuMapEditor:key_press( o, k )
+function MenuUI:key_press( o, k )
 	self._mouse_id = self._mouse_id or managers.mouse_pointer:get_id()
 	if self._current_menu and not self._menu_closed then
 		self.key_pressed = k 
@@ -159,9 +154,9 @@ function MenuMapEditor:key_press( o, k )
 						if item.type == "toggle" then
 							item.value = not item.value
 						end	
-						MenuMapEditor[item.callback](self, item)
+						item.callback(self, item)
 						managers.menu_component:post_event("menu_enter")
-						MenuMapEditor:set_value(item, item.value)
+						self:set_value(item, item.value)
 					elseif item.type == "combo" then
 						 local combo_list = self._menu_panel:child(item.name .. "list")
 						 if not self._openlist then
@@ -185,7 +180,7 @@ function MenuMapEditor:key_press( o, k )
 		end
 	end
 end
-function MenuMapEditor:key_hold( text, k, item )
+function MenuUI:key_hold( text, k, item )
 	local sec = 0 
   	while self.key_pressed == k and self._highlighted.panel == text:parent() do
   		if k == Idstring("backspace") then
@@ -204,15 +199,15 @@ function MenuMapEditor:key_hold( text, k, item )
   	self:set_value(item, text:text())
   	text:enter_text(nil)
 end
-function MenuMapEditor:enter_text( text, s )
+function MenuUI:enter_text( text, s )
 	text:replace_text(s)
 end
-function MenuMapEditor:mouse_moved( o, x, y )
+function MenuUI:mouse_moved( o, x, y )
 	if self._slider_hold and self._old_x then
 		local slider_bg = self._slider_hold.panel:child("slider_bg")
 		self._slider_hold.value = self._slider_hold.value + (x - self._old_x)
-      	MenuMapEditor[self._slider_hold.callback](self, self._slider_hold)
-      	MenuMapEditor:set_value(self._slider_hold, self._slider_hold.value)
+      	self._slider_hold.callback(self, self._slider_hold)
+      	self:set_value(self._slider_hold, self._slider_hold.value)
     end	
   	if self._openlist then
   	 	for k, v in pairs(self._openlist.items) do
@@ -237,41 +232,43 @@ function MenuMapEditor:mouse_moved( o, x, y )
         end
    	end
    	local found = false
-   	for _, item in pairs(self._current_menu.children) do
-   		if not self._openlist and not self._slider_hold then
-		    if item.panel:inside(x, y) then
-			    item.panel:child("bg"):set_color(Color(0, 0.5, 1))
-			    self:set_help(item.help)
-			    item.highlight = true
-			    found = true
-			    self._highlighted = item
-			    if item.type == "toggle" then
-			    	item.panel:child("toggle"):set_color(Color.black)
+   	if self._current_menu then
+	   	for _, item in pairs(self._current_menu.children) do
+	   		if not self._openlist and not self._slider_hold then
+			    if item.panel:inside(x, y) then
+				    item.panel:child("bg"):set_color(Color(0, 0.5, 1))
+				    self:set_help(item.help)
+				    item.highlight = true
+				    found = true
+				    self._highlighted = item
+				    if item.type == "toggle" then
+				    	item.panel:child("toggle"):set_color(Color.black)
+				    end
+			    else
+			    	item.panel:child("bg"):set_color(Color.white:with_alpha(0))
+			        item.highlight = false
+				    if item.type == "toggle" then
+				    	item.panel:child("toggle"):set_color(Color.black)
+				    end        
 			    end
-		    else
-		    	item.panel:child("bg"):set_color(Color.white:with_alpha(0))
-		        item.highlight = false
-			    if item.type == "toggle" then
-			    	item.panel:child("toggle"):set_color(Color.black)
-			    end        
-		    end
-		end
-   	end		    	
+			end
+	   	end		
+  	end    	
    	if not found then 
 		self._highlighted = nil
 	end
    	self._old_x = x
 end
  
-function MenuMapEditor:set_help(help)
+function MenuUI:set_help(help)
 	self._help_text:set_text(help)
 	local _,_,w,h = self._help_text:text_rect()
 	self._help_panel:set_size(w + 10,h)
 end
-function MenuMapEditor:mouse_release( o, button, x, y )
+function MenuUI:mouse_release( o, button, x, y )
 	self._slider_hold = nil
 end
-function MenuMapEditor:mouse_pressed( o, button, x, y )
+function MenuUI:mouse_pressed( o, button, x, y )
 if button == Idstring("0") then
     if self._hide_panel:inside(x,y) then
         self._hide_panel:child("text"):set_text(self._hidden and "<" or ">")
@@ -319,12 +316,12 @@ if button == Idstring("0") then
     end
     if self._highlighted and alive(self._highlighted.panel) and self._highlighted.panel:inside(x,y) then
         local item = self._highlighted
-        managers.menu_component:post_event("menu_enter")
+        managers.menu_component:post_event("menu_enter")           
+        if item.type == "toggle" then
+            self:set_value(item, not item.value)
+        end
         if item.callback then
-            if item.type == "toggle" then
-                self:set_value(item, not item.value)
-            end
-            self[item.callback](self, item)
+            item.callback(self, item)
         end
         if item.type == "slider" then
             if item.panel:child("slider_bg"):inside(x,y) then
@@ -352,7 +349,7 @@ if self._highlighted and alive(self._highlighted.panel) and self._highlighted.pa
         if not self._openlist then
             if (wheelup and (item.value - 1) ~= 0) or (not wheelup and (item.value + 1) < (#item.items + 1))  then
                 self:set_value(item, item.value + (wheelup and -1) or (not wheelup and 1))
-                self[item.callback](self, item)
+                item.callback(self, item)
                 return
             end
         end
@@ -369,14 +366,19 @@ end
 
  
 
-function MenuMapEditor:set_value(item, value)		
+function MenuUI:set_value(item, value)		
 	item.value = value
 	if item.type == "toggle" then
-		if value == true then
+		if value then
 			item.panel:child("toggle"):set_texture_rect(24,0,24,24)
 		else
 			item.panel:child("toggle"):set_texture_rect(0,0,24,24)			
 		end
+		if item.value then
+			managers.menu_component:post_event("box_tick")
+		else
+			managers.menu_component:post_event("box_untick")
+		end	
 	elseif item.type == "slider" then
 		local slider_value = item.panel:child("slider_value")
 		slider_value:set_text(string.format("%.2f", value))
@@ -388,7 +390,7 @@ function MenuMapEditor:set_value(item, value)
 		item.panel:child("combo_selected"):set_text(item.localize_items and managers.localization:text(item.items[value]) or item.items[value])
 	end
 end 
-function MenuMapEditor:CreateItem( config ) 
+function MenuUI:CreateItem( config ) 
 	local panel = config.parent and  self._scroll_panel:child(config.parent.."_items") or self._menu_panel
 	local item_panel = panel:panel({ 
 		name = config.name,
@@ -425,11 +427,6 @@ function MenuMapEditor:CreateItem( config )
 
     self._options[config.name] = config
     if config.parent then  
-		if config.type == "toggle" then
-			config.callback = config.callback or "toggleclbk"
-		elseif config.type ~= "button" then
-			config.callback = config.callback or "valueclbk"
-		end
 		local parent = self._options[config.parent].index
 	    if not self._menus[parent].children then
 	        self._menus[parent].children[1] = config
@@ -628,313 +625,21 @@ function MenuMapEditor:CreateItem( config )
 	end
 end
 
-function MenuMapEditor:get_item( name )  
+function MenuUI:get_item( name )  
 	for _,item in pairs(self._options) do
 		if item.name == name then
 			return item
 		end
 	end
 end  
-function MenuMapEditor:reset(item, value)
+function MenuUI:reset(item, value)
 	if item and item.type ~= "button" then
-		MenuMapEditor[item.callback](self, item)
-		MenuMapEditor:set_value(item, item.value)
+		item.callback(self, item)
+		self:set_value(item, item.value)
 	end
 end
 
-function MenuMapEditor:CreateItems()
-    self:CreateItem({
-        name = "unit_options",
-        text = "Selected Unit",
-        help = "",
-        type = "menu"  
-    })      
-    self:CreateItem({
-        name = "units_browser",
-        text = "Units",
-        help = "",
-        directory = "assets/extract/units",
-        type = "browser"  
-    })      
-    self:CreateItem({
-        name = "missions_options",
-        text = "Missions",
-        help = "",
-        type = "menu"  
-    })            
-    self:CreateItem({
-        name = "continents_options",
-        text = "Continents",
-        help = "",
-        type = "menu"  
-    })      
-    self:CreateItem({
-        name = "game_options",
-        text = "Game",
-        help = "",
-        type = "menu"  
-    })        
-    self:CreateItem({
-        name = "unit_name",
-        text = "Name: ",
-        value = "",
-        help = "",
-        parent = "unit_options",
-        type = "textbox"  
-    })    
-    self:CreateItem({
-        name = "unit_id",
-        text = "ID: ",
-        value = "",
-        help = "",
-        parent = "unit_options",
-        type = "textbox"  
-    })         
-    self:CreateItem({
-        name = "unit_path",
-        text = "Unit path: ",
-        value = "",
-        help = "",
-        parent = "unit_options",
-        type = "textbox"  
-    })      
-    self:CreateItem({
-        name = "positionx",
-        text = "Position x: ",
-        value = 0,
-        help = "",
-        callback = "set_unit_data", 
-        parent = "unit_options",
-        type = "slider"  
-    })     
-    self:CreateItem({
-        name = "positiony",
-        text = "Position Y: ",
-        value = 0,
-        help = "",
-        callback = "set_unit_data", 
-        parent = "unit_options",
-        type = "slider"  
-    })       
-    self:CreateItem({
-        name = "positionz",
-        text = "Position z: ",
-        value = 0,
-        help = "",
-        callback = "set_unit_data", 
-        parent = "unit_options",
-        type = "slider"  
-    })       
-    self:CreateItem({
-        name = "rotationyaw",
-        text = "Rotation yaw: ",
-        value = 0,
-        help = "",
-        callback = "set_unit_data", 
-        parent = "unit_options",
-        type = "slider"  
-    })     
-    self:CreateItem({
-        name = "rotationpitch",
-        text = "Rotation pitch: ",
-        value = 0,
-        help = "",
-        callback = "set_unit_data",       
-        parent = "unit_options",
-        type = "slider"  
-    })       
-    self:CreateItem({
-        name = "rotationroll",
-        text = "Rotation roll: ",
-        value = 0,
-        help = "",
-        callback = "set_unit_data",
-        parent = "unit_options",
-        type = "slider"  
-    })          
-    self:CreateItem({
-        name = "unit_delete_btn",
-        text = "Delete unit",
-        help = "",
-        callback = "delete_unit",
-        parent = "unit_options",
-        type = "button"  
-    })      
-    self:CreateItem({
-        name = "continents_savepath",
-        text = "Save path: ",
-        value = "maps",
-        help = "",
-        parent = "continents_options",
-        type = "textbox"  
-    })       
-    self:CreateItem({
-        name = "continents_filetype",
-        text = "Type: ",
-        value = 1,
-        items = {"custom_xml", "generic_xml", "json"},
-        help = "",
-        parent = "continents_options",
-        type = "combo"  
-    })     
-    self:CreateItem({
-        name = "continents_savebtn",
-        text = "Save",
-        help = "",
-        callback = "save_continents",
-        parent = "continents_options",
-        type = "button"  
-    })  
-    self:CreateItem({
-        name = "units_visibility",
-        text = "MenuMapEditor units visibility",
-        help = "",
-        value = false,
-        callback = "set_MenuMapEditor_units_visible",
-        parent = "continents_options",
-        type = "toggle"  
-    })      
-    self:CreateItem({
-        name = "units_highlight",
-        text = "Highlight all units",
-        help = "",
-        value = false,
-        parent = "continents_options",
-        type = "toggle"  
-    })       
-    self:CreateItem({
-        name = "show_elements",
-        text = "Show elements",
-        help = "",
-        value = false,
-        parent = "missions_options",
-        type = "toggle"  
-    })         
-    self:CreateItem({
-        name = "teleport_player",
-        text = "Teleport player",
-        help = "",
-        callback = "teleport_me",
-        parent = "game_options",
-        type = "button"  
-    })      
- end
-function MenuMapEditor:teleport_me()
-	BeardLib.MapEditor:drop_player()
-end
-function MenuMapEditor:_unit_color()
-	local num = self._selected_unit:num_bodies()
-	for i = 0, num - 1 do
-		local body = self._selected_unit:body(i)
-		if body:has_ray_type(Idstring("MenuMapEditor")) or not body:has_ray_type(Idstring("body")) then
-			if body:has_ray_type(Idstring("walk")) and not body:has_ray_type(Idstring("body")) then
-				if body:has_ray_type(Idstring("mover")) then
-					return Color(1, 1, 0.25, 1)
-				end
-				if not body:has_ray_type(Idstring("mover")) then
-					return Color(1, 0.25, 1, 1)
-				end
-			end
-			if body:has_ray_type(Idstring("mover")) then
-				return Color(1, 1, 1, 0.25)
-			end
-		end
-	end
-	return Color(1, 0.5, 0.5, 0.85)
-end
-
-function MenuMapEditor:update()		
-	if self.units_found then
-		for _, unit in pairs(self.units_found) do
-			Application:draw(unit, 1, 1,1)
-		end
-	end		
-	if alive(self._selected_unit) then
-		Application:draw(self._selected_unit, self:_unit_color():unpack())	
-		name_brush = Draw:brush(self:_unit_color())
-	else
-		name_brush = Draw:brush(Color.green)
-	end
-	if self:get_item("units_highlight").value then
-		local name_brush
-		for _, unit in pairs(World:find_units_quick("all")) do
-			if unit:MenuMapEditor_id() ~= -1 then
-				Application:draw(unit, 1, 1,1)
-			end
-		end
-		name_brush:set_font(Idstring("fonts/font_medium"), 32)
-		if managers.viewport:get_current_camera() then
-			local cam_up = managers.viewport:get_current_camera():rotation():z()
-			local cam_right = managers.viewport:get_current_camera():rotation():x()
-			if alive(self._selected_unit) then
-				name_brush:center_text(self._selected_unit:position() + Vector3(-10, -10, 200), self._selected_unit:unit_data().name_id .. "[ " .. self._selected_unit:MenuMapEditor_id() .. " ]", cam_right, -cam_up)
-			end
-		end	
-	end
-end
-
-function MenuMapEditor:load_continents(continents)
-    for continent_name, _ in pairs(continents) do
-	    self:CreateItem({
-	        name = continent_name,
-	        text = "Save continent: " .. continent_name,
-	        help = "",
-	        value = true,
-	        parent = "continents_options",
-	        type = "toggle"  
-	    })     
-    end
-end
-function MenuMapEditor:delete_unit( item )
-	if alive(self._selected_unit) then
-		setup._world_holder._definition:delete_unit(self._selected_unit)		
-		World:delete_unit(self._selected_unit)
-		self:set_unit(nil)			
-	end
-end
-function MenuMapEditor:set_MenuMapEditor_units_visible( item )
-	for _, unit in pairs(World:find_units_quick("all")) do
-		if type(unit:unit_data()) == "table" and unit:unit_data().only_visible_in_MenuMapEditor then
-			unit:set_visible( item.value )
-		end
-	end
-end
-function MenuMapEditor:set_unit( unit )
-	self._selected_unit = unit	
-	self:set_value(self:get_item("unit_name"), unit and unit:unit_data().name_id or "")
-	self:set_value(self:get_item("unit_path"), unit and unit:unit_data().name or "")
-	self:set_value(self:get_item("unit_id"), unit and unit:unit_data().unit_id or "")	
-	self:set_value(self:get_item("positionx"), unit and unit:position().x or 0)
-	self:set_value(self:get_item("positiony"), unit and unit:position().y or 0)
-	self:set_value(self:get_item("positionz"), unit and unit:position().z or 0)	
-	self:set_value(self:get_item("rotationyaw"), unit and unit:rotation():yaw() or 0)
-	self:set_value(self:get_item("rotationpitch"), unit and unit:rotation():pitch() or 0)
-	self:set_value(self:get_item("rotationroll"), unit and unit:rotation():roll() or 0)
-end
-function MenuMapEditor:save_continents()
-	local item = self:get_item("continents_filetype")
-	local type = item.items[item.value]
-	local path = self:get_item("continents_savepath").value
-	local world_def = setup._world_holder._definition
-	if file.DirectoryExists( path ) then
-		for continent_name, _ in pairs(world_def._continent_definitions) do
-			if self:get_item(continent_name).value then
-				world_def:save_continent(continent_name, type, path)
-			end
-		end
-	else
-		log("Directory doesn't exists.")
-	end
-end
-function MenuMapEditor:set_unit_data( item )
-	if alive(self._selected_unit) then
-		BeardLib.MapEditor:set_position(Vector3(self:get_item("positionx").value, self:get_item("positiony").value, self:get_item("positionz").value), Rotation(self:get_item("rotationyaw").value, self:get_item("rotationpitch").value, self:get_item("rotationroll").value))
-		if self._selected_unit:MenuMapEditor_id() then
-			setup._world_holder._definition:set_unit(self._selected_unit:MenuMapEditor_id(), {position = self._selected_unit:position(), rotation = self._selected_unit:rotation()})
-		end
-	end
-end
-function MenuMapEditor:browse( config )
+function MenuUI:browse( config )
 	local folders
 	local files
 	if config.directory then
@@ -949,14 +654,14 @@ function MenuMapEditor:browse( config )
    		name = "back_btn",
     	text = "^ ( " .. (config.current_dir or config.custom_dir) .. " )",
     	parent = config.name or self._current_menu.name,
-    	callback = "folder_back" ,
+    	callback = callback(self, self, "folder_back"),
     	type = "button",
     })    
     self:CreateItem({
    		name = "search_btn",
     	text = "Search",
     	parent = config.name or self._current_menu.name,
-    	callback = "file_search",
+    	callback = callback(self, self, "file_search"),
     	type = "button",
     })
     if folders then
@@ -965,7 +670,7 @@ function MenuMapEditor:browse( config )
 	    		name = folder,
 	    		text = folder,
 	    		parent = config.name,
-	    		callback = "folder_click",
+	    		callback = callback(self, self, "folder_click"),
 	    		type = "button",
 	    	})
 	    end
@@ -979,34 +684,36 @@ function MenuMapEditor:browse( config )
 		    		path = config.current_dir:gsub("assets/extract/", "") .. "/" .. file:gsub(".unit", ""),
 		    		color = PackageManager:has(Idstring("unit"), Idstring(config.current_dir:gsub("assets/extract/", "") .. "/" .. file:gsub(".unit", ""))) and Color.green or Color.red,
 		    		parent = config.name,
-		    		callback = "file_click",
+		    		callback = config.file_click,
 		    		type = "button",
 		    	})
 		    end
 	    end	
 	end
 end
-
  
- 
-function MenuMapEditor:scroll_up()
+function MenuUI:scroll_up()
 	if self._current_menu.items_panel:h() > self._scroll_panel:h() then
 		self._current_menu.items_panel:set_top(math.min(0, self._current_menu.items_panel:top() + 20))
 		return true
 	end
 end
-function MenuMapEditor:scroll_down()
+function MenuUI:scroll_down()
 	if self._current_menu.items_panel:h() > self._scroll_panel:h() then
 		self._current_menu.items_panel:set_bottom(math.max(self._current_menu.items_panel:bottom() - 20, self._scroll_panel:h()))
 		return true
 	end
 end
 
-function MenuMapEditor:folder_click(item)
+function MenuUI:folder_click(menu, item)
 	self._current_menu.current_dir = self._current_menu.current_dir .. "/" .. item.text
 	self:browse(self._current_menu)
+	local folder_click = self:get_item(item.parent).folder_click
+	if folder_click then
+		folder_click()
+	end
 end
-function MenuMapEditor:file_search(item)
+function MenuUI:file_search(menu, item)
 	self._is_searching = false
 	managers.system_menu:show_keyboard_input({
 		text = "", 
@@ -1014,7 +721,7 @@ function MenuMapEditor:file_search(item)
 		callback_func = callback(self, self, "search", self._current_menu.directory),
 	})	
 end
-function MenuMapEditor:search(path, success, search)
+function MenuUI:search(path, success, search)
 	if not success then
 		return
 	end
@@ -1033,7 +740,7 @@ function MenuMapEditor:search(path, success, search)
 		    		path = path:gsub("assets/extract/", "") .. "/" .. file:gsub(".unit", ""):gsub(".xml", ""),
 		    		color = PackageManager:has(Idstring("unit"), Idstring(path:gsub("assets/extract/", "") .. "/" .. file:gsub(".unit", ""):gsub(".xml", "xml"))) and Color.green or Color.red,
 		    		parent = self._current_menu.name,
-		    		callback = "file_click",
+		    		callback = self._current_menu.file_click,
 		    		type = "button",
 		    	})
 		    end			
@@ -1047,37 +754,8 @@ function MenuMapEditor:search(path, success, search)
 	end
 
 end
-function MenuMapEditor:file_click(item)
-	local cam = managers.viewport:get_current_camera()
-	local unit_path = self._current_menu.current_dir:gsub("assets/extract/", "") .. "/" .. item.name:gsub(".unit", "")
-	local unit_path = item.path
-	local SpawnUnit = function()
-		local unit
-		if MassUnitManager:can_spawn_unit(Idstring(unit_path)) then
-			unit = MassUnitManager:spawn_unit(Idstring(unit_path), cam:position() + cam:rotation():y(), Rotation(0,0,0))
-		else
-			unit = CoreUnit.safe_spawn_unit(unit_path,  cam:position() + cam:rotation():y(),  Rotation(0,0,0))
-		end	
-		unit:unit_data().name_id = "new_unit"
-		unit:unit_data().unit_id = math.random(99999)
-		unit:unit_data().name = unit_path
-		unit:unit_data().position = unit:position()
-		unit:unit_data().rotation = unit:rotation()
-		setup._world_holder._definition:add_unit(unit)
-	end
-	if item.color == Color.red then
-		QuickMenu:new( "Warning", "Unit is not loaded, load it?", 
-		{[1] = {text = "Yes", callback = function()	
-			managers.dyn_resource:load(Idstring("unit"), Idstring(unit_path), DynamicResourceManager.DYN_RESOURCES_PACKAGE, false)
-			self:browse(self._current_menu)
-			SpawnUnit()			
-  		end
-  		},[2] = {text = "No", is_cancel_button = true}}, true)
-	else
-		SpawnUnit()
-	end
-end
-function MenuMapEditor:folder_back(item)
+ 
+function MenuUI:folder_back(menu, item)
 	if self._is_searching then
 		self._is_searching = false
 		self:browse(self._current_menu)
@@ -1089,20 +767,9 @@ function MenuMapEditor:folder_back(item)
 	end
 
 end
-function MenuMapEditor:clear( menu )
+function MenuUI:clear( menu )
 	for k, item in pairs(self._current_menu.children) do
 		item.panel:parent():remove(item.panel)
 	end
 	self._current_menu.children = {}
 end
-function MenuMapEditor:toggleclbk(item)
-	if item.value then
-		managers.menu_component:post_event("box_tick")
-	else
-		managers.menu_component:post_event("box_untick")
-	end
-end
-function MenuMapEditor:valueclbk(item)
-
-end
-

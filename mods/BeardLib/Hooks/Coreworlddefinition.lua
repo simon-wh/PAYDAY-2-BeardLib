@@ -31,7 +31,7 @@ function WorldDefinition:init_done()
 			self:_unload_package(package)
 		end
 	end
-	_G.BeardLib.MenuMapEditor:load_continents(self._continent_definitions)
+	_G.BeardLib.MapEditor:load_continents(self._continent_definitions)
 	self:_unload_package(self._current_world_init_package)
 end
 
