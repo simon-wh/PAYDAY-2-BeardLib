@@ -8,13 +8,41 @@ core:import("CoreTable")
 
 require("core/lib/managers/mission/CoreElementDebug")
 MissionManager = MissionManager or CoreClass.class(CoreEvent.CallbackHandler)
- 
-function MissionManager:_load_mission_file(file_dir, data)
+ function MissionManager:parse(params, stage_name, offset, file_type)
+	local file_path, activate_mission
+	if CoreClass.type_name(params) == "table" then
+		file_path = params.file_path
+		file_type = params.file_type or "mission"
+		activate_mission = params.activate_mission
+		offset = params.offset
+	else
+		file_path = params
+		file_type = file_type or "mission"
+	end
+	CoreDebug.cat_debug("gaspode", "MissionManager", file_path, file_type, activate_mission)
+	if not DB:has(file_type, file_path) then
+		Application:error("Couldn't find", file_path, "(", file_type, ")")
+		return false
+	end
+	local reverse = string.reverse(file_path)
+	local i = string.find(reverse, "/")
+	local file_dir = string.reverse(string.sub(reverse, i))
+	local continent_files = self:_serialize_to_script(file_type, file_path)
+	continent_files._meta = nil
+	self._missions = {}
+	for name, data in pairs(continent_files) do
+		if not managers.worlddefinition:continent_excluded(name) then
+			self:_load_mission_file(name, file_dir, data)
+		end
+	end
+	_G.BeardLib.MapEditor:load_missions(self._missions)
+	self:_activate_mission(activate_mission)
+	return true
+end
+function MissionManager:_load_mission_file(name, file_dir, data)
 	local file_path = file_dir .. data.file
 	local scripts = self:_serialize_to_script("mission", file_path)
-	if scripts.default then
-		self._orig_scripts = self:_serialize_to_script("mission", file_path) --The rotation in some elements turns into a number for some reason..
-	end
+	self._missions[name] = self:_serialize_to_script("mission", file_path) 
 	for name, data in pairs(scripts) do	
 		data.name = name
 		self:_add_script(data)
@@ -59,14 +87,19 @@ function MissionManager:test_add_element(element_name)
 		values = elements.all,
 	}
 	table.merge(new_element.values, elements[element_name])
-	table.insert(self._orig_scripts["default"].elements, new_element)
+	table.insert(self._missions["world"]["default"].elements, new_element)
 end
 
-function MissionManager:test_save_mission_file()
-	local new_data = _G.BeardLib:GetTypeDataTo({default = self._orig_scripts["default"]}, "generic_xml")	 
-	local file = io.open("test" .. ".generic_xml", "w+")
-	file:write(new_data)
-	file:close()			 
+function MissionManager:save_mission_file(mission, type, path)
+	local new_data = _G.BeardLib:GetTypeDataTo({default = self._missions[mission]["default"]}, type)	 
+	local mission_file = io.open(path .. "/" .. mission .. "_mission" .. "." .. type, "w+")
+	_G.BeardLib:log("Saving mission: " .. mission .. " as a " .. type .. " in " .. path)
+	if mission_file then
+		mission_file:write(new_data)
+		mission_file:close()	
+	else
+		_G.BeardLib:log("Failed to save mission: " .. mission .. " path: " .. path)
+	end		 
 end
 function MissionManager:find_elements_of_unit(unit)
 	if not alive(unit) then
@@ -142,7 +175,7 @@ function MissionScript:_debug_draw(t, dt)
 	name_brush:set_render_template(Idstring("OverlayVertexColorTextured"))
 
 	local wanted_classes = {"ElementAreaTrigger", "ElementSpawnCivilian", "ElementPlayerSpawner"} --Leave as "" if you want all of them to draw.
-	if _G.BeardLib.MapEditor._menu:get_item("show_elements").value then
+	if _G.BeardLib.MapEditor._menu:GetItem("show_elements").value then
 		for id, element in pairs(self._elements) do
 			for _, class in pairs(wanted_classes) do
 				if element.class == class or class == "" then

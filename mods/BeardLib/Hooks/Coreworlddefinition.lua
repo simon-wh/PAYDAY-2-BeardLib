@@ -4,9 +4,13 @@ WorldDefinition = WorldDefinition or class()
 function WorldDefinition:save_continent(continent, type, path)
 	local new_data = _G.BeardLib:GetTypeDataTo(self._continent_definitions[continent], type)	 	
 	local continent_file = io.open(path .. "/" .. continent .. "." .. type, "w+")
-	log("Saving continent: " .. continent .. " as a " .. type .. " in " .. path)
-   	continent_file:write(new_data)
-    continent_file:close()	
+	_G.BeardLib:log("Saving continent: " .. continent .. " as a " .. type .. " in " .. path)
+	if continent_file then
+	   	continent_file:write(new_data)
+	    continent_file:close()	
+	else
+		_G.BeardLib:log("Failed to save continent: " .. continent .. " path: " .. path)
+	end
 end
 
 function WorldDefinition:set_unit(unit_id, config)

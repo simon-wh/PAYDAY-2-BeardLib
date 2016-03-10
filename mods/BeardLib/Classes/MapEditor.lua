@@ -36,184 +36,178 @@ function MapEditor:create_menu()
 	})
 
 end
-function MapEditor:create_items(menu)
-    menu:CreateItem({
+function MapEditor:create_items(Menu)
+    local unit_options = Menu:NewMenu({
         name = "unit_options",
         text = "Selected Unit",
         help = "",
-        type = "menu"  
     })      
-    menu:CreateItem({
+    Menu:NewMenu({
         name = "units_browser",
         text = "Units",
         help = "",
+        browser = true,
         directory = "assets/extract/units",
         file_click = callback(self, self, "file_click"),
     --    folder_click = callback(self, self, "folder_click"),
-        type = "browser"  
     })      
-    menu:CreateItem({
+    local mission_options = Menu:NewMenu({
         name = "missions_options",
         text = "Missions",
         help = "",
-        type = "menu"  
     })            
-    menu:CreateItem({
+    local continents_options = Menu:NewMenu({
         name = "continents_options",
         text = "Continents",
         help = "",
-        type = "menu"  
     })      
-    menu:CreateItem({
+    local game_options = Menu:NewMenu({
         name = "game_options",
         text = "Game",
         help = "",
-        type = "menu"  
-    })        
-    menu:CreateItem({
+    }) 
+    self:create_unit_items(unit_options)       
+    self:create_continents_items(continents_options)       
+    self:create_missions_items(mission_options)       
+    self:create_game_items(game_options)       
+end
+function MapEditor:create_unit_items(Menu)
+    Menu:TextBox({
         name = "unit_name",
         text = "Name: ",
         value = "",
         help = "",
-        parent = "unit_options",
-        type = "textbox"  
     })    
-    menu:CreateItem({
+    Menu:TextBox({
         name = "unit_id",
         text = "ID: ",
         value = "",
         help = "",
-        parent = "unit_options",
-        type = "textbox"  
     })         
-    menu:CreateItem({
+    Menu:TextBox({
         name = "unit_path",
         text = "Unit path: ",
         value = "",
         help = "",
-        parent = "unit_options",
-        type = "textbox"  
-    })      
-    menu:CreateItem({
+    })     
+    Menu:Slider({
         name = "positionx",
         text = "Position x: ",
         value = 0,
         help = "",
         callback = callback(self, self, "set_unit_data"), 
-        parent = "unit_options",
-        type = "slider"  
     })     
-    menu:CreateItem({
+    Menu:Slider({
         name = "positiony",
         text = "Position Y: ",
         value = 0,
         help = "",
         callback = callback(self, self, "set_unit_data"), 
-        parent = "unit_options",
-        type = "slider"  
     })       
-    menu:CreateItem({
+    Menu:Slider({
         name = "positionz",
         text = "Position z: ",
         value = 0,
         help = "",
         callback = callback(self, self, "set_unit_data"), 
-        parent = "unit_options",
-        type = "slider"  
     })       
-    menu:CreateItem({
+    Menu:Slider({
         name = "rotationyaw",
         text = "Rotation yaw: ",
         value = 0,
         help = "",
         callback = callback(self, self, "set_unit_data"), 
-        parent = "unit_options",
-        type = "slider"  
     })     
-    menu:CreateItem({
+    Menu:Slider({
         name = "rotationpitch",
         text = "Rotation pitch: ",
         value = 0,
         help = "",
         callback = callback(self, self, "set_unit_data"),       
-        parent = "unit_options",
-        type = "slider"  
     })       
-    menu:CreateItem({
+    Menu:Slider({
         name = "rotationroll",
         text = "Rotation roll: ",
         value = 0,
         help = "",
         callback = callback(self, self, "set_unit_data"),
-        parent = "unit_options",
-        type = "slider"  
     })          
-    menu:CreateItem({
+    Menu:Button({
         name = "unit_delete_btn",
         text = "Delete unit",
         help = "",
         callback = callback(self, self, "delete_unit"),
-        parent = "unit_options",
-        type = "button"  
-    })      
-    menu:CreateItem({
+    })      	
+end
+function MapEditor:create_continents_items(Menu)
+    Menu:TextBox({
         name = "continents_savepath",
         text = "Save path: ",
-        value = BeardLib.mod_path .. "save",
+        value = BeardLib.MapsPath,
         help = "",
-        parent = "continents_options",
-        type = "textbox"  
     })       
-    menu:CreateItem({
+    Menu:ComboBox({
         name = "continents_filetype",
         text = "Type: ",
         value = 1,
         items = {"custom_xml", "generic_xml", "json"},
         help = "",
-        parent = "continents_options",
-        type = "combo"  
     })     
-    menu:CreateItem({
+    Menu:Button({
         name = "continents_savebtn",
         text = "Save",
         help = "",
         callback = callback(self, self, "save_continents"),
-        parent =  "continents_options",
-        type = "button"  
     })  
-    menu:CreateItem({
+    Menu:Toggle({
         name = "units_visibility",
         text = "Editor units visibility",
         help = "",
         value = false,
         callback = callback(self, self, "set_editor_units_visible"),
-        parent = "continents_options",
-        type = "toggle"  
     })      
-    menu:CreateItem({
+    Menu:Toggle({
         name = "units_highlight",
         text = "Highlight all units",
         help = "",
         value = false,
-        parent = "continents_options",
-        type = "toggle"  
     })       
-    menu:CreateItem({
-        name = "show_elements",
-        text = "Show elements",
-        help = "",
-        value = false,
-        parent = "missions_options",
-        type = "toggle"  
-    })         
-    menu:CreateItem({
+     	
+end
+function MapEditor:create_game_items(Menu)
+    Menu:Button({
         name = "teleport_player",
         text = "Teleport player",
         help = "",
         callback = callback(self, self, "drop_player"),
-        parent = "game_options",
-        type = "button"  
     })      
+end
+function MapEditor:create_missions_items(Menu)
+    Menu:TextBox({
+        name = "missions_savepath",
+        text = "Save path: ",
+        value = BeardLib.MapsPath,
+        help = "",
+    })       
+    Menu:ComboBox({
+        name = "missions_filetype",
+        text = "Type: ",
+        value = 2,
+        items = {"custom_xml", "generic_xml", "json"},
+        help = "",
+    })     
+    Menu:Button({
+        name = "missions_savebtn",
+        text = "Save",
+        help = "",
+        callback = callback(self, self, "save_missions"),
+    })   	
+    Menu:Toggle({
+        name = "show_elements",
+        text = "Show elements",
+        help = "",
+        value = false,
+    })    
 end
 function MapEditor:delete_unit(menu, item)
 	if alive(self._selected_unit) then
@@ -240,15 +234,19 @@ function MapEditor:file_click(menu, item)
 		else
 			unit = CoreUnit.safe_spawn_unit(unit_path,  cam:position() + cam:rotation():y(),  Rotation(0,0,0))
 		end	
-		unit:unit_data().name_id = "new_unit"
-		unit:unit_data().unit_id = math.random(99999)
-		unit:unit_data().name = unit_path
-		unit:unit_data().position = unit:position()
-		unit:unit_data().rotation = unit:rotation()
+		if not unit.unit_data or not unit:unit_data()  then
+			BeardLib:log(unit_path .. " has no unit data...")
+		else
+			unit:unit_data().name_id = "new_unit"
+			unit:unit_data().unit_id = math.random(99999)
+			unit:unit_data().name = unit_path
+			unit:unit_data().position = unit:position()
+			unit:unit_data().rotation = unit:rotation()
+		end
 		setup._world_holder._definition:add_unit(unit)
 	end
 	if item.color == Color.red then
-		QuickMenu:new( "Warning", "Unit is not loaded, load it?", 
+		QuickMenu:new( "Warning", "Unit is not loaded, load it? (Might crash)", 
 		{[1] = {text = "Yes", callback = function()	
 			managers.dyn_resource:load(Idstring("unit"), Idstring(unit_path), DynamicResourceManager.DYN_RESOURCES_PACKAGE, false)
 			MenuUI:browse(menu._current_menu)
@@ -260,14 +258,29 @@ function MapEditor:file_click(menu, item)
 	end
 end
 function MapEditor:save_continents(menu)
-	local item = menu:get_item("continents_filetype")
+	local item = menu:GetItem("continents_filetype")
 	local type = item.items[item.value]
-	local path = menu:get_item("continents_savepath").value
+	local path = menu:GetItem("continents_savepath").value
 	local world_def = setup._world_holder._definition
 	if file.DirectoryExists( path ) then
 		for continent_name, _ in pairs(world_def._continent_definitions) do
-			if menu:get_item(continent_name).value then
+			if menu:GetItem(continent_name).value then
 				world_def:save_continent(continent_name, type, path)
+			end
+		end
+	else
+		log("Directory doesn't exists.")
+	end
+end
+function MapEditor:save_missions(menu)
+	local item = menu:GetItem("missions_filetype")
+	local type = item.items[item.value]
+	local path = menu:GetItem("missions_savepath").value
+	local world_def = setup._world_holder._definition
+	if file.DirectoryExists( path ) then
+		for mission_name, _ in pairs(managers.mission._missions) do
+			if menu:GetItem("missions_options"):GetItem(mission_name).value then
+				managers.mission:save_mission_file(mission_name, type, path)
 			end
 		end
 	else
@@ -276,7 +289,7 @@ function MapEditor:save_continents(menu)
 end
 function MapEditor:set_unit_data(menu, item)
 	if alive(self._selected_unit) then
-		self:set_position(Vector3(menu:get_item("positionx").value, menu:get_item("positiony").value, menu:get_item("positionz").value), Rotation(menu:get_item("rotationyaw").value, menu:get_item("rotationpitch").value, menu:get_item("rotationroll").value))
+		self:set_position(Vector3(menu:GetItem("positionx").value, menu:GetItem("positiony").value, menu:GetItem("positionz").value), Rotation(menu:GetItem("rotationyaw").value, menu:GetItem("rotationpitch").value, menu:GetItem("rotationroll").value))
 		if self._selected_unit:editor_id() then
 			setup._world_holder._definition:set_unit(self._selected_unit:editor_id(), {position = self._selected_unit:position(), rotation = self._selected_unit:rotation()})
 		end
@@ -285,27 +298,35 @@ end
 
 function MapEditor:load_continents(continents)
     for continent_name, _ in pairs(continents) do
-	    self._menu:CreateItem({
-	        name = continent_name,
-	        text = "Save continent: " .. continent_name,
+        self._menu:GetItem("continents_options"):Toggle({
+            name = continent_name,
+            text = "Save continent: " .. continent_name,
+            help = "",
+            value = true,
+        })    
+    end
+end
+function MapEditor:load_missions(missions)
+    for mission_name, _ in pairs(missions) do
+	    self._menu:GetItem("missions_options"):Toggle({
+	        name = mission_name,
+	        text = "Save mission: " .. mission_name,
 	        help = "",
 	        value = true,
-	        parent = "continents_options",
-	        type = "toggle"  
-	    })     
+	    })    
     end
 end
 function MapEditor:set_unit(unit)
 	self._selected_unit = unit
-	self._menu:set_value(self._menu:get_item("unit_name"), unit and unit:unit_data().name_id or "")
-	self._menu:set_value(self._menu:get_item("unit_path"), unit and unit:unit_data().name or "")
-	self._menu:set_value(self._menu:get_item("unit_id"), unit and unit:unit_data().unit_id or "")	
-	self._menu:set_value(self._menu:get_item("positionx"), unit and unit:position().x or 0)
-	self._menu:set_value(self._menu:get_item("positiony"), unit and unit:position().y or 0)
-	self._menu:set_value(self._menu:get_item("positionz"), unit and unit:position().z or 0)	
-	self._menu:set_value(self._menu:get_item("rotationyaw"), unit and unit:rotation():yaw() or 0)
-	self._menu:set_value(self._menu:get_item("rotationpitch"), unit and unit:rotation():pitch() or 0)
-	self._menu:set_value(self._menu:get_item("rotationroll"), unit and unit:rotation():roll() or 0)
+	self._menu:GetItem("unit_name"):SetValue(unit and unit:unit_data().name_id or "")
+	self._menu:GetItem("unit_path"):SetValue(unit and unit:unit_data().name or "")
+	self._menu:GetItem("unit_id"):SetValue(unit and unit:unit_data().unit_id or "")	
+	self._menu:GetItem("positionx"):SetValue(unit and unit:position().x or 0)
+	self._menu:GetItem("positiony"):SetValue(unit and unit:position().y or 0)
+	self._menu:GetItem("positionz"):SetValue(unit and unit:position().z or 0)	
+	self._menu:GetItem("rotationyaw"):SetValue(unit and unit:rotation():yaw() or 0)
+	self._menu:GetItem("rotationpitch"):SetValue(unit and unit:rotation():pitch() or 0)
+	self._menu:GetItem("rotationroll"):SetValue(unit and unit:rotation():roll() or 0)
 end
 function MapEditor:show_key_pressed()
 	if self._closed then
@@ -324,7 +345,7 @@ end
 function MapEditor:select_unit()
 	local cam = self._camera_object
 	local ray
-	if self._menu:get_item("units_visibility").value then
+	if self._menu:GetItem("units_visibility").value then
 		ray = World:raycast("ray", cam:position(), cam:position() + cam:rotation():y() * 1000, "ray_type",  "body editor", "slot_mask",managers.slot:get_mask("all"))
 	else
 		ray = World:raycast("ray", cam:position(), cam:position() + cam:rotation():y() * 1000)
@@ -388,7 +409,9 @@ function MapEditor:disable()
     --Application:set_pause(false)
     
     --Show HUD
-    managers.hud:set_enabled()
+    if managers.hud then
+        managers.hud:set_enabled()
+    end
 end
 function MapEditor:enable()
 	local active_vp = managers.viewport:first_active_viewport()
@@ -412,7 +435,9 @@ function MapEditor:enable()
     --Application:set_pause(true)
     
     --Hide HUD
-    managers.hud:set_disabled()
+    if managers.hud then
+        managers.hud:set_disabled()
+    end
 end
 function MapEditor:update(t, dt)
 	local main_t = TimerManager:main():time()
@@ -426,7 +451,7 @@ function MapEditor:update(t, dt)
 		brush:set_font(Idstring("fonts/font_medium"), 32)
 		brush:center_text(self._selected_unit:position() + Vector3(-10, -10, 200), self._selected_unit:unit_data().name_id .. "[ " .. self._selected_unit:editor_id() .. " ]", cam_right, -cam_up)
 	end
-	if self._menu:get_item("units_highlight").value then
+	if self._menu:GetItem("units_highlight").value then
 		for _, unit in pairs(World:find_units_quick("all")) do
 			if unit:editor_id() ~= -1 then
 				Application:draw(unit, 1, 1,1)

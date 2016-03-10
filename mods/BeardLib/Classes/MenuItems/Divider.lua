@@ -1,0 +1,49 @@
+Divider = Divider or class(Menu)
+
+function Divider:init( parent, params )
+	params.panel = parent.items_panel:panel({ 
+		name = params.name,
+      	y = 10, 
+      	x = 10,
+      	w = parent.items_panel:w() - 10,
+      	h = params.size or 16,
+      	layer = 21,
+    }) 
+    local DividerText = params.panel:text({
+	    name = "title",
+	    text = params.text,
+	    vertical = "center",
+	    align = "left",
+	    x = 4,
+	   	h = 24,
+	    layer = 6,
+	    color = Color.black,
+	    font = "fonts/font_medium_mf",
+	    font_size = 16
+	})	
+	local Divider = params.panel:rect({
+		h = 2,
+		color = params.color or Color.black
+	})
+	local _,_,w,h = DividerText:text_rect()
+	DividerText:set_w(w)
+	Divider:set_top(DividerText:bottom())
+    table.merge(self, params)
+    self.parent = parent
+    self.menu = parent.menu
+end
+
+function Divider:SetValue(value)
+
+end
+
+function Divider:key_press( o, k )
+
+end
+function Divider:mouse_pressed( o, button, x, y )
+
+end
+
+function Divider:mouse_moved( o, x, y )
+
+end

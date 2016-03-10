@@ -8,7 +8,7 @@ if not _G.BeardLib then
     self.sequence_mods = self.sequence_mods or {}
     self.ScriptDataMenu = "BeardLibScriptDataMenu"
     self.MainMenu = "BeardLibMainMenu"
-    self.MapsPath = "./BeardLibMaps/"
+    self.MapsPath = "BeardLibMaps"
     self.CurrentViewportNo = 0
     self.ScriptExceptions = self.ScriptExceptions or {}
     self.EditorEnabled = true
@@ -130,9 +130,16 @@ if not _G.BeardLib then
         "ScriptData/ContinentData.lua",
         "ScriptData/SequenceData.lua",
         "EnvironmentEditorManager.lua",
-        "EnvironmentEditorHandler.lua",
+        "EnvironmentEditorHandler.lua",      
+        "MenuUI.lua",        
+        "MenuItems/Menu.lua",   
+        "MenuItems/Item.lua",
+        "MenuItems/Toggle.lua",
+        "MenuItems/ComboBox.lua",
+        "MenuItems/Slider.lua",
+        "MenuItems/TextBox.lua", 
+        "MenuItems/Divider.lua", 
         "MapEditor.lua",
-        "MenuUI.lua",
         "MenuHelperPlus.lua",
         "UnitPropertiesItem.lua",
         "json_utils.lua",
