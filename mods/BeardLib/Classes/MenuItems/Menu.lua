@@ -230,7 +230,7 @@ function Menu:search(path, success, search)
 	end
 	local files = file.GetFiles( path )
 	if files ~= false then
-		for _, unit_path in pairs(BeardLib.UnitPaths) do
+		for _, unit_path in pairs(BeardLib.DBPaths["unit"]) do
 			local split = string.split(unit_path, "/")
 			local unit = split[#split]
 			if unit:match(search) then

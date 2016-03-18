@@ -5,7 +5,7 @@ function EnvironmentEditorManager:init()
     self.NodeName = "EnvironmentEditorNode"
 end
 
-function EnvironmentEditorManager:CreateNode(main_node)
+function EnvironmentEditorManager:BuildNode(main_node)
     MenuCallbackHandler.EnvironmentEditorExit = function(this, item)
         if BeardLib.path_text then
             BeardLib.path_text:set_visible(false)

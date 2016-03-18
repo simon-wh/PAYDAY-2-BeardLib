@@ -35,7 +35,7 @@ MissionManager = MissionManager or CoreClass.class(CoreEvent.CallbackHandler)
 			self:_load_mission_file(name, file_dir, data)
 		end
 	end
-	_G.BeardLib.MapEditor:load_missions(self._missions)
+	_G.BeardLib.managers.MapEditor:load_missions(self._missions)
 	self:_activate_mission(activate_mission)
 	return true
 end
@@ -175,7 +175,7 @@ function MissionScript:_debug_draw(t, dt)
 	name_brush:set_render_template(Idstring("OverlayVertexColorTextured"))
 
 	local wanted_classes = {"ElementAreaTrigger", "ElementSpawnCivilian", "ElementPlayerSpawner"} --Leave as "" if you want all of them to draw.
-	if _G.BeardLib.MapEditor._menu:GetItem("show_elements").value then
+	if _G.BeardLib.managers.MapEditor._menu:GetItem("show_elements").value then
 		for id, element in pairs(self._elements) do
 			for _, class in pairs(wanted_classes) do
 				if element.class == class or class == "" then

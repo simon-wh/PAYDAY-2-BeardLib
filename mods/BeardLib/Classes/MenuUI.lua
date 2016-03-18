@@ -178,7 +178,7 @@ function MenuUI:mouse_pressed( o, button, x, y )
         return
     end
     if not self._openlist and not self._slider_hold and not self._highlighted then
-    	BeardLib.MapEditor:select_unit()
+    	BeardLib.managers.MapEditor:select_unit()
     end	
 end
 function MenuUI:mouse_moved( o, x, y )

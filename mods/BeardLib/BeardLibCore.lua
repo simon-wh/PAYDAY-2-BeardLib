@@ -6,26 +6,21 @@ if not _G.BeardLib then
     self.mod_path = ModPath
     self.save_path = SavePath
     self.sequence_mods = self.sequence_mods or {}
-    self.ScriptDataMenu = "BeardLibScriptDataMenu"
     self.MainMenu = "BeardLibMainMenu"
     self.MapsPath = "BeardLibMaps"
     self.CurrentViewportNo = 0
     self.ScriptExceptions = self.ScriptExceptions or {}
     self.EditorEnabled = true
-    self.hooks_directory = "Hooks/"
-    self.class_directory = "Classes/"
+    self.HooksDirectory = "Hooks/"
+    self.ClassDirectory = "Classes/"
     self.ScriptData = {}
     self.managers = {}
     self._replace_script_data = {}
     
-    self.UnitPaths = {}
+    self.DBPaths = {}
+    self.DBEntries = {}
      
-    self.script_data_paths = {
-        {path = "%userprofile%", name = "User Folder"},
-        {path = "%userprofile%/Documents/", name = "Documents"},
-        {path = "%userprofile%/Desktop/", name = "Desktop"},
-        {path = string.gsub(Application:base_path(), "\\", "/"), name = "PAYDAY 2"}
-    }
+   
     --Make this true if io.popen doesn't tab you out of the game, false if it does
     --[[if false then
         local handle = io.popen("wmic logicaldisk get name")
@@ -50,41 +45,10 @@ if not _G.BeardLib then
             handle:close()
         end
     else]]--
-        local user_path = string.gsub(Application:windows_user_folder(),  "\\", "/")
-        local split_user_path = string.split(user_path, "/")
-        for i = 1, 3 do
-            table.remove(split_user_path, #split_user_path)
-        end
-        user_path = table.concat(split_user_path, "/")
-        for i, path_data in pairs(self.script_data_paths) do
-            path_data.path = string.gsub(path_data.path, "%%userprofile%%", user_path)
-            if not string.ends(path_data.path, "/") then
-                path_data.path = path_data.path .. "/"
-            end
-        end
-        
-        table.insert(self.script_data_paths, {
-            path = "C:/", name = "C Drive"
-        })
-        
-        table.insert(self.script_data_paths, {
-            path = "D:/", name = "D Drive"
-        })
-        
-        table.insert(self.script_data_paths, {
-            path = "E:/", name = "E Drive"
-        })
-        
-        table.insert(self.script_data_paths, {
-            path = "F:/", name = "F Drive"
-        })
+    
     --end    
     
-    self.script_file_extensions = {
-        "json",
-        "xml",
-        "generic_xml",
-        "custom_xml",
+    self.script_data_types = {
         "sequence_manager",
         "environment",
         "menu",
@@ -106,22 +70,85 @@ if not _G.BeardLib then
         "action_message",
         "achievment",
         "controller_settings",
+    }
+    
+    self.file_types = {
+        "achievment",
+        "action_message",
+        "animation",
+        "animation_def",
+        "animation_state_machine",
+        "animation_states",
+        "animation_subset",
+        "atom_batcher_settings",
+        "banksinfo",
+        "bmfc",
+        "bnk",
+        "bnkinfo",
+        "camera_shakes",
+        "cameras",
+        "cgb",
+        "comment",
+        "continent",
+        "continents",
+        "controller_settings",
+        "cooked_physics",
+        "cover_data",
+        "credits",
+        "decals",
+        "dialog",
+        "dialog_index",
+        "diesel_layers",
+        "effect",
+        "environment",
+        "font",
+        "gui",
+        "hint",
+        "idstring_lookup",
+        "light_intensities",
+        "lua",
+        "massunit",
+        "material_config",
+        "menu",
+        "merged_font",
+        "mission",
+        "model",
+        "movie",
+        "nav_data",
+        "network_settings",
+        "object",
+        "objective",
+        "physic_effect",
+        "physics_settings",
+        "post_processor",
+        "prefhud",
+        "render_config",
+        "render_template_database",
+        "scene",
+        "scenes",
+        "sequence_manager",
+        "sfap0",
+        "shaders",
+        "stream",
+        "strings",
+        "texture",
+        "texture_channels",
+        "tga",
+        "unit",
+        "world",
+        "world_cameras",
+        "world_setting",
+        "world_sounds",
+        "xbox_live",
+        "xml"
+    }
+    
+    self.script_data_formats = {
+        "json",
+        "xml",
+        "generic_xml",
+        "custom_xml",
         "binary",
-    }
-    
-    self.script_file_from_types = {
-        [1] = {name = "binary", func = "ScriptSerializer:from_binary", open_type = "rb"},
-        [2] = {name = "json", func = "json.custom_decode"},
-        [3] = {name = "xml", func = "ScriptSerializer:from_xml"},
-        [4] = {name = "generic_xml", func = "ScriptSerializer:from_generic_xml"},
-        [5] = {name = "custom_xml", func = "ScriptSerializer:from_custom_xml"},
-    }
-    
-    self.script_file_to_types = {
-        [1] = {name = "binary", open_type = "wb"},
-        [2] = {name = "json"},
-        [3] = {name = "generic_xml"},
-        [4] = {name = "custom_xml"},
     }
     
     self.classes = {
@@ -131,6 +158,7 @@ if not _G.BeardLib then
         "ScriptData/SequenceData.lua",
         "EnvironmentEditorManager.lua",
         "EnvironmentEditorHandler.lua",      
+        "ScriptDataConverterManager.lua",      
         "MenuUI.lua",        
         "MenuItems/Menu.lua",   
         "MenuItems/Item.lua",
@@ -173,6 +201,7 @@ function BeardLib:init()
     self.ScriptData.Environment = EnvironmentData:new("BeardLibBaseEnvironmentDataProcessor")
     self.ScriptData.Continent = ContinentData:new("BeardLibBaseContinentDataProcessor")
     self.managers.EnvironmentEditor = EnvironmentEditorManager:new()
+    self.managers.ScriptDataConveter = ScriptDataConveterManager:new()
     
     --Load ScriptData mod_overrides
     self:LoadModOverridePlus()
@@ -194,16 +223,53 @@ function BeardLib:LoadHashlist()
     
     BeardLib:log("Loading Hashlist")
     
+    local function AddPathEntry(line, typ)
+        local path_split = string.split(line, "/")
+        local curr_tbl = self.DBEntries
+        
+        local filename = table.remove(path_split, #path_split)
+        
+        for _, part in pairs(path_split) do
+            curr_tbl[part] = curr_tbl[part] or {}
+            curr_tbl = curr_tbl[part]
+        end
+        table.insert(curr_tbl, {
+            path = line,
+            name = filename,
+            file_type = typ
+        })
+    end
+    
     if file ~= nil then
+        --Iterate through each string which contains _ or /, which should include all the filepaths in the idstring_lookup
         for line in string.gmatch(file:read(), "[%w_/]+%z") do
-            if DB:has("unit", line) then
-                table.insert(self.UnitPaths, line)
-            end
+            --Remove the Zero byte at the end of the path
+            line = string.sub(line, 1, #line - 1)
+            
+            --[[if DB:has("unit", line) then
+                self.DBPaths["unit"] = self.DBPaths["unit"] or {}
+                table.insert(self.DBPaths["unit"], line)
+                AddPathEntry(line, "unit")
+            else]]--
+                for _, typ in pairs(self.file_types) do
+                    self.DBPaths[typ] = self.DBPaths[typ] or {}
+                    if DB:has(typ, line) then
+                        table.insert(self.DBPaths[typ], line)
+                        AddPathEntry(line, typ)
+                        --I wish I could break so we don't have to iterate more than needed, but some files exist with the same name but a different type
+                        --break
+                    end
+                end
+            --end
         end
         file:close()
-    else
-        log("nil")
     end
+    
+    for typ, filetbl in pairs(self.DBPaths) do
+        BeardLib:log(typ .. " Count: " .. #filetbl)
+    end
+    
+    --SaveTable(self.DBEntries, "DBEntries_index.txt")
     
     BeardLib:log("Hashlist Loaded")
 end
@@ -220,12 +286,20 @@ function BeardLib:LoadModOverrideFolder(directory, currentFilePath)
     if subFiles then
         for _, sub_file in pairs(subFiles) do
             local file_name_split = string.split(sub_file, "%.")
-            if table.contains(self.script_file_extensions, file_name_split[2]) then
+            if table.contains(self.script_data_formats, file_name_split[2]) or table.contains(self.script_data_types, file_name_split[2]) then
                 local fullFilepath = currentFilePath .. "/" .. file_name_split[1]
                 self:ReplaceScriptData(directory .. sub_file, #file_name_split == 2 and "binary" or file_name_split[3], fullFilepath, file_name_split[2], true, false)
             end
         end
     end
+end
+
+function BeardLib:RefreshCurrentNode()
+    local selected_node = managers.menu:active_menu().logic:selected_node()
+    managers.menu:active_menu().renderer:refresh_node(selected_node)
+    local selected_item = selected_node:selected_item()
+    selected_node:select_item(selected_item and selected_item:name())
+    managers.menu:active_menu().renderer:highlight_item(selected_item)
 end
 
 function BeardLib:LoadScriptDataModFromJson(path)
@@ -246,7 +320,7 @@ end
 if RequiredScript then
     local requiredScript = RequiredScript:lower()
     if BeardLib.hook_files[requiredScript] then
-        dofile( BeardLib.mod_path .. BeardLib.hooks_directory .. BeardLib.hook_files[requiredScript] )
+        dofile( BeardLib.mod_path .. BeardLib.HooksDirectory .. BeardLib.hook_files[requiredScript] )
     end
 end
 
@@ -352,14 +426,19 @@ function BeardLib:ReplaceScriptData(replacementPath, typ, path, extension, preve
 end
 
 function BeardLib:update(t, dt)
-    BeardLib.managers.EnvironmentEditor:update(t, dt)
-    if BeardLib.MapEditor then
-        BeardLib.MapEditor:update(t, dt)
+    for _, manager in pairs(self.managers) do
+        if manager.update then
+            manager:update(t, dt)
+        end
     end
 end
 
 function BeardLib:paused_update(t, dt)
-    BeardLib.managers.EnvironmentEditor:paused_update(t, dt)
+    for _, manager in pairs(self.managers) do
+        if manager.paused_update then
+            manager:paused_update(t, dt)
+        end
+    end
 end
 
 function BeardLib:GetSubValues(tbl, key)
@@ -373,72 +452,6 @@ function BeardLib:GetSubValues(tbl, key)
     return new_tbl
 end
 
-function BeardLib:GetTypeDataFrom(file, typ)
-    local read_data = file:read("*all")
-    
-    local new_data
-    if typ == "json" then
-        new_data = json.custom_decode(read_data)
-    elseif typ == "xml" then
-        new_data = ScriptSerializer:from_xml(read_data)
-    elseif typ == "custom_xml" then
-        new_data = ScriptSerializer:from_custom_xml(read_data)
-    elseif typ == "generic_xml" then
-        new_data = ScriptSerializer:from_generic_xml(read_data)
-    elseif typ == "binary" then
-        new_data = ScriptSerializer:from_binary(read_data)
-    end
-    
-    return new_data
-end
-
-function BeardLib:GetTypeDataTo(data, typ)
-    local new_data
-    if typ == "json" then
-        new_data = json.custom_encode(data)
-    elseif typ == "custom_xml" then
-        new_data = ScriptSerializer:to_custom_xml(data)
-    elseif typ == "generic_xml" then
-        new_data = ScriptSerializer:to_generic_xml(data)
-    elseif typ == "binary" then
-        new_data = ScriptSerializer:to_binary(data)
-    end
-    
-    return new_data
-end
-
-function BeardLib:ConvertFile(file, from_i, to_i, filename_dialog)
-    local from_data = self.script_file_from_types[from_i]
-    local to_data = self.script_file_to_types[to_i]
-    
-    local from_file = io.open(file, from_data.open_type or 'r')
-    local convert_data = self:GetTypeDataFrom(from_file, from_data.name)
-    from_file:close()
-    
-    local new_path = file .. "." .. to_data.name
-    
-    if filename_dialog then
-        --Use system_menu dialog
-         managers.system_menu:show_keyboard_input({text = new_path, title = "File name", callback_func = callback(self, self, "SaveConvertedData", {from_data = from_data, to_data = to_data, convert_data = convert_data, current_file = file})})
-    else
-        BeardLib:SaveConvertedData(new_path, {from_data = from_data, to_data = to_data, convert_data = convert_data, current_file = file})
-    end
-    
-    
-end
-
-function BeardLib:SaveConvertedData(params, success, value)
-    if not success then
-        return
-    end
-    local to_file = io.open(value, params.to_data.open_type or "w+")
-    local new_data = self:GetTypeDataTo(params.convert_data, params.to_data.name)
-    to_file:write(new_data)
-    to_file:close()
-    
-    BeardLib:RefreshFilesAndFolders()
-end
-
 if Hooks then
     Hooks:Register("GameSetupPauseUpdate")
     if GameSetup then
@@ -446,7 +459,7 @@ if Hooks then
             Hooks:Call("GameSetupPauseUpdate", t, dt)
         end)
     end
-
+    
     Hooks:Add("MenuUpdate", "BeardLibMenuUpdate", function( t, dt )
         BeardLib:update(t, dt)
     end)
@@ -457,7 +470,8 @@ if Hooks then
     
     Hooks:Add("GameSetupPauseUpdate", "BeardLibGameSetupPausedUpdate", function(t, dt)
         BeardLib:paused_update(t, dt)
-    end)       
+    end)
+    
     Hooks:Add("LocalizationManagerPostInit", "BeardLibLocalization", function(loc)
         LocalizationManager:add_localized_strings({
             ["BeardLibEnvMenu"] = "Environment Mod Menu",
@@ -470,35 +484,17 @@ if Hooks then
     end)
 
     Hooks:Add("MenuManagerSetupCustomMenus", "Base_SetupBeardLibMenu", function( menu_manager, nodes )
-        BeardLib.MapEditor = MapEditor:new()
-        
-        MenuCallbackHandler.BeardLibScriptDataMenuBack = function(this, item)
-            BeardLib:CreateRootItems()
-            BeardLib.current_script_path = ""
-            if BeardLib.path_text then
-                BeardLib.path_text:set_visible(false)
-            end
-        end
-        
+        --I'm going to leave this here, but I really don't like it being here
+        BeardLib.managers.MapEditor = MapEditor:new()
+    
         local main_node = MenuHelperPlus:NewNode(nil, {
             name = BeardLib.MainMenu,
             menu_components =  managers.menu._is_start_menu and "player_profile menuscene_info news game_installing" or nil
         })
         
-        local node = MenuHelperPlus:NewNode(nil, {
-            name = BeardLib.ScriptDataMenu,
-            back_callback = "BeardLibScriptDataMenuBack"
-        })
+        BeardLib.managers.EnvironmentEditor:BuildNode(main_node)
         
-        
-        MenuHelperPlus:AddButton({
-            id = "BeardLibScriptDataMenu",
-            title = "BeardLibScriptDataMenu_title",
-            node = main_node,
-            next_node = BeardLib.ScriptDataMenu,
-        })
-        
-        BeardLib.managers.EnvironmentEditor:CreateNode(main_node)
+        BeardLib.managers.ScriptDataConveter:BuildNode(main_node)
         
         managers.menu:add_back_button(main_node)
         
@@ -511,280 +507,9 @@ if Hooks then
         })
     end)
     
-    function BeardLib:RefreshFilesAndFolders()
-        local node = MenuHelperPlus:GetNode(nil, BeardLib.ScriptDataMenu)
-        node:clean_items()
+    --[[Hooks:Add("MenuManagerPopulateCustomMenus", "PopulateBeardLibMenus", function(menu_manager, nodes)
         
-        local gui_class = managers.menu:active_menu().renderer
-        
-        self.path_text = self.path_text or gui_class.safe_rect_panel:child("BeardLibPathText") or gui_class.safe_rect_panel:text({
-            name = "BeardLibPathText",
-            text = "",
-            font =  tweak_data.menu.pd2_medium_font, 
-            font_size = 25,
-            layer = 20,
-            color = Color.yellow
-        })
-        self.path_text:set_text(self.current_script_path)
-        self.path_text:set_visible(true)
-        local x, y, w, h = self.path_text:text_rect()
-        self.path_text:set_size(w, h)
-        self.path_text:set_position(0, 0)
-        
-        MenuHelperPlus:AddButton({
-            id = "BackToStart",
-            title = "Back to Shortcuts",
-            callback = "BeardLibScriptStart",
-            node = node,
-            localized = false
-        })
-
-        MenuHelperPlus:AddButton({
-            id = "OpenFolderInExplorer",
-            title = "Open In Explorer",
-            callback = "BeardLibOpenInExplorer",
-            node = node,
-            localized = false
-        })
-        
-        local up_level = string.split(self.current_script_path, "/")
-        if #up_level > 1 then
-            table.remove(up_level, #up_level)
-            MenuHelperPlus:AddButton({
-                id = "UpLevel",
-                title = "UP A DIRECTORY...",
-                callback = "BeardLibFolderClick",
-                node = node,
-                localized = false,
-                merge_data = {
-                    base_path = table.concat(up_level, "/") .. "/"
-                }
-            })
-        end
-        MenuHelperPlus:AddDivider({
-            id = "fileDivider",
-            node = node,
-            size = 15
-        })
-        
-        local folders = file.GetDirectories(self.current_script_path)
-        local files = file.GetFiles(self.current_script_path)
-        
-        if folders then
-            for i, folder in pairs(folders) do
-                MenuHelperPlus:AddButton({
-                    id = "BeardLibPath" .. folder,
-                    title = folder,
-                    callback = "BeardLibFolderClick",
-                    node = node,
-                    localized = false,
-                    merge_data = {
-                        base_path = self.current_script_path .. folder .. "/",
-                        row_item_color = Color.yellow,
-                        hightlight_color = Color.yellow,
-                        to_upper = false
-                    }
-                })
-            end
-        end
-        
-        if files then
-            for i, file in pairs(files) do
-                local file_parts = string.split(file, "%.")
-                local extension = file_parts[#file_parts]
-                if table.contains(self.script_file_extensions, extension) then
-                    MenuHelperPlus:AddButton({
-                        id = "BeardLibPath" .. file,
-                        title = file,
-                        callback = "BeardLibFileClick",
-                        node = node,
-                        localized = false,
-                        merge_data = {
-                            base_path = self.current_script_path .. file,
-                            row_item_color = Color.white,
-                            hightlight_color = Color.white,
-                            to_upper = false
-                        }
-                    })
-                end
-            end
-        end
-        
-        managers.menu:add_back_button(node)
-        
-        local selected_node = managers.menu:active_menu().logic:selected_node()
-        managers.menu:active_menu().renderer:refresh_node(selected_node)
-        local selected_item = selected_node:selected_item()
-        selected_node:select_item(selected_item and selected_item:name())
-        managers.menu:active_menu().renderer:highlight_item(selected_item)
-        
-    end
-    
-     function BeardLib:CreateScriptDataFileOption()
-        local node = MenuHelperPlus:GetNode(nil, BeardLib.ScriptDataMenu)
-        node:clean_items()
-        
-        MenuHelperPlus:AddButton({
-            id = "BackToStart",
-            title = "Back to Shortcuts",
-            callback = "BeardLibScriptStart",
-            node = node,
-            localized = false
-        })
-        
-        MenuHelperPlus:AddButton({
-            id = "Cancel",
-            title = "Cancel",
-            callback = "BeardLibFolderClick",
-            node = node,
-            localized = false,
-            merge_data = {
-                base_path = self.current_script_path
-            }
-        })
-        
-        MenuHelperPlus:AddDivider({
-            id = "fileDivider",
-            node = node,
-            size = 15
-        })
-        
-        --log(self.current_selected_file_path)
-        
-        if self.path_text then
-            self.path_text:set_visible(true)
-            self.path_text:set_text(self.current_selected_file_path)
-            local x, y, w, h = self.path_text:text_rect()
-            self.path_text:set_size(w, h)
-            self.path_text:set_position(0, 0)
-        end
-        
-        local file_parts = string.split(self.current_selected_file, "%.")
-        local extension = file_parts[#file_parts]
-        local selected_from = 1
-        for i, typ in pairs(self.script_file_from_types) do
-            if typ.name == extension then
-                selected_from = i
-                break
-            end
-        end
-        
-        MenuHelperPlus:AddMultipleChoice({
-            id = "convertfrom",
-            title = "from",
-            node = node,
-            value = selected_from,
-            items = self:GetSubValues(self.script_file_from_types, "name"),
-            localized = false,
-            localized_items = false
-        })
-        
-        MenuHelperPlus:AddMultipleChoice({
-            id = "convertto",
-            title = "to",
-            node = node,
-            items = self:GetSubValues(self.script_file_to_types, "name"),
-            localized = false,
-            localized_items = false
-        })
-        
-        MenuHelperPlus:AddButton({
-            id = "convert",
-            title = "convert",
-            callback = "BeardLibConvertClick",
-            node = node,
-            localized = false
-        })
-        
-        managers.menu:add_back_button(node)
-        
-        local selected_node = managers.menu:active_menu().logic:selected_node()
-        managers.menu:active_menu().renderer:refresh_node(selected_node)
-        local selected_item = selected_node:selected_item()
-        selected_node:select_item(selected_item and selected_item:name())
-        managers.menu:active_menu().renderer:highlight_item(selected_item)
-        
-    end
-    
-    Hooks:Add("MenuManagerPopulateCustomMenus", "PopulateBeardLibMenus", function(menu_manager, nodes)
-        MenuCallbackHandler.BeardLibFolderClick = function(this, item)
-            BeardLib.current_script_path = item._parameters.base_path
-            
-            BeardLib:RefreshFilesAndFolders()
-        end
-        
-        MenuCallbackHandler.BeardLibFileClick = function(this, item)
-            BeardLib.current_selected_file = item._parameters.text_id
-            BeardLib.current_selected_file_path = item._parameters.base_path
-            
-            BeardLib:CreateScriptDataFileOption()
-        end
-        
-        MenuCallbackHandler.BeardLibScriptStart = function(this, item)
-            local gui_class = managers.menu:active_menu().renderer:active_node_gui()
-            local path_text = gui_class.safe_rect_panel:child("BeardLibPathText")
-            
-            if path_text then
-                gui_class.safe_rect_panel:remove(path_text)
-            end
-            
-            local node = MenuHelperPlus:GetNode(nil, BeardLib.ScriptDataMenu)
-            node:clean_items()
-        
-            BeardLib.current_script_path = ""
-            BeardLib:CreateRootItems()
-            
-            if BeardLib.path_text then
-                BeardLib.path_text:set_visible(false)
-            end
-            
-            local selected_node = managers.menu:active_menu().logic:selected_node()
-            managers.menu:active_menu().renderer:refresh_node(selected_node)
-            local selected_item = selected_node:selected_item()
-            selected_node:select_item(selected_item and selected_item:name())
-            managers.menu:active_menu().renderer:highlight_item(selected_item)
-        end
-        
-        MenuCallbackHandler.BeardLibConvertClick = function(this, item)
-            local node = MenuHelperPlus:GetNode(nil, BeardLib.ScriptDataMenu)
-            
-            local convertfrom_item = node:item("convertfrom")
-            local convertto_item = node:item("convertto")
-            
-            if convertfrom_item and convertto_item then
-                BeardLib:ConvertFile(BeardLib.current_selected_file_path, convertfrom_item:value(), convertto_item:value(), true)
-            end
-        end
-        
-        MenuCallbackHandler.BeardLibOpenInExplorer = function(this, item)
-            local open_path = string.gsub(BeardLib.current_script_path, "%./", "")
-            open_path = string.gsub(BeardLib.current_script_path, "/", "\\")
-            
-            os.execute("start \"\" \"" .. open_path .. "\"")
-        end
-        
-        BeardLib:CreateRootItems()
-    end)
-    
-    function BeardLib:CreateRootItems()
-        local node = MenuHelperPlus:GetNode(nil, BeardLib.ScriptDataMenu)
-        node:clean_items()
-        
-        for i, path_data in pairs(BeardLib.script_data_paths) do
-            MenuHelperPlus:AddButton({
-                id = "BeardLibPath" .. path_data.name,
-                title = path_data.name,
-                callback = "BeardLibFolderClick",
-                node = node,
-                localized = false,
-                merge_data = {
-                    base_path = path_data.path
-                }
-            })
-        end
-        
-        managers.menu:add_back_button(node)
-    end
+    end)]]--
     
     Hooks:Register("BeardLibCreateCustomMenus")
     Hooks:Register("BeardLibCreateCustomNodesAndButtons")
@@ -837,7 +562,7 @@ end
 
 if not BeardLib.setup then
     for _, class in pairs(BeardLib.classes) do
-        dofile(BeardLib.mod_path .. BeardLib.class_directory .. class)
+        dofile(BeardLib.mod_path .. BeardLib.ClassDirectory .. class)
     end
     BeardLib:init()
     BeardLib.setup = true
