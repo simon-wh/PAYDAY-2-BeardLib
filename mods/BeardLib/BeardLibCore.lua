@@ -239,7 +239,8 @@ function BeardLib:LoadHashlist()
             file_type = typ
         })
     end
-    
+    local types = clone(self.script_data_types)
+    table.insert(types, "unit")
     if file ~= nil then
         --Iterate through each string which contains _ or /, which should include all the filepaths in the idstring_lookup
         for line in string.gmatch(file:read(), "[%w_/]+%z") do
@@ -251,7 +252,7 @@ function BeardLib:LoadHashlist()
                 table.insert(self.DBPaths["unit"], line)
                 AddPathEntry(line, "unit")
             else]]--
-                for _, typ in pairs(self.file_types) do
+                for _, typ in pairs(types) do
                     self.DBPaths[typ] = self.DBPaths[typ] or {}
                     if DB:has(typ, line) then
                         table.insert(self.DBPaths[typ], line)

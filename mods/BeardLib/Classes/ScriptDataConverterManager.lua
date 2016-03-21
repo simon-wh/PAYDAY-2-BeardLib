@@ -113,6 +113,7 @@ function ScriptDataConveterManager:ConvertFile(file, from_i, to_i, filename_dial
     local from_file = not self.assets and io.open(file, from_data.open_type or 'r') or nil
     if from_file == nil then
         BeardLib:log("[Error] File not accessible")
+        return
     end
     
     local convert_data = self.assets and PackageManager:_script_data(file_split[2]:id(), file_split[1]:id()) or self:GetTypeDataFrom(from_file, from_data.name)
@@ -241,6 +242,7 @@ function ScriptDataConveterManager:RefreshFilesAndFolders()
     local files, folders = self:GetFilesAndFolders(self.current_script_path)
     
     if folders then
+        table.sort(folders)
         for i, folder in pairs(folders) do
             MenuHelperPlus:AddButton({
                 id = "BeardLibPath" .. folder,
@@ -259,9 +261,14 @@ function ScriptDataConveterManager:RefreshFilesAndFolders()
     end
     
     if files then
+        table.sort(files)
         for i, file in pairs(files) do
             local file_parts = string.split(file, "%.")
             local extension = file_parts[#file_parts]
+            local colour = Color.white
+            if self.assets and not PackageManager:has(extension:id(), (self.current_script_path .. file_parts[1]):id()) then
+                colour = Color.red
+            end
             if table.contains(BeardLib.script_data_types, extension) or table.contains(BeardLib.script_data_formats, extension) then
                 MenuHelperPlus:AddButton({
                     id = "BeardLibPath" .. file,
@@ -271,8 +278,8 @@ function ScriptDataConveterManager:RefreshFilesAndFolders()
                     localized = false,
                     merge_data = {
                         base_path = self.current_script_path .. file,
-                        row_item_color = Color.white,
-                        hightlight_color = Color.white,
+                        row_item_color = colour,
+                        hightlight_color = colour,
                         to_upper = false
                     }
                 })
