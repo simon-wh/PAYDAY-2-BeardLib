@@ -111,7 +111,7 @@ function ScriptDataConveterManager:ConvertFile(file, from_i, to_i, filename_dial
     local filename_split = string.split(file_split[1], "/")
     
     local from_file = not self.assets and io.open(file, from_data.open_type or 'r') or nil
-    if from_file == nil then
+    if from_file == nil and not self.assets then
         BeardLib:log("[Error] File not accessible")
         return
     end

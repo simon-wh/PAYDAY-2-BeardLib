@@ -430,11 +430,6 @@ function json.custom_decode (js_string)
         return read_value(t,tt_object_value)
     end
     
-    local scriptDataConversion = {
-        [3] = "Vector3",
-        [4] = "math.QuaternionToEuler"
-    }
-    
     local searchTypes = {
         "Vector3",
         "Rotation",
@@ -460,7 +455,7 @@ function json.custom_decode (js_string)
             local v = read_object_value(o)
             if CoreClass.type_name(v) == "string" then
                 for _, typ in pairs(searchTypes) do
-                    if string.find(tostring(v), typ) then
+                    if string.begins(tostring(v), typ) then
                         local newValue = loadstring("return " .. v)
                         v = newValue()
                     end
@@ -471,12 +466,7 @@ function json.custom_decode (js_string)
                 k = tonumber(k)
             end
             
-            if k == "$values" and scriptDataConversion[#v] then
-                local newValue = loadstring("return " .. scriptDataConversion[#v] .. "( " .. table.concat(v, ",") .. ")")
-                o = newValue()
-            else
-                o[k] = v
-            end
+            o[k] = v
         end
     end
     
