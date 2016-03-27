@@ -70,6 +70,7 @@ if not _G.BeardLib then
         "action_message",
         "achievment",
         "controller_settings",
+        "network_settings",
     }
     
     self.file_types = {
@@ -110,7 +111,7 @@ if not _G.BeardLib then
         "massunit",
         "material_config",
         "menu",
-        "merged_font",
+        "merged_font", 
         "mission",
         "model",
         "movie",
@@ -160,6 +161,7 @@ if not _G.BeardLib then
         "EnvironmentEditorHandler.lua",      
         "ScriptDataConverterManager.lua",      
         "MenuUI.lua",        
+        "MenuDialog.lua",                
         "MenuItems/Menu.lua",   
         "MenuItems/Item.lua",
         "MenuItems/Toggle.lua",
@@ -167,6 +169,7 @@ if not _G.BeardLib then
         "MenuItems/Slider.lua",
         "MenuItems/TextBox.lua", 
         "MenuItems/Divider.lua", 
+        "MenuItems/Table.lua",         
         "MapEditor.lua",
         "MenuHelperPlus.lua",
         "UnitPropertiesItem.lua",
@@ -486,7 +489,9 @@ if Hooks then
 
     Hooks:Add("MenuManagerSetupCustomMenus", "Base_SetupBeardLibMenu", function( menu_manager, nodes )
         --I'm going to leave this here, but I really don't like it being here
+        --Because of GUI manager 3:
         BeardLib.managers.MapEditor = MapEditor:new()
+        BeardLib.managers.Dialog = MenuDialog:new()
     
         local main_node = MenuHelperPlus:NewNode(nil, {
             name = BeardLib.MainMenu,

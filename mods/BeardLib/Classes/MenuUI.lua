@@ -11,19 +11,36 @@ function MenuUI:init( config )
         name = "menu_panel",
         halign = "center", 
         align = "center",
-        layer = 1000,
+        layer = config.layer or 100,
         h = config.h or self._fullscreen_ws_pnl:h(),
         w = config.w or self._fullscreen_ws_pnl:w(),
-        alpha = 1
     })      
+    if config.position == "right" then
+        self._panel:set_right(self._fullscreen_ws_pnl:right())
+    elseif config.position == "center" then     
+        self._panel:set_center(self._fullscreen_ws_pnl:center())
+    end
     self._scroll_panel = self._panel:panel({
         name = "scroll_panel",
         halign = "center", 
         align = "center",
-        y = 35,
-        h = self._panel:h() - 35,
-        w = self._panel:w(),
-    })  
+        y = config.tabs and 35 or 0,
+        h = self._panel:h() - (config.tabs and 35 or 0),
+    })	
+    local bar_h = self._scroll_panel:top() - self._scroll_panel:bottom()
+    self._scroll_panel:panel({
+        name = "scroll_bar",
+        halign = "center", 
+        align = "center",
+        w = 4,
+        layer = 20,
+    }):rect({
+		name = "rect",
+		color = Color.black,
+		layer = 4,
+		alpha = 0.5,
+		h = bar_h,
+    })
     self._fullscreen_ws_pnl:rect({
       	name = "crosshair_vertical", 
       	w = 2,
@@ -45,31 +62,6 @@ function MenuUI:init( config )
       	alpha = 0.8, 
         layer = 19 
     })      
-    self._hide_panel = self._fullscreen_ws_pnl:panel({
-      	name = "hide_panel", 
-      	w = 16,
-      	h = 16,
-      	y = 16,
-        layer = 25 
-    })  
-    self._hide_panel:rect({
-      	name = "bg", 
-      	halign="grow", 
-      	valign="grow", 
-      	alpha = 0.8, 
-    })    
-  	self._hide_panel:text({
-	    name = "text",
-	    text = "<",
-	    layer = 20,
-	    w = 16,
-	    h = 16,
-		align = "center",	   
-	    color = Color.black,
-	    font = "fonts/font_large_mf",
-	    font_size = 16
-	})    
-	self._hide_panel:set_left(self._panel:right())  
 	self._help_panel = self._panel:panel({
         name = "help_panel",
         x = 30,
@@ -96,7 +88,8 @@ function MenuUI:init( config )
 	    color = Color.black,
 	    font = "fonts/font_large_mf",
 	    font_size = 16
-	})  
+	})      
+    table.merge(self, config)
 	local _,_,w,h = self._help_text:text_rect()
 	self._help_panel:set_size(w + 10,h)
 	if config.create_items then
@@ -104,7 +97,8 @@ function MenuUI:init( config )
 	else
 		BeardLib:log("No create items callback found")
 	end
-    self._menu_closed = true
+    self._menu_closed = true    
+
     self._fullscreen_ws_pnl:key_press(callback(self, self, "key_press"))    
     self._fullscreen_ws_pnl:key_release(callback(self, self, "key_release"))    
     return self
@@ -113,6 +107,15 @@ end
 function MenuUI:NewMenu(params)
 	return Menu:new(self, params)
 end
+
+function MenuUI:AlignMenus() 
+    for i, menu in pairs(self._menus) do
+        if menu.panel then
+            menu.panel:set_left(self._menus[i - 1] and self._menus[i - 1].panel:right() + 2 or 5)
+        end
+    end
+end
+
 function MenuUI:enable()
 	self._fullscreen_ws_pnl:set_alpha(1)
 	self._menu_closed = false
@@ -146,13 +149,22 @@ end
 
 function MenuUI:key_release( o, k )
 	self.key_pressed = nil
+    if self.keyrelease then
+        self.keyrelease(o, k)
+    end
 end
  
 function MenuUI:key_press( o, k )
+    if self._menu_closed then
+        return
+    end
 	self.key_pressed = k 
 	for _, menu in ipairs(self._menus) do
 		menu:key_press( o, k )		
-	end			
+	end		
+    if self.keypress then
+        self.keypress(o, k)
+    end	
 end
 
 function MenuUI:set_help(help)
@@ -162,30 +174,33 @@ function MenuUI:set_help(help)
 end
 function MenuUI:mouse_release( o, button, x, y )
 	self._slider_hold = nil
+	self._grabbed_scroll_bar = nil
+    if self.mouserelease then
+        self.mouserelease(o, k)
+    end    
 end
 
 function MenuUI:mouse_pressed( o, button, x, y )
 	for _, menu in ipairs(self._menus) do
 		if menu:mouse_pressed( o, button, x, y ) then
-			return
+		    return
 		end
-	end		
-    if self._hide_panel:inside(x,y) then
-        self._hide_panel:child("text"):set_text(self._hidden and "<" or ">")
-        self._panel:set_right(self._hidden and self._panel:w() or 0  )
-        self._hidden = not self._hidden
-        self._hide_panel:set_left(self._panel:right())
-        return
-    end
-    if not self._openlist and not self._slider_hold and not self._highlighted then
-    	BeardLib.managers.MapEditor:select_unit()
-    end	
+	end	
+    if self.mousepressed then
+        self.mousepressed(button, x, y)
+    end      	
 end
 function MenuUI:mouse_moved( o, x, y )
 	for _, menu in ipairs( self._menus ) do
-		menu:mouse_moved( o, x, y)
+		menu:mouse_moved( o, x, y )
 	end
 	self._old_x = x	
+	self._old_y = y	
+end
+function MenuUI:SwitchMenu( Menu )  
+    self._current_menu:SetVisible(false)
+    Menu:SetVisible(true)
+    self._current_menu = Menu
 end
 function MenuUI:GetItem( name )  
 	for _,menu in pairs(self._menus) do

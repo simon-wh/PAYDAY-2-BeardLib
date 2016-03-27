@@ -2,7 +2,7 @@ core:module("CoreWorldDefinition")
 WorldDefinition = WorldDefinition or class()
 
 function WorldDefinition:save_continent(continent, type, path)
-	local new_data = _G.BeardLib:GetTypeDataTo(self._continent_definitions[continent], type)	 	
+	local new_data = _G.BeardLib.managers.ScriptDataConveter:GetTypeDataTo(self._continent_definitions[continent], type)	 	
 	local continent_file = io.open(path .. "/" .. continent .. "." .. type, "w+")
 	_G.BeardLib:log("Saving continent: " .. continent .. " as a " .. type .. " in " .. path)
 	if continent_file then
@@ -27,6 +27,21 @@ function WorldDefinition:set_unit(unit_id, config)
 			end
 		end
 	end
+end
+function WorldDefinition:get_unit_number(name)
+	local i = 1
+	for continent_name, continent in pairs(self._continent_definitions) do
+		for _,static in pairs(continent.statics) do
+			if type(static) == "table" then
+				for _,unit_data in pairs(static) do
+					if unit_data.name == name then 
+						i = i + 1
+					end
+				end
+			end
+		end
+	end
+	return i
 end
 
 function WorldDefinition:init_done()
@@ -87,4 +102,41 @@ function WorldDefinition:assign_unit_data(unit, data)
 	self:_setup_ladder(unit, data)
 	self:_setup_zipline(unit, data)
 	self:_project_assign_unit_data(unit, data)
+end
+
+ local is_editor = Application:editor()
+function WorldDefinition:make_unit(data, offset)
+	local name = data.name
+	if self._ignore_spawn_list[Idstring(name):key()] then
+		return nil
+	end
+	if table.has(self._replace_names, name) then
+		name = self._replace_names[name]
+	end
+	if not name then
+		return nil
+	end
+	if not is_editor and not Network:is_server() then
+		local network_sync = PackageManager:unit_data(name:id()):network_sync()
+		if network_sync ~= "none" and network_sync ~= "client" then
+			return
+		end
+	end
+	local unit
+	if MassUnitManager:can_spawn_unit(Idstring(name)) and not is_editor then
+		unit = MassUnitManager:spawn_unit(Idstring(name), data.position + offset, data.rotation)
+	else
+		unit = CoreUnit.safe_spawn_unit(name, data.position, data.rotation)
+	end
+	if unit then
+		self:assign_unit_data(unit, data)
+	elseif is_editor then
+		local s = "Failed creating unit " .. tostring(name)
+		Application:throw_exception(s)
+	end
+	if self._termination_counter == 0 then
+		Application:check_termination()
+	end
+	self._termination_counter = (self._termination_counter + 1) % 100
+	return unit
 end

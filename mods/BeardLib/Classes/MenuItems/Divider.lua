@@ -6,7 +6,7 @@ function Divider:init( parent, params )
       	y = 10, 
       	x = 10,
       	w = parent.items_panel:w() - 10,
-      	h = params.size or 16,
+      	h = params.size or 30,
       	layer = 21,
     }) 
     local DividerText = params.panel:text({
@@ -23,6 +23,7 @@ function Divider:init( parent, params )
 	})	
 	local Divider = params.panel:rect({
 		h = 2,
+        visible = params.text ~= nil,
 		color = params.color or Color.black
 	})
 	local _,_,w,h = DividerText:text_rect()
@@ -35,6 +36,10 @@ end
 
 function Divider:SetValue(value)
 
+end
+
+function Divider:SetText(text)
+    self.panel:child("title"):set_text(text)
 end
 
 function Divider:key_press( o, k )

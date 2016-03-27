@@ -52,14 +52,21 @@ function Item:key_press( o, k )
 end
 function Item:mouse_pressed( o, button, x, y )
     if self.callback and self.panel:inside(x,y) and button == Idstring("0") then
-        self.callback(self.menu, self)
+        self.callback(self.parent, self)
+        return true
     end
 end
 
-function Item:mouse_moved( o, x, y )
+function Item:SetText(text)
+    self.panel:child("title"):set_text(text)
+end
+
+function Item:mouse_moved( o, x, y, highlight )
 	if not self.menu._openlist and not self.menu._slider_hold then
 	    if self.panel:inside(x, y) then
-		    self.panel:child("bg"):set_color(Color(0, 0.5, 1))
+            if highlight ~= false then
+		        self.panel:child("bg"):set_color(Color(0, 0.5, 1))
+            end
 		    self.menu:set_help(self.help)
 		    self.highlight = true
 		    self.menu._highlighted = self

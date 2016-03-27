@@ -1,90 +1,120 @@
 Menu = Menu or class(MenuUI)
 
 function Menu:init( menu, params )
-	local MenuPanel = menu._panel
-	params.panel = MenuPanel:panel({ 
-		name = params.name,
-      	y = 10, 
-      	x = 10,
-      	h = 24,
-      	layer = 21,
-    }) 
-    local Marker = params.panel:rect({
-      	name = "bg", 
-      	h = 24,
-      	halign="grow", 
-      	valign="grow", 
-        layer = -1 
-    })
-    local ItemText = params.panel:text({
-	    name = "title",
-	    text = params.text,
-	    vertical = "center",
-	    align = "left",
-	    x = 4,
-	   	h = 24,
-	    layer = 6,
-	    color = Color.black,
-	    font = "fonts/font_medium_mf",
-	    font_size = 16
-	}) 
-	params.items_panel = menu._scroll_panel:panel({ 
-		name = params.name .. "_items",
-      	w = MenuPanel:w() - 12, 
-      	visible = not menu._first_parent,
-      	layer = 21,
-	})  
-	local _,_,w,_ = ItemText:text_rect()
+	local MenuPanel = menu._panel  
+    if menu.tabs then
+    	params.panel = MenuPanel:panel({ 
+    		name = params.name,
+          	y = 10, 
+          	x = 5,
+          	h = 24,
+          	layer = 21,
+        }) 
+        local Marker = params.panel:rect({
+            name = "bg", 
+            h = 24,
+            halign="grow", 
+            valign="grow", 
+            layer = -1 
+        })       
+        local Line = params.panel:rect({
+          	name = "Line", 
+          	h = 2,
+          	halign="grow", 
+          	valign="grow", 
+            layer = 1 
+        })
+        Line:set_bottom(Marker:bottom())
+        local ItemText = params.panel:text({
+    	    name = "title",
+    	    text = params.text,
+    	    vertical = "center",
+    	    align = "left",
+    	    x = 4,
+    	   	h = 24,
+    	    layer = 6,
+    	    color = Color.black,
+    	    font = "fonts/font_medium_mf",
+    	    font_size = 16
+    	}) 
+    	local _,_,w,_ = ItemText:text_rect()
 	    params.panel:set_w(w + 8)  	    
 	    ItemText:set_w(w)
-	    params.visible = true
+	    params.visible = true      
+    end	    
+    params.items_panel = menu._scroll_panel:panel({ 
+        name = params.name .. "_items",
+        w = MenuPanel:w() - 12, 
+        visible = not menu._first_parent,
+        layer = 21,
+    })     
     if not menu._first_parent then
-    	menu._menus[1] = self
-    	params.index = 1
-    	menu._first_parent = self
-    	Marker:set_color(Color(0, 0.5, 1))   
-    	menu._current_menu = self
+        self.visible = true
+        menu._first_parent = self
+        menu._current_menu = self
     else
-    	menu._menus[#menu._menus + 1] = self
-    	params.index = #menu._menus
-    	params.panel:set_left(menu._menus[#menu._menus - 1].panel:right() + 2)
-    	menu._menus[params.index].visible = false
-    end	
-    table.merge(self,params)
+        self.visible = false
+    end    
+    table.merge(self, params)
     self.menu = menu
-    self._items = {}    
-    if params.browser then
-    	self:browse(params)
-    end  
+    self._items = {}     
+    table.insert(menu._menus, self)   
+    if menu.tabs then
+        if menu._first_parent == self then
+            self:SetVisible(true) 
+        end    
+        menu:AlignMenus()
+    end 
 end
+
 function Menu:mouse_pressed( o, button, x, y )
 	local menu = self.menu        
 	if menu._current_menu == self then
 		if menu._highlighted then
-			menu._highlighted:mouse_pressed( o, button, x, y)
+			if menu._highlighted:mouse_pressed( o, button, x, y ) then
+                return true
+            end
 		end
         if button == Idstring("mouse wheel down") then
             self:scroll_down()
         elseif button == Idstring("mouse wheel up") then
             self:scroll_up()
-        end
+        end	
+        if button == Idstring("0") then
+			if self.menu._scroll_panel:child("scroll_bar"):child("rect"):inside(x, y) then
+				self.menu._grabbed_scroll_bar = true
+                return true
+			end	
+			if self.menu._scroll_panel:child("scroll_bar"):inside(x, y) then
+				self.menu._grabbed_scroll_bar = true
+				local where = (y - self.menu._scroll_panel:world_top()) / (self.menu._scroll_panel:world_bottom() - self.menu._scroll_panel:world_top())
+				self:scroll(where * self.items_panel:h())
+                return true
+			end
+		end
 	else
-	    if self.panel:child("bg"):inside(x,y) then
+	    if self.panel and self.panel:child("bg"):inside(x,y) then
 	    	managers.menu_component:post_event("menu_enter")
 	        self:SetVisible(true)
+	        self:AlignScrollBar()
 	        menu._current_menu:SetVisible(false)
 	        menu._current_menu = self
 	        return true
 	    end	
 	end		
+
 end
 function Menu:mouse_moved( o, x, y )
 	if self.menu._current_menu == self then
 		for _, item in ipairs(self._items) do
 			item:mouse_moved( o, x, y )
-		end       	
-     end
-	if self.panel:child("bg"):inside(x,y) then
+		end     
+	    if self.menu._grabbed_scroll_bar then
+			local where = (y - self.menu._scroll_panel:world_top()) / (self.menu._scroll_panel:world_bottom() - self.menu._scroll_panel:world_top())
+			self:scroll(where * self.items_panel:h())
+	    end		  	
+    end
+	if self.panel and self.panel:child("bg"):inside(x,y) then
         self:SetHighlight(true)
         self.menu:set_help(self.help)
     elseif self.menu._current_menu ~= self then
@@ -123,26 +153,37 @@ function Menu:AlignItem(Item)
 	else
 		Item.panel:set_top(self._items[#self._items - 1].panel:bottom())
 	end
+	self:AlignScrollBar()
 end
 
 function Menu:AlignItems() --Makes search units stuck and crash sometimes..
-	self.items_panel:set_h(0)
+    local h = 0 
 	for i, item in ipairs(self._items) do
 		if i == 1 then
 			item.panel:set_top(0)
 		else
 			item.panel:set_top(self._items[i - 1].panel:bottom())
 		end
-		self.items_panel:grow(0, item.panel:h())
+        h = h + item.panel:h()
 	end
+    self.items_panel:set_h(h)
     if self.items_panel:h() < self.menu._scroll_panel:h() then 	
 		self.items_panel:set_top(0)
     end	
+  	self:AlignScrollBar()
+end
+function Menu:AlignScrollBar()
+	local scroll_bar = self.menu._scroll_panel:child("scroll_bar")
+	local scroll_bar_rect = scroll_bar:child("rect")
+	local bar_h = self.menu._scroll_panel:top() - self.menu._scroll_panel:bottom()
+	scroll_bar_rect:set_h(math.abs(self.menu._scroll_panel:h() * (bar_h / self.items_panel:h() )))
+ 	scroll_bar_rect:set_y( -(self.items_panel:y()) * self.menu._scroll_panel:h()  / self.items_panel:h())
+	scroll_bar:set_left(self.menu._scroll_panel:left())
+	scroll_bar:set_visible(self.items_panel:h() > self.menu._scroll_panel:h())
 end
 function Menu:GetItem( name )
-	for _, item in ipairs(self._items) do
+	for _, item in pairs(self._items) do
 		if item.name == name then
-			log("yes " .. item.name .. " == " .. name)
 			return item
 		end
 	end
@@ -151,169 +192,95 @@ end
 function Menu:scroll_up()
 	if self.items_panel:h() > self.menu._scroll_panel:h() then
 		self.items_panel:set_top(math.min(0, self.items_panel:top() + 20))
+		self:AlignScrollBar()
 		return true
 	end
 end
+
 function Menu:scroll_down()
 	if self.items_panel:h() > self.menu._scroll_panel:h() then
 		self.items_panel:set_bottom(math.max(self.items_panel:bottom() - 20, self.menu._scroll_panel:h()))
+		self:AlignScrollBar()
 		return true
 	end
 end
-function Menu:ClearItems()
-	for k, item in pairs(self._items) do
-		item.panel:parent():remove(item.panel)
+function Menu:scroll(y)
+	if self.items_panel:h() > self.menu._scroll_panel:h() then
+		self.items_panel:set_y(math.clamp(-y, -self.items_panel:h() ,0))
+		self:AlignScrollBar()
+		return true
 	end
-	self._items = {}
+end
+function Menu:ClearItems(label)
+    local temp = self._items
+    self._items = {}
+	for k, item in pairs(temp) do
+        if not label or item.label == label then
+		    item.panel:parent():remove(item.panel)
+        else
+            table.insert(self._items, item)
+        end
+	end
+    self.items_panel:set_y(0)
 end
 function Menu:RemoveItem(name)
 	for k, item in pairs(self._items) do
 		if item.name == name then
 			item.panel:parent():remove(item.panel)
 			table.remove(self._items, k)
+			self:AlignItems()
 		end
 	end
 end
-
-function Menu:browse( config )
-	local folders
-	local files
-	if config.directory then
-		self:ClearItems()
-		self.items_panel:set_y(0)
-		self.current_dir = self.current_dir or self.directory
-		BeardLib:log(self.current_dir)
-		folders = file.GetDirectories( self.current_dir )
-	    files = file.GetFiles( self.current_dir )
-	end
-    self:Button({
-   		name = "back_btn",
-    	text = "^ ( " .. (self.current_dir or self.custom_dir) .. " )",
-    	callback = callback(self, self, "folder_back"),
-    })    
-    self:Button({
-   		name = "search_btn",
-    	text = "Search",
-    	callback = callback(self, self, "file_search"),
-    })
-    if folders then
-	    for _, folder in pairs(folders) do
-	    	self:Button({
-	    		name = folder,
-	    		text = folder,
-	    		callback = callback(self, self, "folder_click"),
-	    	})
-	    end
-	end
-	if files then
-	    for _,file in pairs(files) do
-	    	if file:match("unit") then
-		    	self:Button({
-		    		name = file:gsub(".unit", ""),
-		    		text = file,
-		    		path = self.current_dir:gsub("assets/extract/", "") .. "/" .. file:gsub(".unit", ""),
-		    		color = PackageManager:has(Idstring("unit"), Idstring(self.current_dir:gsub("assets/extract/", "") .. "/" .. file:gsub(".unit", ""))) and Color.green or Color.red,
-		    		callback = self.file_click,
-		    	})
-		    end
-	    end	
-	end
-end
-function Menu:search(path, success, search)
-	if not success then
-		return
-	end
-	if not self.menu._is_searching then
-		self:ClearItems()
-		self:browse({custom_dir = "Searching " .. tostring(search) })
-		self.menu._is_searching = true
-	end
-	local files = file.GetFiles( path )
-	if files ~= false then
-		for _, unit_path in pairs(BeardLib.DBPaths["unit"]) do
-			local split = string.split(unit_path, "/")
-			local unit = split[#split]
-			if unit:match(search) then
-		    	self:Button({
-		    		name = unit,
-		    		text = unit,
-		    		path = unit_path,
-		    		color = PackageManager:has(Idstring("unit"), Idstring(unit_path)) and Color.green or Color.red,
-		    		callback = self.file_click,
-		    	})
-		    end			
-		end
-	end
-end
-
-function Menu:folder_click(menu, item)
-	self.current_dir = self.current_dir .. "/" .. item.text
-	self:browse(self)
-	local folder_click = self:GetItem(item.parent).folder_click
-	if folder_click then
-		folder_click()
-	end
-end
-function Menu:file_search(menu, item)
-	self.menu._is_searching = false
-	managers.system_menu:show_keyboard_input({
-		text = "", 
-		title = "Search:", 
-		callback_func = callback(self, self, "search", self.menu._current_menu.directory),
-	})	
-end
-function Menu:GetItem( name )  
-	for _,item in pairs(self._items) do
-		if item.name == name then
-			return item
-		end
-	end	
-	return {}
-end
-function Menu:folder_back(menu, item)
-	if self.menu._is_searching then
-		self.menu._is_searching = false
-		self:browse(self)
-	else
-		local str = string.split(self.menu._current_menu.current_dir, "/")
-		table.remove(str, #str)
-		self.menu._current_menu.current_dir = table.concat(str, "/")
-		self:browse(self)
-	end
-end
+ 
 
 function Menu:Toggle( params )
 	local Item = Toggle:new(self, params)
- 	table.insert(self._items, Item)
- 	self:AlignItem(Item)
+    return self:NewItem(Item) 
 end
 function Menu:Button( params )
 	local Item = Item:new(self, params)
- 	table.insert(self._items, Item)
- 	self:AlignItem(Item) 	
+    return self:NewItem(Item)  	
 end
 function Menu:ComboBox( params )
 	local Item = ComboBox:new(self, params)
- 	table.insert(self._items, Item)
- 	self:AlignItem(Item) 	
+    return self:NewItem(Item)
 end 
 function Menu:TextBox( params )
 	local Item = TextBox:new(self, params)
- 	table.insert(self._items, Item)
- 	self:AlignItem(Item) 	
+    return self:NewItem(Item)
 end 
 function Menu:ComboBox( params )
 	local Item = ComboBox:new(self, params)
- 	table.insert(self._items, Item)
- 	self:AlignItem(Item) 	
+    return self:NewItem(Item)
 end 
 function Menu:Slider( params )
 	local Item = Slider:new(self, params)
- 	table.insert(self._items, Item)
-  	self:AlignItem(Item)	
+    return self:NewItem(Item)
 end 
 function Menu:Divider( params )
 	local Item = Divider:new(self, params)
- 	table.insert(self._items, Item)
-  	self:AlignItem(Item)	
+    return self:NewItem(Item)
+end
+function Menu:Table( params )
+	local Item = Table:new(self, params)
+    return self:NewItem(Item)
 end 
+
+function Menu:NewItem( Item )
+    local temp = self._items
+    if Item.index then
+        self._items = {}
+        for k,v in pairs(temp) do
+            if Item.index == k then
+                table.insert(self._items, Item)
+            end
+            table.insert(self._items, v)
+        end
+        self:AlignItems()
+    else    
+        table.insert(self._items, Item)
+        self:AlignItem(Item)   
+    end
+    return Item
+end

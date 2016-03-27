@@ -11,7 +11,7 @@ function Toggle:init( menu, params )
         color = Color.black,
         texture = "guis/textures/menu_tickbox",
         texture_rect = params.value and {24,0,24,24} or {0,0,24,24},
-    }):set_world_right(params.panel:right() - 4)
+    }):set_right(params.panel:w() - 4)
 end
 
 function Toggle:SetValue(value)
@@ -29,6 +29,7 @@ function Toggle:mouse_pressed( o, button, x, y )
 	if button == Idstring("0") then
 		self:SetValue(not self.value)	
 		self.super.mouse_pressed(self, o, button, x, y)
+        return true
 	end
 end
 
