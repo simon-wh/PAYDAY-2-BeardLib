@@ -281,8 +281,8 @@ function MenuHelperPlus:AddSlider(params)
 	
 	local data = {
 		type = "CoreMenuItemSlider.ItemSlider",
-		min = params.min or 0,
-		max = params.max or 10,
+		min = params.min or math.min(params.value, 0),
+		max = params.max or math.max(params.value, 10),
 		step = params.step or 1,
 		show_value = params.show_value or false
 	}

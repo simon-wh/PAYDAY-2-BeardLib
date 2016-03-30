@@ -12,6 +12,7 @@ if not _G.BeardLib then
     self.ScriptExceptions = self.ScriptExceptions or {}
     self.EditorEnabled = true
     self.HooksDirectory = "Hooks/"
+    self.ModulesDirectory = "Modules/"
     self.ClassDirectory = "Classes/"
     self.ScriptData = {}
     self.managers = {}
@@ -174,7 +175,9 @@ if not _G.BeardLib then
         "MenuHelperPlus.lua",
         "UnitPropertiesItem.lua",
         "json_utils.lua",
-        "utils.lua"
+        "utils.lua",
+        "ModulesCore.lua",
+        "ModuleBase.lua"
     }
 
     self.hook_files = {
@@ -570,6 +573,15 @@ if not BeardLib.setup then
     for _, class in pairs(BeardLib.classes) do
         dofile(BeardLib.mod_path .. BeardLib.ClassDirectory .. class)
     end
+    
+    local modules = file.GetFiles(BeardLib.mod_path .. BeardLib.ModulesDirectory)
+    if modules then
+        for _, mdle in pairs(modules) do
+            dofile(BeardLib.mod_path .. BeardLib.ModulesDirectory .. mdle)
+        end
+    end
+    
+    
     BeardLib:init()
     BeardLib.setup = true
 end

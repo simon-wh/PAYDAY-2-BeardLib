@@ -1,0 +1,14 @@
+<mod name="ExampleMod" global_key="example_mod">
+    <modules>
+        <OptionModule save_file="ExampleModOptions.txt" build_menu="true" auto_load="true"> <!--file="$ModPath/Examples/" global_key="Constants" disallowed_states="ingame" name="constants_module" -->
+            <options node_name="MainExampleOptNode">
+                <option_group name="ExampleOptionGroup" title_id="ExampleOptionGroup_textid" node_name="this is a node">
+                    <option type="number" default_value="4" name="ExampleNumberSubOption" hidden="false" min="0" max="10" value_changed="$global$:ExampleNumberSubOptionChanged"/>
+                </option_group>
+                <option type="multichoice" default_value="1" name="ExampleMultiChoiceOption" values="{Binding $global$.ExampleMultiChoiceOptions}"/> <!-- values="Opt1 Opt2 Opt3 Opt4" -->
+                <option type="bool" default_value="true" name="ExampleBooleanOption"/>
+                <option type="string" default_value="gr8 b8 m8 i r8 8/8" name="ExampleStringOption"/>
+            </options>
+        </OptionModule>
+    </modules>
+</mod>
