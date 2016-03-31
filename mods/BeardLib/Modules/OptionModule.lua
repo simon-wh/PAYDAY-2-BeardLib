@@ -182,28 +182,7 @@ function OptionModule:CreateSlider(option_tbl, parent_node, option_path)
     })
 end
 
-function OptionModule:CreateSlider(option_tbl, parent_node, option_path)
-    local id = option_tbl.name .. self._option_key .. "Toggle"
-    
-    option_path = option_path == "" and option_tbl.name or option_path .. "/" .. option_tbl.name
-    
-    MenuHelperPlus:AddToggle({
-        id = id,
-        title = option_tbl.title_id or id .. "TitleID",
-        node = parent_node,
-        desc = option_tbl.desc_id or id .. "DescID",
-        callback = "OptionModuleGeneric_ValueChanged",
-        value = self:GetValue(option_path),
-        merge_data = {
-            set_value = callback(self, self, "SetValue"),
-            get_value = callback(self, self, "GetValue"),
-            option_key = option_path,
-            option_value_changed = option_tbl.value_changed and self:StringToCallback(option_tbl.value_changed) or nil
-        }
-    })
-end
-
-function OptionModule:CreateSlider(option_tbl, parent_node, option_path)
+function OptionModule:CreateToggle(option_tbl, parent_node, option_path)
     local id = option_tbl.name .. self._option_key .. "Toggle"
     
     option_path = option_path == "" and option_tbl.name or option_path .. "/" .. option_tbl.name

@@ -198,7 +198,7 @@ if not _G.BeardLib then
 end
 
 function BeardLib:init()
-    if not file.GetFiles(self.MapsPath) then
+    if not file.DirectoryExists(self.MapsPath) then
         os.execute("mkdir " .. self.MapsPath)
     end
     
