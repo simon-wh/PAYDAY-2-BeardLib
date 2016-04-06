@@ -36,30 +36,17 @@ function MenuUI:init( config )
         layer = 20,
     }):rect({
 		name = "rect",
-		color = Color.black,
+		color = config.text_color or Color.black,
 		layer = 4,
 		alpha = 0.5,
 		h = bar_h,
     })
-    self._fullscreen_ws_pnl:rect({
-      	name = "crosshair_vertical", 
-      	w = 2,
-      	h = 6,
-      	alpha = 0.8, 
-        layer = 999 
-    }):set_center(self._fullscreen_ws_pnl:center())        
-    self._fullscreen_ws_pnl:rect({
-      	name = "crosshair_horizontal", 
-      	w = 6,
-      	h = 2,
-      	alpha = 0.8, 
-        layer = 999 
-    }):set_center(self._fullscreen_ws_pnl:center())
     self._panel:rect({
       	name = "menu_bg", 
       	halign="grow", 
       	valign="grow", 
-      	alpha = 0.8, 
+        color = config.background_color or Color.white,
+      	alpha = config.background_alpha or 0.8, 
         layer = 19 
     })      
 	self._help_panel = self._panel:panel({
@@ -85,7 +72,7 @@ function MenuUI:init( config )
 	    valign = "left",
 	    align = "left",
 	    vertical = "top",	    
-	    color = Color.black,
+	    color = config.text_color or Color.black,
 	    font = "fonts/font_large_mf",
 	    font_size = 16
 	})      

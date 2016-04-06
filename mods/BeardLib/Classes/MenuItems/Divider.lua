@@ -17,14 +17,14 @@ function Divider:init( parent, params )
 	    x = 4,
 	   	h = 24,
 	    layer = 6,
-	    color = Color.black,
-	    font = "fonts/font_medium_mf",
+	    color = params.text_color or Color.black,
+	    font = parent.menu.font or "fonts/font_medium_mf",
 	    font_size = 16
 	})	
 	local Divider = params.panel:rect({
 		h = 2,
         visible = params.text ~= nil,
-		color = params.color or Color.black
+		color = params.color or params.text_color or Color.black
 	})
 	local _,_,w,h = DividerText:text_rect()
 	DividerText:set_w(w)

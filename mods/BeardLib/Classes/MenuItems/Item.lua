@@ -1,6 +1,7 @@
 Item = Item or class(Menu)
 
 function Item:init( parent, params )
+    params.text_color = params.text_color or parent.text_color
 	params.panel = parent.items_panel:panel({ 
 		name = params.name,
       	y = 10, 
@@ -25,7 +26,7 @@ function Item:init( parent, params )
 	    x = 4,
 	   	h = 24,
 	    layer = 6,
-	    color = Color.black,
+	    color = params.text_color or Color.black,
 	    font = "fonts/font_medium_mf",
 	    font_size = 16
 	})

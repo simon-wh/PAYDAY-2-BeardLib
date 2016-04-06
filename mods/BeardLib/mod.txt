@@ -9,6 +9,8 @@
 		{ "hook_id" : "core/lib/system/coresystem", "script_path" : "Hooks/CoreSystem.lua" },
 		{ "hook_id" : "core/lib/managers/viewport/environment/coreenvironmentmanager", "script_path" : "BeardLibCore.lua" },
 		{ "hook_id" : "core/lib/managers/viewport/corescriptviewport", "script_path" : "BeardLibCore.lua" },
+        { "hook_id" : "lib/managers/navigationmanager", "script_path" : "BeardLibCore.lua"},      
+        { "hook_id" : "lib/managers/navfieldbuilder", "script_path" : "BeardLibCore.lua"},		
 		{ "hook_id" : "lib/managers/menu/menuscenemanager", "script_path" : "BeardLibCore.lua" },
 		{ "hook_id" : "lib/managers/menu/menuinput", "script_path" : "BeardLibCore.lua" },
 		{ "hook_id" : "lib/managers/menu/textboxgui", "script_path" : "BeardLibCore.lua" },

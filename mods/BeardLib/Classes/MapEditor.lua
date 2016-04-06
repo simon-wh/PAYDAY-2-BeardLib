@@ -149,8 +149,9 @@ function MapEditor:mouse_pressed( button, x, y )
 end
 function MapEditor:create_menu()
 	self._menu = MenuUI:new({
-		w = 305,
+		w = 325,
         tabs = true,
+        background_color = Color(0.8, 0.8, 0.8),
         mousepressed = callback(self, self, "mouse_pressed"),
 		create_items = callback(self, self, "create_items"),
 	})
@@ -164,7 +165,8 @@ function MapEditor:create_menu()
     self._hide_panel:rect({
         name = "bg", 
         halign="grow", 
-        valign="grow", 
+        valign="grow",
+        color = Color(0.8, 0.8, 0.8), 
         alpha = 0.8, 
     })    
     self._hide_panel:text({
@@ -178,6 +180,20 @@ function MapEditor:create_menu()
         font = "fonts/font_large_mf",
         font_size = 16
     })    
+    self._menu._fullscreen_ws_pnl:rect({
+        name = "crosshair_vertical", 
+        w = 2,
+        h = 6,
+        alpha = 0.8, 
+        layer = 999 
+    }):set_center(self._menu._fullscreen_ws_pnl:center())        
+    self._menu._fullscreen_ws_pnl:rect({
+        name = "crosshair_horizontal", 
+        w = 6,
+        h = 2,
+        alpha = 0.8, 
+        layer = 999 
+    }):set_center(self._menu._fullscreen_ws_pnl:center())    
     self._hide_panel:set_left(self._menu._panel:right())  
 end
 function MapEditor:create_items(menu)
@@ -415,12 +431,7 @@ function MapEditor:create_unit_items(menu)
     })      	
 end
 function MapEditor:create_save_options_items(menu)
-    menu:Button({
-        name = "save_map_tweakdata",
-        text = "Save map",
-        help = "",
-        callback = callback(self, self, "save_map"),
-    })  
+    local level =  "/" .. (Global.game_settings.level_id or "")
     menu:Divider({
         name = "continents_div",        
         size = 30,
@@ -429,7 +440,7 @@ function MapEditor:create_save_options_items(menu)
     menu:TextBox({
         name = "continents_savepath",
         text = "Save path: ",
-        value = BeardLib.MapsPath,
+        value = BeardLib.MapsPath .. level,
         help = "",
     })       
     menu:ComboBox({
@@ -453,7 +464,7 @@ function MapEditor:create_save_options_items(menu)
     menu:TextBox({
         name = "missions_savepath",
         text = "Save path: ",
-        value = BeardLib.MapsPath,
+        value = BeardLib.MapsPath .. level,
         help = "",
     })       
     menu:ComboBox({
@@ -469,25 +480,31 @@ function MapEditor:create_save_options_items(menu)
         help = "",
         callback = callback(self, self, "save_missions"),
     })       	
+    menu:Divider({
+        name = "nav_data_div",
+        size = 30,
+        text = "Nav data",
+    })    
+    menu:TextBox({
+        name = "nav_data_savepath",
+        text = "Save path: ",
+        value = BeardLib.MapsPath .. level,
+        help = "",
+    })         
+    menu:Button({
+        name = "build_nav",
+        text = "Build navdata",
+        help = "",
+        callback = callback(self, self, "_build_nav_segments"),
+    })        
+    menu:Button({
+        name = "save_nav",
+        text = "Save navdata",
+        help = "",
+        callback = callback(self, self, "save_nav_data"),
+    })      
 end
-
-function MapEditor:save_map()
-    --Downloadable maps find
-    local data = {
-        name = "new_level",
-        author = "someone",
-        narrative = tweak_data.narrative:job_data(Global.job_manager.current_job.job_id),
-        level = tweak_data.levels[Global.level_data.level_id], 
-    }
-    local new_data = _G.BeardLib.managers.ScriptDataConveter:GetTypeDataTo(data, "json")    
-    local level_file = io.open(BeardLib.MapsPath .. "/level.json", "w+")
-    if level_file then
-        level_file:write(new_data)
-        level_file:close()    
-    else
-        BeardLib:log("Failed")
-    end     
-end
+ 
 function MapEditor:set_unit(unit)
     self._selected_unit = unit
     self._selected_units = {}
@@ -515,6 +532,69 @@ function MapEditor:set_unit(unit)
     end
 end
 
+function MapEditor:_build_nav_segments()
+    QuickMenu:new( "Info", "This will disable the player and AI and build the nav data proceed?", 
+    {[1] = {text = "Yes", callback = function() 
+        local settings = {}
+        local units = {}
+        for _, unit in ipairs(World:find_units_quick("all")) do
+            if unit:name() == Idstring("core/units/nav_surface/nav_surface") then
+                table.insert(units, unit)
+            end
+        end    
+        for _, unit in ipairs(units) do
+            local ray = World:raycast(unit:position() + Vector3(0, 0, 50), unit:position() - Vector3(0, 0, 150), nil, managers.slot:get_mask("all"))
+            if ray and ray.position then
+                table.insert(settings, {
+                    position = unit:position(),
+                    id = unit:editor_id(),
+                    color = Color(),
+                    location_id = unit:ai_editor_data().location_id
+                })
+            end
+        end
+        if #settings > 0 then
+            for _, unit in pairs(World:find_units_quick("all")) do
+                if unit:in_slot(managers.slot:get_mask("persons"))   then
+                    unit:set_enabled(false) 
+                    if unit:brain() then
+                       unit:brain()._current_logic.update = nil
+                    end
+                    table.insert(self._disabled_units, unit)
+                    for _, extension in pairs(unit:extensions()) do
+                        unit:set_extension_update_enabled(Idstring(extension), false)
+                    end
+                end         
+            end    
+            managers.navigation:clear()
+            managers.navigation:build_nav_segments(settings, callback(self, self, "_build_visibility_graph"))
+        else
+            BeardLib:log("No nav surface found.")
+        end      
+    end
+    },[2] = {text = "No", is_cancel_button = true}}, true)    
+end
+
+function MapEditor:_build_visibility_graph()
+    local all_visible = true
+    local exclude, include
+    if not all_visible then
+        exclude = {}
+        include = {}
+        for _, unit in ipairs(World:find_units_quick("all")) do
+            if unit:name() == Idstring("core/units/nav_surface/nav_surface") then
+                exclude[unit:unit_data().unit_id] = unit:ai_editor_data().visibilty_exlude_filter
+                include[unit:unit_data().unit_id] = unit:ai_editor_data().visibilty_include_filter
+            end
+        end
+    end
+    local ray_lenght = 150
+    managers.navigation:build_visibility_graph(callback(self, self, "_finish_visibility_graph"), all_visible, exclude, include, ray_lenght)
+end
+
+function MapEditor:_finish_visibility_graph(menu, item)
+    managers.groupai:set_state("none")
+end
 function MapEditor:show_add_element_dialog(menu, item)
     local items = {             
         {
@@ -559,7 +639,7 @@ function MapEditor:set_unit_data(menu, item)
             self._selected_unit:unit_data().rotation = self._selected_unit:rotation()
             self._selected_unit:unit_data().mesh_variation = self._menu:GetItem("unit_mesh_variation").value ~= "" and self._menu:GetItem("unit_mesh_variation").value or nil
             self._selected_unit:unit_data().name = self._menu:GetItem("unit_path").value -- Later will add button to unit browser.
-            setup._world_holder._definition:set_unit(self._selected_unit:unit_data().unit_id, self._selected_unit:unit_data())
+            managers.worlddefinition:set_unit(self._selected_unit:unit_data().unit_id, self._selected_unit:unit_data())
         end
     end
 end
@@ -897,12 +977,12 @@ end
  
 function MapEditor:delete_unit(menu, item)
 	if alive(self._selected_unit) then
-		setup._world_holder._definition:delete_unit(self._selected_unit)		
+		managers.worlddefinition:delete_unit(self._selected_unit)		
 		World:delete_unit(self._selected_unit)
 	end
     for _, unit in pairs(self._selected_units) do
         if alive(unit) then
-            setup._world_holder._definition:delete_unit(unit)        
+            managers.worlddefinition:delete_unit(unit)        
             World:delete_unit(unit)
         end                    
     end 
@@ -910,8 +990,8 @@ function MapEditor:delete_unit(menu, item)
 end
 function MapEditor:set_editor_units_visible(menu, item)
 	for _, unit in pairs(World:find_units_quick("all")) do
-		if type(unit:unit_data()) == "table" and unit:unit_data().only_visible_in_editor then
-			unit:set_visible( item.value )
+		if type(unit:unit_data()) == "table" and (unit:unit_data().only_visible_in_editor or unit:unit_data().only_exists_in_editor) then
+			unit:set_visible( self._menu:GetItem("units_visibility").value )
 		end
 	end
 end
@@ -931,7 +1011,7 @@ function MapEditor:SpawnUnit( unit_path, unit_data )
     if not unit.unit_data or not unit:unit_data()  then
         BeardLib:log(unit_path .. " has no unit data...")
     else
-        unit:unit_data().name_id = split[#split] .."_".. setup._world_holder._definition:get_unit_number(unit_path)
+        unit:unit_data().name_id = split[#split] .."_".. managers.worlddefinition:get_unit_number(unit_path)
         unit:unit_data().unit_id = math.random(999999)
         unit:unit_data().name = unit_path
         unit:unit_data().position = unit:position()
@@ -939,7 +1019,7 @@ function MapEditor:SpawnUnit( unit_path, unit_data )
     end
     self:_select_unit(unit)
 
-    setup._world_holder._definition:add_unit(unit)   
+    managers.worlddefinition:add_unit(unit)   
 end
 function MapEditor:file_click(menu, item)
 	local unit_path = self.current_dir:gsub("assets/extract/", "") .. "/" .. item.name:gsub(".unit", "")
@@ -960,22 +1040,27 @@ function MapEditor:save_continents(menu)
 	local item = menu:GetItem("continents_filetype")
 	local type = item.items[item.value]
 	local path = menu:GetItem("continents_savepath").value
-	local world_def = setup._world_holder._definition
-	if file.DirectoryExists( path ) then
+	local world_def = managers.worlddefinition
+	if not file.DirectoryExists( path ) then
+        os.execute("mkdir " .. path:gsub("/" , "\\"))
+    end
+    if file.DirectoryExists( path ) then
 		for continent_name, _ in pairs(world_def._continent_definitions) do
 			if menu:GetItem("continent_" .. continent_name).value then
 				world_def:save_continent(continent_name, type, path)
 			end
 		end
 	else
-		log("Directory doesn't exists.")
+		BeardLib:log("Directory doesn't exists(Failed to create directory?)")
 	end
 end
 function MapEditor:save_missions(menu)
 	local item = menu:GetItem("missions_filetype")
 	local type = item.items[item.value]
 	local path = menu:GetItem("missions_savepath").value
-	local world_def = setup._world_holder._definition
+    if not file.DirectoryExists( path ) then
+        os.execute("mkdir " .. path:gsub("/" , "\\"))
+    end    
 	if file.DirectoryExists( path ) then
 		for mission_name, _ in pairs(managers.mission._missions) do
 			if menu:GetItem("mission_" .. mission_name).value then
@@ -983,10 +1068,27 @@ function MapEditor:save_missions(menu)
 			end
 		end
 	else
-		log("Directory doesn't exists.")
+        BeardLib:log("Directory doesn't exists(Failed to create directory?)")
 	end
 end
 
+function MapEditor:save_nav_data(menu)
+    local path = menu:GetItem("missions_savepath").value
+    if not file.DirectoryExists( path ) then
+        os.execute("mkdir " .. path:gsub("/" , "\\"))
+    end    
+    if file.DirectoryExists( path ) then
+        if managers.navigation:get_save_data() then
+            local file = io.open(path .. "/nav_manager_data.nav_data", "w+")
+            file:write(managers.navigation._load_data)
+            file:close() 
+        else
+            BeardLib:log("Save data is not ready!")
+        end
+    else
+        BeardLib:log("Directory doesn't exists(Failed to create directory?)")
+    end 
+end
 
 function MapEditor:load_continents(continents)
     for continent_name, _ in pairs(continents) do
@@ -1005,6 +1107,7 @@ function MapEditor:load_missions(missions)
 	        name = "mission_" .. mission_name,
 	        text = "Save mission: " .. mission_name,
 	        help = "",
+            index = 9,
 	        value = true,
 	    })    
     end

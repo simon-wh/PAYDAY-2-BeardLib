@@ -1,6 +1,34 @@
 core:module("CoreWorldDefinition")
 WorldDefinition = WorldDefinition or class()
+function WorldDefinition:init(params)
+	managers.worlddefinition = self
+	self._world_dir = params.world_dir
+	self._cube_lights_path = params.cube_lights_path
+	PackageManager:set_resource_loaded_clbk(Idstring("unit"), nil)
+	self:_load_world_package()
+	self._definition = self:_serialize_to_script(params.file_type, params.file_path)
+	self._continent_definitions = {}
+	self._continents = {}
+	self._portal_slot_mask = World:make_slot_mask(1)
+	self._massunit_replace_names = {}
+	self._replace_names = {}
+	self._replace_units_path = "assets/lib/utils/dev/editor/xml/replace_units"
+	self:_parse_replace_unit()
+	self._ignore_spawn_list = {}
+	self._excluded_continents = {}
+	self:_parse_world_setting(params.world_setting)
+	self:parse_continents()
+	managers.sequence:preload()
+	PackageManager:set_resource_loaded_clbk(Idstring("unit"), callback(managers.sequence, managers.sequence, "clbk_pkg_manager_unit_loaded"))
+	self._all_units = {}
+	self._trigger_units = {}
+	self._use_unit_callbacks = {}
+	self._mission_element_units = {}
+	self._termination_counter = 0
+	self:create("ai")
+end
 
+ 
 function WorldDefinition:save_continent(continent, type, path)
 	local new_data = _G.BeardLib.managers.ScriptDataConveter:GetTypeDataTo(self._continent_definitions[continent], type)	 	
 	local continent_file = io.open(path .. "/" .. continent .. "." .. type, "w+")
@@ -43,7 +71,9 @@ function WorldDefinition:get_unit_number(name)
 	end
 	return i
 end
-
+function WorldDefinition:_continent_editor_only(data)
+	return false
+end
 function WorldDefinition:init_done()
 	if self._continent_init_packages then
 		for _, package in ipairs(self._continent_init_packages) do
@@ -73,11 +103,12 @@ function WorldDefinition:assign_unit_data(unit, data)
 	if not unit:unit_data() then
 		Application:error("The unit " .. unit:name():s() .. " (" .. unit:author() .. ") does not have the required extension unit_data (ScriptUnitData)")
 	end
-	if unit:unit_data().only_exists_in_editor then
+	--[[if unit:unit_data().only_exists_in_editor then
 		self._ignore_spawn_list[unit:name():key()] = true
 		unit:set_slot(0)
 		return
-	end
+	end]]
+	_G.BeardLib.managers.MapEditor:set_editor_units_visible()
 	unit:unit_data().instance = data.instance
 	unit:unit_data().name_id = data.name_id
 	unit:unit_data().unit_id = data.unit_id
@@ -106,8 +137,9 @@ end
 
  local is_editor = Application:editor()
 function WorldDefinition:make_unit(data, offset)
+
 	local name = data.name
-	if self._ignore_spawn_list[Idstring(name):key()] then
+	if self._ignore_spawn_list[Idstring(name):key()] then		
 		return nil
 	end
 	if table.has(self._replace_names, name) then
@@ -137,6 +169,7 @@ function WorldDefinition:make_unit(data, offset)
 	if self._termination_counter == 0 then
 		Application:check_termination()
 	end
-	self._termination_counter = (self._termination_counter + 1) % 100
+	self._termination_counter = (self._termination_counter + 1) % 100	
+ 
 	return unit
 end

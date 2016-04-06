@@ -13,8 +13,8 @@ function ComboBox:init( menu, params )
         align = "center",
         vertical = "center",
         layer = 6,
-        color = Color.black,
-        font = "fonts/font_large_mf",
+        color = params.text_color or Color.black,
+        font = "fonts/font_medium_mf",
         font_size = 16
     })
     local list_icon = params.panel:text({
@@ -27,8 +27,8 @@ function ComboBox:init( menu, params )
         w = 18,
         h = 18,
         layer = 6,
-        color = Color.black,
-        font = "fonts/font_large_mf",
+        color = params.text_color or Color.black,
+        font = "fonts/font_medium_mf",
         font_size = 16
     })
     local combo_bg = params.panel:bitmap({
@@ -67,8 +67,8 @@ function ComboBox:init( menu, params )
             h = 18,
             y = 18 * (k - 1),
             layer = 6,
-            color = Color.black,
-            font = "fonts/font_large_mf",
+            color = params.text_color or Color.black,
+            font = "fonts/font_medium_mf",
             font_size = 16
         })
         local combo_item_bg = self.list:bitmap({

@@ -258,6 +258,9 @@ end
 function MissionScript:create_element( element )
 	local class = element.class
 	local new_element = self:_element_class(element.module, class):new(self, element)		
+	if class == "ElementSpawnCivilian" or class == "ElementSpawnEnemyGroup" or class == "ElementSpawnCivilianGroup" or class == "ElementSpawnEnemyDummy" or class == "ElementEnemyDummyTrigger" or class == "ElementRandom"  then 
+		element.values.enabled = false --Comment it if you want civis and enemies to spawn.
+	end
 	self._elements[element.id] = new_element
 	self._elements[element.id].class = class
 	self._element_groups[class] = self._element_groups[class] or {}

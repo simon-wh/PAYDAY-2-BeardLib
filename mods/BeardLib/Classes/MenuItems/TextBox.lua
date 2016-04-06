@@ -1,8 +1,8 @@
 TextBox = TextBox or class(Item)
 
-function TextBox:init( menu, params )	
+function TextBox:init( parent, params )	
 	params.value = params.value or ""
-	self.super.init( self, menu, params )
+	self.super.init( self, parent, params )
 	local bg = params.panel:bitmap({
         name = "textbg",
         y = 4,
@@ -22,8 +22,8 @@ function TextBox:init( menu, params )
 		word_wrap = true,        
 	    h = 16,
 	    layer = 8,
-	    color = Color.black,
-	    font = "fonts/font_medium_mf",
+	    color = params.text_color or Color.black,
+	    font = parent.font or "fonts/font_medium_mf",
 	    font_size = 16
 	}) 	
 	text:set_selection(text:text():len())		

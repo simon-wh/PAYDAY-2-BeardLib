@@ -21,8 +21,8 @@ function Slider:init( menu, params )
         w = slider_bg:w() - 4,
         h = 16,
         layer = 8,
-        color = Color.black,
-        font = "fonts/font_large_mf",
+        color = params.text_color or Color.black,
+        font = "fonts/font_medium_mf",
         font_size = 16
     })  
     slider_value:set_selection(slider_value:text():len())	

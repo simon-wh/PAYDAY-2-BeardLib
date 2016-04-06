@@ -1,14 +1,14 @@
 Toggle = Toggle or class(Item)
 
-function Toggle:init( menu, params )
-	self.super.init( self, menu, params )
+function Toggle:init( parent, params )
+	self.super.init( self, parent, params )
     params.panel:bitmap({
         name = "toggle",
         x = 2,
         w = params.panel:h() -2,
         h = params.panel:h() -2,
         layer = 6,
-        color = Color.black,
+        color = params.text_color or Color.black,
         texture = "guis/textures/menu_tickbox",
         texture_rect = params.value and {24,0,24,24} or {0,0,24,24},
     }):set_right(params.panel:w() - 4)

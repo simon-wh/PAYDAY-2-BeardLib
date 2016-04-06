@@ -193,6 +193,8 @@ if not _G.BeardLib then
         ["core/lib/utils/dev/editor/coreworlddefinition"] = "Coreworlddefinition.lua",
         ["lib/setups/gamesetup"] = "Gamesetup.lua",
         ["core/lib/system/coresystem"] = "CoreSystem.lua",
+        ["lib/managers/navigationmanager"] = "navigationmanager.lua",      
+        ["lib/managers/navfieldbuilder"] = "navfieldbuilder.lua",             
         --["core/lib/managers/viewport/environment/coreenvironmentmanager"] = "CoreEnvironmentManager.lua"
     }
 end

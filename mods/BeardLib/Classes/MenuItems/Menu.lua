@@ -2,6 +2,7 @@ Menu = Menu or class(MenuUI)
 
 function Menu:init( menu, params )
 	local MenuPanel = menu._panel  
+    params.text_color = params.text_color or menu.text_color
     if menu.tabs then
     	params.panel = MenuPanel:panel({ 
     		name = params.name,
@@ -13,18 +14,11 @@ function Menu:init( menu, params )
         local Marker = params.panel:rect({
             name = "bg", 
             h = 24,
+            color = menu.background_color or Color.white,
             halign="grow", 
             valign="grow", 
             layer = -1 
         })       
-        local Line = params.panel:rect({
-          	name = "Line", 
-          	h = 2,
-          	halign="grow", 
-          	valign="grow", 
-            layer = 1 
-        })
-        Line:set_bottom(Marker:bottom())
         local ItemText = params.panel:text({
     	    name = "title",
     	    text = params.text,
@@ -33,7 +27,7 @@ function Menu:init( menu, params )
     	    x = 4,
     	   	h = 24,
     	    layer = 6,
-    	    color = Color.black,
+    	    color = params.text_color or Color.black,
     	    font = "fonts/font_medium_mf",
     	    font_size = 16
     	}) 
@@ -130,7 +124,7 @@ end
 
 function Menu:SetHighlight( highlight )
 	self.highlight = highlight	
-	self.panel:child("bg"):set_color(highlight and Color(0, 0.5, 1) or Color.white) 
+	self.panel:child("bg"):set_color(highlight and Color(0.2, 0.5, 1) or self.menu.background_color or Color.white) 
 end
 function Menu:SetVisible( visible )
 	self.items_panel:set_visible(visible)

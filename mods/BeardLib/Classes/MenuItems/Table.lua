@@ -19,9 +19,9 @@ function Table:init( menu, params )
             h = 16,
             layer = 6,
             align = "center",        
-            color = Color.black,
-            font = "fonts/font_large_mf",
-            font_size = 24
+            color = params.text_color or Color.black,
+            font = "fonts/font_medium_mf",
+            font_size = 16
         })    
     end
     local remove_btn
@@ -33,9 +33,9 @@ function Table:init( menu, params )
             h = 16,
             align = "center",
             layer = 6,
-            color = Color.black,
-            font = "fonts/font_large_mf",
-            font_size = 24
+            color = params.text_color or Color.black,
+            font = "fonts/font_medium_mf",
+            font_size = 16
         })
     end
     local caret = params.panel:rect({
@@ -68,7 +68,7 @@ function Table:Add(k, v)
     local table_item = table_panel:panel({
         name = "item_" .. k,
         h = 18,
-        color = Color.black,
+        color = self.text_color or Color.black,
     })
     local key = table_item:text({
         name = "key",
@@ -76,8 +76,8 @@ function Table:Add(k, v)
         w = table_panel:w() / 2,
         x = 4,
         layer = 1,        
-        color = Color.black,
-        font = "fonts/font_large_mf",
+        color = self.text_color or Color.black,
+        font = "fonts/font_medium_mf",
         font_size = 16
     })
     if type(v) == "boolean" then
@@ -86,7 +86,7 @@ function Table:Add(k, v)
             w = table_item:h() -2,
             h = table_item:h() -2,            
             layer = 1,
-            color = Color.black,
+            color = self.text_color or Color.black,
             texture = "guis/textures/menu_tickbox",
             texture_rect = v == true and {24,0,24,24} or {0,0,24,24},
         })
@@ -97,8 +97,8 @@ function Table:Add(k, v)
             text = tostring(v),
             w = table_panel:w() / 2,
             layer = 1,
-            color = Color.black,
-            font = "fonts/font_large_mf",
+            color = self.text_color or Color.black,
+            font = "fonts/font_medium_mf",
             font_size = 16
         })
         value:enter_text(callback(self, self, "enter_text")) 
