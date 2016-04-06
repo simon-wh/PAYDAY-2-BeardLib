@@ -45,8 +45,8 @@ function ComboBox:init( menu, params )
     self.list = self.menu._fullscreen_ws_pnl:panel({
         name = params.name.."list",
         y = 0,
-        w = 120,
-        h =  math.max(1, #params.items) * 18,
+        w = params.panel:w() / 1.4,
+        h = self.menu._fullscreen_ws_pnl:h() - 120,
         layer = 1100,
         visible = false,
         halign = "left",
@@ -58,9 +58,33 @@ function ComboBox:init( menu, params )
         valign="grow",
         layer = -1
     })
+    self.items_panel = self.list:panel({ 
+        name = "items_panel",
+        w = self.list:w() - 12, 
+        x = 12,
+        h = math.max(1, #params.items) * 18,
+    })         
+    self._scroll_panel = self.list:panel({
+        name = "scroll_panel",
+        halign = "center", 
+        align = "center",
+    })  
+    local bar_h = self._scroll_panel:top() - self._scroll_panel:bottom()
+    self._scroll_panel:panel({
+        name = "scroll_bar",
+        halign = "center", 
+        align = "center",
+        w = 4,
+    }):rect({
+        name = "rect",
+        color = Color.black,
+        layer = 4,
+        alpha = 0.5,
+        h = bar_h,
+    })    
     list_icon:set_left(combo_bg:right() - 12)
     for k, text in pairs(params.items) do
-        local combo_item = self.list:text({
+        local combo_item = self.items_panel:text({
             name = "item"..k,
             text = text,
             align = "center",
@@ -71,7 +95,7 @@ function ComboBox:init( menu, params )
             font = "fonts/font_medium_mf",
             font_size = 16
         })
-        local combo_item_bg = self.list:bitmap({
+        local combo_item_bg = self.items_panel:bitmap({
             name = "bg"..k,
             align = "center",
             h = 18,
@@ -79,6 +103,7 @@ function ComboBox:init( menu, params )
             layer = 5,
         })
     end
+    self:AlignScrollBar()
 end
 
 function ComboBox:SetValue(value)
@@ -88,7 +113,7 @@ function ComboBox:SetValue(value)
     end
 end
 
-function ComboBox:mouse_pressed( o, button, x, y )
+function ComboBox:mouse_pressed( button, x, y )
     if not self.menu._openlist and self.panel:inside(x,y) then
         if button == Idstring("0") then
             if alive(self.list) then
@@ -111,23 +136,75 @@ function ComboBox:mouse_pressed( o, button, x, y )
             end
         end
     elseif self.menu._openlist == self and self.list:inside(x,y) then
-        for k, v in pairs(self.items) do
-            if self.list:child("item"..k):inside(x,y) then
-                self:SetValue(k)
-                if self.callback then
-                    self.callback(self.menu, self)
-                end                
-                self.list:hide()
-                self.menu._openlist = nil
+        if button == Idstring("mouse wheel down") then
+            self:scroll_down()
+            self:mouse_moved( x, y )
+        elseif button == Idstring("mouse wheel up") then
+            self:scroll_up()      
+            self:mouse_moved( x, y )   
+        end 
+        if button == Idstring("0") then
+            if self._scroll_panel:child("scroll_bar"):child("rect"):inside(x, y) then
+                self._grabbed_scroll_bar = true
                 return true
+            end 
+            if self._scroll_panel:child("scroll_bar"):inside(x, y) then
+                self._grabbed_scroll_bar = true
+                local where = (y - self._scroll_panel:world_top()) / (self._scroll_panel:world_bottom() - self._scroll_panel:world_top())
+                self:scroll(where * self.items_panel:h())
+                return true
+            end            
+            for k, v in pairs(self.items) do
+                if self.items_panel:child("item"..k):inside(x,y) then
+                    self:SetValue(k)
+                    if self.callback then
+                        self.callback(self.menu, self)
+                    end                
+                    self.list:hide()
+                    self.menu._openlist = nil
+                    return true
+                end
             end
         end
-    else
+        return true
+    elseif self.menu._openlist and button == Idstring("0") or button == Idstring("1")  then
         self.menu._openlist.list:hide()
         self.menu._openlist = nil
+        return true
     end
 end
-
+function ComboBox:AlignScrollBar()
+    local scroll_bar = self._scroll_panel:child("scroll_bar")
+    local scroll_bar_rect = scroll_bar:child("rect")
+    local bar_h = self._scroll_panel:top() - self._scroll_panel:bottom()
+    scroll_bar_rect:set_h(math.abs(self._scroll_panel:h() * (bar_h / self.items_panel:h() )))
+    scroll_bar_rect:set_y( -(self.items_panel:y()) * self._scroll_panel:h()  / self.items_panel:h())
+    scroll_bar:set_left(self._scroll_panel:left())
+    scroll_bar:set_visible(self.items_panel:h() > self._scroll_panel:h())
+end
+function ComboBox:scroll_up()
+    if self.items_panel:h() > self._scroll_panel:h() then
+        self.items_panel:set_top(math.min(0, self.items_panel:top() + 20))
+        self:AlignScrollBar()
+        return true
+    end
+end
+function ComboBox:scroll_down()
+    if self.items_panel:h() > self._scroll_panel:h() then
+        self.items_panel:set_bottom(math.max(self.items_panel:bottom() - 20, self._scroll_panel:h()))
+        self:AlignScrollBar()
+        return true
+    end
+end
+function ComboBox:scroll(y)
+    if self.items_panel:h() > self._scroll_panel:h() then
+        self.items_panel:set_y(math.clamp(-y, -self.items_panel:h() ,0))
+        self.items_panel:set_bottom(math.max(self.items_panel:bottom(), self._scroll_panel:h())) 
+        self.items_panel:set_top(math.min(0, self.items_panel:top()))       
+        self:AlignScrollBar()
+        return true
+    end
+end
 function ComboBox:key_press( o, k )
     if not self.menu._openlist then
         if k == Idstring("enter") then
@@ -141,11 +218,20 @@ function ComboBox:key_press( o, k )
     end
 end
 
-function ComboBox:mouse_moved(o, x, y )
-    self.super.mouse_moved(self, o, x, y)
+function ComboBox:mouse_moved( x, y )
+    self.super.mouse_moved(self, x, y)
     if self.menu._openlist == self then
+        if self._grabbed_scroll_bar then
+            local where = (y - self._scroll_panel:world_top()) / (self._scroll_panel:world_bottom() - self._scroll_panel:world_top())
+            self:scroll(where * self.items_panel:h())
+        end            
         for k, v in pairs(self.items) do
-            self.list:child("bg"..k):set_color(self.list:child("bg"..k):inside(x,y) and Color(0, 0.5, 1) or Color.white)
+            self.items_panel:child("bg"..k):set_color(self.items_panel:child("bg"..k):inside(x,y) and Color(0, 0.5, 1) or Color.white)
         end
     end
+end
+
+function ComboBox:mouse_released( button, x, y )
+    self.super.mouse_released( button, x, y )
+    self._grabbed_scroll_bar = false
 end

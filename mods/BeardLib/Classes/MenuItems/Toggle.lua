@@ -25,10 +25,10 @@ function Toggle:SetValue(value)
 	end
 end
 
-function Toggle:mouse_pressed( o, button, x, y )
+function Toggle:mouse_pressed( button, x, y )
 	if button == Idstring("0") then
 		self:SetValue(not self.value)	
-		self.super.mouse_pressed(self, o, button, x, y)
+		self.super.mouse_pressed(self, button, x, y)
         return true
 	end
 end
@@ -42,6 +42,10 @@ function Toggle:key_press( o, k )
 	end
 end
 
-function Toggle:mouse_moved(o, x, y )
-	self.super.mouse_moved(self, o, x, y)
+function Toggle:mouse_moved( x, y )
+    self.super.mouse_moved(self, x, y)
+end
+
+function Toggle:mouse_released( button, x, y )
+    self.super.mouse_released( self, button, x, y )
 end

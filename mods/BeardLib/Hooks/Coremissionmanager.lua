@@ -229,6 +229,20 @@ function MissionManager:get_modifiers_of_unit(unit)
 	return modifiers
 end
 
+function MissionManager:get_mission_element( id )
+	for _, script in pairs(self._missions) do
+		for _, tbl in pairs(script) do
+			if tbl.elements then
+				for i, element in pairs(tbl.elements) do	
+					if element.id == id then
+						return element
+					end
+				end
+			end
+		end
+	end
+	return nil
+end
 function MissionManager:print_classes()
 	for _, Module in pairs(rawget(_G, "CoreMissionManager")) do
 		if type(Module) == "table" then
@@ -289,6 +303,7 @@ function MissionScript:draw_element(element, color)
 	end
 	element:debug_draw()
 end
+ 
 function MissionScript:_debug_draw(t, dt)
 	local wanted_classes = {"", "ElementSpawnCivilian", "ElementPlayerSpawner"} --Leave as "" if you want all of them to draw.
 	if _G.BeardLib.managers.MapEditor._menu:GetItem("show_elements").value then

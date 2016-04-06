@@ -316,8 +316,8 @@ function Table:key_press( o, k )
     end
 end
 
-function Table:mouse_moved( o, x, y )
-    self.super.mouse_moved(self, o, x, y, false)   
+function Table:mouse_moved( x, y )
+    self.super.mouse_moved(self, x, y, false)   
     self.cantype = self._highlighted and self._highlighted.panel:inside(x,y) and self.cantype or false
     for k,v in pairs(self.items) do
         local table_item = self.panel:child("table"):child("item_" .. k)
@@ -335,4 +335,8 @@ function Table:mouse_moved( o, x, y )
     end
     self._highlighted = self._highlighted and (alive(self._highlighted.panel) and self._highlighted.panel:inside(x,y)) and self._highlighted or nil    
     self:update_caret()
+end
+
+function Table:mouse_released( button, x, y )
+    self.super.mouse_released( self, button, x, y )
 end

@@ -108,7 +108,6 @@ function WorldDefinition:assign_unit_data(unit, data)
 		unit:set_slot(0)
 		return
 	end]]
-	_G.BeardLib.managers.MapEditor:set_editor_units_visible()
 	unit:unit_data().instance = data.instance
 	unit:unit_data().name_id = data.name_id
 	unit:unit_data().unit_id = data.unit_id
@@ -134,8 +133,12 @@ function WorldDefinition:assign_unit_data(unit, data)
 	self:_setup_zipline(unit, data)
 	self:_project_assign_unit_data(unit, data)
 end
-
- local is_editor = Application:editor()
+function WorldDefinition:_set_only_visible_in_editor(unit, data)
+	if unit:unit_data().only_visible_in_editor or unit:unit_data().only_exists_in_editor then
+		unit:set_visible(false)
+	end
+end
+local is_editor = Application:editor()
 function WorldDefinition:make_unit(data, offset)
 
 	local name = data.name

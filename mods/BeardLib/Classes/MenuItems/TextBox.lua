@@ -41,18 +41,16 @@ function TextBox:init( parent, params )
 end
 
 
-function TextBox:SetValue(value)
+function TextBox:SetValue(value, reset_selection)
 	local text = self.panel:child("text")
-	self:SetText(value)
-	text:set_selection(text:text():len())	
+	text:set_text(value)
+	if reset_selection then
+		text:set_selection(text:text():len())		
+	end
+	self:update_caret()		
 	self.super.SetValue(self, value)
 end
  
-function TextBox:SetText(text)
-	self.panel:child("text"):set_text(text)
-	self:update_caret()	
-	self.super.SetValue(self, text)
-end
  
 function TextBox:blink( caret )
 	local t = 2
@@ -137,22 +135,30 @@ function TextBox:enter_text( text, s )
 	if self.menu._highlighted == self and self.cantype and not Input:keyboard():down(Idstring("left ctrl")) then
 		self._before_text = text:text()
 		text:replace_text(s)	
-		self:update_caret()		
-		self.value = self.filter == "number" and tonumber(text:text()) or text:text()		
+		self:update_caret()	
+		if self.filter == "number" and tonumber(text:text()) ~= nil then
+			if self.max or self.min then
+				self:SetValue(math.clamp(tonumber(text:text()), self.min, self.max))
+			else
+				self:SetValue(tonumber(text:text()))
+			end
+		else
+			self:SetValue(text:text())
+		end	
 		if self.callback then
 			self.callback(self.parent, self)
 		end
 	end		
 
 end
-function TextBox:mouse_pressed( o, button, x, y )
+function TextBox:mouse_pressed( button, x, y )
 	if not alive(self.panel) then
 		return
 	end
 	self.cantype = self.panel:inside(x,y) and button == Idstring("0")
 	self:update_caret()	
 	if not self.cantype then
-		self:SetText(self.panel:child("text"):text())
+		self:SetValue(self.panel:child("text"):text(), true)
 	end		
 	return self.cantype
 end
@@ -184,12 +190,17 @@ function TextBox:update_caret()
 	self.panel:child("caret"):set_visible(self.cantype)
 end
 
-function TextBox:mouse_moved( o, x, y )
-	self.super.mouse_moved(self, o, x, y)
+function TextBox:mouse_moved( x, y )
+	self.super.mouse_moved(self, x, y)
 	self.cantype = self.panel:inside(x,y) and self.cantype or false		
 	self.panel:child("caret"):set_visible(self.cantype)
 	self:update_caret()
 	if not self.cantype then
-		self:SetText(self.panel:child("text"):text())
+		self:SetValue(self.panel:child("text"):text())
 	end
 end
+
+
+function TextBox:mouse_released( button, x, y )
+    self.super.mouse_released( self, button, x, y )
+end 

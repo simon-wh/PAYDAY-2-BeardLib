@@ -68,14 +68,27 @@ function NavigationManager:update(t, dt)
 			local data = self._draw_data
 			if data then
 				local progress = math.clamp((t - data.start_t) / (data.duration * 0.5), 0, 1)
-				self:_draw_rooms(progress)
-				self:_draw_doors(progress)	
-				self:_draw_nav_blockers()
-				self:_draw_visibility_groups(progress)
-				self:_draw_coarse_graph()
-				self:_draw_anim_nav_links()	
-				self:_draw_covers()
-				self:_draw_pos_reservations(t)
+                if options.quads then
+                    self:_draw_rooms(progress)
+                end
+                if options.doors then
+                    self:_draw_doors(progress)
+                end
+                if options.blockers then
+                    self:_draw_nav_blockers()
+                end
+                if options.vis_graph then
+                    self:_draw_visibility_groups(progress)
+                end
+                if options.coarse_graph then
+                    self:_draw_coarse_graph()
+                end
+                if options.nav_links then
+                    self:_draw_anim_nav_links()
+                end
+                if options.covers then
+                    self:_draw_covers()
+                end
 				if progress == 1 then
 					self._draw_data.start_t = t
 				end

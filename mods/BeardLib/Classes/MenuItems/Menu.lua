@@ -61,18 +61,20 @@ function Menu:init( menu, params )
     end 
 end
 
-function Menu:mouse_pressed( o, button, x, y )
+function Menu:mouse_pressed( button, x, y )
 	local menu = self.menu        
 	if menu._current_menu == self then
 		if menu._highlighted then
-			if menu._highlighted:mouse_pressed( o, button, x, y ) then
+			if menu._highlighted:mouse_pressed( button, x, y ) then
                 return true
             end
 		end
         if button == Idstring("mouse wheel down") then
             self:scroll_down()
+            self:mouse_moved( x, y )
         elseif button == Idstring("mouse wheel up") then
-            self:scroll_up()
+            self:scroll_up()    
+            self:mouse_moved( x, y )     
         end	
         if button == Idstring("0") then
 			if self.menu._scroll_panel:child("scroll_bar"):child("rect"):inside(x, y) then
@@ -98,10 +100,14 @@ function Menu:mouse_pressed( o, button, x, y )
 	end		
 
 end
-function Menu:mouse_moved( o, x, y )
+function Menu:mouse_moved( x, y )
+    if self.menu._openlist then
+        self.menu._openlist:mouse_moved( x, y )
+        return 
+    end
 	if self.menu._current_menu == self then
 		for _, item in ipairs(self._items) do
-			item:mouse_moved( o, x, y )
+			item:mouse_moved( x, y )
 		end     
 	    if self.menu._grabbed_scroll_bar then
 			local where = (y - self.menu._scroll_panel:world_top()) / (self.menu._scroll_panel:world_bottom() - self.menu._scroll_panel:world_top())
@@ -116,6 +122,15 @@ function Menu:mouse_moved( o, x, y )
     end 	
 end
 
+function Menu:mouse_released( button, x, y )
+    if self.menu._current_menu == self then
+        if self.menu._highlighted then
+            if self.menu._highlighted:mouse_released( button, x, y ) then
+                return true
+            end
+        end
+    end  
+end
 function Menu:key_press( o, k )	
 	if self.menu._current_menu == self and self.menu._highlighted then
 		self.menu._highlighted:key_press( o, k )
@@ -201,6 +216,8 @@ end
 function Menu:scroll(y)
 	if self.items_panel:h() > self.menu._scroll_panel:h() then
 		self.items_panel:set_y(math.clamp(-y, -self.items_panel:h() ,0))
+        self.items_panel:set_bottom(math.max(self.items_panel:bottom(), self.menu._scroll_panel:h())) 
+        self.items_panel:set_top(math.min(0, self.items_panel:top()))
 		self:AlignScrollBar()
 		return true
 	end

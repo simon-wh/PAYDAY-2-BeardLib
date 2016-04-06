@@ -40,10 +40,11 @@ function MapEditor:init()
         "ElementAreaTrigger",
         "ElementAssetTrigger",
         "ElementAwardAchievment",
-        "ElementBAInState",
+        "ElementBainState",
         "ElementBlackScreenVariant",
         "ElementBlurZone",
         "ElementCarry",
+        "ElementSequenceTrigger",
         "ElementCharacterOutline",
         "ElementCharacterSequence",
         "ElementCharacterTeam",
@@ -177,7 +178,7 @@ function MapEditor:create_menu()
         h = 16,
         align = "center",      
         color = Color.black,
-        font = "fonts/font_large_mf",
+        font = "fonts/font_medium_mf",
         font_size = 16
     })    
     self._menu._fullscreen_ws_pnl:rect({
@@ -812,6 +813,8 @@ function MapEditor:create_game_items(menu)
         name = "camera_speed",
         text = "Camera speed",
         help = "",
+        max = 10,
+        min = 0,
         step = 0.1,
         value = 2,
     })   
@@ -833,7 +836,33 @@ function MapEditor:create_game_items(menu)
         text = "Show elements",
         help = "",
         value = false,
-    })   
+    })       
+    menu:Toggle({
+        name = "draw_nav_segments",
+        text = "Draw nav segments",
+        help = "",
+        callback = callback(self, self, "draw_nav_segments"),
+        value = false,
+    })
+    menu:Table({
+        name = "draw_nav_segments_options",
+        text = "Draw:",
+        add = false,
+        remove = false,
+        help = "",
+        items = { 
+            quads = true,
+            doors = true,
+            blockers = true,
+            vis_graph = true,
+            coarse_graph = true,
+            nav_links = true,
+            covers = true,
+        },
+        callback = callback(self, self, "draw_nav_segments"),
+        value = false,
+    })
+
     menu:Toggle({
         name = "pause_game",
         text = "Pause game",
@@ -865,11 +894,13 @@ function MapEditor:load_all_mission_elements(menu, item)
         for _, tbl in pairs(script) do
             if tbl.elements then
                 for i, element in pairs(tbl.elements) do            
-                    if #menu._items < 120 and (not searchbox.value or searchbox.value == "" or string.match(element.editor_name, searchbox.value) or string.match(element.id, searchbox.value)) then
+                    if #menu._items < 120 and (not searchbox.value or searchbox.value == "" or string.match(element.editor_name, searchbox.value) or string.match(element.id, searchbox.value)) or string.match(element.class, searchbox.value) then
+                        local _element = managers.mission:get_mission_element(element.id)
                         menu:Button({
                             name = element.editor_name, 
-                            text = element.editor_name .. " [" .. (element.id or "") .."]",
+                            text = element.editor_name .. " [" .. element.id .."]",
                             label = "select_buttons",
+                            color = _element and (_element.values.enabled and Color.green or Color.red) or nil,
                             callback = callback(self, self, "_select_element", element)
                         })            
                     end
@@ -995,7 +1026,9 @@ function MapEditor:set_editor_units_visible(menu, item)
 		end
 	end
 end
-
+function MapEditor:draw_nav_segments( menu, item )
+    managers.navigation:set_debug_draw_state(menu:GetItem("draw_nav_segments").value and menu:GetItem("draw_nav_segments_options").items or false )
+end
 function MapEditor:SpawnUnit( unit_path, unit_data )
     local unit
     local cam = managers.viewport:get_current_camera()

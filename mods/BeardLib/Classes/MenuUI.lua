@@ -109,7 +109,7 @@ function MenuUI:enable()
 	managers.mouse_pointer:use_mouse({
 		mouse_move = callback(self, self, "mouse_moved"),
 		mouse_press = callback(self, self, "mouse_pressed"),
-		mouse_release = callback(self, self, "mouse_release"),
+		mouse_release = callback(self, self, "mouse_released"),
 		id = self._mouse_id
 	}) 	
     self._fullscreen_ws_pnl:key_press(callback(self, self, "key_press"))    
@@ -159,17 +159,22 @@ function MenuUI:set_help(help)
 	local _,_,w,h = self._help_text:text_rect()
 	self._help_panel:set_size(w + 10,h)
 end
-function MenuUI:mouse_release( o, button, x, y )
+function MenuUI:mouse_released( o, button, x, y )
 	self._slider_hold = nil
 	self._grabbed_scroll_bar = nil
+    for _, menu in ipairs(self._menus) do
+        if menu:mouse_released( button, x, y ) then
+            return
+        end
+    end     
     if self.mouserelease then
-        self.mouserelease(o, k)
+        self.mousereleased(o, k)
     end    
 end
 
 function MenuUI:mouse_pressed( o, button, x, y )
 	for _, menu in ipairs(self._menus) do
-		if menu:mouse_pressed( o, button, x, y ) then
+		if menu:mouse_pressed( button, x, y ) then
 		    return
 		end
 	end	
@@ -179,7 +184,7 @@ function MenuUI:mouse_pressed( o, button, x, y )
 end
 function MenuUI:mouse_moved( o, x, y )
 	for _, menu in ipairs( self._menus ) do
-		menu:mouse_moved( o, x, y )
+		menu:mouse_moved( x, y )
 	end
 	self._old_x = x	
 	self._old_y = y	

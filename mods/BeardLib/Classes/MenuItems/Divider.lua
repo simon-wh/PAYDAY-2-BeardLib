@@ -45,10 +45,13 @@ end
 function Divider:key_press( o, k )
 
 end
-function Divider:mouse_pressed( o, button, x, y )
+function Divider:mouse_pressed( button, x, y )
 
 end
 
-function Divider:mouse_moved( o, x, y )
+function Divider:mouse_moved( x, y )
+
+end
+function Divider:mouse_released( button, x, y )
 
 end
