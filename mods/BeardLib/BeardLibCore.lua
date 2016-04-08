@@ -72,6 +72,7 @@ if not _G.BeardLib then
         "achievment",
         "controller_settings",
         "network_settings",
+        "physics_settings",
     }
     
     self.file_types = {

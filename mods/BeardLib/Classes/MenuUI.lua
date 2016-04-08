@@ -126,7 +126,7 @@ function MenuUI:disable()
 		end	
 	end
 	if self._openlist then
-	 	self._panel:child(self._openlist.name .. "list"):set_visible(false)
+	 	self._openlist.list:hide()
 	 	self._openlist = nil
 	end		
 	self._fullscreen_ws_pnl:key_press(nil)    

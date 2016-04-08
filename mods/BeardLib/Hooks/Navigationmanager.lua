@@ -59,7 +59,10 @@ function NavigationManager:init()
 		self._pos_reservations = {}
 	end
 end
-
+function NavigationManager:_safe_remove_unit(unit)
+end
+function NavigationManager:remove_AI_blocker_units()
+end
 function NavigationManager:update(t, dt)
 	if self._debug then
 		self._builder:update(t, dt)

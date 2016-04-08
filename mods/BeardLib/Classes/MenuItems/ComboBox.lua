@@ -42,11 +42,12 @@ function ComboBox:init( menu, params )
     })
     combo_bg:set_right(params.panel:w() - 4)
     combo_selected:set_center(combo_bg:center())
+    local h = math.max(1, #params.items) * 18
     self.list = self.menu._fullscreen_ws_pnl:panel({
         name = params.name.."list",
         y = 0,
         w = params.panel:w() / 1.4,
-        h = self.menu._fullscreen_ws_pnl:h() - 120,
+        h = math.min(self.menu._fullscreen_ws_pnl:h() - self.panel:top(), h),
         layer = 1100,
         visible = false,
         halign = "left",
@@ -62,7 +63,7 @@ function ComboBox:init( menu, params )
         name = "items_panel",
         w = self.list:w() - 12, 
         x = 12,
-        h = math.max(1, #params.items) * 18,
+        h = h,
     })         
     self._scroll_panel = self.list:panel({
         name = "scroll_panel",
@@ -83,7 +84,20 @@ function ComboBox:init( menu, params )
         h = bar_h,
     })    
     list_icon:set_left(combo_bg:right() - 12)
-    for k, text in pairs(params.items) do
+    self:CreateItems()
+end
+function ComboBox:SetItems( items )
+    self.items = items
+    self:CreateItems()
+end
+function ComboBox:CreateItems()
+    self.items_panel:clear()
+    local h = math.max(1, #self.items) * 18
+    self.list:set_h(math.min(self.menu._fullscreen_ws_pnl:h() - self.panel:top(), h))
+    self._scroll_panel:set_h(self.list:h())
+    self.items_panel:set_h(h)
+
+    for k, text in pairs(self.items) do
         local combo_item = self.items_panel:text({
             name = "item"..k,
             text = text,
@@ -91,7 +105,7 @@ function ComboBox:init( menu, params )
             h = 18,
             y = 18 * (k - 1),
             layer = 6,
-            color = params.text_color or Color.black,
+            color = self.text_color or Color.black,
             font = "fonts/font_medium_mf",
             font_size = 16
         })
@@ -102,10 +116,9 @@ function ComboBox:init( menu, params )
             y = 18 * (k - 1),
             layer = 5,
         })
-    end
-    self:AlignScrollBar()
+    end   
+    self:AlignScrollBar() 
 end
-
 function ComboBox:SetValue(value)
     self.super.SetValue(self, value)
     if alive(self.panel) then
@@ -212,7 +225,7 @@ function ComboBox:key_press( o, k )
             self.list:show()
             self.menu._openlist = self
         end
-    else
+    elseif k == Idstring("esc") then
         self.menu._openlist.list:hide()
         self.menu._openlist = nil
     end

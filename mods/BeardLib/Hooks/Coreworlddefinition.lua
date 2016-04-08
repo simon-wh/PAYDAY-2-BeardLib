@@ -58,16 +58,10 @@ function WorldDefinition:set_unit(unit_id, config)
 end
 function WorldDefinition:get_unit_number(name)
 	local i = 1
-	for continent_name, continent in pairs(self._continent_definitions) do
-		for _,static in pairs(continent.statics) do
-			if type(static) == "table" then
-				for _,unit_data in pairs(static) do
-					if unit_data.name == name then 
-						i = i + 1
-					end
-				end
-			end
-		end
+	for _, unit in pairs(World:find_units_quick("all")) do
+		if unit:unit_data() and unit:unit_data().name == name then
+			i = i + 1
+		end 
 	end
 	return i
 end
@@ -99,25 +93,34 @@ end
 function WorldDefinition:add_unit(unit)
 	table.insert(self._continent_definitions["world"].statics, { unit_data = unit:unit_data()})
 end
+
+function WorldDefinition:_set_only_visible_in_editor(unit, data)
+	if unit:unit_data().only_visible_in_editor or unit:unit_data().only_exists_in_editor then
+		unit:set_visible(false)
+	end
+end
+function WorldDefinition:_setup_disable_on_ai_graph(unit, data)
+	if not data.disable_on_ai_graph then
+		return
+	end
+	unit:unit_data().disable_on_ai_graph = data.disable_on_ai_graph
+end
 function WorldDefinition:assign_unit_data(unit, data)
 	if not unit:unit_data() then
 		Application:error("The unit " .. unit:name():s() .. " (" .. unit:author() .. ") does not have the required extension unit_data (ScriptUnitData)")
 	end
-	--[[if unit:unit_data().only_exists_in_editor then
-		self._ignore_spawn_list[unit:name():key()] = true
-		unit:set_slot(0)
-		return
-	end]]
-	unit:unit_data().instance = data.instance
 	unit:unit_data().name_id = data.name_id
-	unit:unit_data().unit_id = data.unit_id
 	unit:unit_data().name = data.name
-
+	unit:unit_data().instance = data.instance
 	self:_setup_unit_id(unit, data)
 	self:_setup_editor_unit_data(unit, data)
 	if unit:unit_data().helper_type and unit:unit_data().helper_type ~= "none" then
 		managers.helper_unit:add_unit(unit, unit:unit_data().helper_type)
 	end
+	if data.continent and is_editor then
+		managers.editor:add_unit_to_continent(data.continent, unit)
+	end	
+
 	self:_setup_lights(unit, data)
 	self:_setup_variations(unit, data)
 	self:_setup_editable_gui(unit, data)
@@ -131,20 +134,12 @@ function WorldDefinition:assign_unit_data(unit, data)
 	self:_setup_projection_light(unit, data)
 	self:_setup_ladder(unit, data)
 	self:_setup_zipline(unit, data)
-	self:_project_assign_unit_data(unit, data)
-end
-function WorldDefinition:_set_only_visible_in_editor(unit, data)
-	if unit:unit_data().only_visible_in_editor or unit:unit_data().only_exists_in_editor then
-		unit:set_visible(false)
-	end
+	self:_project_assign_unit_data(unit, data)	
+ 
 end
 local is_editor = Application:editor()
 function WorldDefinition:make_unit(data, offset)
-
 	local name = data.name
-	if self._ignore_spawn_list[Idstring(name):key()] then		
-		return nil
-	end
 	if table.has(self._replace_names, name) then
 		name = self._replace_names[name]
 	end
@@ -165,14 +160,14 @@ function WorldDefinition:make_unit(data, offset)
 	end
 	if unit then
 		self:assign_unit_data(unit, data)
-	elseif is_editor then
+	else 
 		local s = "Failed creating unit " .. tostring(name)
-		Application:throw_exception(s)
+		log(tostring(s))
 	end
 	if self._termination_counter == 0 then
 		Application:check_termination()
 	end
 	self._termination_counter = (self._termination_counter + 1) % 100	
- 
+
 	return unit
 end

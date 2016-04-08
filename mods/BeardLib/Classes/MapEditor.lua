@@ -14,6 +14,7 @@ function MapEditor:init()
 	self._camera_pos = self._camera_object:position()
 	self._camera_rot = self._camera_object:rotation()	
 	self._closed = true
+    self._editor_all = World:make_slot_mask(1, 2, 3, 10, 11, 12, 15, 19, 29, 33, 34, 35, 36, 37, 38, 39)
 	self._con =  managers.controller:create_controller("MapEditor", nil, true, 10)
 	self._modded_units = {}
     self._selected_units = {}
@@ -51,6 +52,7 @@ function MapEditor:init()
         "ElementCinematicCamera",
         "ElementConsoleCommand",
         "ElementDangerZone",
+        "ElementUnitSequenceTrigger",
         "ElementDialogue",
         "ElementDifficulty",
         "ElementDifficultyLevelCheck",
@@ -363,10 +365,11 @@ function MapEditor:create_unit_items(menu)
         help = "",
         callback = callback(self, self, "set_unit_data"),         
     })             
-    menu:TextBox({
+    menu:ComboBox({
         name = "unit_mesh_variation",
         text = "Mesh variation: ",
-        value = "",
+        value = 1,
+        items = {},
         help = "",
         callback = callback(self, self, "set_unit_data"),         
     })         
@@ -433,17 +436,17 @@ function MapEditor:create_unit_items(menu)
 end
 function MapEditor:create_save_options_items(menu)
     local level =  "/" .. (Global.game_settings.level_id or "")
+    menu:TextBox({
+        name = "savepath",
+        text = "Save path: ",
+        value = BeardLib.MapsPath .. level,
+        help = "",
+    })         
     menu:Divider({
         name = "continents_div",        
         size = 30,
         text = "Continents",
     })   
-    menu:TextBox({
-        name = "continents_savepath",
-        text = "Save path: ",
-        value = BeardLib.MapsPath .. level,
-        help = "",
-    })       
     menu:ComboBox({
         name = "continents_filetype",
         text = "Type: ",
@@ -462,12 +465,6 @@ function MapEditor:create_save_options_items(menu)
         size = 30,
         text = "Missions",
     })
-    menu:TextBox({
-        name = "missions_savepath",
-        text = "Save path: ",
-        value = BeardLib.MapsPath .. level,
-        help = "",
-    })       
     menu:ComboBox({
         name = "missions_filetype",
         text = "Type: ",
@@ -484,14 +481,8 @@ function MapEditor:create_save_options_items(menu)
     menu:Divider({
         name = "nav_data_div",
         size = 30,
-        text = "Nav data",
-    })    
-    menu:TextBox({
-        name = "nav_data_savepath",
-        text = "Save path: ",
-        value = BeardLib.MapsPath .. level,
-        help = "",
-    })         
+        text = "Navigation",
+    })      
     menu:Button({
         name = "build_nav",
         text = "Build navdata",
@@ -499,10 +490,16 @@ function MapEditor:create_save_options_items(menu)
         callback = callback(self, self, "_build_nav_segments"),
     })        
     menu:Button({
-        name = "save_nav",
-        text = "Save navdata",
+        name = "save_nav_data",
+        text = "Save nav data",
         help = "",
         callback = callback(self, self, "save_nav_data"),
+    })         
+    menu:Button({
+        name = "save_cover_data",
+        text = "Save cover data",
+        help = "",
+        callback = callback(self, self, "save_cover_data"),
     })      
 end
  
@@ -512,7 +509,9 @@ function MapEditor:set_unit(unit)
     self._menu:GetItem("unit_name"):SetValue(alive(unit) and unit:unit_data().name_id or "")
     self._menu:GetItem("unit_path"):SetValue(alive(unit) and unit:unit_data().name or "")
     self._menu:GetItem("unit_id"):SetValue(alive(unit) and unit:unit_data().unit_id or "") 
-    self._menu:GetItem("unit_mesh_variation"):SetValue(alive(unit) and unit:unit_data().mesh_variation or "") 
+    local mesh_variations = managers.sequence:get_editable_state_sequence_list(alive(unit) and unit:name() or "") or {}
+    self._menu:GetItem("unit_mesh_variation"):SetItems(mesh_variations)
+    self._menu:GetItem("unit_mesh_variation"):SetValue(alive(unit) and unit:unit_data().mesh_variation and table.get_key(mesh_variations, unit:unit_data().mesh_variation) or nil) 
     self._menu:GetItem("positionx"):SetValue(alive(unit) and unit:position().x or 0)
     self._menu:GetItem("positiony"):SetValue(alive(unit) and unit:position().y or 0)
     self._menu:GetItem("positionz"):SetValue(alive(unit) and unit:position().z or 0)   
@@ -638,7 +637,12 @@ function MapEditor:set_unit_data(menu, item)
             self._selected_unit:unit_data().name_id = self._menu:GetItem("unit_name").value
             self._selected_unit:unit_data().position = self._selected_unit:position()
             self._selected_unit:unit_data().rotation = self._selected_unit:rotation()
-            self._selected_unit:unit_data().mesh_variation = self._menu:GetItem("unit_mesh_variation").value ~= "" and self._menu:GetItem("unit_mesh_variation").value or nil
+            local mesh_variations = managers.sequence:get_editable_state_sequence_list(self._selected_unit:name()) or {}
+            self._selected_unit:unit_data().mesh_variation = mesh_variations[self._menu:GetItem("unit_mesh_variation").value]
+            local mesh_variation = self._selected_unit:unit_data().mesh_variation
+            if mesh_variation and mesh_variation ~= "" then
+                managers.sequence:run_sequence_simple2(mesh_variation, "change_state", self._selected_unit)
+            end
             self._selected_unit:unit_data().name = self._menu:GetItem("unit_path").value -- Later will add button to unit browser.
             managers.worlddefinition:set_unit(self._selected_unit:unit_data().unit_id, self._selected_unit:unit_data())
         end
@@ -1072,7 +1076,7 @@ end
 function MapEditor:save_continents(menu)
 	local item = menu:GetItem("continents_filetype")
 	local type = item.items[item.value]
-	local path = menu:GetItem("continents_savepath").value
+	local path = menu:GetItem("savepath").value
 	local world_def = managers.worlddefinition
 	if not file.DirectoryExists( path ) then
         os.execute("mkdir " .. path:gsub("/" , "\\"))
@@ -1090,7 +1094,7 @@ end
 function MapEditor:save_missions(menu)
 	local item = menu:GetItem("missions_filetype")
 	local type = item.items[item.value]
-	local path = menu:GetItem("missions_savepath").value
+	local path = menu:GetItem("savepath").value
     if not file.DirectoryExists( path ) then
         os.execute("mkdir " .. path:gsub("/" , "\\"))
     end    
@@ -1106,7 +1110,7 @@ function MapEditor:save_missions(menu)
 end
 
 function MapEditor:save_nav_data(menu)
-    local path = menu:GetItem("missions_savepath").value
+    local path = menu:GetItem("savepath").value
     if not file.DirectoryExists( path ) then
         os.execute("mkdir " .. path:gsub("/" , "\\"))
     end    
@@ -1118,6 +1122,34 @@ function MapEditor:save_nav_data(menu)
         else
             BeardLib:log("Save data is not ready!")
         end
+    else
+        BeardLib:log("Directory doesn't exists(Failed to create directory?)")
+    end 
+end
+
+function MapEditor:save_cover_data(menu)
+    local path = menu:GetItem("savepath").value
+    if not file.DirectoryExists( path ) then
+        os.execute("mkdir " .. path:gsub("/" , "\\"))
+    end    
+    if file.DirectoryExists( path ) then
+        local all_cover_units = World:find_units_quick("all", managers.slot:get_mask("cover"))
+        local covers = {
+            positions = {},
+            rotations = {}
+        }
+        for i, unit in pairs(all_cover_units) do
+            local pos = Vector3()
+            unit:m_position(pos)
+            mvector3.set_static(pos, math.round(pos.x), math.round(pos.y), math.round(pos.z))
+            table.insert(covers.positions, pos)
+            local rot = unit:rotation()
+            table.insert(covers.rotations, math.round(rot:yaw()))
+        end
+        local file = io.open(path .. "/cover_data.cover_data", "w+")
+        local new_data = _G.BeardLib.managers.ScriptDataConveter:GetTypeDataTo(covers, "custom_xml")    
+        file:write(new_data)
+        file:close() 
     else
         BeardLib:log("Directory doesn't exists(Failed to create directory?)")
     end 
@@ -1140,7 +1172,7 @@ function MapEditor:load_missions(missions)
 	        name = "mission_" .. mission_name,
 	        text = "Save mission: " .. mission_name,
 	        help = "",
-            index = 9,
+            index = 8,
 	        value = true,
 	    })    
     end
@@ -1165,7 +1197,7 @@ function MapEditor:select_unit(select_more)
 	local cam = self._camera_object
 	local ray
 	if self._menu:GetItem("units_visibility").value then
-        ray = World:raycast("ray", cam:position(), cam:position() + cam:rotation():y() * 1000, "ray_type", "body editor", "slot_mask",managers.slot:get_mask("all"))
+        ray = World:raycast("ray", cam:position(), cam:position() + cam:rotation():y() * 1000, "ray_type", "body editor walk", "slot_mask", self._editor_all)
     else
         ray = World:raycast("ray", cam:position(), cam:position() + cam:rotation():y() * 1000)
     end
@@ -1286,6 +1318,13 @@ function MapEditor:update(t, dt)
 		end
 	end	
 	if self:enabled() then
+        if self._selected_unit and Input:keyboard():down(Idstring("left ctrl")) then
+            if Input:keyboard():down(Idstring("f")) then
+                self:set_camera(self._selected_unit:position())
+            elseif Input:keyboard():down(Idstring("g")) then
+                self:set_camera(self._selected_element.values.position)
+            end 
+        end
 		self:update_camera(main_t, main_dt)
 	end
 end
