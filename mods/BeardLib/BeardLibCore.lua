@@ -10,44 +10,12 @@ if not _G.BeardLib then
     self.MapsPath = "BeardLibMaps"
     self.CurrentViewportNo = 0
     self.ScriptExceptions = self.ScriptExceptions or {}
-    self.EditorEnabled = true
     self.HooksDirectory = "Hooks/"
     self.ModulesDirectory = "Modules/"
     self.ClassDirectory = "Classes/"
     self.ScriptData = {}
     self.managers = {}
     self._replace_script_data = {}
-    
-    self.DBPaths = {}
-    self.DBEntries = {}
-     
-   
-    --Make this true if io.popen doesn't tab you out of the game, false if it does
-    --[[if false then
-        local handle = io.popen("wmic logicaldisk get name")
-        local path = handle:read("*l")
-        while (path ~= nil) do
-            path = handle:read("*l")
-            if path ~= nil then
-                local clean_path = (string.gsub(path,  " ", "") .. "/")
-                if string.find(clean_path, ":") then
-                    table.insert(self.script_data_paths, {path = clean_path, name = clean_path})
-                end
-            end
-        end
-        handle:close()
-        
-        for i, path_data in pairs(self.script_data_paths) do
-            local handle = io.popen("echo " .. path_data.path)
-            path_data.path = string.gsub(handle:read("*l"),  "\\", "/")
-            if not string.ends(path_data.path, "/") then
-                path_data.path = path_data.path .. "/"
-            end
-            handle:close()
-        end
-    else]]--
-    
-    --end    
     
     self.script_data_types = {
         "sequence_manager",
@@ -158,10 +126,7 @@ if not _G.BeardLib then
         "ScriptData/ScriptData.lua",
         "ScriptData/EnvironmentData.lua",
         "ScriptData/ContinentData.lua",
-        "ScriptData/SequenceData.lua",
-        "EnvironmentEditorManager.lua",
-        "EnvironmentEditorHandler.lua",      
-        "ScriptDataConverterManager.lua",      
+        "ScriptData/SequenceData.lua",   
         "MenuUI.lua",        
         "MenuDialog.lua",                
         "MenuItems/Menu.lua",   
@@ -172,12 +137,11 @@ if not _G.BeardLib then
         "MenuItems/TextBox.lua", 
         "MenuItems/Divider.lua", 
         "MenuItems/Table.lua",         
-        "MapEditor.lua",
         "MenuHelperPlus.lua",
         "UnitPropertiesItem.lua",
         "json_utils.lua",
         "utils.lua",
-        "ModulesCore.lua",
+        "ModCore.lua",
         "ModuleBase.lua"
     }
 
@@ -188,14 +152,7 @@ if not _G.BeardLib then
         ["lib/managers/systemmenumanager"] = "SystemMenuManager.lua",
         ["lib/managers/dialogs/keyboardinputdialog"] = "KeyboardInputDialog.lua",
         ["core/lib/managers/viewport/corescriptviewport"] = "CoreScriptViewport.lua",
-        ["core/lib/utils/dev/freeflight/corefreeflightmodifier"] = "CoreFreeFlightModifier.lua",
-        ["core/lib/utils/dev/freeflight/corefreeflight"] = "CoreFreeFlight.lua",
-        ["core/lib/managers/mission/coremissionmanager"] = "Coremissionmanager.lua",
-        ["core/lib/utils/dev/editor/coreworlddefinition"] = "Coreworlddefinition.lua",
-        ["lib/setups/gamesetup"] = "Gamesetup.lua",
-        ["core/lib/system/coresystem"] = "CoreSystem.lua",
-        ["lib/managers/navigationmanager"] = "navigationmanager.lua",      
-        ["lib/managers/navfieldbuilder"] = "navfieldbuilder.lua",             
+        ["core/lib/system/coresystem"] = "CoreSystem.lua"           
         --["core/lib/managers/viewport/environment/coreenvironmentmanager"] = "CoreEnvironmentManager.lua"
     }
 end
@@ -209,13 +166,9 @@ function BeardLib:init()
     self.ScriptData.Sequence = SequenceData:new("BeardLibBaseSequenceDataProcessor")
     self.ScriptData.Environment = EnvironmentData:new("BeardLibBaseEnvironmentDataProcessor")
     self.ScriptData.Continent = ContinentData:new("BeardLibBaseContinentDataProcessor")
-    self.managers.EnvironmentEditor = EnvironmentEditorManager:new()
-    self.managers.ScriptDataConveter = ScriptDataConveterManager:new()
     
     --Load ScriptData mod_overrides
     self:LoadModOverridePlus()
-    
-    self:LoadHashlist()
 end
 
 function BeardLib:LoadModOverridePlus()
@@ -225,63 +178,6 @@ function BeardLib:LoadModOverridePlus()
             self:LoadModOverrideFolder("assets/mod_overrides/" .. path .. "/", "")
         end
     end
-end
-
-function BeardLib:LoadHashlist()
-    local file = DB:open("idstring_lookup", "idstring_lookup")
-    
-    BeardLib:log("Loading Hashlist")
-    
-    local function AddPathEntry(line, typ)
-        local path_split = string.split(line, "/")
-        local curr_tbl = self.DBEntries
-        
-        local filename = table.remove(path_split, #path_split)
-        
-        for _, part in pairs(path_split) do
-            curr_tbl[part] = curr_tbl[part] or {}
-            curr_tbl = curr_tbl[part]
-        end
-        table.insert(curr_tbl, {
-            path = line,
-            name = filename,
-            file_type = typ
-        })
-    end
-    local types = clone(self.script_data_types)
-    table.insert(types, "unit")
-    if file ~= nil then
-        --Iterate through each string which contains _ or /, which should include all the filepaths in the idstring_lookup
-        for line in string.gmatch(file:read(), "[%w_/]+%z") do
-            --Remove the Zero byte at the end of the path
-            line = string.sub(line, 1, #line - 1)
-            
-            --[[if DB:has("unit", line) then
-                self.DBPaths["unit"] = self.DBPaths["unit"] or {}
-                table.insert(self.DBPaths["unit"], line)
-                AddPathEntry(line, "unit")
-            else]]--
-                for _, typ in pairs(types) do
-                    self.DBPaths[typ] = self.DBPaths[typ] or {}
-                    if DB:has(typ, line) then
-                        table.insert(self.DBPaths[typ], line)
-                        AddPathEntry(line, typ)
-                        --I wish I could break so we don't have to iterate more than needed, but some files exist with the same name but a different type
-                        --break
-                    end
-                end
-            --end
-        end
-        file:close()
-    end
-    
-    for typ, filetbl in pairs(self.DBPaths) do
-        BeardLib:log(typ .. " Count: " .. #filetbl)
-    end
-    
-    --SaveTable(self.DBEntries, "DBEntries_index.txt")
-    
-    BeardLib:log("Hashlist Loaded")
 end
 
 function BeardLib:LoadModOverrideFolder(directory, currentFilePath)
@@ -366,7 +262,7 @@ function BeardLib:ProcessScriptData(PackManager, filepath, extension, data)
     end
     
     if self._replace_script_data[filepath:key()] and self._replace_script_data[filepath:key()][extension:key()] then
-        BeardLib:log("Replace: " .. tostring(filepath:key()))
+        self:log("Replace: " .. tostring(filepath:key()))
         
         local replacementPathData = self._replace_script_data[filepath:key()][extension:key()]
         local fileType = replacementPathData.load_type
@@ -484,29 +380,15 @@ if Hooks then
     
     Hooks:Add("LocalizationManagerPostInit", "BeardLibLocalization", function(loc)
         LocalizationManager:add_localized_strings({
-            ["BeardLibEnvMenu"] = "Environment Mod Menu",
-            ["BeardLibEnvMenuHelp"] = "Modify the params of the current Environment",
-            ["BeardLibSaveEnvTable_title"] = "Save Current modifications",
-            ["BeardLibResetEnv_title"] = "Reset Values",
-            ["BeardLibScriptDataMenu_title"] = "ScriptData Converter",
             ["BeardLibMainMenu"] = "BeardLib Main Menu"
         })
     end)
 
     Hooks:Add("MenuManagerSetupCustomMenus", "Base_SetupBeardLibMenu", function( menu_manager, nodes )
-        --I'm going to leave this here, but I really don't like it being here
-        --Because of GUI manager 3:
-        BeardLib.managers.MapEditor = MapEditor:new()
-        BeardLib.managers.Dialog = MenuDialog:new()
-    
         local main_node = MenuHelperPlus:NewNode(nil, {
             name = BeardLib.MainMenu,
             menu_components =  managers.menu._is_start_menu and "player_profile menuscene_info news game_installing" or nil
         })
-        
-        BeardLib.managers.EnvironmentEditor:BuildNode(main_node)
-        
-        BeardLib.managers.ScriptDataConveter:BuildNode(main_node)
         
         managers.menu:add_back_button(main_node)
         
@@ -518,10 +400,6 @@ if Hooks then
             next_node = BeardLib.MainMenu,
         })
     end)
-    
-    --[[Hooks:Add("MenuManagerPopulateCustomMenus", "PopulateBeardLibMenus", function(menu_manager, nodes)
-        
-    end)]]--
     
     Hooks:Register("BeardLibCreateCustomMenus")
     Hooks:Register("BeardLibCreateCustomNodesAndButtons")

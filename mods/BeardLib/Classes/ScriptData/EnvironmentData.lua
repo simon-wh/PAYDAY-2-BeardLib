@@ -81,7 +81,9 @@ function EnvironmentData:ProcessScriptData(data, path, extension, name)
             end
             
             local next_data_path_key = next_data_path:key()
-            BeardLib.managers.EnvironmentEditor:AddHandlerValue(path:key(), next_data_path_key, sub_data.value, next_data_path)
+            if BeardLibEditor and BeardLibEditor.managers.EnvironmentEditor then
+                BeardLibEditor.managers.EnvironmentEditor:AddHandlerValue(path:key(), next_data_path_key, sub_data.value, next_data_path)
+            end
         else
             local next_data_path = name and name .. "/" .. sub_data._meta or sub_data._meta
             

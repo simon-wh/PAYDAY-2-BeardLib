@@ -1,6 +1,6 @@
-BeardLib.ModCore = BeardLib.ModCore or class()
+ModCore = ModCore or class()
 
-function BeardLib.ModCore:init(config_path)
+function ModCore:init(config_path)
     if not io.file_is_readable(config_path) then
         BeardLib:log("[ERROR] Config file is not readable!")
     end
@@ -8,10 +8,10 @@ function BeardLib.ModCore:init(config_path)
     self.ModPath = ModPath
     self.SavePath = SavePath
     
-    self:LoadConfigFile(path)
+    self:LoadConfigFile(config_path)
 end
 
-function BeardLib.ModCore:LoadConfigFile(path)
+function ModCore:LoadConfigFile(path)
     local file = io.open(path, "r")
     local config = ScriptSerializer:from_custom_xml(file:read("*all"))
     
@@ -19,9 +19,7 @@ function BeardLib.ModCore:LoadConfigFile(path)
     self.GlobalKey = config.global_key
     
     if config.modules then
-        for i = 1, table.maxn(config.modules) do
-            local module_tbl = config.modules[i]
-            
+        for i, module_tbl in ipairs(config.modules) do
             local node_class = CoreSerialize.string_to_classtable(module_tbl._meta)
             
             if node_class then
@@ -31,10 +29,14 @@ function BeardLib.ModCore:LoadConfigFile(path)
     end
 end
 
-function BeardLib.ModCore:GetRealFilePath(path)
+function ModCore:GetRealFilePath(path)
     if string.find(path, "%$") then
         return string.gsub(path, "%$(%w+)%$", self)
     else
         return path
     end
+end
+
+function ModCore:log(str)
+    log("[" .. self.Name .. "] " .. str)
 end
