@@ -17,6 +17,10 @@ function OptionModule:init(core_mod, config)
         return
     end
     
+    if self._config.loaded_callback then
+        self._on_load_callback = self._mod:StringToCallback(self._config.loaded_callback)
+    end
+    
     self:LoadDefaultValues()
     
     if self._config.build_menu then
@@ -58,6 +62,10 @@ function OptionModule:Load()
     
     --Merge the loaded options with the existing options
     table.merge(self._mod[self._option_key], ret)
+    
+    if self._on_load_callback then
+        self._on_load_callback()
+    end
 end
 
 --Only for use by the SetValue function
@@ -139,23 +147,18 @@ function OptionModule:Save()
 	file:close()
 end
 
-function OptionModule:StringToCallback(str)
-    local split = string.split(str, ":")
-    
-    local func_name = table.remove(split)
-    
-    local global_tbl_name = split[1]
-    if (string.find(global_tbl_name, "$")) then
-        global_tbl_name = string.gsub(global_tbl_name, "%$(%w+)%$", { ["global"] = self._mod.GlobalKey })
-    end
-    
-    local global_tbl = BeardLib.Utils:StringToTable(global_tbl_name)
-    
-    if global_tbl then
-        return callback(global_tbl, global_tbl, func_name)
-    else
+function OptionModule:RemoveNonNumberIndexes(tbl)
+    if type(tbl) ~= "table" then
         return nil
     end
+
+    for i, _ in pairs(tbl) do
+        if tonumber(i) == nil then
+            tbl[i] = nil
+        end
+    end
+    
+    return tbl
 end
 
 function OptionModule:CreateSlider(option_tbl, parent_node, option_path)
@@ -174,10 +177,10 @@ function OptionModule:CreateSlider(option_tbl, parent_node, option_path)
         step = option_tbl.step,
         value = self:GetValue(option_path),
         merge_data = {
-            set_value = callback(self, self, "SetValue"),
-            get_value = callback(self, self, "GetValue"),
+            set_opt_value = callback(self, self, "SetValue"),
+            get_opt_value = callback(self, self, "GetValue"),
             option_key = option_path,
-            option_value_changed = option_tbl.value_changed and self:StringToCallback(option_tbl.value_changed) or nil
+            option_value_changed = option_tbl.value_changed and self._mod:StringToCallback(option_tbl.value_changed) or nil
         }
     })
 end
@@ -195,10 +198,39 @@ function OptionModule:CreateToggle(option_tbl, parent_node, option_path)
         callback = "OptionModuleGeneric_ValueChanged",
         value = self:GetValue(option_path),
         merge_data = {
-            set_value = callback(self, self, "SetValue"),
-            get_value = callback(self, self, "GetValue"),
+            set_opt_value = callback(self, self, "SetValue"),
+            get_opt_value = callback(self, self, "GetValue"),
             option_key = option_path,
-            option_value_changed = option_tbl.value_changed and self:StringToCallback(option_tbl.value_changed) or nil
+            option_value_changed = option_tbl.value_changed and self._mod:StringToCallback(option_tbl.value_changed) or nil
+        }
+    })
+end
+
+function OptionModule:CreateMultiChoice(option_tbl, parent_node, option_path)
+    local id = option_tbl.name .. self._option_key .. "Toggle"
+    
+    option_path = option_path == "" and option_tbl.name or option_path .. "/" .. option_tbl.name
+    
+    local options = option_tbl.values_tbl and self._mod:StringToTable(option_tbl.values_tbl) or self:RemoveNonNumberIndexes(option_tbl.values)
+    
+    if not options then
+        BeardLib:log("[ERROR] Unable to get an option table for option " .. option_tbl.name)
+    end
+    
+    MenuHelperPlus:AddMultipleChoice({
+        id = id,
+        title = option_tbl.title_id or id .. "TitleID",
+        node = parent_node,
+        desc = option_tbl.desc_id or id .. "DescID",
+        callback = "OptionModuleGeneric_ValueChanged",
+        value = self:GetValue(option_path),
+        items = options,
+        localized_items = option_tbl.localized_items,
+        merge_data = {
+            set_opt_value = callback(self, self, "SetValue"),
+            get_opt_value = callback(self, self, "GetValue"),
+            option_key = option_path,
+            option_value_changed = option_tbl.value_changed and self._mod:StringToCallback(option_tbl.value_changed) or nil
         }
     })
 end
@@ -208,6 +240,8 @@ function OptionModule:CreateOption(option_tbl, parent_node, option_path)
         self:CreateSlider(option_tbl, parent_node, option_path)
     elseif option_tbl.type == "bool" or option_tbl.type == "boolean" then
         self:CreateToggle(option_tbl, parent_node, option_path)
+    elseif option_tbl.type == "multichoice" then
+        self:CreateMultiChoice(option_tbl, parent_node, option_path)
     else
         BeardLib:log("[ERROR] No supported type for option " .. tostring(option_tbl.name) .. " in mod " .. self._mod.Name)
     end
@@ -267,7 +301,7 @@ end
 --Create MenuCallbackHandler callbacks
 Hooks:Add("BeardLibCreateCustomNodesAndButtons", "BeardLibOptionModuleCreateCallbacks", function(self_menu)
     MenuCallbackHandler.OptionModuleGeneric_ValueChanged = function(this, item)
-        item._paramaters:set_value(item._paramaters.option_key, item:value())
+        item._paramaters:set_opt_value(item._paramaters.option_key, item:value())
         
         if item._paramaters.option_value_changed then
             item._paramaters:option_value_changed(item._paramaters.option_key, item:value())

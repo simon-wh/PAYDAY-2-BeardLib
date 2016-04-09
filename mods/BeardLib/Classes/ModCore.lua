@@ -40,3 +40,27 @@ end
 function ModCore:log(str)
     log("[" .. self.Name .. "] " .. str)
 end
+
+function ModCore:StringToTable(str)
+     if (string.find(str, "$")) then
+        str = string.gsub(str, "%$(%w+)%$", { ["global"] = self.GlobalKey })
+    end
+    
+    return BeardLib.Utils:StringToTable(str)
+end
+
+function ModCore:StringToCallback(str)
+    local split = string.split(str, ":")
+    
+    local func_name = table.remove(split)
+    
+    local global_tbl_name = split[1]
+   
+    local global_tbl = self:StringToTable(global_tbl_name)
+    
+    if global_tbl then
+        return callback(global_tbl, global_tbl, func_name)
+    else
+        return nil
+    end
+end
