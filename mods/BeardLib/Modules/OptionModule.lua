@@ -5,28 +5,28 @@ OptionModule.type_name = "OptionsManager"
 
 function OptionModule:init(core_mod, config)
     self.super.init(self, core_mod, config)
-    
+
     self.FileName = self._config.save_file or self._mod.Name .. "_Options.txt"
-    
+
     self._option_key = self._config.global_key or "Options"
-    
+
     self._mod[self._option_key] = {}
-    
+
     if not self._config.options then
         BeardLib:log(string.format("[ERROR] Mod: %s, must contain an options table for the OptionModule", self._mod.Name))
         return
     end
-    
+
     if self._config.loaded_callback then
         self._on_load_callback = self._mod:StringToCallback(self._config.loaded_callback)
     end
-    
+
     self:LoadDefaultValues()
-    
+
     if self._config.build_menu then
         self:BuildMenu()
     end
-    
+
     if self._config.auto_load then
         self:Load()
     end
@@ -38,31 +38,33 @@ function OptionModule:Load()
         self:Save()
         return
     end
-    
+
     local file = io.open(self._mod.SavePath .. self.FileName, 'r')
-    
+
     --pcall for json decoding
-    local ret, err = pcall(function() return json.decode(file:read("*all")) end)
-    
+    local ret, data = pcall(function() return json.decode(file:read("*all")) end)
+
     if not ret then
         BeardLib:log("[ERROR] Unable to load save file for mod, " .. self._mod.Name)
-        BeardLib:log(tostring(err))
-        
+        BeardLib:log(tostring(data))
+
         --Save the corrupted file incase the option values should be recovered
         local corrupted_file = io.open(self._mod.SavePath .. self.FileName .. "_corrupted", "w+")
         corrupted_file:write(file:read("*all"))
-        
+
+        corrupted_file:close()
+
         --Save the Options file with the current option values
         self:Save()
         return
     end
-    
+
     --Close the file handle
     file:close()
-    
+
     --Merge the loaded options with the existing options
-    table.merge(self._mod[self._option_key], ret)
-    
+    table.merge(self._mod[self._option_key], data)
+
     if self._on_load_callback then
         self._on_load_callback()
     end
@@ -80,9 +82,9 @@ end
 function OptionModule:SetValue(name, value)
     if string.find(name, "/") then
         local string_split = string.split(name, "/")
-        
+
         local option_name = table.remove(string_split)
-        
+
         local tbl = self._mod[self._option_key]
         for _, part in pairs(string_split) do
             if tbl[part] == nil then
@@ -91,21 +93,21 @@ function OptionModule:SetValue(name, value)
             end
             tbl = tbl[part]
         end
-        
+
         self:_SetValue(tbl, option_name, value)
     else
         self:_SetValue(self._mod[self._option_key], name, value)
     end
-    
+
     self:Save()
 end
 
 function OptionModule:GetValue(name)
     if string.find(name, "/") then
         local string_split = string.split(name, "/")
-        
+
         local option_name = table.remove(string_split)
-        
+
         local tbl = self._mod[self._option_key]
         for _, part in pairs(string_split) do
             if tbl[part] == nil then
@@ -114,7 +116,7 @@ function OptionModule:GetValue(name)
             end
             tbl = tbl[part]
         end
-        
+
         return tbl[option_name]
     else
         return self._mod[self._option_key][name]
@@ -126,23 +128,21 @@ function OptionModule:LoadDefaultValues()
 end
 
 function OptionModule:_LoadDefaultValues(tbl, option_tbl)
-    for i = 1, table.maxn(tbl) do
-        local sub_tbl = tbl[i]
-        
+    for i, sub_tbl in ipairs(tbl) do
         if sub_tbl._meta then
             if sub_tbl._meta == "option" and sub_tbl.default_value ~= nil then
-                tbl[sub_tbl.name] = sub_tbl.default_value
+                option_tbl[sub_tbl.name] = sub_tbl.default_value
             elseif sub_tbl._meta == "option_group" then
                 option_tbl[sub_tbl.name] = {}
                 self:_LoadDefaultValues(sub_tbl, option_tbl[sub_tbl.name])
             end
-            
+
         end
     end
 end
 
 function OptionModule:Save()
-    local file = io.open(self.FileName, "w+")
+    local file = io.open(self._mod.SavePath .. self.FileName, "w+")
 	file:write(json.encode(self._mod[self._option_key]))
 	file:close()
 end
@@ -157,15 +157,15 @@ function OptionModule:RemoveNonNumberIndexes(tbl)
             tbl[i] = nil
         end
     end
-    
+
     return tbl
 end
 
 function OptionModule:CreateSlider(option_tbl, parent_node, option_path)
     local id = option_tbl.name .. self._option_key .. "Slider"
-    
+
     option_path = option_path == "" and option_tbl.name or option_path .. "/" .. option_tbl.name
-    
+
     MenuHelperPlus:AddSlider({
         id = id,
         title = option_tbl.title_id or id .. "TitleID",
@@ -187,9 +187,9 @@ end
 
 function OptionModule:CreateToggle(option_tbl, parent_node, option_path)
     local id = option_tbl.name .. self._option_key .. "Toggle"
-    
+
     option_path = option_path == "" and option_tbl.name or option_path .. "/" .. option_tbl.name
-    
+
     MenuHelperPlus:AddToggle({
         id = id,
         title = option_tbl.title_id or id .. "TitleID",
@@ -208,15 +208,15 @@ end
 
 function OptionModule:CreateMultiChoice(option_tbl, parent_node, option_path)
     local id = option_tbl.name .. self._option_key .. "Toggle"
-    
+
     option_path = option_path == "" and option_tbl.name or option_path .. "/" .. option_tbl.name
-    
+
     local options = option_tbl.values_tbl and self._mod:StringToTable(option_tbl.values_tbl) or self:RemoveNonNumberIndexes(option_tbl.values)
-    
+
     if not options then
         BeardLib:log("[ERROR] Unable to get an option table for option " .. option_tbl.name)
     end
-    
+
     MenuHelperPlus:AddMultipleChoice({
         id = id,
         title = option_tbl.title_id or id .. "TitleID",
@@ -253,22 +253,23 @@ function OptionModule:CreateSubMenu(option_tbl, parent_node, option_path)
     local main_node = MenuHelperPlus:NewNode(nil, {
         name = menu_name
     })
-    
+
     self:InitializeNode(option_tbl, main_node, option_path == "" and option_tbl.name or option_path .. "/" .. option_tbl.name)
-    
+
     MenuHelperPlus:AddButton({
         id = menu_name .. "Button",
         title = option_tbl.title_id or menu_name .. "ButtonTitleID",
         node_name = parent_node._paramaters.name,
         next_node = menu_name
     })
+
+    managers.menu:add_back_button(main_node)
 end
 
 function OptionModule:InitializeNode(option_tbl, node, option_path)
     option_path = option_path or ""
-    
-    for i = 1, table.maxn(tbl) do
-        local sub_tbl = tbl[i]
+
+    for i, sub_tbl in ipairs(option_tbl) do
         if sub_tbl._meta then
             if sub_tbl._meta == "option" then
                 self:CreateOption(sub_tbl, node, option_path)
@@ -280,21 +281,23 @@ function OptionModule:InitializeNode(option_tbl, node, option_path)
 end
 
 function OptionModule:BuildMenu()
-    Hooks:Add("BeardLibCreateCustomNodesAndButtons", self._mod.Name .. "Build" .. self._option_key .. "Menu", function(self_menu)
+    Hooks:Add("MenuManagerSetupCustomMenus", self._mod.Name .. "Build" .. self._option_key .. "Menu", function(self_menu)
         self._menu_name = self._config.options.node_name or self._mod.Name .. self._option_key .. "Node"
-        
+
         local main_node = MenuHelperPlus:NewNode(nil, {
             name = self._menu_name
         })
-        
+
         self:InitializeNode(self._config.options, main_node)
-        
+
         MenuHelperPlus:AddButton({
             id = self._menu_name .. "Button",
             title = self._config.options.title_id or self._menu_name .. "ButtonTitleID",
             node_name = LuaModManager.Constants._lua_mod_options_menu_id,
-            next_node = self._menu_name,
+            next_node = self._menu_name
         })
+
+        managers.menu:add_back_button(main_node)
     end)
 end
 
@@ -302,7 +305,7 @@ end
 Hooks:Add("BeardLibCreateCustomNodesAndButtons", "BeardLibOptionModuleCreateCallbacks", function(self_menu)
     MenuCallbackHandler.OptionModuleGeneric_ValueChanged = function(this, item)
         item._paramaters:set_opt_value(item._paramaters.option_key, item:value())
-        
+
         if item._paramaters.option_value_changed then
             item._paramaters:option_value_changed(item._paramaters.option_key, item:value())
         end

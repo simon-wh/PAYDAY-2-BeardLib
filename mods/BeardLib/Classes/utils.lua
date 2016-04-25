@@ -43,7 +43,7 @@ function math.QuaternionToEuler(x, y, z, w)
         local rx = 2 * math.atan2(x, w) --bank/pitch?
         return Rotation(rx, ry, rz)
     end
-    
+
     if (pole_result < (-0.5 * normal)) then --singularity at south pole
         local ry = -math.pi/2
         local rz = 0
@@ -68,13 +68,13 @@ function math.QuaternionToEuler(x, y, z, w)
     --[[local yaw = math.atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z))
     local pitch = math.asin(2 * (w * y - z * x))
     local roll = math.atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y))
-    
+
     return Rotation(yaw, pitch, roll)]]--
 end
 
 function BeardLib.Utils:StringToTable(global_tbl_name)
     local global_tbl
-    if string.find(global_tbl_name, ".") then
+    if string.find(global_tbl_name, "%.") then
         local global_tbl_split = string.split(global_tbl_name, ".")
         global_tbl = _G
         for _, str in pairs(global_tbl_split) do
@@ -86,11 +86,29 @@ function BeardLib.Utils:StringToTable(global_tbl_name)
         end
     else
         global_tbl = rawget(_G, global_tbl_name)
-        if not global_key then
+        if not global_tbl then
             BeardLib:log("[ERROR] Key " .. global_tbl_name .. " does not exist in the global table.")
             return nil
         end
     end
-    
+
     return global_tbl
+end
+
+local encode_chars = {
+	["\t"] = "%09",
+	["\n"] = "%0A",
+	["\r"] = "%0D",
+	[" "] = "+",
+	["!"] = "%21",
+	['"'] = "%22",
+	[":"] = "%3A",
+	["{"] = "%7B",
+	["}"] = "%7D",
+	["["] = "%5B",
+	["]"] = "%5D",
+	[","] = "%2C"
+}
+function BeardLib.Utils:UrlEncode(str)
+	return string.gsub(str, ".", encode_chars)
 end
