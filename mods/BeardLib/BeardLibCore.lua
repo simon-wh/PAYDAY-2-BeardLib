@@ -409,45 +409,6 @@ if Hooks then
         Hooks:Call("BeardLibMenuHelperPlusInitMenus", menu_manager)
         Hooks:Call("BeardLibCreateCustomNodesAndButtons", menu_manager)
     end)
-    
-    --[[Hooks:Add( "BeardLibCreateCustomMenus", "BeardLibCreateEditorMenu", function(menu_manager) 
-        MenuHelperPlus:NewMenu({
-            init_node = {
-                name = "editor_main",
-                align_node = 0.75,
-                back_callback = nil,
-                gui_class = "MenuNodeMainGui",
-                menu_components = "",
-                modifier = "PauseMenu",
-                refresh = nil,
-                topic_id = "menu_ingame_menu",
-                merge_data = nil
-            },
-            name = "menu_editor",
-            id = "editor_menu",
-            fake_path = "gamedata/menus/editor_menu",
-            callback_handler = "MenuCallbackHandler",
-            input = "MenuInput",
-            renderer = "MenuRenderer",
-            merge_data = nil
-        })
-    end)
-    
-    Hooks:Add( "BeardLibCreateCustomNodesAndButtons", "BeardLibCreateEditorMenuData", function(menu_manager)
-        MenuCallbackHandler.Editor_Exit = function(this, item)
-            managers.menu:close_menu("menu_editor")
-            setup:freeflight():disable()
-        end
-        MenuHelperPlus:AddButton({
-            menu = "menu_editor",
-            node_name = "editor_main",
-            id = "BeardLibTestButton",
-            title = "Exit Editor",
-            desc = "Exit the current instance of the editor",
-            callback = "Editor_Exit",
-            localized = false
-        })
-    end)]]--
 end
 
 if not BeardLib.setup then

@@ -1,3 +1,5 @@
+core:import("CoreSerialize")
+
 ModCore = ModCore or class()
 
 function ModCore:init(config_path)
@@ -19,7 +21,13 @@ function ModCore:LoadConfigFile(path)
     self.GlobalKey = config.global_key
     
     if config.modules then
-        for i, module_tbl in ipairs(config.modules) do
+        self._modules = config.modules
+    end
+end
+
+function ModCore:init_modules()
+    if self._modules then
+        for i, module_tbl in ipairs(self._modules) do
             local node_class = CoreSerialize.string_to_classtable(module_tbl._meta)
             
             if node_class then
@@ -27,7 +35,7 @@ function ModCore:LoadConfigFile(path)
             end
         end
     end
-end
+end 
 
 function ModCore:GetRealFilePath(path)
     if string.find(path, "%$") then
@@ -42,7 +50,7 @@ function ModCore:log(str)
 end
 
 function ModCore:StringToTable(str)
-     if (string.find(str, "$")) then
+    if (string.find(str, "$")) then
         str = string.gsub(str, "%$(%w+)%$", { ["global"] = self.GlobalKey })
     end
     

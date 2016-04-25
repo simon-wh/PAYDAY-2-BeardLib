@@ -134,7 +134,7 @@ end
 function MenuHelperPlus:AddButton(params)
 	local node = params.node or self:GetNode(params.menu, params.node_name)
 	if not node then
-        --error
+        BeardLib:log("[ERROR] Unable to find node " .. params.node_name)
         return
     end
 	
@@ -175,7 +175,7 @@ end
 function MenuHelperPlus:AddDivider(params)
     local node = params.node or self:GetNode(params.menu, params.node_name)
 	if not node then
-        --error
+        BeardLib:log("[ERROR] Unable to find node " .. params.node_name)
         return
     end
     
@@ -205,7 +205,7 @@ end
 function MenuHelperPlus:AddToggle(params)
 	local node = params.node or self:GetNode(params.menu, params.node_name)
 	if not node then
-        --error
+        BeardLib:log("[ERROR] Unable to find node " .. params.node_name)
         return
     end
 	
@@ -275,7 +275,7 @@ end
 function MenuHelperPlus:AddSlider(params)
 	local node = params.node or self:GetNode(params.menu, params.node_name)
 	if not node then
-        --error
+        BeardLib:log("[ERROR] Unable to find node " .. params.node_name)
         return
     end
 	
@@ -320,7 +320,7 @@ end
 function MenuHelperPlus:AddMultipleChoice(params)
 	local node = params.node or self:GetNode(params.menu, params.node_name)
 	if not node then
-        --error
+        BeardLib:log("[ERROR] Unable to find node " .. params.node_name)
         return
     end
 	
@@ -364,7 +364,7 @@ end
 function MenuHelperPlus:AddKeybinding(params)
 	local node = params.node or self:GetNode(params.menu, params.node_name)
 	if not node then
-        --error
+        BeardLib:log("[ERROR] Unable to find node " .. params.node_name)
         return
     end
 	
