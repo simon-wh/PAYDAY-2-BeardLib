@@ -59,21 +59,21 @@ function ComboBox:init( menu, params )
         valign="grow",
         layer = -1
     })
-    self.items_panel = self.list:panel({ 
+    self.items_panel = self.list:panel({
         name = "items_panel",
-        w = self.list:w() - 12, 
+        w = self.list:w() - 12,
         x = 12,
         h = h,
-    })         
+    })
     self._scroll_panel = self.list:panel({
         name = "scroll_panel",
-        halign = "center", 
+        halign = "center",
         align = "center",
-    })  
+    })
     local bar_h = self._scroll_panel:top() - self._scroll_panel:bottom()
     self._scroll_panel:panel({
         name = "scroll_bar",
-        halign = "center", 
+        halign = "center",
         align = "center",
         w = 4,
     }):rect({
@@ -82,7 +82,7 @@ function ComboBox:init( menu, params )
         layer = 4,
         alpha = 0.5,
         h = bar_h,
-    })    
+    })
     list_icon:set_left(combo_bg:right() - 12)
     self:CreateItems()
 end
@@ -116,14 +116,18 @@ function ComboBox:CreateItems()
             y = 18 * (k - 1),
             layer = 5,
         })
-    end   
-    self:AlignScrollBar() 
+    end
+    self:AlignScrollBar()
 end
 function ComboBox:SetValue(value)
     self.super.SetValue(self, value)
     if alive(self.panel) then
         self.panel:child("combo_selected"):set_text(self.localize_items and managers.localization:text(self.items[value]) or self.items[value])
     end
+end
+
+function ComboBox:SelectedItem()
+    return self.items[self.value]
 end
 
 function ComboBox:mouse_pressed( button, x, y )
@@ -153,26 +157,26 @@ function ComboBox:mouse_pressed( button, x, y )
             self:scroll_down()
             self:mouse_moved( x, y )
         elseif button == Idstring("mouse wheel up") then
-            self:scroll_up()      
-            self:mouse_moved( x, y )   
-        end 
+            self:scroll_up()
+            self:mouse_moved( x, y )
+        end
         if button == Idstring("0") then
             if self._scroll_panel:child("scroll_bar"):child("rect"):inside(x, y) then
                 self._grabbed_scroll_bar = true
                 return true
-            end 
+            end
             if self._scroll_panel:child("scroll_bar"):inside(x, y) then
                 self._grabbed_scroll_bar = true
                 local where = (y - self._scroll_panel:world_top()) / (self._scroll_panel:world_bottom() - self._scroll_panel:world_top())
                 self:scroll(where * self.items_panel:h())
                 return true
-            end            
+            end
             for k, v in pairs(self.items) do
                 if self.items_panel:child("item"..k):inside(x,y) then
                     self:SetValue(k)
                     if self.callback then
                         self.callback(self.menu, self)
-                    end                
+                    end
                     self.list:hide()
                     self.menu._openlist = nil
                     return true
@@ -212,8 +216,8 @@ end
 function ComboBox:scroll(y)
     if self.items_panel:h() > self._scroll_panel:h() then
         self.items_panel:set_y(math.clamp(-y, -self.items_panel:h() ,0))
-        self.items_panel:set_bottom(math.max(self.items_panel:bottom(), self._scroll_panel:h())) 
-        self.items_panel:set_top(math.min(0, self.items_panel:top()))       
+        self.items_panel:set_bottom(math.max(self.items_panel:bottom(), self._scroll_panel:h()))
+        self.items_panel:set_top(math.min(0, self.items_panel:top()))
         self:AlignScrollBar()
         return true
     end
@@ -237,7 +241,7 @@ function ComboBox:mouse_moved( x, y )
         if self._grabbed_scroll_bar then
             local where = (y - self._scroll_panel:world_top()) / (self._scroll_panel:world_bottom() - self._scroll_panel:world_top())
             self:scroll(where * self.items_panel:h())
-        end            
+        end
         for k, v in pairs(self.items) do
             self.items_panel:child("bg"..k):set_color(self.items_panel:child("bg"..k):inside(x,y) and Color(0, 0.5, 1) or Color.white)
         end
