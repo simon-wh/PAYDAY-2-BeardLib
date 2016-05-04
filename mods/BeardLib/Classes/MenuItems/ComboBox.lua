@@ -95,7 +95,9 @@ function ComboBox:CreateItems()
     local h = math.max(1, #self.items) * 18
     self.list:set_h(math.min(self.menu._fullscreen_ws_pnl:h() - self.panel:top(), h))
     self._scroll_panel:set_h(self.list:h())
+    self._scroll_panel:child("scroll_bar"):set_h(self.list:h())
     self.items_panel:set_h(h)
+    self.items_panel:set_y(0)
 
     for k, text in pairs(self.items) do
         local combo_item = self.items_panel:text({
