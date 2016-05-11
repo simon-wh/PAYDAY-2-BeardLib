@@ -1,5 +1,3 @@
-BeardLib.Utils = {}
-
 function table.merge(og_table, new_table)
 	for i, data in pairs(new_table) do
 		if type(data) == "table" and og_table[i] then
@@ -72,6 +70,8 @@ function math.QuaternionToEuler(x, y, z, w)
     return Rotation(yaw, pitch, roll)]]--
 end
 
+BeardLib.Utils = {}
+
 function BeardLib.Utils:StringToTable(global_tbl_name)
     local global_tbl
     if string.find(global_tbl_name, "%.") then
@@ -110,5 +110,16 @@ local encode_chars = {
 	[","] = "%2C"
 }
 function BeardLib.Utils:UrlEncode(str)
+	if not str then
+		return ""
+	end
+
 	return string.gsub(str, ".", encode_chars)
+end
+
+BeardLib.Utils.Math = {}
+
+function BeardLib.Utils.Math:Round(val, dp)
+	local mult = 10^(dp or 0)
+	return math.floor(val * mult + 0.5) / mult
 end
