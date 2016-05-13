@@ -13,120 +13,11 @@ if not _G.BeardLib then
     self.HooksDirectory = self.ModPath .. "Hooks/"
     self.ModulesDirectory = self.ModPath .. "Modules/"
     self.ClassDirectory = self.ModPath .. "Classes/"
-    self.ScriptData = {}
     self.managers = {}
     self._replace_script_data = {}
 
-    self.script_data_types = {
-        "sequence_manager",
-        "environment",
-        "menu",
-        "continent",
-        "continents",
-        "mission",
-        "nav_data",
-        "cover_data",
-        "world",
-        "world_cameras",
-        "prefhud",
-        "objective",
-        "credits",
-        "hint",
-        "comment",
-        "dialog",
-        "dialog_index",
-        "timeline",
-        "action_message",
-        "achievment",
-        "controller_settings",
-        "network_settings",
-        "physics_settings",
-    }
-
-    self.file_types = {
-        "achievment",
-        "action_message",
-        "animation",
-        "animation_def",
-        "animation_state_machine",
-        "animation_states",
-        "animation_subset",
-        "atom_batcher_settings",
-        "banksinfo",
-        "bmfc",
-        "bnk",
-        "bnkinfo",
-        "camera_shakes",
-        "cameras",
-        "cgb",
-        "comment",
-        "continent",
-        "continents",
-        "controller_settings",
-        "cooked_physics",
-        "cover_data",
-        "credits",
-        "decals",
-        "dialog",
-        "dialog_index",
-        "diesel_layers",
-        "effect",
-        "environment",
-        "font",
-        "gui",
-        "hint",
-        "idstring_lookup",
-        "light_intensities",
-        "lua",
-        "massunit",
-        "material_config",
-        "menu",
-        "merged_font",
-        "mission",
-        "model",
-        "movie",
-        "nav_data",
-        "network_settings",
-        "object",
-        "objective",
-        "physic_effect",
-        "physics_settings",
-        "post_processor",
-        "prefhud",
-        "render_config",
-        "render_template_database",
-        "scene",
-        "scenes",
-        "sequence_manager",
-        "sfap0",
-        "shaders",
-        "stream",
-        "strings",
-        "texture",
-        "texture_channels",
-        "tga",
-        "unit",
-        "world",
-        "world_cameras",
-        "world_setting",
-        "world_sounds",
-        "xbox_live",
-        "xml"
-    }
-
-    self.script_data_formats = {
-        "json",
-        "xml",
-        "generic_xml",
-        "custom_xml",
-        "binary",
-    }
-
     self.classes = {
-        "ScriptData/ScriptData.lua",
-        "ScriptData/EnvironmentData.lua",
-        "ScriptData/ContinentData.lua",
-        "ScriptData/SequenceData.lua",
+        "Definitions.lua",
         "MenuUI.lua",
         "MenuDialog.lua",
         "MenuItems/Menu.lua",
@@ -165,13 +56,8 @@ function BeardLib:init()
         os.execute("mkdir " .. self.MapsPath)
     end
 
-    --implement creation of script data class instances
-    self.ScriptData.Sequence = SequenceData:new("BeardLibBaseSequenceDataProcessor")
-    self.ScriptData.Environment = EnvironmentData:new("BeardLibBaseEnvironmentDataProcessor")
-    self.ScriptData.Continent = ContinentData:new("BeardLibBaseContinentDataProcessor")
-
     --Load ScriptData mod_overrides
-    --self:LoadModOverridePlus()
+    self:LoadModOverridePlus()
 end
 
 function BeardLib:LoadClasses()
@@ -224,21 +110,6 @@ function BeardLib:RefreshCurrentNode()
     local selected_item = selected_node:selected_item()
     selected_node:select_item(selected_item and selected_item:name())
     managers.menu:active_menu().renderer:highlight_item(selected_item)
-end
-
-function BeardLib:LoadScriptDataModFromJson(path)
-    local file = io.open(path, 'r')
-    if not file then
-        return
-    end
-    local data = json.custom_decode(file:read("*all"))
-    for i, tbl in pairs(data) do
-        if BeardLib.ScriptData[i] then
-            for no, mod_data in pairs(tbl) do
-                BeardLib.ScriptData[i]:ParseJsonData(mod_data)
-            end
-        end
-    end
 end
 
 if RequiredScript then
