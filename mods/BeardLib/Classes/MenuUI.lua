@@ -49,19 +49,18 @@ function MenuUI:init( config )
       	alpha = config.background_alpha or 0.8, 
         layer = 19 
     })      
-	self._help_panel = self._panel:panel({
-        name = "help_panel",
-        x = 30,
-	    y = 10,
+	self._help_panel = self._fullscreen_ws_pnl:panel({
+        name = "help_panel",   
 	    w = self._panel:w() - 100,
-        layer = 20,
+        layer = 30,
      })   
-    self._help_panel:rect()
+    self._help_panel:set_left(self._panel:right())
     self._help_panel:rect({
-    	name = "line",
-    	w = 2,
-    	color = Color(0, 0.5, 1),
+        name = "bg",
+        color = config.background_color or Color.white,
+        alpha = config.background_alpha or 0.8,      
     })
+
 	self._help_text = self._help_panel:text({
 	    name = "help_text",
 	    text = "",
@@ -85,16 +84,34 @@ function MenuUI:init( config )
 		BeardLib:log("No create items callback found")
 	end
     self._menu_closed = true    
-
     self._fullscreen_ws_pnl:key_press(callback(self, self, "key_press"))    
     self._fullscreen_ws_pnl:key_release(callback(self, self, "key_release"))    
-    return self
 end
-
+ 
 function MenuUI:NewMenu(params)
 	return Menu:new(self, params)
 end
 
+function MenuUI:SetSize( w, h )    
+    self._panel:set_size(w, h)
+    if self.position == "right" then
+        self._panel:set_right(self._fullscreen_ws_pnl:right())
+    elseif self.position == "center" then     
+        self._panel:set_center(self._fullscreen_ws_pnl:center())
+    end
+    self._scroll_panel:set_size(w,  h - (self.tabs and 35 or 0))
+    self._scroll_panel:set_x(0)
+    self._scroll_panel:child("scroll_bar"):set_h(h)
+    self._help_panel:set_left(self._panel:right())
+    self:AlignMenus()
+    for i, menu in pairs(self._menus) do
+        if menu.panel then
+            menu.panel:set_size(self._panel:size())
+        end
+        menu.items_panel:set_size(w- 12, h)
+        menu:RecreateItems()
+    end
+end
 function MenuUI:AlignMenus() 
     for i, menu in pairs(self._menus) do
         if menu.panel then
@@ -154,7 +171,7 @@ function MenuUI:key_press( o, k )
     end	
 end
 
-function MenuUI:set_help(help)
+function MenuUI:SetHelp(help)
 	self._help_text:set_text(help)
 	local _,_,w,h = self._help_text:text_rect()
 	self._help_panel:set_size(w + 10,h)
@@ -171,7 +188,7 @@ function MenuUI:mouse_released( o, button, x, y )
         self.mousereleased(o, k)
     end    
 end
-
+ 
 function MenuUI:mouse_pressed( o, button, x, y )
 	for _, menu in ipairs(self._menus) do
 		if menu:mouse_pressed( button, x, y ) then

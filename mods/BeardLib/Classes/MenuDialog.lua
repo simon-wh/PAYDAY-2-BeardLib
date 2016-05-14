@@ -11,32 +11,37 @@ function MenuDialog:init()
 end
 
 function MenuDialog:create_items(Menu)   
-    self._dialog_menu = Menu:NewMenu({
+    self._menu = Menu:NewMenu({
         name = "dialog",           
     }) 
 end
 
 function MenuDialog:show( params )
-    self._dialog_menu:ClearItems()
+    self._menu:ClearItems()
     self._dialog:enable()
     self._params = params
-    self._dialog_menu:Divider({
+    if params.w or params.h then
+        params.w = params.w or 500
+        params.h = params.h or 160
+        self._dialog:SetSize(params.w, params.h)
+    end
+    self._menu:Divider({
         name = "title",
         text = params.title,
         size = 30,
     })
     for k, item in pairs(params.items) do
-        if self._dialog_menu[item.type] then
-            params.items[k] = self._dialog_menu[item.type](self._dialog_menu, item)
+        if self._menu[item.type] then
+            params.items[k] = self._menu[item.type](self._menu, item)
         end 
     end
-    self._dialog_menu:Button({
+    self._menu:Button({
         name = "yes_btn",
         text = params.yes or "Yes",
         callback = callback(self, self, "hide", true)
     })
     if params.no then
-        self._dialog_menu:Button({
+        self._menu:Button({
             name = "no_btn",
             text = params.no or "No",
             callback = callback(self, self, "hide", false)
@@ -45,7 +50,7 @@ function MenuDialog:show( params )
 end
 function MenuDialog:hide(callback)
     self._dialog:disable()
-    self._dialog_menu:ClearItems()
+    self._menu:ClearItems()
     if callback and self._params and self._params.callback then
         self._params.callback(self._params.items)
     end

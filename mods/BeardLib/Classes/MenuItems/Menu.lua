@@ -116,7 +116,7 @@ function Menu:mouse_moved( x, y )
     end
 	if self.panel and self.panel:child("bg"):inside(x,y) then
         self:SetHighlight(true)
-        self.menu:set_help(self.help)
+        self.menu:SetHelp(self.help)
     elseif self.menu._current_menu ~= self then
 	    self:SetHighlight(false) 	        		
     end 	
@@ -225,12 +225,19 @@ end
 function Menu:ClearItems(label)
     local temp = self._items
     self._items = {}
-	for k, item in pairs(temp) do
+    for k, item in pairs(temp) do
         if not label or item.label == label then
-		    item.panel:parent():remove(item.panel)
+            item.panel:parent():remove(item.panel)
         else
             table.insert(self._items, item)
         end
+    end
+    self.items_panel:set_y(0)
+end
+function Menu:RecreateItems()
+	for k, item in pairs(self._items) do
+		item.panel:parent():remove(item.panel)
+        self[item.type](self, item)
 	end
     self.items_panel:set_y(0)
 end
@@ -243,7 +250,6 @@ function Menu:RemoveItem(name)
 		end
 	end
 end
- 
 
 function Menu:Toggle( params )
 	local Item = Toggle:new(self, params)
@@ -274,8 +280,20 @@ function Menu:Divider( params )
     return self:NewItem(Item)
 end
 function Menu:Table( params )
-	local Item = Table:new(self, params)
+    local Item = Table:new(self, params)
     return self:NewItem(Item)
+end 
+function Menu:ToolBox( params )
+    local Item = ToolBox:new(self, params)
+    return self:NewItem(Item)
+end
+function Menu:GetIndex( name )
+    for k, item in pairs(self._items) do
+        if item.name == name then
+            return k
+        end
+    end
+    return 1
 end 
 
 function Menu:NewItem( Item )

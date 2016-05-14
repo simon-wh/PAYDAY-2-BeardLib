@@ -3,7 +3,8 @@ Slider = Slider or class(Item)
 function Slider:init( menu, params )    
     params.value = params.value or 1
 	self.super.init( self, menu, params )
-    local item_width = params.panel:w() / 1.4
+    self.type = "Slider"
+    local item_width = params.panel:w() / 1.5
 	local slider_bg = params.panel:bitmap({
         name = "slider_bg",
         y = 4,
@@ -72,25 +73,40 @@ function Slider:update_caret()
     self.panel:child("caret"):set_world_position(x, y + 1)
     self.panel:child("caret"):set_visible(self.cantype)
 end
-function Slider:SetValue(value, reset_selection)
+function Slider:SetValue(value, reset_selection, no_format)
     value = tonumber(value) or 0
     local slider_value = self.panel:child("slider_value")
     local slider_icon = self.panel:child("slider_icon")
 	local slider = self.panel:child("slider")
-	slider_value:set_text(string.format("%.2f", value))
-    if reset_selection then
+
+    if self.max or self.min then           
+        local val = math.clamp(value, self.min, self.max)
+        slider:set_w((self.panel:w() / 1.5) * ((val - self.min) / (self.max - self.min)))         
+        slider_icon:set_right(slider:right())             
+        slider_value:set_text(not no_format and string.format("%.2f", val) or val)
+    else
+        slider_value:set_text(not no_format and string.format("%.2f", value) or value)        
+    end   
+     if reset_selection then
         slider_value:set_selection(slider_value:text():len())  
     end
     if self.max or self.min then
-        slider:set_w((self.panel:w() / 1.4) * (value / self.max))         
-        slider_icon:set_right(slider:right())
-    end
+	   self.super.SetValue(self, math.clamp(value, self.min, self.max))
+    else
+        self.super.SetValue(self, value)
+    end    
     self._before_text = self.value
-	self.super.SetValue(self, value)
 end
 
+function Slider:SetValueByPercentage( percent )
+    self:SetValue(self.min + (self.max - self.min) * percent)
+end
+ 
 function Slider:mouse_pressed( button, x, y )
-	self.super.mouse_pressed(self, button, x, y)    
+	self.super.mouse_pressed(self, button, x, y)   
+    if not self.enabled then
+        return
+    end      
     local inside 
     if self.max or self.min then
         inside = self.panel:child("slider_bg"):inside(x,y) or self.panel:child("slider"):inside(x,y)
@@ -103,10 +119,13 @@ function Slider:mouse_pressed( button, x, y )
             local slider_bg = self.panel:child("slider_bg")
             local where = (x - slider_bg:world_left()) / (slider_bg:world_right() - slider_bg:world_left())
             managers.menu_component:post_event("menu_enter")
-            self:SetValue( tonumber(math.clamp(where * self.max, self.min, self.max)))
+            self:SetValueByPercentage(where)
             if self.callback then
                 self.callback(self.menu, self)
-            end            
+            end    
+        else
+           -- managers.mouse_pointer._mouse:hide()    
+          --  self._mouse_pos_x, self._mouse_pos_y = managers.mouse_pointer._mouse:world_position()     
         end
         return true              
     end  
@@ -121,29 +140,37 @@ function Slider:key_press( o, k )
     self.panel:child("slider_value"):animate(callback(self, TextBox, "key_hold"), k)
 end 
 
-
 function Slider:mouse_moved( x, y )
-	self.super.mouse_moved(self, x, y)
-	if self.menu._slider_hold == self and self.menu._old_x then
+    self.super.mouse_moved(self, x, y)
+    if self.menu._slider_hold == self and self.menu._old_x then
         if self.max or self.min then
             local slider_bg = self.panel:child("slider_bg")
             local where = (x - slider_bg:world_left()) / (slider_bg:world_right() - slider_bg:world_left())
-            self:SetValue(tonumber(math.clamp(where * self.max, self.min, self.max)))
+            self:SetValueByPercentage(where)
         else
             local slider_bg = self.panel:child("slider_bg")
             local move = self.step or (x - self.menu._old_x)
             if self.step and x - self.menu._old_x <= 0 then
                 move = -move
             end     
-            self:SetValue((type(self.value) == "number" and self.value or 0) + move)
+            --managers.mouse_pointer:set_mouse_world_position(self._mouse_pos_x, self._mouse_pos_y)
+            self:SetValue((type(self.value) == "number" and self.value or 0) + move, true)
         end
         if self.callback then
             self.callback(self.menu, self)
         end
-    end	        
+    end       
+    local cantype = self.cantype  
     self.cantype = self.panel:inside(x,y) and self.cantype or false     
+    if cantype and not self.cantype then
+        TextBox.CheckText(self, self.panel:child("slider_value"))
+        self:SetValue(self.value, true)
+    end     
     self:update_caret()
 end
+ 
+
 function Slider:mouse_released( button, x, y )
     self.super.mouse_released( self, button, x, y )
+    --managers.mouse_pointer._mouse:show()
 end

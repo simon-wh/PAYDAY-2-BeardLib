@@ -2,6 +2,7 @@ Toggle = Toggle or class(Item)
 
 function Toggle:init( parent, params )
 	self.super.init( self, parent, params )
+    self.type = "Toggle"
     params.panel:bitmap({
         name = "toggle",
         x = 2,

@@ -35,7 +35,7 @@ function ComboBox:init( menu, params )
         name = "combo_bg",
         y = 4,
         x = -2,
-        w = params.panel:w() / 1.4,
+        w = params.panel:w() / 1.5,
         h = 16,
         layer = 5,
         color = Color(0.6, 0.6, 0.6),
@@ -46,7 +46,7 @@ function ComboBox:init( menu, params )
     self.list = self.menu._fullscreen_ws_pnl:panel({
         name = params.name.."list",
         y = 0,
-        w = params.panel:w() / 1.4,
+        w = params.panel:w() / 1.5,
         h = math.min(self.menu._fullscreen_ws_pnl:h() - self.panel:top(), h),
         layer = 1100,
         visible = false,
@@ -102,7 +102,7 @@ function ComboBox:CreateItems()
     for k, text in pairs(self.items) do
         local combo_item = self.items_panel:text({
             name = "item"..k,
-            text = text,
+            text = tostring(text),
             align = "center",
             h = 18,
             y = 18 * (k - 1),
@@ -145,7 +145,7 @@ function ComboBox:mouse_pressed( button, x, y )
         local wheelup = (button == Idstring("mouse wheel up") and 1) or (button == Idstring("mouse wheel down") and 0) or -1
         if wheelup ~= -1 then
             if not self.menu._openlist then
-                if ((self.value - 1) ~= 0) and ((self.value + 1) < (#self.items + 1))  then
+                if self.value and ((self.value - 1) ~= 0) and ((self.value + 1) < (#self.items + 1))  then
                     self:SetValue(self.value + ((wheelup == 1) and -1 or 1))
                     if self.callback then
                         self.callback(self.menu, self)

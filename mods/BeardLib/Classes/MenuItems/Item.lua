@@ -1,9 +1,11 @@
 Item = Item or class(Menu)
 
 function Item:init( parent, params )
+    self.type = "button"
+    params.enabled = params.enabled or true
     params.text_color = params.text_color or parent.text_color
-	params.panel = parent.items_panel:panel({ 
-		name = params.name,
+	  params.panel = parent.items_panel:panel({ 
+		    name = params.name,
       	y = 10, 
       	x = 10,
       	w = parent.items_panel:w() - 10,
@@ -18,7 +20,7 @@ function Item:init( parent, params )
       	valign="grow", 
         layer = -1 
     })
-    local ItemText = params.panel:text({
+    params.title = params.panel:text({
 	    name = "title",
 	    text = params.text,
 	    vertical = "center",
@@ -29,15 +31,15 @@ function Item:init( parent, params )
 	    color = params.text_color or Color.black,
 	    font = "fonts/font_medium_mf",
 	    font_size = 16
-	})
- 	if params.color then
- 		local color = params.panel:rect({
- 			color = params.color,
- 			w = 2,
- 		})
- 	end  	
-	local _,_,w,h = ItemText:text_rect()
-	ItemText:set_w(w)
+  	})
+   	if params.color then
+   		local color = params.panel:rect({
+   			color = params.color,
+   			w = 2,
+   		})
+   	end  	
+  	local _,_,w,h = params.title:text_rect()
+  	params.title:set_w(w)
     params.option = params.option or params.name    
     table.merge(self, params)
     self.parent = parent
@@ -45,14 +47,22 @@ function Item:init( parent, params )
 end
 
 function Item:SetValue(value)
-	self.value = value
+    self.value = value
 end
-
+function Item:SetEnabled(enabled)
+	self.enabled = enabled
+end
+function Item:Index()
+    return self.parent:GetIndex(self.name)
+end
 function Item:key_press( o, k )
 
 end
 function Item:mouse_pressed( button, x, y )
-    if self.callback and self.panel:inside(x,y) and button == Idstring("0") then
+    if not self.enabled then
+        return
+    end
+    if self.callback and alive(self.panel) and self.panel:inside(x,y) and button == Idstring("0") then
         self.callback(self.parent, self)
         return true
     end
@@ -67,12 +77,15 @@ function Item:SetCallback( callback )
 end
 
 function Item:mouse_moved( x, y, highlight )
+    if not self.enabled then
+        return
+    end    
 	if not self.menu._openlist and not self.menu._slider_hold then
 	    if self.panel:inside(x, y) then
             if highlight ~= false then
 		        self.panel:child("bg"):set_color(Color(0, 0.5, 1))
             end
-		    self.menu:set_help(self.help)
+		    self.menu:SetHelp(self.help)
 		    self.highlight = true
 		    self.menu._highlighted = self
 	    else

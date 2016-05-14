@@ -3,18 +3,19 @@ TextBox = TextBox or class(Item)
 function TextBox:init( parent, params )	
 	params.value = params.value or ""
 	self.super.init( self, parent, params )
+    self.type = "TextBox"
 	local bg = params.panel:bitmap({
         name = "textbg",
         y = 4,
         x = -2,
-        w = params.panel:w() / 1.4,
+        w = params.panel:w() / 1.5,
         h = 16,
         layer = 5,
         color = Color(0.5, 0.5, 0.5),
     })	
     local text = params.panel:text({
 	    name = "text",
-	    text = params.value,
+	    text = tostring(params.value),
 	    valign = "center",
 	    vertical = "center",
         w = bg:w() - 4,
@@ -50,8 +51,21 @@ function TextBox:SetValue(value, reset_selection)
 	self:update_caret()		
 	self.super.SetValue(self, value)
 end
- 
- 
+function TextBox:CheckText(text)
+    if self.filter == "number" then
+        if tonumber(text:text()) ~= nil then
+            if self.max or self.min then
+                self:SetValue(math.clamp(tonumber(text:text()), self.min or tonumber(text:text()), self.max or tonumber(text:text())), true)
+            else
+                self:SetValue(tonumber(text:text()), true)
+            end
+        else
+            self:SetValue(tonumber(self._before_text), true, true)
+        end
+    else
+        self:SetValue(text:text(), true)
+    end     
+end 
 function TextBox:blink( caret )
 	local t = 2
 	while true do
@@ -63,7 +77,7 @@ function TextBox:blink( caret )
  	end
 end
 function TextBox:key_hold( text, k )
-  	while self.menu.key_pressed == k and self.menu._highlighted == self do		
+  	while self.cantype and self.menu.key_pressed == k and self.menu._highlighted == self do		
 		local s, e = text:selection()
 		local n = utf8.len(text:text())
 		if Input:keyboard():down(Idstring("left ctrl")) then
@@ -128,29 +142,24 @@ function TextBox:key_hold( text, k )
 	    wait(0.2)
   	end
 end
+  
 function TextBox:enter_text( text, s )
-	if self.menu._menu_closed or (self.filter == "number" and tonumber(s) == nil and not (s == "." and not text:text():match(".")) and not (s == "-" and not text:text():match("-"))  ) then
-		return
-	end
-	if self.menu._highlighted == self and self.cantype and not Input:keyboard():down(Idstring("left ctrl")) then
-		self._before_text = text:text()
-		text:replace_text(s)	
-		self:update_caret()	
-		if self.filter == "number" and tonumber(text:text()) ~= nil then
-			if self.max or self.min then
-				self:SetValue(math.clamp(tonumber(text:text()), self.min, self.max))
-			else
-				self:SetValue(tonumber(text:text()))
-			end
-		else
-			self:SetValue(text:text())
-		end	
-		if self.callback then
-			self.callback(self.parent, self)
-		end
-	end		
-
+    local number = self.filter == "number"
+    if self.menu._menu_closed or (number and tonumber(s) == nil and s ~= "-" and s ~= ".") then
+        return
+    end
+    if self.menu._highlighted == self and self.cantype and not Input:keyboard():down(Idstring("left ctrl")) then
+        self._before_text = number and (tonumber(text:text()) ~= nil and tonumber(text:text()) or self._before_text) or text:text()
+        text:replace_text(s)
+        self:update_caret() 
+        local txt = not number and text:text() or tonumber(text:text())
+        if self.callback and tostring(txt) == text:text() then
+            self:SetValue(txt, false, true)
+            self.callback(self.parent, self)
+        end
+    end     
 end
+
 function TextBox:mouse_pressed( button, x, y )
 	if not alive(self.panel) then
 		return
@@ -164,8 +173,13 @@ function TextBox:mouse_pressed( button, x, y )
 end
 
 function TextBox:key_press( o, k )	
+	local text = self.panel:child("text")
 	if self.cantype then 
- 		self.panel:child("text"):animate(callback(self, self, "key_hold"), k)
+ 		text:animate(callback(self, self, "key_hold"), k)
+ 	end
+ 	if k == Idstring("enter") then
+ 		self.cantype = false
+ 		self:CheckText(text)
  	end
 	self:update_caret()		
 end
@@ -191,15 +205,20 @@ function TextBox:update_caret()
 end
 
 function TextBox:mouse_moved( x, y )
-	self.super.mouse_moved(self, x, y)
-	self.cantype = self.panel:inside(x,y) and self.cantype or false		
-	self.panel:child("caret"):set_visible(self.cantype)
-	self:update_caret()
-	if not self.cantype then
-		self:SetValue(self.panel:child("text"):text())
-	end
+    self.super.mouse_moved(self, x, y)
+    local text = self.panel:child("text")
+    local cantype = self.cantype
+    self.cantype = self.panel:inside(x,y) and self.cantype or false 
+    if cantype and not self.cantype then
+        self:CheckText(text)
+    end 
+    self.panel:child("caret"):set_visible(self.cantype)
+    self:update_caret()
+    if not self.cantype then
+        self:SetValue(text:text())
+    end
 end
-
+ 
 
 function TextBox:mouse_released( button, x, y )
     self.super.mouse_released( self, button, x, y )

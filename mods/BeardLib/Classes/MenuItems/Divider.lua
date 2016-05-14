@@ -1,6 +1,7 @@
 Divider = Divider or class(Menu)
 
 function Divider:init( parent, params )
+    self.type = "Divider"
 	params.panel = parent.items_panel:panel({ 
 		name = params.name,
       	y = 10, 
@@ -9,7 +10,7 @@ function Divider:init( parent, params )
       	h = params.size or 30,
       	layer = 21,
     }) 
-    local DividerText = params.panel:text({
+    params.title = params.panel:text({
 	    name = "title",
 	    text = params.text,
 	    vertical = "center",
@@ -21,15 +22,16 @@ function Divider:init( parent, params )
 	    font = parent.menu.font or "fonts/font_medium_mf",
 	    font_size = 16
 	})	
-	local Divider = params.panel:rect({
+	params.div = params.panel:rect({
 		h = 2,
+        x = 4,
         visible = params.text ~= nil,
 		color = params.color or params.text_color or Color.black
-	})
-	local _,_,w,h = DividerText:text_rect()
-	DividerText:set_w(w)
-	Divider:set_top(DividerText:bottom())
+	})    
     table.merge(self, params)
+	local _,_,w,h = self.title:text_rect() 
+    self.div:set_top(self.title:bottom())
+	self.div:set_w(w)
     self.parent = parent
     self.menu = parent.menu
 end
@@ -37,9 +39,19 @@ end
 function Divider:SetValue(value)
 
 end
+function Divider:SetEnabled(enalbed)
+
+end
+function Divider:Index()
+    return self.parent:GetIndex(self.name)
+end
 
 function Divider:SetText(text)
-    self.panel:child("title"):set_text(text)
+    self.title:set_text(text)
+end
+
+function Divider:SetColor(color)
+    self.div:set_color(color or Color.white)
 end
 
 function Divider:key_press( o, k )
@@ -48,7 +60,6 @@ end
 function Divider:mouse_pressed( button, x, y )
 
 end
-
 function Divider:mouse_moved( x, y )
 
 end

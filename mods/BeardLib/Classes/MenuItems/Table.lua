@@ -3,11 +3,12 @@ Table = Table or class(Item)
 function Table:init( menu, params )   
     params.items = params.items or {}
     self.super.init( self, menu, params )    
+    self.type = "Table"
+    local _,_,_,h = self.title:text_rect()
     local table_panel = params.panel:panel({
         name = "table",
-        y = 4,
-        x = -2,
-        w = params.panel:w() / 1.4,
+        y = h + 4,
+        w = params.panel:w() - 4,
         layer = 5,
     })
     local add_btn
@@ -56,8 +57,7 @@ function Table:init( menu, params )
             remove_btn:set_world_right(params.panel:right())
         end
     end
-    table_panel:set_world_right(params.panel:right() - 4)    
-    table_panel:set_top(add_btn and add_btn:bottom() or remove_btn and remove_btn:bottom() or 0)
+    table_panel:set_world_right(params.panel:right())    
     self:SetValue(self.items)
 end 
 function Table:Add(k, v)
@@ -90,7 +90,7 @@ function Table:Add(k, v)
             texture = "guis/textures/menu_tickbox",
             texture_rect = v == true and {24,0,24,24} or {0,0,24,24},
         })
-        value:set_left(key:right())  
+        value:set_right(table_item:right())  
     else
         local value = table_item:text({
             name = "value",
