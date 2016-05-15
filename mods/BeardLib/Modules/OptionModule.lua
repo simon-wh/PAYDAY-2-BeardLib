@@ -1,16 +1,16 @@
 OptionModule = OptionModule or class(ModuleBase)
 
 --Need a better name for this
-OptionModule.type_name = "OptionsManager"
+OptionModule.type_name = "Options"
 
 function OptionModule:init(core_mod, config)
     self.super.init(self, core_mod, config)
 
     self.FileName = self._config.save_file or self._mod.Name .. "_Options.txt"
 
-    self._option_key = self._config.global_key or "Options"
+    self._storage = {}
 
-    self._mod[self._option_key] = {}
+    self._name = config.name or self.type_name
 
     if not self._config.options then
         BeardLib:log(string.format("[ERROR] Mod: %s, must contain an options table for the OptionModule", self._mod.Name))
@@ -21,7 +21,7 @@ function OptionModule:init(core_mod, config)
         self._on_load_callback = self._mod:StringToCallback(self._config.loaded_callback)
     end
 
-    self:LoadDefaultValues()
+    self:InitOptions(self._config.options, self._storage)
 
     if self._config.build_menu then
         self:BuildMenu()
@@ -63,20 +63,95 @@ function OptionModule:Load()
     file:close()
 
     --Merge the loaded options with the existing options
-    table.merge(self._mod[self._option_key], data)
+    self:ApplyValues(self._storage, data)
 
     if self._on_load_callback then
         self._on_load_callback()
     end
 end
 
+function OptionModule:ApplyValues(tbl, value_tbl)
+    for i, sub_tbl in pairs(tbl) do
+        if sub_tbl._meta then
+            if sub_tbl._meta == "option" and value_tbl[sub_tbl.name] ~= nil then
+                sub_tbl.value = value_tbl[sub_tbl.name]
+            elseif (sub_tbl._meta == "option_group" or sub_tbl._meta == "option_set") and value_tbl[sub_tbl.name] then
+                self:ApplyValues(sub_tbl, value_tbl[sub_tbl.name])
+            end
+        end
+    end
+end
+
+function OptionModule:RemoveAllSubTables(tbl)
+    for i, sub in pairs(tbl) do
+        if type(sub) == "table" then
+            tbl[i] = nil
+        end
+    end
+    return tbl
+end
+
+function OptionModule:InitOptions(tbl, option_tbl)
+    for i, sub_tbl in ipairs(tbl) do
+        if sub_tbl._meta then
+            if sub_tbl._meta == "option" then
+                if sub_tbl.type == "multichoice" then
+                    sub_tbl.values = sub_tbl.values_tbl and self._mod:StringToTable(sub_tbl.values_tbl) or self:RemoveNonNumberIndexes(sub_tbl.values)
+                end
+
+                if sub_tbl.value_changed then
+                    sub_tbl.value_changed = self._mod:StringToCallback(sub_tbl.value_changed)
+                end
+
+                if sub_tbl.enabled_callback then
+                    sub_tbl.enabled_callback = self._mod:StringToCallback(sub_tbl.enabled_callback)
+                end
+
+                option_tbl[sub_tbl.name] = sub_tbl
+                option_tbl[sub_tbl.name].value = sub_tbl.default_value
+            elseif sub_tbl._meta == "option_group" then
+                option_tbl[sub_tbl.name] = self:RemoveAllSubTables(clone(sub_tbl))
+                self:InitOptions(sub_tbl, option_tbl[sub_tbl.name])
+            elseif sub_tbl._meta == "option_set" then
+                local tbl = sub_tbl.items and self:RemoveNonNumberIndexes(sub_tbl.items)
+                if sub_tbl.items_tbl then
+                    tbl = self._mod:StringToTable(sub_tbl.values_tbl)
+                elseif sub_tbl.populate_items then
+                    local clbk = self._mod:StringToCallback(sub_tbl.populate_items)
+                    tbl = assert(clbk)()
+                end
+
+                for _, item in pairs(tbl) do
+                    local new_tbl = deep_clone(sub_tbl)
+                    new_tbl.items = nil
+                    new_tbl.items_tbl = nil
+                    new_tbl.populate_items = nil
+                    table.insert(sub_tbl, table.merge(new_tbl, {
+                        _meta = "option",
+                        default_value = item.default_value,
+                        name = item.name,
+                        title_id = item.title_id
+                    }))
+                end
+
+                option_tbl[sub_tbl.name] = self:RemoveAllSubTables(clone(sub_tbl))
+                self:InitOptions(sub_tbl, option_tbl[sub_tbl.name])
+            end
+        end
+    end
+end
+
 --Only for use by the SetValue function
-function OptionModule:_SetValue(tbl, name, value)
+function OptionModule:_SetValue(tbl, name, value, full_name)
     if tbl[name] == nil then
         BeardLib:log(string.format("[ERROR] Option of name %q does not exist in mod, %s", name, self._mod.Name))
         return
     end
-    tbl[name] = value
+    tbl[name].value = value
+
+    if tbl[name].value_changed then
+        tbl[name]:value_changed(full_name, value)
+    end
 end
 
 function OptionModule:SetValue(name, value)
@@ -85,7 +160,7 @@ function OptionModule:SetValue(name, value)
 
         local option_name = table.remove(string_split)
 
-        local tbl = self._mod[self._option_key]
+        local tbl = self._storage
         for _, part in pairs(string_split) do
             if tbl[part] == nil then
                 BeardLib:log(string.format("[ERROR] Option Group of name %q does not exist in mod, %s", name, self._mod.Name))
@@ -94,21 +169,21 @@ function OptionModule:SetValue(name, value)
             tbl = tbl[part]
         end
 
-        self:_SetValue(tbl, option_name, value)
+        self:_SetValue(tbl, option_name, value, name)
     else
-        self:_SetValue(self._mod[self._option_key], name, value)
+        self:_SetValue(self._storage, name, value, name)
     end
 
     self:Save()
 end
 
-function OptionModule:GetValue(name)
+function OptionModule:GetOption(name)
     if string.find(name, "/") then
         local string_split = string.split(name, "/")
 
         local option_name = table.remove(string_split)
 
-        local tbl = self._mod[self._option_key]
+        local tbl = self._storage
         for _, part in pairs(string_split) do
             if tbl[part] == nil then
                 BeardLib:log(string.format("[ERROR] Option Group of name %q does not exist in mod, %s", name, self._mod.Name))
@@ -119,31 +194,60 @@ function OptionModule:GetValue(name)
 
         return tbl[option_name]
     else
-        return self._mod[self._option_key][name]
+        return self._storage[name]
     end
 end
 
-function OptionModule:LoadDefaultValues()
-    self:_LoadDefaultValues(self._config.options, self._mod[self._option_key])
+function OptionModule:GetValue(name, real)
+    local option = self:GetOption(name)
+    if option then
+        if real and option.type == "multichoice" then
+            return option.values[option.value]
+        else
+            return option.value
+        end
+
+    else
+        return
+    end
+
+    return option.value
 end
 
-function OptionModule:_LoadDefaultValues(tbl, option_tbl)
-    for i, sub_tbl in ipairs(tbl) do
-        if sub_tbl._meta then
-            if sub_tbl._meta == "option" and sub_tbl.default_value ~= nil then
-                option_tbl[sub_tbl.name] = sub_tbl.default_value
-            elseif sub_tbl._meta == "option_group" then
-                option_tbl[sub_tbl.name] = {}
-                self:_LoadDefaultValues(sub_tbl, option_tbl[sub_tbl.name])
-            end
+function OptionModule:LoadDefaultValues()
+    self:_LoadDefaultValues(self._storage)
+end
 
+function OptionModule:_LoadDefaultValues(option_tbl)
+    for i, sub_tbl in pairs(option_tbl) do
+        if sub_tbl._meta then
+            if sub_tbl._meta == "option" then
+                option_tbl[sub_tbl.name].value = sub_tbl.default_value
+            elseif sub_tbl._meta == "option_group" or sub_tbl._meta == "option_set" then
+                self:_LoadDefaultValues(option_tbl[sub_tbl.name])
+            end
+        end
+    end
+end
+
+function OptionModule:PopulateSaveTable(tbl, save_tbl)
+    for i, sub_tbl in pairs(tbl) do
+        if sub_tbl._meta then
+            if sub_tbl._meta == "option" then
+                save_tbl[sub_tbl.name] = sub_tbl.value
+            elseif sub_tbl._meta == "option_group" or sub_tbl._meta == "option_set" then
+                save_tbl[sub_tbl.name] = {}
+                self:PopulateSaveTable(sub_tbl, save_tbl[sub_tbl.name])
+            end
         end
     end
 end
 
 function OptionModule:Save()
     local file = io.open(self._mod.SavePath .. self.FileName, "w+")
-	file:write(json.encode(self._mod[self._option_key]))
+    local save_data = {}
+    self:PopulateSaveTable(self._storage, save_data)
+	file:write(json.encode(save_data))
 	file:close()
 end
 
@@ -162,12 +266,18 @@ function OptionModule:RemoveNonNumberIndexes(tbl)
 end
 
 function OptionModule:CreateSlider(option_tbl, parent_node, option_path)
-    local id = option_tbl.name .. self._option_key .. "Slider"
+    local id = self._mod.Name .. option_tbl.name
 
     option_path = option_path == "" and option_tbl.name or option_path .. "/" .. option_tbl.name
 
+    local enabled = true
+
+    if option_tbl.enabled_callback then
+        enabled = option_tbl:enabled_callback()
+    end
+
     MenuHelperPlus:AddSlider({
-        id = id,
+        id = option_tbl.name,
         title = option_tbl.title_id or id .. "TitleID",
         node = parent_node,
         desc = option_tbl.desc_id or id .. "DescID",
@@ -175,50 +285,61 @@ function OptionModule:CreateSlider(option_tbl, parent_node, option_path)
         min = option_tbl.min,
         max = option_tbl.max,
         step = option_tbl.step,
+        enabled = enabled,
         value = self:GetValue(option_path),
+        show_value = option_tbl.show_value,
         merge_data = {
-            set_opt_value = callback(self, self, "SetValue"),
-            get_opt_value = callback(self, self, "GetValue"),
-            option_key = option_path,
-            option_value_changed = option_tbl.value_changed and self._mod:StringToCallback(option_tbl.value_changed) or nil
+            module = self,
+            option_key = option_path
         }
     })
 end
 
 function OptionModule:CreateToggle(option_tbl, parent_node, option_path)
-    local id = option_tbl.name .. self._option_key .. "Toggle"
+    local id = self._mod.Name .. option_tbl.name
 
     option_path = option_path == "" and option_tbl.name or option_path .. "/" .. option_tbl.name
 
+    local enabled = true
+
+    if option_tbl.enabled_callback then
+        enabled = option_tbl:enabled_callback()
+    end
+
     MenuHelperPlus:AddToggle({
-        id = id,
+        id = option_tbl.name,
         title = option_tbl.title_id or id .. "TitleID",
         node = parent_node,
         desc = option_tbl.desc_id or id .. "DescID",
         callback = "OptionModuleGeneric_ValueChanged",
         value = self:GetValue(option_path),
+        enabled = enabled,
         merge_data = {
-            set_opt_value = callback(self, self, "SetValue"),
-            get_opt_value = callback(self, self, "GetValue"),
-            option_key = option_path,
-            option_value_changed = option_tbl.value_changed and self._mod:StringToCallback(option_tbl.value_changed) or nil
+            module = self,
+            option_key = option_path
         }
     })
 end
 
 function OptionModule:CreateMultiChoice(option_tbl, parent_node, option_path)
-    local id = option_tbl.name .. self._option_key .. "Toggle"
+    local id = self._mod.Name .. option_tbl.name
 
     option_path = option_path == "" and option_tbl.name or option_path .. "/" .. option_tbl.name
 
-    local options = option_tbl.values_tbl and self._mod:StringToTable(option_tbl.values_tbl) or self:RemoveNonNumberIndexes(option_tbl.values)
+    local options = option_tbl.values
 
     if not options then
         BeardLib:log("[ERROR] Unable to get an option table for option " .. option_tbl.name)
     end
 
+    local enabled = true
+
+    if option_tbl.enabled_callback then
+        enabled = option_tbl:enabled_callback()
+    end
+
     MenuHelperPlus:AddMultipleChoice({
-        id = id,
+        id = option_tbl.name,
         title = option_tbl.title_id or id .. "TitleID",
         node = parent_node,
         desc = option_tbl.desc_id or id .. "DescID",
@@ -226,11 +347,10 @@ function OptionModule:CreateMultiChoice(option_tbl, parent_node, option_path)
         value = self:GetValue(option_path),
         items = options,
         localized_items = option_tbl.localized_items,
+        enabled = enabled,
         merge_data = {
-            set_opt_value = callback(self, self, "SetValue"),
-            get_opt_value = callback(self, self, "GetValue"),
-            option_key = option_path,
-            option_value_changed = option_tbl.value_changed and self._mod:StringToCallback(option_tbl.value_changed) or nil
+            module = self,
+            option_key = option_path
         }
     })
 end
@@ -248,7 +368,8 @@ function OptionModule:CreateOption(option_tbl, parent_node, option_path)
 end
 
 function OptionModule:CreateSubMenu(option_tbl, parent_node, option_path)
-    local menu_name = option_tbl.node_name or option_tbl.name .. self._option_key .. "Node"
+    local base_name = option_tbl.name .. self._name
+    local menu_name = option_tbl.node_name or  base_name .. "Node"
 
     local main_node = MenuHelperPlus:NewNode(nil, {
         name = menu_name
@@ -257,9 +378,10 @@ function OptionModule:CreateSubMenu(option_tbl, parent_node, option_path)
     self:InitializeNode(option_tbl, main_node, option_path == "" and option_tbl.name or option_path .. "/" .. option_tbl.name)
 
     MenuHelperPlus:AddButton({
-        id = menu_name .. "Button",
-        title = option_tbl.title_id or menu_name .. "ButtonTitleID",
-        node_name = parent_node._paramaters.name,
+        id = base_name .. "Button",
+        title = option_tbl.title_id or base_name .. "ButtonTitleID",
+        desc = option_tbl.desc_id or base_name .. "ButtonDescID",
+        node = parent_node,
         next_node = menu_name
     })
 
@@ -268,12 +390,11 @@ end
 
 function OptionModule:InitializeNode(option_tbl, node, option_path)
     option_path = option_path or ""
-
-    for i, sub_tbl in ipairs(option_tbl) do
+    for i, sub_tbl in pairs(option_tbl) do
         if sub_tbl._meta then
-            if sub_tbl._meta == "option" then
+            if sub_tbl._meta == "option" and not sub_tbl.hidden then
                 self:CreateOption(sub_tbl, node, option_path)
-            elseif sub_tbl._meta == "option_group" then
+            elseif sub_tbl._meta == "option_group" or sub_tbl._meta == "option_set" then
                 self:CreateSubMenu(sub_tbl, node, option_path)
             end
         end
@@ -281,18 +402,19 @@ function OptionModule:InitializeNode(option_tbl, node, option_path)
 end
 
 function OptionModule:BuildMenu()
-    Hooks:Add("MenuManagerSetupCustomMenus", self._mod.Name .. "Build" .. self._option_key .. "Menu", function(self_menu)
-        self._menu_name = self._config.options.node_name or self._mod.Name .. self._option_key .. "Node"
-
+    Hooks:Add("MenuManagerSetupCustomMenus", self._mod.Name .. "Build" .. self._name .. "Menu", function(self_menu)
+        local base_name = self._mod.Name .. self._name
+        self._menu_name = self._config.options.node_name or base_name .. "Node"
+        log("build menu")
         local main_node = MenuHelperPlus:NewNode(nil, {
             name = self._menu_name
         })
 
-        self:InitializeNode(self._config.options, main_node)
+        self:InitializeNode(self._storage, main_node)
 
         MenuHelperPlus:AddButton({
-            id = self._menu_name .. "Button",
-            title = self._config.options.title_id or self._menu_name .. "ButtonTitleID",
+            id = base_name .. "Button",
+            title = self._config.options.title_id or base_name .. "ButtonTitleID",
             node_name = LuaModManager.Constants._lua_mod_options_menu_id,
             next_node = self._menu_name
         })
@@ -304,11 +426,6 @@ end
 --Create MenuCallbackHandler callbacks
 Hooks:Add("BeardLibCreateCustomNodesAndButtons", "BeardLibOptionModuleCreateCallbacks", function(self_menu)
     MenuCallbackHandler.OptionModuleGeneric_ValueChanged = function(this, item)
-        item._paramaters:set_opt_value(item._paramaters.option_key, item:value())
-
-        if item._paramaters.option_value_changed then
-            item._paramaters:option_value_changed(item._paramaters.option_key, item:value())
-        end
+        OptionModule.SetValue(item._parameters.module, item._parameters.option_key, item:value())
     end
-
 end)

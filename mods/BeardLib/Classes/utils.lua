@@ -75,12 +75,12 @@ BeardLib.Utils = {}
 function BeardLib.Utils:StringToTable(global_tbl_name)
     local global_tbl
     if string.find(global_tbl_name, "%.") then
-        local global_tbl_split = string.split(global_tbl_name, ".")
+        local global_tbl_split = string.split(global_tbl_name, "[.]")
         global_tbl = _G
         for _, str in pairs(global_tbl_split) do
-            global_key = rawget(global_tbl, str)
-            if not global_key then
-                BeardLib:log("[ERROR] Key " .. str .. " does not exist in the specified global table.")
+            global_tbl = rawget(global_tbl, str)
+            if not global_tbl then
+                BeardLib:log("[ERROR] Key " .. str .. " does not exist in the current global table.")
                 return nil
             end
         end
