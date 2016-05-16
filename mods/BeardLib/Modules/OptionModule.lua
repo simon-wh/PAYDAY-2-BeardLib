@@ -122,16 +122,9 @@ function OptionModule:InitOptions(tbl, option_tbl)
                 end
 
                 for _, item in pairs(tbl) do
-                    local new_tbl = deep_clone(sub_tbl)
-                    new_tbl.items = nil
-                    new_tbl.items_tbl = nil
-                    new_tbl.populate_items = nil
-                    table.insert(sub_tbl, table.merge(new_tbl, {
-                        _meta = "option",
-                        default_value = item.default_value,
-                        name = item.name,
-                        title_id = item.title_id
-                    }))
+                    local new_tbl = self:RemoveAllNumberIndexes(deep_clone(sub_tbl.item_parameters))
+                    new_tbl._meta = "option"
+                    table.insert(sub_tbl, table.merge(new_tbl, item))
                 end
 
                 option_tbl[sub_tbl.name] = self:RemoveAllSubTables(clone(sub_tbl))
@@ -150,7 +143,7 @@ function OptionModule:_SetValue(tbl, name, value, full_name)
     tbl[name].value = value
 
     if tbl[name].value_changed then
-        tbl[name]:value_changed(full_name, value)
+        tbl[name].value_changed(full_name, value)
     end
 end
 
@@ -206,7 +199,6 @@ function OptionModule:GetValue(name, real)
         else
             return option.value
         end
-
     else
         return
     end
@@ -251,6 +243,22 @@ function OptionModule:Save()
 	file:close()
 end
 
+function OptionModule:RemoveAllNumberIndexes(tbl)
+    if type(tbl) ~= "table" then
+        return nil
+    end
+
+    for i, sub in pairs(tbl) do
+        if tonumber(i) ~= nil then
+            tbl[i] = nil
+        elseif type(sub) == "table" then
+            tbl[i] = self:RemoveAllNumberIndexes(sub)
+        end
+    end
+
+    return tbl
+end
+
 function OptionModule:RemoveNonNumberIndexes(tbl)
     if type(tbl) ~= "table" then
         return nil
@@ -265,34 +273,51 @@ function OptionModule:RemoveNonNumberIndexes(tbl)
     return tbl
 end
 
+function OptionModule:GetParameter(tbl, i)
+    if tbl[i] then
+        if type(tbl[i]) == "function" then
+            return tbl[i]()
+        else
+            return tbl[i]
+        end
+    end
+
+    return nil
+end
+
 function OptionModule:CreateSlider(option_tbl, parent_node, option_path)
     local id = self._mod.Name .. option_tbl.name
 
     option_path = option_path == "" and option_tbl.name or option_path .. "/" .. option_tbl.name
 
-    local enabled = true
+    local enabled = not self:GetParameter(option_tbl, "disabled")
 
     if option_tbl.enabled_callback then
         enabled = option_tbl:enabled_callback()
     end
 
-    MenuHelperPlus:AddSlider({
-        id = option_tbl.name,
-        title = option_tbl.title_id or id .. "TitleID",
+    local self_vars = {
+        option_key = option_path,
+        module = self
+    }
+
+    local merge_data = self:GetParameter(option_tbl, "merge_data") or {}
+    merge_data = self:RemoveAllNumberIndexes(merge_data)
+
+    MenuHelperPlus:AddSlider(table.merge({
+        id = self:GetParameter(option_tbl, "name"),
+        title = self:GetParameter(option_tbl, "title_id") or id .. "TitleID",
         node = parent_node,
-        desc = option_tbl.desc_id or id .. "DescID",
+        desc = self:GetParameter(option_tbl, "desc_id") or id .. "DescID",
         callback = "OptionModuleGeneric_ValueChanged",
-        min = option_tbl.min,
-        max = option_tbl.max,
-        step = option_tbl.step,
+        min = self:GetParameter(option_tbl, "min"),
+        max = self:GetParameter(option_tbl, "max"),
+        step = self:GetParameter(option_tbl, "step"),
         enabled = enabled,
         value = self:GetValue(option_path),
-        show_value = option_tbl.show_value,
-        merge_data = {
-            module = self,
-            option_key = option_path
-        }
-    })
+        show_value = self:GetParameter(option_tbl, "show_value"),
+        merge_data = self_vars
+    }, merge_data))
 end
 
 function OptionModule:CreateToggle(option_tbl, parent_node, option_path)
@@ -300,25 +325,30 @@ function OptionModule:CreateToggle(option_tbl, parent_node, option_path)
 
     option_path = option_path == "" and option_tbl.name or option_path .. "/" .. option_tbl.name
 
-    local enabled = true
+    local enabled = not self:GetParameter(option_tbl, "disabled")
 
     if option_tbl.enabled_callback then
         enabled = option_tbl:enabled_callback()
     end
 
-    MenuHelperPlus:AddToggle({
-        id = option_tbl.name,
-        title = option_tbl.title_id or id .. "TitleID",
+    local self_vars = {
+        option_key = option_path,
+        module = self
+    }
+
+    local merge_data = self:GetParameter(option_tbl, "merge_data") or {}
+    merge_data = self:RemoveAllNumberIndexes(merge_data)
+
+    MenuHelperPlus:AddToggle(table.merge({
+        id = self:GetParameter(option_tbl, "name"),
+        title = self:GetParameter(option_tbl, "title_id") or id .. "TitleID",
         node = parent_node,
-        desc = option_tbl.desc_id or id .. "DescID",
+        desc = self:GetParameter(option_tbl, "desc_id") or id .. "DescID",
         callback = "OptionModuleGeneric_ValueChanged",
         value = self:GetValue(option_path),
         enabled = enabled,
-        merge_data = {
-            module = self,
-            option_key = option_path
-        }
-    })
+        merge_data = self_vars
+    }, merge_data))
 end
 
 function OptionModule:CreateMultiChoice(option_tbl, parent_node, option_path)
@@ -326,33 +356,38 @@ function OptionModule:CreateMultiChoice(option_tbl, parent_node, option_path)
 
     option_path = option_path == "" and option_tbl.name or option_path .. "/" .. option_tbl.name
 
-    local options = option_tbl.values
+    local options = self:GetParameter(option_tbl, "values")
 
     if not options then
         BeardLib:log("[ERROR] Unable to get an option table for option " .. option_tbl.name)
     end
 
-    local enabled = true
+    local enabled = not self:GetParameter(option_tbl, "disabled")
 
     if option_tbl.enabled_callback then
         enabled = option_tbl:enabled_callback()
     end
 
-    MenuHelperPlus:AddMultipleChoice({
-        id = option_tbl.name,
-        title = option_tbl.title_id or id .. "TitleID",
+    local self_vars = {
+        option_key = option_path,
+        module = self
+    }
+
+    local merge_data = self:GetParameter(option_tbl, "merge_data") or {}
+    merge_data = self:RemoveAllNumberIndexes(merge_data)
+
+    MenuHelperPlus:AddMultipleChoice(table.merge({
+        id = self:GetParameter(option_tbl, "name"),
+        title = self:GetParameter(option_tbl, "title_id") or id .. "TitleID",
         node = parent_node,
-        desc = option_tbl.desc_id or id .. "DescID",
+        desc = self:GetParameter(option_tbl, "desc_id") or id .. "DescID",
         callback = "OptionModuleGeneric_ValueChanged",
         value = self:GetValue(option_path),
         items = options,
-        localized_items = option_tbl.localized_items,
+        localized_items = self:GetParameter(option_tbl, "localized_items"),
         enabled = enabled,
-        merge_data = {
-            module = self,
-            option_key = option_path
-        }
-    })
+        merge_data = self_vars
+    }, merge_data))
 end
 
 function OptionModule:CreateOption(option_tbl, parent_node, option_path)
@@ -367,20 +402,33 @@ function OptionModule:CreateOption(option_tbl, parent_node, option_path)
     end
 end
 
+function OptionModule:CreateDivider(parent_node, tbl)
+    local merge_data = self:GetParameter(tbl, "merge_data") or {}
+    merge_data = self:RemoveAllNumberIndexes(merge_data)
+    MenuHelperPlus:AddDivider(table.merge({
+        id = self:GetParameter(tbl, "name"),
+        node = parent_node,
+        size = self:GetParameter(tbl, "size")
+    }, merge_data))
+end
+
 function OptionModule:CreateSubMenu(option_tbl, parent_node, option_path)
-    local base_name = option_tbl.name .. self._name
-    local menu_name = option_tbl.node_name or  base_name .. "Node"
+    local name = self:GetParameter(option_tbl, "name")
+    local base_name = name .. self._name
+    local menu_name = self:GetParameter(option_tbl, "node_name") or  base_name .. "Node"
 
-    local main_node = MenuHelperPlus:NewNode(nil, {
+    local merge_data = self:GetParameter(option_tbl, "merge_data") or {}
+    merge_data = self:RemoveAllNumberIndexes(merge_data)
+    local main_node = MenuHelperPlus:NewNode(nil, table.merge({
         name = menu_name
-    })
+    }, merge_data))
 
-    self:InitializeNode(option_tbl, main_node, option_path == "" and option_tbl.name or option_path .. "/" .. option_tbl.name)
+    self:InitializeNode(option_tbl, main_node, option_path == "" and name or option_path .. "/" .. name)
 
     MenuHelperPlus:AddButton({
         id = base_name .. "Button",
-        title = option_tbl.title_id or base_name .. "ButtonTitleID",
-        desc = option_tbl.desc_id or base_name .. "ButtonDescID",
+        title = self:GetParameter(option_tbl, "title_id") or base_name .. "ButtonTitleID",
+        desc = self:GetParameter(option_tbl, "desc_id") or base_name .. "ButtonDescID",
         node = parent_node,
         next_node = menu_name
     })
@@ -390,10 +438,12 @@ end
 
 function OptionModule:InitializeNode(option_tbl, node, option_path)
     option_path = option_path or ""
-    for i, sub_tbl in pairs(option_tbl) do
+    for i, sub_tbl in ipairs(option_tbl) do
         if sub_tbl._meta then
             if sub_tbl._meta == "option" and not sub_tbl.hidden then
                 self:CreateOption(sub_tbl, node, option_path)
+            elseif sub_tbl._meta == "divider" then
+                self:CreateDivider(node, sub_tbl)
             elseif sub_tbl._meta == "option_group" or sub_tbl._meta == "option_set" then
                 self:CreateSubMenu(sub_tbl, node, option_path)
             end
@@ -404,17 +454,18 @@ end
 function OptionModule:BuildMenu()
     Hooks:Add("MenuManagerSetupCustomMenus", self._mod.Name .. "Build" .. self._name .. "Menu", function(self_menu)
         local base_name = self._mod.Name .. self._name
-        self._menu_name = self._config.options.node_name or base_name .. "Node"
-        log("build menu")
-        local main_node = MenuHelperPlus:NewNode(nil, {
+        self._menu_name = self:GetParameter(self._config.options, "node_name") or base_name .. "Node"
+        local merge_data = self:GetParameter(self._config.options, "merge_data") or {}
+        merge_data = self:RemoveAllNumberIndexes(merge_data)
+        local main_node = MenuHelperPlus:NewNode(nil, table.merge({
             name = self._menu_name
-        })
+        }, merge_data))
 
-        self:InitializeNode(self._storage, main_node)
+        self:InitializeNode(self._config.options, main_node)
 
         MenuHelperPlus:AddButton({
             id = base_name .. "Button",
-            title = self._config.options.title_id or base_name .. "ButtonTitleID",
+            title = self:GetParameter(self._config.options, "title_id") or base_name .. "ButtonTitleID",
             node_name = LuaModManager.Constants._lua_mod_options_menu_id,
             next_node = self._menu_name
         })
