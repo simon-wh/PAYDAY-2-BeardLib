@@ -3,6 +3,8 @@ Menu = Menu or class(MenuUI)
 function Menu:init( menu, params )
 	local MenuPanel = menu._panel  
     params.text_color = params.text_color or menu.text_color
+    params.items_size = menu.items_size or 16
+    params.highlight_color = menu.highlight_color or Color(0.2, 0.5, 1)
     if menu.tabs then
     	params.panel = MenuPanel:panel({ 
     		name = params.name,
@@ -51,6 +53,7 @@ function Menu:init( menu, params )
     end    
     table.merge(self, params)
     self.menu = menu
+    self.items = {}     
     self._items = {}     
     table.insert(menu._menus, self)   
     if menu.tabs then
@@ -64,7 +67,7 @@ end
 function Menu:mouse_pressed( button, x, y )
 	local menu = self.menu        
 	if menu._current_menu == self then
-		if menu._highlighted then
+		if menu._highlighted ~= self and menu._highlighted then
 			if menu._highlighted:mouse_pressed( button, x, y ) then
                 return true
             end
@@ -106,13 +109,13 @@ function Menu:mouse_moved( x, y )
         return 
     end
 	if self.menu._current_menu == self then
-		for _, item in ipairs(self._items) do
-			item:mouse_moved( x, y )
-		end     
 	    if self.menu._grabbed_scroll_bar then
 			local where = (y - self.menu._scroll_panel:world_top()) / (self.menu._scroll_panel:world_bottom() - self.menu._scroll_panel:world_top())
 			self:scroll(where * self.items_panel:h())
-	    end		  	
+	    end	       
+        for _, item in ipairs(self._items) do
+            item:mouse_moved( x, y )
+        end   	  	
     end
 	if self.panel and self.panel:child("bg"):inside(x,y) then
         self:SetHighlight(true)
@@ -124,7 +127,7 @@ end
 
 function Menu:mouse_released( button, x, y )
     if self.menu._current_menu == self then
-        if self.menu._highlighted then
+        if self.menu._highlighted ~= self and self.menu._highlighted then
             if self.menu._highlighted:mouse_released( button, x, y ) then
                 return true
             end
@@ -132,14 +135,16 @@ function Menu:mouse_released( button, x, y )
     end  
 end
 function Menu:key_press( o, k )	
-	if self.menu._current_menu == self and self.menu._highlighted then
+	if self.menu._current_menu == self and self.menu._highlighted ~= self and self.menu._highlighted then
 		self.menu._highlighted:key_press( o, k )
 	end
 end
 
 function Menu:SetHighlight( highlight )
-	self.highlight = highlight	
-	self.panel:child("bg"):set_color(highlight and Color(0.2, 0.5, 1) or self.menu.background_color or Color.white) 
+    if highlight then
+        self.menu._highlighted = self
+    end
+	self.panel:child("bg"):set_color(highlight and self.highlight_color or self.menu.background_color or Color.white) 
 end
 function Menu:SetVisible( visible )
 	self.items_panel:set_visible(visible)
@@ -153,28 +158,28 @@ end
 
 function Menu:AlignItem(Item)	
 	local h = 0 
-	for i, item in ipairs(self._items) do
-		h = h + item.panel:h()
+	for i, item in ipairs(self.items) do
+		h = h + item.panel:h() + 2
 	end
 	self.items_panel:set_h(h)
 	if #self._items == 1 then
 		Item.panel:set_top(0)
 	else
-		Item.panel:set_top(self._items[#self._items - 1].panel:bottom())
+		Item.panel:set_top(self.items[#self.items - 1].panel:bottom() + 2)
 	end
 	self:AlignScrollBar()
 end
 
 function Menu:AlignItems() --Makes search units stuck and crash sometimes..
     local h = 0 
-	for i, item in ipairs(self._items) do
+	for i, item in ipairs(self.items) do
 		if i == 1 then
 			item.panel:set_top(0)
 		else
-			item.panel:set_top(self._items[i - 1].panel:bottom())
+			item.panel:set_top(self.items[i - 1].panel:bottom() + 2)
 		end
-        h = h + item.panel:h()
-	end
+        h = h + item.panel:h() + 2
+ 	end
     self.items_panel:set_h(h)
     if self.items_panel:h() < self.menu._scroll_panel:h() then 	
 		self.items_panel:set_top(0)
@@ -200,59 +205,70 @@ function Menu:GetItem( name )
 end
 function Menu:scroll_up()
 	if self.items_panel:h() > self.menu._scroll_panel:h() then
-		self.items_panel:set_top(math.min(0, self.items_panel:top() + 20))
-		self:AlignScrollBar()
+		self.items_panel:set_top(math.min(0, self.items_panel:top() + 20))   
+        self:AlignScrollBar()
 		return true
-	end
+	end        
 end
 
 function Menu:scroll_down()
 	if self.items_panel:h() > self.menu._scroll_panel:h() then
-		self.items_panel:set_bottom(math.max(self.items_panel:bottom() - 20, self.menu._scroll_panel:h()))
-		self:AlignScrollBar()
+		self.items_panel:set_bottom(math.max(self.items_panel:bottom() - 20, self.menu._scroll_panel:h()))    
+        self:AlignScrollBar()
 		return true
-	end
+	end        
 end
 function Menu:scroll(y)
 	if self.items_panel:h() > self.menu._scroll_panel:h() then
 		self.items_panel:set_y(math.clamp(-y, -self.items_panel:h() ,0))
         self.items_panel:set_bottom(math.max(self.items_panel:bottom(), self.menu._scroll_panel:h())) 
-        self.items_panel:set_top(math.min(0, self.items_panel:top()))
-		self:AlignScrollBar()
+        self.items_panel:set_top(math.min(0, self.items_panel:top()))    
+        self:AlignScrollBar()
 		return true
-	end
+	end       
 end
 function Menu:ClearItems(label)
-    local temp = self._items
+    local temp = clone(self._items)
     self._items = {}
+    self.items = {}
     for k, item in pairs(temp) do
         if not label or item.label == label then
-            item.panel:parent():remove(item.panel)
+            if not item.group then
+                item.panel:parent():remove(item.panel)
+            end
         else
             table.insert(self._items, item)
+            if not item.group then
+                table.insert(self.items, item)
+            end
         end
     end
     self.items_panel:set_y(0)
+    self:AlignItems()
 end
 function Menu:RecreateItems()
-	for k, item in pairs(self._items) do
+	for k, item in pairs(self.items) do
 		item.panel:parent():remove(item.panel)
         self[item.type](self, item)
 	end
     self.items_panel:set_y(0)
 end
 function Menu:RemoveItem(name)
-	for k, item in pairs(self._items) do
+	for k, item in pairs(self.items) do
 		if item.name == name then
 			item.panel:parent():remove(item.panel)
-			table.remove(self._items, k)
+			table.remove(self.items, k)
 			self:AlignItems()
 		end
 	end
 end
 
 function Menu:Toggle( params )
-	local Item = Toggle:new(self, params)
+    local Item = Toggle:new(self, params)
+    return self:NewItem(Item) 
+end
+function Menu:ItemsGroup( params )
+	local Item = ItemsGroup:new(self, params)
     return self:NewItem(Item) 
 end
 function Menu:Button( params )
@@ -296,20 +312,19 @@ function Menu:GetIndex( name )
     return 1
 end 
 
-function Menu:NewItem( Item )
-    local temp = self._items
-    if Item.index then
-        self._items = {}
-        for k,v in pairs(temp) do
-            if Item.index == k then
-                table.insert(self._items, Item)
-            end
-            table.insert(self._items, v)
-        end
-        self:AlignItems()
+function Menu:NewItem( item )
+    if item.index then
+        table.insert(self._items, item.index, item)
     else    
-        table.insert(self._items, Item)
-        self:AlignItem(Item)   
+        table.insert(self._items, item)
+    end    
+    if not item.group then
+        if item.index then
+            table.insert(self.items, item.index, item)
+        else    
+            table.insert(self.items, item)
+        end
     end
-    return Item
+    self:AlignItems()
+    return item
 end

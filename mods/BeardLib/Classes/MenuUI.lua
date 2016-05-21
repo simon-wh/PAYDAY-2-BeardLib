@@ -185,7 +185,7 @@ function MenuUI:mouse_released( o, button, x, y )
         end
     end     
     if self.mouserelease then
-        self.mousereleased(o, k)
+        self.mouserelease(o, k)
     end    
 end
  
@@ -203,6 +203,9 @@ function MenuUI:mouse_moved( o, x, y )
 	for _, menu in ipairs( self._menus ) do
 		menu:mouse_moved( x, y )
 	end
+    if self.mousemoved then
+        self.mousemoved( x, y )
+    end         
 	self._old_x = x	
 	self._old_y = y	
 end

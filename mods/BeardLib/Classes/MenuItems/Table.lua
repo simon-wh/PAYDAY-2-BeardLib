@@ -16,8 +16,8 @@ function Table:init( menu, params )
         add_btn = params.panel:text({
             name = "add_btn",
             text = "+",
-            w = 16,
-            h = 16,
+            w = params.items_size - 2,
+            h = params.items_size - 2,
             layer = 6,
             align = "center",        
             color = params.text_color or Color.black,
@@ -42,7 +42,7 @@ function Table:init( menu, params )
     local caret = params.panel:rect({
         name = "caret",
         w = 1,
-        h = 14,
+        h = params.items_size - 4,
         alpha = 0,
         layer = 9,
     })
@@ -67,7 +67,7 @@ function Table:Add(k, v)
     self.items[k] = v
     local table_item = table_panel:panel({
         name = "item_" .. k,
-        h = 18,
+        h = self.items_size - 2,
         color = self.text_color or Color.black,
     })
     local key = table_item:text({
@@ -78,13 +78,13 @@ function Table:Add(k, v)
         layer = 1,        
         color = self.text_color or Color.black,
         font = "fonts/font_medium_mf",
-        font_size = 16
+        font_size = self.items_size - 2
     })
     if type(v) == "boolean" then
         local value = table_item:bitmap({
             name = "value",
-            w = table_item:h() -2,
-            h = table_item:h() -2,            
+            w = table_item:h(),
+            h = table_item:h(),            
             layer = 1,
             color = self.text_color or Color.black,
             texture = "guis/textures/menu_tickbox",
@@ -99,7 +99,7 @@ function Table:Add(k, v)
             layer = 1,
             color = self.text_color or Color.black,
             font = "fonts/font_medium_mf",
-            font_size = 16
+            font_size = self.items_size - 2
         })
         value:enter_text(callback(self, self, "enter_text")) 
         value:set_left(key:right())  
@@ -122,9 +122,9 @@ function Table:Remove(k)
 end
 function Table:Align()
     local table_panel = self.panel:child("table")
-    local h = 18
+    local h = self.items_size - 2
     for i, child in pairs(table_panel:children()) do
-        child:set_y((18 * (i - 1)))
+        child:set_y(((self.items_size - 2) * (i - 1)))
         h = h + child:h()
     end    
     self.panel:set_h(h + 8)
@@ -190,32 +190,7 @@ function Table:SetValue(items)
         end
     end
 end
-function Table:mouse_pressed( o, button, x, y )
-    if button == Idstring("0") then
-        if self._highlighted and self._highlighted.panel:inside(x,y) then
-            local value = self.items[self._highlighted.k]
-            if type(value) == "boolean" then
-                self:Set(self._highlighted.k, not value)
-                if self.callback then
-                    self.callback(self.parent, self)
-                end          
-                return true   
-            else
-                self.cantype = self._highlighted.panel:inside(x,y)
-                self:update_caret()
-                return self.cantype 
-            end
-        end        
-        if self.panel:child("add_btn") and self.panel:child("add_btn"):inside(x,y) then
-            self:show_add_value_dialog()
-            return true
-        end    
-        if self.panel:child("remove_btn") and self.panel:child("remove_btn"):inside(x,y) then
-            self:show_remove_value_dialog()
-            return true        
-        end
-    end
-end
+
 
 function Table:show_add_value_dialog(menu, item)
     local items = {             
@@ -315,7 +290,32 @@ function Table:key_press( o, k )
         self:update_caret()
     end
 end
-
+function Table:mouse_pressed( o, button, x, y )
+    if button == Idstring("0") then
+        if self._highlighted and self._highlighted.panel:inside(x,y) then
+            local value = self.items[self._highlighted.k]
+            if type(value) == "boolean" then
+                self:Set(self._highlighted.k, not value)
+                if self.callback then
+                    self.callback(self.parent, self)
+                end          
+                return true   
+            else
+                self.cantype = self._highlighted.panel:inside(x,y)
+                self:update_caret()
+                return self.cantype 
+            end
+        end        
+        if self.panel:child("add_btn") and self.panel:child("add_btn"):inside(x,y) then
+            self:show_add_value_dialog()
+            return true
+        end    
+        if self.panel:child("remove_btn") and self.panel:child("remove_btn"):inside(x,y) then
+            self:show_remove_value_dialog()
+            return true        
+        end
+    end
+end
 function Table:mouse_moved( x, y )
     self.super.mouse_moved(self, x, y, false)   
     self.cantype = self._highlighted and self._highlighted.panel:inside(x,y) and self.cantype or false
@@ -334,7 +334,9 @@ function Table:mouse_moved( x, y )
         end
     end
     self._highlighted = self._highlighted and (alive(self._highlighted.panel) and self._highlighted.panel:inside(x,y)) and self._highlighted or nil    
-    self:update_caret()
+	if self.cantype then
+		self:update_caret()
+	end
 end
 
 function Table:mouse_released( button, x, y )

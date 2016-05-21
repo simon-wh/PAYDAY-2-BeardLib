@@ -6,10 +6,9 @@ function TextBox:init( parent, params )
     self.type = "TextBox"
 	local bg = params.panel:bitmap({
         name = "textbg",
-        y = 4,
         x = -2,
         w = params.panel:w() / 1.5,
-        h = 16,
+        h = params.items_size,
         layer = 5,
         color = Color(0.5, 0.5, 0.5),
     })	
@@ -21,23 +20,23 @@ function TextBox:init( parent, params )
         w = bg:w() - 4,
 		wrap = true,
 		word_wrap = true,        
-	    h = 16,
+	    h = params.items_size - 2,
 	    layer = 8,
 	    color = params.text_color or Color.black,
 	    font = parent.font or "fonts/font_medium_mf",
-	    font_size = 16
+	    font_size = params.items_size - 2
 	}) 	
 	text:set_selection(text:text():len())		
     local caret = params.panel:rect({
         name = "caret",
         w = 1,
-        h = 16,
+        h = params.items_size - 2,
        	alpha = 0,
         layer = 9,
     })			
     text:enter_text(callback(self, self, "enter_text"))	
     caret:animate(callback(self, self, "blink"))
-    bg:set_right(params.panel:w() - 4)
+    bg:set_right(params.panel:w())
     text:set_center(bg:center())
 end
 
@@ -48,7 +47,7 @@ function TextBox:SetValue(value, reset_selection)
 	if reset_selection then
 		text:set_selection(text:text():len())		
 	end
-	self:update_caret()		
+	self:update_caret()
 	self.super.SetValue(self, value)
 end
 function TextBox:CheckText(text)
@@ -187,12 +186,15 @@ end
 function TextBox:update_caret()		
 	local text = self.panel:child("text")
 	local lines = math.max(1,text:number_of_lines())
-	self.panel:child("textbg"):set_h(16 * lines)
-	self.panel:child("text"):set_h(16 * lines)
- 	self.panel:set_h( self.panel:child("text"):h() + 8 )
-
+	self.panel:child("textbg"):set_h( self.items_size * lines)
+	self.panel:child("text"):set_h((self.items_size - 2) * lines)
+ 	self.panel:set_h( self.items_size * lines )
 	self.panel:child("text"):set_center(self.panel:child("textbg"):center())
- 	self.parent:AlignItems()
+    if self.group then
+        self.group:AlignItems()
+    else
+        self.parent:AlignItems()
+    end
 	
 	local s, e = text:selection()
 	local x, y, w, h = text:selection_rect()
@@ -213,8 +215,8 @@ function TextBox:mouse_moved( x, y )
         self:CheckText(text)
     end 
     self.panel:child("caret"):set_visible(self.cantype)
-    self:update_caret()
-    if not self.cantype then
+    
+    if self.cantype then
         self:SetValue(text:text())
     end
 end

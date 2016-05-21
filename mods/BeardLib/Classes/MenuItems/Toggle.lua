@@ -6,8 +6,8 @@ function Toggle:init( parent, params )
     params.panel:bitmap({
         name = "toggle",
         x = 2,
-        w = params.panel:h() -2,
-        h = params.panel:h() -2,
+        w = params.panel:h(),
+        h = params.panel:h(),
         layer = 6,
         color = params.text_color or Color.black,
         texture = "guis/textures/menu_tickbox",

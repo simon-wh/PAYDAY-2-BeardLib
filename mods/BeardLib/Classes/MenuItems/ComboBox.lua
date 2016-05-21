@@ -15,7 +15,7 @@ function ComboBox:init( menu, params )
         layer = 6,
         color = params.text_color or Color.black,
         font = "fonts/font_medium_mf",
-        font_size = 16
+        font_size = params.items_size - 2
     })
     local list_icon = params.panel:text({
         name = "list_icon",
@@ -24,23 +24,23 @@ function ComboBox:init( menu, params )
         valign = "right",
         align = "right",
         vertical = "center",
-        w = 18,
-        h = 18,
+        w = params.items_size - 4,
+        h = params.items_size - 4,
         layer = 6,
         color = params.text_color or Color.black,
         font = "fonts/font_medium_mf",
-        font_size = 16
+        font_size = params.items_size - 2
     })
+    local _,_,w,_ = list_icon:text_rect()
+    list_icon:set_w(w)
     local combo_bg = params.panel:bitmap({
         name = "combo_bg",
-        y = 4,
         x = -2,
         w = params.panel:w() / 1.5,
-        h = 16,
         layer = 5,
         color = Color(0.6, 0.6, 0.6),
     })
-    combo_bg:set_right(params.panel:w() - 4)
+    combo_bg:set_right(params.panel:w())
     combo_selected:set_center(combo_bg:center())
     local h = math.max(1, #params.items) * 18
     self.list = self.menu._fullscreen_ws_pnl:panel({
@@ -83,7 +83,7 @@ function ComboBox:init( menu, params )
         alpha = 0.5,
         h = bar_h,
     })
-    list_icon:set_left(combo_bg:right() - 12)
+    list_icon:set_right(combo_bg:right())
     self:CreateItems()
 end
 function ComboBox:SetItems( items )

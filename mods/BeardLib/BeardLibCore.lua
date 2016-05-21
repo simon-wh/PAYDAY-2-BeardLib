@@ -28,6 +28,7 @@ if not _G.BeardLib then
         "MenuItems/TextBox.lua",
         "MenuItems/Divider.lua",
         "MenuItems/Table.lua",
+        "MenuItems/ItemsGroup.lua",
         "MenuHelperPlus.lua",
         "UnitPropertiesItem.lua",
         "json_utils.lua",

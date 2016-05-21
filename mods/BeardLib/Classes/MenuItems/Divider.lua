@@ -2,11 +2,12 @@ Divider = Divider or class(Menu)
 
 function Divider:init( parent, params )
     self.type = "Divider"
-	params.panel = parent.items_panel:panel({ 
+    local panel = params.group and params.group.panel or parent.items_panel
+	params.panel = panel:panel({ 
 		name = params.name,
-      	y = 10, 
-      	x = 10,
-      	w = parent.items_panel:w() - 10,
+        y = 10, 
+        x = params.group and 4 or 10,
+        w = parent.items_panel:w() - (params.group and 15 or 10),
       	h = params.size or 30,
       	layer = 21,
     }) 
@@ -25,7 +26,7 @@ function Divider:init( parent, params )
 	params.div = params.panel:rect({
 		h = 2,
         x = 4,
-        visible = params.text ~= nil,
+        visible = params.color ~= false or params.text ~= nil,
 		color = params.color or params.text_color or Color.black
 	})    
     table.merge(self, params)
@@ -34,6 +35,9 @@ function Divider:init( parent, params )
 	self.div:set_w(w)
     self.parent = parent
     self.menu = parent.menu
+    if params.group then
+        params.group:AddItem(self)
+    end    
 end
 
 function Divider:SetValue(value)
