@@ -1,5 +1,6 @@
 function table.merge(og_table, new_table)
 	for i, data in pairs(new_table) do
+		i = type(data) == "table" and data.index or i
 		if type(data) == "table" and og_table[i] then
 			og_table[i] = table.merge(og_table[i], data)
 		else
@@ -7,6 +8,16 @@ function table.merge(og_table, new_table)
 		end
 	end
 	return og_table
+end
+
+function table.add(t, items)
+	for i, sub_item in ipairs(items) do
+		if t[i] then
+			table.insert(t, sub_item)
+		else
+			t[i] = sub_item
+		end
+	end
 end
 
 function string.key(str)
@@ -93,6 +104,45 @@ function BeardLib.Utils:StringToTable(global_tbl_name)
     end
 
     return global_tbl
+end
+
+function BeardLib.Utils:RemoveAllSubTables(tbl)
+    for i, sub in pairs(tbl) do
+        if type(sub) == "table" then
+            tbl[i] = nil
+        end
+    end
+    return tbl
+end
+
+function BeardLib.Utils:RemoveAllNumberIndexes(tbl)
+    if type(tbl) ~= "table" then
+        return nil
+    end
+
+    for i, sub in pairs(tbl) do
+        if tonumber(i) ~= nil then
+            tbl[i] = nil
+        elseif type(sub) == "table" then
+            tbl[i] = self:RemoveAllNumberIndexes(sub)
+        end
+    end
+
+    return tbl
+end
+
+function BeardLib.Utils:RemoveNonNumberIndexes(tbl)
+    if type(tbl) ~= "table" then
+        return nil
+    end
+
+    for i, _ in pairs(tbl) do
+        if tonumber(i) == nil then
+            tbl[i] = nil
+        end
+    end
+
+    return tbl
 end
 
 local encode_chars = {

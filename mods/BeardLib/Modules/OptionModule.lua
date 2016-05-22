@@ -82,21 +82,14 @@ function OptionModule:ApplyValues(tbl, value_tbl)
     end
 end
 
-function OptionModule:RemoveAllSubTables(tbl)
-    for i, sub in pairs(tbl) do
-        if type(sub) == "table" then
-            tbl[i] = nil
-        end
-    end
-    return tbl
-end
+
 
 function OptionModule:InitOptions(tbl, option_tbl)
     for i, sub_tbl in ipairs(tbl) do
         if sub_tbl._meta then
             if sub_tbl._meta == "option" then
                 if sub_tbl.type == "multichoice" then
-                    sub_tbl.values = sub_tbl.values_tbl and self._mod:StringToTable(sub_tbl.values_tbl) or self:RemoveNonNumberIndexes(sub_tbl.values)
+                    sub_tbl.values = sub_tbl.values_tbl and self._mod:StringToTable(sub_tbl.values_tbl) or BeardLib.Utils:RemoveNonNumberIndexes(sub_tbl.values)
                 end
 
                 if sub_tbl.value_changed then
@@ -110,10 +103,10 @@ function OptionModule:InitOptions(tbl, option_tbl)
                 option_tbl[sub_tbl.name] = sub_tbl
                 option_tbl[sub_tbl.name].value = sub_tbl.default_value
             elseif sub_tbl._meta == "option_group" then
-                option_tbl[sub_tbl.name] = self:RemoveAllSubTables(clone(sub_tbl))
+                option_tbl[sub_tbl.name] = BeardLib.Utils:RemoveAllSubTables(clone(sub_tbl))
                 self:InitOptions(sub_tbl, option_tbl[sub_tbl.name])
             elseif sub_tbl._meta == "option_set" then
-                local tbl = sub_tbl.items and self:RemoveNonNumberIndexes(sub_tbl.items)
+                local tbl = sub_tbl.items and BeardLib.Utils:RemoveNonNumberIndexes(sub_tbl.items)
                 if sub_tbl.items_tbl then
                     tbl = self._mod:StringToTable(sub_tbl.values_tbl)
                 elseif sub_tbl.populate_items then
@@ -122,12 +115,12 @@ function OptionModule:InitOptions(tbl, option_tbl)
                 end
 
                 for _, item in pairs(tbl) do
-                    local new_tbl = self:RemoveAllNumberIndexes(deep_clone(sub_tbl.item_parameters))
+                    local new_tbl = BeardLib.Utils:RemoveAllNumberIndexes(deep_clone(sub_tbl.item_parameters))
                     new_tbl._meta = "option"
                     table.insert(sub_tbl, table.merge(new_tbl, item))
                 end
 
-                option_tbl[sub_tbl.name] = self:RemoveAllSubTables(clone(sub_tbl))
+                option_tbl[sub_tbl.name] = BeardLib.Utils:RemoveAllSubTables(clone(sub_tbl))
                 self:InitOptions(sub_tbl, option_tbl[sub_tbl.name])
             end
         end
@@ -243,36 +236,6 @@ function OptionModule:Save()
 	file:close()
 end
 
-function OptionModule:RemoveAllNumberIndexes(tbl)
-    if type(tbl) ~= "table" then
-        return nil
-    end
-
-    for i, sub in pairs(tbl) do
-        if tonumber(i) ~= nil then
-            tbl[i] = nil
-        elseif type(sub) == "table" then
-            tbl[i] = self:RemoveAllNumberIndexes(sub)
-        end
-    end
-
-    return tbl
-end
-
-function OptionModule:RemoveNonNumberIndexes(tbl)
-    if type(tbl) ~= "table" then
-        return nil
-    end
-
-    for i, _ in pairs(tbl) do
-        if tonumber(i) == nil then
-            tbl[i] = nil
-        end
-    end
-
-    return tbl
-end
-
 function OptionModule:GetParameter(tbl, i)
     if tbl[i] then
         if type(tbl[i]) == "function" then
@@ -302,7 +265,7 @@ function OptionModule:CreateSlider(option_tbl, parent_node, option_path)
     }
 
     local merge_data = self:GetParameter(option_tbl, "merge_data") or {}
-    merge_data = self:RemoveAllNumberIndexes(merge_data)
+    merge_data = BeardLib.Utils:RemoveAllNumberIndexes(merge_data)
 
     MenuHelperPlus:AddSlider(table.merge({
         id = self:GetParameter(option_tbl, "name"),
@@ -337,7 +300,7 @@ function OptionModule:CreateToggle(option_tbl, parent_node, option_path)
     }
 
     local merge_data = self:GetParameter(option_tbl, "merge_data") or {}
-    merge_data = self:RemoveAllNumberIndexes(merge_data)
+    merge_data = BeardLib.Utils:RemoveAllNumberIndexes(merge_data)
 
     MenuHelperPlus:AddToggle(table.merge({
         id = self:GetParameter(option_tbl, "name"),
@@ -374,7 +337,7 @@ function OptionModule:CreateMultiChoice(option_tbl, parent_node, option_path)
     }
 
     local merge_data = self:GetParameter(option_tbl, "merge_data") or {}
-    merge_data = self:RemoveAllNumberIndexes(merge_data)
+    merge_data = BeardLib.Utils:RemoveAllNumberIndexes(merge_data)
 
     MenuHelperPlus:AddMultipleChoice(table.merge({
         id = self:GetParameter(option_tbl, "name"),
@@ -404,7 +367,7 @@ end
 
 function OptionModule:CreateDivider(parent_node, tbl)
     local merge_data = self:GetParameter(tbl, "merge_data") or {}
-    merge_data = self:RemoveAllNumberIndexes(merge_data)
+    merge_data = BeardLib.Utils:RemoveAllNumberIndexes(merge_data)
     MenuHelperPlus:AddDivider(table.merge({
         id = self:GetParameter(tbl, "name"),
         node = parent_node,
@@ -418,7 +381,7 @@ function OptionModule:CreateSubMenu(option_tbl, parent_node, option_path)
     local menu_name = self:GetParameter(option_tbl, "node_name") or  base_name .. "Node"
 
     local merge_data = self:GetParameter(option_tbl, "merge_data") or {}
-    merge_data = self:RemoveAllNumberIndexes(merge_data)
+    merge_data = BeardLib.Utils:RemoveAllNumberIndexes(merge_data)
     local main_node = MenuHelperPlus:NewNode(nil, table.merge({
         name = menu_name
     }, merge_data))
@@ -456,7 +419,7 @@ function OptionModule:BuildMenu()
         local base_name = self._mod.Name .. self._name
         self._menu_name = self:GetParameter(self._config.options, "node_name") or base_name .. "Node"
         local merge_data = self:GetParameter(self._config.options, "merge_data") or {}
-        merge_data = self:RemoveAllNumberIndexes(merge_data)
+        merge_data = BeardLib.Utils:RemoveAllNumberIndexes(merge_data)
         local main_node = MenuHelperPlus:NewNode(nil, table.merge({
             name = self._menu_name
         }, merge_data))
