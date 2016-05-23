@@ -116,8 +116,10 @@ function BeardLib.Utils:RemoveAllSubTables(tbl)
 end
 
 function BeardLib.Utils:RemoveAllNumberIndexes(tbl)
+	if not tbl then return nil end
+
     if type(tbl) ~= "table" then
-        return nil
+        return tbl
     end
 
     for i, sub in pairs(tbl) do
@@ -132,8 +134,10 @@ function BeardLib.Utils:RemoveAllNumberIndexes(tbl)
 end
 
 function BeardLib.Utils:RemoveNonNumberIndexes(tbl)
+	if not tbl then return nil end
+	
     if type(tbl) ~= "table" then
-        return nil
+        return tbl
     end
 
     for i, _ in pairs(tbl) do

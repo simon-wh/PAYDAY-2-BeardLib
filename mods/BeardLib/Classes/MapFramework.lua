@@ -23,7 +23,7 @@ function MapFramework:LoadMaps()
 
             if file.DirectoryExists(BeardLib.MapsPath .. "/" .. cfile_split[1]) then
                 data = ScriptSerializer:from_custom_xml(cfile:read("*all"))
-                self:LoadMapConfig(cfile_split[1], data)
+                self:LoadMapConfig(cfile_split[1], BeardLib.MapsPath .. "/" .. cfile_split[1] .. "/", data)
             else
                 BeardLib:log("[ERROR] Map must have an assets folder. Map: " .. cfile_split[1])
             end
@@ -31,7 +31,7 @@ function MapFramework:LoadMaps()
     end
 end
 
-function MapFramework:LoadMapConfig(name, data)
+function MapFramework:LoadMapConfig(name, path, data)
     self._maps[name]  = data
 
     --[[if not tweak_data then
@@ -39,14 +39,14 @@ function MapFramework:LoadMapConfig(name, data)
     else]]
         for _, sub_data in ipairs(data) do
             if self._config_calls[sub_data._meta] then
-                self._config_calls[sub_data._meta](name, sub_data)
+                self._config_calls[sub_data._meta](name, path, sub_data)
             end
         end
     --end
 end
 
-local load_localization_file = function(key, directory, file)
-    local localiz_path = BeardLib.MapsPath .. "/" .. key .. "/" .. directory .. "/" .. file
+local load_localization_file = function(path, directory, file)
+    local localiz_path = path .. directory .. "/" .. file
     if io.file_is_readable(localiz_path) then
         BeardLib:log("Loaded: " .. localiz_path)
         LocalizationManager:load_localization_file(localiz_path)
@@ -57,7 +57,7 @@ local load_localization_file = function(key, directory, file)
     end
 end
 
-function MapFramework:LoadLocalizationConfig(name, data)
+function MapFramework:LoadLocalizationConfig(name, path, data)
     Hooks:Add("LocalizationManagerPostInit", name .. "LevelLocalization", function(loc)
         local file_loaded = false
 
@@ -71,12 +71,12 @@ function MapFramework:LoadLocalizationConfig(name, data)
         end
 
         if not file_loaded and data.default then
-            load_localization_file(name, data.directory, data.default)
+            load_localization_file(path, data.directory, data.default)
         end
 	end)
 end
 
-function MapFramework:LoadContactConfig(name, data)
+function MapFramework:LoadContactConfig(name, path, data)
     Hooks:PostHook(NarrativeTweakData, "init", data.id .. "AddContactData", function(self)
         self.contacts[data.id] = {
             name_id = data.name_id,
@@ -87,7 +87,7 @@ function MapFramework:LoadContactConfig(name, data)
     end)
 end
 
-function MapFramework:LoadNarrativeConfig(name, data)
+function MapFramework:LoadNarrativeConfig(name, path, data)
     Hooks:PostHook(NarrativeTweakData, "init", data.id .. "AddNarrativeData", function(self)
         self.jobs[data.id] = {
             name_id = data.name_id or "heist_" .. data.id .. "_name",
@@ -97,9 +97,9 @@ function MapFramework:LoadNarrativeConfig(name, data)
             chain = {},
             briefing_event = data.briefing_event,
             debrief_event = data.debrief_event,
-            crimenet_callouts = data.crimenet_callouts,
-            crimenet_videos = data.crimenet_videos,
-            payout = data.payout or {0.001,0.001,0.001,0.001,0.001},
+            crimenet_callouts = BeardLib.Utils:RemoveNonNumberIndexes(data.crimenet_callouts),
+            crimenet_videos = BeardLib.Utils:RemoveNonNumberIndexes(data.crimenet_videos),
+            payout = BeardLib.Utils:RemoveNonNumberIndexes(data.payout) or {0.001,0.001,0.001,0.001,0.001},
             contract_cost = BeardLib.Utils:RemoveNonNumberIndexes(data.contract_cost) or {0.001,0.001,0.001,0.001,0.001},
             experience_mul = BeardLib.Utils:RemoveNonNumberIndexes(data.experience_mul) or {0.001,0.001,0.001,0.001,0.001},
             contract_visuals = {
@@ -107,7 +107,9 @@ function MapFramework:LoadNarrativeConfig(name, data)
                 max_mission_xp = BeardLib.Utils:RemoveNonNumberIndexes(data.max_mission_xp) or {0.001,0.001,0.001,0.001,0.001}
             }
         }
-
+        if data.merge_data then
+            table.merge(self.jobs[data.id], data.merge_data)
+        end
         for i, level in ipairs(data.chain) do
             self.jobs[data.id].chain[i] = level
         end
@@ -116,13 +118,13 @@ function MapFramework:LoadNarrativeConfig(name, data)
     end)
 end
 
-function MapFramework:LoadLevelConfig(name, data)
+function MapFramework:LoadLevelConfig(name, path, data)
     if Global.level_data and Global.level_data.level_id == data.id then
         if data.include then
             for i, include_data in ipairs(data.include) do
                 if include_data.file then
                     local file_split = string.split(include_data.file, "[.]")
-                    BeardLib:ReplaceScriptData(BeardLib.MapsPath .. "/" .. name .. "/" .. include_data.file, include_data.type, "levels/mods/" .. data.id .. "/" .. file_split[1], file_split[2], true)
+                    BeardLib:ReplaceScriptData(path .. (data.include.directory and (data.include.directory .. "/") or "") .. include_data.file, include_data.type, "levels/mods/" .. data.id .. "/" .. file_split[1], file_split[2], true)
                 end
             end
         end
@@ -130,13 +132,29 @@ function MapFramework:LoadLevelConfig(name, data)
         if data.script_data_mods then
             for i, mod_data in ipairs(data.script_data_mods) do
                 if mod_data._meta == "mod" then
-                    BeardLib:ReplaceScriptData(BeardLib.MapsPath .. "/" .. name .. "/" .. mod_data.replacement, mod_data.replacement_type, mod_data.target_path, mod_data.target_ext, mod_data.add, mod_data.merge_mode)
+                    BeardLib:ReplaceScriptData(path .. mod_data.replacement, mod_data.replacement_type, mod_data.target_path, mod_data.target_ext, mod_data.add, mod_data.merge_mode)
+                end
+            end
+        end
+
+        if data.hooks then
+            local dest_tbl = _posthooks
+            for _, hook in ipairs(data.hooks) do
+                if io.file_is_readable(path .. hook.file) then
+                    local req_script = hook.source_file:lower()
+
+                    dest_tbl[req_script] = dest_tbl[req_script] or {}
+                    table.insert(dest_tbl[req_script], {
+                        mod_path = path,
+                        script = path .. hook.file
+                    })
+                else
+                    self:log("[ERROR] Level hook file does not exist! File: " .. path .. hook.file)
                 end
             end
         end
     end
     Hooks:PostHook(LevelsTweakData, "init", data.id .. "AddLevelData", function(self)
-
         self[data.id] = {
             name_id = data.name_id or "heist_" .. data.id .. "_name",
             briefing_id = data.brief_id or "heist_" .. data.id .. "_brief",
@@ -150,7 +168,7 @@ function MapFramework:LoadLevelConfig(name, data)
             cube = data.cube,
             ghost_bonus = data.ghost_bonus,
             max_bags = data.max_bags,
-            allowed_gamemodes = data.allowed_gamemodes
+            allowed_gamemodes = BeardLib.Utils:RemoveNonNumberIndexes(data.allowed_gamemodes)
         }
 
         table.insert(self._level_index, data.id)

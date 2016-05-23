@@ -23,6 +23,7 @@ if not _G.BeardLib then
         "MenuDialog.lua",
         "MenuItems/Menu.lua",
         "MenuItems/Item.lua",
+        "MenuItems/ItemsGroup.lua",
         "MenuItems/Toggle.lua",
         "MenuItems/ComboBox.lua",
         "MenuItems/Slider.lua",
