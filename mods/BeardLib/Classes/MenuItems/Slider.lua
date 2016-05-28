@@ -1,10 +1,10 @@
 Slider = Slider or class(Item)
 
-function Slider:init( menu, params )    
+function Slider:init( menu, params )
     params.value = params.value or 1
 	self.super.init( self, menu, params )
     self.type = "Slider"
-    self.step = self.step or 1
+    self.step = params.step or 1
     local item_width = params.panel:w() / 1.5
 	local slider_bg = params.panel:bitmap({
         name = "slider_bg",

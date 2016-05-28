@@ -1,79 +1,16 @@
-MapFramework = MapFramework or class()
+MapFramework = MapFramework or class(FrameworkBase)
 
 function MapFramework:init()
     BeardLib.managers.MapFramework = self
+    self._asset_folder_required = true
+    self._directory = BeardLib.MapsPath
     self._config_calls = {
-        ["localization"] = callback(self, self, "LoadLocalizationConfig"),
-        ["contact"] = callback(self, self, "LoadContactConfig"),
-        ["narrative"] = callback(self, self, "LoadNarrativeConfig"),
-        ["level"] = callback(self, self, "LoadLevelConfig")
+        localization = {func = callback(self, self, "LoadLocalizationConfig"), requires_assets = true},
+        contact = {func = callback(self, self, "LoadContactConfig")},
+        narrative = {func = callback(self, self, "LoadNarrativeConfig")},
+        level = {func = callback(self, self, "LoadLevelConfig"), requires_assets = true}
     }
-
-    self._maps = {}
-    self:LoadMaps()
-end
-
-function MapFramework:LoadMaps()
-    local files = file.GetFiles(BeardLib.MapsPath)
-    if files then
-        for _, config_file in pairs(files) do
-            local cfile_split = string.split(config_file, "%.")
-            local cfile = io.open(BeardLib.MapsPath .. "/" .. config_file, 'r')
-            local data
-
-            if file.DirectoryExists(BeardLib.MapsPath .. "/" .. cfile_split[1]) then
-                data = ScriptSerializer:from_custom_xml(cfile:read("*all"))
-                self:LoadMapConfig(cfile_split[1], BeardLib.MapsPath .. "/" .. cfile_split[1] .. "/", data)
-            else
-                BeardLib:log("[ERROR] Map must have an assets folder. Map: " .. cfile_split[1])
-            end
-        end
-    end
-end
-
-function MapFramework:LoadMapConfig(name, path, data)
-    self._maps[name]  = data
-
-    --[[if not tweak_data then
-        BeardLib:log("[ERROR] Tweak Data has not been intialized before this map was attempted to be loaded")
-    else]]
-        for _, sub_data in ipairs(data) do
-            if self._config_calls[sub_data._meta] then
-                self._config_calls[sub_data._meta](name, path, sub_data)
-            end
-        end
-    --end
-end
-
-local load_localization_file = function(path, directory, file)
-    local localiz_path = path .. directory .. "/" .. file
-    if io.file_is_readable(localiz_path) then
-        BeardLib:log("Loaded: " .. localiz_path)
-        LocalizationManager:load_localization_file(localiz_path)
-        return true
-    else
-        BeardLib:log("[ERROR] Localization file is not readable by the lua state! File: " .. localiz_path)
-        return false
-    end
-end
-
-function MapFramework:LoadLocalizationConfig(name, path, data)
-    Hooks:Add("LocalizationManagerPostInit", name .. "LevelLocalization", function(loc)
-        local file_loaded = false
-
-        for i, def in ipairs(data) do
-            if Idstring(def.language):key() == SystemInfo:language():key() then
-                if load_localization_file(name, data.directory, def.file) then
-                    file_loaded = true
-                    break
-                end
-            end
-        end
-
-        if not file_loaded and data.default then
-            load_localization_file(path, data.directory, data.default)
-        end
-	end)
+    self.super.init(self)
 end
 
 function MapFramework:LoadContactConfig(name, path, data)

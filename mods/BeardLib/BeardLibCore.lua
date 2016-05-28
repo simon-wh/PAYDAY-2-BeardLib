@@ -17,6 +17,7 @@ if not _G.BeardLib then
     self._replace_script_data = {}
 
     self.classes = {
+        "FrameworkBase.lua",
         "MapFramework.lua",
         "Definitions.lua",
         "MenuUI.lua",
