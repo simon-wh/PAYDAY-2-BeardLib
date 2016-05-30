@@ -1,6 +1,5 @@
 FrameworkBase = FrameworkBase or class()
 FrameworkBase._directory = ""
-FrameworkBase._asset_folder_required = false
 
 function FrameworkBase:init()
     self._loaded_configs = {}
@@ -12,41 +11,28 @@ function FrameworkBase:init()
 end
 
 function FrameworkBase:Load()
-    local files = file.GetFiles(self._directory)
-    if files then
-        for _, config_file in pairs(files) do
-            local cfile_split = string.split(config_file, "%.")
-            if #cfile_split >= 2 then
-                local cfile = io.open(self._directory .. "/" .. config_file, 'r')
-                local data
-
-                if cfile_split[#cfile_split] == "xml" then
-                    data = ScriptSerializer:from_custom_xml(cfile:read("*all"))
-                else
-                    data = json.custom_decode(cfile:read("*all"))
-                end
-
-                local has_assets = file.DirectoryExists(self._directory .. "/" .. cfile_split[1])
-
-                if not has_assets and self._asset_folder_required then
-                    BeardLib:log("[ERROR] Framework Config must have an assets folder. Config: " .. cfile_split[1])
-                else
-                    self:LoadConfig(cfile_split[1], self._directory .. "/" .. cfile_split[1] .. "/", data, has_assets)
-                end
+    local dirs = file.GetDirectories(self._directory)
+    if dirs then
+        for _, dir in pairs(dirs) do
+            local main_file = self._directory .. "/" .. dir .. "/main.xml"
+            if io.file_is_readable(main_file) then
+                local cfile = io.open(main_file, 'r')
+                local data = ScriptSerializer:from_custom_xml(cfile:read("*all"))
+                self:LoadConfig(dir, self._directory .. "/" .. dir .. "/", data)
+            else
+                BeardLib:log("[ERROR] Could not read the main.xml file from " .. self._directory .. "/" .. dir)
             end
         end
     end
 end
 
-function FrameworkBase:LoadConfig(name, path, data, assets)
-    self._loaded_configs[name] = {data = data, path = path, assets = assets, name = name}
+function FrameworkBase:LoadConfig(name, path, data)
+    self._loaded_configs[name] = {data = data, path = path, name = name}
 
     for _, sub_data in ipairs(data) do
         local cfg_tbl = self._config_calls[sub_data._meta]
-        if cfg_tbl and (not cfg_tbl.requires_assets or cfg_tbl.requires_assets and assets) then
+        if cfg_tbl then
             cfg_tbl.func(name, path, sub_data)
-        elseif cfg_tbl and cfg_tbl.requires_assets then
-            BeardLib:log(string.format("[ERROR] Config table does not have the required assets. (%s)", sub_data._meta))
         else
             BeardLib:log("[ERROR] No Config call for the subtable: " .. sub_data._meta)
         end
