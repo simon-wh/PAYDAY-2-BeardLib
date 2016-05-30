@@ -83,3 +83,21 @@ function FrameworkBase:LoadLocalizationConfig(name, path, data)
         end
 	end)
 end
+
+function FrameworkBase:LoadHooks(name, data)
+    local path = self._directory .. "/" .. name .. "/" .. (data.directory and data.directory .. "/" or "")
+    local dest_tbl = _posthooks
+    for _, hook in ipairs(data) do
+        if io.file_is_readable(path .. hook.file) then
+            local req_script = hook.source_file:lower()
+
+            dest_tbl[req_script] = dest_tbl[req_script] or {}
+            table.insert(dest_tbl[req_script], {
+                mod_path = path,
+                script = path .. hook.file
+            })
+        else
+            BeardLib:log("[ERROR] Hook file does not exist! File: " .. path .. hook.file)
+        end
+    end
+end

@@ -20,6 +20,128 @@ function table.add(t, items)
 	end
 end
 
+function table.search(tbl, search_term)
+    local search_terms = {search_term}
+
+    if string.find(search_term, "/") then
+        search_terms = string.split(search_term, "/")
+    end
+
+	local index
+    for _, term in pairs(search_terms) do
+        local term_parts = {term}
+        if string.find(term, ";") then
+            term_parts = string.split(term, ";")
+        end
+        local search_keys = {
+            params = {}
+        }
+        for _, term in pairs(term_parts) do
+            if string.find(term, "=") then
+                local term_split = string.split(term, "=")
+                search_keys.params[term_split[1]] = loadstring("return " .. term_split[2])()
+
+				if not search_keys.params[term_split[1]] then
+					BeardLib:log(string.format("[ERROR] An error occured while trying to parse the value %s", term_split[2]))
+				end
+            elseif not search_keys._meta then
+                search_keys._meta = term
+            end
+        end
+
+		local found_tbl = false
+        for i, sub in ipairs(tbl) do
+            if type(sub) == "table" then
+                local valid = true
+                if search_keys._meta and sub._meta ~= search_keys._meta then
+                    valid = false
+                end
+
+                for k, v in pairs(search_keys.params) do
+                    if sub[k] == nil or (sub[k] and sub[k] ~= v) then
+                        valid = false
+                        break
+                    end
+                end
+
+                if valid then
+                    if i == 1 then
+                        if tbl[sub._meta] then
+                            tbl[sub._meta] = sub
+                        end
+                    end
+
+                    tbl = sub
+					found_tbl = true
+					index = i
+                    break
+                end
+            end
+        end
+		if not found_tbl then
+			return nil
+		end
+    end
+	return index, tbl
+end
+
+function table.custom_insert(tbl, add_tbl, pos_phrase)
+	if not pos_phrase then
+		table.insert(tbl, add_tbl)
+		return
+	end
+
+	if tonumber(pos_phrase) ~= nil then
+		table.insert(tbl, pos_phrase, add_tbl)
+	else
+		local phrase_split = string.split(pos_phrase, ":")
+		local i, _ = table.search(tbl, phrase_split[2])
+
+		if not i then
+			BeardLib:log(string.format("[ERROR] Could not find table for relative placement. %s", pos_phrase))
+			table.insert(tbl, add_tbl)
+		else
+			i = phrase_split[1] == "after" and i + 1 or i
+			table.insert(tbl, i, add_tbl)
+		end
+	end
+end
+
+local special_params = {
+    "search",
+	"index"
+}
+
+function table.script_merge(base_tbl, new_tbl)
+    for i, sub in pairs(new_tbl) do
+        if type(sub) == "table" then
+            if tonumber(i) ~= nil then
+                if sub.search then
+                    local index, found_tbl = table.search(base_tbl, sub.search)
+                    if found_tbl then
+                        table.script_merge(found_tbl, sub)
+                    end
+                else
+                    table.custom_insert(base_tbl, sub, sub.index)
+					if not base_tbl[sub._meta] then
+						base_tbl[sub._meta] = sub
+					end
+					for _, param in pairs(special_params) do
+						sub[param] = nil
+					end
+                end
+            --[[else
+                if not base_tbl[i] then
+                    base_tbl[i] = sub
+                end]]--
+            end
+        elseif not table.contains(special_params, i) then
+            base_tbl[i] = sub
+        end
+    end
+end
+
+
 function string.key(str)
     local ids = Idstring(str)
     local key = ids:key()
@@ -135,7 +257,7 @@ end
 
 function BeardLib.Utils:RemoveNonNumberIndexes(tbl)
 	if not tbl then return nil end
-	
+
     if type(tbl) ~= "table" then
         return tbl
     end

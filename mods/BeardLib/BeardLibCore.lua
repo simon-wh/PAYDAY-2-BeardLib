@@ -160,12 +160,7 @@ function BeardLib:ProcessScriptData(PackManager, filepath, extension, data)
             self:log("Replace: " .. tostring(filepath:key()))
 
             local fileType = replacement.load_type
-            local file
-            if fileType == "binary" then
-                file = io.open(replacement.path, "rb")
-            else
-                file = io.open(replacement.path, 'r')
-            end
+            local file = io.open(replacement.path, fileType == "binary" and "rb" or 'r')
 
             if file then
                 local read_data = file:read("*all")
@@ -190,11 +185,13 @@ function BeardLib:ProcessScriptData(PackManager, filepath, extension, data)
                 end
 
                 if new_data then
-                    if (replacement.merge_mode) then
+                    if replacement.merge_mode then
                         if replacement.merge_mode == "merge" then
                             table.merge(data, new_data)
+                        elseif replacement.merge_mode == "script_merge" then
+                            log("script_merge")
+                            table.script_merge(data, new_data)
                         elseif replacement.merge_mode == "add" then
-                            log("table add")
                             table.add(data, new_data)
                         end
                     else

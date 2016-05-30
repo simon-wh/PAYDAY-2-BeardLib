@@ -5,23 +5,23 @@ LocalizationModule.type_name = "LocalizationModule"
 
 function LocalizationModule:init(core_mod, config)
     self.super.init(self, core_mod, config)
-    
+
     self.LocalizationDirectory = self._config.directory and self._mod.ModPath .. self._config.directory or self._mod.ModPath
-    
+
     if not string.ends(self.LocalizationDirectory, "/") then
         self.LocalizationDirectory = self.LocalizationDirectory .. "/"
     end
-    
+
     self.Localizations = {}
-    
-    for _, tbl in pairs(self._config) do
+
+    for _, tbl in ipairs(self._config) do
         if tbl._meta == "localization" then
             self.Localizations[Idstring(tbl.language):key()] = tbl.file
         end
     end
-    
+
     self.DefaultLocalization = self._config.default or self.Localizations[1]
-    
+
     self:RegisterHooks()
 end
 

@@ -42,7 +42,8 @@ function MapFramework:LoadNarrativeConfig(name, path, data)
             contract_visuals = {
                 min_mission_xp = BeardLib.Utils:RemoveNonNumberIndexes(data.min_mission_xp) or {0.001,0.001,0.001,0.001,0.001},
                 max_mission_xp = BeardLib.Utils:RemoveNonNumberIndexes(data.max_mission_xp) or {0.001,0.001,0.001,0.001,0.001}
-            }
+            },
+            allowed_gamemodes = BeardLib.Utils:RemoveNonNumberIndexes(data.allowed_gamemodes)
         }
         if data.merge_data then
             table.merge(self.jobs[data.id], data.merge_data)
@@ -75,20 +76,7 @@ function MapFramework:LoadLevelConfig(name, path, data)
         end
 
         if data.hooks then
-            local dest_tbl = _posthooks
-            for _, hook in ipairs(data.hooks) do
-                if io.file_is_readable(path .. hook.file) then
-                    local req_script = hook.source_file:lower()
-
-                    dest_tbl[req_script] = dest_tbl[req_script] or {}
-                    table.insert(dest_tbl[req_script], {
-                        mod_path = path,
-                        script = path .. hook.file
-                    })
-                else
-                    self:log("[ERROR] Level hook file does not exist! File: " .. path .. hook.file)
-                end
-            end
+            self:LoadHooks(name, data.hooks)
         end
     end
     Hooks:PostHook(LevelsTweakData, "init", data.id .. "AddLevelData", function(self)
@@ -104,8 +92,7 @@ function MapFramework:LoadLevelConfig(name, path, data)
             custom_packages = data.packages,
             cube = data.cube,
             ghost_bonus = data.ghost_bonus,
-            max_bags = data.max_bags,
-            allowed_gamemodes = BeardLib.Utils:RemoveNonNumberIndexes(data.allowed_gamemodes)
+            max_bags = data.max_bags
         }
 
         table.insert(self._level_index, data.id)
