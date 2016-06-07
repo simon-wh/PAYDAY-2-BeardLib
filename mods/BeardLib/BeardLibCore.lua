@@ -224,6 +224,7 @@ function BeardLib:ProcessScriptData(PackManager, filepath, extension, data)
 end
 
 function BeardLib:ReplaceScriptData(replacement, replacement_type, target_path, target_ext, extra_data)
+    extra_data = extra_data or {}
     self._replace_script_data[target_path:key()] = self._replace_script_data[target_path:key()] or {}
     self._replace_script_data[target_path:key()][target_ext:key()] = self._replace_script_data[target_path:key()][target_ext:key()] or {}
     --[[if self._replace_script_data[path:key()][target_ext:key()] then
