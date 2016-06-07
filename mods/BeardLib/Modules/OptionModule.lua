@@ -10,8 +10,6 @@ function OptionModule:init(core_mod, config)
 
     self._storage = {}
 
-    self._name = config.name or self.type_name
-
     if not self._config.options then
         BeardLib:log(string.format("[ERROR] Mod: %s, must contain an options table for the OptionModule", self._mod.Name))
         return
@@ -23,8 +21,8 @@ function OptionModule:init(core_mod, config)
 
     self:InitOptions(self._config.options, self._storage)
 
-    if self._config.build_menu then
-        self:BuildMenu()
+    if self._config.auto_build_menu then
+        self:BuildMenuHook()
     end
 
     if self._config.auto_load then
@@ -248,7 +246,7 @@ function OptionModule:GetParameter(tbl, i)
     return nil
 end
 
-function OptionModule:CreateSlider(option_tbl, parent_node, option_path)
+function OptionModule:CreateSlider(parent_node, option_tbl, option_path)
     local id = self._mod.Name .. option_tbl.name
 
     option_path = option_path == "" and option_tbl.name or option_path .. "/" .. option_tbl.name
@@ -283,7 +281,7 @@ function OptionModule:CreateSlider(option_tbl, parent_node, option_path)
     }, merge_data))
 end
 
-function OptionModule:CreateToggle(option_tbl, parent_node, option_path)
+function OptionModule:CreateToggle(parent_node, option_tbl, option_path)
     local id = self._mod.Name .. option_tbl.name
 
     option_path = option_path == "" and option_tbl.name or option_path .. "/" .. option_tbl.name
@@ -314,7 +312,7 @@ function OptionModule:CreateToggle(option_tbl, parent_node, option_path)
     }, merge_data))
 end
 
-function OptionModule:CreateMultiChoice(option_tbl, parent_node, option_path)
+function OptionModule:CreateMultiChoice(parent_node, option_tbl, option_path)
     local id = self._mod.Name .. option_tbl.name
 
     option_path = option_path == "" and option_tbl.name or option_path .. "/" .. option_tbl.name
@@ -353,13 +351,13 @@ function OptionModule:CreateMultiChoice(option_tbl, parent_node, option_path)
     }, merge_data))
 end
 
-function OptionModule:CreateOption(option_tbl, parent_node, option_path)
+function OptionModule:CreateOption(parent_node, option_tbl, option_path)
     if option_tbl.type == "number" then
-        self:CreateSlider(option_tbl, parent_node, option_path)
+        self:CreateSlider(parent_node, option_tbl, option_path)
     elseif option_tbl.type == "bool" or option_tbl.type == "boolean" then
-        self:CreateToggle(option_tbl, parent_node, option_path)
+        self:CreateToggle(parent_node, option_tbl, option_path)
     elseif option_tbl.type == "multichoice" then
-        self:CreateMultiChoice(option_tbl, parent_node, option_path)
+        self:CreateMultiChoice(parent_node, option_tbl, option_path)
     else
         BeardLib:log("[ERROR] No supported type for option " .. tostring(option_tbl.name) .. " in mod " .. self._mod.Name)
     end
@@ -375,9 +373,10 @@ function OptionModule:CreateDivider(parent_node, tbl)
     }, merge_data))
 end
 
-function OptionModule:CreateSubMenu(option_tbl, parent_node, option_path)
+function OptionModule:CreateSubMenu(parent_node, option_tbl, option_path)
+    option_path = option_path or ""
     local name = self:GetParameter(option_tbl, "name")
-    local base_name = name .. self._name
+    local base_name = name and name .. self._name or self._mod.Name .. self._name
     local menu_name = self:GetParameter(option_tbl, "node_name") or  base_name .. "Node"
 
     local merge_data = self:GetParameter(option_tbl, "merge_data") or {}
@@ -386,7 +385,7 @@ function OptionModule:CreateSubMenu(option_tbl, parent_node, option_path)
         name = menu_name
     }, merge_data))
 
-    self:InitializeNode(option_tbl, main_node, option_path == "" and name or option_path .. "/" .. name)
+    self:InitializeNode(main_node, option_tbl, name and (option_path == "" and name or option_path .. "/" .. name) or "")
 
     MenuHelperPlus:AddButton({
         id = base_name .. "Button",
@@ -399,47 +398,37 @@ function OptionModule:CreateSubMenu(option_tbl, parent_node, option_path)
     managers.menu:add_back_button(main_node)
 end
 
-function OptionModule:InitializeNode(option_tbl, node, option_path)
+function OptionModule:InitializeNode(node, option_tbl, option_path)
+    option_tbl = option_tbl or self._config.options
     option_path = option_path or ""
     for i, sub_tbl in ipairs(option_tbl) do
         if sub_tbl._meta then
             if sub_tbl._meta == "option" and not sub_tbl.hidden then
-                self:CreateOption(sub_tbl, node, option_path)
+                self:CreateOption(node, sub_tbl, option_path)
             elseif sub_tbl._meta == "divider" then
                 self:CreateDivider(node, sub_tbl)
             elseif sub_tbl._meta == "option_group" or sub_tbl._meta == "option_set" then
-                self:CreateSubMenu(sub_tbl, node, option_path)
+                self:CreateSubMenu(node, sub_tbl, option_path)
             end
         end
     end
 end
 
-function OptionModule:BuildMenu()
-    Hooks:Add("MenuManagerSetupCustomMenus", self._mod.Name .. "Build" .. self._name .. "Menu", function(self_menu)
-        local base_name = self._mod.Name .. self._name
-        self._menu_name = self:GetParameter(self._config.options, "node_name") or base_name .. "Node"
-        local merge_data = self:GetParameter(self._config.options, "merge_data") or {}
-        merge_data = BeardLib.Utils:RemoveAllNumberIndexes(merge_data)
-        local main_node = MenuHelperPlus:NewNode(nil, table.merge({
-            name = self._menu_name
-        }, merge_data))
-
-        self:InitializeNode(self._config.options, main_node)
-
-        MenuHelperPlus:AddButton({
-            id = base_name .. "Button",
-            title = self:GetParameter(self._config.options, "title_id") or base_name .. "ButtonTitleID",
-            node_name = LuaModManager.Constants._lua_mod_options_menu_id,
-            next_node = self._menu_name
-        })
-
-        managers.menu:add_back_button(main_node)
+function OptionModule:BuildMenuHook()
+    Hooks:Add("MenuManagerSetupCustomMenus", self._mod.Name .. "Build" .. self._name .. "Menu", function(self_menu, nodes)
+        self:BuildMenu(nodes[LuaModManager.Constants._lua_mod_options_menu_id])
     end)
+end
+
+function OptionModule:BuildMenu(node)
+    self:CreateSubMenu(node, self._config.options)
 end
 
 --Create MenuCallbackHandler callbacks
 Hooks:Add("BeardLibCreateCustomNodesAndButtons", "BeardLibOptionModuleCreateCallbacks", function(self_menu)
     MenuCallbackHandler.OptionModuleGeneric_ValueChanged = function(this, item)
-        OptionModule.SetValue(item._parameters.module, item._parameters.option_key, item:value())
+        local value = item:value()
+        if type(item:value()) == "string" then value = value == "on" end
+        OptionModule.SetValue(item._parameters.module, item._parameters.option_key, value)
     end
 end)

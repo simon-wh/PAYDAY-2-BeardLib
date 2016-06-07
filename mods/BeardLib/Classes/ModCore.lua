@@ -26,27 +26,40 @@ function ModCore:LoadConfigFile(path)
 end
 
 function ModCore:init_modules()
+    local modules = {}
     if self._modules then
         for i, module_tbl in ipairs(self._modules) do
             local node_class = CoreSerialize.string_to_classtable(module_tbl._meta)
 
             if node_class then
-                self[module_tbl.name or node_class.type_name] = node_class:new(self, module_tbl)
+                local node_obj = node_class:new(self, module_tbl)
+                if self[node_obj._name] then
+                    self:log("The name of module: %s already exists in the mod table, please make sure this is a unique name!", node_obj._name)
+                end
+
+                self[node_obj._name] = node_obj
+                table.insert(modules, node_obj)
             end
+        end
+    end
+
+    for _, module in pairs(modules) do
+        if module.post_init then
+            module:post_init()
         end
     end
 end
 
-function ModCore:GetRealFilePath(path)
+function ModCore:GetRealFilePath(path, lookup_tbl)
     if string.find(path, "%$") then
-        return string.gsub(path, "%$(%w+)%$", self)
+        return string.gsub(path, "%$(%w+)%$", lookup_tbl or self)
     else
         return path
     end
 end
 
-function ModCore:log(str)
-    log("[" .. self.Name .. "] " .. str)
+function ModCore:log(str, ...)
+    log("[" .. self.Name .. "] " .. string.format(str, ...))
 end
 
 function ModCore:StringToTable(str)
@@ -57,7 +70,7 @@ function ModCore:StringToTable(str)
     return BeardLib.Utils:StringToTable(str)
 end
 
-function ModCore:StringToCallback(str)
+function ModCore:StringToCallback(str, self_tbl)
     local split = string.split(str, ":")
 
     local func_name = table.remove(split)
@@ -67,7 +80,7 @@ function ModCore:StringToCallback(str)
     local global_tbl = self:StringToTable(global_tbl_name)
     --PrintTable(global_tbl)
     if global_tbl then
-        return callback(global_tbl, global_tbl, func_name)
+        return callback(self_tbl or global_tbl, global_tbl, func_name)
     else
         return nil
     end

@@ -2,7 +2,7 @@ if not _G.BeardLib then
     _G.BeardLib = {}
 
     local self = BeardLib
-
+    self.Name = "BeardLib"
     self.ModPath = ModPath
     self.SavePath = SavePath
     self.sequence_mods = self.sequence_mods or {}
@@ -36,6 +36,7 @@ if not _G.BeardLib then
         "json_utils.lua",
         "utils.lua",
         "ModCore.lua",
+        "ModAssetUpdateManager.lua",
         "ModuleBase.lua"
     }
 
@@ -60,6 +61,17 @@ function BeardLib:init()
     if not file.DirectoryExists(self.MapsPath) then
         os.execute("mkdir " .. self.MapsPath)
     end
+
+    LocalizationModule:new(self, {
+        directory = "Localization",
+        {
+            _meta = "localization",
+            file = "english.txt",
+            language = "english"
+        }
+    })
+
+    self.managers.asset_update = ModAssetUpdateManager:new()
 
     --Load ScriptData mod_overrides
     self:LoadModOverridePlus()
@@ -157,54 +169,52 @@ function BeardLib:ProcessScriptData(PackManager, filepath, extension, data)
 
     if self._replace_script_data[filepath:key()] and self._replace_script_data[filepath:key()][extension:key()] then
         for _, replacement in pairs(self._replace_script_data[filepath:key()][extension:key()]) do
-            self:log("Replace: " .. tostring(filepath:key()))
 
-            local fileType = replacement.load_type
-            local file = io.open(replacement.path, fileType == "binary" and "rb" or 'r')
+            if not replacement.data.use_clbk or replacement.data.use_clbk() then
+                self:log("Replace: " .. tostring(filepath:key()))
 
-            if file then
-                local read_data = file:read("*all")
+                local fileType = replacement.load_type
+                local file = io.open(replacement.path, fileType == "binary" and "rb" or 'r')
 
-                local new_data
-                if fileType == "json" then
-                    new_data = json.custom_decode(read_data)
-                elseif fileType == "xml" then
-                    new_data = ScriptSerializer:from_xml(read_data)
-                elseif fileType == "custom_xml" then
-                    new_data = ScriptSerializer:from_custom_xml(read_data)
-                elseif fileType == "generic_xml" then
-                    new_data = ScriptSerializer:from_generic_xml(read_data)
-                elseif fileType == "binary" then
-                    new_data = ScriptSerializer:from_binary(read_data)
-                else
-                    new_data = json.custom_decode(read_data)
-                end
+                if file then
+                    local read_data = file:read("*all")
 
-                if extension == Idstring("nav_data") then
-                    self:RemoveMetas(new_data)
-                end
-
-                if new_data then
-                    if replacement.merge_mode then
-                        if replacement.merge_mode == "merge" then
-                            table.merge(data, new_data)
-                        elseif replacement.merge_mode == "script_merge" then
-                            log("script_merge")
-                            table.script_merge(data, new_data)
-                        elseif replacement.merge_mode == "add" then
-                            table.add(data, new_data)
-                        end
+                    local new_data
+                    if fileType == "json" then
+                        new_data = json.custom_decode(read_data)
+                    elseif fileType == "xml" then
+                        new_data = ScriptSerializer:from_xml(read_data)
+                    elseif fileType == "custom_xml" then
+                        new_data = ScriptSerializer:from_custom_xml(read_data)
+                    elseif fileType == "generic_xml" then
+                        new_data = ScriptSerializer:from_generic_xml(read_data)
+                    elseif fileType == "binary" then
+                        new_data = ScriptSerializer:from_binary(read_data)
                     else
-                        data = new_data
+                        new_data = json.custom_decode(read_data)
                     end
+
+                    if extension == Idstring("nav_data") then
+                        self:RemoveMetas(new_data)
+                    end
+
+                    if new_data then
+                        if replacement.data.merge_mode then
+                            if replacement.data.merge_mode == "merge" then
+                                table.merge(data, new_data)
+                            elseif replacement.data.merge_mode == "script_merge" then
+                                table.script_merge(data, new_data)
+                            elseif replacement.data.merge_mode == "add" then
+                                table.add(data, new_data)
+                            end
+                        else
+                            data = new_data
+                        end
+                    end
+                    file:close()
                 end
-                file:close()
             end
         end
-    end
-
-    if extension == Idstring("objective") then
-        SaveTable(data, "objectives.txt")
     end
 
     Hooks:Call("BeardLibPreProcessScriptData", PackManager, filepath, extension, data)
@@ -213,7 +223,7 @@ function BeardLib:ProcessScriptData(PackManager, filepath, extension, data)
     return data
 end
 
-function BeardLib:ReplaceScriptData(replacement, replacement_type, target_path, target_ext, add, merge_mode)
+function BeardLib:ReplaceScriptData(replacement, replacement_type, target_path, target_ext, extra_data)
     self._replace_script_data[target_path:key()] = self._replace_script_data[target_path:key()] or {}
     self._replace_script_data[target_path:key()][target_ext:key()] = self._replace_script_data[target_path:key()][target_ext:key()] or {}
     --[[if self._replace_script_data[path:key()][target_ext:key()] then
@@ -221,15 +231,15 @@ function BeardLib:ReplaceScriptData(replacement, replacement_type, target_path, 
     end]]--
     log(replacement .. "|" .. target_path .. "|" .. target_ext)
     if not DB:has(target_ext, target_path) then
-        add = true
+        extra_data.add = true
     end
 
-    if add then
+    if extra_data.add then
         BeardLib.ScriptExceptions[target_path:key()] = BeardLib.ScriptExceptions[target_path:key()] or {}
         BeardLib.ScriptExceptions[target_path:key()][target_ext:key()] = true
     end
 
-    table.insert(self._replace_script_data[target_path:key()][target_ext:key()], {path = replacement, load_type = replacement_type, merge_mode = merge_mode})
+    table.insert(self._replace_script_data[target_path:key()][target_ext:key()], {path = replacement, load_type = replacement_type, data = extra_data})
 end
 
 function BeardLib:update(t, dt)

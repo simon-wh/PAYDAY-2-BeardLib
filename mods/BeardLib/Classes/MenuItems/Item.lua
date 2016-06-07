@@ -2,26 +2,26 @@ Item = Item or class(Menu)
 
 function Item:init( parent, params )
     self.type = "button"
-    params.enabled = params.enabled or true
+    if params.enabled == nil then params.enabled = true end
     params.text_color = params.text_color or parent.text_color
     params.text_color = params.text_color or parent.text_color
     params.items_size = parent.items_size
     local panel = params.group and params.group.panel or parent.items_panel
-	  params.panel = panel:panel({ 
+	  params.panel = panel:panel({
 		    name = params.name,
-      	y = 10, 
+      	y = 10,
       	x = params.group and 4 or 10,
       	w = parent.items_panel:w() - (params.group and 15 or 10),
       	h = params.items_size,
       	layer = 20,
-    }) 
+    })
     local Marker = params.panel:rect({
-      	name = "bg", 
+      	name = "bg",
       	color = Color.white:with_alpha(0),
       	h = self.items_size,
-      	halign="grow", 
-      	valign="grow", 
-        layer = -1 
+      	halign="grow",
+      	valign="grow",
+        layer = -1
     })
     params.title = params.panel:text({
 	    name = "title",

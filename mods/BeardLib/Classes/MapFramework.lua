@@ -62,7 +62,7 @@ function MapFramework:LoadLevelConfig(name, path, data)
             for i, include_data in ipairs(data.include) do
                 if include_data.file then
                     local file_split = string.split(include_data.file, "[.]")
-                    BeardLib:ReplaceScriptData(path .. (data.include.directory and (data.include.directory .. "/") or "") .. include_data.file, include_data.type, "levels/mods/" .. data.id .. "/" .. file_split[1], file_split[2], true)
+                    BeardLib:ReplaceScriptData(BeardLib.Utils.Path.Combine(path, data.include.directory, include_data.file), include_data.type, "levels/mods/" .. data.id .. "/" .. file_split[1], file_split[2], {add = true})
                 end
             end
         end
@@ -70,7 +70,7 @@ function MapFramework:LoadLevelConfig(name, path, data)
         if data.script_data_mods then
             for i, mod_data in ipairs(data.script_data_mods) do
                 if mod_data._meta == "mod" then
-                    BeardLib:ReplaceScriptData(path .. mod_data.replacement, mod_data.replacement_type, mod_data.target_path, mod_data.target_ext, mod_data.add, mod_data.merge_mode)
+                    BeardLib:ReplaceScriptData(BeardLib.Utils.Path.Combine(path, mod_data.replacement), mod_data.replacement_type, mod_data.target_path, mod_data.target_ext, {add = mod_data.add, merge_mode = mod_data.merge_mode})
                 end
             end
         end

@@ -39,8 +39,8 @@ function table.search(tbl, search_term)
         for _, term in pairs(term_parts) do
             if string.find(term, "=") then
                 local term_split = string.split(term, "=")
-                search_keys.params[term_split[1]] = loadstring("return " .. term_split[2])()
-
+				log(tostring(term_split[2]))
+                search_keys.params[term_split[1]] = assert(loadstring("return " .. term_split[2]))()
 				if not search_keys.params[term_split[1]] then
 					BeardLib:log(string.format("[ERROR] An error occured while trying to parse the value %s", term_split[2]))
 				end
@@ -293,9 +293,38 @@ function BeardLib.Utils:UrlEncode(str)
 	return string.gsub(str, ".", encode_chars)
 end
 
+BeardLib.Utils.Path = {}
+
+BeardLib.Utils.Path._seperator_char = "/"
+
+function BeardLib.Utils.Path.Combine(...)
+	local paths = {...}
+	local all_parts = {}
+	for _, path_part in pairs(paths) do
+		if (string.find(path_part, BeardLib.Utils.Path._seperator_char)) then
+			for _, sub_path_part in pairs(string.split(path_part, BeardLib.Utils.Path._seperator_char)) do
+				if sub_path_part == ".." then
+					table.remove(all_parts)
+				else
+					table.insert(all_parts, sub_path_part)
+				end
+			end
+		else
+			if path_part == ".." then
+				table.remove(all_parts)
+			else
+				table.insert(all_parts, path_part)
+			end
+		end
+	end
+
+	return table.concat(all_parts, BeardLib.Utils.Path._seperator_char)
+end
+
 BeardLib.Utils.Math = {}
 
 function BeardLib.Utils.Math:Round(val, dp)
 	local mult = 10^(dp or 0)
-	return math.floor(val * mult + 0.5) / mult
+	local rounded = math.floor(val * mult + 0.5) / mult
+	return rounded
 end

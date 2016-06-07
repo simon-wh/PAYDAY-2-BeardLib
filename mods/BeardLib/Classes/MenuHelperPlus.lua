@@ -128,16 +128,17 @@ function MenuHelperPlus:CreateAndInsertLegendData(nodeData, params)
 end
 
 function MenuHelperPlus:GetNode(menu_name, node_name)
-    return managers.menu._registered_menus[menu_name or managers.menu._is_start_menu and "menu_main" or "menu_pause"] and managers.menu._registered_menus[menu_name or managers.menu._is_start_menu and "menu_main" or "menu_pause"].logic._data._nodes[node_name] or nil
+	menu_name = menu_name or managers.menu._is_start_menu and "menu_main" or "menu_pause"
+    return managers.menu._registered_menus[menu_name] and managers.menu._registered_menus[menu_name].logic._data._nodes[node_name] or nil
 end
 
 function MenuHelperPlus:AddButton(params)
 	local node = params.node or self:GetNode(params.menu, params.node_name)
 	if not node then
-        BeardLib:log("[ERROR] Unable to find node " .. params.node_name)
+        BeardLib:log("[ERROR] Unable to find node " .. tostring(params.node_name))
         return
     end
-	
+
 	local data = {
 		type = "CoreMenuItem.Item",
 	}
