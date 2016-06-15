@@ -39,7 +39,6 @@ function table.search(tbl, search_term)
         for _, term in pairs(term_parts) do
             if string.find(term, "=") then
                 local term_split = string.split(term, "=")
-				log(tostring(term_split[2]))
                 search_keys.params[term_split[1]] = assert(loadstring("return " .. term_split[2]))()
 				if not search_keys.params[term_split[1]] then
 					BeardLib:log(string.format("[ERROR] An error occured while trying to parse the value %s", term_split[2]))

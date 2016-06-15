@@ -51,3 +51,26 @@ function WorldDefinition:_load_continent_package(path)
 
     WorldDefinition_load_continent_package(self, path)
 end
+
+local WorldDefinition_create_environment = WorldDefinition._create_environment
+function WorldDefinition:_create_environment(data, offset)
+
+    local shape_data
+    if data.dome_occ_shapes and data.dome_occ_shapes[1] and data.dome_occ_shapes[1].world_dir then
+        shape_data = data.dome_occ_shapes[1]
+        data.dome_occ_shapes = nil
+    end
+
+    WorldDefinition_create_environment(self, data, offset)
+
+	if shape_data then
+		local corner = shape_data.position
+		local size = Vector3(shape_data.depth, shape_data.width, shape_data.height)
+		local texture_name = shape_data.world_dir .. "cube_lights/" .. "dome_occlusion"
+		if not DB:has(Idstring("texture"), Idstring(texture_name)) then
+			Application:error("Dome occlusion texture doesn't exists, probably needs to be generated", texture_name)
+		else
+			managers.environment_controller:set_dome_occ_params(corner, size, texture_name)
+		end
+	end
+end

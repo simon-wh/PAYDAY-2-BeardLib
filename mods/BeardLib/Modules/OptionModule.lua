@@ -80,8 +80,6 @@ function OptionModule:ApplyValues(tbl, value_tbl)
     end
 end
 
-
-
 function OptionModule:InitOptions(tbl, option_tbl)
     for i, sub_tbl in ipairs(tbl) do
         if sub_tbl._meta then
