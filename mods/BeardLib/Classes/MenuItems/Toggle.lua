@@ -5,9 +5,8 @@ function Toggle:init( parent, params )
     self.type = "Toggle"
     params.panel:bitmap({
         name = "toggle",
-        x = 2,
-        w = params.panel:h(),
-        h = params.panel:h(),
+        w = params.items_size,
+        h = params.items_size,
         layer = 6,
         color = params.text_color or Color.black,
         texture = "guis/textures/menu_tickbox",
@@ -37,9 +36,7 @@ end
 function Toggle:key_press( o, k )
 	if k == Idstring("enter") then
 		self:SetValue(not self.value)
-		if self.callback then
-			self.callback(self.menu, self)
-		end
+		self:RunCallback()
 	end
 end
 

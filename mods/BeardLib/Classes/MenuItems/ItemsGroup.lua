@@ -1,39 +1,25 @@
 ItemsGroup = ItemsGroup or class(Menu)
 
 function ItemsGroup:init( parent, params )
-    params.enabled = params.enabled or true
-    params.text_color = params.text_color or parent.text_color
     params.items = params.items or {}
+    params.type = "ItemsGroup"
     params.panel = parent.items_panel:panel({ 
         name = params.name,
         y = 10, 
-        x = 10,
         h = math.max(#params.items, 1) * parent.items_size,
-        layer = 21,
     }) 
-    params.panel:rect({
-        x = 4,
-        halign = "grow",
-        valign = "grow",       
-        alpha = 0.2,
-    })
-    params.toggle = params.panel:text({
+    params.toggle = params.panel:bitmap({
         name = "toggle",
-        text = "^",
-        vertical = "center",
-        align = "left",
-        rotation = 180,
-        x = 6,
-        y = -4,
         w = parent.items_size,
         h = parent.items_size,
-        layer = 6,
+        texture = "guis/textures/menu_arrows",
         color = params.text_color or Color.black,
-        font = "fonts/font_large_mf",
-        font_size = parent.items_size
+        rotation = -90,
+        x = 4,
+        y = -1,
+        texture_rect = {24,0,24,24},
+        layer = 6,
     })    
-    local _,_,w,h = params.toggle:text_rect()
-    params.toggle:set_size(w,h)
     params.title = params.panel:text({
         name = "title",
         text = params.text,
@@ -47,6 +33,11 @@ function ItemsGroup:init( parent, params )
         font_size = parent.items_size
     })
     local _,_,w,h = params.title:text_rect()
+    params.panel:rect({
+        name = "bg",
+        h = h,
+        color = parent.highlight_color,     
+    })    
     params.title:set_w(w)
     params.option = params.option or params.name    
     table.merge(self, params)
@@ -67,8 +58,9 @@ function ItemsGroup:key_press( o, k )
 
 end
 function ItemsGroup:mouse_pressed( button, x, y )
-    if self.panel:inside(x,y) then
+    if button == Idstring("0") and alive(self.panel) and self.panel:inside(x,y) then
         self:Toggle()
+        return true
     end
 end
 function ItemsGroup:AddItem( item )
@@ -85,9 +77,10 @@ function ItemsGroup:Toggle()
     end
     for i, item in ipairs(self.items) do
         item:SetEnabled(not self.closed)
+        item.panel:set_visible(not self.closed)
     end
-    self.toggle:set_rotation(self.closed and 90 or 180)
-    self.toggle:set_y(self.closed and -2 or -4)
+    self.toggle:set_rotation(self.closed and -180 or -90)
+    self.panel:child("bg"):set_visible(not self.closed)
     self:AlignItems()
 end
 function ItemsGroup:AlignItems(text)
@@ -118,7 +111,10 @@ function ItemsGroup:mouse_moved( x, y, highlight )
     if not self.menu._openlist and not self.menu._slider_hold then
         if self.panel:inside(x, y) then
             self.menu:SetHelp(self.help)
-            self.menu._highlighted = self   
+            self.menu._highlighted = self 
+            self.panel:child("bg"):show()  
+        elseif self.closed then
+            self.panel:child("bg"):hide()
         end 
         self.menu._highlighted = self.menu._highlighted and (alive(self.menu._highlighted.panel) and self.menu._highlighted.panel:inside(x,y)) and self.menu._highlighted or nil
     end   

@@ -1,14 +1,15 @@
 Table = Table or class(Item)
 
-function Table:init( menu, params )   
+function Table:init( parent, params )   
     params.items = params.items or {}
-    self.super.init( self, menu, params )    
+    self.super.init( self, parent, params )    
     self.type = "Table"
     local _,_,_,h = self.title:text_rect()
     local table_panel = params.panel:panel({
         name = "table",
+        w = params.panel:w() - self.padding,
+        x = self.padding / 2,
         y = h + 4,
-        w = params.panel:w() - 4,
         layer = 5,
     })
     local add_btn
@@ -34,7 +35,7 @@ function Table:init( menu, params )
             h = 16,
             align = "center",
             layer = 6,
-            color = params.text_color or Color.black,
+            color = params.text_color or parent.text_color,
             font = "fonts/font_medium_mf",
             font_size = 16
         })
@@ -76,7 +77,7 @@ function Table:Add(k, v)
         w = table_panel:w() / 2,
         x = 4,
         layer = 1,        
-        color = self.text_color or Color.black,
+        color = self.text_color or self.parent.text_color,
         font = "fonts/font_medium_mf",
         font_size = self.items_size - 2
     })
@@ -86,7 +87,7 @@ function Table:Add(k, v)
             w = table_item:h(),
             h = table_item:h(),            
             layer = 1,
-            color = self.text_color or Color.black,
+            color = self.text_color or self.parent.text_color,
             texture = "guis/textures/menu_tickbox",
             texture_rect = v == true and {24,0,24,24} or {0,0,24,24},
         })
@@ -97,7 +98,7 @@ function Table:Add(k, v)
             text = tostring(v),
             w = table_panel:w() / 2,
             layer = 1,
-            color = self.text_color or Color.black,
+            color = self.text_color or self.parent.text_color,
             font = "fonts/font_medium_mf",
             font_size = self.items_size - 2
         })
@@ -106,7 +107,7 @@ function Table:Add(k, v)
     end 
     local table_item_bg = table_item:rect({
         name = "bg",
-        color = Color(0.6, 0.6, 0.6),
+        color = self.parent.background_color / 1.2,
         layer = 0,
     })    
     self:Align()
@@ -149,9 +150,7 @@ function Table:enter_text( text, s )
         text:replace_text(s)
         self:update_caret()
         self:Set(self._highlighted.k, text:text())       
-        if self.callback then
-          self.callback(self.parent, self)
-        end
+        self:RunCallback()
     end
 end
 function Table:Set(k, v)
@@ -264,9 +263,7 @@ function Table:RemoveValueCallback(items)
             self:Remove(item.name)
         end
     end
-    if self.callback then
-        self.callback(self.parent, self)
-    end                          
+    self:RunCallback()                       
 end
 function Table:update_caret()
     if self.cantype then
@@ -296,9 +293,7 @@ function Table:mouse_pressed( o, button, x, y )
             local value = self.items[self._highlighted.k]
             if type(value) == "boolean" then
                 self:Set(self._highlighted.k, not value)
-                if self.callback then
-                    self.callback(self.parent, self)
-                end          
+                self:RunCallback()       
                 return true   
             else
                 self.cantype = self._highlighted.panel:inside(x,y)
@@ -323,10 +318,10 @@ function Table:mouse_moved( x, y )
         local table_item = self.panel:child("table"):child("item_" .. k)
         if table_item then
             if table_item:inside(x,y) then
-                table_item:child("bg"):set_color(Color(0, 0.5, 1))
+                table_item:child("bg"):set_color(self.parent.highlight_color)
                 self._highlighted = {panel = table_item, k = k}
             else
-                table_item:child("bg"):set_color(Color(0.6, 0.6, 0.6))
+                table_item:child("bg"):set_color(self.parent.background_color / 1.2)
             end
             if not self.cantype and type(v) ~= "boolean" and type(v) ~= "table" then
                 self:Set(k, table_item:child("value"):text())

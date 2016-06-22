@@ -1,11 +1,13 @@
 MenuDialog = MenuDialog or class()
 function MenuDialog:init()
     self._dialog = MenuUI:new({
-        w = 500,
-        h = 160,
         layer = 999,
-        position = "center",
-        tabs = false,
+        alpha = 0.6,
+        text_color = Color.white,
+        normal_color = Color("33476a"):with_alpha(0),
+        highlight_color = Color("33476a"),
+        background_color = Color(0.2, 0.2, 0.2),        
+        position = "Center",
         create_items = callback(self, self, "create_items")
     })    
 end
@@ -13,6 +15,7 @@ end
 function MenuDialog:create_items(Menu)   
     self._menu = Menu:NewMenu({
         name = "dialog",           
+        visible = true,
     }) 
 end
 
@@ -20,11 +23,10 @@ function MenuDialog:show( params )
     self._menu:ClearItems()
     self._dialog:enable()
     self._params = params
-    if params.w or params.h then
-        params.w = params.w or 500
-        params.h = params.h or 160
-        self._dialog:SetSize(params.w, params.h)
-    end
+    params.w = params.w or 600
+    params.h = params.h or 500
+    self._menu:SetSize(params.w, params.h)
+    self._menu:SetPositionByString("Center")
     self._menu:Divider({
         name = "title",
         text = params.title,

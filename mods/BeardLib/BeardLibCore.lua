@@ -25,12 +25,13 @@ if not _G.BeardLib then
         "MenuItems/Menu.lua",
         "MenuItems/Item.lua",
         "MenuItems/ItemsGroup.lua",
+        "MenuItems/ImageButton.lua",
         "MenuItems/Toggle.lua",
         "MenuItems/ComboBox.lua",
         "MenuItems/Slider.lua",
         "MenuItems/TextBox.lua",
-        "MenuItems/Divider.lua",
         "MenuItems/Table.lua",
+        "MenuItems/ContextMenu.lua",
         "MenuHelperPlus.lua",
         "UnitPropertiesItem.lua",
         "json_utils.lua",
@@ -45,12 +46,22 @@ if not _G.BeardLib then
         ["lib/managers/menu/menuinput"] = "MenuInput.lua",
         ["lib/managers/menu/textboxgui"] = "TextBoxGUI.lua",
         ["lib/managers/systemmenumanager"] = "SystemMenuManager.lua",
+        ["lib/managers/killzonemanager"] = "Killzonemanager.lua",
+        ["lib/managers/gameplaycentralmanager"] = "GamePlayCentralManager.lua",
+        ["lib/managers/killzonemanager"] = "Killzonemanager.lua",
+        ["lib/managers/missionmanager"] = "MissionManager.lua",
+
         ["lib/managers/dialogs/keyboardinputdialog"] = "KeyboardInputDialog.lua",
         ["core/lib/managers/viewport/corescriptviewport"] = "CoreScriptViewport.lua",
         ["core/lib/utils/dev/editor/coreworlddefinition"] = "CoreWorldDefinition.lua",
         ["core/lib/system/coresystem"] = "CoreSystem.lua",
-        ["lib/tweak_data/narrativetweakdata"] = "TweakData.lua"
+        ["lib/tweak_data/narrativetweakdata"] = "TweakData.lua",        
         --["core/lib/managers/viewport/environment/coreenvironmentmanager"] = "CoreEnvironmentManager.lua"
+    }
+    self.custom_mission_elements = {
+        "MoveUnit",
+        "TeleportPlayer",
+        "Environment"
     }
 end
 
@@ -224,13 +235,13 @@ function BeardLib:ProcessScriptData(PackManager, filepath, extension, data)
 end
 
 function BeardLib:ReplaceScriptData(replacement, replacement_type, target_path, target_ext, extra_data)
-    extra_data = extra_data or {}
+    extra_data = type(extra_data) == "table" and extra_data or {}
     self._replace_script_data[target_path:key()] = self._replace_script_data[target_path:key()] or {}
     self._replace_script_data[target_path:key()][target_ext:key()] = self._replace_script_data[target_path:key()][target_ext:key()] or {}
     --[[if self._replace_script_data[path:key()][target_ext:key()] then
         BeardLib:log("[ERROR] Filepath has already been replaced, continuing with overwrite")
     end]]--
-    log(replacement .. "|" .. target_path .. "|" .. target_ext)
+    self:log(replacement .. "|" .. target_path .. "|" .. target_ext)
     if not DB:has(target_ext, target_path) then
         extra_data.add = true
     end

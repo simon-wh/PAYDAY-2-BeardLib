@@ -3,6 +3,7 @@ function MenuUI:init( config )
 	local ws = managers.gui_data:create_fullscreen_workspace()   
  	ws:connect_keyboard(Input:keyboard())  
     ws:connect_mouse(Input:mouse())  
+    config.position = config.position or "Left"
 	self._fullscreen_ws = ws
     self._fullscreen_ws_pnl = ws:panel():panel({alpha = 0})
     self._options = {}
@@ -11,21 +12,31 @@ function MenuUI:init( config )
         name = "menu_panel",
         halign = "center", 
         align = "center",
-        layer = config.layer or 100,
+        layer = config.layer or 500,
         h = config.h or self._fullscreen_ws_pnl:h(),
         w = config.w or self._fullscreen_ws_pnl:w(),
     })      
-    if config.position == "right" then
-        self._panel:set_right(self._fullscreen_ws_pnl:right())
-    elseif config.position == "center" then     
-        self._panel:set_center(self._fullscreen_ws_pnl:center())
+
+    if type(config.position) == "table" then
+        self._panel:position(config.position[1] or self._panel:x(), config.position[2] or self._panel:y())
+    else
+         if string.match(config.position, "Center") then
+            self._panel:set_center(self._fullscreen_ws_pnl:center())
+        end      
+        if string.match(config.position, "Bottom") then
+            self._panel:set_bottom(self._fullscreen_ws_pnl:bottom())
+        end         
+        if string.match(config.position, "Top") then
+            self._panel:set_top(self._fullscreen_ws_pnl:top())
+        end     
+        if string.match(config.position, "Right") then
+            self._panel:set_right(self._fullscreen_ws_pnl:right())
+        end       
     end
     self._scroll_panel = self._panel:panel({
         name = "scroll_panel",
         halign = "center", 
         align = "center",
-        y = config.tabs and 35 or 0,
-        h = self._panel:h() - (config.tabs and 35 or 0),
     })	
     local bar_h = self._scroll_panel:top() - self._scroll_panel:bottom()
     self._scroll_panel:panel({
@@ -38,17 +49,9 @@ function MenuUI:init( config )
 		name = "rect",
 		color = config.text_color or Color.black,
 		layer = 4,
-		alpha = 0.5,
+		alpha = config.alpha or 0.5,
 		h = bar_h,
     })
-    self._panel:rect({
-      	name = "menu_bg", 
-      	halign="grow", 
-      	valign="grow", 
-        color = config.background_color or Color.white,
-      	alpha = config.background_alpha or 0.8, 
-        layer = 19 
-    })      
 	self._help_panel = self._fullscreen_ws_pnl:panel({
         name = "help_panel",   
 	    w = self._panel:w() - 100,
@@ -75,6 +78,12 @@ function MenuUI:init( config )
 	    font = "fonts/font_large_mf",
 	    font_size = 16
 	})      
+    self._tabs_panel = self._panel:panel({
+        y = 10, 
+        x = 5,
+        h = 24,
+        layer = 20,
+    })
     table.merge(self, config)
 	local _,_,w,h = self._help_text:text_rect()
 	self._help_panel:set_size(w + 10,h)
@@ -83,13 +92,15 @@ function MenuUI:init( config )
 	else
 		BeardLib:log("No create items callback found")
 	end
-    self._menu_closed = true    
+    self._menu_closed = config.closed or config.closed == nil    
     self._fullscreen_ws_pnl:key_press(callback(self, self, "key_press"))    
     self._fullscreen_ws_pnl:key_release(callback(self, self, "key_release"))    
 end
  
-function MenuUI:NewMenu(params)
-	return Menu:new(self, params)
+function MenuUI:NewMenu(params) 
+    local menu = Menu:new(self, params)
+    table.insert(self._menus, menu)  
+    return menu
 end
 
 function MenuUI:SetSize( w, h )    
@@ -103,23 +114,11 @@ function MenuUI:SetSize( w, h )
     self._scroll_panel:set_x(0)
     self._scroll_panel:child("scroll_bar"):set_h(h)
     self._help_panel:set_left(self._panel:right())
-    self:AlignMenus()
     for i, menu in pairs(self._menus) do
-        if menu.panel then
-            menu.panel:set_size(self._panel:size())
-        end
         menu.items_panel:set_size(w- 12, h)
         menu:RecreateItems()
     end
 end
-function MenuUI:AlignMenus() 
-    for i, menu in pairs(self._menus) do
-        if menu.panel then
-            menu.panel:set_left(self._menus[i - 1] and self._menus[i - 1].panel:right() + 2 or 5)
-        end
-    end
-end
-
 function MenuUI:enable()
 	self._fullscreen_ws_pnl:set_alpha(1)
 	self._menu_closed = false
@@ -130,7 +129,7 @@ function MenuUI:enable()
 		id = self._mouse_id
 	}) 	
     self._fullscreen_ws_pnl:key_press(callback(self, self, "key_press"))    
-    self._fullscreen_ws_pnl:key_release(callback(self, self, "key_release"))    	
+    self._fullscreen_ws_pnl:key_release(callback(self, self, "key_release"))    
 end
 
 function MenuUI:disable()
@@ -164,7 +163,9 @@ function MenuUI:key_press( o, k )
     end
 	self.key_pressed = k 
 	for _, menu in ipairs(self._menus) do
-		menu:key_press( o, k )		
+        if menu:key_press( o, k ) then
+            return true
+        end		
 	end		
     if self.keypress then
         self.keypress(o, k)
@@ -192,7 +193,7 @@ end
 function MenuUI:mouse_pressed( o, button, x, y )
 	for _, menu in ipairs(self._menus) do
 		if menu:mouse_pressed( button, x, y ) then
-		    return
+            return    
 		end
 	end	
     if self.mousepressed then
