@@ -4,7 +4,7 @@ FrameworkBase._directory = ""
 function FrameworkBase:init()
     self._loaded_configs = {}
     self._config_calls = table.merge(self._config_calls or {}, {
-        localization = {func = callback(self, self, "LoadLocalizationConfig"), requires_assets = true}
+        localization = {func = callback(self, self, "LoadLocalizationConfig")}
     })
 
     self:Load()

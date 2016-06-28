@@ -21,7 +21,7 @@
 		{ "hook_id" : "lib/managers/dialogs/keyboardinputdialog", "script_path" : "BeardLibCore.lua" },
 		{ "hook_id" : "lib/setups/gamesetup", "script_path" : "BeardLibCore.lua"},
 		{ "hook_id" : "lib/setups/setup", "script_path" : "BeardLibCore.lua"},
-		{ "hook_id" : "lib/tweak_data/narrativetweakdata", "script_path" : "BeardLibCore.lua"},
+		{ "hook_id" : "lib/tweak_data/enveffecttweakdata", "script_path" : "BeardLibCore.lua"},
 		{ "hook_id" : "core/lib/utils/dev/editor/coreworlddefinition", "script_path" : "BeardLibCore.lua"},
 		{ "hook_id" : "core/lib/managers/mission/coremissionmanager", "script_path" : "BeardLibCore.lua"}
 	],

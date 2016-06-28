@@ -5,10 +5,10 @@ function MapFramework:init()
     self._asset_folder_required = true
     self._directory = BeardLib.MapsPath
     self._config_calls = {
-        localization = {func = callback(self, self, "LoadLocalizationConfig"), requires_assets = true},
+        localization = {func = callback(self, self, "LoadLocalizationConfig")},
         contact = {func = callback(self, self, "LoadContactConfig")},
         narrative = {func = callback(self, self, "LoadNarrativeConfig")},
-        level = {func = callback(self, self, "LoadLevelConfig"), requires_assets = true}
+        level = {func = callback(self, self, "LoadLevelConfig")},
     }
     self.super.init(self)
 end
@@ -97,4 +97,24 @@ function MapFramework:LoadLevelConfig(name, path, data)
 
         table.insert(self._level_index, data.id)
     end)
+
+    if data.assets then
+        Hooks:PostHook(AssetsTweakData, "init", data.id .. "AddAssetsData", function(self)
+            for _, value in ipairs(data.assets) do
+                if value._meta == "asset" then
+                    if self[value.name] ~= nil then
+                        table.insert(value.exclude and self[value.name].exclude_stages or self[value.name].stages, data.id)
+                    else
+                        BeardLib:log("[ERROR] Asset %s does not exist! (Map: %s)", value.name, name)
+                    end
+                else
+                    if not self[value._meta] then
+                        self[value._meta] = value
+                    else
+                        BeardLib:log("[ERROR] Asset with name: %s already exists! (Map: %s)", value._meta, name)
+                    end
+                end
+            end
+        end)
+    end
 end

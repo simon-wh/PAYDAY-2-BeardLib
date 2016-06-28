@@ -55,7 +55,7 @@ if not _G.BeardLib then
         ["core/lib/managers/viewport/corescriptviewport"] = "CoreScriptViewport.lua",
         ["core/lib/utils/dev/editor/coreworlddefinition"] = "CoreWorldDefinition.lua",
         ["core/lib/system/coresystem"] = "CoreSystem.lua",
-        ["lib/tweak_data/narrativetweakdata"] = "TweakData.lua",        
+        ["lib/tweak_data/enveffecttweakdata"] = "TweakData.lua",        
         --["core/lib/managers/viewport/environment/coreenvironmentmanager"] = "CoreEnvironmentManager.lua"
     }
     self.custom_mission_elements = {
