@@ -19,11 +19,14 @@ function OptionModule:init(core_mod, config)
         self._on_load_callback = self._mod:StringToCallback(self._config.loaded_callback)
     end
 
-    self:InitOptions(self._config.options, self._storage)
 
     if self._config.auto_build_menu then
         self:BuildMenuHook()
     end
+end
+
+function OptionModule:post_init()
+    self:InitOptions(self._config.options, self._storage)
 
     if self._config.auto_load then
         self:Load()
@@ -40,7 +43,7 @@ function OptionModule:Load()
     local file = io.open(self._mod.SavePath .. self.FileName, 'r')
 
     --pcall for json decoding
-    local ret, data = pcall(function() return json.decode(file:read("*all")) end)
+    local ret, data = pcall(function() return json.custom_decode(file:read("*all")) end)
 
     if not ret then
         BeardLib:log("[ERROR] Unable to load save file for mod, " .. self._mod.Name)
@@ -95,7 +98,7 @@ function OptionModule:InitOptions(tbl, option_tbl)
                 if sub_tbl.enabled_callback then
                     sub_tbl.enabled_callback = self._mod:StringToCallback(sub_tbl.enabled_callback)
                 end
-
+                sub_tbl.default_value = type(sub_tbl.default_value) == "string" and BeardLib.Utils:normalize_string_value(sub_tbl.default_value) or sub_tbl.default_value
                 option_tbl[sub_tbl.name] = sub_tbl
                 option_tbl[sub_tbl.name].value = sub_tbl.default_value
             elseif sub_tbl._meta == "option_group" then
@@ -228,7 +231,7 @@ function OptionModule:Save()
     local file = io.open(self._mod.SavePath .. self.FileName, "w+")
     local save_data = {}
     self:PopulateSaveTable(self._storage, save_data)
-	file:write(json.encode(save_data))
+	file:write(json.custom_encode(save_data))
 	file:close()
 end
 
@@ -349,6 +352,74 @@ function OptionModule:CreateMultiChoice(parent_node, option_tbl, option_path)
     }, merge_data))
 end
 
+function OptionModule:CreateMatrix(parent_node, option_tbl, option_path, components)
+    local id = self._mod.Name .. option_tbl.name
+
+    option_path = option_path == "" and option_tbl.name or option_path .. "/" .. option_tbl.name
+
+    local enabled = not self:GetParameter(option_tbl, "disabled")
+
+    if option_tbl.enabled_callback then
+        enabled = option_tbl:enabled_callback()
+    end
+    local scale_factor = self:GetParameter(option_tbl, "scale_factor") or 1
+
+    local self_vars = {
+        option_key = option_path,
+        module = self,
+        scale_factor = scale_factor,
+        opt_type = option_tbl.type
+    }
+
+    local merge_data = self:GetParameter(option_tbl, "merge_data") or {}
+    merge_data = BeardLib.Utils:RemoveAllNumberIndexes(merge_data)
+    local base_params = table.merge({
+        id = self:GetParameter(option_tbl, "name"),
+        title = managers.localization:text(self:GetParameter(option_tbl, "title_id") or id .. "TitleID"),
+        node = parent_node,
+        desc = managers.localization:text(self:GetParameter(option_tbl, "desc_id") or id .. "DescID"),
+        callback = "OptionModuleVector_ValueChanged",
+        min = self:GetParameter(option_tbl, "min") or 0,
+        max = self:GetParameter(option_tbl, "max") or scale_factor,
+        step = self:GetParameter(option_tbl, "step") or (scale_factor > 1 and 1 or 0.01),
+        enabled = enabled,
+        show_value = self:GetParameter(option_tbl, "show_value"),
+        localized = false,
+        localized_help = false,
+        merge_data = self_vars
+    }, merge_data)
+    local value = self:GetValue(option_path)
+    local function GetComponentValue(val, component)
+        return type(val[component]) == "function" and val[component](val) or val[component]
+    end
+
+    for _, vec in pairs(components) do
+        local params = clone(base_params)
+        params.id = params.id .. "-" .. vec.id
+        params.title = params.title .. " - " .. vec.title
+        params.desc = params.desc .. " - " .. vec.title
+        params.merge_data.component = vec.id
+        if vec.max then
+            params.max = vec.max
+        end
+        params.value = GetComponentValue(value, vec.id) * scale_factor
+        MenuHelperPlus:AddSlider(params)
+    end
+end
+
+function OptionModule:CreateColour(parent_node, option_tbl, option_path)
+    local alpha = not not self:GetParameter(option_tbl, "alpha")
+    self:CreateMatrix(parent_node, option_tbl, option_path, { [1] =alpha and {id="a", title="A"} or nil, {id="r", title="R"}, {id="g", title="G"}, {id="b", title="B"} })
+end
+
+function OptionModule:CreateVector(parent_node, option_tbl, option_path)
+    self:CreateMatrix(parent_node, option_tbl, option_path, { {id="x", title="X"}, {id="y", title="Y"}, {id="z", title="Z"} })
+end
+
+function OptionModule:CreateRotation(parent_node, option_tbl, option_path)
+    self:CreateMatrix(parent_node, option_tbl, option_path, { {id="yaw", title="YAW"}, {id="pitch", title="PITCH"}, {id="roll", title="ROLL", max=90} })
+end
+
 function OptionModule:CreateOption(parent_node, option_tbl, option_path)
     if option_tbl.type == "number" then
         self:CreateSlider(parent_node, option_tbl, option_path)
@@ -356,6 +427,12 @@ function OptionModule:CreateOption(parent_node, option_tbl, option_path)
         self:CreateToggle(parent_node, option_tbl, option_path)
     elseif option_tbl.type == "multichoice" then
         self:CreateMultiChoice(parent_node, option_tbl, option_path)
+    elseif option_tbl.type == "colour" or option_tbl.type == "color" then
+        self:CreateColour(parent_node, option_tbl, option_path)
+    elseif option_tbl.type == "vector" then
+        self:CreateVector(parent_node, option_tbl, option_path)
+    elseif option_tbl.type == "rotation" then
+        self:CreateRotation(parent_node, option_tbl, option_path)
     else
         BeardLib:log("[ERROR] No supported type for option " .. tostring(option_tbl.name) .. " in mod " .. self._mod.Name)
     end
@@ -374,7 +451,7 @@ end
 function OptionModule:CreateSubMenu(parent_node, option_tbl, option_path)
     option_path = option_path or ""
     local name = self:GetParameter(option_tbl, "name")
-    local base_name = name and name .. self._name or self._mod.Name .. self._name
+    local base_name = name and self._mod.Name .. name .. self._name or self._mod.Name .. self._name
     local menu_name = self:GetParameter(option_tbl, "node_name") or  base_name .. "Node"
 
     local merge_data = self:GetParameter(option_tbl, "merge_data") or {}
@@ -428,5 +505,28 @@ Hooks:Add("BeardLibCreateCustomNodesAndButtons", "BeardLibOptionModuleCreateCall
         local value = item:value()
         if type(item:value()) == "string" then value = value == "on" end
         OptionModule.SetValue(item._parameters.module, item._parameters.option_key, value)
+    end
+
+    MenuCallbackHandler.OptionModuleVector_ValueChanged = function(this, item)
+        local cur_val =  OptionModule.GetValue(item._parameters.module, item._parameters.option_key)
+        local new_value = item:value() / item._parameters.scale_factor
+        if item._parameters.opt_type == "colour" or item._parameters.opt_type == "color" then
+            cur_val[item._parameters.component] = new_value
+        elseif item._parameters.opt_type == "vector" then
+            if item._parameters.component == "x" then
+                mvector3.set_x(cur_val, new_value)
+            elseif item._parameters.component == "y" then
+                mvector3.set_y(cur_val, new_value)
+            elseif item._parameters.component == "z" then
+                mvector3.set_z(cur_val, new_value)
+            end
+        elseif item._parameters.opt_type == "rotation" then
+            local comp = item._parameters.component
+            log("1" .. tostring(cur_val))
+            mrotation.set_yaw_pitch_roll(cur_val, comp == "yaw" and new_value or cur_val:yaw(), comp == "pitch" and new_value or cur_val:pitch(), comp == "roll" and new_value or cur_val:roll())
+            log("2" .. tostring(cur_val))
+        end
+
+        OptionModule.SetValue(item._parameters.module, item._parameters.option_key, cur_val)
     end
 end)

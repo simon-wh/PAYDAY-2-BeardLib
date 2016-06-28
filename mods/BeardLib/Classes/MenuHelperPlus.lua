@@ -63,44 +63,34 @@ function MenuHelperPlus:NewNode(Menuname, params)
 		return
 	end
 	local nodes = RegisteredMenu.logic._data._nodes
-	
-	local parameters = {
+
+	local parameters = table.merge({
 		_meta = "node",
-		align_line = params.align_line or 0.75,
-		back_callback = params.back_callback,
-		gui_class = params.gui_class or "MenuNodeGui",
-		menu_components = params.menu_components or "",
-		modifier = params.modifier,
-		name = params.name,
-		refresh = params.refresh,
-		stencil_align = params.stencil_align or "right",
-		stencil_image = params.stencil_image or "bg_creategame",
-		topic_id = params.topic_id,
-		type = params.type or "CoreMenuNode.MenuNode",
-		update = params.update,
-		scene_state = params.scene_state
-	}
-	if params.merge_data then
-		table.merge(parameters, params.merge_data)
-	end
-	
+		align_line = 0.75,
+		gui_class = "MenuNodeGui",
+		menu_components = "",
+		stencil_align = "right",
+		stencil_image = "bg_creategame",
+		type = "CoreMenuNode.MenuNode",
+	}, params)
+
 	if params.legends then
 		for i, legend in pairs(params.legends) do
 			self:CreateAndInsertLegendData(parameters, legend)
 		end
 	end
-	
+
 	local node_class = CoreMenuNode.MenuNode
     if parameters.type then
         node_class = CoreSerialize.string_to_classtable(parameters.type)
     end
 	local new_node = node_class:new(parameters)
-		
-	local callback_handler = CoreSerialize.string_to_classtable(params.callback_overwrite or "MenuCallbackHandler")
-	new_node:set_callback_handler(params.callback_overwrite and callback_handler or RegisteredMenu.callback_handler)
-	
+
+	local callback_handler = CoreSerialize.string_to_classtable(params.callback_handler or "MenuCallbackHandler")
+	new_node:set_callback_handler(params.callback_handler and callback_handler or RegisteredMenu.callback_handler)
+
 	nodes[params.name] = new_node
-    
+
     return new_node
 end
 

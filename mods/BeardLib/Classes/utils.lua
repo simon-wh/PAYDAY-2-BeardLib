@@ -204,6 +204,23 @@ end
 
 BeardLib.Utils = {}
 
+local searchTypes = {
+    "Vector3",
+    "Rotation",
+    "Color",
+    "callback"
+}
+
+function BeardLib.Utils:normalize_string_value(value)
+	for _, search in pairs(searchTypes) do
+		if string.begins(value, search) then
+			value = loadstring("return " .. value)()
+			break
+		end
+	end
+	return value
+end
+
 function BeardLib.Utils:StringToTable(global_tbl_name)
     local global_tbl
     if string.find(global_tbl_name, "%.") then
