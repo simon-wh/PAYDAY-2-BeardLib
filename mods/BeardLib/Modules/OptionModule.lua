@@ -72,6 +72,17 @@ function OptionModule:Load()
 end
 
 function OptionModule:ApplyValues(tbl, value_tbl)
+    if tbl._meta == "option_set" and tbl.not_pre_generated then
+        for key, value in pairs(value_tbl) do
+            local new_tbl = BeardLib.Utils:RemoveAllNumberIndexes(tbl.item_parameters and deep_clone(tbl.item_parameters) or {})
+            new_tbl._meta = "option"
+            new_tbl.name = key
+            new_tbl.value = value
+            tbl[key] = new_tbl
+        end
+        return
+    end
+
     for i, sub_tbl in pairs(tbl) do
         if sub_tbl._meta then
             if sub_tbl._meta == "option" and value_tbl[sub_tbl.name] ~= nil then
@@ -105,20 +116,21 @@ function OptionModule:InitOptions(tbl, option_tbl)
                 option_tbl[sub_tbl.name] = BeardLib.Utils:RemoveAllSubTables(clone(sub_tbl))
                 self:InitOptions(sub_tbl, option_tbl[sub_tbl.name])
             elseif sub_tbl._meta == "option_set" then
-                local tbl = sub_tbl.items and BeardLib.Utils:RemoveNonNumberIndexes(sub_tbl.items)
-                if sub_tbl.items_tbl then
-                    tbl = self._mod:StringToTable(sub_tbl.values_tbl)
-                elseif sub_tbl.populate_items then
-                    local clbk = self._mod:StringToCallback(sub_tbl.populate_items)
-                    tbl = assert(clbk)()
-                end
+                if not sub_tbl.not_pre_generated then
+                    local tbl = sub_tbl.items and BeardLib.Utils:RemoveNonNumberIndexes(sub_tbl.items)
+                    if sub_tbl.items_tbl then
+                        tbl = self._mod:StringToTable(sub_tbl.values_tbl)
+                    elseif sub_tbl.populate_items then
+                        local clbk = self._mod:StringToCallback(sub_tbl.populate_items)
+                        tbl = assert(clbk)()
+                    end
 
-                for _, item in pairs(tbl) do
-                    local new_tbl = BeardLib.Utils:RemoveAllNumberIndexes(deep_clone(sub_tbl.item_parameters))
-                    new_tbl._meta = "option"
-                    table.insert(sub_tbl, table.merge(new_tbl, item))
+                    for _, item in pairs(tbl) do
+                        local new_tbl = BeardLib.Utils:RemoveAllNumberIndexes(deep_clone(sub_tbl.item_parameters))
+                        new_tbl._meta = "option"
+                        table.insert(sub_tbl, table.merge(new_tbl, item))
+                    end
                 end
-
                 option_tbl[sub_tbl.name] = BeardLib.Utils:RemoveAllSubTables(clone(sub_tbl))
                 self:InitOptions(sub_tbl, option_tbl[sub_tbl.name])
             end
@@ -205,7 +217,7 @@ end
 function OptionModule:_LoadDefaultValues(option_tbl)
     for i, sub_tbl in pairs(option_tbl) do
         if sub_tbl._meta then
-            if sub_tbl._meta == "option" then
+            if sub_tbl._meta == "option" and sub_tbl.default_value ~= nil then
                 option_tbl[sub_tbl.name].value = sub_tbl.default_value
             elseif sub_tbl._meta == "option_group" or sub_tbl._meta == "option_set" then
                 self:_LoadDefaultValues(option_tbl[sub_tbl.name])
