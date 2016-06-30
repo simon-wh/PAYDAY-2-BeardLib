@@ -102,3 +102,7 @@ BeardLib.script_data_formats = {
     "custom_xml",
     "binary",
 }
+
+BeardLib.definitions = {}
+
+BeardLib.definitions.mod_override = "assets/mod_overrides/"

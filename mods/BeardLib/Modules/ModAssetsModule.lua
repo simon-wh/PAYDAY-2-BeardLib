@@ -44,7 +44,7 @@ function ModAssetsModule:init(core_mod, config)
     end
 
     self.folder_names = type(self._config.folder_name) == "string" and {self._config.folder_name} or BeardLib.Utils:RemoveNonNumberIndexes(self._config.folder_name)
-    self.install_directory = self._config.install_directory and self._mod:GetRealFilePath(self._config.install_directory, self) or "assets/mod_overrides/"
+    self.install_directory = self._config.install_directory and self._mod:GetRealFilePath(self._config.install_directory, self) or BeardLib.definitions.mod_override
 
     self.version_file = self._config.version_file and self._mod:GetRealFilePath(self._config.version_file, self) or BeardLib.Utils.Path.Combine(self.install_directory, self.folder_names[1], self._default_version_file)
     self._version = 0
@@ -54,6 +54,10 @@ function ModAssetsModule:init(core_mod, config)
     if not self._config.manual_check then
         self:RegisterAutoUpdateCheckHook()
     end
+end
+
+function ModAssetsModule:GetMainInstallDir()
+    return BeardLib.Utils.Path.Combine(self.version_file, "..")
 end
 
 function ModAssetsModule:RegisterAutoUpdateCheckHook()
