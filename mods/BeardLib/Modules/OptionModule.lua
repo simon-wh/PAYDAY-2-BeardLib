@@ -228,7 +228,7 @@ end
 
 function OptionModule:PopulateSaveTable(tbl, save_tbl)
     for i, sub_tbl in pairs(tbl) do
-        if sub_tbl._meta then
+        if type(sub_tbl) == "table" and sub_tbl._meta then
             if sub_tbl._meta == "option" then
                 save_tbl[sub_tbl.name] = sub_tbl.value
             elseif sub_tbl._meta == "option_group" or sub_tbl._meta == "option_set" then
