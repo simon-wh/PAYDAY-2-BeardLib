@@ -237,7 +237,7 @@ function BeardLib:ProcessScriptData(PackManager, filepath, extension, data)
 end
 
 function BeardLib:ReplaceScriptData(replacement, replacement_type, target_path, target_ext, options)
-    if extra_data ~= nil and type(extra_data) ~= "table" then
+    if options ~= nil and type(options) ~= "table" then
         self:log("[ERROR] %s:ReplaceScriptData parameter 5, expected table, got %s", self.Name, tostring(type(extra_data)))
         return
     end
