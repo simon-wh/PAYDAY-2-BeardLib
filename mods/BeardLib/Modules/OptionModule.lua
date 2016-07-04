@@ -84,7 +84,7 @@ function OptionModule:ApplyValues(tbl, value_tbl)
     end
 
     for i, sub_tbl in pairs(tbl) do
-        if sub_tbl._meta then
+        if type(sub_tbl) == "table" and sub_tbl._meta then
             if sub_tbl._meta == "option" and value_tbl[sub_tbl.name] ~= nil then
                 sub_tbl.value = value_tbl[sub_tbl.name]
             elseif (sub_tbl._meta == "option_group" or sub_tbl._meta == "option_set") and value_tbl[sub_tbl.name] then
@@ -199,7 +199,11 @@ function OptionModule:GetValue(name, real)
     local option = self:GetOption(name)
     if option then
         if real and option.type == "multichoice" then
-            return option.values[option.value]
+            if type(option.values[option.value]) == "table" then
+                return option.values[option.value].value
+            else
+                return option.values[option.value]
+            end
         else
             return option.value
         end
@@ -228,7 +232,7 @@ end
 
 function OptionModule:PopulateSaveTable(tbl, save_tbl)
     for i, sub_tbl in pairs(tbl) do
-        if sub_tbl._meta then
+        if type(sub_tbl) == "table" and sub_tbl._meta then
             if sub_tbl._meta == "option" then
                 save_tbl[sub_tbl.name] = sub_tbl.value
             elseif sub_tbl._meta == "option_group" or sub_tbl._meta == "option_set" then
@@ -472,7 +476,9 @@ function OptionModule:CreateSubMenu(parent_node, option_tbl, option_path)
         name = menu_name
     }, merge_data))
 
-    self:InitializeNode(main_node, option_tbl, name and (option_path == "" and name or option_path .. "/" .. name) or "")
+    if option_tbl.build_items == nil or option_tbl.build_items then
+        self:InitializeNode(main_node, option_tbl, name and (option_path == "" and name or option_path .. "/" .. name) or "")
+    end
 
     MenuHelperPlus:AddButton({
         id = base_name .. "Button",
@@ -494,7 +500,7 @@ function OptionModule:InitializeNode(node, option_tbl, option_path)
                 self:CreateOption(node, sub_tbl, option_path)
             elseif sub_tbl._meta == "divider" then
                 self:CreateDivider(node, sub_tbl)
-            elseif sub_tbl._meta == "option_group" or sub_tbl._meta == "option_set" then
+            elseif sub_tbl._meta == "option_group" or sub_tbl._meta == "option_set" and (sub_tbl.build_menu == nil or sub_tbl.build_menu) then
                 self:CreateSubMenu(node, sub_tbl, option_path)
             end
         end
@@ -515,7 +521,7 @@ end
 Hooks:Add("BeardLibCreateCustomNodesAndButtons", "BeardLibOptionModuleCreateCallbacks", function(self_menu)
     MenuCallbackHandler.OptionModuleGeneric_ValueChanged = function(this, item)
         local value = item:value()
-        if type(item:value()) == "string" then value = value == "on" end
+        if item.TYPE == "toggle" then value = value == "on" end
         OptionModule.SetValue(item._parameters.module, item._parameters.option_key, value)
     end
 

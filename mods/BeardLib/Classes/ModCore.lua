@@ -26,6 +26,10 @@ function ModCore:LoadConfigFile(path)
 end
 
 function ModCore:init_modules()
+    if self.modules_initialized then
+        return
+    end
+
     local modules = {}
     if self._modules then
         for i, module_tbl in ipairs(self._modules) do
@@ -48,6 +52,7 @@ function ModCore:init_modules()
             module:post_init()
         end
     end
+    self.modules_initialized = true
 end
 
 function ModCore:GetRealFilePath(path, lookup_tbl)

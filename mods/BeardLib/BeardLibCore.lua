@@ -85,7 +85,7 @@ function BeardLib:init()
     self.managers.asset_update = ModAssetUpdateManager:new()
 
     --Load ScriptData mod_overrides
-    self:LoadModOverridePlus()
+    --self:LoadModOverridePlus()
 end
 
 function BeardLib:LoadClasses()
@@ -181,7 +181,7 @@ function BeardLib:ProcessScriptData(PackManager, filepath, extension, data)
     if self._replace_script_data[filepath:key()] and self._replace_script_data[filepath:key()][extension:key()] then
         for _, replacement in pairs(self._replace_script_data[filepath:key()][extension:key()]) do
 
-            if not replacement.data.use_clbk or replacement.data.use_clbk() then
+            if not replacement.options.use_clbk or replacement.options.use_clbk() then
                 self:log("Replace: " .. tostring(filepath:key()))
 
                 local fileType = replacement.load_type
@@ -207,15 +207,17 @@ function BeardLib:ProcessScriptData(PackManager, filepath, extension, data)
 
                     if extension == Idstring("nav_data") then
                         self:RemoveMetas(new_data)
+                    elseif (extension == Idstring("continents") or extension == Idstring("mission")) and fileType=="custom_xml" then
+                        BeardLib.Utils:RemoveAllNumberIndexes(new_data, true)
                     end
 
                     if new_data then
-                        if replacement.data.merge_mode then
-                            if replacement.data.merge_mode == "merge" then
+                        if replacement.options.merge_mode then
+                            if replacement.options.merge_mode == "merge" then
                                 table.merge(data, new_data)
-                            elseif replacement.data.merge_mode == "script_merge" then
+                            elseif replacement.options.merge_mode == "script_merge" then
                                 table.script_merge(data, new_data)
-                            elseif replacement.data.merge_mode == "add" then
+                            elseif replacement.options.merge_mode == "add" then
                                 table.add(data, new_data)
                             end
                         else
@@ -234,24 +236,24 @@ function BeardLib:ProcessScriptData(PackManager, filepath, extension, data)
     return data
 end
 
-function BeardLib:ReplaceScriptData(replacement, replacement_type, target_path, target_ext, extra_data)
-    extra_data = type(extra_data) == "table" and extra_data or {}
+function BeardLib:ReplaceScriptData(replacement, replacement_type, target_path, target_ext, options)
+    if extra_data ~= nil and type(extra_data) ~= "table" then
+        self:log("[ERROR] %s:ReplaceScriptData parameter 5, expected table, got %s", self.Name, tostring(type(extra_data)))
+        return
+    end
+    options = options or {}
     self._replace_script_data[target_path:key()] = self._replace_script_data[target_path:key()] or {}
     self._replace_script_data[target_path:key()][target_ext:key()] = self._replace_script_data[target_path:key()][target_ext:key()] or {}
-    --[[if self._replace_script_data[path:key()][target_ext:key()] then
-        BeardLib:log("[ERROR] Filepath has already been replaced, continuing with overwrite")
-    end]]--
-    self:log(replacement .. "|" .. target_path .. "|" .. target_ext)
     if not DB:has(target_ext, target_path) then
-        extra_data.add = true
+        options.add = true
     end
 
-    if extra_data.add then
+    if options.add then
         BeardLib.ScriptExceptions[target_path:key()] = BeardLib.ScriptExceptions[target_path:key()] or {}
         BeardLib.ScriptExceptions[target_path:key()][target_ext:key()] = true
     end
 
-    table.insert(self._replace_script_data[target_path:key()][target_ext:key()], {path = replacement, load_type = replacement_type, data = extra_data})
+    table.insert(self._replace_script_data[target_path:key()][target_ext:key()], {path = replacement, load_type = replacement_type, options = options})
 end
 
 function BeardLib:update(t, dt)

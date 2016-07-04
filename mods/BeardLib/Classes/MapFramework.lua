@@ -43,7 +43,8 @@ function MapFramework:LoadNarrativeConfig(name, path, data)
                 min_mission_xp = BeardLib.Utils:RemoveNonNumberIndexes(data.min_mission_xp) or {0.001,0.001,0.001,0.001,0.001},
                 max_mission_xp = BeardLib.Utils:RemoveNonNumberIndexes(data.max_mission_xp) or {0.001,0.001,0.001,0.001,0.001}
             },
-            allowed_gamemodes = BeardLib.Utils:RemoveNonNumberIndexes(data.allowed_gamemodes)
+            allowed_gamemodes = BeardLib.Utils:RemoveNonNumberIndexes(data.allowed_gamemodes),
+            custom = true
         }
         if data.merge_data then
             table.merge(self.jobs[data.id], data.merge_data)
@@ -92,7 +93,8 @@ function MapFramework:LoadLevelConfig(name, path, data)
             custom_packages = data.packages,
             cube = data.cube,
             ghost_bonus = data.ghost_bonus,
-            max_bags = data.max_bags
+            max_bags = data.max_bags,
+            custom = true
         }
 
         table.insert(self._level_index, data.id)

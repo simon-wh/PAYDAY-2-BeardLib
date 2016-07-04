@@ -253,7 +253,7 @@ function BeardLib.Utils:RemoveAllSubTables(tbl)
     return tbl
 end
 
-function BeardLib.Utils:RemoveAllNumberIndexes(tbl)
+function BeardLib.Utils:RemoveAllNumberIndexes(tbl, shallow)
 	if not tbl then return nil end
 
     if type(tbl) ~= "table" then
@@ -263,7 +263,7 @@ function BeardLib.Utils:RemoveAllNumberIndexes(tbl)
     for i, sub in pairs(tbl) do
         if tonumber(i) ~= nil then
             tbl[i] = nil
-        elseif type(sub) == "table" then
+        elseif type(sub) == "table" and not shallow then
             tbl[i] = self:RemoveAllNumberIndexes(sub)
         end
     end
