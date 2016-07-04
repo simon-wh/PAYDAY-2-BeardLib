@@ -71,7 +71,7 @@ function MapFramework:LoadLevelConfig(name, path, data)
         if data.script_data_mods then
             for i, mod_data in ipairs(data.script_data_mods) do
                 if mod_data._meta == "mod" then
-                    BeardLib:ReplaceScriptData(BeardLib.Utils.Path.Combine(path, mod_data.replacement), mod_data.replacement_type, mod_data.target_path, mod_data.target_ext, {add = mod_data.add, merge_mode = mod_data.merge_mode})
+                    BeardLib:ReplaceScriptData(BeardLib.Utils.Path.Combine(path, mod_data.replacement), mod_data.replacement_type, mod_data.target_path, mod_data.target_ext, mod_data.options)
                 end
             end
         end

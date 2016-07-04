@@ -260,14 +260,19 @@ function BeardLib.Utils:RemoveAllNumberIndexes(tbl, shallow)
         return tbl
     end
 
-    for i, sub in pairs(tbl) do
-        if tonumber(i) ~= nil then
-            tbl[i] = nil
-        elseif type(sub) == "table" and not shallow then
-            tbl[i] = self:RemoveAllNumberIndexes(sub)
-        end
-    end
-
+	if shallow then
+		for i, sub in ipairs(tbl) do
+			tbl[i] = nil
+		end
+	else
+	    for i, sub in pairs(tbl) do
+	        if tonumber(i) ~= nil then
+	            tbl[i] = nil
+	        elseif type(sub) == "table" and not shallow then
+	            tbl[i] = self:RemoveAllNumberIndexes(sub)
+	        end
+	    end
+	end
     return tbl
 end
 
