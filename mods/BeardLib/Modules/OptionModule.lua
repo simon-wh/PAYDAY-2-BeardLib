@@ -564,4 +564,4 @@ Hooks:Add("BeardLibCreateCustomNodesAndButtons", "BeardLibOptionModuleCreateCall
     end
 end)
 
-return OptionModule
+BeardLib:RegisterModule(OptionModule.type_name, OptionModule)

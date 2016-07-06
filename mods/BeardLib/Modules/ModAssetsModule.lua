@@ -287,4 +287,4 @@ function ModAssetsModule:InitializeNode(node)
     })
 end
 
-return ModAssetsModule
+BeardLib:RegisterModule(ModAssetsModule.type_name, ModAssetsModule)

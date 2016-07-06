@@ -73,4 +73,4 @@ function LevelModule:RegisterHook()
     end
 end
 
-return LevelModule
+BeardLib:RegisterModule(LevelModule.type_name, LevelModule)

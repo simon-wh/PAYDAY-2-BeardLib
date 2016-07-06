@@ -40,4 +40,4 @@ function NarrativeModule:RegisterHook()
     end)
 end
 
-return NarrativeModule
+BeardLib:RegisterModule(NarrativeModule.type_name, NarrativeModule)

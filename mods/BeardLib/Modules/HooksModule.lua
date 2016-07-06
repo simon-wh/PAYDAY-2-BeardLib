@@ -29,4 +29,4 @@ function HooksModule:Load()
     end
 end
 
-return HooksModule
+BeardLib:RegisterModule(HooksModule.type_name, HooksModule)

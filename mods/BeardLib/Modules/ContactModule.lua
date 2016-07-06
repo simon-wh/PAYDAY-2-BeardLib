@@ -18,4 +18,4 @@ function ContactModule:RegisterHook()
     end)
 end
 
-return ContactModule
+BeardLib:RegisterModule(ContactModule.type_name, ContactModule)

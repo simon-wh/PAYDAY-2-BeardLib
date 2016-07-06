@@ -22,4 +22,4 @@ function ScriptReplacementsModule:post_init()
     end
 end
 
-return ScriptReplacementsModule
+BeardLib:RegisterModule(ScriptReplacementsModule.type_name, ScriptReplacementsModule)

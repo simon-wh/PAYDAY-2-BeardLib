@@ -76,4 +76,4 @@ function MenuModule:build_node(node_data, parent_node)
     managers.menu:add_back_button(main_node)
 end
 
-return MenuModule
+BeardLib:RegisterModule(MenuModule.type_name, MenuModule)

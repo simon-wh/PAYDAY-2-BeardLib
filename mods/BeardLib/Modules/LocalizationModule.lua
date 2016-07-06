@@ -31,4 +31,4 @@ function LocalizationModule:RegisterHooks()
 	end)
 end
 
-return LocalizationModule
+BeardLib:RegisterModule(LocalizationModule.type_name, LocalizationModule)

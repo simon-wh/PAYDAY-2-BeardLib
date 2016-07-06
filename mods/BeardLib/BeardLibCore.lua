@@ -8,7 +8,6 @@ if not _G.BeardLib then
     self.sequence_mods = self.sequence_mods or {}
     self.MainMenu = "BeardLibMainMenu"
     self.MapsPath = "Maps"
-    self.CurrentViewportNo = 0
     self.ScriptExceptions = self.ScriptExceptions or {}
     self.HooksDirectory = self.ModPath .. "Hooks/"
     self.ModulesDirectory = self.ModPath .. "Modules/"
@@ -107,11 +106,7 @@ function BeardLib:LoadModules()
     local modules = file.GetFiles(self.ModulesDirectory)
     if modules then
         for _, mdle in pairs(modules) do
-            local module = dofile(self.ModulesDirectory .. mdle)
-
-            if module then
-                BeardLib:RegisterModule(module.type_name, module)
-            end
+            dofile(self.ModulesDirectory .. mdle)
         end
     end
 end

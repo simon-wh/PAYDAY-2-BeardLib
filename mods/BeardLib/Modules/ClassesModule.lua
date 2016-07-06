@@ -22,4 +22,4 @@ function ClassesModule:Load()
     end
 end
 
-return ClassesModule
+BeardLib:RegisterModule(ClassesModule.type_name, ClassesModule)
