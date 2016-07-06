@@ -2,7 +2,7 @@ core:import("CoreSerialize")
 
 ModCore = ModCore or class()
 ModCore._ignored_modules = {}
-function ModCore:init(config_path, load_modules)
+function ModCore:init(config_path, load_modules, post_init)
     if not io.file_is_readable(config_path) then
         self:log("[ERROR] Config file is not readable!")
         return
@@ -14,6 +14,19 @@ function ModCore:init(config_path, load_modules)
     self:LoadConfigFile(config_path)
     if load_modules then
         self:init_modules()
+    end
+    self._auto_post_init = post_init
+end
+
+function ModCore:post_init(ignored_modules)
+    for _, module in pairs(self._modules) do
+        if (not ignored_modules or not table.contains(ignored_modules, module._name)) then
+            local success, err = pcall(function() module:post_init() end)
+
+            if not success then
+                self:log("[ERROR] An error occured on the post initialization of %s. Error:\n%s", module._name, tostring(err))
+            end
+        end
     end
 end
 
@@ -63,14 +76,8 @@ function ModCore:init_modules()
         end
     end
 
-    for _, module in pairs(self._modules) do
-        if module.post_init then
-            local success, err = pcall(function() module:post_init() end)
-
-            if not success then
-                self:log("[ERROR] An error occured on the post initialization of %s. Error:\n%s", module._name, tostring(err))
-            end
-        end
+    if self._auto_post_init then
+        self:post_init()
     end
     self.modules_initialized = true
 end
@@ -112,7 +119,6 @@ function ModCore:StringToCallback(str, self_tbl)
     local global_tbl_name = split[1]
 
     local global_tbl = self:StringToTable(global_tbl_name)
-
     if global_tbl then
         return callback(self_tbl or global_tbl, global_tbl, func_name)
     else

@@ -26,11 +26,19 @@ function OptionModule:init(core_mod, config)
 end
 
 function OptionModule:post_init()
+    if self._post_init_complete then
+        return false
+    end
+
     self:InitOptions(self._config.options, self._storage)
 
     if self._config.auto_load then
         self:Load()
     end
+
+    self.super.post_init(self)
+
+    return true
 end
 
 function OptionModule:Load()
@@ -104,6 +112,10 @@ function OptionModule:InitOptions(tbl, option_tbl)
 
                 if sub_tbl.value_changed then
                     sub_tbl.value_changed = self._mod:StringToCallback(sub_tbl.value_changed)
+                end
+
+                if sub_tbl.converter then
+                    sub_tbl.converter = self._mod:StringToCallback(sub_tbl.converter)
                 end
 
                 if sub_tbl.enabled_callback then
@@ -183,7 +195,7 @@ function OptionModule:GetOption(name)
         local tbl = self._storage
         for _, part in pairs(string_split) do
             if tbl[part] == nil then
-                BeardLib:log(string.format("[ERROR] Option Group of name %q does not exist in mod, %s", name, self._mod.Name))
+                BeardLib:log(string.format("[ERROR] Option of name %q does not exist in mod, %s", name, self._mod.Name))
                 return
             end
             tbl = tbl[part]
@@ -198,15 +210,18 @@ end
 function OptionModule:GetValue(name, real)
     local option = self:GetOption(name)
     if option then
-        if real and option.type == "multichoice" then
-            if type(option.values[option.value]) == "table" then
-                return option.values[option.value].value
-            else
-                return option.values[option.value]
+        if real then
+            if option.converter then
+                return option.converter(option, option.value)
+            elseif option.type == "multichoice" then
+                if type(option.values[option.value]) == "table" then
+                    return option.values[option.value].value
+                else
+                    return option.values[option.value]
+                end
             end
-        else
-            return option.value
         end
+        return option.value
     else
         return
     end
