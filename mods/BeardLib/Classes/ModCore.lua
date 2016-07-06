@@ -1,28 +1,30 @@
 core:import("CoreSerialize")
 
 ModCore = ModCore or class()
-
-function ModCore:init(config_path)
+ModCore._ignored_modules = {}
+function ModCore:init(config_path, load_modules)
     if not io.file_is_readable(config_path) then
-        BeardLib:log("[ERROR] Config file is not readable!")
+        self:log("[ERROR] Config file is not readable!")
+        return
     end
 
     self.ModPath = ModPath
     self.SavePath = SavePath
 
     self:LoadConfigFile(config_path)
+    if load_modules then
+        self:init_modules()
+    end
 end
 
 function ModCore:LoadConfigFile(path)
     local file = io.open(path, "r")
     local config = ScriptSerializer:from_custom_xml(file:read("*all"))
 
-    self.Name = config.name
+    self.Name = config.name or "ERR:" .. tostring(table.remove(string.split(self.ModPath, "/")))
     self.GlobalKey = config.global_key
 
-    if config.modules then
-        self._modules = config.modules
-    end
+    self._config = config
 end
 
 function ModCore:init_modules()
@@ -30,26 +32,44 @@ function ModCore:init_modules()
         return
     end
 
-    local modules = {}
-    if self._modules then
-        for i, module_tbl in ipairs(self._modules) do
-            local node_class = CoreSerialize.string_to_classtable(module_tbl._meta)
+    self._modules = {}
+    for i, module_tbl in ipairs(self._config) do
+        if type(module_tbl) == "table" then
+            if not table.contains(self._ignored_modules, module_tbl._meta) then
+                local node_class = BeardLib.modules[module_tbl._meta]
 
-            if node_class then
-                local node_obj = node_class:new(self, module_tbl)
-                if self[node_obj._name] then
-                    self:log("The name of module: %s already exists in the mod table, please make sure this is a unique name!", node_obj._name)
+                if not node_class and module_tbl._force_search then
+                    node_class = CoreSerialize.string_to_classtable(module_tbl._meta)
                 end
 
-                self[node_obj._name] = node_obj
-                table.insert(modules, node_obj)
+                if node_class then
+                    local success, node_obj = pcall(function() return node_class:new(self, module_tbl) end)
+                    if success then
+                        if not node_obj._loose then
+                            if self[node_obj._name] then
+                                self:log("The name of module: %s already exists in the mod table, please make sure this is a unique name!", node_obj._name)
+                            end
+
+                            self[node_obj._name] = node_obj
+                        end
+                        table.insert(self._modules, node_obj)
+                    else
+                        self:log("[ERROR] An error occured on initilization of module: %s. Error:\n%s", module_tbl._meta, tostring(err))
+                    end
+                else
+                    self:log("[ERROR] Unable to find module with key %s", module_tbl._meta)
+                end
             end
         end
     end
 
-    for _, module in pairs(modules) do
+    for _, module in pairs(self._modules) do
         if module.post_init then
-            module:post_init()
+            local success, err = pcall(function() module:post_init() end)
+
+            if not success then
+                self:log("[ERROR] An error occured on the post initialization of %s. Error:\n%s", module._name, tostring(err))
+            end
         end
     end
     self.modules_initialized = true
@@ -68,11 +88,20 @@ function ModCore:log(str, ...)
 end
 
 function ModCore:StringToTable(str)
+    if str == "self" then return self end
+
     if (string.find(str, "$")) then
         str = string.gsub(str, "%$(%w+)%$", { ["global"] = self.GlobalKey })
     end
 
-    return BeardLib.Utils:StringToTable(str)
+    local global_tbl
+    local self_search = "self."
+    if string.begins(str, self_search) then
+        str = string.sub(str, #self_search + 1, #str)
+        global_tbl = self
+    end
+
+    return BeardLib.Utils:StringToTable(str, global_tbl)
 end
 
 function ModCore:StringToCallback(str, self_tbl)
@@ -83,7 +112,7 @@ function ModCore:StringToCallback(str, self_tbl)
     local global_tbl_name = split[1]
 
     local global_tbl = self:StringToTable(global_tbl_name)
-    --PrintTable(global_tbl)
+
     if global_tbl then
         return callback(self_tbl or global_tbl, global_tbl, func_name)
     else

@@ -1,5 +1,5 @@
 ModAssetsModule = ModAssetsModule or class(ModuleBase)
-ModAssetsModule.type_name = "assets"
+ModAssetsModule.type_name = "AssetUpdates"
 ModAssetsModule._default_version_file = "version.txt"
 
 function ModAssetsModule:init(core_mod, config)
@@ -20,7 +20,7 @@ function ModAssetsModule:init(core_mod, config)
             version_api_url = "http://manager.lastbullet.net/GetDownloadVersion/$id$.txt",
             download_file_func = callback(self, self, "LastBulletDownloadAssets"),
             download_info_url = "http://manager.lastbullet.net/GetSingleDownload/$id$.json",
-            download_api_url = "http://forums.lastbullet.net/mydownloads/downloads/$download$"
+            download_api_url = "http://lastbullet.net/mydownloads/downloads/$download$"
         }
     }
 
@@ -286,3 +286,5 @@ function ModAssetsModule:InitializeNode(node)
         merge_data = { mod_key = self._mod.GlobalKey }
     })
 end
+
+return ModAssetsModule

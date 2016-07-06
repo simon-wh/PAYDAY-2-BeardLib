@@ -548,3 +548,5 @@ Hooks:Add("BeardLibCreateCustomNodesAndButtons", "BeardLibOptionModuleCreateCall
         OptionModule.SetValue(item._parameters.module, item._parameters.option_key, cur_val)
     end
 end)
+
+return OptionModule

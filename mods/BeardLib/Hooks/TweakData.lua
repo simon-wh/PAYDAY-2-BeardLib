@@ -1,1 +1,1 @@
-MapFramework:new()
+BeardLib.managers.MapFramework:RegisterHooks()

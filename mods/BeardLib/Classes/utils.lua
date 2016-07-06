@@ -221,11 +221,11 @@ function BeardLib.Utils:normalize_string_value(value)
 	return value
 end
 
-function BeardLib.Utils:StringToTable(global_tbl_name)
-    local global_tbl
+function BeardLib.Utils:StringToTable(global_tbl_name, global_tbl)
+    local global_tbl = global_tbl or _G
     if string.find(global_tbl_name, "%.") then
         local global_tbl_split = string.split(global_tbl_name, "[.]")
-        global_tbl = _G
+
         for _, str in pairs(global_tbl_split) do
             global_tbl = rawget(global_tbl, str)
             if not global_tbl then
@@ -234,7 +234,7 @@ function BeardLib.Utils:StringToTable(global_tbl_name)
             end
         end
     else
-        global_tbl = rawget(_G, global_tbl_name)
+        global_tbl = rawget(global_tbl, global_tbl_name)
         if not global_tbl then
             BeardLib:log("[ERROR] Key " .. global_tbl_name .. " does not exist in the global table.")
             return nil
@@ -321,20 +321,22 @@ BeardLib.Utils.Path._seperator_char = "/"
 function BeardLib.Utils.Path.Combine(...)
 	local paths = {...}
 	local all_parts = {}
-	for _, path_part in pairs(paths) do
-		if (string.find(path_part, BeardLib.Utils.Path._seperator_char)) then
-			for _, sub_path_part in pairs(string.split(path_part, BeardLib.Utils.Path._seperator_char)) do
-				if sub_path_part == ".." then
+	for i, path_part in pairs(paths) do
+		if path_part and type(path_part) == "string" then
+			if (string.find(path_part, BeardLib.Utils.Path._seperator_char)) then
+				for _, sub_path_part in pairs(string.split(path_part, BeardLib.Utils.Path._seperator_char)) do
+					if sub_path_part == ".." then
+						table.remove(all_parts)
+					else
+						table.insert(all_parts, sub_path_part)
+					end
+				end
+			else
+				if path_part == ".." then
 					table.remove(all_parts)
 				else
-					table.insert(all_parts, sub_path_part)
+					table.insert(all_parts, path_part)
 				end
-			end
-		else
-			if path_part == ".." then
-				table.remove(all_parts)
-			else
-				table.insert(all_parts, path_part)
 			end
 		end
 	end

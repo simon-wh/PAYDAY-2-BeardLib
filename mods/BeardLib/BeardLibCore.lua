@@ -17,6 +17,7 @@ if not _G.BeardLib then
     self._replace_script_data = {}
 
     self.classes = {
+        "ModCore.lua",
         "FrameworkBase.lua",
         "MapFramework.lua",
         "Definitions.lua",
@@ -33,10 +34,8 @@ if not _G.BeardLib then
         "MenuItems/Table.lua",
         "MenuItems/ContextMenu.lua",
         "MenuHelperPlus.lua",
-        "UnitPropertiesItem.lua",
         "json_utils.lua",
         "utils.lua",
-        "ModCore.lua",
         "ModAssetUpdateManager.lua",
         "ModuleBase.lua"
     }
@@ -55,7 +54,7 @@ if not _G.BeardLib then
         ["core/lib/managers/viewport/corescriptviewport"] = "CoreScriptViewport.lua",
         ["core/lib/utils/dev/editor/coreworlddefinition"] = "CoreWorldDefinition.lua",
         ["core/lib/system/coresystem"] = "CoreSystem.lua",
-        ["lib/tweak_data/enveffecttweakdata"] = "TweakData.lua",        
+        ["lib/tweak_data/enveffecttweakdata"] = "TweakData.lua",
         --["core/lib/managers/viewport/environment/coreenvironmentmanager"] = "CoreEnvironmentManager.lua"
     }
     self.custom_mission_elements = {
@@ -63,6 +62,8 @@ if not _G.BeardLib then
         "TeleportPlayer",
         "Environment"
     }
+    self.modules = {}
+
 end
 
 function BeardLib:init()
@@ -81,9 +82,8 @@ function BeardLib:init()
             language = "english"
         }
     })
-
     self.managers.asset_update = ModAssetUpdateManager:new()
-
+    self.managers.MapFramework = MapFramework:new()
     --Load ScriptData mod_overrides
     --self:LoadModOverridePlus()
 end
@@ -94,11 +94,24 @@ function BeardLib:LoadClasses()
     end
 end
 
+function BeardLib:RegisterModule(key, module)
+    if not self.modules[key] then
+        self:log("Registered module with key %s", key)
+        self.modules[key] = module
+    else
+        self:log("[ERROR] Module with key %s already exists", key or "")
+    end
+end
+
 function BeardLib:LoadModules()
     local modules = file.GetFiles(self.ModulesDirectory)
     if modules then
         for _, mdle in pairs(modules) do
-            dofile(self.ModulesDirectory .. mdle)
+            local module = dofile(self.ModulesDirectory .. mdle)
+
+            if module then
+                BeardLib:RegisterModule(module.type_name, module)
+            end
         end
     end
 end
@@ -126,7 +139,7 @@ function BeardLib:LoadModOverrideFolder(directory, currentFilePath)
             local file_name_split = string.split(sub_file, "%.")
             if table.contains(self.script_data_formats, file_name_split[2]) or table.contains(self.script_data_types, file_name_split[2]) then
                 local fullFilepath = currentFilePath .. "/" .. file_name_split[1]
-                self:ReplaceScriptData(directory .. sub_file, #file_name_split == 2 and "binary" or file_name_split[3], fullFilepath, file_name_split[2], true, false)
+                self:ReplaceScriptData(directory .. sub_file, #file_name_split == 2 and "binary" or file_name_split[3], fullFilepath, file_name_split[2], {})
             end
         end
     end
@@ -147,8 +160,8 @@ if RequiredScript then
     end
 end
 
-function BeardLib:log(str)
-    log("[BeardLib] " .. str)
+function BeardLib:log(str, ...)
+    log("[BeardLib] " .. string.format(str, ...))
 end
 
 function BeardLib:ShouldGetScriptData(filepath, extension)

@@ -1,7 +1,7 @@
 ScriptReplacementsModule = ScriptReplacementsModule or class(ModuleBase)
 
 --Need a better name for this
-ScriptReplacementsModule.type_name = "ScriptReplacementsModule"
+ScriptReplacementsModule.type_name = "ScriptMods"
 
 function ScriptReplacementsModule:init(core_mod, config)
     self.super.init(self, core_mod, config)
@@ -17,7 +17,9 @@ function ScriptReplacementsModule:post_init()
                 options.use_clbk = self._mod:StringToCallback(tbl.use_clbk)
             end
 
-            BeardLib:ReplaceScriptData(BeardLib.Utils.Path.Combine(self.ScriptDirectory, tbl.file), tbl.type, tbl.target_file, tbl.target_type, options)
+            BeardLib:ReplaceScriptData(BeardLib.Utils.Path.Combine(self.ScriptDirectory, tbl.file or tbl.replacement), tbl.type or tbl.replacement_type, tbl.target_file or tbl.target_path, tbl.target_type or tbl.target_ext, options)
         end
     end
 end
+
+return ScriptReplacementsModule

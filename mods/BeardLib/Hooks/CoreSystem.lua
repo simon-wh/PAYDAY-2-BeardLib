@@ -47,9 +47,7 @@ getmetatable(PackageManager).script_data = function(self, extension, filepath, n
         end
     end
 
-    data = BeardLib:ProcessScriptData(self, filepath, extension, data)
-
-	return data
+	return BeardLib:ProcessScriptData(self, filepath, extension, data)
 end
 
 getmetatable(DB)._has = getmetatable(DB)._has or getmetatable(DB).has

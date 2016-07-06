@@ -1,11 +1,13 @@
 FrameworkBase = FrameworkBase or class()
 FrameworkBase._directory = ""
-
+FrameworkBase.auto_init_modules = true
+FrameworkBase.main_file_name = "main.xml"
+FrameworkBase._mod_core = ModCore
 function FrameworkBase:init()
-    self._loaded_configs = {}
-    self._config_calls = table.merge(self._config_calls or {}, {
+    self._loaded_mods = {}
+    --[[self._config_calls = table.merge(self._config_calls or {}, {
         localization = {func = callback(self, self, "LoadLocalizationConfig")}
-    })
+    })]]--
 
     self:Load()
 end
@@ -14,21 +16,28 @@ function FrameworkBase:Load()
     local dirs = file.GetDirectories(self._directory)
     if dirs then
         for _, dir in pairs(dirs) do
-            local main_file = self._directory .. "/" .. dir .. "/main.xml"
+            local path = BeardLib.Utils.Path.Combine(self._directory, dir)
+            local main_file = BeardLib.Utils.Path.Combine(path, self.main_file_name)
             if io.file_is_readable(main_file) then
-                local cfile = io.open(main_file, 'r')
-                local data = ScriptSerializer:from_custom_xml(cfile:read("*all"))
-                self:LoadConfig(dir, self._directory .. "/" .. dir .. "/", data)
+                declare("ModPath", path)
+                local success, node_obj = pcall(function() return self._mod_core:new(main_file, self.auto_init_modules) end)
+                if success then
+                    BeardLib:log("Loaded Map: %s", path)
+                    self._loaded_mods[dir] = node_obj
+                else
+                    BeardLib:log("[ERROR] An error occured on initilization of Map %s. Error:\n%s", dir, tostring(node_obj))
+                end
+                --local cfile = io.open(main_file, 'r')
+                --local data = ScriptSerializer:from_custom_xml(cfile:read("*all"))
+                --self:LoadConfig(dir, self._directory .. "/" .. dir .. "/", data)
             else
-                BeardLib:log("[ERROR] Could not read the main.xml file from " .. self._directory .. "/" .. dir)
+                BeardLib:log("[ERROR] Could not read %s", main_file)
             end
         end
     end
 end
 
-function FrameworkBase:LoadConfig(name, path, data)
-    self._loaded_configs[name] = {data = data, path = path, name = name}
-
+--[[function FrameworkBase:LoadConfig(name, path, data)
     for _, sub_data in ipairs(data) do
         local cfg_tbl = self._config_calls[sub_data._meta]
         if cfg_tbl then
@@ -37,9 +46,9 @@ function FrameworkBase:LoadConfig(name, path, data)
             BeardLib:log("[ERROR] No Config call for the subtable: " .. sub_data._meta)
         end
     end
-end
+end]]
 
-local load_localization_file = function(path, directory, file)
+--[[local load_localization_file = function(path, directory, file)
     local localiz_path = path .. directory .. "/" .. file
     if io.file_is_readable(localiz_path) then
         BeardLib:log("Loaded: " .. localiz_path)
@@ -68,9 +77,9 @@ function FrameworkBase:LoadLocalizationConfig(name, path, data)
             load_localization_file(path, data.directory, data.default)
         end
 	end)
-end
+end]]--
 
-function FrameworkBase:LoadHooks(name, data)
+--[[function FrameworkBase:LoadHooks(name, data)
     local path = self._directory .. "/" .. name .. "/" .. (data.directory and data.directory .. "/" or "")
     local dest_tbl = _posthooks
     for _, hook in ipairs(data) do
@@ -86,4 +95,4 @@ function FrameworkBase:LoadHooks(name, data)
             BeardLib:log("[ERROR] Hook file does not exist! File: " .. path .. hook.file)
         end
     end
-end
+end]]--
