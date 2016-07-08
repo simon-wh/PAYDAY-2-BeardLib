@@ -1,11 +1,13 @@
 Slider = Slider or class(Item)
 
 function Slider:init( menu, params )    
-    params.value = params.value or 1
-	self.super.init( self, menu, params )
+    params.value = params.value or 1    
     self.type = "Slider"
+    self.size_by_text = false
+	self.super.init( self, menu, params )
     self.step = self.step or 1
     self.floats = self.floats or 2
+    self.filter = "number"
     local item_width = params.panel:w() - self.padding
 	local slider_bg = params.panel:bitmap({
         name = "slider_bg",
@@ -13,32 +15,18 @@ function Slider:init( menu, params )
         h = params.items_size / 1.5,
         layer = 5,
         color = menu.background_color / 1.2,
+    })
+    TextBoxBase.init(self, {
+        lines = 1,
+        panel = self.panel,
+        align = "center",
+        w = params.panel:w() / 3.5,
+        value = self.value,
     })	 
-    local slider_value = params.panel:text({
-        name = "slider_value",
-        text = tostring(string.format("%.2f", params.value)),
-        align = "right",
-        valign = "center",
-        vertical = "center",
-        w = params.panel:w() / 1.5,
-        h = params.items_size - 2,
-        layer = 8,
-        color = params.text_color or Color.black,
-        font = "fonts/font_medium_mf",
-        font_size = 16
-    })  
-    slider_value:set_selection(slider_value:text():len())	
-    self.filter = "number"
-    local caret = params.panel:rect({
-        name = "caret",
-        w = 1,
-        h = params.items_size,
-        alpha = 0,
-        layer = 20,
-    })   
     slider_bg:set_center(params.panel:center())
     slider_bg:set_world_bottom(params.panel:world_bottom() - 4)
-    slider_value:set_right(params.panel:right() - 4)     
+    params.panel:child("textbg"):set_right(params.panel:right() - 4)     
+    params.panel:child("text"):set_center(params.panel:child("textbg"):center()) 
     if params.max or params.min then
         params.max = params.max or 1
         params.min = params.min or 0
@@ -47,41 +35,27 @@ function Slider:init( menu, params )
             w = item_width * (params.value / params.max),
             h = slider_bg:h(),
             layer = 6,
-            color = menu.highlight_color / 1.4
-            
+            color = menu.marker_highlight_color / 1.4
         })              
         local slider_icon = params.panel:rect({
             name = "slider_icon",
-            w = 4,
+            w = 2,
             h = slider_bg:h(),
             layer = 7,
-            color = slider_value:color(),
         })  
         slider:set_leftbottom(slider_bg:left(), slider_bg:bottom())
         slider_icon:set_rightbottom(slider:right(), slider:bottom())
     end       
-    slider_value:enter_text(callback(self, TextBox, "enter_text")) 
-    caret:animate(callback(self, TextBox, "blink"))    
     self._mouse_pos_x, self._mouse_pos_y = 0,0
 end
 function Slider:SetStep(step)  
     self.step = step
-end   
-function Slider:update_caret()     
-    local text = self.panel:child("slider_value")
-
-    local s, e = text:selection()
-    local x, y, w, h = text:selection_rect()
-    if s == 0 and e == 0 then
-        x = text:world_x()
-        y = text:world_y()
-    end
-    self.panel:child("caret"):set_world_position(x, y + 1)
-    self.panel:child("caret"):set_visible(self.cantype)
 end
 function Slider:SetValue(value, reset_selection, no_format)
+    log(tostring(value))
     value = tonumber(value) or 0
-    local slider_value = self.panel:child("slider_value")
+    log(tostring(value))
+    local text = self.panel:child("text")
     local slider_icon = self.panel:child("slider_icon")
 	local slider = self.panel:child("slider")
 
@@ -89,12 +63,12 @@ function Slider:SetValue(value, reset_selection, no_format)
         local val = math.clamp(value, self.min, self.max)
         slider:set_w((self.panel:w() - self.padding) * ((val - self.min) / (self.max - self.min)))         
         slider_icon:set_right(slider:right())             
-        slider_value:set_text(not no_format and string.format("%.2f", val) or val)
+        text:set_text(not no_format and string.format("%.2f", val) or val)
     else
-        slider_value:set_text(not no_format and string.format("%.2f", value) or value)        
+        text:set_text(not no_format and string.format("%.2f", value) or value)        
     end   
      if reset_selection then
-        slider_value:set_selection(slider_value:text():len())  
+        text:set_selection(text:text():len())  
     end
     if self.max or self.min then
 	   self.super.SetValue(self, math.clamp(value, self.min, self.max))
@@ -108,8 +82,8 @@ function Slider:SetValueByPercentage( percent )
     self:SetValue(self.min + (self.max - self.min) * percent)
 end
  
-function Slider:mouse_pressed( button, x, y )
-	self.super.mouse_pressed(self, button, x, y)   
+function Slider:MousePressed( button, x, y )
+	self.super.MousePressed(self, button, x, y)   
     if not self.enabled then
         return
     end      
@@ -138,33 +112,14 @@ function Slider:mouse_pressed( button, x, y )
             return true              
         end
     end  
-    if button == Idstring("1") then
-        self.cantype = self.panel:inside(x,y)
-        self:update_caret() 
-        return self.cantype   
-    end 
 end
 
-function Slider:key_press( o, k )
-    if not alive(self.panel) then
-        return
-    end
-    local text = self.panel:child("slider_value")
-    if k == Idstring("enter") then
-        self.cantype = false
-        text:stop()
-        TextBox.CheckText(self, text)
-    end       
-     if self.cantype then 
-        text:stop()
-        text:animate(callback(self, TextBox, "key_hold"), k)
-        return true
-    end
+function Slider:KeyPressed( o, k )
 
 end 
 
-function Slider:mouse_moved( x, y )
-    self.super.mouse_moved(self, x, y)
+function Slider:MouseMoved( x, y )
+    self.super.MouseMoved(self, x, y)
     if self.menu._slider_hold == self and self.menu._old_x then
         if self.max or self.min then
             local slider_bg = self.panel:child("slider_bg")
@@ -187,18 +142,8 @@ function Slider:mouse_moved( x, y )
         end
         self:RunCallback()
     end        
-    
-    local cantype = self.cantype  
-    self.cantype = self.panel:inside(x,y) and self.cantype or false     
-    if cantype and not self.cantype then
-        TextBox.CheckText(self, self.panel:child("slider_value"))
-        self:SetValue(self.value, true)
-    end     
-	if self.cantype then
-		self:update_caret()
-	end
 end
  
-function Slider:mouse_released( button, x, y )
-    self.super.mouse_released( self, button, x, y )
+function Slider:MouseReleased( button, x, y )
+    self.super.MouseReleased( self, button, x, y )
 end

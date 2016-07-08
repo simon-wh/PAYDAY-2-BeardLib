@@ -1,11 +1,14 @@
 ComboBox = ComboBox or class(Item)
 
 function ComboBox:init( parent, params )
+    self.type = "ComboBox"
+    self.size_by_text = false
     self.super.init( self, parent, params )
     self.items = self.items or {} 
+    local text = self.items[self.value]
     local combo_selected = self.panel:text({
         name = "combo_selected",
-        text = tostring(self.items[self.value or 1]),
+        text = self.localized_items and text and managers.localization:text(text) or text or "",
         h = self.items_size,
         valign = "center",
         align = "center",
@@ -53,7 +56,12 @@ function ComboBox:init( parent, params )
         valign="grow",
         layer = -1
     })
-    TextBox.create(self, {panel = self.list})
+    TextBoxBase.init(self, {
+        panel = self.list,
+        lines = 1,
+        value = "",
+        update_text = callback(self, self, "update_search"),
+    })
     self.items_panel = self.list:panel({
         name = "items_panel",
         w = self.list:w() - self.padding,
@@ -80,17 +88,6 @@ function ComboBox:init( parent, params )
     })
     self:update_search()
 end
-function ComboBox:enter_text( text, s )
-    if self.menu._menu_closed then
-        return
-    end
-    if self.menu._highlighted == self and self.cantype and not Input:keyboard():down(Idstring("left ctrl")) then
-        self._before_text = number and (tonumber(text:text()) ~= nil and tonumber(text:text()) or self._before_text) or text:text()
-        text:replace_text(s)
-        self:update_caret() 
-        self:update_search()
-    end     
-end
 function ComboBox:SetItems( items )
     self.items = items or {}
     self:update_search()
@@ -100,7 +97,7 @@ function ComboBox:CreateItems()
     for k, text in pairs(self.found_items) do
         local combo_item = self.items_panel:text({
             name = "item"..k,
-            text = tostring(text),
+            text = self.localized_items and managers.localization:text(tostring(text)) or tostring(text),
             align = "center",
             h = 12,
             y = (k - 1) * 14,
@@ -125,7 +122,8 @@ end
 function ComboBox:SetValue(value)
     self.super.SetValue(self, value)
     if alive(self.panel) then
-        self.panel:child("combo_selected"):set_text(self.localize_items and managers.localization:text(self.items[value]) or self.items[value])
+        local text = self.items[value]
+        self.panel:child("combo_selected"):set_text(self.localized_items and text and managers.localization:text(text) or text or "")
     end
 end
 
@@ -136,13 +134,11 @@ end
 function ComboBox:hide()
     self.list:hide()
     self.menu._openlist = nil
-    self.list:child("text"):set_text("")
-    self.cantype = false
 end
 function ComboBox:show()
     local bottom_h = (self.menu._scroll_panel:world_bottom() - self.panel:world_bottom()) - 4
     local top_h = (self.panel:world_top() - self.menu._scroll_panel:world_top()) - 4
-    local items_h = (#self.found_items + 1) * 14
+    local items_h = (#self.found_items * 14) + self.items_size
     local normal_pos = items_h <= bottom_h or bottom_h >= top_h
     if (normal_pos and items_h > bottom_h) or (not normal_pos and items_h > top_h) then
         self.list:set_h(math.min(bottom_h, top_h))
@@ -153,17 +149,16 @@ function ComboBox:show()
     self._scroll_panel:child("scroll_bar"):set_h(self.list:h())
     self.items_panel:set_h(items_h)      
     if normal_pos then 
-        self.list:set_lefttop(self.panel:child("combo_bg"):world_left(), self.panel:child("combo_bg"):world_bottom() + 2)
+        self.list:set_lefttop(self.panel:child("combo_bg"):world_left(), self.panel:child("combo_bg"):world_bottom())
     else       
-        self.list:set_leftbottom(self.panel:child("combo_bg"):world_left(), self.panel:child("combo_bg"):world_top() - 2)        
+        self.list:set_leftbottom(self.panel:child("combo_bg"):world_left(), self.panel:child("combo_bg"):world_top())        
     end    
     self.items_panel:set_y(self.items_size)        
     self.list:show()
     self.menu._openlist = self
     self:AlignScrollBar()
-    self:update_caret()
 end
-function ComboBox:mouse_pressed( button, x, y )
+function ComboBox:MousePressed( button, x, y )
     if not self.menu._openlist and self.panel:inside(x,y) then
         if button == Idstring("0") then
             if alive(self.list) then
@@ -174,17 +169,12 @@ function ComboBox:mouse_pressed( button, x, y )
     elseif self.menu._openlist == self and self.list:inside(x,y) then
         if button == Idstring("mouse wheel down") then
             self:scroll_down()
-            self:mouse_moved( x, y )
+            self:MouseMoved( x, y )
         elseif button == Idstring("mouse wheel up") then
             self:scroll_up()
-            self:mouse_moved( x, y )
+            self:MouseMoved( x, y )
         end
-        if button == Idstring("0") then
-            self.cantype = self.list:child("textbg"):inside(x,y)
-            self:update_caret() 
-            if self.cantype then
-                return true
-            end                 
+        if button == Idstring("0") then               
             if self._scroll_panel:child("scroll_bar"):child("rect"):inside(x, y) then
                 self._grabbed_scroll_bar = true
                 return true
@@ -242,66 +232,7 @@ function ComboBox:scroll(y)
         return true
     end
 end
-function ComboBox:key_hold( text, k )
-    while self.cantype and self.menu.key_pressed == k and self.menu._highlighted == self do     
-        local s, e = text:selection()
-        local n = utf8.len(text:text())
-        if Input:keyboard():down(Idstring("left ctrl")) then
-            if Input:keyboard():down(Idstring("a")) then
-                text:set_selection(0, text:text():len())
-            elseif Input:keyboard():down(Idstring("c")) then
-                Application:set_clipboard(tostring(text:selected_text())) 
-            elseif Input:keyboard():down(Idstring("v")) then
-                if (self.filter == "number" and tonumber(Application:get_clipboard()) == nil) then
-                    return
-                end
-                self._before_text = text:text()
-                text:replace_text(tostring(Application:get_clipboard()))      
-                self:update_search()
-            elseif Input:keyboard():down(Idstring("z")) and self._before_text then
-                local before_text = self._before_text
-                self._before_text = text:text()      
-                self:update_search()       
-            end
-        elseif Input:keyboard():down(Idstring("left shift")) then
-            if Input:keyboard():down(Idstring("left")) then
-                text:set_selection(s - 1, e)
-            elseif Input:keyboard():down(Idstring("right")) then
-                text:set_selection(s, e + 1)    
-            end
-        else    
-            if k == Idstring("backspace") then      
-                if not (utf8.len(text:text()) < 1) then
-                    if s == e and s > 0 then
-                        text:set_selection(s - 1, e)
-                    end
-                    self._before_text = text:text()
-                    text:replace_text("")      
-                end 
-                self.value = text:text()    
-                self:RunCallback()
-                self:update_search()
-            elseif k == Idstring("left") then
-                if s < e then
-                    text:set_selection(s, s)
-                elseif s > 0 then
-                    text:set_selection(s - 1, s - 1)
-                end
-            elseif k == Idstring("right") then
-                if s < e then
-                    text:set_selection(e, e)
-                elseif s < n then
-                    text:set_selection(s + 1, s + 1)
-                end 
-            else
-                self.menu.key_pressed = nil
-            end         
-        end    
-        self:update_caret()    
-        wait(0.2)
-    end
-end
-function ComboBox:key_press( o, k )
+function ComboBox:KeyPressed( o, k )
     if not self.menu._openlist then
         if k == Idstring("enter") then
             self.list:set_lefttop(self.panel:child("combo_bg"):world_left(), self.panel:child("combo_bg"):world_bottom() + 4)
@@ -311,29 +242,8 @@ function ComboBox:key_press( o, k )
     elseif k == Idstring("esc") then
         self.menu._openlist.list:hide()
         self.menu._openlist = nil
-    else
-        if self.cantype then 
-            self.list:child("text"):stop()
-            self.list:child("text"):animate(callback(self, self, "key_hold"), k)
-            return true
-        end
-        self:update_caret()     
     end
 end
-
-function ComboBox:update_caret()     
-    local text = self.list:child("text")
-    text:set_center(self.list:child("textbg"):center())
-    local s, e = text:selection()
-    local x, y, w, h = text:selection_rect()
-    if s == 0 and e == 0 then
-        x = text:world_x()
-        y = text:world_y()
-    end
-    self.list:child("caret"):set_world_position(x, y + 1)
-    self.list:child("caret"):set_visible(self.cantype)
-end
-
 function ComboBox:update_search()
     local text = self.list:child("text"):text()
     self.found_items = {}
@@ -348,21 +258,20 @@ function ComboBox:update_search()
     end 
     self:CreateItems()
 end
-function ComboBox:mouse_moved( x, y )
-    self.super.mouse_moved(self, x, y)
+function ComboBox:MouseMoved( x, y )
+    self.super.MouseMoved(self, x, y)
     if self.menu._openlist == self then
         if self._grabbed_scroll_bar then
             local where = (y - self._scroll_panel:world_top()) / (self._scroll_panel:world_bottom() - self._scroll_panel:world_top())
             self:scroll(where * self.items_panel:h())
         end
         for k, v in pairs(self.found_items) do
-            self.items_panel:child("bg"..k):set_color(self.items_panel:child("bg"..k):inside(x,y) and self.parent.highlight_color or self.parent.background_color)
+            self.items_panel:child("bg"..k):set_color(self.items_panel:child("bg"..k):inside(x,y) and self.parent.marker_highlight_color or self.parent.background_color)
         end
-        self.cantype = self.list:child("textbg"):inside(x,y) and self.cantype or false 
     end
 end
 
-function ComboBox:mouse_released( button, x, y )
-    self.super.mouse_released( button, x, y )
+function ComboBox:MouseReleased( button, x, y )
+    self.super.MouseReleased( button, x, y )
     self._grabbed_scroll_bar = false
 end

@@ -36,7 +36,7 @@ function ItemsGroup:init( parent, params )
     params.panel:rect({
         name = "bg",
         h = h,
-        color = parent.highlight_color,     
+        color = params.marker_highlight_color,     
     })    
     params.title:set_w(w)
     params.option = params.option or params.name    
@@ -54,10 +54,10 @@ end
 function ItemsGroup:Index()
     return self.parent:GetIndex(self.name)
 end
-function ItemsGroup:key_press( o, k )
+function ItemsGroup:KeyPressed( o, k )
 
 end
-function ItemsGroup:mouse_pressed( button, x, y )
+function ItemsGroup:MousePressed( button, x, y )
     if button == Idstring("0") and alive(self.panel) and self.panel:inside(x,y) then
         self:Toggle()
         return true
@@ -104,7 +104,7 @@ function ItemsGroup:SetCallback( callback )
     self.callback = callback
 end
 
-function ItemsGroup:mouse_moved( x, y, highlight )
+function ItemsGroup:MouseMoved( x, y, highlight )
     if not self.enabled then
         return
     end    
@@ -120,6 +120,6 @@ function ItemsGroup:mouse_moved( x, y, highlight )
     end   
 end
 
-function ItemsGroup:mouse_released( button, x, y )
+function ItemsGroup:MouseReleased( button, x, y )
 
 end

@@ -1,6 +1,7 @@
 ContextMenu = ContextMenu or class(Item)
 
 function ContextMenu:init( parent, params )
+    self.type = "ContextMenu"
     self.super.init( self, parent, params )
     params.items = params.items or {} 
     self.list = self.menu._fullscreen_ws_pnl:panel({
@@ -109,7 +110,7 @@ function ContextMenu:show()
     self.menu._openlist = self
     self:AlignScrollBar()
 end
-function ContextMenu:mouse_pressed( button, x, y )
+function ContextMenu:MousePressed( button, x, y )
     if not self.menu._openlist and self.panel:inside(x,y) then
         if button == Idstring("0") then
             if alive(self.list) then
@@ -120,10 +121,10 @@ function ContextMenu:mouse_pressed( button, x, y )
     elseif self.menu._openlist == self and self.list:inside(x,y) then
         if button == Idstring("mouse wheel down") then
             self:scroll_down()
-            self:mouse_moved( x, y )
+            self:MouseMoved( x, y )
         elseif button == Idstring("mouse wheel up") then
             self:scroll_up()
-            self:mouse_moved( x, y )
+            self:MouseMoved( x, y )
         end
         if button == Idstring("0") then
             if self.cantype then
@@ -185,7 +186,7 @@ function ContextMenu:scroll(y)
         return true
     end
 end
-function ContextMenu:key_press( o, k )
+function ContextMenu:KeyPressed( o, k )
     if not self.menu._openlist then
         if k == Idstring("enter") and self.highlight then
             self.list:set_lefttop(self.panel:world_left(), self.panel:world_bottom() + 4)
@@ -198,8 +199,8 @@ function ContextMenu:key_press( o, k )
     end
 end
 
-function ContextMenu:mouse_moved( x, y )
-    self.super.mouse_moved(self, x, y)
+function ContextMenu:MouseMoved( x, y )
+    self.super.MouseMoved(self, x, y)
     if self.menu._openlist == self then
         if self._grabbed_scroll_bar then
             local where = (y - self._scroll_panel:world_top()) / (self._scroll_panel:world_bottom() - self._scroll_panel:world_top())
@@ -207,13 +208,13 @@ function ContextMenu:mouse_moved( x, y )
         end
         for k, v in pairs(self.items) do
             if alive( self.items_panel:child("bg"..k)) then
-                self.items_panel:child("bg"..k):set_color(self.items_panel:child("bg"..k):inside(x,y) and self.parent.highlight_color or self.parent.background_color)  
+                self.items_panel:child("bg"..k):set_color(self.items_panel:child("bg"..k):inside(x,y) and self.marker_highlight_color or self.parent.background_color)  
             end
         end
     end
 end
 
-function ContextMenu:mouse_released( button, x, y )
-    self.super.mouse_released( button, x, y )
+function ContextMenu:MouseReleased( button, x, y )
+    self.super.MouseReleased( button, x, y )
     self._grabbed_scroll_bar = false
 end

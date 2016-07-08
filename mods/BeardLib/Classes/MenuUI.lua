@@ -1,35 +1,49 @@
 MenuUI = MenuUI or class()
-function MenuUI:init( config )
+function MenuUI:init( params )
 	local ws = managers.gui_data:create_fullscreen_workspace()   
  	ws:connect_keyboard(Input:keyboard())  
     ws:connect_mouse(Input:mouse())  
-    config.position = config.position or "Left"
+    params.position = params.position or "Left"
 	self._fullscreen_ws = ws
     self._fullscreen_ws_pnl = ws:panel():panel({alpha = 0})
     self._options = {}
     self._menus = {}
+
+    if params.w == "full" then
+        params.w = self._fullscreen_ws_pnl:w()
+    elseif params.w == "half" then
+        params.w = self._fullscreen_ws_pnl:w() / 2
+    end    
     self._panel = self._fullscreen_ws_pnl:panel({
         name = "menu_panel",
         halign = "center", 
         align = "center",
-        layer = config.layer or 500,
-        h = config.h or self._fullscreen_ws_pnl:h(),
-        w = config.w or self._fullscreen_ws_pnl:w(),
+        layer = params.layer or 500,
+        h = params.h or self._fullscreen_ws_pnl:h(),
+        w = params.w or self._fullscreen_ws_pnl:w(),
     })      
-
-    if type(config.position) == "table" then
-        self._panel:position(config.position[1] or self._panel:x(), config.position[2] or self._panel:y())
+    self._panel:rect({
+        name = "bg", 
+        halign="grow", 
+        valign="grow", 
+        visible = params.background_color ~= nil, 
+        color = params.background_color,
+        alpha = params.background_alpha, 
+        layer = 0 
+    })         
+    if type(params.position) == "table" then
+        self._panel:position(params.position[1] or self._panel:x(), params.position[2] or self._panel:y())
     else
-         if string.match(config.position, "Center") then
+         if string.match(params.position, "Center") then
             self._panel:set_center(self._fullscreen_ws_pnl:center())
         end      
-        if string.match(config.position, "Bottom") then
+        if string.match(params.position, "Bottom") then
             self._panel:set_bottom(self._fullscreen_ws_pnl:bottom())
         end         
-        if string.match(config.position, "Top") then
+        if string.match(params.position, "Top") then
             self._panel:set_top(self._fullscreen_ws_pnl:top())
         end     
-        if string.match(config.position, "Right") then
+        if string.match(params.position, "Right") then
             self._panel:set_right(self._fullscreen_ws_pnl:right())
         end       
     end
@@ -47,9 +61,9 @@ function MenuUI:init( config )
         layer = 20,
     }):rect({
 		name = "rect",
-		color = config.text_color or Color.black,
+		color = params.text_color or Color.black,
 		layer = 4,
-		alpha = config.alpha or 0.5,
+		alpha = params.alpha or 0.5,
 		h = bar_h,
     })
 	self._help_panel = self._fullscreen_ws_pnl:panel({
@@ -60,8 +74,8 @@ function MenuUI:init( config )
     self._help_panel:set_left(self._panel:right())
     self._help_panel:rect({
         name = "bg",
-        color = config.background_color or Color.white,
-        alpha = config.background_alpha or 0.8,      
+        color = params.background_color or Color.white,
+        alpha = params.background_alpha or 0.8,      
     })
 
 	self._help_text = self._help_panel:text({
@@ -74,7 +88,7 @@ function MenuUI:init( config )
 	    valign = "left",
 	    align = "left",
 	    vertical = "top",	    
-	    color = config.text_color or Color.black,
+	    color = params.text_color or Color.black,
 	    font = "fonts/font_large_mf",
 	    font_size = 16
 	})      
@@ -84,17 +98,17 @@ function MenuUI:init( config )
         h = 24,
         layer = 20,
     })
-    table.merge(self, config)
+    table.merge(self, params)
 	local _,_,w,h = self._help_text:text_rect()
 	self._help_panel:set_size(w + 10,h)
-	if config.create_items then
-		config.create_items(self)
+	if params.create_items then
+		params.create_items(self)
 	else
 		BeardLib:log("No create items callback found")
 	end
-    self._menu_closed = config.closed or config.closed == nil    
-    self._fullscreen_ws_pnl:key_press(callback(self, self, "key_press"))    
-    self._fullscreen_ws_pnl:key_release(callback(self, self, "key_release"))    
+    self._menu_closed = params.closed or params.closed == nil    
+    self._fullscreen_ws_pnl:key_press(callback(self, self, "KeyPressed"))    
+    self._fullscreen_ws_pnl:key_release(callback(self, self, "KeyReleased"))    
 end
  
 function MenuUI:NewMenu(params) 
@@ -123,13 +137,13 @@ function MenuUI:enable()
 	self._fullscreen_ws_pnl:set_alpha(1)
 	self._menu_closed = false
 	managers.mouse_pointer:use_mouse({
-		mouse_move = callback(self, self, "mouse_moved"),
-		mouse_press = callback(self, self, "mouse_pressed"),
-		mouse_release = callback(self, self, "mouse_released"),
+		mouse_move = callback(self, self, "MouseMoved"),
+		mouse_press = callback(self, self, "MousePressed"),
+		mouse_release = callback(self, self, "MouseReleased"),
 		id = self._mouse_id
 	}) 	
-    self._fullscreen_ws_pnl:key_press(callback(self, self, "key_press"))    
-    self._fullscreen_ws_pnl:key_release(callback(self, self, "key_release"))    
+    self._fullscreen_ws_pnl:key_press(callback(self, self, "KeyPressed"))    
+    self._fullscreen_ws_pnl:key_release(callback(self, self, "KeyReleased"))       
 end
 
 function MenuUI:disable()
@@ -150,25 +164,33 @@ function MenuUI:disable()
 	managers.mouse_pointer:remove_mouse(self._mouse_id)
 end
 
-function MenuUI:key_release( o, k )
-	self.key_pressed = nil
-    if self.keyrelease then
-        self.keyrelease(o, k)
+function MenuUI:KeyReleased( o, k )
+	self._key_pressed = nil
+    if self.key_released then
+        self.key_release(o, k)
     end
 end
  
-function MenuUI:key_press( o, k )
+function MenuUI:MouseInside()
+    for _, menu in pairs(self._menus) do
+        if menu:MouseInside() then
+            return true
+        end
+    end
+end 
+
+function MenuUI:KeyPressed( o, k )
     if self._menu_closed then
         return
     end
-	self.key_pressed = k 
+	self._key_pressed = k 
 	for _, menu in ipairs(self._menus) do
-        if menu:key_press( o, k ) then
+        if menu:KeyPressed( o, k ) then
             return true
         end		
 	end		
-    if self.keypress then
-        self.keypress(o, k)
+    if self.key_press then
+        self.key_press(o, k)
     end	
 end
 
@@ -177,35 +199,35 @@ function MenuUI:SetHelp(help)
 	local _,_,w,h = self._help_text:text_rect()
 	self._help_panel:set_size(w + 10,h)
 end
-function MenuUI:mouse_released( o, button, x, y )
+function MenuUI:MouseReleased( o, button, x, y )
 	self._slider_hold = nil
 	self._grabbed_scroll_bar = nil
     for _, menu in ipairs(self._menus) do
-        if menu:mouse_released( button, x, y ) then
+        if menu:MouseReleased( button, x, y ) then
             return
         end
     end     
-    if self.mouserelease then
-        self.mouserelease(o, k)
+    if self.mouse_release then
+        self.mouse_release(o, k)
     end    
 end
  
-function MenuUI:mouse_pressed( o, button, x, y )
+function MenuUI:MousePressed( o, button, x, y )
 	for _, menu in ipairs(self._menus) do
-		if menu:mouse_pressed( button, x, y ) then
+		if menu:MousePressed( button, x, y ) then
             return    
 		end
 	end	
-    if self.mousepressed then
-        self.mousepressed(button, x, y)
+    if self.mouse_press then
+        self.mouse_press(button, x, y)
     end      	
 end
-function MenuUI:mouse_moved( o, x, y )
+function MenuUI:MouseMoved( o, x, y )
 	for _, menu in ipairs( self._menus ) do
-		menu:mouse_moved( x, y )
+		menu:MouseMoved( x, y )
 	end
-    if self.mousemoved then
-        self.mousemoved( x, y )
+    if self.mouse_move then
+        self.mouse_move( x, y )
     end         
 	self._old_x = x	
 	self._old_y = y	

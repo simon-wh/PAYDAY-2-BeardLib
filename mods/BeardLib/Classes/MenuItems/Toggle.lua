@@ -1,8 +1,8 @@
 Toggle = Toggle or class(Item)
 
-function Toggle:init( parent, params )
+function Toggle:init( parent, params )    
+	self.type = "Toggle"
 	self.super.init( self, parent, params )
-    self.type = "Toggle"
     params.panel:bitmap({
         name = "toggle",
         w = params.items_size,
@@ -25,25 +25,25 @@ function Toggle:SetValue(value)
 	end
 end
 
-function Toggle:mouse_pressed( button, x, y )
+function Toggle:MousePressed( button, x, y )
 	if button == Idstring("0") then
 		self:SetValue(not self.value)	
-		self.super.mouse_pressed(self, button, x, y)
+		self.super.MousePressed(self, button, x, y)
         return true
 	end
 end
 
-function Toggle:key_press( o, k )
+function Toggle:KeyPressed( o, k )
 	if k == Idstring("enter") then
 		self:SetValue(not self.value)
 		self:RunCallback()
 	end
 end
 
-function Toggle:mouse_moved( x, y )
-    self.super.mouse_moved(self, x, y)
+function Toggle:MouseMoved( x, y )
+    self.super.MouseMoved(self, x, y)
 end
 
-function Toggle:mouse_released( button, x, y )
-    self.super.mouse_released( self, button, x, y )
+function Toggle:MouseReleased( button, x, y )
+    self.super.MouseReleased( self, button, x, y )
 end

@@ -1,27 +1,28 @@
 Item = Item or class(Menu)
 
 function Item:init( parent, params )
-    self.type = params.type or "Button"
-	  params.panel = params.parent_panel:panel({ 
-		    name = params.name,
+  	self.type = self.type or "Button"
+	params.panel = params.parent_panel:panel({ 
+		name = params.name,
         w = params.w - params.padding,      
-        h = params.items_size * 2,
+        h = params.items_size * ((self.type == "Button" or self.type == "Toggle") and 1 or 2),
         x = params.padding / 2,
       	y = 10, 
     }) 
     local Marker = params.panel:rect({
       	name = "bg", 
-      	color =  params.normal_color,
+      	color = params.marker_color,
       	halign="grow", 
       	valign="grow", 
         layer = -1 
     })
     params.title = params.panel:text({
   	    name = "title",
-  	    text = params.text,
+  	    text = params.localized and params.text and managers.localization:text(params.text) or params.text,
   	    vertical = "center",
-        x = 4,
+        x = params.padding,
   	    align = params.align,
+  	    w = params.panel:w(),
   	   	h = params.items_size,
   	    layer = 6,
   	    color = params.text_color or Color.black,
@@ -38,6 +39,7 @@ function Item:init( parent, params )
     params.title:set_y(0)
     if params.size_by_text then
         params.panel:set_size(w + params.items_size + 10,h)
+     	params.title:set_size(params.panel:w(), h)
         params.title:set_x(params.color and 2 or 0)
     end    
     if self.type == "Divider" then
@@ -63,10 +65,10 @@ end
 function Item:Index()
     return self.parent:GetIndex(self.name)
 end
-function Item:key_press( o, k )
+function Item:KeyPressed( o, k )
 
 end
-function Item:mouse_pressed( button, x, y )
+function Item:MousePressed( button, x, y )
     if not self.enabled or self.type == "Divider" then
         return
     end
@@ -82,34 +84,41 @@ function Item:RunCallback(clbk)
         clbk(self.parent, self)
     end  
 end
+function Item:SetColor(color)
+	if color then
+		self.div:set_color(color)
+	end
+	self.div:set_visible(color ~= nil)
+end
 function Item:SetText(text)
-    self.panel:child("title"):set_text(text)
+	params.text = text 
+	self.panel:child("title"):set_text(self.localized and text and managers.localization:text(text) or text)
 end
 
 function Item:SetCallback( callback )
     self.callback = callback
 end
 
-function Item:mouse_moved( x, y, highlight )
+function Item:MouseMoved( x, y, highlight )
     if not self.enabled or self.type == "Divider" then
         return
     end    
   	if not self.menu._openlist and not self.menu._slider_hold then
   	    if self.panel:inside(x, y) then
           if highlight ~= false then
-  		        self.panel:child("bg"):set_color(self.highlight_color)
+  		        self.panel:child("bg"):set_color(self.marker_highlight_color)
           end
   		    self.menu:SetHelp(self.help)
   		    self.highlight = true
   		    self.menu._highlighted = self
   	    else
-  	      self.panel:child("bg"):set_color(self.normal_color)
+  	      self.panel:child("bg"):set_color(self.marker_color)
           self.highlight = false       
   		end	
   		self.menu._highlighted = self.menu._highlighted and (alive(self.menu._highlighted.panel) and self.menu._highlighted.panel:inside(x,y)) and self.menu._highlighted or nil
   	end
 end
 
-function Item:mouse_released( button, x, y )
+function Item:MouseReleased( button, x, y )
 
 end

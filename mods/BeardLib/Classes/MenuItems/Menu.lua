@@ -3,14 +3,16 @@ Menu = Menu or class(MenuUI)
 function Menu:init( menu, params )
     params.text_color = params.text_color or menu.text_color
     params.items_size = params.items_size or menu.items_size or 16
-    params.background_color = params.background_color or menu.background_color or Color.white
-    params.highlight_color = params.highlight_color or menu.highlight_color or Color(0.2, 0.5, 1)
-    params.normal_color = params.normal_color or Color.white:with_alpha(0)
+    params.background_color = params.background_color 
+    params.marker_highlight_color = params.marker_highlight_color or menu.marker_highlight_color or Color(0.2, 0.5, 1)
+    params.marker_color = params.marker_color or Color.white:with_alpha(0)
     params.align = params.align or menu.align 
     params.position = params.position or "Left"
     local w = menu._panel:w() - 12
     if params.w == "full" then
         params.w = menu._scroll_panel:w()
+    elseif params.w == "half" then
+        params.w = menu._scroll_panel:w() / 2
     end
     params.w = params.w or (w < 400 and w or 400)   
     params.panel = menu._scroll_panel:panel({ 
@@ -24,8 +26,9 @@ function Menu:init( menu, params )
         name = "bg", 
         halign="grow", 
         valign="grow", 
-        color = menu.background_color or Color.white,
-        alpha = menu.alpha or 0.8, 
+        visible = params.background_color ~= nil, 
+        color = params.background_color,
+        alpha = params.background_alpha, 
         layer = 0 
     })         
     local bar_h = params.panel:top() - params.panel:bottom()
@@ -60,7 +63,7 @@ function Menu:init( menu, params )
     self.items = {}     
     self._items = {}     
     if type(params.position) == "table" then
-        self:SetPosition(cofnig.position[1], cofnig.position[2])
+        self:SetPosition(params.position[1], params.position[2])
     else
         self:SetPositionByString(params.position)    
     end     
@@ -109,6 +112,9 @@ function Menu:SetMaxRow(max)
     self.row_max = max
     self:AlignItems()
 end
+function Menu:MouseInside()
+    return self.panel:inside(managers.mouse_pointer._mouse:world_position())
+end
 function Menu:SetSize(w,h)
     self.panel:set_size(w or self.w,h or self.h)
     self.panel:child("scroll_bar"):set_h(h or self.h)
@@ -118,22 +124,22 @@ function Menu:SetSize(w,h)
     self.h = h or self.h
     self:RecreateItems()
 end
-function Menu:mouse_pressed( button, x, y )
+function Menu:MousePressed( button, x, y )
     local menu = self.menu        
     if self.visible then
         if menu._highlighted and menu._highlighted.parent == self then
-            if menu._highlighted:mouse_pressed( button, x, y ) then
+            if menu._highlighted:MousePressed( button, x, y ) then
                 return true
             end
         end
         if not self.menu._openlist and self.panel:inside(x,y) then
             if button == Idstring("mouse wheel down") then
                 self:scroll_down()
-                self:mouse_moved( x, y )
+                self:MouseMoved( x, y )
                 return true
             elseif button == Idstring("mouse wheel up") then
                 self:scroll_up()    
-                self:mouse_moved( x, y )     
+                self:MouseMoved( x, y )     
                 return true
             end 
         end
@@ -153,9 +159,9 @@ function Menu:mouse_pressed( button, x, y )
         end
     end     
 end
-function Menu:mouse_moved( x, y )
+function Menu:MouseMoved( x, y )
     if self.menu._openlist then
-        self.menu._openlist:mouse_moved( x, y )
+        self.menu._openlist:MouseMoved( x, y )
         return 
     end
     if self.visible then
@@ -164,22 +170,22 @@ function Menu:mouse_moved( x, y )
             self:scroll(where * self.items_panel:h())
         end        
         for _, item in ipairs(self._items) do
-            item:mouse_moved( x, y )
+            item:MouseMoved( x, y )
         end         
     end
 end
 
-function Menu:mouse_released( button, x, y )
+function Menu:MouseReleased( button, x, y )
     self.panel:child("scroll_bar"):child("rect"):set_color(Color.white)
     if self:CheckSelf() then
-        if self.menu._highlighted:mouse_released( button, x, y ) then
+        if self.menu._highlighted:MouseReleased( button, x, y ) then
             return true
         end
     end  
 end
-function Menu:key_press( o, k ) 
+function Menu:KeyPressed( o, k ) 
     if self:CheckSelf() then
-        if self.menu._highlighted:key_press( o, k ) then
+        if self.menu._highlighted:KeyPressed( o, k ) then
             return true
         end
     end
@@ -388,8 +394,8 @@ function Menu:ConfigureItem( item )
     item.enabled = item.enabled or true
     item.text_color = item.text_color or self.text_color
     item.items_size = item.items_size or self.items_size 
-    item.highlight_color = item.highlight_color or self.highlight_color 
-    item.normal_color = item.normal_color or self.normal_color 
+    item.marker_highlight_color = item.marker_highlight_color or self.marker_highlight_color 
+    item.marker_color = item.marker_color or self.marker_color 
     item.align = item.align or self.align or "left"
     item.size_by_text = item.size_by_text or self.size_by_text  
     item.parent_panel = item.group and item.group.panel or self.items_panel

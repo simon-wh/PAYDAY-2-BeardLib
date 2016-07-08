@@ -11,7 +11,7 @@ function ImageButton:init( parent, params )
     }) 
     local Marker = params.panel:rect({
         name = "bg", 
-        color = params.normal_color,
+        color = params.marker_color,
         halign="grow", 
         valign="grow", 
         layer = -1 
@@ -56,10 +56,10 @@ end
 function ImageButton:Index()
     return self.parent:GetIndex(self.name)
 end
-function ImageButton:key_press( o, k )
+function ImageButton:KeyPressed( o, k )
 
 end
-function ImageButton:mouse_pressed( button, x, y )
+function ImageButton:MousePressed( button, x, y )
     if not self.enabled then
         return
     end
@@ -82,26 +82,26 @@ function ImageButton:SetCallback( callback )
     self.callback = callback
 end
 
-function ImageButton:mouse_moved( x, y, highlight )
+function ImageButton:MouseMoved( x, y, highlight )
     if not self.enabled then
         return
     end    
     if not self.menu._openlist and not self.menu._slider_hold then
         if self.panel:inside(x, y) then
           if highlight ~= false then
-                self.panel:child("bg"):set_color(self.highlight_color)
+                self.panel:child("bg"):set_color(self.marker_highlight_color)
           end
             self.menu:SetHelp(self.help)
             self.highlight = true
             self.menu._highlighted = self
         else
-          self.panel:child("bg"):set_color(self.normal_color)
+          self.panel:child("bg"):set_color(self.marker_color)
           self.highlight = false       
         end 
         self.menu._highlighted = self.menu._highlighted and (alive(self.menu._highlighted.panel) and self.menu._highlighted.panel:inside(x,y)) and self.menu._highlighted or nil
     end
 end
 
-function ImageButton:mouse_released( button, x, y )
+function ImageButton:MouseReleased( button, x, y )
 
 end
