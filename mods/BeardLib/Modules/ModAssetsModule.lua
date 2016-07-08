@@ -1,5 +1,5 @@
 ModAssetsModule = ModAssetsModule or class(ModuleBase)
-ModAssetsModule.type_name = "assets"
+ModAssetsModule.type_name = "AssetUpdates"
 ModAssetsModule._default_version_file = "version.txt"
 
 function ModAssetsModule:init(core_mod, config)
@@ -20,7 +20,7 @@ function ModAssetsModule:init(core_mod, config)
             version_api_url = "http://manager.lastbullet.net/GetDownloadVersion/$id$.txt",
             download_file_func = callback(self, self, "LastBulletDownloadAssets"),
             download_info_url = "http://manager.lastbullet.net/GetSingleDownload/$id$.json",
-            download_api_url = "http://forums.lastbullet.net/mydownloads/downloads/$download$"
+            download_api_url = "http://lastbullet.net/mydownloads/downloads/$download$"
         }
     }
 
@@ -43,8 +43,8 @@ function ModAssetsModule:init(core_mod, config)
         return
     end
 
-    self.folder_names = type(self._config.folder_name) == "string" and {self._config.folder_name} or BeardLib.Utils:RemoveNonNumberIndexes(self._config.folder_name)
-    self.install_directory = self._config.install_directory and self._mod:GetRealFilePath(self._config.install_directory, self) or BeardLib.definitions.mod_override
+    self.folder_names = self._config.use_local_dir and table.remove(string.split(self._mod.ModPath, "/")) or (type(self._config.folder_name) == "string" and {self._config.folder_name} or BeardLib.Utils:RemoveNonNumberIndexes(self._config.folder_name))
+    self.install_directory = self._config.use_local_path and BeardLib.Utils.Path.Combine(self._mod.ModPath, "..") or (self._config.install_directory and self._mod:GetRealFilePath(self._config.install_directory, self) or BeardLib.definitions.mod_override)
 
     self.version_file = self._config.version_file and self._mod:GetRealFilePath(self._config.version_file, self) or BeardLib.Utils.Path.Combine(self.install_directory, self.folder_names[1], self._default_version_file)
     self._version = 0
@@ -208,7 +208,7 @@ function ModAssetsModule:StoreDownloadedAssets(data, id)
 
         for _, dir in pairs(self.folder_names) do
             local path = BeardLib.Utils.Path.Combine(self.install_directory, dir)
-            if _G.file.DirectoryExists(path) then
+            if not self._config.dont_delete and _G.file.DirectoryExists(path) then
                 io.remove_directory_and_files(path .. "/")
             end
         end
@@ -286,3 +286,5 @@ function ModAssetsModule:InitializeNode(node)
         merge_data = { mod_key = self._mod.GlobalKey }
     })
 end
+
+BeardLib:RegisterModule(ModAssetsModule.type_name, ModAssetsModule)

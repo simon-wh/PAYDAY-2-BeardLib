@@ -26,11 +26,19 @@ function OptionModule:init(core_mod, config)
 end
 
 function OptionModule:post_init()
+    if self._post_init_complete then
+        return false
+    end
+
     self:InitOptions(self._config.options, self._storage)
 
     if self._config.auto_load then
         self:Load()
     end
+
+    self.super.post_init(self)
+
+    return true
 end
 
 function OptionModule:Load()
@@ -84,7 +92,7 @@ function OptionModule:ApplyValues(tbl, value_tbl)
     end
 
     for i, sub_tbl in pairs(tbl) do
-        if sub_tbl._meta then
+        if type(sub_tbl) == "table" and sub_tbl._meta then
             if sub_tbl._meta == "option" and value_tbl[sub_tbl.name] ~= nil then
                 sub_tbl.value = value_tbl[sub_tbl.name]
             elseif (sub_tbl._meta == "option_group" or sub_tbl._meta == "option_set") and value_tbl[sub_tbl.name] then
@@ -104,6 +112,10 @@ function OptionModule:InitOptions(tbl, option_tbl)
 
                 if sub_tbl.value_changed then
                     sub_tbl.value_changed = self._mod:StringToCallback(sub_tbl.value_changed)
+                end
+
+                if sub_tbl.converter then
+                    sub_tbl.converter = self._mod:StringToCallback(sub_tbl.converter)
                 end
 
                 if sub_tbl.enabled_callback then
@@ -183,7 +195,7 @@ function OptionModule:GetOption(name)
         local tbl = self._storage
         for _, part in pairs(string_split) do
             if tbl[part] == nil then
-                BeardLib:log(string.format("[ERROR] Option Group of name %q does not exist in mod, %s", name, self._mod.Name))
+                BeardLib:log(string.format("[ERROR] Option of name %q does not exist in mod, %s", name, self._mod.Name))
                 return
             end
             tbl = tbl[part]
@@ -198,11 +210,18 @@ end
 function OptionModule:GetValue(name, real)
     local option = self:GetOption(name)
     if option then
-        if real and option.type == "multichoice" then
-            return option.values[option.value]
-        else
-            return option.value
+        if real then
+            if option.converter then
+                return option.converter(option, option.value)
+            elseif option.type == "multichoice" then
+                if type(option.values[option.value]) == "table" then
+                    return option.values[option.value].value
+                else
+                    return option.values[option.value]
+                end
+            end
         end
+        return option.value
     else
         return
     end
@@ -472,7 +491,9 @@ function OptionModule:CreateSubMenu(parent_node, option_tbl, option_path)
         name = menu_name
     }, merge_data))
 
-    self:InitializeNode(main_node, option_tbl, name and (option_path == "" and name or option_path .. "/" .. name) or "")
+    if option_tbl.build_items == nil or option_tbl.build_items then
+        self:InitializeNode(main_node, option_tbl, name and (option_path == "" and name or option_path .. "/" .. name) or "")
+    end
 
     MenuHelperPlus:AddButton({
         id = base_name .. "Button",
@@ -494,7 +515,7 @@ function OptionModule:InitializeNode(node, option_tbl, option_path)
                 self:CreateOption(node, sub_tbl, option_path)
             elseif sub_tbl._meta == "divider" then
                 self:CreateDivider(node, sub_tbl)
-            elseif sub_tbl._meta == "option_group" or sub_tbl._meta == "option_set" then
+            elseif sub_tbl._meta == "option_group" or sub_tbl._meta == "option_set" and (sub_tbl.build_menu == nil or sub_tbl.build_menu) then
                 self:CreateSubMenu(node, sub_tbl, option_path)
             end
         end
@@ -515,7 +536,7 @@ end
 Hooks:Add("BeardLibCreateCustomNodesAndButtons", "BeardLibOptionModuleCreateCallbacks", function(self_menu)
     MenuCallbackHandler.OptionModuleGeneric_ValueChanged = function(this, item)
         local value = item:value()
-        if type(item:value()) == "string" then value = value == "on" end
+        if item.TYPE == "toggle" then value = value == "on" end
         OptionModule.SetValue(item._parameters.module, item._parameters.option_key, value)
     end
 
@@ -542,3 +563,5 @@ Hooks:Add("BeardLibCreateCustomNodesAndButtons", "BeardLibOptionModuleCreateCall
         OptionModule.SetValue(item._parameters.module, item._parameters.option_key, cur_val)
     end
 end)
+
+BeardLib:RegisterModule(OptionModule.type_name, OptionModule)

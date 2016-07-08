@@ -44,26 +44,26 @@ end
 --- Encodes an arbitrary Lua object / variable.
 -- @param v The Lua object / variable to be JSON encoded.
 -- @return String containing the JSON encoding in internal Lua string format (i.e. not unicode)
-function json.custom_encode (v, tabs)
+function json.custom_encode (v, format, tabs)
     tabs = tabs or 0
 
   -- Handle nil values
   if v==nil then
     return "null"
   end
-  
-  local vtype = CoreClass.type_name(v)  
+
+  local vtype = CoreClass.type_name(v)
 
   -- Handle strings
-  if vtype=='string' or vtype=='Vector3' or vtype=='Rotation' or vtype=='Color' or vtype=='callback' then    
+  if vtype=='string' or vtype=='Vector3' or vtype=='Rotation' or vtype=='Color' or vtype=='callback' then
     return '"' .. encodeString(v) .. '"'	    -- Need to handle encoding in string
   end
-  
+
   -- Handle booleans
   if vtype=='number' or vtype=='boolean' then
     return tostring(v)
   end
-  
+
   -- Handle tables
   if vtype=='table' then
     local rval = {}
@@ -71,7 +71,7 @@ function json.custom_encode (v, tabs)
     local bArray, maxCount = isArray(v)
     if bArray then
       for i = 1,maxCount do
-        table.insert(rval, json.custom_encode(v[i], tabs + 1))
+        table.insert(rval, json.custom_encode(v[i], format, tabs + 1))
       end
     else	-- An object, not an array
       for i,j in pairs(v) do
@@ -80,32 +80,32 @@ function json.custom_encode (v, tabs)
         end
       end
     end
-    
+
     local length = 0
     for _, _ in pairs(rval) do
         length = length + 1
     end
-    
+
     if bArray then
         if length > 0 then
-            return '[\n' .. get_tabs(tabs + 1) .. table.concat(rval,',\n' .. get_tabs(tabs + 1)) .. '\n' .. get_tabs(tabs) .. ']'
+            return '[' .. (format and '\n' or '') .. get_tabs(tabs + 1) .. table.concat(rval,',' .. (format and '\n' or '') .. get_tabs(tabs + 1)) .. (format and '\n' or '') .. get_tabs(tabs) .. ']'
         else
             return '{}'
         end
     else
         if length > 0 then
-            return '{\n' .. get_tabs(tabs + 1) .. table.concat(rval,',\n' .. get_tabs(tabs + 1)) .. '\n' .. get_tabs(tabs) .. '}'
+            return '{' .. (format and '\n' or '') .. get_tabs(tabs + 1) .. table.concat(rval,',' .. (format and '\n' or '') .. get_tabs(tabs + 1)) .. (format and '\n' or '') .. get_tabs(tabs) .. '}'
         else
             return '{}'
         end
     end
   end
-  
+
   -- Handle null values
   if vtype=='function' and v==nil then
     return 'null'
   end
-  
+
   assert(false,'encode attempt to encode unsupported type ' .. vtype .. ':' .. base.tostring(v))
 end
 
@@ -129,9 +129,9 @@ end
 -- @param t The table to evaluate as an array
 -- @return boolean, number True if the table can be represented as an array, false otherwise. If true,
 -- the second returned value is the maximum
--- number of indexed elements in the array. 
+-- number of indexed elements in the array.
 function isArray(t)
-  -- Next we count all the elements, ensuring that any non-indexed elements are not-encodable 
+  -- Next we count all the elements, ensuring that any non-indexed elements are not-encodable
   -- (with the possible exception of 'n')
   local maxIndex = 0
   for k,v in pairs(t) do

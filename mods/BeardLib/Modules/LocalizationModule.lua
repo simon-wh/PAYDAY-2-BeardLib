@@ -1,7 +1,7 @@
 LocalizationModule = LocalizationModule or class(ModuleBase)
 
 --Need a better name for this
-LocalizationModule.type_name = "localization"
+LocalizationModule.type_name = "Localization"
 
 function LocalizationModule:init(core_mod, config)
     self.super.init(self, core_mod, config)
@@ -22,7 +22,6 @@ function LocalizationModule:init(core_mod, config)
 end
 
 function LocalizationModule:RegisterHooks()
-    log(tostring(self._mod.Name))
     Hooks:Add("LocalizationManagerPostInit", self._mod.Name .. "_Localization", function(loc)
         if self.Localizations[SystemInfo:language():key()] then
             LocalizationManager:load_localization_file(BeardLib.Utils.Path.Combine(self.LocalizationDirectory, self.Localizations[SystemInfo:language():key()]))
@@ -31,3 +30,5 @@ function LocalizationModule:RegisterHooks()
         end
 	end)
 end
+
+BeardLib:RegisterModule(LocalizationModule.type_name, LocalizationModule)

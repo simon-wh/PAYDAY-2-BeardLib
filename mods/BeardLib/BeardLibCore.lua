@@ -8,7 +8,6 @@ if not _G.BeardLib then
     self.sequence_mods = self.sequence_mods or {}
     self.MainMenu = "BeardLibMainMenu"
     self.MapsPath = "Maps"
-    self.CurrentViewportNo = 0
     self.ScriptExceptions = self.ScriptExceptions or {}
     self.HooksDirectory = self.ModPath .. "Hooks/"
     self.ModulesDirectory = self.ModPath .. "Modules/"
@@ -17,6 +16,7 @@ if not _G.BeardLib then
     self._replace_script_data = {}
 
     self.classes = {
+        "ModCore.lua",
         "FrameworkBase.lua",
         "MapFramework.lua",
         "Definitions.lua",
@@ -33,10 +33,8 @@ if not _G.BeardLib then
         "MenuItems/Table.lua",
         "MenuItems/ContextMenu.lua",
         "MenuHelperPlus.lua",
-        "UnitPropertiesItem.lua",
         "json_utils.lua",
         "utils.lua",
-        "ModCore.lua",
         "ModAssetUpdateManager.lua",
         "ModuleBase.lua"
     }
@@ -55,7 +53,7 @@ if not _G.BeardLib then
         ["core/lib/managers/viewport/corescriptviewport"] = "CoreScriptViewport.lua",
         ["core/lib/utils/dev/editor/coreworlddefinition"] = "CoreWorldDefinition.lua",
         ["core/lib/system/coresystem"] = "CoreSystem.lua",
-        ["lib/tweak_data/enveffecttweakdata"] = "TweakData.lua",        
+        ["lib/tweak_data/enveffecttweakdata"] = "TweakData.lua",
         --["core/lib/managers/viewport/environment/coreenvironmentmanager"] = "CoreEnvironmentManager.lua"
     }
     self.custom_mission_elements = {
@@ -63,6 +61,8 @@ if not _G.BeardLib then
         "TeleportPlayer",
         "Environment"
     }
+    self.modules = {}
+
 end
 
 function BeardLib:init()
@@ -81,16 +81,24 @@ function BeardLib:init()
             language = "english"
         }
     })
-
     self.managers.asset_update = ModAssetUpdateManager:new()
-
+    self.managers.MapFramework = MapFramework:new()
     --Load ScriptData mod_overrides
-    self:LoadModOverridePlus()
+    --self:LoadModOverridePlus()
 end
 
 function BeardLib:LoadClasses()
     for _, clss in pairs(self.classes) do
         dofile(self.ClassDirectory .. clss)
+    end
+end
+
+function BeardLib:RegisterModule(key, module)
+    if not self.modules[key] then
+        self:log("Registered module with key %s", key)
+        self.modules[key] = module
+    else
+        self:log("[ERROR] Module with key %s already exists", key or "")
     end
 end
 
@@ -126,7 +134,7 @@ function BeardLib:LoadModOverrideFolder(directory, currentFilePath)
             local file_name_split = string.split(sub_file, "%.")
             if table.contains(self.script_data_formats, file_name_split[2]) or table.contains(self.script_data_types, file_name_split[2]) then
                 local fullFilepath = currentFilePath .. "/" .. file_name_split[1]
-                self:ReplaceScriptData(directory .. sub_file, #file_name_split == 2 and "binary" or file_name_split[3], fullFilepath, file_name_split[2], true, false)
+                self:ReplaceScriptData(directory .. sub_file, #file_name_split == 2 and "binary" or file_name_split[3], fullFilepath, file_name_split[2], {})
             end
         end
     end
@@ -147,8 +155,8 @@ if RequiredScript then
     end
 end
 
-function BeardLib:log(str)
-    log("[BeardLib] " .. str)
+function BeardLib:log(str, ...)
+    log("[BeardLib] " .. string.format(str, ...))
 end
 
 function BeardLib:ShouldGetScriptData(filepath, extension)
@@ -181,7 +189,7 @@ function BeardLib:ProcessScriptData(PackManager, filepath, extension, data)
     if self._replace_script_data[filepath:key()] and self._replace_script_data[filepath:key()][extension:key()] then
         for _, replacement in pairs(self._replace_script_data[filepath:key()][extension:key()]) do
 
-            if not replacement.data.use_clbk or replacement.data.use_clbk() then
+            if not replacement.options.use_clbk or replacement.options.use_clbk() then
                 self:log("Replace: " .. tostring(filepath:key()))
 
                 local fileType = replacement.load_type
@@ -207,15 +215,17 @@ function BeardLib:ProcessScriptData(PackManager, filepath, extension, data)
 
                     if extension == Idstring("nav_data") then
                         self:RemoveMetas(new_data)
+                    elseif (extension == Idstring("continents") or extension == Idstring("mission")) and fileType=="custom_xml" then
+                        BeardLib.Utils:RemoveAllNumberIndexes(new_data, true)
                     end
 
                     if new_data then
-                        if replacement.data.merge_mode then
-                            if replacement.data.merge_mode == "merge" then
+                        if replacement.options.merge_mode then
+                            if replacement.options.merge_mode == "merge" then
                                 table.merge(data, new_data)
-                            elseif replacement.data.merge_mode == "script_merge" then
+                            elseif replacement.options.merge_mode == "script_merge" then
                                 table.script_merge(data, new_data)
-                            elseif replacement.data.merge_mode == "add" then
+                            elseif replacement.options.merge_mode == "add" then
                                 table.add(data, new_data)
                             end
                         else
@@ -234,24 +244,24 @@ function BeardLib:ProcessScriptData(PackManager, filepath, extension, data)
     return data
 end
 
-function BeardLib:ReplaceScriptData(replacement, replacement_type, target_path, target_ext, extra_data)
-    extra_data = type(extra_data) == "table" and extra_data or {}
+function BeardLib:ReplaceScriptData(replacement, replacement_type, target_path, target_ext, options)
+    if options ~= nil and type(options) ~= "table" then
+        self:log("[ERROR] %s:ReplaceScriptData parameter 5, expected table, got %s", self.Name, tostring(type(extra_data)))
+        return
+    end
+    options = options or {}
     self._replace_script_data[target_path:key()] = self._replace_script_data[target_path:key()] or {}
     self._replace_script_data[target_path:key()][target_ext:key()] = self._replace_script_data[target_path:key()][target_ext:key()] or {}
-    --[[if self._replace_script_data[path:key()][target_ext:key()] then
-        BeardLib:log("[ERROR] Filepath has already been replaced, continuing with overwrite")
-    end]]--
-    self:log(replacement .. "|" .. target_path .. "|" .. target_ext)
     if not DB:has(target_ext, target_path) then
-        extra_data.add = true
+        options.add = true
     end
 
-    if extra_data.add then
+    if options.add then
         BeardLib.ScriptExceptions[target_path:key()] = BeardLib.ScriptExceptions[target_path:key()] or {}
         BeardLib.ScriptExceptions[target_path:key()][target_ext:key()] = true
     end
 
-    table.insert(self._replace_script_data[target_path:key()][target_ext:key()], {path = replacement, load_type = replacement_type, data = extra_data})
+    table.insert(self._replace_script_data[target_path:key()][target_ext:key()], {path = replacement, load_type = replacement_type, options = options})
 end
 
 function BeardLib:update(t, dt)

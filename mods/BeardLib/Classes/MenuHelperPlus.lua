@@ -314,14 +314,18 @@ function MenuHelperPlus:AddMultipleChoice(params)
         BeardLib:log("[ERROR] Unable to find node " .. params.node_name)
         return
     end
-	
+
 	local data = {
 		type = "MenuItemMultiChoice"
 	}
 	for k, v in ipairs( params.items or {} ) do
-		table.insert( data, { _meta = "option", text_id = v, value = k, localize = params.localized_items } )
+		if type(v) == "table" then
+			table.insert(data, table.merge(v, { _meta="option" }) )
+		else
+			table.insert( data, { _meta = "option", text_id = v, value = k, localize = params.localized_items } )
+		end
 	end
-	
+
 	local item_params = {
 		name = params.id,
 		text_id = params.title,
