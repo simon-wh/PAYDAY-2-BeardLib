@@ -14,7 +14,7 @@ function ScriptReplacementsModule:post_init()
         if tbl._meta == "mod" then
             local options = tbl.options
             if options and options.use_clbk then
-                options.use_clbk = self._mod:StringToCallback(tbl.use_clbk)
+                options.use_clbk = self._mod:StringToCallback(options.use_clbk)
             end
 
             BeardLib:ReplaceScriptData(BeardLib.Utils.Path:Combine(self.ScriptDirectory, tbl.file or tbl.replacement), tbl.type or tbl.replacement_type, tbl.target_file or tbl.target_path, tbl.target_type or tbl.target_ext, options)
