@@ -24,14 +24,14 @@ if not _G.BeardLib then
         "MenuUI.lua",
         "MenuDialog.lua",
         "MenuItems/Menu.lua",
-        "MenuItems/Item.lua",        
-        "MenuItems/TextBoxBase.lua",
+        "MenuItems/Item.lua",
         "MenuItems/ItemsGroup.lua",
         "MenuItems/ImageButton.lua",
         "MenuItems/Toggle.lua",
         "MenuItems/ComboBox.lua",
         "MenuItems/Slider.lua",
         "MenuItems/TextBox.lua",
+        "MenuItems/Table.lua",
         "MenuItems/ContextMenu.lua",
         "MenuHelperPlus.lua",
         "json_utils.lua",
@@ -115,29 +115,73 @@ function BeardLib:LoadModules()
 end
 
 function BeardLib:LoadModOverridePlus()
-    local mods = file.GetDirectories("assets/mod_overrides/")
+    local mods = file.GetDirectories(self.definitions.mod_override)
     if mods then
         for _, path in pairs(mods) do
-            self:LoadModOverrideFolder("assets/mod_overrides/" .. path .. "/", "")
+            self:LoadModOverrideFolder(BeardLib.Utils.Path:Combine(self.definitions.mod_override, path))
         end
     end
 end
 
-function BeardLib:LoadModOverrideFolder(directory, currentFilePath)
-    local subFolders = file.GetDirectories(directory)
-    if subFolders then
-        for _, sub_path in pairs(subFolders) do
-            self:LoadModOverrideFolder(directory .. sub_path .. "/", currentFilePath .. (currentFilePath == "" and "" or "/") .. sub_path)
+local add_file = "add.xml"
+
+function BeardLib:LoadModOverrideFolder(directory)
+    local add_file_path = BeardLib.Utils.Path:Combine(directory, add_file)
+    if SystemFS:exists(add_file_path) then
+        local file = io.open(add_file_path, "r")
+        local config = ScriptSerializer:from_custom_xml(file:read("*all"))
+        self:LoadAddConfig(directory, config)
+    end
+end
+
+function BeardLib:LoadAddConfig(directory, config)
+    for i, child in ipairs(config) do
+        if type(child) == "table" then
+            local typ = child._meta
+            local path = child.path
+            if typ and path then
+                path = self.Utils.Path:Normalize(path)
+                local ext_ids = Idstring(typ)
+                local path_ids = Idstring(path)
+                local file_path = BeardLib.Utils.Path:Combine(directory, path) ..".".. typ
+                if SystemFS:exists(file_path) then
+                    if (not DB:has(ext_ids, path_ids) or child.force) then
+                        if typ == "unit" then
+                            Global.added_units[tostring(path_ids:key())] = true
+                        end
+                        --self:log("Added file %s %s", path, typ)
+                        DB:create_entry(ext_ids, path_ids, file_path)
+                        PackageManager:reload(ext_ids, path_ids)
+                    end
+                else
+                    self:log("[ERROR] File does not exist! %s", file_path)
+                end
+            else
+                self:log("[ERROR] Node in %s does not contain a definition for both type and path", add_file_path)
+            end
         end
     end
+end
 
-    local subFiles = file.GetFiles(directory)
-    if subFiles then
-        for _, sub_file in pairs(subFiles) do
-            local file_name_split = string.split(sub_file, "%.")
-            if table.contains(self.script_data_formats, file_name_split[2]) or table.contains(self.script_data_types, file_name_split[2]) then
-                local fullFilepath = currentFilePath .. "/" .. file_name_split[1]
-                self:ReplaceScriptData(directory .. sub_file, #file_name_split == 2 and "binary" or file_name_split[3], fullFilepath, file_name_split[2], {})
+function BeardLib:UnloadAddConfig(config)
+    self:log("Unloading added files")
+    for i, child in ipairs(config) do
+        if type(child) == "table" then
+            local typ = child._meta
+            local path = child.path
+            if typ and path then
+                path = self.Utils.Path:Normalize(path)
+                local ext_ids = Idstring(typ)
+                local path_ids = Idstring(path)
+                if DB:has(ext_ids, path_ids) then
+                    if typ == "unit" then
+                        Global.added_units[tostring(path_ids:key())] = nil
+                    end
+                    --self:log("Unloaded %s %s", path, typ)
+                    DB:remove_entry(ext_ids, path_ids)
+                end
+            else
+                self:log("[ERROR] Node in %s does not contain a definition for both type and path", add_file_path)
             end
         end
     end

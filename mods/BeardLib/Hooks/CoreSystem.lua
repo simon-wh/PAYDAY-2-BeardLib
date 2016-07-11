@@ -33,6 +33,22 @@ getmetatable(PackageManager).unit_data = function(PackManager, ...)
     SaveTable(data.__index, "UnitDataIndex.txt")
     return data
 end]]--
+local ids_unit = Idstring("unit")
+
+getmetatable(World)._spawn_unit = getmetatable(World)._spawn_unit or getmetatable(World).spawn_unit
+
+getmetatable(World).spawn_unit = function(self, unit_name, pos, rot)
+	if Global.added_units[tostring(unit_name:key())] then
+		if not managers.dyn_resource:has_resource(ids_unit, unit_name, managers.dyn_resource.DYN_RESOURCES_PACKAGE) then
+			managers.dyn_resource:load(ids_unit, unit_name, managers.dyn_resource.DYN_RESOURCES_PACKAGE)
+			while not managers.dyn_resource:is_resource_ready(ids_unit, unit_name, managers.dyn_resource.DYN_RESOURCES_PACKAGE) do end
+		end
+	end
+
+	return self:_spawn_unit(unit_name, pos, rot)
+end
+
+
 
 getmetatable(PackageManager)._script_data = getmetatable(PackageManager)._script_data or getmetatable(PackageManager).script_data
 
