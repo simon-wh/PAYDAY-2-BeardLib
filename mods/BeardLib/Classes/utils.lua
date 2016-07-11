@@ -204,6 +204,17 @@ end
 
 BeardLib.Utils = {}
 
+function BeardLib.Utils:GetSubValues(tbl, key)
+    local new_tbl = {}
+    for i, vals in pairs(tbl) do
+        if vals[key] then
+            new_tbl[i] = vals[key]
+        end
+    end
+
+    return new_tbl
+end
+
 local searchTypes = {
     "Vector3",
     "Rotation",
@@ -316,21 +327,21 @@ end
 
 BeardLib.Utils.Path = {}
 
-BeardLib.Utils.Path._seperator_char = "/"
+BeardLib.Utils.Path._separator_char = "/"
 
 function BeardLib.Utils.Path:GetDirectory(path)
 	if not path then return nil end
-	local split = string.split(self:Normalize(path), self._seperator_char)
+	local split = string.split(self:Normalize(path), self._separator_char)
 	table.remove(split)
-	return table.concat(split, self._seperator_char)
+	return table.concat(split, self._separator_char)
 end
 
 function BeardLib.Utils.Path:GetFileName(str)
-	if string.ends(str, self._seperator_char) then
+	if string.ends(str, self._separator_char) then
 		return nil
 	end
 	str = self:Normalize(str)
-	return table.remove(string.split(str, self._seperator_char))
+	return table.remove(string.split(str, self._separator_char))
 end
 
 function BeardLib.Utils.Path:GetFileNameWithoutExtension(str)
@@ -352,8 +363,8 @@ function BeardLib.Utils.Path:Normalize(str)
 
 	--Clean seperators
 	str = string.gsub(str, ".", {
-		["\\"] = self._seperator_char,
-		--["/"] = self._seperator_char,
+		["\\"] = self._separator_char,
+		--["/"] = self._separator_char,
 	})
 
 	str = string.gsub(str, "([%w+]/%.%.)", "")
@@ -367,8 +378,8 @@ function BeardLib.Utils.Path:Combine(start, ...)
 		if string.begins(path_part, ".") then
 			path_part = string.sub(path_part, 2, #path_part)
 		end
-		if not string.ends(final_string, self._seperator_char) and not string.begins(path_part, self._seperator_char) then
-			final_string = final_string .. self._seperator_char
+		if not string.ends(final_string, self._separator_char) and not string.begins(path_part, self._separator_char) then
+			final_string = final_string .. self._separator_char
 		end
 		final_string = final_string .. path_part
 	end

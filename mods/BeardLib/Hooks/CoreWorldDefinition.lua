@@ -25,6 +25,7 @@ local WorldDefinitionunload_packages = WorldDefinition.unload_packages
 function WorldDefinition:unload_packages()
     if Global.level_data._add then
         Global.level_data._add:Unload()
+        Global.level_data._add = nil
     end
     if self._custom_loaded_packages then
         if not Global.editor_mode then

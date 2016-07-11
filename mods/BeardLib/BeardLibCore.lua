@@ -310,17 +310,6 @@ function BeardLib:paused_update(t, dt)
     end
 end
 
-function BeardLib:GetSubValues(tbl, key)
-    local new_tbl = {}
-    for i, vals in pairs(tbl) do
-        if vals[key] then
-            new_tbl[i] = vals[key]
-        end
-    end
-
-    return new_tbl
-end
-
 if Hooks then
     Hooks:Register("GameSetupPauseUpdate")
     if GameSetup then
