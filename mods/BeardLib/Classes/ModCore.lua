@@ -35,7 +35,12 @@ function ModCore:LoadConfigFile(path)
     local config = ScriptSerializer:from_custom_xml(file:read("*all"))
 
     self.Name = config.name or "ERR:" .. tostring(table.remove(string.split(self.ModPath, "/")))
-    self.GlobalKey = config.global_key
+    if config.global_key then
+        self.global = config.global_key
+        if not _G[self.global] then
+            declare(self.global, self)
+        end
+    end
 
     self._config = config
 end
@@ -98,7 +103,7 @@ function ModCore:StringToTable(str)
     if str == "self" then return self end
 
     if (string.find(str, "$")) then
-        str = string.gsub(str, "%$(%w+)%$", { ["global"] = self.GlobalKey })
+        str = string.gsub(str, "%$(%w+)%$", self)
     end
 
     local global_tbl

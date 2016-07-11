@@ -23,14 +23,18 @@ end
 
 local WorldDefinitionunload_packages = WorldDefinition.unload_packages
 function WorldDefinition:unload_packages()
+    if Global.level_data._add then
+        Global.level_data._add:Unload()
+    end
     if self._custom_loaded_packages then
-        if not BeardLibEditor then
+        if not Global.editor_mode then
             for _, pck in pairs(self._custom_loaded_packages) do
                 self:_unload_package(pck)
             end
         end
         return
     end
+
     WorldDefinitionunload_packages(self)
 end
 

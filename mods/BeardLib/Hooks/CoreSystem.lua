@@ -36,27 +36,27 @@ end]]--
 
 getmetatable(PackageManager)._script_data = getmetatable(PackageManager)._script_data or getmetatable(PackageManager).script_data
 
-getmetatable(PackageManager).script_data = function(self, extension, filepath, name_mt)
+getmetatable(PackageManager).script_data = function(self, ext, path, name_mt)
 	local data = {}
 
-    if BeardLib:ShouldGetScriptData(filepath, extension) then
+    if DB:_has(ext, path) then
         if name_mt ~= nil then
-            data = self:_script_data(extension, filepath, name_mt)
+            data = self:_script_data(ext, path, name_mt)
         else
-            data = self:_script_data(extension, filepath)
+            data = self:_script_data(ext, path)
         end
     end
 
-	return BeardLib:ProcessScriptData(self, filepath, extension, data)
+	return BeardLib:ProcessScriptData(self, path, ext, data)
 end
 
 getmetatable(DB)._has = getmetatable(DB)._has or getmetatable(DB).has
 
-getmetatable(DB).has = function(self, extension, filepath)
+getmetatable(DB).has = function(self, ext, path)
 
-    if BeardLib._replace_script_data[filepath:key()] and BeardLib._replace_script_data[filepath:key()][extension:key()] then
+    if BeardLib._replace_script_data[ext:key()] and BeardLib._replace_script_data[ext:key()][path:key()] and #BeardLib._replace_script_data[ext:key()][path:key()] > 0 then
         return true
     end
 
-    return self:_has(extension, filepath)
+    return self:_has(ext, path)
 end

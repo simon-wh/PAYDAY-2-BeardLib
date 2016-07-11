@@ -15,9 +15,13 @@ function LevelModule:Load()
             for i, include_data in ipairs(self._config.include) do
                 if include_data.file then
                     local file_split = string.split(include_data.file, "[.]")
-                    BeardLib:ReplaceScriptData(BeardLib.Utils.Path.Combine(self._mod.ModPath, self._config.include.directory, include_data.file), include_data.type, BeardLib.Utils.Path.Combine("levels/mods/", self._config.id, file_split[1]), file_split[2], {add = true})
+                    BeardLib:ReplaceScriptData(BeardLib.Utils.Path:Combine(self._mod.ModPath, self._config.include.directory, include_data.file), include_data.type, BeardLib.Utils.Path:Combine("levels/mods/", self._config.id, file_split[1]), file_split[2], {add = true})
                 end
             end
+        end
+
+        if self._config.add then
+            Global.level_data._add = AddFilesModule:new(self._mod, self._config.add)
         end
 
         if self._config.script_data_mods then
@@ -46,6 +50,7 @@ function LevelModule:RegisterHook()
             cube = self._config.cube,
             ghost_bonus = self._config.ghost_bonus,
             max_bags = self._config.max_bags,
+            team_ai_off = self._config.team_ai_off,
             custom = true
         }
 

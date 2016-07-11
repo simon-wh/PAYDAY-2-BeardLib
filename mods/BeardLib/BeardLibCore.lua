@@ -19,6 +19,7 @@ if not _G.BeardLib then
         "ModCore.lua",
         "FrameworkBase.lua",
         "MapFramework.lua",
+        "AddFramework.lua",
         "Definitions.lua",
         "MenuUI.lua",
         "MenuDialog.lua",
@@ -48,12 +49,13 @@ if not _G.BeardLib then
         ["lib/managers/gameplaycentralmanager"] = "GamePlayCentralManager.lua",
         ["lib/managers/killzonemanager"] = "Killzonemanager.lua",
         ["lib/managers/missionmanager"] = "MissionManager.lua",
-
+        ["lib/managers/menumanager"] = "MenuManager.lua",
+        ["lib/managers/jobmanager"] = "JobManager.lua",
         ["lib/managers/dialogs/keyboardinputdialog"] = "KeyboardInputDialog.lua",
-        ["core/lib/managers/viewport/corescriptviewport"] = "CoreScriptViewport.lua",
         ["core/lib/utils/dev/editor/coreworlddefinition"] = "CoreWorldDefinition.lua",
         ["core/lib/system/coresystem"] = "CoreSystem.lua",
         ["lib/tweak_data/enveffecttweakdata"] = "TweakData.lua",
+        ["lib/network/matchmaking/networkmatchmakingsteam"] = "NetworkMatchmakingSteam.lua"
         --["core/lib/managers/viewport/environment/coreenvironmentmanager"] = "CoreEnvironmentManager.lua"
     }
     self.custom_mission_elements = {
@@ -62,7 +64,7 @@ if not _G.BeardLib then
         "Environment"
     }
     self.modules = {}
-
+    Global.added_units = Global.added_units or {}
 end
 
 function BeardLib:init()
@@ -83,8 +85,9 @@ function BeardLib:init()
     })
     self.managers.asset_update = ModAssetUpdateManager:new()
     self.managers.MapFramework = MapFramework:new()
-    --Load ScriptData mod_overrides
-    --self:LoadModOverridePlus()
+    self.managers.AddFramework = AddFramework:new()
+    --Load mod_overrides adds
+    self:LoadModOverridePlus()
 end
 
 function BeardLib:LoadClasses()
@@ -159,14 +162,6 @@ function BeardLib:log(str, ...)
     log("[BeardLib] " .. string.format(str, ...))
 end
 
-function BeardLib:ShouldGetScriptData(filepath, extension)
-    if (BeardLib and BeardLib.ScriptExceptions and BeardLib.ScriptExceptions[filepath:key()] and BeardLib.ScriptExceptions[filepath:key()][extension:key()]) then
-        return false
-    end
-
-    return true
-end
-
 function BeardLib:RemoveMetas(tbl)
     for i, data in pairs(tbl) do
         if type(data) == "table" then
@@ -179,18 +174,18 @@ end
 
 Hooks:Register("BeardLibPreProcessScriptData")
 Hooks:Register("BeardLibProcessScriptData")
-function BeardLib:ProcessScriptData(PackManager, filepath, extension, data)
-    if extension == Idstring("menu") then
-        if MenuHelperPlus and MenuHelperPlus:GetMenuDataFromHashedFilepath(filepath:key()) then
-            data = MenuHelperPlus:GetMenuDataFromHashedFilepath(filepath:key())
+function BeardLib:ProcessScriptData(PackManager, path, ext, data)
+    if ext == Idstring("menu") then
+        if MenuHelperPlus and MenuHelperPlus:GetMenuDataFromHashedFilepath(path:key()) then
+            data = MenuHelperPlus:GetMenuDataFromHashedFilepath(path:key())
         end
     end
 
-    if self._replace_script_data[filepath:key()] and self._replace_script_data[filepath:key()][extension:key()] then
-        for _, replacement in pairs(self._replace_script_data[filepath:key()][extension:key()]) do
+    if self._replace_script_data[ext:key()] and self._replace_script_data[ext:key()][path:key()] then
+        for _, replacement in pairs(self._replace_script_data[ext:key()][path:key()]) do
 
             if not replacement.options.use_clbk or replacement.options.use_clbk() then
-                self:log("Replace: " .. tostring(filepath:key()))
+                --self:log("Replace: " .. tostring(path:key()))
 
                 local fileType = replacement.load_type
                 local file = io.open(replacement.path, fileType == "binary" and "rb" or 'r')
@@ -213,9 +208,9 @@ function BeardLib:ProcessScriptData(PackManager, filepath, extension, data)
                         new_data = json.custom_decode(read_data)
                     end
 
-                    if extension == Idstring("nav_data") then
+                    if ext == Idstring("nav_data") then
                         self:RemoveMetas(new_data)
-                    elseif (extension == Idstring("continents") or extension == Idstring("mission")) and fileType=="custom_xml" then
+                    elseif (ext == Idstring("continents") or ext == Idstring("mission")) and fileType=="custom_xml" then
                         BeardLib.Utils:RemoveAllNumberIndexes(new_data, true)
                     end
 
@@ -238,8 +233,8 @@ function BeardLib:ProcessScriptData(PackManager, filepath, extension, data)
         end
     end
 
-    Hooks:Call("BeardLibPreProcessScriptData", PackManager, filepath, extension, data)
-    Hooks:Call("BeardLibProcessScriptData", PackManager, filepath, extension, data)
+    Hooks:Call("BeardLibPreProcessScriptData", PackManager, path, ext, data)
+    Hooks:Call("BeardLibProcessScriptData", PackManager, path, ext, data)
 
     return data
 end
@@ -250,18 +245,9 @@ function BeardLib:ReplaceScriptData(replacement, replacement_type, target_path, 
         return
     end
     options = options or {}
-    self._replace_script_data[target_path:key()] = self._replace_script_data[target_path:key()] or {}
-    self._replace_script_data[target_path:key()][target_ext:key()] = self._replace_script_data[target_path:key()][target_ext:key()] or {}
-    if not DB:has(target_ext, target_path) then
-        options.add = true
-    end
-
-    if options.add then
-        BeardLib.ScriptExceptions[target_path:key()] = BeardLib.ScriptExceptions[target_path:key()] or {}
-        BeardLib.ScriptExceptions[target_path:key()][target_ext:key()] = true
-    end
-
-    table.insert(self._replace_script_data[target_path:key()][target_ext:key()], {path = replacement, load_type = replacement_type, options = options})
+    self._replace_script_data[target_ext:key()] = self._replace_script_data[target_ext:key()] or {}
+    self._replace_script_data[target_ext:key()][target_path:key()] = self._replace_script_data[target_ext:key()][target_path:key()] or {}
+    table.insert(self._replace_script_data[target_ext:key()][target_path:key()], {path = replacement, load_type = replacement_type, options = options})
 end
 
 function BeardLib:update(t, dt)

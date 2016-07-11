@@ -17,7 +17,7 @@ function ScriptReplacementsModule:post_init()
                 options.use_clbk = self._mod:StringToCallback(tbl.use_clbk)
             end
 
-            BeardLib:ReplaceScriptData(BeardLib.Utils.Path.Combine(self.ScriptDirectory, tbl.file or tbl.replacement), tbl.type or tbl.replacement_type, tbl.target_file or tbl.target_path, tbl.target_type or tbl.target_ext, options)
+            BeardLib:ReplaceScriptData(BeardLib.Utils.Path:Combine(self.ScriptDirectory, tbl.file or tbl.replacement), tbl.type or tbl.replacement_type, tbl.target_file or tbl.target_path, tbl.target_type or tbl.target_ext, options)
         end
     end
 end

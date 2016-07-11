@@ -1,0 +1,16 @@
+{
+	"name" : "YOUR_MOD",
+	"description" : "YOUR_MOD_DESCRIPTION",
+	"author" : "YOU",
+	"contact" : "YOUR_CONTACT_DETAILS",
+	"version" : "MOD_VERSION",
+    "pre_hooks" : [
+		{ "hook_id" : "lib/entry", "script_path" : "Core.lua" }
+    ],
+    "libraries" : [
+        {
+            "display_name" : "BeardLib",
+            "identifier" : "beardlib"
+        }
+    ]
+}

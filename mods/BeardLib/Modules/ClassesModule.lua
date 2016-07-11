@@ -9,10 +9,10 @@ function ClassesModule:init(core_mod, config)
 end
 
 function ClassesModule:Load()
-    local path = BeardLib.Utils.Path.Combine(self._mod.ModPath, self._config.directory)
+    local path = BeardLib.Utils.Path:Combine(self._mod.ModPath, self._config.directory)
     for _, c in ipairs(self._config) do
         if c._meta == "class" then
-            local class_file = BeardLib.Utils.Path.Combine(path, c.file)
+            local class_file = BeardLib.Utils.Path:Combine(path, c.file)
             if io.file_is_readable(class_file) then
                 dofile(class_file)
             else

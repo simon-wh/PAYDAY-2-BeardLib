@@ -16,8 +16,8 @@ function FrameworkBase:Load()
     local dirs = file.GetDirectories(self._directory)
     if dirs then
         for _, dir in pairs(dirs) do
-            local path = BeardLib.Utils.Path.Combine(self._directory, dir)
-            local main_file = BeardLib.Utils.Path.Combine(path, self.main_file_name)
+            local path = BeardLib.Utils.Path:Combine(self._directory, dir)
+            local main_file = BeardLib.Utils.Path:Combine(path, self.main_file_name)
             if io.file_is_readable(main_file) then
                 declare("ModPath", path)
                 local success, node_obj = pcall(function() return self._mod_core:new(main_file, self.auto_init_modules) end)
@@ -30,7 +30,7 @@ function FrameworkBase:Load()
                 --local cfile = io.open(main_file, 'r')
                 --local data = ScriptSerializer:from_custom_xml(cfile:read("*all"))
                 --self:LoadConfig(dir, self._directory .. "/" .. dir .. "/", data)
-            else
+            elseif not self._ignore_detection_errors then
                 BeardLib:log("[ERROR] Could not read %s", main_file)
             end
         end

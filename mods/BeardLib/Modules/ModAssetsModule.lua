@@ -44,10 +44,12 @@ function ModAssetsModule:init(core_mod, config)
     end
 
     self.folder_names = self._config.use_local_dir and table.remove(string.split(self._mod.ModPath, "/")) or (type(self._config.folder_name) == "string" and {self._config.folder_name} or BeardLib.Utils:RemoveNonNumberIndexes(self._config.folder_name))
-    self.install_directory = self._config.use_local_path and BeardLib.Utils.Path.Combine(self._mod.ModPath, "..") or (self._config.install_directory and self._mod:GetRealFilePath(self._config.install_directory, self) or BeardLib.definitions.mod_override)
+    self.install_directory = self._config.use_local_path and BeardLib.Utils.Path:Combine(self._mod.ModPath, "..") or (self._config.install_directory and self._mod:GetRealFilePath(self._config.install_directory, self) or BeardLib.definitions.mod_override)
 
-    self.version_file = self._config.version_file and self._mod:GetRealFilePath(self._config.version_file, self) or BeardLib.Utils.Path.Combine(self.install_directory, self.folder_names[1], self._default_version_file)
+    self.version_file = self._config.version_file and self._mod:GetRealFilePath(self._config.version_file, self) or BeardLib.Utils.Path:Combine(self.install_directory, self.folder_names[1], self._default_version_file)
     self._version = 0
+
+    self._update_manager_id = self._mod.Name .. self._name
 
     self:RetrieveCurrentVersion()
 
@@ -57,7 +59,7 @@ function ModAssetsModule:init(core_mod, config)
 end
 
 function ModAssetsModule:GetMainInstallDir()
-    return BeardLib.Utils.Path.Combine(self.version_file, "..")
+    return BeardLib.Utils.Path:GetDirectory(self.version_file)
 end
 
 function ModAssetsModule:RegisterAutoUpdateCheckHook()
@@ -82,7 +84,7 @@ function ModAssetsModule:RetrieveCurrentVersion()
 end
 
 function ModAssetsModule:CheckVersion(force)
-    if not force and not BeardLib.managers.asset_update:CheckUpdateStatus(self._mod.GlobalKey) then
+    if not force and not BeardLib.managers.asset_update:CheckUpdateStatus(self._update_manager_id) then
         return
     end
 
@@ -94,7 +96,6 @@ function ModAssetsModule:CheckVersion(force)
 end
 
 function ModAssetsModule:_CheckVersion(force)
-    log("check version")
     local version_url = self._mod:GetRealFilePath(self.provider.version_api_url, self)
     dohttpreq(version_url, function(data, id)
         self._mod:log("Recieved data '%s' from the server", tostring(data))
@@ -166,7 +167,7 @@ function ModAssetsModule:ShowRequiresUpdatePrompt()
 end
 
 function ModAssetsModule:IgnoreUpdate()
-    BeardLib.managers.asset_update:SetUpdateStatus(self._mod.GlobalKey, false)
+    BeardLib.managers.asset_update:SetUpdateStatus(self._update_manager_id, false)
 end
 
 function ModAssetsModule:DownloadAssets()
@@ -207,7 +208,7 @@ function ModAssetsModule:StoreDownloadedAssets(data, id)
     	end
 
         for _, dir in pairs(self.folder_names) do
-            local path = BeardLib.Utils.Path.Combine(self.install_directory, dir)
+            local path = BeardLib.Utils.Path:Combine(self.install_directory, dir)
             if not self._config.dont_delete and _G.file.DirectoryExists(path) then
                 io.remove_directory_and_files(path .. "/")
             end
@@ -268,8 +269,8 @@ function ModAssetsModule:InitializeNode(node)
         desc = "ModAssetsToggleAutoUpdatesDescID",
         node = node,
         callback = "ModAssetsToggleAutoUpdates_Changed",
-        value = BeardLib.managers.asset_update:CheckUpdateStatus(self._mod.GlobalKey),
-        merge_data = { mod_key = self._mod.GlobalKey }
+        value = BeardLib.managers.asset_update:CheckUpdateStatus(self._update_manager_id),
+        merge_data = { mod_key = self._update_manager_id }
     })
 
     MenuCallbackHandler.ModAssetsCheckForUpdates = function(this, item)
