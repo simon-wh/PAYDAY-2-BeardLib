@@ -1,8 +1,5 @@
-Hooks:PostHook(GamePlayCentralManager, "init", "post_init", function(self, t, dt)
-	 self._move_units = {}
-end)
-
 function GamePlayCentralManager:add_move_unit(unit, start_pos, end_pos, speed, done_callback)
+	self._move_units = self._move_units or {}
     for k, move_unit in pairs(self._move_units) do
         if move_unit.unit == unit then
 			table.remove(self._move_units, k)
@@ -24,8 +21,8 @@ end
 function GamePlayCentralManager:add_rotate_unit(unit, from, to, speed)
 
 end
-Hooks:PostHook(GamePlayCentralManager, "update", "post_update", function(self, t, dt)
-	for k, move_unit in pairs(self._move_units) do
+Hooks:PostHook(GamePlayCentralManager, "update", "BeardLibGamePlayCentralManagerpost_update", function(self, t, dt)
+	for k, move_unit in pairs(self._move_units or {}) do
 		if move_unit.t == move_unit.total_time then
 			table.remove(self._move_units, k)
             move_unit.done_callback()
