@@ -24,7 +24,7 @@ if not _G.BeardLib then
         "MenuUI.lua",
         "MenuDialog.lua",
         "MenuItems/Menu.lua",
-        "MenuItems/TextBoxBase.lua",  
+        "MenuItems/TextBoxBase.lua",
         "MenuItems/Item.lua",
         "MenuItems/ItemsGroup.lua",
         "MenuItems/ImageButton.lua",
@@ -115,6 +115,10 @@ function BeardLib:LoadModules()
 end
 
 function BeardLib:LoadModOverridePlus()
+    if not SystemFS then
+        return
+    end
+
     local mods = file.GetDirectories(self.definitions.mod_override)
     if mods then
         for _, path in pairs(mods) do
@@ -127,7 +131,7 @@ local add_file = "add.xml"
 
 function BeardLib:LoadModOverrideFolder(directory)
     local add_file_path = BeardLib.Utils.Path:Combine(directory, add_file)
-    if SystemFS:exists(add_file_path) then
+    if io.file_is_readable(add_file_path) then
         local file = io.open(add_file_path, "r")
         local config = ScriptSerializer:from_custom_xml(file:read("*all"))
         self:LoadAddConfig(directory, config)
