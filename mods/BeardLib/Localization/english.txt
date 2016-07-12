@@ -1,0 +1,19 @@
+{
+    "mod_assets_updates_available" : "Mod Assets Update Required!",
+    "mod_assets_updates_available_desc" : "$mod requires an update for it's assets!",
+    "mod_assets_updates_download_now" : "Download Now",
+    "mod_assets_updates_ignore" : "Ignore update",
+    "mod_assets_updates_remind_later" : "Remind me later",
+    "mod_assets_title" : "Mod Assets",
+    "ModAssetsManagementTextID" : "Assets Update Manager",
+    "ModAssetsManagementDescID" : "",
+    "ModAssetsToggleAutoUpdatesTextID" : "Toggle Assets Update Check",
+    "ModAssetsToggleAutoUpdatesDescID" : "",
+    "ModAssetsCheckUpdatesTextID" : "Check for Assets update now!",
+    "ModAssetsCheckUpdatesDescID" : "",
+    "mod_assets_no_change" : "Lastest Version installed!",
+    "mod_assets_no_change_desc" : "You already have the latest version of the mod assets installed!",
+    "mod_assets_error" : "ERROR!",
+    "mod_assets_error_desc" : "An error occured while trying to get the server version number for the assets",
+    "menu_ok" : "OK"
+}

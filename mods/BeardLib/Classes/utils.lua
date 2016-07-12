@@ -1,5 +1,6 @@
 function table.merge(og_table, new_table)
 	for i, data in pairs(new_table) do
+		i = type(data) == "table" and data.index or i
 		if type(data) == "table" and og_table[i] then
 			og_table[i] = table.merge(og_table[i], data)
 		else
@@ -8,6 +9,137 @@ function table.merge(og_table, new_table)
 	end
 	return og_table
 end
+
+function table.add(t, items)
+	for i, sub_item in ipairs(items) do
+		if t[i] then
+			table.insert(t, sub_item)
+		else
+			t[i] = sub_item
+		end
+	end
+end
+
+function table.search(tbl, search_term)
+    local search_terms = {search_term}
+
+    if string.find(search_term, "/") then
+        search_terms = string.split(search_term, "/")
+    end
+
+	local index
+    for _, term in pairs(search_terms) do
+        local term_parts = {term}
+        if string.find(term, ";") then
+            term_parts = string.split(term, ";")
+        end
+        local search_keys = {
+            params = {}
+        }
+        for _, term in pairs(term_parts) do
+            if string.find(term, "=") then
+                local term_split = string.split(term, "=")
+                search_keys.params[term_split[1]] = assert(loadstring("return " .. term_split[2]))()
+				if not search_keys.params[term_split[1]] then
+					BeardLib:log(string.format("[ERROR] An error occured while trying to parse the value %s", term_split[2]))
+				end
+            elseif not search_keys._meta then
+                search_keys._meta = term
+            end
+        end
+
+		local found_tbl = false
+        for i, sub in ipairs(tbl) do
+            if type(sub) == "table" then
+                local valid = true
+                if search_keys._meta and sub._meta ~= search_keys._meta then
+                    valid = false
+                end
+
+                for k, v in pairs(search_keys.params) do
+                    if sub[k] == nil or (sub[k] and sub[k] ~= v) then
+                        valid = false
+                        break
+                    end
+                end
+
+                if valid then
+                    if i == 1 then
+                        if tbl[sub._meta] then
+                            tbl[sub._meta] = sub
+                        end
+                    end
+
+                    tbl = sub
+					found_tbl = true
+					index = i
+                    break
+                end
+            end
+        end
+		if not found_tbl then
+			return nil
+		end
+    end
+	return index, tbl
+end
+
+function table.custom_insert(tbl, add_tbl, pos_phrase)
+	if not pos_phrase then
+		table.insert(tbl, add_tbl)
+		return
+	end
+
+	if tonumber(pos_phrase) ~= nil then
+		table.insert(tbl, pos_phrase, add_tbl)
+	else
+		local phrase_split = string.split(pos_phrase, ":")
+		local i, _ = table.search(tbl, phrase_split[2])
+
+		if not i then
+			BeardLib:log(string.format("[ERROR] Could not find table for relative placement. %s", pos_phrase))
+			table.insert(tbl, add_tbl)
+		else
+			i = phrase_split[1] == "after" and i + 1 or i
+			table.insert(tbl, i, add_tbl)
+		end
+	end
+end
+
+local special_params = {
+    "search",
+	"index"
+}
+
+function table.script_merge(base_tbl, new_tbl)
+    for i, sub in pairs(new_tbl) do
+        if type(sub) == "table" then
+            if tonumber(i) ~= nil then
+                if sub.search then
+                    local index, found_tbl = table.search(base_tbl, sub.search)
+                    if found_tbl then
+                        table.script_merge(found_tbl, sub)
+                    end
+                else
+                    table.custom_insert(base_tbl, sub, sub.index)
+					if not base_tbl[sub._meta] then
+						base_tbl[sub._meta] = sub
+					end
+					for _, param in pairs(special_params) do
+						sub[param] = nil
+					end
+                end
+            --[[else
+                if not base_tbl[i] then
+                    base_tbl[i] = sub
+                end]]--
+            end
+        elseif not table.contains(special_params, i) then
+            base_tbl[i] = sub
+        end
+    end
+end
+
 
 function string.key(str)
     local ids = Idstring(str)
@@ -41,7 +173,7 @@ function math.QuaternionToEuler(x, y, z, w)
         local rx = 2 * math.atan2(x, w) --bank/pitch?
         return Rotation(rx, ry, rz)
     end
-    
+
     if (pole_result < (-0.5 * normal)) then --singularity at south pole
         local ry = -math.pi/2
         local rz = 0
@@ -66,6 +198,199 @@ function math.QuaternionToEuler(x, y, z, w)
     --[[local yaw = math.atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z))
     local pitch = math.asin(2 * (w * y - z * x))
     local roll = math.atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y))
-    
+
     return Rotation(yaw, pitch, roll)]]--
+end
+
+BeardLib.Utils = {}
+
+function BeardLib.Utils:GetSubValues(tbl, key)
+    local new_tbl = {}
+    for i, vals in pairs(tbl) do
+        if vals[key] then
+            new_tbl[i] = vals[key]
+        end
+    end
+
+    return new_tbl
+end
+
+local searchTypes = {
+    "Vector3",
+    "Rotation",
+    "Color",
+    "callback"
+}
+
+function BeardLib.Utils:normalize_string_value(value)
+	for _, search in pairs(searchTypes) do
+		if string.begins(value, search) then
+			value = loadstring("return " .. value)()
+			break
+		end
+	end
+	return value
+end
+
+function BeardLib.Utils:StringToTable(global_tbl_name, global_tbl)
+    local global_tbl = global_tbl or _G
+    if string.find(global_tbl_name, "%.") then
+        local global_tbl_split = string.split(global_tbl_name, "[.]")
+
+        for _, str in pairs(global_tbl_split) do
+            global_tbl = rawget(global_tbl, str)
+            if not global_tbl then
+                BeardLib:log("[ERROR] Key " .. str .. " does not exist in the current global table.")
+                return nil
+            end
+        end
+    else
+        global_tbl = rawget(global_tbl, global_tbl_name)
+        if not global_tbl then
+            BeardLib:log("[ERROR] Key " .. global_tbl_name .. " does not exist in the global table.")
+            return nil
+        end
+    end
+
+    return global_tbl
+end
+
+function BeardLib.Utils:RemoveAllSubTables(tbl)
+    for i, sub in pairs(tbl) do
+        if type(sub) == "table" then
+            tbl[i] = nil
+        end
+    end
+    return tbl
+end
+
+function BeardLib.Utils:RemoveAllNumberIndexes(tbl, shallow)
+	if not tbl then return nil end
+
+    if type(tbl) ~= "table" then
+        return tbl
+    end
+
+	if shallow then
+		for i, sub in ipairs(tbl) do
+			tbl[i] = nil
+		end
+	else
+	    for i, sub in pairs(tbl) do
+	        if tonumber(i) ~= nil then
+	            tbl[i] = nil
+	        elseif type(sub) == "table" and not shallow then
+	            tbl[i] = self:RemoveAllNumberIndexes(sub)
+	        end
+	    end
+	end
+    return tbl
+end
+
+function BeardLib.Utils:RemoveNonNumberIndexes(tbl)
+	if not tbl then return nil end
+
+    if type(tbl) ~= "table" then
+        return tbl
+    end
+
+    for i, _ in pairs(tbl) do
+        if tonumber(i) == nil then
+            tbl[i] = nil
+        end
+    end
+
+    return tbl
+end
+
+local encode_chars = {
+	["\t"] = "%09",
+	["\n"] = "%0A",
+	["\r"] = "%0D",
+	[" "] = "+",
+	["!"] = "%21",
+	['"'] = "%22",
+	[":"] = "%3A",
+	["{"] = "%7B",
+	["}"] = "%7D",
+	["["] = "%5B",
+	["]"] = "%5D",
+	[","] = "%2C"
+}
+function BeardLib.Utils:UrlEncode(str)
+	if not str then
+		return ""
+	end
+
+	return string.gsub(str, ".", encode_chars)
+end
+
+BeardLib.Utils.Path = {}
+
+BeardLib.Utils.Path._separator_char = "/"
+
+function BeardLib.Utils.Path:GetDirectory(path)
+	if not path then return nil end
+	local split = string.split(self:Normalize(path), self._separator_char)
+	table.remove(split)
+	return table.concat(split, self._separator_char)
+end
+
+function BeardLib.Utils.Path:GetFileName(str)
+	if string.ends(str, self._separator_char) then
+		return nil
+	end
+	str = self:Normalize(str)
+	return table.remove(string.split(str, self._separator_char))
+end
+
+function BeardLib.Utils.Path:GetFileNameWithoutExtension(str)
+	local filename = self:GetFileName(str)
+	if not filename then
+		return nil
+	end
+
+	if string.find(filename, "%.") then
+		local split = string.split(filename, "%.")
+		table.remove(split)
+		filename = table.concat(split, ".")
+	end
+	return filename
+end
+
+function BeardLib.Utils.Path:Normalize(str)
+	if not str then return nil end
+
+	--Clean seperators
+	str = string.gsub(str, ".", {
+		["\\"] = self._separator_char,
+		--["/"] = self._separator_char,
+	})
+
+	str = string.gsub(str, "([%w+]/%.%.)", "")
+	return str
+end
+
+function BeardLib.Utils.Path:Combine(start, ...)
+	local paths = {...}
+	local final_string = start
+	for i, path_part in pairs(paths) do
+		if string.begins(path_part, ".") then
+			path_part = string.sub(path_part, 2, #path_part)
+		end
+		if not string.ends(final_string, self._separator_char) and not string.begins(path_part, self._separator_char) then
+			final_string = final_string .. self._separator_char
+		end
+		final_string = final_string .. path_part
+	end
+
+	return self:Normalize(final_string)
+end
+
+BeardLib.Utils.Math = {}
+
+function BeardLib.Utils.Math:Round(val, dp)
+	local mult = 10^(dp or 0)
+	local rounded = math.floor(val * mult + 0.5) / mult
+	return rounded
 end

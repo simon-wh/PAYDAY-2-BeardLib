@@ -44,26 +44,26 @@ end
 --- Encodes an arbitrary Lua object / variable.
 -- @param v The Lua object / variable to be JSON encoded.
 -- @return String containing the JSON encoding in internal Lua string format (i.e. not unicode)
-function json.custom_encode (v, tabs)
+function json.custom_encode (v, format, tabs)
     tabs = tabs or 0
 
   -- Handle nil values
   if v==nil then
     return "null"
   end
-  
-  local vtype = CoreClass.type_name(v)  
+
+  local vtype = CoreClass.type_name(v)
 
   -- Handle strings
-  if vtype=='string' or vtype=='Vector3' or vtype=='Rotation' or vtype=='Color' or vtype=='callback' then    
+  if vtype=='string' or vtype=='Vector3' or vtype=='Rotation' or vtype=='Color' or vtype=='callback' then
     return '"' .. encodeString(v) .. '"'	    -- Need to handle encoding in string
   end
-  
+
   -- Handle booleans
   if vtype=='number' or vtype=='boolean' then
     return tostring(v)
   end
-  
+
   -- Handle tables
   if vtype=='table' then
     local rval = {}
@@ -71,7 +71,7 @@ function json.custom_encode (v, tabs)
     local bArray, maxCount = isArray(v)
     if bArray then
       for i = 1,maxCount do
-        table.insert(rval, json.custom_encode(v[i], tabs + 1))
+        table.insert(rval, json.custom_encode(v[i], format, tabs + 1))
       end
     else	-- An object, not an array
       for i,j in pairs(v) do
@@ -80,28 +80,32 @@ function json.custom_encode (v, tabs)
         end
       end
     end
-    
+
     local length = 0
     for _, _ in pairs(rval) do
         length = length + 1
     end
-    
+
     if bArray then
         if length > 0 then
-            return '[\n' .. get_tabs(tabs + 1) .. table.concat(rval,',\n' .. get_tabs(tabs + 1)) .. '\n' .. get_tabs(tabs) .. ']'
+            return '[' .. (format and '\n' or '') .. get_tabs(tabs + 1) .. table.concat(rval,',' .. (format and '\n' or '') .. get_tabs(tabs + 1)) .. (format and '\n' or '') .. get_tabs(tabs) .. ']'
         else
             return '{}'
         end
     else
-      return '{\n' .. get_tabs(tabs + 1) .. table.concat(rval,',\n' .. get_tabs(tabs + 1)) .. '\n' .. get_tabs(tabs) .. '}'
+        if length > 0 then
+            return '{' .. (format and '\n' or '') .. get_tabs(tabs + 1) .. table.concat(rval,',' .. (format and '\n' or '') .. get_tabs(tabs + 1)) .. (format and '\n' or '') .. get_tabs(tabs) .. '}'
+        else
+            return '{}'
+        end
     end
   end
-  
+
   -- Handle null values
   if vtype=='function' and v==nil then
     return 'null'
   end
-  
+
   assert(false,'encode attempt to encode unsupported type ' .. vtype .. ':' .. base.tostring(v))
 end
 
@@ -111,6 +115,10 @@ end
 -- @return The string appropriately escaped.
 local qrep = {["\\"]="\\\\", ['"']='\\"',['\n']='\\n',['\t']='\\t'}
 function encodeString(s)
+    if CoreClass.type_name(s) == "Color" then
+        return string.format("Color(%s, %s, %s, %s)", s.a, s.r, s.g, s.b)
+    end
+
   return tostring(s):gsub('["\\\n\t]',qrep)
 end
 
@@ -121,9 +129,9 @@ end
 -- @param t The table to evaluate as an array
 -- @return boolean, number True if the table can be represented as an array, false otherwise. If true,
 -- the second returned value is the maximum
--- number of indexed elements in the array. 
+-- number of indexed elements in the array.
 function isArray(t)
-  -- Next we count all the elements, ensuring that any non-indexed elements are not-encodable 
+  -- Next we count all the elements, ensuring that any non-indexed elements are not-encodable
   -- (with the possible exception of 'n')
   local maxIndex = 0
   for k,v in pairs(t) do
@@ -138,7 +146,7 @@ function isArray(t)
       end  -- End of (k~='n')
     end -- End of k,v not an indexed pair
   end  -- End of loop across all pairs
-  return true, maxIndex
+  return false, maxIndex
 end
 
 --- Determines whether the given Lua object / table / variable can be JSON encoded. The only
@@ -414,30 +422,18 @@ function json.custom_decode (js_string)
             end
             if t == true then  -- ... we found a terminator token
                 --status "arr close"
-                return o 
+                return o
             end
-            i = i + 1			
+            i = i + 1
         end
     end
-    
+
     -- object value reading
     function read_object_value (o)
         local t = next_token(tt_object_value)
         return read_value(t,tt_object_value)
     end
-    
-    local scriptDataConversion = {
-        [3] = "Vector3",
-        [4] = "math.QuaternionToEuler"
-    }
-    
-    local searchTypes = {
-        "Vector3",
-        "Rotation",
-        "Color",
-        "callback"
-    }
-    
+
     -- object key reading, might also terminate the object
     function read_object_key (o)
         while true do
@@ -448,40 +444,30 @@ function json.custom_decode (js_string)
             if t == true then return o end
             if t == tt_object_key then return read_object_key(o) end
             local k = read_string(t)
-            
+
             if next_token(tt_object_colon) == tt_comment_start then
                 t = read_comment(tt_object_colon)
             end
-            
+
             local v = read_object_value(o)
             if CoreClass.type_name(v) == "string" then
-                for _, typ in pairs(searchTypes) do
-                    if string.find(tostring(v), typ) then
-                        local newValue = loadstring("return " .. v)
-                        v = newValue()
-                    end
-                end
+                v = BeardLib.Utils:normalize_string_value(v)
             end
-            
+
             if tonumber(k) ~= nil then
                 k = tonumber(k)
             end
-            
-            if k == "$values" and scriptDataConversion[#v] then
-                local newValue = loadstring("return " .. scriptDataConversion[#v] .. "( " .. table.concat(v, ",") .. ")")
-                o = newValue()
-            else
-                o[k] = v
-            end
+
+            o[k] = v
         end
     end
-    
+
     -- now let's read data from our string and pretend it's an object value
     local r = read_object_value()
     if pos<=#js_string then
         -- not sure about what to do with dangling characters
         --error("Dangling characters in JSON code ("..location()..")")
     end
-    
+
     return r
 end

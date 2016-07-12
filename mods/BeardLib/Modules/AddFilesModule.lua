@@ -1,0 +1,19 @@
+AddFilesModule = AddFilesModule or class(ModuleBase)
+
+AddFilesModule.type_name = "AddFiles"
+
+function AddFilesModule:init(core_mod, config)
+    self.super.init(self, core_mod, config)
+    self:Load()
+end
+
+function AddFilesModule:Load()
+    local directory = BeardLib.Utils.Path:Combine(self._mod.ModPath, self._config.directory)
+    BeardLib:LoadAddConfig(directory, self._config)
+end
+
+function AddFilesModule:Unload()
+    BeardLib:UnloadAddConfig(self._config)
+end
+
+BeardLib:RegisterModule(AddFilesModule.type_name, AddFilesModule)
