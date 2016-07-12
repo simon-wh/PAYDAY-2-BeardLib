@@ -151,7 +151,7 @@ function BeardLib:LoadAddConfig(directory, config)
                         end
                         --self:log("Added file %s %s", path, typ)
                         DB:create_entry(ext_ids, path_ids, file_path)
-                        PackageManager:reload(ext_ids, path_ids)
+                        --PackageManager:reload(ext_ids, path_ids)
                     end
                 else
                     self:log("[ERROR] File does not exist! %s", file_path)

@@ -8,6 +8,11 @@ function ContactModule:init(core_mod, config)
 end
 
 function ContactModule:RegisterHook()
+    if not self._config.id then
+        self._mod:log("[ERROR] Contact does not contain a definition for id!")
+        return
+    end
+
     Hooks:PostHook(NarrativeTweakData, "init", self._config.id .. "AddContactData", function(narr_self)
         narr_self.contacts[self._config.id] = {
             name_id = self._config.name_id,
