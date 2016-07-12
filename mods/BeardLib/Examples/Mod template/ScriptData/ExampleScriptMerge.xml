@@ -1,0 +1,5 @@
+<table>
+    <node search="menu;id='start_menu'/node;name='main'">
+        <item index="after:item;name='fbi_files'" next_node="options" name="ExampleButton" text_id="MY SPICY BUTTON" help_id=""/>
+    </node>
+</table>

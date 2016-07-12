@@ -1,0 +1,27 @@
+<mod name="YOUR_MOD" global_key="YOURMOD">
+    <!--directory points to the directory containing the classes relative to this mods folder-->
+    <Classes directory="Classes">
+        <class file="ExampleClass.lua"/>
+    </Classes>
+    <Hooks directory="Hooks">
+        <hook file="TweakData.lua" source_file="lib/tweak_data/tweakdata"/>
+    </Hooks>
+
+    <Localization directory="Localization" default="english.txt">
+        <localization language="russian" file="russian.txt"/>
+    </Localization>
+
+    <ScriptMods directory="ScriptData">
+        <mod file="ExampleScriptMerge.xml" type="custom_xml" target_file="gamedata/menus/start_menu" target_type="menu">
+            <options merge_mode="script_merge"/>
+        </mod>
+    </ScriptMods>
+    <Options name="Options" auto_build_menu="true" auto_load="true">
+        <options>
+            <!--Ingame the option menu background will be halved-->
+            <merge_data area_bg="half">
+            </merge_data>
+            <option type="bool" default_value="true" name="ExampleOption"/>
+        </options>
+    </Options>
+</mod>
