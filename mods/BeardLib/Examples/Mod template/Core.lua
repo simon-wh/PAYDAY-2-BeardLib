@@ -8,7 +8,7 @@ YOURMODCore = YOURMODCore or class(ModCore)
 function YOURMODCore:init()
 	--Calling the base function for init from ModCore
 	--self_tbl, config path, auto load modules, auto post init modules
-	self.super.init(self, ModPath .. "config.xml", true, false)
+	self.super.init(self, ModPath .. "config.xml", true, true)
 end
 
 if not _G.YOURMOD then
