@@ -12,7 +12,7 @@ function YOURMODCore:init()
 end
 
 if not _G.YOURMOD then
-	local success, err = pcall(function() _G.YOURMOD = YOURMODCore:new() end)
+	local success, err = pcall(function() YOURMODCore:new() end)
 	if not success then
 		log("[ERROR] An error occured on the initialization of YOUR MOD. " .. tostring(err))
 	end

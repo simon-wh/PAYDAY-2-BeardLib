@@ -11,6 +11,11 @@ end
 function MaskModule:RegisterHook()
     self._config.max_amount = self._config.max_amount or 1
     Hooks:PostHook(BlackMarketTweakData, "_init_masks", self._config.id .. "AddMaskData", function(bm_self)
+        if bm_self.masks[self._config.id] then
+            self._mod:log("[ERROR] Mask with id '%s' already exists!", self._config.id)
+            return
+        end
+
         bm_self.masks[self._config.id] = {
             name_id = self._config.name_id or "mask_" .. self._config.id .. "_title",
             desc_id = self._config.brief_id or "mask_" .. self._config.id .. "_desc",

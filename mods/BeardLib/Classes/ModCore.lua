@@ -7,7 +7,7 @@ function ModCore:init(config_path, load_modules, post_init)
         self:log("[ERROR] Config file is not readable!")
         return
     end
-
+    self._auto_post_init = post_init
     self.ModPath = ModPath
     self.SavePath = SavePath
 
@@ -15,14 +15,13 @@ function ModCore:init(config_path, load_modules, post_init)
     if load_modules then
         self:init_modules()
     end
-    self._auto_post_init = post_init
 end
 
 function ModCore:post_init(ignored_modules)
     for _, module in pairs(self._modules) do
         if (not ignored_modules or not table.contains(ignored_modules, module._name)) then
             local success, err = pcall(function() module:post_init() end)
-
+            
             if not success then
                 self:log("[ERROR] An error occured on the post initialization of %s. Error:\n%s", module._name, tostring(err))
             end
