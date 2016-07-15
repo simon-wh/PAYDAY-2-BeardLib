@@ -105,7 +105,7 @@ function ItemsGroup:SetCallback( callback )
 end
 
 function ItemsGroup:MouseMoved( x, y, highlight )
-    if not self.enabled then
+    if not alive(self.panel) or not self.enabled then
         return
     end    
     if not self.menu._openlist and not self.menu._slider_hold then

@@ -5,7 +5,8 @@ function Slider:init( menu, params )
     self.type = "Slider"
     self.size_by_text = false
 	self.super.init( self, menu, params )
-    self.step = self.step or 1
+    self.step = self.step or 1 
+    self.value = tonumber(self.value) or 0
     self.floats = self.floats or 2
     self.filter = "number"
     local item_width = params.panel:w() - self.padding
@@ -51,10 +52,8 @@ end
 function Slider:SetStep(step)  
     self.step = step
 end
-function Slider:SetValue(value, reset_selection, no_format)
-    log(tostring(value))
+function Slider:SetValue(value, run_callback, reset_selection, format)
     value = tonumber(value) or 0
-    log(tostring(value))
     local text = self.panel:child("text")
     local slider_icon = self.panel:child("slider_icon")
 	local slider = self.panel:child("slider")
@@ -63,23 +62,23 @@ function Slider:SetValue(value, reset_selection, no_format)
         local val = math.clamp(value, self.min, self.max)
         slider:set_w((self.panel:w() - self.padding) * ((val - self.min) / (self.max - self.min)))         
         slider_icon:set_right(slider:right())             
-        text:set_text(not no_format and string.format("%.2f", val) or val)
+        text:set_text(format and string.format("%.2f", val) or val)
     else
-        text:set_text(not no_format and string.format("%.2f", value) or value)        
+        text:set_text(format and string.format("%.2f", value) or value)        
     end   
      if reset_selection then
         text:set_selection(text:text():len())  
     end
     if self.max or self.min then
-	   self.super.SetValue(self, math.clamp(value, self.min, self.max))
+	   self.super.SetValue(self, math.clamp(value, self.min, self.max), run_callback)
     else
-        self.super.SetValue(self, value)
+        self.super.SetValue(self, value, run_callback)
     end    
     self._before_text = self.value
 end
 
 function Slider:SetValueByPercentage( percent )
-    self:SetValue(self.min + (self.max - self.min) * percent)
+    self:SetValue(self.min + (self.max - self.min) * percent, false, true, true)
 end
  
 function Slider:MousePressed( button, x, y )
@@ -96,8 +95,7 @@ function Slider:MousePressed( button, x, y )
     if inside then
         local wheelup = (button == Idstring("mouse wheel up") and 0) or (button == Idstring("mouse wheel down") and 1) or -1
         if wheelup ~= -1 then
-            self:SetValue(self.value + ((wheelup == 1) and -self.step or self.step))
-            self:RunCallback()
+            self:SetValue(self.value + ((wheelup == 1) and -self.step or self.step), true, true, true)
             return true
         end
     	if button == Idstring("0") then
@@ -138,7 +136,7 @@ function Slider:MouseMoved( x, y )
                     move = -move
                 end                   
             end
-            self:SetValue((type(self.value) == "number" and self.value or 0) + move, true)
+            self:SetValue((type(self.value) == "number" and self.value or 0) + move, false, true, true)
         end
         self:RunCallback()
     end        

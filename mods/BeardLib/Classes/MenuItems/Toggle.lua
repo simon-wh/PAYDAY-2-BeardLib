@@ -14,8 +14,8 @@ function Toggle:init( parent, params )
     }):set_right(params.panel:w() - 4)
 end
 
-function Toggle:SetValue(value)
-	self.super.SetValue(self, value)
+function Toggle:SetValue(value, run_callback)
+	self.super.SetValue(self, value, run_callback)
 	if value == true then
 		managers.menu_component:post_event("box_tick")
 		self.panel:child("toggle"):set_texture_rect(24,0,24,24)

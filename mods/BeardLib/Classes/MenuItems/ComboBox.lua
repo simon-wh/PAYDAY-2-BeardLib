@@ -119,8 +119,8 @@ function ComboBox:CreateItems()
         self:show()
     end
 end
-function ComboBox:SetValue(value)
-    self.super.SetValue(self, value)
+function ComboBox:SetValue(value, run_callback)
+    self.super.SetValue(self, value, run_callback)
     if alive(self.panel) then
         local text = self.items[value]
         self.panel:child("combo_selected"):set_text(self.localized_items and text and managers.localization:text(text) or text or "")

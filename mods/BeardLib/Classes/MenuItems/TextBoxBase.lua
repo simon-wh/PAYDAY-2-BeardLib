@@ -6,11 +6,11 @@ function TextBoxBase:init(params)
         w = (params.w or self.panel:w()) - self.padding - 4,
         h = params.h or self.items_size,
         layer = 10,
-        color = self.parent.background_color / 1.4,
+        color = self.parent.background_color and self.parent.background_color / 1.4,
     })  
     local text = params.panel:text({
         name = "text",
-        text = params.value and self.filter == "number" and string.format("%." .. self.floats .. "f", params.value) or tostring(params.value) or "",
+        text = params.value and self.filter == "number" and string.format("%." .. self.floats .. "f", tonumber(params.value)) or tostring(params.value) or "",
         align  = params.align,
         valign = "center",
         vertical = "center",
@@ -63,24 +63,27 @@ function TextBoxBase:init(params)
  	self.CheckText = TextBoxBase.CheckText
  	self.tonumber = TextBoxBase.tonumber
  	self.key_hold = TextBoxBase.key_hold
- 	self.update_caret = TextBoxBase.update_caret    
+    self.update_caret = TextBoxBase.update_caret    
+ 	self.fixed_text = TextBoxBase.fixed_text    
  	text:enter_text(callback(self, TextBoxBase, "enter_text")) 
  	self.text_panel = params.panel
  	self.update_text = params.update_text or function(self, ...) self:SetValue(...) end
+    self:update_caret()
 end
 function TextBoxBase:CheckText(text)
     if self.filter == "number" then
         if tonumber(text:text()) ~= nil then
+            local num = self:tonumber(text:text())
             if self.max or self.min then
-                self:update_text(math.clamp(self:tonumber(text:text()), self.min or self:tonumber(text:text()), self.max or self:tonumber(text:text())), true)
+                self:update_text(math.clamp(num, self.min or num, self.max or num), true, true, true)
             else
-                self:update_text(self:tonumber(text:text()), true)
+                self:update_text(num, true, true, true)
             end
         else
-            self:update_text(self:tonumber(self._before_text), true, true)
+            self:update_text(self:tonumber(self._before_text), true, true, true)
         end
     else
-    	self:update_text(text:text(), true)
+    	self:update_text(text:text(), true, true)
     end     
 end 
 function TextBoxBase:tonumber( text )
@@ -124,9 +127,10 @@ function TextBoxBase:key_hold( text, k )
 					end
 					self._before_text = text:text()
 					text:replace_text("")      
+                    if (self.filter ~= "number") or (text:text() ~= "" and self:fixed_text(text:text()) == text:text()) then
+                        self:update_text(text:text(), true)
+                    end
 				end 
-                self:update_text(text:text())
-				self:RunCallback()
 		    elseif k == Idstring("left") then
 				if s < e then
 					text:set_selection(s, s)
@@ -152,6 +156,9 @@ function TextBoxBase:key_hold( text, k )
   	end
 end
   
+function TextBoxBase:fixed_text( text )
+    return tostring(not (self.filter == "number") and text or tonumber(text))
+end
 function TextBoxBase:enter_text( text, s )
     local number = self.filter == "number"
     if self.menu._menu_closed or (number and tonumber(s) == nil and s ~= "-" and s ~= ".") then
@@ -161,11 +168,8 @@ function TextBoxBase:enter_text( text, s )
         self._before_text = number and (tonumber(text:text()) ~= nil and tonumber(text:text()) or self._before_text) or text:text()
         text:replace_text(s)
         self:update_caret() 
-        local txt = text:text()
-        txt = not number and txt or tonumber(txt)
-        if txt == text:text() then
-            self:update_text(txt, false, true)
-            self:RunCallback()
+        if self:fixed_text(text:text()) == text:text() then
+            self:update_text(text:text(), true)
         end
     end     
 end
@@ -234,7 +238,7 @@ function TextBoxBase:MousePressed( button, x, y )
         self:update_caret() 
         return true
     elseif could_type then
-    	self:update_text(text:text(), true)
+    	self:update_text(text:text(), false, true, true)
     	return true
     end
 end
@@ -254,18 +258,12 @@ function TextBoxBase:MouseMoved( x, y )
         else
             text:set_selection(self._start_select, i + 1)    
         end
-        self:update_caret()
     end    
     local cantype = self.cantype
     self.cantype = self.text_panel:inside(x,y) and self.cantype or false 
     if cantype and not self.cantype then
         self:CheckText(text)
     end 
-    self.text_panel:child("caret"):set_visible(self.cantype)
-    
-    if self.cantype then
-        self:update_text(text:text())
-    end        
     self:update_caret()
 end
 

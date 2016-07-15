@@ -2,11 +2,9 @@ MenuDialog = MenuDialog or class()
 function MenuDialog:init()
     self._dialog = MenuUI:new({
         layer = 999,
-        alpha = 0.6,
         text_color = Color.white,
-        normal_color = Color("33476a"):with_alpha(0),
-        highlight_color = Color("33476a"),
-        background_color = Color(0.2, 0.2, 0.2),        
+        marker_color = Color("33476a"):with_alpha(0),
+        marker_highlight_color = Color("33476a"),        
         position = "Center",
         create_items = callback(self, self, "create_items")
     })    
@@ -14,6 +12,8 @@ end
 
 function MenuDialog:create_items(Menu)   
     self._menu = Menu:NewMenu({
+        background_color = Color(0.2, 0.2, 0.2),
+        background_alpha = 0.6,
         name = "dialog",           
         visible = true,
     }) 

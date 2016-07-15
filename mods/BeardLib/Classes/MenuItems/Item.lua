@@ -1,7 +1,7 @@
 Item = Item or class(Menu)
 
 function Item:init( parent, params )
-  	self.type = self.type or "Button"
+  self.type = self.type or "Button" 
 	params.panel = params.parent_panel:panel({ 
 		name = params.name,
         w = params.w - params.padding,      
@@ -56,8 +56,11 @@ function Item:init( parent, params )
     end
 end
 
-function Item:SetValue(value)
+function Item:SetValue(value, run_callback)
     self.value = value
+    if run_callback then
+		self:RunCallback()
+    end
 end
 function Item:SetEnabled(enabled)
     self.enabled = enabled
@@ -100,7 +103,7 @@ function Item:SetCallback( callback )
 end
 
 function Item:MouseMoved( x, y, highlight )
-    if not self.enabled or self.type == "Divider" then
+    if not alive(self.panel) or not self.enabled or self.type == "Divider" then
         return
     end    
   	if not self.menu._openlist and not self.menu._slider_hold then

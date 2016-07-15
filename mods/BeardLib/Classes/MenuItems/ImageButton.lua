@@ -47,8 +47,11 @@ function ImageButton:init( parent, params )
     end
 end
 
-function ImageButton:SetValue(value)
+function ImageButton:SetValue(value, run_callback)
     self.value = value
+    if run_callback then
+        self:RunCallback()
+    end
 end
 function ImageButton:SetEnabled(enabled)
     self.enabled = enabled

@@ -109,6 +109,7 @@ function MenuUI:init( params )
     self._menu_closed = params.closed or params.closed == nil    
     self._fullscreen_ws_pnl:key_press(callback(self, self, "KeyPressed"))    
     self._fullscreen_ws_pnl:key_release(callback(self, self, "KeyReleased"))    
+    return self
 end
  
 function MenuUI:NewMenu(params) 
