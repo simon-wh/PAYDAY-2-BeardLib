@@ -75,12 +75,12 @@ function TextBoxBase:CheckText(text)
         if tonumber(text:text()) ~= nil then
             local num = self:tonumber(text:text())
             if self.max or self.min then
-                self:update_text(math.clamp(num, self.min or num, self.max or num), true, true, true)
+                self:update_text(math.clamp(num, self.min or num, self.max or num), true, true)
             else
-                self:update_text(num, true, true, true)
+                self:update_text(num, true, true)
             end
         else
-            self:update_text(self:tonumber(self._before_text), true, true, true)
+            self:update_text(self:tonumber(self._before_text), true, true)
         end
     else
     	self:update_text(text:text(), true, true)
@@ -110,7 +110,7 @@ function TextBoxBase:key_hold( text, k )
 			elseif Input:keyboard():down(Idstring("z")) and self._before_text then
 				local before_text = self._before_text
 				self._before_text = text:text()
-				self:update_text(before_text)	
+				self:update_text(before_text, true, true, true)	
 				self:RunCallback()						
 	    	end
 	    elseif Input:keyboard():down(Idstring("left shift")) then
@@ -128,7 +128,7 @@ function TextBoxBase:key_hold( text, k )
 					self._before_text = text:text()
 					text:replace_text("")      
                     if (self.filter ~= "number") or (text:text() ~= "" and self:fixed_text(text:text()) == text:text()) then
-                        self:update_text(text:text(), true)
+                        self:update_text(text:text(), true, false, true)
                     end
 				end 
 		    elseif k == Idstring("left") then
@@ -169,7 +169,7 @@ function TextBoxBase:enter_text( text, s )
         text:replace_text(s)
         self:update_caret() 
         if self:fixed_text(text:text()) == text:text() then
-            self:update_text(text:text(), true)
+            self:update_text(text:text(), true, false, true)
         end
     end     
 end

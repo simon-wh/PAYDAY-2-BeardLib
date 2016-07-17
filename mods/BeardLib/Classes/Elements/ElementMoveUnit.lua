@@ -22,13 +22,13 @@ function ElementMoveUnit:on_executed(instigator)
 	end
 	if not self._values.end_pos and not self._values.displacement then
 		log("[ERROR] MoveUnit must either have a displacement or end position defined!")
+		return
 	end
 
-	if #self._units == 0 then
+	if #self._units == 0 and alive(instigator) then
 		self:register_move_unit(instigator)
 	else
 		for _, unit in pairs(self._units) do
-			--managers.game_play_central:add_move_unit(unit, self._values.position, self._values.speed, {x = self._values.change_x, y = self._values.change_y, z = self._values.change_z}, callback(self, self, "done_callback", instigator))
 			self:register_move_unit(unit)
 		end
 	end
@@ -41,8 +41,6 @@ function ElementMoveUnit:register_move_unit(unit)
 		end_pos = mvector3.copy(start_pos)
 		mvector3.add(end_pos, self._values.displacement)
 	end
-
-
 	managers.game_play_central:add_move_unit(unit, start_pos, end_pos, self._values.speed, callback(self, self, "done_callback", unit))
 end
 

@@ -297,15 +297,25 @@ function Menu:ClearItems(label)
     self.items = {}
     for k, item in pairs(temp) do
         if not label or item.label == label then
-            if not item.group then
+            if alive(item.panel) then
+                if item.group then
+                    table.delete(item.group.items, item)
+                    item.group:AlignItems()
+                end                
+                if item.override_parent then
+                    table.delete(item.group._items, item)
+                end
                 item.panel:parent():remove(item.panel)
             end
         else
             table.insert(self._items, item)
-            if not item.group then
+            if not item.group and not item.override_parent then
                 table.insert(self.items, item)
             end
         end
+    end
+    if self.menu._openlist then
+        self.menu._openlist:hide()
     end
     self.items_panel:set_y(0)
     self:AlignItems()
@@ -398,7 +408,7 @@ function Menu:ConfigureItem( item )
     item.marker_color = item.marker_color or self.marker_color 
     item.align = item.align or self.align or "left"
     item.size_by_text = item.size_by_text or self.size_by_text  
-    item.parent_panel = item.group and item.group.panel or self.items_panel
+    item.parent_panel = (item.group and item.group.panel) or (item.override_parent and item.override_parent.panel) or self.items_panel
     item.padding = item.padding or 4
     item.w = item.w or ((self.items_panel:w() > 250 and not self.override_size_limit and 250 or self.items_panel:w()))
 end
@@ -408,7 +418,7 @@ function Menu:NewItem( item )
     else    
         table.insert(self._items, item)
     end    
-    if not item.group then
+    if not item.group and not item.override_parent then
         if item.index then
             table.insert(self.items, item.index, item)
         else    

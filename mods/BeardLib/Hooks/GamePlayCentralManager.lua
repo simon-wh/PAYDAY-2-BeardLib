@@ -37,19 +37,7 @@ Hooks:PostHook(GamePlayCentralManager, "update", "BeardLibGamePlayCentralManager
 end)
 
 function GamePlayCentralManager:set_position(unit, position, rotation, offset)
-    --[[if offset and unit:unit_data()._prev_pos and unit:unit_data()._prev_rot then
-        local pos = mvector3.copy(unit:unit_data()._prev_pos)
-        mvector3.add(pos, position)
-        unit:set_position(pos)
-        local prev_rot = unit:unit_data()._prev_rot
-        local rot = Rotation(prev_rot:yaw(), prev_rot:pitch(), prev_rot:roll())
-        rot:yaw_pitch_roll(rot:yaw() + rotation:yaw(), rot:pitch() + rotation:pitch(), rot:roll() + rotation:roll())
-       -- unit:set_rotation(rot)
-   else]]--
-
-    	unit:set_position(position)
-    --	unit:set_rotation(rotation)
-    --end
+    unit:set_position(position)
 	local objects = unit:get_objects_by_type(Idstring("model"))
 	for _, object in pairs(objects) do
 		object:set_visibility(not object:visibility())

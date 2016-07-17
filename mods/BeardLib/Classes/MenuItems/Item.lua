@@ -1,7 +1,10 @@
 Item = Item or class(Menu)
 
 function Item:init( parent, params )
-  self.type = self.type or "Button" 
+    self.type = self.type or "Button" 
+    if params.override_parent then
+        params.override_parent:AddItem(self)
+    end
 	params.panel = params.parent_panel:panel({ 
 		name = params.name,
         w = params.w - params.padding,      
@@ -9,6 +12,7 @@ function Item:init( parent, params )
         x = params.padding / 2,
       	y = 10, 
     }) 
+
     local Marker = params.panel:rect({
       	name = "bg", 
       	color = params.marker_color,
@@ -45,8 +49,10 @@ function Item:init( parent, params )
     if self.type == "Divider" then
         params.title:set_world_center_y(params.panel:world_center_y())   
     end
+    self._items = {}
     params.option = params.option or params.name    
     table.merge(self, params)
+    self:SetPositionByString(params.position)
     if params.group then
         if params.group.type == "ItemsGroup" then
             params.group:AddItem(self)
@@ -55,7 +61,32 @@ function Item:init( parent, params )
         end
     end
 end
-
+function Item:SetPosition( x,y )
+    self.panel:set_position(x,y)   
+end
+function Item:SetPositionByString( pos )
+    if not pos then
+        return
+    end
+    if string.match(pos, "Center") then
+       self.panel:set_world_center(self.parent_panel:world_center())
+    end      
+    if string.match(pos, "Bottom") then
+       self.panel:set_world_bottom(self.parent_panel:world_bottom())
+    end         
+    if string.match(pos, "Top") then
+        self.panel:set_world_top(self.parent_panel:world_top())
+    end     
+    if string.match(pos, "Right") then
+        self.panel:set_world_right(self.parent_panel:world_right())
+    end            
+    if string.match(pos, "Left") then
+        self.panel:set_world_left(self.parent_panel:world_left())
+    end    
+end
+function Item:AddItem(item)
+    table.insert(self._items, item) 
+end
 function Item:SetValue(value, run_callback)
     self.value = value
     if run_callback then
@@ -69,33 +100,48 @@ function Item:Index()
     return self.parent:GetIndex(self.name)
 end
 function Item:KeyPressed( o, k )
-
+    for _, item in pairs(self._items) do
+        if item:KeyPressed(o, k) then
+            return true
+        end
+    end 
 end
 function Item:MousePressed( button, x, y )
     if not self.enabled or self.type == "Divider" then
         return
     end
+    for _, item in pairs(self._items) do
+        if item:MousePressed(button, x, y) then
+            return true
+        end
+    end 
     if alive(self.panel) and self.panel:inside(x,y) and button == Idstring("0") then
         self:RunCallback()
         return true
     end
 end
 
-function Item:RunCallback(clbk)
+function Item:RunCallback(clbk, ...)
     clbk = clbk or self.callback
     if clbk then
-        clbk(self.parent, self)
+        clbk(self.parent, self, ...)
     end  
 end
 function Item:SetColor(color)
 	if color then
 		self.div:set_color(color)
 	end
-	self.div:set_visible(color ~= nil)
+    if alive(self.div) then
+	   self.div:set_visible(color ~= nil)
+    end
 end
 function Item:SetText(text)
 	params.text = text 
 	self.panel:child("title"):set_text(self.localized and text and managers.localization:text(text) or text)
+end
+
+function Item:SetLabel( label )
+    self.label = label
 end
 
 function Item:SetCallback( callback )
@@ -107,16 +153,19 @@ function Item:MouseMoved( x, y, highlight )
         return
     end    
   	if not self.menu._openlist and not self.menu._slider_hold then
+        for _, item in pairs(self._items) do
+            item:MouseMoved(x,y)
+        end
   	    if self.panel:inside(x, y) then
-          if highlight ~= false then
+            if highlight ~= false then
   		        self.panel:child("bg"):set_color(self.marker_highlight_color)
-          end
+            end
   		    self.menu:SetHelp(self.help)
   		    self.highlight = true
   		    self.menu._highlighted = self
   	    else
-  	      self.panel:child("bg"):set_color(self.marker_color)
-          self.highlight = false       
+            self.panel:child("bg"):set_color(self.marker_color)
+            self.highlight = false       
   		end	
   		self.menu._highlighted = self.menu._highlighted and (alive(self.menu._highlighted.panel) and self.menu._highlighted.panel:inside(x,y)) and self.menu._highlighted or nil
   	end
