@@ -7,7 +7,7 @@ function ContextMenu:init( parent, params )
     self.list = self.menu._fullscreen_ws_pnl:panel({
         name = params.name.."list",
         y = 0,
-        w = self.panel:w(),
+        w = 128,
         layer = 1100,
         visible = false,
         halign = "left",
@@ -142,7 +142,7 @@ function ContextMenu:MousePressed( button, x, y )
             end
             for k, item in pairs(self.items) do
                 if alive(self.items_panel:child("item"..k)) and self.items_panel:child("item"..k):inside(x,y) then
-                    self:RunCallback(item.callback)
+                    self:RunCallback(item.callback, item)
                     self:hide()
                     return true
                 end

@@ -11,10 +11,11 @@ function MenuDialog:init()
 end
 
 function MenuDialog:create_items(Menu)   
-    self._menu = Menu:NewMenu({
+    self._menu = Menu:NewMenu({        
+        name = "dialog",           
         background_color = Color(0.2, 0.2, 0.2),
         background_alpha = 0.6,
-        name = "dialog",           
+        override_size_limit = true,
         visible = true,
     }) 
 end
