@@ -18,6 +18,7 @@ function table.add(t, items)
 			t[i] = sub_item
 		end
 	end
+	return t
 end
 
 function table.search(tbl, search_term)
@@ -203,6 +204,44 @@ function math.QuaternionToEuler(x, y, z, w)
 end
 
 BeardLib.Utils = {}
+
+function BeardLib.Utils:CleanOutfitString(str)
+	local outfit_list = managers.blackmarket:unpack_outfit_from_string(str)
+
+	if tweak_data.blackmarket.masks[outfit_list.mask.mask_id].custom then
+		outfit_list.mask.mask_id = "character_locked"
+	end
+
+	if tweak_data.blackmarket.textures[outfit_list.mask.blueprint.pattern.id].custom then
+		outfit_list.mask.blueprint.pattern.id = "no_color_no_material"
+	end
+
+	if tweak_data.blackmarket.materials[outfit_list.mask.blueprint.material.id].custom then
+		outfit_list.mask.blueprint.material.id = "plastic"
+	end
+
+	if tweak_data.blackmarket.melee_weapons[outfit_list.melee_weapon].custom then
+		outfit_list.melee_weapon = "weapon"
+	end
+
+	if tweak_data.weapon.factory[outfit_list.primary.factory_id].custom then
+		outfit_list.primary.factory_id = "wpn_fps_ass_amcar"
+	end
+
+	if tweak_data.weapon.factory[outfit_list.secondary.factory_id].custom then
+		outfit_list.secondary.factory_id = "wpn_fps_pis_g17"
+	end
+
+	for _, weap in pairs({outfit_list.primary, outfit_list.secondary}) do
+		for i, part_id in pairs(weap.blueprint) do
+			if tweak_data.weapon.factory.parts[part_id] and tweak_data.weapon.factory.parts[part_id].custom then
+				table.remove(weap.blueprint, i)
+			end
+		end
+	end
+
+	return managers.blackmarket:outfit_string_from_list(outfit_list)
+end
 
 function BeardLib.Utils:GetSubValues(tbl, key)
     local new_tbl = {}

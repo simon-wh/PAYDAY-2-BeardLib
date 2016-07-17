@@ -4,6 +4,7 @@ function NetworkMatchMakingSTEAM:set_attributes(settings)
 	if not self.lobby_handler then
 		return
 	end
+
 	self.lobby_handler:delete_lobby_data ("level_id")
 	self.lobby_handler:delete_lobby_data ("job_key")
 
@@ -18,8 +19,6 @@ function NetworkMatchMakingSTEAM:set_attributes(settings)
     		"friend",
     		"private"
     	}
-		log("Added level: " .. tostring(level_id))
-		log("Added narrative: " .. tostring(job_key))
     	local lobby_attributes = {
     		owner_name = managers.network.account:username_id(),
     		owner_id = managers.network.account:player_id(),
@@ -52,16 +51,16 @@ end
 local orig_NetworkMatchMakingSTEAM_lobby_to_numbers = NetworkMatchMakingSTEAM._lobby_to_numbers
 
 function NetworkMatchMakingSTEAM:_lobby_to_numbers(lobby)
-	log("Received level: " .. tostring(lobby:key_value("level_id")))
-	log("Received narrative: " .. tostring(lobby:key_value("job_key")))
+	--log("Received level: " .. tostring(lobby:key_value("level_id")))
+	--log("Received narrative: " .. tostring(lobby:key_value("job_key")))
     if lobby:key_value("level_id") ~= "value_missing" or lobby:key_value("job_key") ~= "value_missing" then
         local _level_index = table.index_of(tweak_data.levels._level_index, lobby:key_value("level_id"))
         local _job_index = table.index_of(tweak_data.narrative._jobs_index, lobby:key_value("job_key"))
         if _level_index ~= -1 or _job_index ~= -1 then
             local level_index = _level_index == -1 and tonumber(lobby:key_value("level")) or _level_index
             local job_index = _job_index == -1 and tonumber(lobby:key_value("job_id")) or _job_index
-			log("level_index: " .. tostring(level_index))
-			log("job_index: " .. tostring(job_index))
+			--log("level_index: " .. tostring(level_index))
+			--log("job_index: " .. tostring(job_index))
             return {
         		level_index + 1000 * job_index,
         		tonumber(lobby:key_value("difficulty")),

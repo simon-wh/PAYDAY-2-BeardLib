@@ -11,9 +11,6 @@ function GamePlayCentralManager:add_move_unit(unit, start_pos, end_pos, speed, d
     end
 	start_pos = start_pos or unit:position()
 	speed = speed or 1
-	log(tostring(start_pos))
-	log(tostring(end_pos))
-	log(tostring(speed))
 	local total_time = mvector3.distance(start_pos, end_pos) / speed
 
 	table.insert(self._move_units, {unit = unit, start_pos = start_pos, end_pos = end_pos, speed = speed, done_callback = done_callback, t=0, total_time = total_time})

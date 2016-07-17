@@ -22,7 +22,7 @@ function FrameworkBase:Load()
                 declare("ModPath", path)
                 local success, node_obj = pcall(function() return self._mod_core:new(main_file, self.auto_init_modules) end)
                 if success then
-                    BeardLib:log("Loaded Map: %s", path)
+                    BeardLib:log("Loaded Config: %s", path)
                     self._loaded_mods[dir] = node_obj
                 else
                     BeardLib:log("[ERROR] An error occured on initilization of Map %s. Error:\n%s", dir, tostring(node_obj))
