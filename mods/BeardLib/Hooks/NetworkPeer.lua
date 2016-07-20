@@ -54,7 +54,7 @@ function NetworkPeer:send(func_name, ...)
 			--orig_NetworkPeer_send(self, "send_chat_message", LuaNetworking.HiddenChannel, parse_as_lnetwork_string(send_outfit_id, orig_outift .. "|" .. params[4]))
 	    end
 	end
-    orig_NetworkPeer_send(self, func_name, unpack(params))
+    orig_NetworkPeer_send(self, func_name, unpack(params, 1, params.n))
 end
 
 Hooks:Add("NetworkReceivedData", sync_game_settings_id, function(sender, id, data)
