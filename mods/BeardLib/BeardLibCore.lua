@@ -159,7 +159,7 @@ function BeardLib:LoadAddConfig(directory, config)
                         end
                         --self:log("Added file %s %s", path, typ)
                         DB:create_entry(ext_ids, path_ids, file_path)
-                        --PackageManager:reload(ext_ids, path_ids)
+                        PackageManager:reload(ext_ids, path_ids)
                     end
                 else
                     self:log("[ERROR] File does not exist! %s", file_path)
@@ -214,16 +214,6 @@ function BeardLib:log(str, ...)
     log("[BeardLib] " .. string.format(str, ...))
 end
 
-function BeardLib:RemoveMetas(tbl)
-    for i, data in pairs(tbl) do
-        if type(data) == "table" then
-            self:RemoveMetas(data)
-        elseif i == "_meta" then
-            tbl[i] = nil
-        end
-    end
-end
-
 Hooks:Register("BeardLibPreProcessScriptData")
 Hooks:Register("BeardLibProcessScriptData")
 function BeardLib:ProcessScriptData(PackManager, path, ext, data)
@@ -261,9 +251,9 @@ function BeardLib:ProcessScriptData(PackManager, path, ext, data)
                     end
 
                     if ext == Idstring("nav_data") then
-                        self:RemoveMetas(new_data)
+                        self.Utils:RemoveMetas(new_data)
                     elseif (ext == Idstring("continents") or ext == Idstring("mission")) and fileType=="custom_xml" then
-                        BeardLib.Utils:RemoveAllNumberIndexes(new_data, true)
+                        self.Utils:RemoveAllNumberIndexes(new_data, true)
                     end
 
                     if new_data then

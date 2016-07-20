@@ -33,7 +33,6 @@ function NetworkPeer:send(func_name, ...)
     	if func_name == "join_request_reply" then
 	        if params[1] == 1 and is_custom() then
 	            params[14] = get_job_string()
-				log(tostring(params[14]))
 	        end
 	    elseif func_name == "sync_game_settings" then
 	        if is_custom() then

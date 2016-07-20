@@ -342,6 +342,20 @@ function BeardLib.Utils:RemoveNonNumberIndexes(tbl)
     return tbl
 end
 
+function BeardLib.Utils:RemoveMetas(tbl, shallow)
+	if not tbl then return nil end
+	tbl._meta = nil
+
+	if not shallow then
+	    for i, data in pairs(tbl) do
+	        if type(data) == "table" then
+	            self:RemoveMetas(data, shallow)
+	        end
+	    end
+	end
+	return tbl
+end
+
 local encode_chars = {
 	["\t"] = "%09",
 	["\n"] = "%0A",
