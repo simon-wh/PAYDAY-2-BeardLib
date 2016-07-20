@@ -94,7 +94,18 @@ function OptionModule:ApplyValues(tbl, value_tbl)
     for i, sub_tbl in pairs(tbl) do
         if type(sub_tbl) == "table" and sub_tbl._meta then
             if sub_tbl._meta == "option" and value_tbl[sub_tbl.name] ~= nil then
-                sub_tbl.value = value_tbl[sub_tbl.name]
+                local value = value_tbl[sub_tbl.name]
+                if sub_tbl.type == "multichoice" then
+                    if sub_tbl.save_value then
+                        local index = table.index_of(sub_tbl.values, value)
+                        value = index ~= -1 and index or sub_tbl.default_value
+                    else
+                        if value > #sub_tbl.values then
+                            value = sub_tbl.default_value
+                        end
+                    end
+                end
+                sub_tbl.value = value
             elseif (sub_tbl._meta == "option_group" or sub_tbl._meta == "option_set") and value_tbl[sub_tbl.name] then
                 self:ApplyValues(sub_tbl, value_tbl[sub_tbl.name])
             end
@@ -249,7 +260,15 @@ function OptionModule:PopulateSaveTable(tbl, save_tbl)
     for i, sub_tbl in pairs(tbl) do
         if type(sub_tbl) == "table" and sub_tbl._meta then
             if sub_tbl._meta == "option" then
-                save_tbl[sub_tbl.name] = sub_tbl.value
+                local value = sub_tbl.value
+                if sub_tbl.type=="multichoice" and sub_tbl.save_value then
+                    if type(sub_tbl.values[sub_tbl.value]) == "table" then
+                        value = sub_tbl.values[sub_tbl.value].value
+                    else
+                        value = sub_tbl.values[sub_tbl.value]
+                    end
+                end
+                save_tbl[sub_tbl.name] = value
             elseif sub_tbl._meta == "option_group" or sub_tbl._meta == "option_set" then
                 save_tbl[sub_tbl.name] = {}
                 self:PopulateSaveTable(sub_tbl, save_tbl[sub_tbl.name])

@@ -28,11 +28,11 @@ function WorldDefinition:unload_packages()
         Global.level_data._add = nil
     end
     if self._custom_loaded_packages then
-        if not Global.editor_mode then
+        --if not Global.editor_mode then
             for _, pck in pairs(self._custom_loaded_packages) do
                 self:_unload_package(pck)
             end
-        end
+        --end
         return
     end
 
