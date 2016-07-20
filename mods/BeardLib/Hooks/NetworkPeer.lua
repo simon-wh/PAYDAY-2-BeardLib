@@ -28,7 +28,7 @@ function NetworkPeer:send(func_name, ...)
 	if not self._ip_verified then
 		return
 	end
-	local params = {...}
+	local params = table.pack(...)
 	if self ~= managers.network:session():local_peer() then
     	if func_name == "join_request_reply" then
 	        if params[1] == 1 and is_custom() then

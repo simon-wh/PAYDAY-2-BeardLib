@@ -32,6 +32,7 @@ function MaskModule:RegisterHook()
             skip_mask_on_sequence = self._config.skip_mask_on_sequence,
             value = self._config.value or 0,
             infamous = self._config.infamous,
+            default_blueprint = self._config.default_blueprint,
             global_value = self._config.global_value or BeardLib.definitions.module_defaults.mask.default_global_value,
             custom = true
         }
