@@ -9,7 +9,7 @@ end
 
 function MaskPatternModule:RegisterHook()
     self._config.default_amount = self._config.default_amount and tonumber(self._config.default_amount) or 1
-    Hooks:PostHook(BlackMarketTweakData, "_init_materials", self._config.id .. "AddMaskPatternData", function(bm_self)
+    Hooks:PostHook(BlackMarketTweakData, "_init_textures", self._config.id .. "AddMaskPatternData", function(bm_self)
         if bm_self.textures[self._config.id] then
             self._mod:log("[ERROR] Mask Pattern with id '%s' already exists!", self._config.id)
             return

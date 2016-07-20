@@ -1,3 +1,8 @@
+-- From: http://stackoverflow.com/questions/7183998/in-lua-what-is-the-right-way-to-handle-varargs-which-contains-nil
+function table.pack(...)
+  return { n = select("#", ...), ... }
+end
+
 function table.merge(og_table, new_table)
 	for i, data in pairs(new_table) do
 		i = type(data) == "table" and data.index or i
