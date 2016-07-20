@@ -1,9 +1,13 @@
 # PAYDAY-2-BeardLib
 
-Easy Payday 2 script file manipulation through LUA.
+A large library that assists in mod creation.
+- Script File Manipulation.
+- Custom Heist framework
+- Modules Framework
+- Easy ability to add content. Such as Masks, Melee Weapons, Weapon Mods etc
 
 # Editors
-BeardLib contains some editor functionality, however the main one that is present currently is the Environment Editor.
+Editor functionality can now be found in the new [BeardLib-Editor](https://github.com/GreatBigBushyBeard/PAYDAY-2-BeardLib-Editor)
 
 ## Documentation
 The main documentation can be found on the [wiki](https://github.com/GreatBigBushyBeard/PAYDAY-2-BeardLib/wiki) for this repo.
@@ -12,6 +16,5 @@ The main documentation can be found on the [wiki](https://github.com/GreatBigBus
 * [BLT](https://github.com/JamesWilko/Payday-2-BLT)
 
 ## A few mods that make use of BeardLib
-* PD:TH Hud (PD:TH Equipment): [GitHub](https://github.com/GreatBigBushyBeard/PAYDAY-2-PDTH-Hud/) [LastBullet](http://forums.lastbullet.net/mydownloads.php?action=view_down&did=682)
+* PD:TH Hud: [GitHub](https://github.com/GreatBigBushyBeard/PAYDAY-2-PDTH-Hud/) [LastBullet](http://forums.lastbullet.net/mydownloads.php?action=view_down&did=682)
 * Time of Day: [LastBullet](http://forums.lastbullet.net/mydownloads.php?action=view_down&did=14925)
-* Undercover Port [LastBullet](http://forums.lastbullet.net/mydownloads.php?action=view_down&did=15298)
