@@ -50,25 +50,6 @@ function MaskModule:RegisterHook()
 
         end
     end)
-    --[[Hooks:Add("MenuManagerOnOpenMenu", self._config.id .. "AddMaskToPlayer", function( self_menu, menu, index )
-        if menu == "menu_main" then
-            local global_value = self._config.global_value or self._default_global_value
-            local current_amount = (managers.blackmarket:get_item_amount(global_value, "masks", self._config.id, true) + managers.blackmarket:get_crafted_item_amount("masks", self._config.id))
-            if current_amount < self._config.max_amount then
-                while current_amount < self._config.max_amount do
-                    log(string.format("added %s to the inventory", self._config.id))
-        			managers.blackmarket:add_to_inventory(global_value, "masks", self._config.id, false)
-                    current_amount = current_amount + 1
-                end
-            elseif current_amount > self._config.max_amount then
-                while current_amount > self._config.max_amount do
-                    log(string.format("removed %s from the inventory", self._config.id))
-                    managers.blackmarket:remove_item(global_value, "masks", self._config.id)
-                    current_amount = current_amount - 1
-                end
-            end
-        end
-    end)]]--
 end
 
 BeardLib:RegisterModule(MaskModule.type_name, MaskModule)

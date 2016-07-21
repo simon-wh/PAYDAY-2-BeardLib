@@ -60,23 +60,33 @@ end
 Hooks:Add("NetworkReceivedData", sync_game_settings_id, function(sender, id, data)
     if id == sync_game_settings_id then
         local split_data = string.split(data, "|")
-
-        managers.network._handlers.connection:sync_game_settings(tweak_data.narrative:get_index_from_job_id(split_data[1]),
-        tweak_data.levels:get_index_from_level_id(split_data[2]),
-        tweak_data:difficulty_to_index(split_data[3]),
-        managers.network:session():peer(sender):rpc())
+        local peer = managers.network:session():peer(sender)
+        local rpc = peer and peer:rpc()
+        if rpc then
+            managers.network._handlers.connection:sync_game_settings(tweak_data.narrative:get_index_from_job_id(split_data[1]),
+            tweak_data.levels:get_index_from_level_id(split_data[2]),
+            tweak_data:difficulty_to_index(split_data[3]),
+            managers.network:session():peer(sender):rpc())
+        else
+            log("[ERROR] RPC is nil!")
+        end
     end
 end)
 
 Hooks:Add("NetworkReceivedData", sync_stage_settings_id, function(sender, id, data)
     if id == sync_stage_settings_id then
         local split_data = string.split(data, "|")
-
-        managers.network._handlers.connection:sync_stage_settings(tweak_data.narrative:get_index_from_job_id(split_data[1]),
-        tonumber(split_data[2]),
-        tonumber(split_data[3]),
-        tweak_data.levels:get_index_from_level_id(split_data[4]) or 0,
-        managers.network:session():peer(sender):rpc())
+        local peer = managers.network:session():peer(sender)
+        local rpc = peer and peer:rpc()
+        if rpc then
+            managers.network._handlers.connection:sync_stage_settings(tweak_data.narrative:get_index_from_job_id(split_data[1]),
+            tonumber(split_data[2]),
+            tonumber(split_data[3]),
+            tweak_data.levels:get_index_from_level_id(split_data[4]) or 0,
+            rpc)
+        else
+            log("[ERROR] RPC is nil!")
+        end
     end
 
 end)
@@ -84,11 +94,14 @@ end)
 Hooks:Add("NetworkReceivedData", send_outfit_id, function(sender, id, data)
     if id == send_outfit_id then
         local outfit = string.split(data, "|")
-		--log("received outfit "..data .. " from " .. tostring(sender))
-        managers.network._handlers.connection:sync_outfit(outfit[1],
+        local peer = managers.network:session():peer(sender)
+        if peer then
+            peer:set_outfit_string(outfit[1], outfit[2], false)
+        end
+        --[[managers.network._handlers.connection:sync_outfit(outfit[1],
         outfit[2],
         false,
-        managers.network:session():peer(sender):rpc())
+        managers.network:session():peer(sender):rpc())]]--
     end
 end)
 

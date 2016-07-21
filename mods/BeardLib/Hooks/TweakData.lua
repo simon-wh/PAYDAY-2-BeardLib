@@ -33,6 +33,7 @@ Hooks:PostHook(DLCTweakData, "init", "BeardLibDLCTweakDataInit", function(self, 
         content = {
             --loot_global_value = "mod",
             loot_drops = BeardLib._mod_lootdrop_items
+            upgrades = BeardLib._mod_upgrade_items
         }
     }
 end)

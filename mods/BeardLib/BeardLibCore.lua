@@ -68,6 +68,7 @@ if not _G.BeardLib then
     }
     self.modules = {}
     self._mod_lootdrop_items = {}
+    self._mod_upgrade_items = {}
     Global.added_units = Global.added_units or {}
 end
 

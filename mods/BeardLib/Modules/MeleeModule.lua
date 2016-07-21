@@ -36,6 +36,7 @@ function MeleeModule:RegisterHook()
         if self._config.merge_data then
             table.merge(bm_self.melee_weapons[self._config.id], self._config.merge_data)
         end
+        table.insert(BeardLib._mod_upgrade_items, self._config.id)
     end)
 
     Hooks:PostHook(UpgradesTweakData, "init", self._config.id .. "AddMeleeUpgradesData", function(u_self)
