@@ -37,7 +37,7 @@ end
 
 function LevelModule:RegisterHook()
     Hooks:PostHook(LevelsTweakData, "init", self._config.id .. "AddLevelData", function(l_self)
-        l_self[self._config.id] = {
+        local data = {
             name_id = self._config.name_id or "heist_" .. self._config.id .. "_name",
             briefing_id = self._config.brief_id or "heist_" .. self._config.id .. "_brief",
             briefing_dialog = self._config.briefing_dialog,
@@ -53,7 +53,10 @@ function LevelModule:RegisterHook()
             team_ai_off = self._config.team_ai_off,
             custom = true
         }
-
+        if self._config.merge_data then
+            table.merge(data, BeardLib.Utils:RemoveMetas(self._config.merge_data, true))
+        end
+        l_self[self._config.id] = data
         table.insert(l_self._level_index, self._config.id)
     end)
 

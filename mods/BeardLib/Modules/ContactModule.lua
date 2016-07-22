@@ -14,12 +14,16 @@ function ContactModule:RegisterHook()
     end
 
     Hooks:PostHook(NarrativeTweakData, "init", self._config.id .. "AddContactData", function(narr_self)
-        narr_self.contacts[self._config.id] = {
+        local data = {
             name_id = self._config.name_id,
             description_id = self._config.desc_id,
             package = self._config.package,
             assets_gui = self._config.assets_gui and self._config.assets_gui:id()
         }
+        if self._config.merge_data then
+            table.merge(data, BeardLib.Utils:RemoveMetas(self._config.merge_data, true))
+        end
+        narr_self.contacts[self._config.id] = data
     end)
 end
 

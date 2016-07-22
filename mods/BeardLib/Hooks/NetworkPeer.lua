@@ -111,10 +111,7 @@ local orig_NetworkPeer_set_outfit_string = NetworkPeer.set_outfit_string
 function NetworkPeer:set_outfit_string(outfit_string, outfit_version, outfit_signature)
 	if outfit_signature == false then
 		self._real_outfit_string = outfit_string
-		outfit_string = self._profile.outfit_string
-		if self._profile.outfit_string==""then
-			return
-		end
+		return
 	end
 
     orig_NetworkPeer_set_outfit_string(self, outfit_string, outfit_version, outfit_signature or self._signature)
@@ -126,28 +123,30 @@ function NetworkPeer:set_outfit_string(outfit_string, outfit_version, outfit_sig
         local old_outfit_list = managers.blackmarket:unpack_outfit_from_string(old_outfit_string)
         local new_outfit_list = managers.blackmarket:unpack_outfit_from_string(self._real_outfit_string)
 
-        if tweak_data.blackmarket.masks[new_outfit_list.mask.mask_id] then
+        if tweak_data.blackmarket.masks[new_outfit_list.mask.mask_id] and tweak_data.blackmarket.masks[new_outfit_list.mask.mask_id].custom then
             old_outfit_list.mask.mask_id = new_outfit_list.mask.mask_id
         end
 
-        if tweak_data.blackmarket.textures[new_outfit_list.mask.blueprint.pattern.id] then
+        if tweak_data.blackmarket.textures[new_outfit_list.mask.blueprint.pattern.id] and tweak_data.blackmarket.textures[new_outfit_list.mask.blueprint.pattern.id].custom then
     		old_outfit_list.mask.blueprint.pattern.id = new_outfit_list.mask.blueprint.pattern.id
     	end
 
-    	if tweak_data.blackmarket.materials[new_outfit_list.mask.blueprint.material.id] then
+    	if tweak_data.blackmarket.materials[new_outfit_list.mask.blueprint.material.id] and tweak_data.blackmarket.materials[new_outfit_list.mask.blueprint.material.id].custom then
     		old_outfit_list.mask.blueprint.material.id = new_outfit_list.mask.blueprint.material.id
     	end
 
-        if tweak_data.blackmarket.melee_weapons[new_outfit_list.melee_weapon] then
+        if tweak_data.blackmarket.melee_weapons[new_outfit_list.melee_weapon] and tweak_data.blackmarket.melee_weapons[new_outfit_list.melee_weapon].custom then
             old_outfit_list.melee_weapon = new_outfit_list.melee_weapon
         end
 
-        if tweak_data.weapon.factory[new_outfit_list.primary.factory_id] then
+        if tweak_data.weapon.factory[new_outfit_list.primary.factory_id] and tweak_data.weapon.factory[new_outfit_list.primary.factory_id].custom then
             old_outfit_list.primary.factory_id = new_outfit_list.primary.factory_id
+            old_outfit_list.primary.blueprint = new_outfit_list.primary.blueprint
         end
 
-        if tweak_data.weapon.factory[new_outfit_list.secondary.factory_id] then
+        if tweak_data.weapon.factory[new_outfit_list.secondary.factory_id] and tweak_data.weapon.factory[new_outfit_list.secondary.factory_id].custom then
             old_outfit_list.secondary.factory_id = new_outfit_list.secondary.factory_id
+            old_outfit_list.secondary.blueprint = new_outfit_list.secondary.blueprint
         end
 
     	self._profile.outfit_string = managers.blackmarket:outfit_string_from_list(old_outfit_list)
@@ -155,7 +154,7 @@ function NetworkPeer:set_outfit_string(outfit_string, outfit_version, outfit_sig
     	--[[if not self._ticket_wait_response then
     		self:verify_outfit()
     	end]]--
-    	if self._real_outfit_string ~= self._profile.outfit_string then
+        if old_outfit_string ~= self._profile.outfit_string then
     		self:_reload_outfit()
     	end
     	--self:_update_equipped_armor()
