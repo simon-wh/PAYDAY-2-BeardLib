@@ -70,6 +70,9 @@ if not _G.BeardLib then
     self._mod_lootdrop_items = {}
     self._mod_upgrade_items = {}
     Global.added_units = Global.added_units or {}
+    self._files_to_load = {}
+    self._custom_packages = {}
+    Global.custom_loaded_packages = Global.custom_loaded_packages or {}
 end
 
 function BeardLib:init()
@@ -132,6 +135,13 @@ function BeardLib:LoadModOverridePlus()
     end
 end
 
+function BeardLib:LoadAsset(ext_ids, path_ids)
+    if not managers.dyn_resource:has_resource(ext_ids, path_ids, managers.dyn_resource.DYN_RESOURCES_PACKAGE) then
+        self:log("loaded file %s.%s", path_ids:key(), ext_ids:key())
+        managers.dyn_resource:load(ext_ids, path_ids, managers.dyn_resource.DYN_RESOURCES_PACKAGE)
+    end
+end
+
 local add_file = "add.xml"
 
 function BeardLib:LoadModOverrideFolder(directory)
@@ -158,9 +168,18 @@ function BeardLib:LoadAddConfig(directory, config)
                         if typ == "unit" then
                             Global.added_units[tostring(path_ids:key())] = true
                         end
+                        --[[if string.find(path, "husk") then
+                            child.load = true
+                        end]]
+
                         --self:log("Added file %s %s", path, typ)
                         DB:create_entry(ext_ids, path_ids, file_path)
-                        PackageManager:reload(ext_ids, path_ids)
+                        if child.reload then
+                            PackageManager:reload(ext_ids, path_ids)
+                        end
+                        if child.load then
+                            table.insert(self._files_to_load, {ext_ids, path_ids})
+                        end
                     end
                 else
                     self:log("[ERROR] File does not exist! %s", file_path)
@@ -170,7 +189,14 @@ function BeardLib:LoadAddConfig(directory, config)
             end
         end
     end
+    if managers.dyn_resource then
+        while #BeardLib._files_to_load > 0 do
+            local ext_ids, path_ids = unpack(table.remove(BeardLib._files_to_load))
+            BeardLib:LoadAsset(ext_ids, path_ids)
+        end
+    end
 end
+
 
 function BeardLib:UnloadAddConfig(config)
     self:log("Unloading added files")
@@ -185,6 +211,11 @@ function BeardLib:UnloadAddConfig(config)
                 if DB:has(ext_ids, path_ids) then
                     if typ == "unit" then
                         Global.added_units[tostring(path_ids:key())] = nil
+                    end
+                    if child.unload ~= false then
+                        if managers.dyn_resource:has_resource(ext_ids, path_ids, managers.dyn_resource.DYN_RESOURCES_PACKAGE) then
+                            managers.dyn_resource:unload(ext_ids, path_ids, managers.dyn_resource.DYN_RESOURCES_PACKAGE)
+                        end
                     end
                     --self:log("Unloaded %s %s", path, typ)
                     DB:remove_entry(ext_ids, path_ids)
@@ -287,6 +318,11 @@ function BeardLib:ReplaceScriptData(replacement, replacement_type, target_path, 
         self:log("[ERROR] %s:ReplaceScriptData parameter 5, expected table, got %s", self.Name, tostring(type(extra_data)))
         return
     end
+    if not io.file_is_readable(replacement) then
+        self:log("[ERROR] Lua state is unable to read file '%s'!", replacement)
+        return
+    end
+
     options = options or {}
     self._replace_script_data[target_ext:key()] = self._replace_script_data[target_ext:key()] or {}
     self._replace_script_data[target_ext:key()][target_path:key()] = self._replace_script_data[target_ext:key()][target_path:key()] or {}

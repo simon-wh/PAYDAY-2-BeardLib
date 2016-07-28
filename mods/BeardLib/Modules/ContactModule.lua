@@ -4,12 +4,21 @@ ContactModule.type_name = "contact"
 ContactModule._loose = true
 
 function ContactModule:init(core_mod, config)
-    self.super.init(self, core_mod, config)
+    if not self.super.init(self, core_mod, config) then
+        return false
+    end
+
+    if not self._config.id then
+        BeardLib:log("[ERROR] The ID must be specified for a contact")
+        return false
+    end
+
+    return true
 end
 
 function ContactModule:RegisterHook()
     if not self._config.id then
-        self._mod:log("[ERROR] Contact does not contain a definition for id!")
+        self:log("[ERROR] Contact does not contain a definition for id!")
         return
     end
 

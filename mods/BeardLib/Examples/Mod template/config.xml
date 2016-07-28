@@ -19,8 +19,7 @@
     <Options name="Options" auto_build_menu="true" auto_load="true">
         <options>
             <!--Ingame the option menu background will be halved-->
-            <merge_data area_bg="half">
-            </merge_data>
+            <merge_data area_bg="half"/>
             <option type="bool" default_value="true" name="ExampleOption"/>
         </options>
     </Options>
