@@ -1,41 +1,32 @@
-MeleeModule = MeleeModule or class(ModuleBase)
+MeleeModule = MeleeModule or class(ItemModuleBase)
 
 MeleeModule.type_name = "Melee"
-MeleeModule._loose = true
 
 function MeleeModule:init(core_mod, config)
-    self.super.init(self, core_mod, config)
+    if not self.super.init(self, core_mod, config) then
+        return false
+    end
+
+    return true
 end
 
 function MeleeModule:RegisterHook()
-    local dlc = self._config.dlc or BeardLib.definitions.module_defaults.mask.default_dlc
+    local dlc
     self._config.unlock_level = self._config.unlock_level or 1
     Hooks:PostHook(BlackMarketTweakData, "_init_melee_weapons", self._config.id .. "AddMeleeData", function(bm_self)
         if bm_self.melee_weapons[self._config.id] then
-            self._mod:log("[ERROR] Melee weapon with id '%s' already exists!", self._config.id)
+            BeardLib:log("[ERROR] Melee weapon with id '%s' already exists!", self._config.id)
             return
         end
 
-        bm_self.melee_weapons[self._config.id] = table.merge(self._config.based_on and (bm_self.melee_weapons[self._config.based_on] ~= nil and clone(bm_self.melee_weapons[self._config.based_on])) or bm_self.melee_weapons.kabar, {
-            name_id = self._config.name_id or "bm_melee_" .. self._config.id,
-            unit = self._config.unit,
-            third_unit = self._config.third_unit,
-            dlc = dlc,
-            texture_bundle_folder = self._config.texture_bundle_folder,
-            animation = self._config.animation,
-            stats = self._config.stats,
-            sounds = self._config.sounds,
-            anim_global_param = self._config.anim_global_param,
-            anim_attack_vars = self._config.anim_attack_vars,
-            repeat_expire_t = self._config.repeat_expire_t,
-            expire_t = self._config.expire_t,
-            melee_damage_delay = self._config.melee_damage_delay,
+        local data = table.merge(deep_clone(self._config.based_on and (bm_self.melee_weapons[self._config.based_on] ~= nil and bm_self.melee_weapons[self._config.based_on]) or bm_self.melee_weapons.kabar), table.merge({
+            name_id = "bm_melee_" .. self._config.id,
+            dlc = BeardLib.definitions.module_defaults.item.default_dlc,
             custom = true,
             free = not self._config.unlock_level
-        })
-        if self._config.merge_data then
-            table.merge(bm_self.melee_weapons[self._config.id], self._config.merge_data)
-        end
+        }, self._config.item or self._config))
+        dlc = data.dlc
+        bm_self.melee_weapons[self._config.id] = data
         table.insert(BeardLib._mod_upgrade_items, self._config.id)
     end)
 

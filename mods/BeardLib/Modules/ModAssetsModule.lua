@@ -3,16 +3,9 @@ ModAssetsModule.type_name = "AssetUpdates"
 ModAssetsModule._default_version_file = "version.txt"
 
 function ModAssetsModule:init(core_mod, config)
-    self.super.init(self, core_mod, config)
-
-    if not self._config.id then
-        BeardLib:log("[ERROR] The ID must be specified for mod assets")
-        return
-    end
-
-    if not self._config.folder_name then
-        self._mod:log("[ERROR] The folder name must be specified for mod assets")
-        return
+    self.required_params = table.add(clone(self.required_params), {"id", "folder_name"})
+    if not self.super.init(self, core_mod, config) then
+        return false
     end
 
     self._providers = {
@@ -30,7 +23,7 @@ function ModAssetsModule:init(core_mod, config)
         if self._providers[self._config.provider] then
             self.provider = self._providers[self._config.provider]
         else
-            self._mod:log("[ERROR] No provider information for provider: %s", self._config.provider)
+            self:log("[ERROR] No provider information for provider: %s", self._config.provider)
             return
         end
     elseif self._config.custom_provider then
@@ -39,7 +32,7 @@ function ModAssetsModule:init(core_mod, config)
         if provider_details.download_file_func then provider_details.download_file_func = self._mod:StringToCallback(provider_details.download_file_func, self) end
         self.provider = provider_details
     else
-        self._mod:log("[ERROR] No provider can be found for mod assets")
+        self:log("[ERROR] No provider can be found for mod assets")
         return
     end
 
@@ -56,6 +49,8 @@ function ModAssetsModule:init(core_mod, config)
     if not self._config.manual_check then
         self:RegisterAutoUpdateCheckHook()
     end
+
+    return true
 end
 
 function ModAssetsModule:GetMainInstallDir()
@@ -76,10 +71,10 @@ function ModAssetsModule:RetrieveCurrentVersion()
         if tonumber(version) then
             self._version = tonumber(version)
         else
-            self._mod:log("[ERROR] Unable to parse version '%s' as a number. File: %s", version, self.version_file)
+            self:log("[ERROR] Unable to parse version '%s' as a number. File: %s", version, self.version_file)
         end
     else
-        self._mod:log("[ERROR] Unable to read version file for '%s's assets. File: %s", self._mod.Name, self.version_file)
+        self:log("[ERROR] Unable to read version file for '%s's assets. File: %s", self._mod.Name, self.version_file)
     end
 end
 
@@ -98,7 +93,7 @@ end
 function ModAssetsModule:_CheckVersion(force)
     local version_url = self._mod:GetRealFilePath(self.provider.version_api_url, self)
     dohttpreq(version_url, function(data, id)
-        self._mod:log("Recieved data '%s' from the server", tostring(data))
+        self:log("Received data '%s' from the server", tostring(data))
         if tonumber(data) then
             if tonumber(data) > self._version then
                 self:ShowRequiresUpdatePrompt()
@@ -107,7 +102,7 @@ function ModAssetsModule:_CheckVersion(force)
             end
         else
             self:ShowErrorPrompt()
-            self._mod:log("[ERROR] Unable to parse string '%s' as a version number", data)
+            self:log("[ERROR] Unable to parse string '%s' as a version number", data)
         end
     end)
 end
@@ -180,7 +175,7 @@ end
 
 function ModAssetsModule:_DownloadAssets(data)
     local download_url = self._mod:GetRealFilePath(self.provider.download_api_url, data or self)
-    self._mod:log("Downloading assets from url: %s", download_url)
+    self:log("Downloading assets from url: %s", download_url)
     managers.menu:show_download_progress( self._mod.Name .. " " .. managers.localization:text("mod_assets_title"))
     dohttpreq( download_url, callback(self, self, "StoreDownloadedAssets"), LuaModUpdates.UpdateDownloadDialog)
 end
@@ -188,10 +183,10 @@ end
 function ModAssetsModule:StoreDownloadedAssets(data, id)
 	local ret, pdata = pcall(function()
         LuaModUpdates:SetDownloadDialogKey("mod_download_complete", true)
-    	self._mod:log("[INFO] Finished downloading assets")
+    	self:log("[INFO] Finished downloading assets")
 
     	if string.is_nil_or_empty(data) then
-    		self._mod:log("[ERROR] Assets download failed, received data was invalid")
+    		self:log("[ERROR] Assets download failed, received data was invalid")
     		LuaModUpdates:SetDownloadDialogKey("mod_download_failed", true)
     		return
     	end
@@ -203,7 +198,7 @@ function ModAssetsModule:StoreDownloadedAssets(data, id)
     		file:write(data)
     		file:close()
         else
-            self._mod:log("[ERROR] An error occured while trying to store the downloaded asset data")
+            self:log("[ERROR] An error occured while trying to store the downloaded asset data")
             return
     	end
 
@@ -221,7 +216,7 @@ function ModAssetsModule:StoreDownloadedAssets(data, id)
     	LuaModUpdates._current_download_dialog = nil
 	end)
 	if not ret then
-		self._mod:log("[ERROR] " .. pdata)
+		self:log("[ERROR] " .. pdata)
 	end
 end
 
@@ -234,7 +229,7 @@ function ModAssetsModule:LastBulletDownloadAssets()
             if ret then
                 self:_DownloadAssets(d_data[tostring(self.id)])
             else
-                self._mod:log("Failed to parse the data received from LastBullet!")
+                self:log("Failed to parse the data received from LastBullet!")
             end
         end
     )

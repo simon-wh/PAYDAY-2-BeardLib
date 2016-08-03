@@ -4,14 +4,15 @@ LocalizationModule = LocalizationModule or class(ModuleBase)
 LocalizationModule.type_name = "Localization"
 
 function LocalizationModule:init(core_mod, config)
-    self.super.init(self, core_mod, config)
-
+    if not self.super.init(self, core_mod, config) then
+        return false
+    end
     self.LocalizationDirectory = self._config.directory and BeardLib.Utils.Path:Combine(self._mod.ModPath, self._config.directory) or self._mod.ModPath
 
     self.Localizations = {}
 
     for _, tbl in ipairs(self._config) do
-        if tbl._meta == "localization" then
+        if tbl._meta == "localization" or tbl._meta == "loc" then
             self.Localizations[Idstring(tbl.language):key()] = tbl.file
         end
     end
@@ -19,6 +20,8 @@ function LocalizationModule:init(core_mod, config)
     self.DefaultLocalization = self._config.default or self.Localizations[1]
 
     self:RegisterHooks()
+
+    return true
 end
 
 function LocalizationModule:RegisterHooks()

@@ -2,14 +2,14 @@ MenuModule = MenuModule or class(ModuleBase)
 MenuModule.type_name = "Menu"
 
 function MenuModule:init(core_mod, config)
-    self.super.init(self, core_mod, config)
-
-    if not self._config.menu then
-        self._mod:log("Menu Module must contain a menu table")
-        return
+    self.required_params = table.add(clone(self.required_params), {"menu"})
+    if not self.super.init(self, core_mod, config) then
+        return false
     end
 
     self:create_hooks()
+
+    return true
 end
 
 function MenuModule:create_hooks()
@@ -20,21 +20,25 @@ end
 
 function MenuModule:build_node_items(node, data)
     for i, sub_item in ipairs(data) do
-        if sub_item._meta == "sub_menu" then
+        if sub_item._meta == "sub_menu" or sub_item._meta == "menu" then
             if sub_item.key then
                 if self._mod[sub_item.key] then
                     self._mod[sub_item.key]:BuildMenu(node)
                 else
-                    self._mod:log("[ERROR] Cannot find module of id '%s' in mod", sub_item.key)
+                    self:log("[ERROR] Cannot find module of id '%s' in mod", sub_item.key)
                 end
             else
                 self:build_node(sub_item, node)
             end
         elseif sub_item._meta == "item_group" then
-            if self._mod[sub_item.key] then
-                self._mod[sub_item.key]:InitializeNode(node)
+            if sub_item.key then
+                if self._mod[sub_item.key] then
+                    self._mod[sub_item.key]:InitializeNode(node)
+                else
+                    self:log("[ERROR] Cannot find module of id '%s' in mod", sub_item.key)
+                end
             else
-                self._mod:log("[ERROR] Cannot find module of id '%s' in mod", sub_item.key)
+                self:log("[ERROR] item_group must contain a definition for the parameter 'key'")
             end
         elseif sub_item._meta == "divider" then
             self:CreateDivider(node, sub_item)
@@ -54,7 +58,7 @@ end
 
 function MenuModule:build_node(node_data, parent_node)
     parent_node = node_data.parent_node and MenuHelperPlus:GetNode(node_data.parent_node) or parent_node
-    local base_name = node_data.name and self._mod.Name .. node_data.name or self._mod.Name .. self._name
+    local base_name = node_data.name or self._mod.Name .. self._name
     local menu_name = node_data.node_name or base_name .. "Node"
 
     local merge_data = node_data.merge_data or {}

@@ -8,31 +8,36 @@ function WorldDefinition:_load_world_package()
     if level_tweak.custom_packages then
         self._custom_loaded_packages = {}
         for _, package in pairs(level_tweak.custom_packages) do
-            if  PackageManager:package_exists(package) and not PackageManager:loaded(package) then
+            if PackageManager:package_exists(package) and not PackageManager:loaded(package) then
         		PackageManager:load(package)
                 log("Loaded package: "..package)
         		table.insert(self._custom_loaded_packages, package)
         	end
         end
-        if not self._has_package then
-            return
-        end
+    end
+    if not self._has_package then
+        return
     end
     WorldDefinition_load_world_package(self)
 end
 
 local WorldDefinitionunload_packages = WorldDefinition.unload_packages
 function WorldDefinition:unload_packages()
+
     if Global.level_data._add then
         Global.level_data._add:Unload()
         Global.level_data._add = nil
     end
+
     if self._custom_loaded_packages then
         --if not Global.editor_mode then
             for _, pck in pairs(self._custom_loaded_packages) do
                 self:_unload_package(pck)
             end
         --end
+    end
+
+    if not self._has_package then
         return
     end
 
@@ -41,7 +46,7 @@ end
 
 local WorldDefinition_load_continent_init_package = WorldDefinition._load_continent_init_package
 function WorldDefinition:_load_continent_init_package(path)
-    if self._custom_loaded_packages and not self._has_package then
+    if not self._has_package then
         return
     end
 
@@ -50,7 +55,7 @@ end
 
 local WorldDefinition_load_continent_package =  WorldDefinition._load_continent_package
 function WorldDefinition:_load_continent_package(path)
-    if self._custom_loaded_packages and not self._has_package then
+    if not self._has_package then
         return
     end
 

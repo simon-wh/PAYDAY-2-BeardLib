@@ -1,58 +1,40 @@
+function overwrite_meta_function(tbl, func_name, new_func)
+	local old_func_name = "_" .. func_name
+	local meta_table = getmetatable(tbl)
 
---Unneeded memory usage, should only be used for dedicated editor
---[[_G.og_idstring = Idstring
+	if not meta_table[func_name] then
+		log(string.format("[ERROR] Function with name '%s' could not be found in the meta table!", func_name))
+		return
+	end
 
-function Idstring(str)
-    if not str then
-        str = ""
-    end
+	meta_table[old_func_name] = meta_table[old_func_name] or meta_table[func_name]
 
-    local ids = og_idstring(str)
-    ids.s = function(this)
-        return str
-    end
+	meta_table[func_name] = new_func
+end
 
-    return ids
-end]]--
-
---[[function print(str, ...)
-    local tbl = {...}
-
-    log(str)
-
-    for i, val in pairs(tbl) do
-        log(tostring(val))
-    end
-end]]--
-
---[[getmetatable(PackageManager)._unit_data = getmetatable(PackageManager)._unit_data or getmetatable(PackageManager).unit_data
-
-getmetatable(PackageManager).unit_data = function(PackManager, ...)
-    log("unit data called")
-    local data = PackManager:_unit_data(...)
-    SaveTable(data.__index, "UnitDataIndex.txt")
-    return data
-end]]--
 local ids_unit = Idstring("unit")
 
-getmetatable(World)._spawn_unit = getmetatable(World)._spawn_unit or getmetatable(World).spawn_unit
-
-getmetatable(World).spawn_unit = function(self, unit_name, pos, rot)
+overwrite_meta_function(World, "spawn_unit", function(self, unit_name, ...)
 	if Global.added_units[tostring(unit_name:key())] then
 		if not managers.dyn_resource:has_resource(ids_unit, unit_name, managers.dyn_resource.DYN_RESOURCES_PACKAGE) then
 			managers.dyn_resource:load(ids_unit, unit_name, managers.dyn_resource.DYN_RESOURCES_PACKAGE)
 			while not managers.dyn_resource:is_resource_ready(ids_unit, unit_name, managers.dyn_resource.DYN_RESOURCES_PACKAGE) do end
 		end
 	end
+	return self:_spawn_unit(unit_name, ...)
+end)
 
-	return self:_spawn_unit(unit_name, pos, rot)
-end
+overwrite_meta_function(PackageManager, "unit_data", function(self, unit_name, ...)
+	if Global.added_units[tostring(unit_name:key())] then
+		if not managers.dyn_resource:has_resource(ids_unit, unit_name, managers.dyn_resource.DYN_RESOURCES_PACKAGE) then
+			managers.dyn_resource:load(ids_unit, unit_name, managers.dyn_resource.DYN_RESOURCES_PACKAGE)
+			while not managers.dyn_resource:is_resource_ready(ids_unit, unit_name, managers.dyn_resource.DYN_RESOURCES_PACKAGE) do end
+		end
+	end
+	return self:_unit_data(unit_name, ...)
+end)
 
-
-
-getmetatable(PackageManager)._script_data = getmetatable(PackageManager)._script_data or getmetatable(PackageManager).script_data
-
-getmetatable(PackageManager).script_data = function(self, ext, path, name_mt)
+overwrite_meta_function(PackageManager, "script_data", function(self, ext, path, name_mt)
 	local data = {}
 
     if DB:_has(ext, path) then
@@ -64,15 +46,72 @@ getmetatable(PackageManager).script_data = function(self, ext, path, name_mt)
     end
 
 	return BeardLib:ProcessScriptData(self, path, ext, data)
-end
+end)
 
-getmetatable(DB)._has = getmetatable(DB)._has or getmetatable(DB).has
-
-getmetatable(DB).has = function(self, ext, path)
-
+overwrite_meta_function(DB, "has", function(self, ext, path)
     if BeardLib._replace_script_data[ext:key()] and BeardLib._replace_script_data[ext:key()][path:key()] and #BeardLib._replace_script_data[ext:key()][path:key()] > 0 then
         return true
     end
 
     return self:_has(ext, path)
-end
+end)
+
+overwrite_meta_function(PackageManager, "load", function(self, pck, ...)
+	if not pck then
+		return true
+	end
+
+	if BeardLib and BeardLib._custom_packages[pck:key()] then
+		local cpck = BeardLib._custom_packages[pck:key()]
+		if not cpck:loaded() then
+			cpck:Load()
+		end
+		return true
+	end
+
+	self:_load(pck, ...)
+end)
+
+overwrite_meta_function(PackageManager, "unload", function(self, pck)
+	if not pck then
+		return
+	end
+
+	if BeardLib and BeardLib._custom_packages[pck:key()] then
+		local cpck = BeardLib._custom_packages[pck:key()]
+		if cpck:loaded() then
+			cpck:Unload()
+		end
+		return
+	end
+
+	self:_unload(pck)
+end)
+
+overwrite_meta_function(PackageManager, "loaded", function(self, pck)
+	if not pck then
+		return false
+	end
+
+	if BeardLib and BeardLib._custom_packages[pck:key()] then
+		return BeardLib._custom_packages[pck:key()]:loaded()
+	end
+
+	return self:_loaded(pck)
+end)
+
+overwrite_meta_function(PackageManager, "package_exists", function(self, pck)
+	if not pck then
+		return false
+	end
+
+	if BeardLib and BeardLib._custom_packages[pck:key()] then
+		return true
+	end
+
+	return self:_package_exists(pck)
+end)
+
+--[[function print(...)
+	log(string.format(...))
+end]]--

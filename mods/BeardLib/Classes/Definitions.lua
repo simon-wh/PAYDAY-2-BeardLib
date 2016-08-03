@@ -107,4 +107,8 @@ BeardLib.definitions = {}
 
 BeardLib.definitions.mod_override = "assets/mod_overrides/"
 BeardLib.definitions.module_defaults = {
+    item = {
+        default_global_value = "mod",
+        default_dlc = "mod"
+    }
 }

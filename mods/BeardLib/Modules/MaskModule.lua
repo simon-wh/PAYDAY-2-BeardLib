@@ -1,51 +1,44 @@
-BeardLib.definitions.module_defaults.mask = {
-    default_global_value = "mod",
-    default_dlc = "mod"
-}
-
-MaskModule = MaskModule or class(ModuleBase)
+MaskModule = MaskModule or class(ItemModuleBase)
 
 MaskModule.type_name = "Mask"
-MaskModule._loose = true
 
 function MaskModule:init(core_mod, config)
-    self.super.init(self, core_mod, config)
+    self.clean_table = table.add(clone(self.clean_table), {
+        {
+            param ="pcs",
+            action = "no_number_indexes"
+        }
+    })
+    if not self.super.init(self, core_mod, config) then
+        return false
+    end
+
+    return true
 end
 
 function MaskModule:RegisterHook()
     self._config.default_amount = self._config.default_amount and tonumber(self._config.default_amount) or 1
     Hooks:PostHook(BlackMarketTweakData, "_init_masks", self._config.id .. "AddMaskData", function(bm_self)
         if bm_self.masks[self._config.id] then
-            self._mod:log("[ERROR] Mask with id '%s' already exists!", self._config.id)
+            BeardLib:log("[ERROR] Mask with id '%s' already exists!", self._config.id)
             return
         end
-        local data = {
-            name_id = self._config.name_id or "bm_msk_" .. self._config.id,
-            desc_id = self._config.brief_id or "bm_msk_" .. self._config.id .. "_desc",
-            unit = self._config.unit,
-            dlc = self._config.dlc or BeardLib.definitions.module_defaults.mask.default_dlc,
-            texture_bundle_folder = self._config.texture_bundle_folder,
-            pcs = self._config.pcs and BeardLib.Utils:RemoveNonNumberIndexes(self._config.pcs) or {},
-            pc = self._config.pc,
-            sort_number = self._config.sort_number,
-            type = self._config.type,
-            skip_mask_on_sequence = self._config.skip_mask_on_sequence,
-            value = self._config.value or 0,
-            infamous = self._config.infamous,
-            default_blueprint = self._config.default_blueprint,
-            global_value = self._config.global_value or BeardLib.definitions.module_defaults.mask.default_global_value,
+        local data = table.merge({
+            name_id = "bm_msk_" .. self._config.id,
+            desc_id = "bm_msk_" .. self._config.id .. "_desc",
+            dlc = BeardLib.definitions.module_defaults.item.default_dlc,
+            pcs = {},
+            value = 0,
+            global_value = BeardLib.definitions.module_defaults.item.default_global_value,
             custom = true
-        }
-        if self._config.merge_data then
-            table.merge(data, self._config.merge_data)
-        end
+        }, self._config.item or self._config)
         bm_self.masks[self._config.id] = data
-        if data.dlc == BeardLib.definitions.module_defaults.mask.default_dlc then
+        if data.dlc == BeardLib.definitions.module_defaults.item.default_dlc then
             table.insert(BeardLib._mod_lootdrop_items, {
                 type_items = "masks",
                 item_entry = self._config.id,
                 amount = self._config.default_amount,
-                global_value = data.global_value ~= BeardLib.definitions.module_defaults.mask.default_global_value and data.global_value or nil
+                global_value = data.global_value ~= BeardLib.definitions.module_defaults.item.default_global_value and data.global_value or nil
             })
 
         end

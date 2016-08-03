@@ -4,25 +4,28 @@ OptionModule = OptionModule or class(ModuleBase)
 OptionModule.type_name = "Options"
 
 function OptionModule:init(core_mod, config)
-    self.super.init(self, core_mod, config)
+    self.required_params = table.add(clone(self.required_params), {"options"})
+    if not self.super.init(self, core_mod, config) then
+        return false
+    end
 
     self.FileName = self._config.save_file or self._mod.Name .. "_Options.txt"
 
     self._storage = {}
 
-    if not self._config.options then
-        BeardLib:log(string.format("[ERROR] Mod: %s, must contain an options table for the OptionModule", self._mod.Name))
-        return
-    end
-
     if self._config.loaded_callback then
         self._on_load_callback = self._mod:StringToCallback(self._config.loaded_callback)
     end
 
-
-    if self._config.auto_build_menu then
+    if self._config.build_menu ~= nil then
+        self._config.auto_build_menu = self._config.build_menu
+    end
+    
+    if self._config.auto_build_menu == nil or self._config.auto_build_menu then
         self:BuildMenuHook()
     end
+
+    return true
 end
 
 function OptionModule:post_init()
@@ -32,7 +35,7 @@ function OptionModule:post_init()
 
     self:InitOptions(self._config.options, self._storage)
 
-    if self._config.auto_load then
+    if self._config.auto_load == nil or self._config.auto_load then
         self:Load()
     end
 
@@ -439,7 +442,7 @@ function OptionModule:CreateMatrix(parent_node, option_tbl, option_path, compone
         merge_data = self_vars
     }, merge_data)
     local value = self:GetValue(option_path)
-    local function GetComponentValue(val, component)
+    local GetComponentValue = function(val, component)
         return type(val[component]) == "function" and val[component](val) or val[component]
     end
 
@@ -459,7 +462,7 @@ end
 
 function OptionModule:CreateColour(parent_node, option_tbl, option_path)
     local alpha = not not self:GetParameter(option_tbl, "alpha")
-    self:CreateMatrix(parent_node, option_tbl, option_path, { [1] =alpha and {id="a", title="A"} or nil, {id="r", title="R"}, {id="g", title="G"}, {id="b", title="B"} })
+    self:CreateMatrix(parent_node, option_tbl, option_path, { [1] = alpha and {id="a", title="A"} or nil, {id="r", title="R"}, {id="g", title="G"}, {id="b", title="B"} })
 end
 
 function OptionModule:CreateVector(parent_node, option_tbl, option_path)
@@ -574,9 +577,9 @@ Hooks:Add("BeardLibCreateCustomNodesAndButtons", "BeardLibOptionModuleCreateCall
             end
         elseif item._parameters.opt_type == "rotation" then
             local comp = item._parameters.component
-            log("1" .. tostring(cur_val))
+            self:log("1" .. tostring(cur_val))
             mrotation.set_yaw_pitch_roll(cur_val, comp == "yaw" and new_value or cur_val:yaw(), comp == "pitch" and new_value or cur_val:pitch(), comp == "roll" and new_value or cur_val:roll())
-            log("2" .. tostring(cur_val))
+            self:log("2" .. tostring(cur_val))
         end
 
         OptionModule.SetValue(item._parameters.module, item._parameters.option_key, cur_val)

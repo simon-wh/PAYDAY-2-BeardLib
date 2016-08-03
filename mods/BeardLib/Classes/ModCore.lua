@@ -21,7 +21,7 @@ function ModCore:post_init(ignored_modules)
     for _, module in pairs(self._modules) do
         if (not ignored_modules or not table.contains(ignored_modules, module._name)) then
             local success, err = pcall(function() module:post_init() end)
-            
+
             if not success then
                 self:log("[ERROR] An error occured on the post initialization of %s. Error:\n%s", module._name, tostring(err))
             end
@@ -60,18 +60,22 @@ function ModCore:init_modules()
                 end
 
                 if node_class then
-                    local success, node_obj = pcall(function() return node_class:new(self, module_tbl) end)
+                    local success, node_obj, valid = pcall(function() return node_class:new(self, module_tbl) end)
                     if success then
-                        if not node_obj._loose then
-                            if self[node_obj._name] then
-                                self:log("The name of module: %s already exists in the mod table, please make sure this is a unique name!", node_obj._name)
-                            end
+                        if valid == false then
+                            self:log("Module with name %s does not contain a valid config. See above for details", node_obj._name)
+                        else
+                            if not node_obj._loose or node_obj._name ~= node_obj.type_name then
+                                if self[node_obj._name] then
+                                    self:log("The name of module: %s already exists in the mod table, please make sure this is a unique name!", node_obj._name)
+                                end
 
-                            self[node_obj._name] = node_obj
+                                self[node_obj._name] = node_obj
+                            end
+                            table.insert(self._modules, node_obj)
                         end
-                        table.insert(self._modules, node_obj)
                     else
-                        self:log("[ERROR] An error occured on initilization of module: %s. Error:\n%s", module_tbl._meta, tostring(err))
+                        self:log("[ERROR] An error occured on initilization of module: %s. Error:\n%s", module_tbl._meta, tostring(node_obj))
                     end
                 else
                     self:log("[ERROR] Unable to find module with key %s", module_tbl._meta)

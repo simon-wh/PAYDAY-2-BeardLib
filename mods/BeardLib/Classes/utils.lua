@@ -267,6 +267,10 @@ local searchTypes = {
 }
 
 function BeardLib.Utils:normalize_string_value(value)
+    if type(value) ~= "string" then
+        return value
+    end
+
 	for _, search in pairs(searchTypes) do
 		if string.begins(value, search) then
 			value = loadstring("return " .. value)()
@@ -276,7 +280,7 @@ function BeardLib.Utils:normalize_string_value(value)
 	return value
 end
 
-function BeardLib.Utils:StringToTable(global_tbl_name, global_tbl)
+function BeardLib.Utils:StringToTable(global_tbl_name, global_tbl, silent)
     local global_tbl = global_tbl or _G
     if string.find(global_tbl_name, "%.") then
         local global_tbl_split = string.split(global_tbl_name, "[.]")
@@ -284,14 +288,18 @@ function BeardLib.Utils:StringToTable(global_tbl_name, global_tbl)
         for _, str in pairs(global_tbl_split) do
             global_tbl = rawget(global_tbl, str)
             if not global_tbl then
-                BeardLib:log("[ERROR] Key " .. str .. " does not exist in the current global table.")
+                if not silent then
+                    BeardLib:log("[ERROR] Key " .. str .. " does not exist in the current global table.")
+                end
                 return nil
             end
         end
     else
         global_tbl = rawget(global_tbl, global_tbl_name)
         if not global_tbl then
-            BeardLib:log("[ERROR] Key " .. global_tbl_name .. " does not exist in the global table.")
+            if not silent then
+                BeardLib:log("[ERROR] Key " .. global_tbl_name .. " does not exist in the current global table.")
+            end
             return nil
         end
     end

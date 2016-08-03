@@ -4,9 +4,13 @@ ScriptReplacementsModule = ScriptReplacementsModule or class(ModuleBase)
 ScriptReplacementsModule.type_name = "ScriptMods"
 
 function ScriptReplacementsModule:init(core_mod, config)
-    self.super.init(self, core_mod, config)
+    if not self.super.init(self, core_mod, config) then
+        return false
+    end
 
     self.ScriptDirectory = self._config.directory and self._mod.ModPath .. self._config.directory or self._mod.ModPath
+
+    return true
 end
 
 function ScriptReplacementsModule:post_init()

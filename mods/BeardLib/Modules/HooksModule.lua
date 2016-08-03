@@ -3,9 +3,13 @@ HooksModule = HooksModule or class(ModuleBase)
 HooksModule.type_name = "Hooks"
 
 function HooksModule:init(core_mod, config)
-    self.super.init(self, core_mod, config)
+    if not self.super.init(self, core_mod, config) then
+        return false
+    end
 
     self:Load()
+
+    return true
 end
 
 function HooksModule:Load()
@@ -24,7 +28,7 @@ function HooksModule:Load()
                     script = hook_file
                 })
             else
-                self._mod:log("[ERROR] Hook file not readable by the lua state! File: %s", hook_file)
+                self:log("[ERROR] Hook file not readable by the lua state! File: %s", hook_file)
             end
         end
     end
