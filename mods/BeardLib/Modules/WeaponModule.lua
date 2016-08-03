@@ -40,7 +40,7 @@ function WeaponModule:RegisterHook()
             minigun = aim_assist_minigun_default,
         }
 
-        local data = table.merge(self._config.based_on and (w_self[self._config.based_on] ~= nil and w_self[self._config.based_on]) or w_self.glock_17, {
+        local data = table.merge(deep_clone(self._config.based_on and (w_self[self._config.based_on] ~= nil and w_self[self._config.based_on]) or w_self.glock_17), {
             name_id = self._config.name_id or "bm_w_" .. self._config.id,
             desc_id = self._config.desc_id or "bm_w_" .. self._config.id .. "_desc",
             description_id = self._config.description_id or "des_" .. self._config.id,
@@ -100,8 +100,9 @@ function WeaponModule:RegisterHook()
             default_blueprint = BeardLib.Utils:RemoveMetas(self._config.default_blueprint, true),
             uses_parts = BeardLib.Utils:RemoveMetas(self._config.uses_parts, true),
             optional_types = BeardLib.Utils:RemoveMetas(self._config.optional_types, true),
+            override = BeardLib.Utils:RemoveMetas(BeardLib.Utils:RemoveAllNumberIndexes(self._config.override)),
             animations = BeardLib.Utils:RemoveMetas(self._config.animations, true),
-            adds = BeardLib.Utils:RemoveMetas(BeardLib.Utils:RemoveAllNumberIndexes(self._config.adds, true), true),
+            adds = BeardLib.Utils:RemoveMetas(BeardLib.Utils:RemoveAllNumberIndexes(self._config.adds)),
             custom = true
         }
 
@@ -128,7 +129,7 @@ function WeaponModule:RegisterHook()
 
     Hooks:PostHook(PlayerTweakData, "_init_new_stances", self._config.id .. "AddWeaponStancesData", function(p_self)
         local stance_data = self._config.stance or {}
-        local data = table.merge(stance_data.based_on and (p_self.stances[stance_data.based_on] ~= nil and p_self.stances[stance_data.based_on]) or self._config.based_on and (p_self.stances[self._config.based_on] ~= nil and p_self.stances[self._config.based_on]) or p_self.stances.glock_17, {
+        local data = table.merge(deep_clone(stance_data.based_on and (p_self.stances[stance_data.based_on] ~= nil and p_self.stances[stance_data.based_on]) or self._config.based_on and (p_self.stances[self._config.based_on] ~= nil and p_self.stances[self._config.based_on]) or p_self.stances.glock_17), {
             standard = stance_data.standard,
             steelsight = stance_data.steelsight,
             crouched = stance_data.crouched,

@@ -18,7 +18,7 @@ function OptionModule:init(core_mod, config)
     end
 
 
-    if self._config.auto_build_menu then
+    if self._config.auto_build_menu == nil or self._config.auto_build_menu then
         self:BuildMenuHook()
     end
 
@@ -32,7 +32,7 @@ function OptionModule:post_init()
 
     self:InitOptions(self._config.options, self._storage)
 
-    if self._config.auto_load then
+    if self._config.auto_load == nil or self._config.auto_load then
         self:Load()
     end
 
@@ -439,7 +439,7 @@ function OptionModule:CreateMatrix(parent_node, option_tbl, option_path, compone
         merge_data = self_vars
     }, merge_data)
     local value = self:GetValue(option_path)
-    local function GetComponentValue(val, component)
+    local GetComponentValue = function(val, component)
         return type(val[component]) == "function" and val[component](val) or val[component]
     end
 
@@ -459,7 +459,7 @@ end
 
 function OptionModule:CreateColour(parent_node, option_tbl, option_path)
     local alpha = not not self:GetParameter(option_tbl, "alpha")
-    self:CreateMatrix(parent_node, option_tbl, option_path, { [1] =alpha and {id="a", title="A"} or nil, {id="r", title="R"}, {id="g", title="G"}, {id="b", title="B"} })
+    self:CreateMatrix(parent_node, option_tbl, option_path, { [1] = alpha and {id="a", title="A"} or nil, {id="r", title="R"}, {id="g", title="G"}, {id="b", title="B"} })
 end
 
 function OptionModule:CreateVector(parent_node, option_tbl, option_path)
