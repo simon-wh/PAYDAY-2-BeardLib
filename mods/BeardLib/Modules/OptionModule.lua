@@ -17,7 +17,10 @@ function OptionModule:init(core_mod, config)
         self._on_load_callback = self._mod:StringToCallback(self._config.loaded_callback)
     end
 
-
+    if self._config.build_menu ~= nil then
+        self._config.auto_build_menu = self._config.build_menu
+    end
+    
     if self._config.auto_build_menu == nil or self._config.auto_build_menu then
         self:BuildMenuHook()
     end
