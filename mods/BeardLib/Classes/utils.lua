@@ -209,6 +209,15 @@ function math.QuaternionToEuler(x, y, z, w)
 end
 
 BeardLib.Utils = {}
+BeardLib.Utils.WeapConv = {
+    [1] = "wpn_fps_pis_g17",
+    [2] = "wpn_fps_ass_amcar"
+}
+function BeardLib.Utils:GetCleanedWeaponData(unit)
+    local player_inv = unit and unit:inventory() or managers.player:player_unit():inventory()
+    local new_weap_name = self.WeapConv[tweak_data.weapon[managers.weapon_factory:get_weapon_id_by_factory_id(player_inv:equipped_unit():base()._factory_id or player_inv:equipped_unit():name())].use_data.selection_index]
+    return PlayerInventory._get_weapon_sync_index(new_weap_name), managers.weapon_factory:blueprint_to_string(new_weap_name, tweak_data.weapon.factory[new_weap_name].default_blueprint)
+end
 
 function BeardLib.Utils:CleanOutfitString(str)
 	local outfit_list = managers.blackmarket:unpack_outfit_from_string(str)
@@ -230,11 +239,13 @@ function BeardLib.Utils:CleanOutfitString(str)
 	end
 
 	if tweak_data.weapon.factory[outfit_list.primary.factory_id].custom then
-		outfit_list.primary.factory_id = "wpn_fps_ass_amcar"
+		outfit_list.primary.factory_id = self.WeapConv[2]
+        outfit_list.primary.blueprint = tweak_data.weapon.factory[outfit_list.primary.factory_id].default_blueprint
 	end
 
 	if tweak_data.weapon.factory[outfit_list.secondary.factory_id].custom then
-		outfit_list.secondary.factory_id = "wpn_fps_pis_g17"
+		outfit_list.secondary.factory_id = self.WeapConv[1]
+        outfit_list.secondary.blueprint = tweak_data.weapon.factory[outfit_list.secondary.factory_id].default_blueprint
 	end
 
 	for _, weap in pairs({outfit_list.primary, outfit_list.secondary}) do

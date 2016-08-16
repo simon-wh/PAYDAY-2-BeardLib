@@ -49,6 +49,7 @@ if not _G.BeardLib then
         ["lib/managers/gameplaycentralmanager"] = "GamePlayCentralManager.lua",
         ["lib/managers/killzonemanager"] = "Killzonemanager.lua",
         ["lib/managers/missionmanager"] = "MissionManager.lua",
+        ["lib/managers/weaponfactorymanager"] = "WeaponFactoryManager.lua",
         ["lib/managers/dialogs/keyboardinputdialog"] = "KeyboardInputDialog.lua",
         ["core/lib/utils/dev/editor/coreworlddefinition"] = "CoreWorldDefinition.lua",
         ["core/lib/system/coresystem"] = "CoreSystem.lua",
@@ -58,6 +59,7 @@ if not _G.BeardLib then
         ["lib/network/base/clientnetworksession"] = "ClientNetworkSession.lua",
         ["lib/units/beings/player/playermovement"] = "PlayerMovement.lua",
         ["lib/units/beings/player/huskplayermovement"] = "HuskPlayerMovement.lua",
+        ["lib/units/beings/player/playerinventory"] = "PlayerInventory.lua",
         ["lib/setups/setup"] = "Setup.lua"
         --["core/lib/managers/viewport/environment/coreenvironmentmanager"] = "CoreEnvironmentManager.lua"
     }

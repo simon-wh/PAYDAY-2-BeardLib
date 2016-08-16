@@ -52,7 +52,13 @@ function NetworkPeer:send(func_name, ...)
 			local orig_outift = params[3]
 			params[3] = BeardLib.Utils:CleanOutfitString(params[3])
 			--orig_NetworkPeer_send(self, "send_chat_message", LuaNetworking.HiddenChannel, parse_as_lnetwork_string(send_outfit_id, orig_outift .. "|" .. params[4]))
-	    end
+        elseif func_name == "set_equipped_weapon" then
+            if params[2] == -1 then
+                local index, data = BeardLib.Utils:GetCleanedWeaponData()
+                params[2] = index
+                params[3] = data
+            end
+        end
 	end
     orig_NetworkPeer_send(self, func_name, unpack(params, 1, params.n))
 end
@@ -139,7 +145,7 @@ function NetworkPeer:set_outfit_string(outfit_string, outfit_version, outfit_sig
             old_outfit_list.melee_weapon = new_outfit_list.melee_weapon
         end
 
-        if tweak_data.weapon.factory[new_outfit_list.primary.factory_id] and tweak_data.weapon.factory[new_outfit_list.primary.factory_id].custom then
+        --[[if tweak_data.weapon.factory[new_outfit_list.primary.factory_id] and tweak_data.weapon.factory[new_outfit_list.primary.factory_id].custom then
             old_outfit_list.primary.factory_id = new_outfit_list.primary.factory_id
             old_outfit_list.primary.blueprint = new_outfit_list.primary.blueprint
         end
@@ -147,10 +153,9 @@ function NetworkPeer:set_outfit_string(outfit_string, outfit_version, outfit_sig
         if tweak_data.weapon.factory[new_outfit_list.secondary.factory_id] and tweak_data.weapon.factory[new_outfit_list.secondary.factory_id].custom then
             old_outfit_list.secondary.factory_id = new_outfit_list.secondary.factory_id
             old_outfit_list.secondary.blueprint = new_outfit_list.secondary.blueprint
-        end
+        end]]--
 
     	self._profile.outfit_string = managers.blackmarket:outfit_string_from_list(old_outfit_list)
-
     	--[[if not self._ticket_wait_response then
     		self:verify_outfit()
     	end]]--

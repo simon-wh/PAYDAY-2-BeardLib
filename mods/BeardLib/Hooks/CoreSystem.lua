@@ -15,7 +15,7 @@ end
 local ids_unit = Idstring("unit")
 
 overwrite_meta_function(World, "spawn_unit", function(self, unit_name, ...)
-	if Global.added_units[tostring(unit_name:key())] then
+	if unit_name and Global.added_units[tostring(unit_name:key())] then
 		if not managers.dyn_resource:has_resource(ids_unit, unit_name, managers.dyn_resource.DYN_RESOURCES_PACKAGE) then
 			managers.dyn_resource:load(ids_unit, unit_name, managers.dyn_resource.DYN_RESOURCES_PACKAGE)
 			while not managers.dyn_resource:is_resource_ready(ids_unit, unit_name, managers.dyn_resource.DYN_RESOURCES_PACKAGE) do end

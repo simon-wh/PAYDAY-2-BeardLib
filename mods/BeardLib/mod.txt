@@ -22,6 +22,7 @@
 		{ "hook_id" : "lib/managers/weaponfactorymanager", "script_path" : "BeardLibCore.lua" },
 		{ "hook_id" : "lib/units/beings/player/playermovement", "script_path" : "BeardLibCore.lua" },
 		{ "hook_id" : "lib/units/beings/player/huskplayermovement", "script_path" : "BeardLibCore.lua" },
+		{ "hook_id" : "lib/units/beings/player/playerinventory", "script_path" : "BeardLibCore.lua" },
 		{ "hook_id" : "lib/network/base/basenetworksession", "script_path" : "BeardLibCore.lua" },
 		{ "hook_id" : "lib/network/base/clientnetworksession", "script_path" : "BeardLibCore.lua" },
 		{ "hook_id" : "lib/network/handlers/unitnetworkhandler", "script_path" : "BeardLibCore.lua" },
@@ -37,7 +38,7 @@
 	],
 	"updates" : [
 		{
-			"revision" : 19.5,
+			"revision" : 19.6,
 			"identifier" : "beardlib"
 		}
 	]

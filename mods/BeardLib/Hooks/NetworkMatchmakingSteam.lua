@@ -1,6 +1,6 @@
 local orig_NetworkMatchMakingSTEAM_set_attributes = NetworkMatchMakingSTEAM.set_attributes
 
-function NetworkMatchMakingSTEAM:set_attributes(settings)
+function NetworkMatchMakingSTEAM:set_attributes(settings, ...)
 	if not self.lobby_handler then
 		return
 	end
@@ -44,13 +44,13 @@ function NetworkMatchMakingSTEAM:set_attributes(settings)
     	self.lobby_handler:set_lobby_data(lobby_attributes)
     	self.lobby_handler:set_lobby_type(permissions[settings.numbers[3]])
     else
-        orig_NetworkMatchMakingSTEAM_set_attributes(self, settings)
+        orig_NetworkMatchMakingSTEAM_set_attributes(self, settings, ...)
     end
 end
 
 local orig_NetworkMatchMakingSTEAM_lobby_to_numbers = NetworkMatchMakingSTEAM._lobby_to_numbers
 
-function NetworkMatchMakingSTEAM:_lobby_to_numbers(lobby)
+function NetworkMatchMakingSTEAM:_lobby_to_numbers(lobby, ...)
 	--log("Received level: " .. tostring(lobby:key_value("level_id")))
 	--log("Received narrative: " .. tostring(lobby:key_value("job_key")))
     if lobby:key_value("level_id") ~= "value_missing" or lobby:key_value("job_key") ~= "value_missing" then
@@ -75,5 +75,5 @@ function NetworkMatchMakingSTEAM:_lobby_to_numbers(lobby)
         	}
         end
     end
-    return orig_NetworkMatchMakingSTEAM_lobby_to_numbers(self, lobby)
+    return orig_NetworkMatchMakingSTEAM_lobby_to_numbers(self, lobby, ...)
 end

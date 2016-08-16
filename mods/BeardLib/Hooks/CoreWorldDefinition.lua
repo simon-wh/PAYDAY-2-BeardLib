@@ -2,7 +2,7 @@ core:module("CoreWorldDefinition")
 WorldDefinition = WorldDefinition or CoreWorldDefinition.WorldDefinition
 
 local WorldDefinition_load_world_package = WorldDefinition._load_world_package
-function WorldDefinition:_load_world_package()
+function WorldDefinition:_load_world_package(...)
     local level_tweak = _G.tweak_data.levels[Global.level_data.level_id]
     self._has_package = not not level_tweak.package
     if level_tweak.custom_packages then
@@ -18,11 +18,11 @@ function WorldDefinition:_load_world_package()
     if not self._has_package then
         return
     end
-    WorldDefinition_load_world_package(self)
+    WorldDefinition_load_world_package(self, ...)
 end
 
 local WorldDefinitionunload_packages = WorldDefinition.unload_packages
-function WorldDefinition:unload_packages()
+function WorldDefinition:unload_packages(...)
 
     if Global.level_data._add then
         Global.level_data._add:Unload()
@@ -41,29 +41,29 @@ function WorldDefinition:unload_packages()
         return
     end
 
-    WorldDefinitionunload_packages(self)
+    WorldDefinitionunload_packages(self, ...)
 end
 
 local WorldDefinition_load_continent_init_package = WorldDefinition._load_continent_init_package
-function WorldDefinition:_load_continent_init_package(path)
+function WorldDefinition:_load_continent_init_package(path, ...)
     if not self._has_package then
         return
     end
 
-    WorldDefinition_load_continent_init_package(self, path)
+    WorldDefinition_load_continent_init_package(self, path, ...)
 end
 
 local WorldDefinition_load_continent_package =  WorldDefinition._load_continent_package
-function WorldDefinition:_load_continent_package(path)
+function WorldDefinition:_load_continent_package(path, ...)
     if not self._has_package then
         return
     end
 
-    WorldDefinition_load_continent_package(self, path)
+    WorldDefinition_load_continent_package(self, path, ...)
 end
 
 local WorldDefinition_create_environment = WorldDefinition._create_environment
-function WorldDefinition:_create_environment(data, offset)
+function WorldDefinition:_create_environment(data, offset, ...)
 
     local shape_data
     if data.dome_occ_shapes and data.dome_occ_shapes[1] and data.dome_occ_shapes[1].world_dir then
@@ -71,7 +71,7 @@ function WorldDefinition:_create_environment(data, offset)
         data.dome_occ_shapes = nil
     end
 
-    WorldDefinition_create_environment(self, data, offset)
+    WorldDefinition_create_environment(self, data, offset, ...)
 
 	if shape_data then
 		local corner = shape_data.position
