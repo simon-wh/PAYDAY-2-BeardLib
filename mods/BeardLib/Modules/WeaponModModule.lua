@@ -26,7 +26,7 @@ function WeaponModModule:RegisterHook()
             dlc = self._config.drop and (self._config.dlc or BeardLib.definitions.module_defaults.item.default_dlc),
             texture_bundle_folder = self._config.texture_bundle_folder,
             pcs = self._config.pcs and BeardLib.Utils:RemoveNonNumberIndexes(self._config.pcs),
-            stats = table.merge({value=0}, self._config.stats or {}),
+            stats = table.merge({value=0}, BeardLib.Utils:RemoveMetas(self._config.stats, true) or {}),
             type = self._config.type,
             animations = self._config.animations,
             is_a_unlockable = self._config.is_a_unlockable,
