@@ -52,15 +52,15 @@ ItemModuleBase._loose = true
 local remove_last = function(str)
     local tbl = string.split(str, "%.")
 
-    return table.remove(tbl), table.concat(tbl, ".")
+    return table.remove(tbl), #tbl > 0 and table.concat(tbl, ".")
 end
 function ItemModuleBase:init(core_mod, config)
     if not ModuleBase.init(self, core_mod, config) then
         return false
     end
     for _, clean in pairs(self.clean_table) do
-        local i, search_string = string.find(clean.param, "%.") and remove_last(clean.param) or clean.param, nil
-        local tbl = search_string and  BeardLib.Utils:StringToTable(search_string, self._config, true) or self._config
+        local i, search_string = remove_last(clean.param)
+        local tbl = search_string and BeardLib.Utils:StringToTable(search_string, self._config, true) or self._config
         if tbl and tbl[i] then
             for _, action in pairs(type(clean.action) == "table" and clean.action or {clean.action}) do
                 if action == "no_subtables" then
