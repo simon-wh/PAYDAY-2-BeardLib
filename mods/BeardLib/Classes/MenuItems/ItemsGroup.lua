@@ -1,4 +1,4 @@
-ItemsGroup = ItemsGroup or class(Menu)
+ItemsGroup = ItemsGroup or class()
 
 function ItemsGroup:init( parent, params )
     params.items = params.items or {}

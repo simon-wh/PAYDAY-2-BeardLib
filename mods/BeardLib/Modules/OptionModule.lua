@@ -249,7 +249,7 @@ end
 
 function OptionModule:_LoadDefaultValues(option_tbl)
     for i, sub_tbl in pairs(option_tbl) do
-        if sub_tbl._meta then
+        if type(sub_tbl) == "table" and sub_tbl._meta then
             if sub_tbl._meta == "option" and sub_tbl.default_value ~= nil then
                 option_tbl[sub_tbl.name].value = sub_tbl.default_value
             elseif sub_tbl._meta == "option_group" or sub_tbl._meta == "option_set" then

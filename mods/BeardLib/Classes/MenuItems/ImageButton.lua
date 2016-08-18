@@ -1,4 +1,4 @@
-ImageButton = ImageButton or class(Menu)
+ImageButton = ImageButton or class()
 
 function ImageButton:init( parent, params )
     self.type = "ImageButton"
