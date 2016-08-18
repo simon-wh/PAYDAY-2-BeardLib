@@ -30,7 +30,7 @@ function NetworkPeer:send(func_name, ...)
 	end
 	local params = table.pack(...)
 	if self ~= managers.network:session():local_peer() then
-    	if func_name == "join_request_reply" then
+    	if string.ends(func_name,"join_request_reply") then
 	        if params[1] == 1 and is_custom() then
 	            params[14] = get_job_string()
 	        end
@@ -48,7 +48,7 @@ function NetworkPeer:send(func_name, ...)
 			local orig_outift = params[1]
 			params[1] = BeardLib.Utils:CleanOutfitString(params[1])
 			orig_NetworkPeer_send(self, "send_chat_message", LuaNetworking.HiddenChannel, parse_as_lnetwork_string(send_outfit_id, orig_outift .. "|" .. params[2]))
-		elseif func_name == "set_unit" then
+		elseif string.ends(func_name, "set_unit") then
 			local orig_outift = params[3]
 			params[3] = BeardLib.Utils:CleanOutfitString(params[3])
 			--orig_NetworkPeer_send(self, "send_chat_message", LuaNetworking.HiddenChannel, parse_as_lnetwork_string(send_outfit_id, orig_outift .. "|" .. params[4]))
