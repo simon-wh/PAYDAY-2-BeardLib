@@ -48,6 +48,7 @@ if not _G.BeardLib then
         ["lib/managers/killzonemanager"] = "Killzonemanager.lua",
         ["lib/managers/gameplaycentralmanager"] = "GamePlayCentralManager.lua",
         ["lib/managers/killzonemanager"] = "Killzonemanager.lua",
+        ["lib/managers/trademanager"] = "TradeManager.lua",
         ["lib/managers/missionmanager"] = "MissionManager.lua",
         ["lib/managers/weaponfactorymanager"] = "WeaponFactoryManager.lua",
         ["lib/managers/dialogs/keyboardinputdialog"] = "KeyboardInputDialog.lua",

@@ -49,7 +49,7 @@ function NetworkPeer:send(func_name, ...)
 			params[1] = BeardLib.Utils:CleanOutfitString(params[1])
 			orig_NetworkPeer_send(self, "send_chat_message", LuaNetworking.HiddenChannel, parse_as_lnetwork_string(send_outfit_id, orig_outift .. "|" .. params[2]))
 		elseif string.ends(func_name, "set_unit") then
-			local orig_outift = params[3]
+			--local orig_outift = params[3]
 			params[3] = BeardLib.Utils:CleanOutfitString(params[3])
 			--orig_NetworkPeer_send(self, "send_chat_message", LuaNetworking.HiddenChannel, parse_as_lnetwork_string(send_outfit_id, orig_outift .. "|" .. params[4]))
         elseif func_name == "set_equipped_weapon" then
@@ -60,6 +60,7 @@ function NetworkPeer:send(func_name, ...)
             end
         end
 	end
+
     orig_NetworkPeer_send(self, func_name, unpack(params, 1, params.n))
 end
 

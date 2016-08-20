@@ -1,6 +1,6 @@
 {
 	"name" : "BeardLib",
-	"description" : "",
+	"description" : "Library for easier script file manipulation and mod creation",
 	"author" : "GREAT BIG BUSHY BEARD",
 	"contact" : "simon@lastbullet.net",
 	"priority" : 500,
@@ -10,7 +10,8 @@
 		{ "hook_id" : "core/lib/managers/viewport/environment/coreenvironmentmanager", "script_path" : "BeardLibCore.lua" },
         { "hook_id" : "lib/managers/navigationmanager", "script_path" : "BeardLibCore.lua"},
         { "hook_id" : "lib/managers/navfieldbuilder", "script_path" : "BeardLibCore.lua"},
-        { "hook_id" : "lib/managers/killzonemanager", "script_path" : "BeardLibCore.lua"},
+		{ "hook_id" : "lib/managers/killzonemanager", "script_path" : "BeardLibCore.lua"},
+        { "hook_id" : "lib/managers/trademanager", "script_path" : "BeardLibCore.lua"},
 		{ "hook_id" : "lib/managers/missionmanager", "script_path" : "BeardLibCore.lua"},
 		{ "hook_id" : "lib/managers/menumanager", "script_path" : "BeardLibCore.lua"},
         { "hook_id" : "lib/managers/jobmanager", "script_path" : "BeardLibCore.lua"},
@@ -38,7 +39,7 @@
 	],
 	"updates" : [
 		{
-			"revision" : 19.9,
+			"revision" : 20.0,
 			"identifier" : "beardlib"
 		}
 	]
