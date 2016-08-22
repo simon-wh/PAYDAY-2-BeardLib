@@ -96,7 +96,7 @@ function ModAssetsModule:_CheckVersion(force)
         self:log("Received data '%s' from the server", tostring(data))
         if tonumber(data) then
             if tonumber(data) > self._version then
-                self:ShowRequiresUpdatePrompt()
+                BeardLib.managers.asset_update:RegisterUpdate(callback(self, self, "ShowRequiresUpdatePrompt"))
             elseif force then
                 self:ShowNoChangePrompt()
             end
@@ -154,15 +154,20 @@ function ModAssetsModule:ShowRequiresUpdatePrompt()
             },
             {
                 text = managers.localization:text("mod_assets_updates_remind_later"),
-                is_cancel_button = true
+                callback = callback(self, self, "SetReady")
             }
         },
         true
     )
 end
 
+function ModAssetsModule:SetReady()
+    BeardLib.managers.asset_update._ready_for_update = true
+end
+
 function ModAssetsModule:IgnoreUpdate()
     BeardLib.managers.asset_update:SetUpdateStatus(self._update_manager_id, false)
+    self:SetReady()
 end
 
 function ModAssetsModule:DownloadAssets()
@@ -201,19 +206,20 @@ function ModAssetsModule:StoreDownloadedAssets(data, id)
             self:log("[ERROR] An error occured while trying to store the downloaded asset data")
             return
     	end
-
-        for _, dir in pairs(self.folder_names) do
-            local path = BeardLib.Utils.Path:Combine(self.install_directory, dir)
-            if not self._config.dont_delete and _G.file.DirectoryExists(path) then
-                io.remove_directory_and_files(path .. "/")
+        if not self._config.dont_delete then
+            for _, dir in pairs(self.folder_names) do
+                local path = BeardLib.Utils.Path:Combine(self.install_directory, dir)
+                if _G.file.DirectoryExists(path) then
+                    io.remove_directory_and_files(path .. "/")
+                end
             end
         end
-
         unzip(temp_zip_path, self.install_directory)
         LuaModUpdates:SetDownloadDialogKey("mod_extraction_complete", true)
         os.remove(temp_zip_path)
 
     	LuaModUpdates._current_download_dialog = nil
+        self:SetReady()
 	end)
 	if not ret then
 		self:log("[ERROR] " .. pdata)
