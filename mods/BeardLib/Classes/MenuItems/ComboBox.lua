@@ -17,7 +17,7 @@ function ComboBox:init(parent, params)
         valign = "center",
         align = "center",
         vertical = "center",
-        layer = 1,
+        layer = 2,
         color = parent.background_color and self.text_color or Color.black,
         font = "fonts/font_medium_mf",
         font_size = self.items_size - 2
@@ -26,7 +26,7 @@ function ComboBox:init(parent, params)
         name = "combo_bg",
         w = self.panel:w() / 2,
         h = self.items_size,
-        layer = -1,
+        layer = 1,
         color = ((parent.background_color or Color.white) / 1.2):with_alpha(1),
     })
     combo_bg:set_right(self.panel:w())
@@ -38,7 +38,7 @@ function ComboBox:init(parent, params)
         texture = "guis/textures/menuicons",
         texture_rect = {4,0,16,16},
         color = not parent.background_color and Color.black,
-        layer = 1,
+        layer = 2,
     }):set_right(combo_bg:right() - 2)
     local h = math.max(1, #self.items) * 18
     self.list = self.menu._fullscreen_ws_pnl:panel({
@@ -164,7 +164,7 @@ function ComboBox:show()
     self:AlignScrollBar()
 end
 function ComboBox:MousePressed( button, x, y )
-    if not self.menu._openlist and self.panel:inside(x,y) then
+    if not self.menu._openlist and self.parent.panel:inside(x,y) and self.panel:inside(x,y) then
         if button == Idstring("0") then
             if alive(self.list) then
                 self:show()

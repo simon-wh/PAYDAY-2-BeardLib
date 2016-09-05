@@ -1,7 +1,7 @@
 Menu = Menu or class(MenuUI)
 
 function Menu:init(menu, params)
-    params.text_color = params.text_color or menu.text_color
+    params.text_color = params.text_color or menu.text_color or Color.white
     params.text_highlight_color = params.text_highlight_color or menu.text_highlight_color or Color.white
     params.items_size = params.items_size or menu.items_size or 16
     params.background_color = params.background_color
@@ -36,7 +36,7 @@ function Menu:init(menu, params)
     local scroll_bar = params.panel:panel({
         name = "scroll_bar",
         halign = "center",
-        w = 8,
+        w = 4,
         layer = 20,
     })
     scroll_bar:rect({
@@ -49,7 +49,7 @@ function Menu:init(menu, params)
     params.items_panel = params.panel:panel({
         name = "items_panel",
         layer = 1,
-        w = params.w - scroll_bar:w(),
+        w = params.w - (scroll_bar:w() * 2),
     })
 
     if not menu._first_parent then
@@ -138,7 +138,7 @@ function Menu:MousePressed(button, x, y)
     local menu = self.menu
     if self.visible then
         if menu._highlighted and menu._highlighted.parent == self then
-            if menu._highlighted:MousePressed( button, x, y ) then
+            if menu._highlighted:MousePressed( button, x, y ) then 
                 return true
             end
         end
@@ -260,9 +260,9 @@ end
 function Menu:AlignScrollBar()
     local scroll_bar = self.panel:child("scroll_bar")
     local scroll_bar_rect = scroll_bar:child("rect")
-    local bar_h =  self.panel:top() -  self.panel:bottom()
+    local bar_h = self.panel:top() - self.panel:bottom()
     scroll_bar_rect:set_h(math.abs( self.panel:h() * (bar_h / self.items_panel:h())))
-    scroll_bar_rect:set_y( -(self.items_panel:y()) * self.panel:h() / self.items_panel:h())
+    scroll_bar_rect:set_y(-(self.items_panel:y()) * self.panel:h() / self.items_panel:h())
     scroll_bar:set_visible(self.items_panel:h() > self.panel:h())
 end
 function Menu:GetItem( name )
@@ -403,6 +403,12 @@ function Menu:TextBox(params)
     self:ConfigureItem(params)
     return self:NewItem(TextBox:new(self, params))
 end
+function Menu:NumberBox(params)
+    self:ConfigureItem(params)
+    params.type = "NumberBox"
+    params.filter = "number"
+    return self:NewItem(TextBox:new(self, params))
+end
 function Menu:ComboBox(params)
     self:ConfigureItem(params)
     return self:NewItem(ComboBox:new(self, params))
@@ -419,10 +425,6 @@ end
 function Menu:Table(params)
     self:ConfigureItem(params)
     return self:NewItem(Table:new(self, params))
-end
-function Menu:ToolBox(params)
-    self:ConfigureItem(params)
-    return self:NewItem(ToolBox:new(self, params))
 end
 function Menu:ContextMenu(params)
     self:ConfigureItem(params)

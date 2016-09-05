@@ -3,7 +3,8 @@ function TextBoxBase:init(params)
 	self.text_panel = params.panel:panel({
 		name = "text_panel",
 		w = params.w,
-		h = params.h or self.items_size
+		h = params.h or self.items_size,
+        layer = 10
 	})
 	self.text_panel:set_right(params.panel:w())
 	self.text_panel:rect({
@@ -21,7 +22,6 @@ function TextBoxBase:init(params)
         wrap = not params.lines or params.lines > 1,
         word_wrap = not params.lines or params.lines > 1,
         h = self.text_panel:h() - 2,
-        layer = 11,
         color = params.text_color or self.text_color,
         font = self.parent.font or "fonts/font_large_mf",
         font_size = self.items_size- 2
@@ -159,8 +159,10 @@ end
 
 function TextBoxBase:fixed_text(text)
 	if self.filter == "number" then
-		local num = tonumber(text) or 0
-		return tostring(math.clamp(num, self.min or num, self.max or num))
+		local num = tonumber(text) 
+        if num then
+		    return string.format("%." .. self.floats .."f", math.clamp(num, self.min or num, self.max or num))
+        end
 	else
 		return text
 	end

@@ -100,6 +100,10 @@ function ItemsGroup:SetText(text)
     self.panel:child("title"):set_text(text)
 end
 
+function Item:SetParam(param, value)
+    self[param] = value
+end
+
 function ItemsGroup:SetCallback( callback )
     self.callback = callback
 end
@@ -110,7 +114,6 @@ function ItemsGroup:MouseMoved( x, y, highlight )
     end    
     if not self.menu._openlist and not self.menu._slider_hold then
         if self.panel:inside(x, y) then
-            self.menu:SetHelp(self.help)
             self.menu._highlighted = self 
             self.panel:child("bg"):show()  
         elseif self.closed then

@@ -81,6 +81,10 @@ function ImageButton:SetImage(texture, texture_rect)
     self.panel:child("icon"):set_image(texture, texture_rect)
 end
 
+function Item:SetParam(param, value)
+    self[param] = value
+end
+
 function ImageButton:SetCallback( callback )
     self.callback = callback
 end
@@ -94,7 +98,6 @@ function ImageButton:MouseMoved( x, y, highlight )
           if highlight ~= false then
                 self.panel:child("bg"):set_color(self.marker_highlight_color)
           end
-            self.menu:SetHelp(self.help)
             self.highlight = true
             self.menu._highlighted = self
         else

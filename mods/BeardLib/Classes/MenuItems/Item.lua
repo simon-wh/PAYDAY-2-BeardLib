@@ -16,7 +16,7 @@ function Item:init(parent, params)
 		color = params.marker_color,
 		halign="grow",
 		valign="grow",
-		layer = -2
+		layer = 0
 	})
 	params.title = params.panel:text({
 		name = "title",
@@ -58,6 +58,9 @@ function Item:init(parent, params)
 			BeardLib:log(self.name .. " group is not a group item!")
 		end
 	end
+end
+function Item:SetParam(param, value)
+    self[param] = value
 end
 function Item:Panel()
 	return self.panel
@@ -116,7 +119,7 @@ function Item:MousePressed( button, x, y )
 			return true
 		end
 	end
-	if alive(self.panel) and self.panel:inside(x,y) and button == Idstring("0") then
+	if alive(self.panel) and self.parent.panel:inside(x,y) and self.panel:inside(x,y) and button == Idstring("0") then
 		self:RunCallback()
 		return true
 	end
@@ -149,15 +152,15 @@ end
 function Item:SetCallback( callback )
 	self.callback = callback
 end
-function Item:MouseMoved( x, y, highlight )
+function Item:MouseMoved(x, y, highlight)
 	if not alive(self.panel) or not self.enabled or self.type == "Divider" then
-		return
+		return false
 	end
 	if not self.menu._openlist and not self.menu._slider_hold then
 		for _, item in pairs(self._items) do
 			item:MouseMoved(x,y)
 		end
-		if self.panel:inside(x, y) then
+		if self.parent.panel:inside(x,y) and self.panel:inside(x, y) then
 			if highlight ~= false then
 				self.panel:child("bg"):set_color(self.marker_highlight_color)
 				self.panel:child("title"):set_color(self.text_highlight_color)
@@ -171,6 +174,7 @@ function Item:MouseMoved( x, y, highlight )
 		end
 		self.menu._highlighted = self.menu._highlighted and (alive(self.menu._highlighted.panel) and self.menu._highlighted.panel:inside(x,y)) and self.menu._highlighted or nil
 	end
+	return true
 end
 
 function Item:MouseReleased( button, x, y )

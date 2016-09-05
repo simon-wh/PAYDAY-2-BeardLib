@@ -39,8 +39,9 @@ function MenuDialog:show(params)
     self._menu:SetPositionByString("Center")
     self._menu:Divider({
         name = "title",
+        color = Color.white,
         text = params.title,
-        size = 30,
+        h = 30,
     })
     for k, item in pairs(params.items) do
         if self._menu[item.type] then

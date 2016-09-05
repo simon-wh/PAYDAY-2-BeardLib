@@ -12,7 +12,7 @@ if not _G.BeardLib then
     self.HooksDirectory = self.ModPath .. "Hooks/"
     self.ModulesDirectory = self.ModPath .. "Modules/"
     self.ClassDirectory = self.ModPath .. "Classes/"
-    self.AssetsDirectory = self.ModPath .. "Assets/"
+	self.AssetsDirectory = self.ModPath .. "Assets/"
     self.managers = {}
     self._replace_script_data = {}
 
@@ -27,7 +27,7 @@ if not _G.BeardLib then
         "MenuItems/Menu.lua",
         "MenuItems/TextBoxBase.lua",
         "MenuItems/Item.lua",
-        "MenuItems/KeyBind.lua",        
+		"MenuItems/KeyBind.lua",  
         "MenuItems/ItemsGroup.lua",
         "MenuItems/ImageButton.lua",
         "MenuItems/Toggle.lua",
@@ -52,7 +52,7 @@ if not _G.BeardLib then
         ["lib/managers/killzonemanager"] = "Killzonemanager.lua",
         ["lib/managers/trademanager"] = "TradeManager.lua",
         ["lib/managers/missionmanager"] = "MissionManager.lua",
-        ["lib/managers/menumanager"] = "MenuManager.lua",
+		["lib/managers/menumanager"] = "MenuManager.lua",
         ["lib/managers/weaponfactorymanager"] = "WeaponFactoryManager.lua",
         ["lib/managers/dialogs/keyboardinputdialog"] = "KeyboardInputDialog.lua",
         ["core/lib/utils/dev/editor/coreworlddefinition"] = "CoreWorldDefinition.lua",
