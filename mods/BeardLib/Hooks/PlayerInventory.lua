@@ -3,23 +3,15 @@ function PlayerInventory._chk_create_w_factory_indexes()
 		return
 	end
 	local weapon_factory_indexed = {}
-	--local full_weapon_factory_indexed = {}
 	PlayerInventory._weapon_factory_indexed = weapon_factory_indexed
-	--PlayerInventory._full_weapon_factory_indexed = full_weapon_factory_indexed
 	for id, data in pairs(tweak_data.weapon.factory) do
 		if id ~= "parts" and data.unit and not data.custom then
-			--[[if data.custom then
-				table.insert(full_weapon_factory_indexed, id)
-			end]]
 			table.insert(weapon_factory_indexed, id)
 		end
 	end
 	table.sort(weapon_factory_indexed, function(a, b)
 		return a < b
 	end)
-	--[[table.sort(full_weapon_factory_indexed, function(a, b)
-		return a < b
-	end)]]
 end
 
 local orig_PlayerInventory_get_weapon_sync_index = PlayerInventory._get_weapon_sync_index

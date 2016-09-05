@@ -1,6 +1,7 @@
 ModAssetUpdateManager = ModAssetUpdateManager or class()
 ModAssetUpdateManager.save_path = SavePath .. "mod_assets_manager.txt"
-
+ModAssetUpdateManager._registered_updates = {}
+ModAssetUpdateManager._ready_for_update = true
 function ModAssetUpdateManager:init()
     self._data = {}
     self:load_manager_file()
@@ -33,5 +34,16 @@ function ModAssetUpdateManager:load_manager_file()
         if ret then
             self._data = data
         end
+    end
+end
+
+function ModAssetUpdateManager:RegisterUpdate(func)
+    table.insert(self._registered_updates, func)
+end
+
+function ModAssetUpdateManager:update(t, dt)
+    if self._ready_for_update and next(self._registered_updates) then
+        self._ready_for_update = false
+        table.remove(self._registered_updates, 1)()
     end
 end
