@@ -18,7 +18,7 @@ function ComboBox:init(parent, params)
         align = "center",
         vertical = "center",
         layer = 2,
-        color = parent.background_color and self.text_color or Color.black,
+        color = parent.background_color and self.text_color or Color.white,
         font = "fonts/font_medium_mf",
         font_size = self.items_size - 2
     })
@@ -107,7 +107,7 @@ function ComboBox:CreateItems()
             align = "center",
             h = 12,
             y = (k - 1) * 14,
-            color = self.background_color and self.text_color or Color.black,
+            color = self.parent.background_color and self.text_color or Color.black,
             font = "fonts/font_medium_mf",
             font_size = 12
         })

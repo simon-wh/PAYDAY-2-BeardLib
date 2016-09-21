@@ -1,6 +1,6 @@
 TextBox = TextBox or class(Item)
 
-function TextBox:init( parent, params )
+function TextBox:init(parent, params)
 	params.value = params.value or ""
 	self.size_by_text = false
 	self.super.init(self, parent, params)	
@@ -34,6 +34,10 @@ function TextBox:SetValue(value, run_callback, reset_selection)
 	end
 	self:update_caret()
 	self.super.SetValue(self, value, run_callback)
+end
+
+function TextBox:SetStep(step)
+	self.step = step
 end
 
 function TextBox:MousePressed(button, x, y)

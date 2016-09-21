@@ -149,7 +149,7 @@ function ContextMenu:MousePressed( button, x, y )
             end
         end
         return true
-    elseif self.menu._openlist and button == Idstring("0") or button == Idstring("1")  then
+    elseif alive(self.menu._openlist) and (button == Idstring("0") or button == Idstring("1")) then
         self.menu._openlist:hide()
         return true
     end
