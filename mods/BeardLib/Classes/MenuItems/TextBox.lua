@@ -20,9 +20,12 @@ function TextBox:SetValue(value, run_callback, reset_selection)
 	local text = self.text_panel:child("text")
 	if self.filter == "number" then
 		value = tonumber(value) or 0
-	    if self.max or self.min then
-	        value = math.clamp(value, self.min, self.max)    
-	    end    
+		if self.max then
+			value = math.min(self.max, value)
+		end
+		if self.min then
+			value = math.max(self.min, value)
+		end
 	    local format = string.format("%." .. self.floats .. "f", value)
 	    value = tonumber(format)    
 	    text:set_text(format)
