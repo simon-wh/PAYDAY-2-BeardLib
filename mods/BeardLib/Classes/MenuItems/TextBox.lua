@@ -4,7 +4,7 @@ function TextBox:init(parent, params)
 	params.value = params.value or ""
 	self.size_by_text = false
 	self.super.init(self, parent, params)	
-	self.type = self.type or "TextBox"
+	self.type_name = self.type_name or "TextBox"
     self.floats = self.floats or 2
     if self.filter == "number" then
     	self.value = tonumber(self.value) or 0
@@ -50,13 +50,11 @@ function TextBox:MousePressed(button, x, y)
 	if not self.cantype then
 		self:SetValue(self.text_panel:child("text"):text(), true, true)
 	end
-	if button == Idstring("1") and self.type == "NumberBox" and not self.no_slide and self.text_panel:inside(x,y) then
+	if button == Idstring("1") and self.type_name == "NumberBox" and not self.no_slide and self.text_panel:inside(x,y) then
 		self.menu._slider_hold = self
 		return true
 	end
 	return self.cantype
-end
-function TextBox:KeyPressed(o, k)
 end
 
 function TextBox:MouseMoved(x, y)
@@ -65,8 +63,14 @@ function TextBox:MouseMoved(x, y)
     end
     if self.cantype then
         self:SetValue(self.text_panel:child("text"):text())
+    end    
+end
+
+function TextBox:SetValueByMouseXPos(x)
+    if not alive(self.panel) then
+        return
     end
-    if self.menu._slider_hold == self and self.menu._old_x then
+    if self.menu._old_x ~= x then
         local move = 0
         if managers.mouse_pointer._mouse:world_x() == self.menu._fullscreen_ws_pnl:w() then
             managers.mouse_pointer:set_mouse_world_position(1, managers.mouse_pointer._mouse:world_y())
@@ -81,7 +85,6 @@ function TextBox:MouseMoved(x, y)
         self:SetValue(self.value + move, true, true)
 	end      
 end
-
 function TextBox:MouseReleased( button, x, y )
     self.super.MouseReleased( self, button, x, y )
 end

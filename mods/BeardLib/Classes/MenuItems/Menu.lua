@@ -7,8 +7,10 @@ function Menu:init(menu, params)
     params.background_color = params.background_color
     params.marker_highlight_color = params.marker_highlight_color or menu.marker_highlight_color or Color(0.2, 0.5, 1)
     params.marker_color = params.marker_color or menu.marker_color or Color.white:with_alpha(0)
+    params.marker_alpha = params.marker_alpha or menu.marker_alpha 
     params.align = params.align or menu.align
     params.position = params.position or "Left"
+    params.offset = params.offset and self:ConvertOffset(params.offset) or self:ConvertOffset(menu.offset) 
     local w = menu._panel:w() - 12
     if params.w == "full" then
         params.w = menu._scroll_panel:w()
@@ -209,42 +211,27 @@ function Menu:SetVisible(visible)
         self.menu._openlist:hide()
     end
 end
-function Menu:AlignItem(Item)
-    local h = 0
-    for i, item in ipairs(self.items) do
-        h = h + item.panel:h() + 2
-    end
-    self.items_panel:set_h(h)
-    if #self._items == 1 then
-        Item.panel:set_top(0)
-    else
-        Item.panel:set_top(self.items[#self.items - 1].panel:bottom() + 2)
-    end
-    self:AlignScrollBar()
-end
 function Menu:AlignItems()
     local h = 0
     local rows = 1
     for i, item in ipairs(self.items) do
+        local offset = item.offset
+        item.panel:set_x(offset[1])            
+        item.panel:set_y(offset[2])
         if self.row_max and i == (self.row_max * rows) + 1 then
-            item.panel:set_top(0)
-            if i == 1 then
-                item.panel:set_left(item.padding / 2)
-            else
-                item.panel:set_left(self.items[self.row_max * rows].panel:right() + 2)
+            if i > 1 then
+                item.panel:set_x(self.items[self.row_max * rows].panel:right() + offset[1])
             end
             rows = rows + 1
         else
             if self.row_max and self.items[(self.row_max * (rows - 1)) + 1] then
-                item.panel:set_left(self.items[(self.row_max * (rows - 1)) + 1].panel:left())
+                item.panel:set_x(self.items[(self.row_max * (rows - 1)) + 1].panel:x() + offset[1])
             end
-            if i == 1 then
-                item.panel:set_top(0)
-            else
-                item.panel:set_top(self.items[i - 1].panel:bottom() + 2)
+            if i > 1 then
+                item.panel:set_y(self.items[i - 1].panel:bottom() + offset[2])
             end
             if not self.row_max or i <= self.row_max then
-                h = h + item.panel:h() + 2
+                h = h + item.panel:h() + offset[2]
             end
         end
     end
@@ -315,7 +302,7 @@ function Menu:ClearItems(label)
             end
         else
             table.insert(self._items, item)
-            if not item.group and not item.override_parent then
+            if not item.group and item.override_parent == nil then
                 table.insert(self.items, item)
             end
         end
@@ -331,7 +318,7 @@ function Menu:RecreateItems()
     local temp = clone(self._items)     
     for k, item in pairs(temp) do
         self:RemoveItem(item)
-        self[item.type](self, item)
+        self[item.type_name](self, item)
     end
     self.items_panel:set_y(0)
 end
@@ -405,7 +392,7 @@ function Menu:TextBox(params)
 end
 function Menu:NumberBox(params)
     self:ConfigureItem(params)
-    params.type = "NumberBox"
+    params.type_name = "NumberBox"
     params.filter = "number"
     return self:NewItem(TextBox:new(self, params))
 end
@@ -419,7 +406,7 @@ function Menu:Slider(params)
 end
 function Menu:Divider(params)
     self:ConfigureItem(params)
-    params.type = "Divider"
+    params.type_name = "Divider"
     return self:NewItem(Item:new(self, params))
 end
 function Menu:Table(params)
@@ -438,6 +425,17 @@ function Menu:GetIndex(name)
     end
     return 1
 end
+function Menu:ConvertOffset(offset)
+    if offset then
+        if type(offset) == "number" then
+            return {offset, offset}
+        else
+            return offset
+        end
+    else
+        return {0,0}
+    end
+end
 function Menu:ConfigureItem(item)
     item.parent = self
     item.menu = self.menu
@@ -447,30 +445,32 @@ function Menu:ConfigureItem(item)
     item.items_size = item.items_size or self.items_size
     item.marker_highlight_color = item.marker_highlight_color or self.marker_highlight_color
     item.marker_color = item.marker_color or self.marker_color
+    item.marker_alpha = item.marker_alpha or self.marker_alpha
     item.align = item.align or self.align or "left"
     item.size_by_text = item.size_by_text or self.size_by_text
     item.parent_panel = (item.group and item.group.panel) or (item.override_parent and item.override_parent.panel) or self.items_panel
-    item.padding = item.padding or 2
+    item.offset = item.offset and self:ConvertOffset(item.offset) or self.offset
     item.override_size_limit = item.override_size_limit or self.override_size_limit
-    item.w = item.w or (self.items_panel:w() > 300 and not item.override_size_limit and 300 or self.items_panel:w())
+    item.w = (item.w or (item.parent_panel:w() > 300 and not item.override_size_limit and 300 or item.parent_panel:w())) - (item.size_by_text and 0 or item.offset[1])
     if type(item.index) == "string" then
         local split = string.split(item.index, "|")
-        local wanted_item = self.menu:GetItem(split[2] or split[1]) 
+        local wanted_item = self:GetItem(split[2] or split[1]) 
         if wanted_item then
             item.index = wanted_item:Index() + (split[1] == "After" and 1 or split[1] == "Before" and -1 or 0)
         else
-            BeardLib:log("Could not create index from string, " .. self.index .. "[Item " .. item.name .. "]")
+            BeardLib:log("Could not create index from string, %s, %s", tostring(item.index), tostring(item))
             item.index = nil
         end
     end 
 end
+
 function Menu:NewItem(item)
     if item.index then
         table.insert(self._items, item.index, item)
     else
         table.insert(self._items, item)
     end
-    if not item.group and not item.override_parent then
+    if not item.group and item.override_parent == nil then
         if item.index then
             table.insert(self.items, item.index, item)
         else

@@ -82,6 +82,14 @@ function MenuUI:init(params)
 	end
     self._fullscreen_ws_pnl:key_press(callback(self, self, "KeyPressed"))
     self._fullscreen_ws_pnl:key_release(callback(self, self, "KeyReleased"))
+    BeardLib:AddUpadter("MenuUI"..tostring(self), function() --Using this way for sliders weirdly fixes the glitch problems caused by normal mouse_moved
+        local x,y = managers.mouse_pointer:world_position()
+        if self._slider_hold then
+            self._slider_hold:SetValueByMouseXPos(x)
+        end
+        self._old_x = x
+        self._old_y = y       
+    end, true)    
     return self
 end
 
@@ -266,8 +274,6 @@ function MenuUI:MouseMoved(o, x, y)
     if self.mouse_move then
         self.mouse_move(x, y)
     end
-	self._old_x = x
-	self._old_y = y
 end
 function MenuUI:SwitchMenu(menu)
     self._current_menu:SetVisible(false)

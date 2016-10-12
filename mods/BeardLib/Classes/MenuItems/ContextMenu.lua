@@ -1,7 +1,7 @@
 ContextMenu = ContextMenu or class(Item)
 
 function ContextMenu:init( parent, params )
-    self.type = "ContextMenu"
+    self.type_name = "ContextMenu"
     self.super.init( self, parent, params )
     params.items = params.items or {} 
     self.list = self.menu._fullscreen_ws_pnl:panel({
@@ -20,12 +20,7 @@ function ContextMenu:init( parent, params )
         valign="grow",
         layer = -1
     })
-    self.items_panel = self.list:panel({
-        name = "items_panel",
-        w = self.list:w() - self.padding,
-        x = self.padding / 2,
-
-    })
+    self.items_panel = self.list:panel({name = "items_panel"})
     self._scroll_panel = self.list:panel({
         name = "scroll_panel",
         halign = "center",
@@ -149,7 +144,7 @@ function ContextMenu:MousePressed( button, x, y )
             end
         end
         return true
-    elseif alive(self.menu._openlist) and (button == Idstring("0") or button == Idstring("1")) then
+    elseif self.menu._openlist and (button == Idstring("0") or button == Idstring("1")) then
         self.menu._openlist:hide()
         return true
     end
@@ -187,13 +182,7 @@ function ContextMenu:scroll(y)
     end
 end
 function ContextMenu:KeyPressed( o, k )
-    if not self.menu._openlist then
-        if k == Idstring("enter") and self.highlight then
-            self.list:set_lefttop(self.panel:world_left(), self.panel:world_bottom() + 4)
-            self.list:show()
-            self.menu._openlist = self
-        end
-    elseif k == Idstring("esc") then
+    if self.menu._openlist and k == Idstring("esc") then
         self.menu._openlist.list:hide()
         self.menu._openlist = nil    
     end

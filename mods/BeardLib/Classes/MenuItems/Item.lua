@@ -1,19 +1,18 @@
 Item = Item or class()
-
 function Item:init(parent, params)
-	self.type = self.type or "Button"
+	self.type_name = self.type_name or "Button"
 	if params.override_parent then
 		params.override_parent:AddItem(self)
 	end
 	params.panel = params.parent_panel:panel({
 		name = params.name,
-		w = params.w - params.padding,
+		w = params.w,
 		h = params.h or params.items_size,
-		x = params.padding,
 	})
 	local Marker = params.panel:rect({
 		name = "bg",
 		color = params.marker_color,
+		alpha = params.marker_alpha,
 		halign="grow",
 		valign="grow",
 		layer = 0
@@ -22,10 +21,10 @@ function Item:init(parent, params)
 		name = "title",
 		text = params.localized and params.text and managers.localization:text(params.text) or params.text,
 		vertical = "center",
-		x = params.padding,
 		align = params.align,
 		w = params.panel:w(),
 		h = params.items_size,
+		x = 4,
 		layer = 6,
 		color = params.text_color or Color.black,
 		font = "fonts/font_large_mf",
@@ -40,19 +39,20 @@ function Item:init(parent, params)
 	params.title:set_h(h)
 	params.title:set_y(0)
 	if params.size_by_text then
-		params.panel:set_size(w + params.items_size + 10,h)
-		params.title:set_size(params.panel:w(), h)
+		params.panel:set_size(w + params.items_size,h)
+		params.title:set_size(params.panel:size())
 		params.title:set_x(params.color and 2 or 0)
 	end
-	if self.type == "Divider" then
+	if self.type_name == "Divider" then
 		params.title:set_world_center_y(params.panel:world_center_y())
 	end
 	self._items = {}
 	params.option = params.option or params.name
 	table.merge(self, params)
+	self.override_parent = params.override_parent --Not sure why table merge doesn't want to add it it might be doing that to other values as well..
 	self:SetPositionByString(params.position)
 	if params.group then
-		if params.group.type == "ItemsGroup" then
+		if params.group.type_name == "ItemsGroup" then
 			params.group:AddItem(self)
 		else
 			BeardLib:log(self.name .. " group is not a group item!")
@@ -65,6 +65,9 @@ end
 function Item:Panel()
 	return self.panel
 end
+function Item:__tostring()
+	return string.format("[%s - %s]", tostring(self.name), tostring(self.type_name))
+end
 function Item:SetPosition( x,y )
 	self.panel:set_position(x,y)
 end
@@ -76,16 +79,16 @@ function Item:SetPositionByString( pos )
 	   self.panel:set_world_center(self.parent_panel:world_center())
 	end
 	if string.match(pos, "Bottom") then
-	   self.panel:set_world_bottom(self.parent_panel:world_bottom())
+	   self.panel:set_bottom(self.parent_panel:h())
 	end
 	if string.match(pos, "Top") then
-		self.panel:set_world_top(self.parent_panel:world_top())
+		self.panel:set_y(0)
 	end
 	if string.match(pos, "Right") then
-		self.panel:set_world_right(self.parent_panel:world_right())
+		self.panel:set_right(self.parent_panel:w())
 	end
 	if string.match(pos, "Left") then
-		self.panel:set_world_left(self.parent_panel:world_left())
+		self.panel:set_x(0)
 	end
 end
 function Item:AddItem(item)
@@ -111,7 +114,7 @@ function Item:KeyPressed( o, k )
 	end
 end
 function Item:MousePressed( button, x, y )
-	if not self.enabled or self.type == "Divider" then
+	if not self.enabled or self.type_name == "Divider" then
 		return
 	end
 	for _, item in pairs(self._items) do
@@ -141,7 +144,7 @@ function Item:SetColor(color)
 	end
 end
 function Item:SetText(text)
-	params.text = text
+	self.text = text
 	self.panel:child("title"):set_text(self.localized and text and managers.localization:text(text) or text)
 end
 
@@ -153,13 +156,10 @@ function Item:SetCallback( callback )
 	self.callback = callback
 end
 function Item:MouseMoved(x, y, highlight)
-	if not alive(self.panel) or not self.enabled or self.type == "Divider" then
+	if not alive(self.panel) or not self.enabled or self.type_name == "Divider" then
 		return false
 	end
 	if not self.menu._openlist and not self.menu._slider_hold then
-		for _, item in pairs(self._items) do
-			item:MouseMoved(x,y)
-		end
 		if self.parent.panel:inside(x,y) and self.panel:inside(x, y) then
 			if highlight ~= false then
 				self.panel:child("bg"):set_color(self.marker_highlight_color)

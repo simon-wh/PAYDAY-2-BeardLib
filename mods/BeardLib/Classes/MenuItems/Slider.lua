@@ -2,7 +2,7 @@ Slider = Slider or class(Item)
 
 function Slider:init( parent, params )
     params.value = params.value or 1
-    self.type = "Slider"
+    self.type_name = "Slider"
     self.size_by_text = false
 	self.super.init( self, parent, params )
     self.step = self.step or 1
@@ -41,6 +41,7 @@ function Slider:init( parent, params )
         color = (parent.background_color and self.text_color) or Color.black,
         name = "slider_icon",
         w = 2,
+        alpha = 0,
         h = slider_bg:h(),
         layer = 7,
     })
@@ -67,12 +68,12 @@ function Slider:SetValue(value, run_callback, reset_selection, no_format)
      if reset_selection then
         text:set_selection(text:text():len())
     end
-    self.super.SetValue(self, value, run_callback)
     self._before_text = self.value
+    self.super.SetValue(self, value, run_callback)
 end
 
 function Slider:SetValueByPercentage( percent )
-    self:SetValue(self.min + (self.max - self.min) * percent, false, true)
+    self:SetValue(self.min + (self.max - self.min) * percent, true, true)
 end
 
 function Slider:MousePressed( button, x, y )
@@ -94,27 +95,18 @@ function Slider:MousePressed( button, x, y )
                 local where = (x - slider_bg:world_left()) / (slider_bg:world_right() - slider_bg:world_left())
                 managers.menu_component:post_event("menu_enter")
                 self:SetValueByPercentage(where)
-                self:RunCallback()
             end
             return true
         end
     end
 end
 
-function Slider:KeyPressed( o, k )
-
-end
-
-function Slider:MouseMoved( x, y )
-    if not self.super.MouseMoved(self, x, y) then
-        return 
+function Slider:SetValueByMouseXPos(x)
+    if not alive(self.panel) then
+        return
     end
-    if self.menu._slider_hold == self and self.menu._old_x then
-        local slider_bg = self.panel:child("slider_bg")
-        local where = (x - slider_bg:world_left()) / (slider_bg:world_right() - slider_bg:world_left())
-        self:SetValueByPercentage(where)
-        self:RunCallback()
-    end
+    local slider_bg = self.panel:child("slider_bg")
+    self:SetValueByPercentage((x - slider_bg:world_left()) / (slider_bg:world_right() - slider_bg:world_left()))
 end
 
 function Slider:MouseReleased( button, x, y )

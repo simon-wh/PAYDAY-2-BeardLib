@@ -52,7 +52,7 @@ if not _G.BeardLib then
         ["lib/managers/killzonemanager"] = "Killzonemanager.lua",
         ["lib/managers/trademanager"] = "TradeManager.lua",
         ["lib/managers/missionmanager"] = "MissionManager.lua",
-		["lib/managers/menumanager"] = "MenuManager.lua",
+        ["lib/managers/menumanager"] = "MenuManager.lua",
         ["lib/managers/weaponfactorymanager"] = "WeaponFactoryManager.lua",
         ["lib/managers/dialogs/keyboardinputdialog"] = "KeyboardInputDialog.lua",
         ["core/lib/utils/dev/editor/coreworlddefinition"] = "CoreWorldDefinition.lua",
@@ -78,6 +78,8 @@ if not _G.BeardLib then
     Global.added_units = Global.added_units or {}
     self._files_to_load = {}
     self._custom_packages = {}
+    self._updaters = {}
+    self._paused_updaters = {}
     Global.custom_loaded_packages = Global.custom_loaded_packages or {}
 end
 
@@ -102,6 +104,18 @@ function BeardLib:init()
     self.managers.AddFramework = AddFramework:new()
     --Load mod_overrides adds
     self:LoadModOverridePlus()
+end
+
+function BeardLib:AddUpadter(id, clbk, pasued)
+    self._updaters[id] = clbk 
+    if paused then
+        self._paused_updaters[id] = clbk 
+    end
+end
+
+function BeardLib:RemoveUpadter(id)
+    self._updaters[id] = nil
+    self._paused_updaters[id] = nil
 end
 
 function BeardLib:LoadClasses()
@@ -341,6 +355,9 @@ function BeardLib:update(t, dt)
             manager:update(t, dt)
         end
     end
+    for _, clbk in pairs(self._updaters) do
+        clbk()
+    end
 end
 
 function BeardLib:paused_update(t, dt)
@@ -348,6 +365,9 @@ function BeardLib:paused_update(t, dt)
         if manager.paused_update then
             manager:paused_update(t, dt)
         end
+    end
+    for _, clbk in pairs(self._paused_updaters) do
+        clbk()
     end
 end
 

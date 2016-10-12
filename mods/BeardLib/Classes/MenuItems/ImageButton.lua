@@ -1,12 +1,11 @@
 ImageButton = ImageButton or class()
 
 function ImageButton:init( parent, params )
-    self.type = "ImageButton"
+    self.type_name = "ImageButton"
     params.panel = params.parent_panel:panel({ 
         name = params.name,
         w = params.w,
         h = params.h,
-        x = params.padding / 2,
         y = 10,
     }) 
     local Marker = params.panel:rect({
@@ -39,7 +38,7 @@ function ImageButton:init( parent, params )
     self.parent = parent
     self.menu = parent.menu    
     if params.group then
-      if params.group.type == "group" then
+      if params.group.type_name == "group" then
           params.group:AddItem(self)
       else
           BeardLib:log(self.name .. " group is not a groupitem!")

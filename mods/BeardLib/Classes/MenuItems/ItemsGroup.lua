@@ -1,8 +1,8 @@
 ItemsGroup = ItemsGroup or class()
 
-function ItemsGroup:init( parent, params )
+function ItemsGroup:init( parent, params )    
+    self.type_name = "ItemsGroup"
     params.items = params.items or {}
-    params.type = "ItemsGroup"
     params.panel = parent.items_panel:panel({ 
         name = params.name,
         y = 10, 

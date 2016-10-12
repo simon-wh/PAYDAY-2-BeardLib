@@ -1,7 +1,7 @@
 KeyBindItem = KeyBindItem or class(Item)
 
 function KeyBindItem:init(parent, params)
-    self.type = "KeyBind"
+    self.type_name = "KeyBind"
     self.size_by_text = false
     self.super.init(self, parent, params)
     self.panel:text({

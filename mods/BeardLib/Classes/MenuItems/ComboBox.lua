@@ -1,7 +1,7 @@
 ComboBox = ComboBox or class(Item)
 
 function ComboBox:init(parent, params)
-    self.type = "ComboBox"
+    self.type_name = "ComboBox"
     self.size_by_text = false
     self.super.init(self, parent, params)
     self.items = self.items or {}
@@ -18,7 +18,7 @@ function ComboBox:init(parent, params)
         align = "center",
         vertical = "center",
         layer = 2,
-        color = parent.background_color and self.text_color or Color.white,
+        color = self.parent.background_color and self.text_color or Color.black,
         font = "fonts/font_medium_mf",
         font_size = self.items_size - 2
     })
@@ -33,8 +33,8 @@ function ComboBox:init(parent, params)
     combo_selected:set_right(self.panel:w())
     self.panel:bitmap({
         name = "combo_icon",
-        w = self.items_size - 2,
-        h = self.items_size - 2,
+        w = self.items_size - 4,
+        h = self.items_size - 4,
         texture = "guis/textures/menuicons",
         texture_rect = {4,0,16,16},
         color = not parent.background_color and Color.black,
@@ -67,7 +67,6 @@ function ComboBox:init(parent, params)
     })
     self.items_panel = self.list:panel({
         name = "items_panel",
-        x = self.padding / 2,
         y = self.items_size,
     })
     self._scroll_panel = self.list:panel({
@@ -167,6 +166,8 @@ function ComboBox:MousePressed( button, x, y )
     if not self.menu._openlist and self.parent.panel:inside(x,y) and self.panel:inside(x,y) then
         if button == Idstring("0") then
             if alive(self.list) then
+                self:CreateItems()
+                self:update_search()
                 self:show()
                 return true
             end
@@ -243,15 +244,8 @@ function ComboBox:KeyPressed(o, k)
     if not alive(self.list) then
         return
     end
-    if not self.menu._openlist then
-        if k == Idstring("enter") then
-            self.list:set_lefttop(self.panel:child("combo_bg"):world_left(), self.panel:child("combo_bg"):world_bottom() + 4)
-            self.list:show()
-            self.menu._openlist = self
-        end
-    elseif k == Idstring("esc") then
-        self.menu._openlist.list:hide()
-        self.menu._openlist = nil
+    if self.menu._openlist and k == Idstring("esc") then
+        self.menu._openlist:hide()
     end
 end
 function ComboBox:update_search()
