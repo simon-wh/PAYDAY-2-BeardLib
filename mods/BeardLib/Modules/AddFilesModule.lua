@@ -14,11 +14,11 @@ end
 
 function AddFilesModule:Load()
     local directory = BeardLib.Utils.Path:Combine(self._mod.ModPath, self._config.directory)
-    BeardLib:LoadAddConfig(directory, self._config)
+    CustomPackageManager:LoadPackageConfig(directory, self._config)
 end
 
 function AddFilesModule:Unload()
-    BeardLib:UnloadAddConfig(self._config)
+    CustomPackageManager:UnloadPackageConfig(self._config)
 end
 
 BeardLib:RegisterModule(AddFilesModule.type_name, AddFilesModule)

@@ -43,7 +43,6 @@ function WeaponModModule:RegisterHook()
                 amount = self._config.default_amount,
                 global_value = self._config.global_value ~= BeardLib.definitions.module_defaults.item.default_global_value and self._config.global_value or nil
             })
-
         end
 
         if self._config.weapons then

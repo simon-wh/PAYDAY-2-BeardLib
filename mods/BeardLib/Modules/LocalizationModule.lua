@@ -13,11 +13,14 @@ function LocalizationModule:init(core_mod, config)
 
     for _, tbl in ipairs(self._config) do
         if tbl._meta == "localization" or tbl._meta == "loc" then
+            if not self.DefaultLocalization then
+                self.DefaultLocalization = tbl.file
+            end
             self.Localizations[Idstring(tbl.language):key()] = tbl.file
         end
     end
 
-    self.DefaultLocalization = self._config.default or self.Localizations[1]
+    self.DefaultLocalization = self._config.default or self.DefaultLocalization
 
     self:RegisterHooks()
 

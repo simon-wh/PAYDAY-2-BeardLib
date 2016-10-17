@@ -15,23 +15,20 @@ function table.merge(og_table, new_table)
 	return og_table
 end
 
-function mrotation.copy(rot)
-    if rot then
-        return Rotation(rot:yaw(), rot:pitch(), rot:roll())
-    end
-    return Rotation()
-end
-
-function mrotation.set_yaw(rot, yaw)
-    return mrotation.set_yaw_pitch_roll(rot, yaw, rot:pitch(), rot:roll())
-end
-
-function mrotation.set_pitch(rot, pitch)
-    return mrotation.set_yaw_pitch_roll(rot, rot:yaw(), pitch, rot:roll())
-end
-
-function mrotation.set_roll(rot, roll)
-    return mrotation.set_yaw_pitch_roll(rot, rot:yaw(), rot:pitch(), roll)
+function table.add_merge(og_table, new_table)
+	for i, data in pairs(new_table) do
+		i = (type(data) == "table" and data.index) or i
+        if type(i) == "number" and og_table[i] then
+            table.insert(og_table, data)
+        else
+    		if type(data) == "table" and og_table[i] then
+    			og_table[i] = table.merge(og_table[i], data)
+    		else
+    			og_table[i] = data
+    		end
+        end
+	end
+	return og_table
 end
 
 function table.add(t, items)
@@ -228,13 +225,45 @@ function math.QuaternionToEuler(x, y, z, w)
 end
 
 BeardLib.Utils = {}
+
+_G.utils = BeardLib.Utils
+
+function BeardLib.Utils:RefreshCurrentNode()
+    local selected_node = managers.menu:active_menu().logic:selected_node()
+    managers.menu:active_menu().renderer:refresh_node(selected_node)
+    local selected_item = selected_node:selected_item()
+    selected_node:select_item(selected_item and selected_item:name())
+    managers.menu:active_menu().renderer:highlight_item(selected_item)
+end
+
+function BeardLib.Utils:CheckParamsValidty(tbl, schema)
+    local ret = true
+    for i = 1, #schema.params do
+        local var = tbl[i]
+        local sc = schema.params[i]
+        if not self:CheckParamValidty(schema.func_name, i, var, sc.type, sc.allow_nil) then
+            ret = false
+        end
+    end
+    return ret
+end
+
+function BeardLib.Utils:CheckParamValidty(func_name, vari, var, desired_type, allow_nil)
+    if (var == nil and not allow_nil) or type(var) ~= desired_type then
+        log(string.format("[%s] Parameter #%s, expected %s, got %s", func_name, vari, desired_type, tostring(var and type(var) or nil)))
+        return false
+    end
+
+    return true
+end
+
 BeardLib.Utils.WeapConv = {
     [1] = "wpn_fps_pis_g17",
     [2] = "wpn_fps_ass_amcar"
 }
 function BeardLib.Utils:GetCleanedWeaponData(unit)
     local player_inv = unit and unit:inventory() or managers.player:player_unit():inventory()
-    local new_weap_name = self.WeapConv[tweak_data.weapon[managers.weapon_factory:get_weapon_id_by_factory_id(player_inv:equipped_unit():base()._factory_id or player_inv:equipped_unit():name())].use_data.selection_index]
+    local new_weap_name = self.WeapConv[tweak_data.weapon[managers.weapon_factory:get_weapon_id_by_factory_id(HuskPlayerInventory._get_weapon_name_from_sync_index(PlayerInventory._get_weapon_sync_index(player_inv:equipped_unit():base()._factory_id or player_inv:equipped_unit():name())))].use_data.selection_index]
     return PlayerInventory._get_weapon_sync_index(new_weap_name), managers.weapon_factory:blueprint_to_string(new_weap_name, tweak_data.weapon.factory[new_weap_name].default_blueprint)
 end
 
@@ -422,6 +451,8 @@ function BeardLib.Utils:UrlEncode(str)
 end
 
 BeardLib.Utils.Path = {}
+
+_G.path = BeardLib.Utils.Path
 
 BeardLib.Utils.Path._separator_char = "/"
 

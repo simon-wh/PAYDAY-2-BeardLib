@@ -59,7 +59,7 @@ end
 
 function ModAssetsModule:RegisterAutoUpdateCheckHook()
     Hooks:Add("MenuManagerOnOpenMenu", self._mod.Name .. self._name .. "UpdateCheck", function( self_menu, menu, index )
-        if menu == "menu_main" then
+        if menu == "menu_main" and not LuaNetworking:IsMultiplayer() then
             self:CheckVersion()
         end
     end)
@@ -101,7 +101,7 @@ function ModAssetsModule:_CheckVersion(force)
                 self:ShowNoChangePrompt()
             end
         else
-            self:ShowErrorPrompt()
+            --self:ShowErrorPrompt()
             self:log("[ERROR] Unable to parse string '%s' as a version number", data)
         end
     end)
