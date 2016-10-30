@@ -4,8 +4,6 @@ _G.CustomAchievementManager = {
     callbacks = {}
 }
 
-
-
 function CustomAchievementManager:enabled(chiev)
     if not chiev then
         return self._enabled

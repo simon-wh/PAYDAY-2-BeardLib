@@ -18,8 +18,8 @@ function cmp:RegisterPackage(id, directory, config)
         return false
     end
     id = id:key()
-    if self.custom_packages[id:key()] then
-        BeardLib:log("Package with ID '%s' already exists! Returning...", id)
+    if self.custom_packages[id] then
+        BeardLib:log("[ERROR] Package with ID '%s' already exists! Returning...", id)
         return false
     end
 
@@ -61,7 +61,7 @@ function cmp:LoadPackageConfig(directory, config)
         BeardLib:log("[ERROR] SystemFS does not exist! Custom Packages cannot function without this! Do you have an outdated game version?")
         return
     end
-
+    local loading = {}
     for i, child in ipairs(config) do
         if type(child) == "table" then
             local typ = child._meta
@@ -73,14 +73,14 @@ function cmp:LoadPackageConfig(directory, config)
                 local file_path = BeardLib.Utils.Path:Combine(directory, path) ..".".. typ
                 if SystemFS:exists(file_path) then
                     if (not DB:has(ids_ext, ids_path) or child.force) then
-
                         --self:log("Added file %s %s", path, typ)
                         FileManager:AddFile(ids_ext, ids_path, file_path)
                         if child.reload then
                             PackageManager:reload(ids_ext, ids_path)
                         end
                         if child.load then
-                            FileManager:LoadAsset(ids_ext, ids_path)
+                            table.insert(loading, {ids_ext, ids_path})
+                            --FileManager:LoadAsset(ids_ext, ids_path)
                         end
                     end
                 else
@@ -91,17 +91,22 @@ function cmp:LoadPackageConfig(directory, config)
             end
         end
     end
+    --For some reason this needs to be here or the game will go into a hissy fit
+    for _, file in pairs(loading) do
+        local ids_ext, ids_path = unpack(file)
+        FileManager:LoadAsset(ids_ext, ids_path)
+    end
 end
 
 
 function cmp:UnloadPackageConfig(config)
-    BeardLib:log("Unloading added files")
+    --[[BeardLib:log("Unloading added files")
     for i, child in ipairs(config) do
         if type(child) == "table" then
             local typ = child._meta
             local path = child.path
             if typ and path then
-                path = self.Utils.Path:Normalize(path)
+                path = BeardLib.Utils.Path:Normalize(path)
                 local ids_ext = Idstring(typ)
                 local ids_path = Idstring(path)
                 if DB:has(ids_ext, ids_path) then
@@ -115,5 +120,5 @@ function cmp:UnloadPackageConfig(config)
                 BeardLib:log("[ERROR] Node in %s does not contain a definition for both type and path", add_file_path)
             end
         end
-    end
+    end]]
 end

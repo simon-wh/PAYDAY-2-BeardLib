@@ -13,7 +13,8 @@ function ModAssetsModule:init(core_mod, config)
             version_api_url = "http://manager.lastbullet.net/GetDownloadVersion/$id$.txt",
             download_file_func = callback(self, self, "LastBulletDownloadAssets"),
             download_info_url = "http://manager.lastbullet.net/GetSingleDownload/$id$.json",
-            download_api_url = "http://lastbullet.net/mydownloads/downloads/$download$"
+            download_api_url = "http://lastbullet.net/mydownloads/downloads/$download$",
+            page_url = "http://downloads.lastbullet.net/$id$"
         }
     }
 
@@ -149,6 +150,10 @@ function ModAssetsModule:ShowRequiresUpdatePrompt()
                 callback = callback(self, self, "DownloadAssets")
             },
             {
+                text = managers.localization:text("mod_assets_visit_page"),
+                callback = callback(self, self, "ViewMod")
+            },
+            {
                 text = managers.localization:text("mod_assets_updates_ignore"),
                 callback = callback(self, self, "IgnoreUpdate")
             },
@@ -176,6 +181,10 @@ function ModAssetsModule:DownloadAssets()
     else
         self:_DownloadAssets()
     end
+end
+
+function ModAssetsModule:ViewMod()
+    Steam:overlay_activate("url", self._mod:GetRealFilePath(self.provider.page_url, self))
 end
 
 function ModAssetsModule:_DownloadAssets(data)

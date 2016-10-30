@@ -17,24 +17,16 @@ local get_job_string = function()
 end
 
 local parse_as_lnetwork_string = function(type_prm, data)
-	local dataString = LuaNetworking.AllPeersString
-	dataString = dataString:gsub("{1}", LuaNetworking.AllPeers)
-	dataString = dataString:gsub("{2}", type_prm)
-	dataString = dataString:gsub("{3}", data)
+	local dataString = LuaNetworking.AllPeersString:gsub("{1}", LuaNetworking.AllPeers):gsub("{2}", type_prm):gsub("{3}", data)
 	return dataString
 end
 
-function NetworkPeer:send(func_name, ...)
-	if not self._ip_verified then
-		return
-	end
-	local params = table.pack(...)
-	if self ~= managers.network:session():local_peer() then
-    	if string.ends(func_name,"join_request_reply") then
-	        if params[1] == 1 and is_custom() then
-	            params[14] = get_job_string()
-	        end
-	    elseif func_name == "sync_game_settings" then
+local peer_send_hook = "NetworkPeerSend"
+Hooks:Register(peer_send_hook)
+
+Hooks:Add(peer_send_hook, "BeardLibCustomHeistFix", function(self, func_name, params)
+    if self ~= managers.network:session():local_peer() then
+        if func_name == "sync_game_settings" then
 	        if is_custom() then
 				orig_NetworkPeer_send(self, "send_chat_message", LuaNetworking.HiddenChannel, parse_as_lnetwork_string(sync_game_settings_id, get_job_string()))
 	            return
@@ -44,7 +36,17 @@ function NetworkPeer:send(func_name, ...)
 				orig_NetworkPeer_send(self, "send_chat_message", LuaNetworking.HiddenChannel, parse_as_lnetwork_string(sync_stage_settings_id, string.format("%s|%s|%s|%s", Global.game_settings.level_id, tostring(self._global.current_job.current_stage), tostring(self._global.alternative_stage or 0), tostring(self._global.interupt_stage))))
 	            return
 	        end
-		elseif func_name == "sync_outfit" then
+		elseif string.ends(func_name,"join_request_reply") then
+            if params[1] == 1 and is_custom() then
+                params[14] = get_job_string()
+            end
+        end
+    end
+end)
+
+Hooks:Add(peer_send_hook, "BeardLibCustomWeaponFix", function(self, func_name, params)
+    if self ~= managers.network:session():local_peer() then
+        if func_name == "sync_outfit" then
 			local orig_outift = params[1]
 			params[1] = BeardLib.Utils:CleanOutfitString(params[1])
 			orig_NetworkPeer_send(self, "send_chat_message", LuaNetworking.HiddenChannel, parse_as_lnetwork_string(send_outfit_id, orig_outift .. "|" .. params[2]))
@@ -59,7 +61,15 @@ function NetworkPeer:send(func_name, ...)
                 params[3] = data
             end
         end
+    end
+end)
+
+function NetworkPeer:send(func_name, ...)
+	if not self._ip_verified then
+		return
 	end
+	local params = table.pack(...)
+    Hooks:Call(peer_send_hook, self, func_name, params)
 
     orig_NetworkPeer_send(self, func_name, unpack(params, 1, params.n))
 end

@@ -1,10 +1,65 @@
-local o_toggle_menu_state = MenuManager.toggle_menu_state
-function MenuManager:toggle_menu_state(...)
-    if BeardLib.DialogOpened then
-        BeardLib.DialogOpened:hide()
-        BeardLib.DialogOpened = nil
-        return
-    else
-        return o_toggle_menu_state(self, ...) 
+local orig_MenuCallbackHandler_start_job = MenuCallbackHandler.start_job
+
+local sync_game_settings_id = "BeardLib_sync_game_settings"
+
+local sync_game_settings = function(peer_id)
+    if Network:is_server() and managers.job:current_job_id() and Global.game_settings.level_id and Global.game_settings.difficulty and (managers.job:current_level_data().custom or managers.job:current_job_data().custom) then
+        if peer_id then
+            LuaNetworking:SendToPeer(peer_id, sync_game_settings_id, string.format("%s|%s|%s", managers.job:current_job_id(), Global.game_settings.level_id, Global.game_settings.difficulty))
+        else
+            LuaNetworking:SendToPeers(sync_game_settings_id, string.format("%s|%s|%s", managers.job:current_job_id(), Global.game_settings.level_id, Global.game_settings.difficulty))
+        end
     end
 end
+
+function MenuCallbackHandler:start_job(job_data)
+    if not managers.job:activate_job(job_data.job_id) then
+        return
+    end
+
+    --orig_MenuCallbackHandler_start_job(self, job_data)
+
+    if managers.job:current_level_data().custom or managers.job:current_job_data().custom then
+    	Global.game_settings.level_id = managers.job:current_level_id()
+    	Global.game_settings.mission = managers.job:current_mission()
+    	Global.game_settings.world_setting = managers.job:current_world_setting()
+    	Global.game_settings.difficulty = job_data.difficulty
+    	local matchmake_attributes = self:get_matchmake_attributes()
+    	if Network:is_server() then
+    		local job_id_index = tweak_data.narrative:get_index_from_job_id(managers.job:current_job_id())
+    		local level_id_index = tweak_data.levels:get_index_from_level_id(Global.game_settings.level_id)
+    		local difficulty_index = tweak_data:difficulty_to_index(Global.game_settings.difficulty)
+    		--managers.network:session():send_to_peers("sync_game_settings", job_id_index, level_id_index, difficulty_index)
+            log("sent updated job")
+            sync_game_settings()
+    		managers.network.matchmake:set_server_attributes(matchmake_attributes)
+    		managers.menu_component:on_job_updated()
+    		managers.menu:active_menu().logic:navigate_back(true)
+    		managers.menu:active_menu().logic:refresh_node("lobby", true)
+    	else
+    		managers.network.matchmake:create_lobby(matchmake_attributes)
+    	end
+    else
+        orig_MenuCallbackHandler_start_job(self, job_data)
+    end
+
+end
+
+Hooks:Add("NetworkReceivedData", sync_game_settings_id, function(sender, id, data)
+    if id == sync_game_settings_id then
+        local split_data = string.split(data, "|")
+
+        managers.network._handlers.connection:sync_game_settings(tweak_data.narrative:get_index_from_job_id(split_data[1]),
+        tweak_data.levels:get_index_from_level_id(split_data[2]),
+        tweak_data:difficulty_to_index(split_data[3]),
+        managers.network:session():peer(sender):rpc())
+    end
+end)
+
+Hooks:Add("BaseNetworkSessionOnPeerEnteredLobby", "BaseNetworkSessionOnPeerEnteredLobby_sync_game_settings", function(peer, peer_id)
+    sync_game_settings(peer_id)
+end)
+
+Hooks:Add("NetworkManagerOnPeerAdded", "NetworkManagerOnPeerAdded_sync_game_settings", function(peer, peer_id)
+    sync_game_settings(peer_id)
+end)

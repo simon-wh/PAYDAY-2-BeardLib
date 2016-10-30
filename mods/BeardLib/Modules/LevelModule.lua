@@ -24,7 +24,7 @@ function LevelModule:Load()
                         if include_data.type then
                             BeardLib:ReplaceScriptData(complete_path, include_data.type, new_path, file_split[2], {add = true})
                         else
-                            DB:create_entry(file_split[2]:id(), new_path:id(), complete_path)
+                            FileManager:AddFile(file_split[2]:id(), new_path:id(), complete_path)
                         end
                     else
                         self:log("[ERROR] Included file '%s' is not readable by the lua state!", complete_path)

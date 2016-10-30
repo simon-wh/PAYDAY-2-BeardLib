@@ -52,7 +52,7 @@ function fm:Process(ids_ext, ids_path, name_mt)
 
                     local fileType = mdata.type
 
-					local file = io.open(mdata.file, 'r+')
+					local file = io.open(mdata.file, fileType == "binary" and "rb" or 'r')
 					if (file ~= nil) then
                         local read_data = file:read("*all")
 
@@ -163,6 +163,8 @@ local _UnLoadAsset = function(ids_ext, ids_path)
 end
 
 function fm:LoadAsset(ids_ext, ids_path)
+	ids_ext = ids_ext:id()
+	ids_path = ids_path:id()
     if not managers.dyn_resource then
         table.insert(self._files_to_load, {ids_ext, ids_path})
         return
@@ -172,6 +174,8 @@ function fm:LoadAsset(ids_ext, ids_path)
 end
 
 function fm:UnLoadAsset(ids_ext, ids_path)
+	ids_ext = ids_ext:id()
+	ids_path = ids_path:id()
     if not managers.dyn_resource then
         table.insert(self._files_to_unload, {ids_ext, ids_path})
         return

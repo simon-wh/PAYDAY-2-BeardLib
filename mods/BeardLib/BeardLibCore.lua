@@ -252,7 +252,7 @@ function BeardLib:ProcessScriptData(PackManager, path, ext, data)
 end]]
 
 function BeardLib:ReplaceScriptData(replacement, replacement_type, target_path, target_ext, options)
-    options = options or {}
+    options = type(options) == "table" and options or {}
     FileManager:ScriptReplaceFile(target_ext, target_path, replacement, table.merge(options, { type = replacement_type, mode = options.merge_mode }))
     --[[if options ~= nil and type(options) ~= "table" then
         self:log("[ERROR] %s:ReplaceScriptData parameter 5, expected table, got %s", self.Name, tostring(type(extra_data)))
