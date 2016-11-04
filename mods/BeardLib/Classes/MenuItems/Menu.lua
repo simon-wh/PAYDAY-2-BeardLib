@@ -11,6 +11,7 @@ function Menu:init(menu, params)
     params.align = params.align or menu.align
     params.position = params.position or "Left"
     params.offset = params.offset and self:ConvertOffset(params.offset) or self:ConvertOffset(menu.offset) 
+    params.override_size_limit = params.override_size_limit or menu.override_size_limit
     local w = menu._panel:w() - 12
     if params.w == "full" then
         params.w = menu._scroll_panel:w()
@@ -437,6 +438,10 @@ function Menu:ConvertOffset(offset)
     end
 end
 function Menu:ConfigureItem(item)
+    if type(item) ~= "table" then
+        log(tostring( debug.traceback() ))
+        return
+    end
     item.parent = self
     item.menu = self.menu
     item.enabled = item.enabled or true

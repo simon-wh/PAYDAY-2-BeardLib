@@ -106,7 +106,7 @@ end
 function Item:Index()
 	return self.parent:GetIndex(self.name)
 end
-function Item:KeyPressed( o, k )
+function Item:KeyPressed(o, k)
 	for _, item in pairs(self._items) do
 		if item:KeyPressed(o, k) then
 			return true
