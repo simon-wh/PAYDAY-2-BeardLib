@@ -1,9 +1,7 @@
 MenuUI = MenuUI or class()
 function MenuUI:init(params)
-    BeardLib:LoadAddConfig(BeardLib.AssetsDirectory,{{
-        _meta = "texture",
-        path = "guis/textures/menuicons"
-    }})
+    local texture = "guis/textures/menuicons"
+    FileManager:AddFile("texture", texture, path:Combine(BeardLib.AssetsDirectory, texture))
 	local ws = managers.gui_data:create_fullscreen_workspace()
  	ws:connect_keyboard(Input:keyboard())
     ws:connect_mouse(Input:mouse())

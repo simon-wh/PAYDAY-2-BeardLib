@@ -12,6 +12,7 @@ if not _G.BeardLib then
     self.HooksDirectory = self.ModPath .. "Hooks/"
     self.ModulesDirectory = self.ModPath .. "Modules/"
     self.ClassDirectory = self.ModPath .. "Classes/"
+    self.AssetsDirectory = self.ModPath .. "Assets/"
     self.managers = {}
     self._replace_script_data = {}
 
