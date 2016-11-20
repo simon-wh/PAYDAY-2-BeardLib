@@ -8,8 +8,9 @@ function MenuUI:init(params)
  	ws:connect_keyboard(Input:keyboard())
     ws:connect_mouse(Input:mouse())
     params.position = params.position or "Left"
+    params.override_size_limit = params.override_size_limit or true
 	self._fullscreen_ws = ws
-    self._fullscreen_ws_pnl = ws:panel():panel({alpha = 0})
+    self._fullscreen_ws_pnl = ws:panel():panel({alpha = 0, layer = params.layer or 500})
     self._options = {}
     self._menus = {}
 
@@ -22,7 +23,6 @@ function MenuUI:init(params)
         name = "menu_panel",
         halign = "center",
         align = "center",
-        layer = params.layer or 500,
         h = params.h or self._fullscreen_ws_pnl:h(),
         w = params.w or self._fullscreen_ws_pnl:w(),
     })
@@ -171,12 +171,17 @@ function MenuUI:disable()
 	end
 	managers.mouse_pointer:remove_mouse(self._mouse_id)
 end
+function MenuUI:RunToggleClbk()
+    if self.toggle_clbk then
+        self.toggle_clbk(self._menu_closed)
+    end           
+end
 function MenuUI:toggle()
     if self._menu_closed then
         self:enable()
         if self.toggle_clbk then
             self.toggle_clbk(self._menu_closed)
-        end       
+        end
     elseif self:ShouldClose() then    
         self:disable()
         if self.toggle_clbk then

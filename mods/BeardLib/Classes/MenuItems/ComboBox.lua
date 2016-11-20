@@ -46,7 +46,7 @@ function ComboBox:init(parent, params)
         y = 0,
         w = params.panel:w() / 2.5,
         h = math.min(self.menu._fullscreen_ws_pnl:h() - self.panel:top(), h),
-        layer = 1100,
+        layer = self.menu._fullscreen_ws_pnl:layer() + 1,
         visible = false,
         halign = "left",
         align = "left"
