@@ -22,7 +22,7 @@ function table.add_merge(og_table, new_table)
             table.insert(og_table, data)
         else
     		if type(data) == "table" and og_table[i] then
-    			og_table[i] = table.merge(og_table[i], data)
+    			og_table[i] = table.add_merge(og_table[i], data)
     		else
     			og_table[i] = data
     		end

@@ -95,9 +95,14 @@ function WeaponModuleNew:RegisterHook()
         data.AMMO_MAX = data.CLIP_AMMO_MAX * data.NR_CLIPS_MAX
         data.AMMO_PICKUP = w_self:_pickup_chance(data.AMMO_MAX, config.ammo_pickup or 1)
         data.npc = nil
+        data.override = nil
+
+        if config.override then
+            data = table.merge(data, config.override)
+        end
 
         w_self[config.id] = data
-        
+
         local npc_data = table.merge(deep_clone(config.based_on and (w_self[config.based_on .. "_npc"] ~= nil and w_self[config.based_on]) or w_self.g17_npc), table.merge({
             usage = config.third_usage,
             AMMO_MAX = data.AMMO_MAX,
@@ -114,6 +119,10 @@ function WeaponModuleNew:RegisterHook()
             custom = true
         }, config.npc or {}))
 
+        if config.override then
+            npc_data = table.merge(npc_data, config.override)
+        end
+
         --w_self[config.id .. "_npc"] = npc_data
     end)
 
@@ -127,6 +136,11 @@ function WeaponModuleNew:RegisterHook()
         local data = table.merge({
             custom = true
         }, config)
+        data.override = nil
+
+        if config.override then
+            data = table.merge(data, config.override)
+        end
 
         w_self[config.id] = data
         w_self[config.id .. "_npc"] = table.merge(clone(data), {unit=config.unit .. "_npc"})

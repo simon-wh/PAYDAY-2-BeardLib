@@ -80,12 +80,8 @@ if not _G.BeardLib then
     self.modules = {}
     self._mod_lootdrop_items = {}
     self._mod_upgrade_items = {}
-    Global.added_units = Global.added_units or {}
-    self._files_to_load = {}
-    self._custom_packages = {}
     self._updaters = {}
     self._paused_updaters = {}
-    Global.custom_loaded_packages = Global.custom_loaded_packages or {}
 end
 
 function BeardLib:init()
@@ -122,6 +118,7 @@ end
 function BeardLib:RemoveUpadter(id)
     self._updaters[id] = nil
     self._paused_updaters[id] = nil
+    self:RegisterTweak()
 end
 
 function BeardLib:LoadClasses()
@@ -146,6 +143,33 @@ function BeardLib:LoadModules()
             dofile(self.ModulesDirectory .. mdle)
         end
     end
+end
+
+function BeardLib:RegisterTweak()
+    TweakDataHelper:ModifyTweak({
+        name_id = "bm_global_value_mod",
+    	desc_id = "menu_l_global_value_mod",
+    	color = Color(255, 59, 174, 254) / 255,
+    	dlc = false,
+    	chance = 1,
+    	value_multiplier = 1,
+    	durability_multiplier = 1,
+    	--drops = false,
+    	track = false,
+    	sort_number = -10,
+    	--category = "mod"
+    }, "lootdrop", "global_values", "mod")
+
+    TweakDataHelper:ModifyTweak("mod", "lootdrop", "global_value_list_index")
+
+    TweakDataHelper:ModifyTweak({
+        free = true,
+        content = {
+            --loot_global_value = "mod",
+            loot_drops = {},
+            upgrades = {}
+        }
+    }, "dlc", "mod")
 end
 
 function BeardLib:LoadModOverridePlus()
@@ -183,71 +207,6 @@ end
 function BeardLib:log(str, ...)
     log("[BeardLib] " .. string.format(str, ...))
 end
-
-function BeardLib:ProcessScriptData(PackManager, path, ext, data)
-    if ext == Idstring("menu") then
-        if MenuHelperPlus and MenuHelperPlus:GetMenuDataFromHashedFilepath(path:key()) then
-            data = MenuHelperPlus:GetMenuDataFromHashedFilepath(path:key())
-        end
-    end
-
-    if self._replace_script_data[ext:key()] and self._replace_script_data[ext:key()][path:key()] then
-        for _, replacement in pairs(self._replace_script_data[ext:key()][path:key()]) do
-
-            if not replacement.options.use_clbk or replacement.options.use_clbk() then
-                --self:log("Replace: " .. tostring(path:key()))
-
-                local fileType = replacement.load_type
-                local file = io.open(replacement.path, fileType == "binary" and "rb" or 'r')
-
-                if file then
-                    local read_data = file:read("*all")
-
-                    local new_data
-                    if fileType == "json" then
-                        new_data = json.custom_decode(read_data)
-                    elseif fileType == "xml" then
-                        new_data = ScriptSerializer:from_xml(read_data)
-                    elseif fileType == "custom_xml" then
-                        new_data = ScriptSerializer:from_custom_xml(read_data)
-                    elseif fileType == "generic_xml" then
-                        new_data = ScriptSerializer:from_generic_xml(read_data)
-                    elseif fileType == "binary" then
-                        new_data = ScriptSerializer:from_binary(read_data)
-                    else
-                        new_data = json.custom_decode(read_data)
-                    end
-
-                    if ext == Idstring("nav_data") then
-                        self.Utils:RemoveMetas(new_data)
-                    elseif (ext == Idstring("continents") or ext == Idstring("mission")) and fileType=="custom_xml" then
-                        self.Utils:RemoveAllNumberIndexes(new_data, true)
-                    end
-
-                    if new_data then
-                        if replacement.options.merge_mode then
-                            if replacement.options.merge_mode == "merge" then
-                                table.merge(data, new_data)
-                            elseif replacement.options.merge_mode == "script_merge" then
-                                table.script_merge(data, new_data)
-                            elseif replacement.options.merge_mode == "add" then
-                                table.add(data, new_data)
-                            end
-                        else
-                            data = new_data
-                        end
-                    end
-                    file:close()
-                end
-            end
-        end
-    end
-
-    Hooks:Call("BeardLibPreProcessScriptData", PackManager, path, ext, data)
-    Hooks:Call("BeardLibProcessScriptData", PackManager, path, ext, data)
-
-    return data
-end]]
 
 function BeardLib:ReplaceScriptData(replacement, replacement_type, target_path, target_ext, options)
     options = type(options) == "table" and options or {}

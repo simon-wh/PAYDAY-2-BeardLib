@@ -17,7 +17,7 @@ function tdh:ModifyTweak(data, ...)
         key = k
     end
     if type(dest_tbl[key]) == "table" then
-        table.merge(dest_tbl[key], data)
+        table.add_merge(dest_tbl[key], data)
     else
         dest_tbl[key] = data
     end
@@ -30,7 +30,7 @@ end
 
 --Takes tweak_main and tweak_data_tbl for cases where this is being called from a tweak init function as it wont have been inserted into the tweak_data main table yet.
 function tdh:Apply(tweak_main, tweak_data_tbl, tbl_name)
-    table.merge(tweak_data_tbl or (tbl_name and tweak_main[tbl_name]) or tweak_main or {}, (tbl_name and self._storage[tbl_name] or self._storage) or {})
+    table.add_merge(tweak_data_tbl or (tbl_name and tweak_main[tbl_name]) or tweak_main or {}, (tbl_name and self._storage[tbl_name] or self._storage) or {})
     if tbl_name then
         self._storage[tbl_name] = nil
         if self.callback[tbl_name] then
