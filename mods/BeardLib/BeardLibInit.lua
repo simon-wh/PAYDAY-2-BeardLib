@@ -28,7 +28,7 @@ end)
 
 Hooks:Add("MenuManagerSetupCustomMenus", "Base_SetupBeardLibMenu", function( menu_manager, nodes )
     local main_node = MenuHelperPlus:NewNode(nil, {
-        name = BeardLib.MainMenu,
+        name = BeardLib.config.main_menu,
         menu_components =  managers.menu._is_start_menu and "player_profile menuscene_info news game_installing" or nil
     })
 
@@ -39,7 +39,7 @@ Hooks:Add("MenuManagerSetupCustomMenus", "Base_SetupBeardLibMenu", function( men
         title = "BeardLibMainMenu",
         node_name = "options",
         position = managers.menu._is_start_menu and 9 or 7,
-        next_node = BeardLib.MainMenu,
+        next_node = BeardLib.config.main_menu,
     })
 end)
 

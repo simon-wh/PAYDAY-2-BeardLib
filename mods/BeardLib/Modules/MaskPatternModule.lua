@@ -33,14 +33,13 @@ function MaskPatternModule:RegisterHook()
             custom = true
         }, self._config)
         bm_self.textures[self._config.id] = data
-        if data.dlc == BeardLib.definitions.module_defaults.item.default_dlc then
-            table.insert(BeardLib._mod_lootdrop_items, {
+        if data.dlc then
+            TweakDataHelper:ModifyTweak({{
                 type_items = "textures",
                 item_entry = self._config.id,
-                amount = default_amount,
-                global_value = data.global_value ~= BeardLib.definitions.module_defaults.item.default_global_value and data.global_value or nil
-            })
-
+                amount = self._config.default_amount,
+                global_value = data.global_value
+            }}, "dlc", data.dlc, "content", "loot_drops")
         end
     end)
 end

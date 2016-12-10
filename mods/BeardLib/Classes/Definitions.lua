@@ -1,4 +1,4 @@
-BeardLib.script_data_types = {
+--[[BeardLib.script_data_types = {
     "sequence_manager",
     "environment",
     "menu",
@@ -101,11 +101,12 @@ BeardLib.script_data_formats = {
     "generic_xml",
     "custom_xml",
     "binary",
-}
+}]]
 
 BeardLib.definitions = {}
 
-BeardLib.definitions.mod_override = "assets/mod_overrides/"
+--BeardLib.definitions.mod_override = "assets/mod_overrides/"
+-- Should be moved to a config xml file
 BeardLib.definitions.module_defaults = {
     item = {
         default_global_value = "mod",

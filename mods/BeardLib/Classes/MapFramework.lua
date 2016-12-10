@@ -1,7 +1,7 @@
 MapFramework = MapFramework or class(FrameworkBase)
 
 function MapFramework:init()
-    self._directory = BeardLib.MapsPath
+    self._directory = BeardLib.config.maps_dir
     self.super.init(self)
 end
 
@@ -18,3 +18,5 @@ function MapFramework:RegisterHooks()
         end
     end
 end
+
+return MapFramework

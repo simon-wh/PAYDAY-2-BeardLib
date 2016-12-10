@@ -8,13 +8,11 @@ tdh._callbacks = {}
 
 function tdh:ModifyTweak(data, ...)
     local dest_tbl = tweak_data or self._storage
-    local key
-    for _, k in pairs({...}) do
-        if key then
-            dest_tbl[k] = dest_tbl[k] or {}
-            dest_tbl = dest_tbl[k]
-        end
-        key = k
+    local path = {...}
+    local key = table.remove(path)
+    for _, k in pairs(path) do
+        dest_tbl[k] = dest_tbl[k] or {}
+        dest_tbl = dest_tbl[k]
     end
     if type(dest_tbl[key]) == "table" then
         table.add_merge(dest_tbl[key], data)

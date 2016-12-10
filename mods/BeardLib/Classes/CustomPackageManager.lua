@@ -91,7 +91,7 @@ function cmp:LoadPackageConfig(directory, config)
             end
         end
     end
-    --For some reason this needs to be here or the game will go into a hissy fit
+    --For some reason this needs to be here, instead of loading in the main loop or the game will go into a hissy fit 
     for _, file in pairs(loading) do
         local ids_ext, ids_path = unpack(file)
         FileManager:LoadAsset(ids_ext, ids_path)
@@ -100,7 +100,7 @@ end
 
 
 function cmp:UnloadPackageConfig(config)
-    --[[BeardLib:log("Unloading added files")
+    BeardLib:log("Unloading added files")
     for i, child in ipairs(config) do
         if type(child) == "table" then
             local typ = child._meta
@@ -120,5 +120,5 @@ function cmp:UnloadPackageConfig(config)
                 BeardLib:log("[ERROR] Node in %s does not contain a definition for both type and path", add_file_path)
             end
         end
-    end]]
+    end
 end

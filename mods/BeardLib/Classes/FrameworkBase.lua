@@ -12,24 +12,25 @@ function FrameworkBase:init()
     self:Load()
 end
 
+function FrameworkBase:LoadMod(dir, path, main_file)
+	declare("ModPath", path)
+	local success, node_obj = pcall(function() return self._mod_core:new(main_file, self.auto_init_modules) end)
+	if success then
+		BeardLib:log("Loaded Config: %s", path)
+		self._loaded_mods[dir] = node_obj
+	else
+		BeardLib:log("[ERROR] An error occured on initilization of Mod %s. Error:\n%s", dir, tostring(node_obj))
+	end
+end
+
 function FrameworkBase:Load()
     local dirs = file.GetDirectories(self._directory)
     if dirs then
         for _, dir in pairs(dirs) do
-            local path = BeardLib.Utils.Path:Combine(self._directory, dir)
-            local main_file = BeardLib.Utils.Path:Combine(path, self.main_file_name)
+            local p = path:Combine(self._directory, dir)
+            local main_file = path:Combine(p, self.main_file_name)
             if io.file_is_readable(main_file) then
-                declare("ModPath", path)
-                local success, node_obj = pcall(function() return self._mod_core:new(main_file, self.auto_init_modules) end)
-                if success then
-                    BeardLib:log("Loaded Config: %s", path)
-                    self._loaded_mods[dir] = node_obj
-                else
-                    BeardLib:log("[ERROR] An error occured on initilization of Map %s. Error:\n%s", dir, tostring(node_obj))
-                end
-                --local cfile = io.open(main_file, 'r')
-                --local data = ScriptSerializer:from_custom_xml(cfile:read("*all"))
-                --self:LoadConfig(dir, self._directory .. "/" .. dir .. "/", data)
+                self:LoadMod(dir, p, main_file)
             elseif not self._ignore_detection_errors then
                 BeardLib:log("[ERROR] Could not read %s", main_file)
             end

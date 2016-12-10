@@ -27,7 +27,10 @@ function MeleeModule:RegisterHook()
         }, self._config.item or self._config))
         dlc = data.dlc
         bm_self.melee_weapons[self._config.id] = data
-        table.insert(BeardLib._mod_upgrade_items, self._config.id)
+
+        if dlc then
+            TweakDataHelper:ModifyTweak({self._config.id}, "dlc", dlc, "content", "upgrades")
+        end
     end)
 
     Hooks:PostHook(UpgradesTweakData, "init", self._config.id .. "AddMeleeUpgradesData", function(u_self)

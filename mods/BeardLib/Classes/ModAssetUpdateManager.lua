@@ -30,7 +30,7 @@ end
 function ModAssetUpdateManager:load_manager_file()
     local file = io.open(self.save_path, 'r')
     if file then
-        local ret, data = pcall(json.decode(file:read("*all")))
+        local ret, data = pcall(function() return json.decode(file:read("*all")) end)
         if ret then
             self._data = data
         end
@@ -47,3 +47,5 @@ function ModAssetUpdateManager:update(t, dt)
         table.remove(self._registered_updates, 1)()
     end
 end
+
+return ModAssetUpdateManager

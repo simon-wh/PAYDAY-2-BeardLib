@@ -39,7 +39,7 @@ function MaskModule:RegisterHook()
                 item_entry = self._config.id,
                 amount = self._config.default_amount,
                 global_value = data.global_value
-            }}, "dlc", "mod", "content", "loot_drops")
+            }}, "dlc", data.dlc, "content", "loot_drops")
         end
     end)
 end

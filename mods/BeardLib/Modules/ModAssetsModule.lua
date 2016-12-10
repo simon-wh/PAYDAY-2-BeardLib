@@ -38,7 +38,7 @@ function ModAssetsModule:init(core_mod, config)
     end
 
     self.folder_names = self._config.use_local_dir and table.remove(string.split(self._mod.ModPath, "/")) or (type(self._config.folder_name) == "string" and {self._config.folder_name} or BeardLib.Utils:RemoveNonNumberIndexes(self._config.folder_name))
-    self.install_directory = self._config.use_local_path and BeardLib.Utils.Path:GetDirectory(self._mod.ModPath) or (self._config.install_directory and self._mod:GetRealFilePath(self._config.install_directory, self) or BeardLib.definitions.mod_override)
+    self.install_directory = self._config.use_local_path and BeardLib.Utils.Path:GetDirectory(self._mod.ModPath) or (self._config.install_directory and self._mod:GetRealFilePath(self._config.install_directory, self) or BeardLib.config.mod_override_dir)
 
     self.version_file = self._config.version_file and self._mod:GetRealFilePath(self._config.version_file, self) or BeardLib.Utils.Path:Combine(self.install_directory, self.folder_names[1], self._default_version_file)
     self._version = 0

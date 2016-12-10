@@ -195,3 +195,5 @@ function fm:update(t,dt)
         _UnLoadAsset(ids_ext, ids_path)
     end
 end
+
+return fm
