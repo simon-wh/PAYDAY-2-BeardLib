@@ -62,7 +62,6 @@
         <hook source="lib/units/beings/player/huskplayermovement" file="HuskPlayerMovement.lua"/>
         <hook source="lib/units/beings/player/playerinventory" file="PlayerInventory.lua"/>
 		<hook source="lib/setups/setup" file="Setup.lua"/>
-        <hook source="lib/managers/menu/blackmarketgui" file="BlackmarketGUI.lua"/>
 	</hooks>
 	<script_data_types>
 		<value_node value="sequence_manager"/>
