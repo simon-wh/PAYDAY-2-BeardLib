@@ -2,19 +2,19 @@ MenuDialog = MenuDialog or class()
 function MenuDialog:init(params)
     params = params or {}
     params.layer = 999
-    params.position = nil
     params.w = nil
-    params.marker_color = params.marker_color or Color("33476a"):with_alpha(0)
-    params.marker_highlight_color = params.marker_highlight_color or Color("33476a")    
+    params.marker_color = params.marker_color or Color.white:with_alpha(0)
+    params.marker_highlight_color = params.marker_highlight_color or Color("4385ef")   
     params.create_items = callback(self, self, "create_items", params)
     params.background_color = nil
     params.background_alpha = nil
-    params.w = nil
     self._dialog = MenuUI:new(params)    
 end
 
 function MenuDialog:create_items(params, menu)   
     params.name = "dialog"
+    params.position = "Center"
+    params.scrollbar = params.scrollbar or false
     params.background_color = params.background_color or Color(0.2, 0.2, 0.2)
     params.background_alpha = params.background_alpha or 0.6
     params.override_size_limit = true
@@ -23,7 +23,11 @@ function MenuDialog:create_items(params, menu)
 end
 
 function MenuDialog:show(params)
-    self._menu:ClearItems()
+    if BeardLib.DialogOpened == self then
+        return
+    end
+    params = params or {}
+    self._menu:ClearItems("default")
     self._dialog:enable()
     self._params = params
     params.w = params.w or 600
@@ -32,31 +36,37 @@ function MenuDialog:show(params)
     self._menu.text_highlight_color = params.text_highlight_color or Color.white
     self._menu.marker_color = params.marker_color or Color("33476a"):with_alpha(0)
     self._menu.marker_highlight_color = params.marker_highlight_color or Color("33476a") 
-    self._menu.background_color = params.background_color or Color(0.2, 0.2, 0.2)
     self._menu.background_alpha = params.background_alpha or 0.6
     self._menu:SetSize(params.w, params.h)
-    self._menu.items_size = params.items_size or 16
-    self._menu:SetPositionByString("Center")
-    self._menu:Divider({
-        name = "title",
-        color = Color.white,
-        text = params.title,
-        h = 30,
-    })
-    for k, item in pairs(params.items) do
-        if self._menu[item.type] then
-            params.items[k] = self._menu[item.type](self._menu, item)
-        end 
+    self._menu.items_size = params.items_size or 20
+    if params.title then
+        self._menu:Divider({
+            name = "title",
+            color = Color.white,
+            text = params.title,
+            label = "default",
+            h = 30,
+        })
+    end
+    if params.items then
+        for k, item in pairs(params.items) do
+            if self._menu[item.type] then
+                item.label = "default"
+                params.items[k] = self._menu[item.type](self._menu, item)
+            end 
+        end
     end
     self._menu:Button({
         name = "yes_btn",
-        text = params.yes or "Yes",
+        text = params.yes or (params.no and "Yes") or "Close",
+        label = "default",
         callback = callback(self, self, "hide", true)
     })
     if params.no then
         self._menu:Button({
             name = "no_btn",
-            text = params.no or "No",
+            text = params.no,
+            label = "default",
             callback = callback(self, self, "hide")
         })
     end

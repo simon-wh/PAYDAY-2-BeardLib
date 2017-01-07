@@ -20,6 +20,7 @@
 		{ "hook_id" : "lib/managers/menumanager", "script_path" : "BeardLibCore.lua"},
 		{ "hook_id" : "lib/managers/jobmanager", "script_path" : "BeardLibCore.lua"},
         { "hook_id" : "lib/managers/achievmentmanager", "script_path" : "BeardLibCore.lua"},
+        { "hook_id" : "lib/managers/menu/scrollablepanel", "script_path" : "BeardLibCore.lua" },
         { "hook_id" : "lib/managers/gameplaycentralmanager", "script_path" : "BeardLibCore.lua"},
 		{ "hook_id" : "lib/managers/menu/menuscenemanager", "script_path" : "BeardLibCore.lua" },
 		{ "hook_id" : "lib/managers/menu/menuinput", "script_path" : "BeardLibCore.lua" },

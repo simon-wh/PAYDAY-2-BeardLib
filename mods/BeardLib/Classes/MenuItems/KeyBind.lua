@@ -24,6 +24,7 @@ function KeyBindItem:SetValue(value, run_callback)
     end
     self.panel:child("keybind_key"):set_text(string.upper(value or "None"))
 end
+
 function KeyBindItem:KeyPressed(o, k)
     local key = Input:keyboard():button_name_str(k)
     if self.CanEdit then
@@ -78,6 +79,7 @@ function KeyBindItem:MouseMoved(x, y)
         self:SetCanEdit(false)
     end
 end
+
 function KeyBindItem:MousePressed(button, x, y)
     if not alive(self.panel) then
         return
@@ -96,6 +98,7 @@ function KeyBindItem:SetCanEdit(CanEdit)
     end    
     self.panel:child("keybind_key"):set_alpha(CanEdit and 0.5 or 1)
 end
+
 function KeyBindItem:GetKeyBind()
     return Idstring(item.value)
 end

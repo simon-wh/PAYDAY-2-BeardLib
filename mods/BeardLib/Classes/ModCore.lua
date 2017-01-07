@@ -41,6 +41,7 @@ function ModCore:LoadConfigFile(path)
         end
     end
 
+    self._clean_config = deep_clone(config)
     self._config = config
 end
 

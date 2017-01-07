@@ -22,9 +22,13 @@
 		<class file="Definitions.lua"/>
 		<class file="MenuUI.lua"/>
 		<class file="MenuDialog.lua"/>
+		<class file="Dialogs/FileBrowserDialog.lua"/>
+		<class file="Dialogs/ListDialog.lua"/>
+		<class file="Dialogs/SelectListDialog.lua"/>
 		<class file="MenuItems/Menu.lua"/>
 		<class file="MenuItems/TextBoxBase.lua"/>
 		<class file="MenuItems/Item.lua"/>
+		<class file="MenuItems/KeyBind.lua"/>
 		<class file="MenuItems/ItemsGroup.lua"/>
 		<class file="MenuItems/ImageButton.lua"/>
 		<class file="MenuItems/Toggle.lua"/>
@@ -52,6 +56,7 @@
         <hook source="lib/managers/weaponfactorymanager" file="WeaponFactoryManager.lua"/>
         <hook source="lib/managers/dialogs/keyboardinputdialog" file="KeyboardInputDialog.lua"/>
         <hook source="core/lib/utils/dev/editor/coreworlddefinition" file="CoreWorldDefinition.lua"/>
+        <hook source="lib/managers/menu/scrollablepanel" file="ScrollablePanel.lua"/>
         <hook source="core/lib/system/coresystem" file="CoreSystem.lua"/>
         <hook source="lib/tweak_data/enveffecttweakdata" file="PreTweakData.lua"/>
         <hook source="lib/tweak_data/tweakdata" file="TweakData.lua"/>

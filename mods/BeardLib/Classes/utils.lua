@@ -162,6 +162,29 @@ function table.script_merge(base_tbl, new_tbl)
     end
 end
 
+function mrotation.copy(rot)
+    if rot then
+        return Rotation(rot:yaw(), rot:pitch(), rot:roll())
+    end
+    return Rotation()
+end
+
+function mrotation.set_yaw(rot, yaw)
+    return mrotation.set_yaw_pitch_roll(rot, yaw, rot:pitch(), rot:roll())
+end
+
+function mrotation.set_pitch(rot, pitch)
+    return mrotation.set_yaw_pitch_roll(rot, rot:yaw(), pitch, rot:roll())
+end
+
+function mrotation.set_roll(rot, roll)
+    return mrotation.set_yaw_pitch_roll(rot, rot:yaw(), rot:pitch(), roll)
+end
+
+function string.pretty2(str)
+    str = tostring(str)
+    return str:gsub("%u", " %1"):gsub("^%s+", "")
+end
 
 function string.key(str)
     local ids = Idstring(str)
@@ -395,6 +418,34 @@ function BeardLib.Utils:RemoveAllNumberIndexes(tbl, shallow)
 	        end
 	    end
 	end
+    return tbl
+end
+
+function BeardLib.Utils:GetNodeByMeta(tbl, meta)
+    if not tbl then return nil end
+
+    for _, v in pairs(tbl) do
+        if type(v) == "table" and v._meta == meta then
+            return v
+        end
+    end
+
+    return nil
+end
+
+function BeardLib.Utils:CleanCustomXmlTable(tbl)
+    if not tbl then return nil end
+
+    for i, v in pairs(tbl) do
+        if type(v) == "table" then
+            if tonumber(i) == nil then
+                tbl[i] = nil
+            else
+                self:CleanCustomXmlTable(v)
+            end
+        end
+    end
+
     return tbl
 end
 

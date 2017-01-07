@@ -1,5 +1,4 @@
-Menu = Menu or class(MenuUI)
-
+Menu = Menu or class()
 function Menu:init(menu, params)
     params.text_color = params.text_color or menu.text_color or Color.white
     params.text_highlight_color = params.text_highlight_color or menu.text_highlight_color or Color.white
@@ -12,14 +11,16 @@ function Menu:init(menu, params)
     params.position = params.position or "Left"
     params.offset = params.offset and self:ConvertOffset(params.offset) or self:ConvertOffset(menu.offset) 
     params.override_size_limit = params.override_size_limit or menu.override_size_limit
-    local w = menu._panel:w() - 12
+    params.control_slice = params.control_slice or menu.control_slice or 2
+    params.auto_align = params.auto_align == nil and true or params.auto_align
+    local w = menu._panel:w()  
     if params.w == "full" then
-        params.w = menu._scroll_panel:w()
+        params.w = menu._panel:w()
     elseif params.w == "half" then
-        params.w = menu._scroll_panel:w() / 2
+        params.w = menu._panel:w() / 2
     end
     params.w = params.w or (w < 400 and w or 400)
-    params.panel = menu._scroll_panel:panel({
+    params.panel = menu._panel:panel({
         name = params.name .. "_panel",
         w = params.w,
         h = params.h,
@@ -35,25 +36,8 @@ function Menu:init(menu, params)
         alpha = params.background_alpha,
         layer = 0
     })
-    local bar_h = params.panel:top() - params.panel:bottom()
-    local scroll_bar = params.panel:panel({
-        name = "scroll_bar",
-        halign = "center",
-        w = 4,
-        layer = 20,
-    })
-    scroll_bar:rect({
-        name = "rect",
-        color = Color.white,
-        layer = 4,
-        h = bar_h,
-    })
-    scroll_bar:set_right(params.panel:right())
-    params.items_panel = params.panel:panel({
-        name = "items_panel",
-        layer = 1,
-        w = params.w - (scroll_bar:w() * 2),
-    })
+    self._scroll = ScrollablePanel:new(params.panel, "ItemsPanel", {padding = 0.0001, scroll_width = params.scrollbar == false and 0 or 8, hide_shade = true})
+    params.items_panel = self._scroll:canvas()
 
     if not menu._first_parent then
         self.visible = self.visible or true
@@ -66,33 +50,38 @@ function Menu:init(menu, params)
     self.menu = menu
     self.items = {}
     self._items = {}
-    if type(params.position) == "table" then
-        self:SetPosition(params.position[1], params.position[2])
+    self:Reposition()
+end
+
+function Menu:Reposition()
+    if type(self.position) == "table" then
+        self:SetPosition(unpack(self.position))
     else
-        self:SetPositionByString(params.position)
+        self:SetPositionByString(self.position)
     end
 end
+
 function Menu:SetPositionByString(pos)
     if string.match(pos, "Center") then
-       self.panel:set_world_center(self.menu._scroll_panel:world_center())
+       self.panel:set_world_center(self.menu._panel:world_center())
     end
     if string.match(pos, "Bottom") then
-       self.panel:set_world_bottom(self.menu._scroll_panel:world_bottom())
+       self.panel:set_world_bottom(self.menu._panel:world_bottom())
     end
     if string.match(pos, "Top") then
-        self.panel:set_world_top(self.menu._scroll_panel:world_top())
+        self.panel:set_world_top(self.menu._panel:world_top())
     end
     if string.match(pos, "Right") then
-        self.panel:set_world_right(self.menu._scroll_panel:world_right())
+        self.panel:set_world_right(self.menu._panel:world_right())
     end
     if string.match(pos, "Left") then
-        self.panel:set_world_left(self.menu._scroll_panel:world_left())
+        self.panel:set_world_left(self.menu._panel:world_left())
     end
-    self:AlignScrollBar()
 end
+
 function Menu:AnimatePosition(pos, position_number)
     pos = pos:lower()
-    local v = position_number or self.menu._scroll_panel["world_" .. pos](self.menu._scroll_panel)
+    local v = position_number or self.menu._panel["world_" .. pos](self.menu._panel)
     local o_v = self.panel["world_" .. pos](self.panel)
     self.panel:animate(function(o)
         local t = 0
@@ -104,29 +93,35 @@ function Menu:AnimatePosition(pos, position_number)
         o["set_world_" .. pos](o, v)
     end)
 end
+
 function Menu:SetPosition(x,y)
     self.panel:set_position(x,y)
-    self:AlignScrollBar()
 end
+
 function Menu:Panel()
     return self.panel
 end
+
 function Menu:SetMaxRow(max)
     self.row_max = max
-    self:AlignItems()
+    if self.auto_align then
+        self:AlignItems()
+    end
 end
+
 function Menu:MouseInside()
     return self.panel:inside(managers.mouse_pointer._mouse:world_position())
 end
+
 function Menu:SetSize(w,h)
     self.panel:set_size(w or self.w,h or self.h)
-    self.panel:child("scroll_bar"):set_h(h or self.h)
-    self.items_panel:set_size((w or self.w) - self.panel:child("scroll_bar"):w(),h or self.h)
-    self.panel:child("scroll_bar"):set_right(self.panel:right())
+    self._scroll:set_size(self.panel:size())
     self.w = w or self.w
     self.h = h or self.h
+    self:Reposition()
     self:RecreateItems()
 end
+
 function Menu:MouseDoubleClick(button, x, y)
     local menu = self.menu
     if self.visible then
@@ -137,64 +132,67 @@ function Menu:MouseDoubleClick(button, x, y)
         end
     end
 end
+
 function Menu:MousePressed(button, x, y)
     local menu = self.menu
     if self.visible then
-        if menu._highlighted and menu._highlighted.parent == self then
-            if menu._highlighted:MousePressed( button, x, y ) then 
-                return true
-            end
-        end
-        if not self.menu._openlist and self.panel:inside(x,y) then
-            if button == Idstring("mouse wheel down") then
-                self:scroll_down()
-                self:MouseMoved( x, y )
-                return true
+        if not self.menu._openlist then
+            if button == Idstring("0") then
+                if self._scroll:mouse_pressed(button, x, y) then
+                    return true
+                end     
+            elseif button == Idstring("mouse wheel down") then
+                if self._scroll:scroll(x, y, -1) then
+                    if menu._highlighted and menu._highlighted.parent == self then
+                        menu._highlighted:MouseMoved(x,y)
+                    end 
+                    return true
+                end
             elseif button == Idstring("mouse wheel up") then
-                self:scroll_up()
-                self:MouseMoved( x, y )
-                return true
+                if self._scroll:scroll(x, y, 1) then
+                    if menu._highlighted and menu._highlighted.parent == self then
+                        menu._highlighted:MouseMoved(x,y)
+                    end 
+                    return true
+                end
             end
         end
-        if button == Idstring("0") then
-            if self.panel:child("scroll_bar"):child("rect"):inside(x, y) then
-                self.menu._grabbed_scroll_bar = self
-                self.panel:child("scroll_bar"):child("rect"):set_color(Color(0.8, 0.8, 0.8))
-                return true
-            end
-            if not self.menu._grabbed_scroll_bar and self.panel:child("scroll_bar"):inside(x, y) then
-                self.menu._grabbed_scroll_bar = self
-                self.panel:child("scroll_bar"):child("rect"):set_color(Color(0.8, 0.8, 0.8))
-                local where = (y - self.panel:world_top()) / (self.panel:world_bottom() - self.panel:world_top())
-                self:scroll(where * self.items_panel:h())
+        if menu._highlighted and menu._highlighted.parent == self then
+            if menu._highlighted:MousePressed(button, x, y) then 
                 return true
             end
         end
     end
 end
+
 function Menu:MouseMoved(x, y)
     if self.menu._openlist then
         self.menu._openlist:MouseMoved(x, y)
         return
     end
-    if self.visible then
-        if self.menu._grabbed_scroll_bar == self then
-            local where = (y - self.panel:world_top()) / (self.panel:world_bottom() - self.panel:world_top())
-            self:scroll(where * self.items_panel:h())
+    if self.visible and self.panel:inside(x,y) then
+        local _, pointer = self._scroll:mouse_moved(nil, x, y) 
+        if pointer then
+            managers.mouse_pointer:set_pointer_image(pointer)
+            return true
+        else
+            managers.mouse_pointer:set_pointer_image("arrow")
         end
         for _, item in ipairs(self._items) do
-            item:MouseMoved(x, y)
+            item:MouseMoved(x, y) 
         end
     end
 end
+
 function Menu:MouseReleased(button, x, y)
-    self.panel:child("scroll_bar"):child("rect"):set_color(Color.white)
+    self._scroll:mouse_released(button, x, y)
     if self:Visible() then
-        if self.menu._highlighted:MouseReleased(button, x, y) then
+        if self.menu._highlighted.MouseReleased and self.menu._highlighted:MouseReleased(button, x, y) then
             return true
         end
     end
 end
+
 function Menu:KeyPressed(o, k)
     if self:Visible() then
         if self.menu._highlighted:KeyPressed( o, k ) then
@@ -202,9 +200,11 @@ function Menu:KeyPressed(o, k)
         end
     end
 end
+
 function Menu:Visible()
     return self.visible and self.menu._highlighted
 end
+
 function Menu:SetVisible(visible)
     self.panel:set_visible(visible)
     self.visible = visible
@@ -212,6 +212,7 @@ function Menu:SetVisible(visible)
         self.menu._openlist:hide()
     end
 end
+
 function Menu:AlignItems()
     local h = 0
     local rows = 1
@@ -236,23 +237,10 @@ function Menu:AlignItems()
             end
         end
     end
-    self.items_panel:set_h(self.row_max and self.row_max == 1 and self.panel:h() or h)
-    if self.items_panel:h() <= self.panel:h() then
-        self.items_panel:set_top(0)
-    end
-    if self.items_panel:h() > self.panel:h() and self.should_scroll_down and not self._grabbed_scroll_bar then
-        self.items_panel:set_bottom(self.panel:h())
-    end
-    self:AlignScrollBar()
+   -- self._scroll:set_canvas_size(self.panel:w(), self.row_max and self.row_max == 1 and self.panel:h() or h)
+    self._scroll:update_canvas_size()
 end
-function Menu:AlignScrollBar()
-    local scroll_bar = self.panel:child("scroll_bar")
-    local scroll_bar_rect = scroll_bar:child("rect")
-    local bar_h = self.panel:top() - self.panel:bottom()
-    scroll_bar_rect:set_h(math.abs( self.panel:h() * (bar_h / self.items_panel:h())))
-    scroll_bar_rect:set_y(-(self.items_panel:y()) * self.panel:h() / self.items_panel:h())
-    scroll_bar:set_visible(self.items_panel:h() > self.panel:h())
-end
+
 function Menu:GetItem( name )
     for _, item in pairs(self._items) do
         if item.name == name then
@@ -261,30 +249,7 @@ function Menu:GetItem( name )
     end
     return nil
 end
-function Menu:scroll_up()
-    if self.items_panel:h() > self.panel:h() then
-        self.items_panel:set_top(math.min(0, self.items_panel:top() + 25))
-        self:AlignScrollBar()
-        return true
-    end
-end
 
-function Menu:scroll_down()
-    if self.items_panel:h() > self.panel:h() then
-        self.items_panel:set_bottom(math.max(self.items_panel:bottom() - 25, self.panel:h()))
-        self:AlignScrollBar()
-        return true
-    end
-end
-function Menu:scroll(y)
-    if self.items_panel:h() > self.panel:h() then
-        self.items_panel:set_y(math.clamp(-y, -self.items_panel:h() ,0))
-        self.items_panel:set_bottom(math.max(self.items_panel:bottom(), self.panel:h()))
-        self.items_panel:set_top(math.min(0, self.items_panel:top()))
-        self:AlignScrollBar()
-        return true
-    end
-end
 function Menu:ClearItems(label)
     local temp = clone(self._items)
     self._items = {}
@@ -312,8 +277,11 @@ function Menu:ClearItems(label)
         self.menu._openlist:hide()
     end
     self.items_panel:set_y(0)
-    self:AlignItems()
+    if self.auto_align then
+        self:AlignItems()
+    end
 end
+
 function Menu:RecreateItems()
     self.items = {}
     local temp = clone(self._items)     
@@ -323,15 +291,24 @@ function Menu:RecreateItems()
     end
     self.items_panel:set_y(0)
 end
+
 function Menu:RemoveItem(item)       
-    item.panel:parent():remove(item.panel)
+    if alive(item.panel) then
+        item.panel:parent():remove(item.panel)
+    end
+    if item.type_name == "ItemsGroup" and item.items then
+        item.items = {}
+    end
     if item.list then
         item.list:parent():remove(item.list)
     end
     table.delete(self.items, item)
     table.delete(self._items, item)
-    self:AlignItems()
+    if self.auto_align then
+        self:AlignItems()
+    end
 end
+
 function Menu:UpdateParams(params)
     params = params or {}
     self.text_color = params.text_color or self.menu.text_color
@@ -363,61 +340,75 @@ function Menu:UpdateParams(params)
     end        
     self:RecreateItems()
 end
+
 function Menu:KeyBind(params)
     self:ConfigureItem(params)
     return self:NewItem(KeyBindItem:new(self, params))
 end
+
 function Menu:Toggle(params)
     self:ConfigureItem(params)
     return self:NewItem(Toggle:new(self, params))
 end
+
 function Menu:ItemsGroup(params)
     self:ConfigureItem(params)
     return self:NewItem(ItemsGroup:new(self, params))
 end
+
 function Menu:ImageButton(params)
     self:ConfigureItem(params)
     return self:NewItem(ImageButton:new(self, params))
 end
+
 function Menu:Button(params)
     self:ConfigureItem(params)
     return self:NewItem(Item:new(self, params))
 end
+
 function Menu:ComboBox(params)
     self:ConfigureItem(params)
     return self:NewItem(ComboBox:new(self, params))
 end
+
 function Menu:TextBox(params)
     self:ConfigureItem(params)
     return self:NewItem(TextBox:new(self, params))
 end
+
 function Menu:NumberBox(params)
     self:ConfigureItem(params)
     params.type_name = "NumberBox"
     params.filter = "number"
     return self:NewItem(TextBox:new(self, params))
 end
+
 function Menu:ComboBox(params)
     self:ConfigureItem(params)
     return self:NewItem(ComboBox:new(self, params))
 end
+
 function Menu:Slider(params)
     self:ConfigureItem(params)
     return self:NewItem(Slider:new(self, params))
 end
+
 function Menu:Divider(params)
     self:ConfigureItem(params)
     params.type_name = "Divider"
     return self:NewItem(Item:new(self, params))
 end
+
 function Menu:Table(params)
     self:ConfigureItem(params)
     return self:NewItem(Table:new(self, params))
 end
+
 function Menu:ContextMenu(params)
     self:ConfigureItem(params)
     return self:NewItem(ContextMenu:new(self, params))
 end
+
 function Menu:GetIndex(name)
     for k, item in pairs(self._items) do
         if item.name == name then
@@ -426,6 +417,7 @@ function Menu:GetIndex(name)
     end
     return 1
 end
+
 function Menu:ConvertOffset(offset)
     if offset then
         if type(offset) == "number" then
@@ -434,9 +426,10 @@ function Menu:ConvertOffset(offset)
             return offset
         end
     else
-        return {0,0}
+        return {2,1}
     end
 end
+
 function Menu:ConfigureItem(item)
     if type(item) ~= "table" then
         log(tostring( debug.traceback() ))
@@ -444,7 +437,7 @@ function Menu:ConfigureItem(item)
     end
     item.parent = self
     item.menu = self.menu
-    item.enabled = item.enabled or true
+    item.enabled = item.enabled == nil and true or item.enabled
     item.text_color = item.text_color or self.text_color
     item.text_highlight_color = item.text_highlight_color or self.text_highlight_color
     item.items_size = item.items_size or self.items_size
@@ -457,6 +450,7 @@ function Menu:ConfigureItem(item)
     item.offset = item.offset and self:ConvertOffset(item.offset) or self.offset
     item.override_size_limit = item.override_size_limit or self.override_size_limit
     item.w = (item.w or (item.parent_panel:w() > 300 and not item.override_size_limit and 300 or item.parent_panel:w())) - (item.size_by_text and 0 or item.offset[1])
+    item.control_slice = item.control_slice or self.control_slice
     if type(item.index) == "string" then
         local split = string.split(item.index, "|")
         local wanted_item = self:GetItem(split[2] or split[1]) 
@@ -482,6 +476,8 @@ function Menu:NewItem(item)
             table.insert(self.items, item)
         end
     end
-    self:AlignItems()
+    if self.auto_align then
+        self:AlignItems()
+    end
     return item
 end

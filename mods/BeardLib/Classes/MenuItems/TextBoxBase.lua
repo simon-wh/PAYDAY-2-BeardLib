@@ -6,7 +6,7 @@ function TextBoxBase:init(params)
 		h = params.h or self.items_size,
         layer = 10
 	})
-	self.text_panel:set_right(params.panel:w())
+	self.text_panel:set_right(params.panel:w() - 1)
 	self.text_panel:rect({
         name = "line",
 		halign = "grow",
@@ -24,7 +24,7 @@ function TextBoxBase:init(params)
         h = self.text_panel:h() - 2,
         color = params.text_color or self.text_color,
         font = self.parent.font or "fonts/font_large_mf",
-        font_size = self.items_size- 2
+        font_size = self.items_size - 2
     })
     text:set_selection(text:text():len())
     local caret = self.text_panel:rect({
@@ -47,12 +47,9 @@ function TextBoxBase:init(params)
 		end
     	return TextBoxBase.MousePressed(self, ...)
     end)
-    Hooks:PostHook(self, "MouseReleased", "MouseReleasedText", function(self, ...)
-		if not alive(self.text_panel) then
-			return
-		end
+    function self:MouseReleased(...)
     	return TextBoxBase.MouseReleased(self, ...)
-    end)
+    end
     Hooks:PostHook(self, "KeyPressed", "KeyPressedText", function(self, ...)
 		if not alive(self.text_panel) then
 			return
@@ -66,6 +63,7 @@ function TextBoxBase:init(params)
  	self.fixed_text = TextBoxBase.fixed_text
 	self.lines = params.lines
 	self.btn = params.btn or "0"
+    self._before_text = params.text
  	text:enter_text(callback(self, TextBoxBase, "enter_text"))
  	self.update_text = params.update_text or function(self, ...) self:SetValue(...) end
     self:update_caret()
@@ -273,6 +271,5 @@ function TextBoxBase:MouseMoved( x, y )
 end
 
 function TextBoxBase:MouseReleased( button, x, y )
-    self.super.MouseReleased( self, button, x, y )
     self._start_select = nil
 end

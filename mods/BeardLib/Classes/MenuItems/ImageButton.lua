@@ -1,6 +1,6 @@
-ImageButton = ImageButton or class()
+ImageButton = ImageButton or class(Item)
 
-function ImageButton:init( parent, params )
+function ImageButton:init(parent, params)
     self.type_name = "ImageButton"
     params.panel = params.parent_panel:panel({ 
         name = params.name,
@@ -8,14 +8,14 @@ function ImageButton:init( parent, params )
         h = params.h,
         y = 10,
     }) 
-    local Marker = params.panel:rect({
+    params.bg = params.panel:rect({
         name = "bg", 
         color = params.marker_color,
         halign="grow", 
         valign="grow", 
         layer = -1 
     })    
-    local Icon = params.panel:bitmap({
+    params.icon = params.panel:bitmap({
         name = "icon", 
         texture = params.texture,
         texture_rect = params.texture_rect,
@@ -27,7 +27,7 @@ function ImageButton:init( parent, params )
         valign="center",         
         layer = 1
     })
-    Icon:set_world_center(params.panel:world_center())
+    params.icon:set_world_center(params.panel:world_center())
     params.div = params.panel:rect({
         color = params.color,
         visible = params.color ~= nil,
@@ -37,6 +37,7 @@ function ImageButton:init( parent, params )
     table.merge(self, params)
     self.parent = parent
     self.menu = parent.menu    
+    self._items = {}
     if params.group then
       if params.group.type_name == "group" then
           params.group:AddItem(self)
@@ -46,67 +47,6 @@ function ImageButton:init( parent, params )
     end
 end
 
-function ImageButton:SetValue(value, run_callback)
-    self.value = value
-    if run_callback then
-        self:RunCallback()
-    end
-end
-function ImageButton:SetEnabled(enabled)
-    self.enabled = enabled
-end
-function ImageButton:Index()
-    return self.parent:GetIndex(self.name)
-end
-function ImageButton:KeyPressed( o, k )
-
-end
-function ImageButton:MousePressed( button, x, y )
-    if not self.enabled then
-        return
-    end
-    if self.callback and alive(self.panel) and self.panel:inside(x,y) and button == Idstring("0") then
-        self.callback(self.parent, self)
-        return true
-    end
-end
-
-function ImageButton:RunCallback()
-    if self.callback then
-        self.callback(self.menu, self)
-    end  
-end
 function ImageButton:SetImage(texture, texture_rect)
     self.panel:child("icon"):set_image(texture, texture_rect)
-end
-
-function Item:SetParam(param, value)
-    self[param] = value
-end
-
-function ImageButton:SetCallback( callback )
-    self.callback = callback
-end
-
-function ImageButton:MouseMoved( x, y, highlight )
-    if not self.enabled then
-        return
-    end    
-    if not self.menu._openlist and not self.menu._slider_hold then
-        if self.panel:inside(x, y) then
-          if highlight ~= false then
-                self.panel:child("bg"):set_color(self.marker_highlight_color)
-          end
-            self.highlight = true
-            self.menu._highlighted = self
-        else
-          self.panel:child("bg"):set_color(self.marker_color)
-          self.highlight = false       
-        end 
-        self.menu._highlighted = self.menu._highlighted and (alive(self.menu._highlighted.panel) and self.menu._highlighted.panel:inside(x,y)) and self.menu._highlighted or nil
-    end
-end
-
-function ImageButton:MouseReleased( button, x, y )
-
 end

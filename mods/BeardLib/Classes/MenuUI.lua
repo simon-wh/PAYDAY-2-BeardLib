@@ -1,7 +1,7 @@
 MenuUI = MenuUI or class()
 function MenuUI:init(params)
     local texture = "guis/textures/menuicons"
-    FileManager:AddFile("texture", texture, path:Combine(BeardLib.config.assets_dir, texture))
+    FileManager:AddFile("texture", texture, BeardLib.Utils.Path:Combine(BeardLib.config.assets_dir, texture .. ".texture"))
 	local ws = managers.gui_data:create_fullscreen_workspace()
  	ws:connect_keyboard(Input:keyboard())
     ws:connect_mouse(Input:mouse())
@@ -9,7 +9,6 @@ function MenuUI:init(params)
     params.override_size_limit = params.override_size_limit or true
 	self._fullscreen_ws = ws
     self._fullscreen_ws_pnl = ws:panel():panel({alpha = 0, layer = params.layer or 500})
-    self._options = {}
     self._menus = {}
 
     if params.w == "full" then
@@ -49,21 +48,6 @@ function MenuUI:init(params)
             self._panel:set_right(self._fullscreen_ws_pnl:right())
         end
     end
-    self._scroll_panel = self._panel:panel({
-        name = "scroll_panel",
-    })
-    local bar_h = self._scroll_panel:top() - self._scroll_panel:bottom()
-    self._scroll_panel:panel({
-        name = "scroll_bar",
-        w = 4,
-        layer = 20,
-    }):rect({
-		name = "rect",
-		color = params.text_color or Color.black,
-		layer = 4,
-		alpha = params.alpha or 0.5,
-		h = bar_h,
-    })
     table.merge(self, params)
 	if params.create_items then
 		params.create_items(self)
@@ -86,8 +70,8 @@ function MenuUI:init(params)
             self._slider_hold:SetValueByMouseXPos(x)
         end
         self._old_x = x
-        self._old_y = y
-    end, true)
+        self._old_y = y       
+    end, true)    
     return self
 end
 
@@ -99,10 +83,6 @@ function MenuUI:UpdateParams(params)
         color = params.background_color,
         alpha = params.background_alpha,        
     })    
-    self._scroll_panel:child("scroll_bar"):child("rect"):configure({
-        color = self.text_color or Color.black,
-        alpha = self.alpha or 0.5,        
-    })
     if type(self.position) == "table" then
         self._panel:position(self.position[1] or self._panel:x(), self.position[2] or self._panel:y())
     else
@@ -127,16 +107,13 @@ function MenuUI:NewMenu(params)
     return menu
 end
 
-function MenuUI:SetSize( w, h )
+function MenuUI:SetSize(w, h)
     self._panel:set_size(w, h)
     if self.position == "right" then
         self._panel:set_right(self._fullscreen_ws_pnl:right())
     elseif self.position == "center" then
         self._panel:set_center(self._fullscreen_ws_pnl:center())
     end
-    self._scroll_panel:set_size(w,  h - (self.tabs and 35 or 0))
-    self._scroll_panel:set_x(0)
-    self._scroll_panel:child("scroll_bar"):set_h(h)
     for i, menu in pairs(self._menus) do
         menu.items_panel:set_size(w- 12, h)
         menu:RecreateItems()
@@ -225,9 +202,8 @@ end
 function MenuUI:SetParam(param, value)
     self[param] = value
 end
-function MenuUI:MouseReleased( o, button, x, y )
+function MenuUI:MouseReleased(o, button, x, y)
 	self._slider_hold = nil
-	self._grabbed_scroll_bar = nil
     for _, menu in ipairs(self._menus) do
         if menu:MouseReleased(button, x, y) then
             return
@@ -271,8 +247,10 @@ function MenuUI:ShouldClose()
 	return false
 end
 function MenuUI:MouseMoved(o, x, y)
-	for _, menu in ipairs( self._menus ) do
-		menu:MouseMoved(x, y)
+	for _, menu in ipairs(self._menus) do
+        if menu:MouseMoved(x, y) then
+            return
+        end
 	end
     if self.mouse_move then
         self.mouse_move(x, y)

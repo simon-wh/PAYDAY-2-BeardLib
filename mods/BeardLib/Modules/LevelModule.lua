@@ -14,6 +14,7 @@ end
 
 function LevelModule:Load()
     if Global.level_data and Global.level_data.level_id == self._config.id then
+        BeardLib.current_map_mod = self._mod
         if self._config.include then
             for i, include_data in ipairs(self._config.include) do
                 if include_data.file then

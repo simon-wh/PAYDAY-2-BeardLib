@@ -1,6 +1,6 @@
-ItemsGroup = ItemsGroup or class()
+ItemsGroup = ItemsGroup or class(Item)
 
-function ItemsGroup:init( parent, params )    
+function ItemsGroup:init(parent, params)    
     self.type_name = "ItemsGroup"
     params.items = params.items or {}
     params.panel = parent.items_panel:panel({ 
@@ -10,14 +10,13 @@ function ItemsGroup:init( parent, params )
     }) 
     params.toggle = params.panel:bitmap({
         name = "toggle",
-        w = parent.items_size,
-        h = parent.items_size,
-        texture = "guis/textures/menu_arrows",
+        w = parent.items_size - 4,
+        h = parent.items_size - 4,
+        texture = "guis/textures/menuicons",
         color = params.text_color or Color.black,
-        rotation = -90,
+        y = 2,
         x = 4,
-        y = -1,
-        texture_rect = {24,0,24,24},
+        texture_rect = {42,2,16,16},
         layer = 6,
     })    
     params.title = params.panel:text({
@@ -45,25 +44,14 @@ function ItemsGroup:init( parent, params )
     self.menu = parent.menu
 end
 
-function ItemsGroup:SetValue(value)
-    self.value = value
-end
-function ItemsGroup:SetEnabled(enabled)
-    self.enabled = enabled
-end
-function ItemsGroup:Index()
-    return self.parent:GetIndex(self.name)
-end
-function ItemsGroup:KeyPressed( o, k )
-
-end
 function ItemsGroup:MousePressed( button, x, y )
-    if button == Idstring("0") and alive(self.panel) and self.panel:inside(x,y) then
+    if button == Idstring("0") and alive(self.panel) and self.panel:child("bg"):inside(x,y) then
         self:Toggle()
         return true
     end
 end
-function ItemsGroup:AddItem( item )
+
+function ItemsGroup:AddItem(item)
     table.insert(self.items, item)
     self:AlignItems()
 end
@@ -79,23 +67,39 @@ function ItemsGroup:Toggle()
         item:SetEnabled(not self.closed)
         item.panel:set_visible(not self.closed)
     end
-    self.toggle:set_rotation(self.closed and -180 or -90)
+    self.toggle:set_texture_rect(self.closed and 42 or 2, self.closed and 2 or 0, 16, 16)
     self.panel:child("bg"):set_visible(not self.closed)
     self:AlignItems()
 end
+
 function ItemsGroup:AlignItems(text)
     local h = self.parent.items_size
+    local rows = 1
     for i, item in ipairs(self.items) do
-        if i == 1 then
-            item.panel:set_top(self.parent.items_size)
+        local offset = item.offset
+        item.panel:set_x(offset[1])            
+        item.panel:set_y(self.parent.items_size + offset[2])
+        if self.row_max and i == (self.row_max * rows) + 1 then
+            if i > 1 then
+                item.panel:set_x(self.items[self.row_max * rows].panel:right() + offset[1])
+            end
+            rows = rows + 1
         else
-            item.panel:set_top(self.items[i - 1].panel:bottom() + 2)
+            if self.row_max and self.items[(self.row_max * (rows - 1)) + 1] then
+                item.panel:set_x(self.items[(self.row_max * (rows - 1)) + 1].panel:x() + offset[1])
+            end
+            if i > 1 then
+                item.panel:set_y(self.items[i - 1].panel:bottom() + offset[2])
+            end
+            if not self.row_max or i <= self.row_max then
+                h = h + item.panel:h() + offset[2]
+            end
         end
-        h = h + item.panel:h() + 2
     end
-    self.panel:set_h( self.closed and self.parent.items_size or h )
+    self.panel:set_h(self.closed and self.parent.items_size or h)
     self.parent:AlignItems()
 end
+
 function ItemsGroup:SetText(text)
     self.panel:child("title"):set_text(text)
 end
@@ -104,11 +108,11 @@ function Item:SetParam(param, value)
     self[param] = value
 end
 
-function ItemsGroup:SetCallback( callback )
+function ItemsGroup:SetCallback(callback)
     self.callback = callback
 end
 
-function ItemsGroup:MouseMoved( x, y, highlight )
+function ItemsGroup:MouseMoved(x, y, highlight)
     if not alive(self.panel) or not self.enabled then
         return
     end    
@@ -123,6 +127,4 @@ function ItemsGroup:MouseMoved( x, y, highlight )
     end   
 end
 
-function ItemsGroup:MouseReleased( button, x, y )
-
-end
+ 

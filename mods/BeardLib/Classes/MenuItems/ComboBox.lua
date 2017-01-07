@@ -9,10 +9,11 @@ function ComboBox:init(parent, params)
     if type(text) == "table" then
         text = text.text
     end
+    local control_size = self.panel:w() / self.control_slice
     local combo_selected = self.panel:text({
         name = "combo_selected",
         text = self.localized_items and text and managers.localization:text(text) or text or "",
-        w = self.panel:w() / 2,
+        w = control_size - 10,
         h = self.items_size,
         valign = "center",
         align = "center",
@@ -24,13 +25,13 @@ function ComboBox:init(parent, params)
     })
     local combo_bg = self.panel:bitmap({
         name = "combo_bg",
-        w = self.panel:w() / 2,
+        w = control_size,
         h = self.items_size,
         layer = 1,
         color = ((parent.background_color or Color.white) / 1.2):with_alpha(1),
     })
     combo_bg:set_right(self.panel:w())
-    combo_selected:set_right(self.panel:w())
+    combo_selected:set_left(combo_bg:left() + 2)
     self.panel:bitmap({
         name = "combo_icon",
         w = self.items_size - 4,
@@ -39,12 +40,12 @@ function ComboBox:init(parent, params)
         texture_rect = {4,0,16,16},
         color = not parent.background_color and Color.black,
         layer = 2,
-    }):set_right(combo_bg:right() - 2)
+    }):set_right(combo_bg:right() - 2.5)
     local h = math.max(1, #self.items) * 18
     self.list = self.menu._fullscreen_ws_pnl:panel({
         name = self.name.."list",
         y = 0,
-        w = params.panel:w() / 2.5,
+        w = control_size,
         h = math.min(self.menu._fullscreen_ws_pnl:h() - self.panel:top(), h),
         layer = self.menu._fullscreen_ws_pnl:layer() + 1,
         visible = false,
@@ -89,10 +90,12 @@ function ComboBox:init(parent, params)
     })
     self:update_search()
 end
-function ComboBox:SetItems( items )
+
+function ComboBox:SetItems(items)
     self.items = items or {}
     self:update_search()
 end
+
 function ComboBox:CreateItems()
     self.items_panel:clear()
     local bg = self.list:child("bg")
@@ -115,6 +118,7 @@ function ComboBox:CreateItems()
         self:show()
     end
 end
+
 function ComboBox:SetValue(value, run_callback, no_items_clbk)    
     local v = self.items[value]
     if run_callback and type(v) == "table" and not no_items_clbk and v.callback then
@@ -129,6 +133,10 @@ function ComboBox:SetValue(value, run_callback, no_items_clbk)
     self.super.SetValue(self, value, run_callback)
 end
 
+function ComboBox:SetSelectedItem(value, ...)    
+    self:SetValue(table.get_key(self.items, value), ...)
+end
+
 function ComboBox:SelectedItem()
     return self.items[self.value]
 end
@@ -140,8 +148,8 @@ function ComboBox:hide()
     self.menu._openlist = nil
 end
 function ComboBox:show()
-    local bottom_h = (self.menu._scroll_panel:world_bottom() - self.panel:world_bottom()) - 4
-    local top_h = (self.panel:world_top() - self.menu._scroll_panel:world_top()) - 4
+    local bottom_h = (self.menu._panel:world_bottom() - self.panel:world_bottom()) - 4
+    local top_h = (self.panel:world_top() - self.menu._panel:world_top()) - 4
     local items_h = (#self.found_items * 14) + self.items_size
     local normal_pos = items_h <= bottom_h or bottom_h >= top_h
     if (normal_pos and items_h > bottom_h) or (not normal_pos and items_h > top_h) then
@@ -162,6 +170,7 @@ function ComboBox:show()
     self.menu._openlist = self
     self:AlignScrollBar()
 end
+
 function ComboBox:MousePressed( button, x, y )
     if not self.menu._openlist and self.parent.panel:inside(x,y) and self.panel:inside(x,y) then
         if button == Idstring("0") then
@@ -203,11 +212,12 @@ function ComboBox:MousePressed( button, x, y )
             end
         end
         return true
-    elseif self.menu._openlist and button == Idstring("0") or button == Idstring("1")  then
+    elseif self.menu._openlist and (button == Idstring("0") or button == Idstring("1"))  then
         self.menu._openlist:hide()
         return true
     end
 end
+
 function ComboBox:AlignScrollBar()
     local scroll_bar = self._scroll_panel:child("scroll_bar")
     local scroll_bar_rect = scroll_bar:child("rect")
@@ -217,6 +227,7 @@ function ComboBox:AlignScrollBar()
     scroll_bar:set_left(self._scroll_panel:left())
     scroll_bar:set_visible(self.items_panel:h() > self._scroll_panel:h())
 end
+
 function ComboBox:scroll_up()
     if self.items_panel:h() > self._scroll_panel:h() then
         self.items_panel:set_top(math.min(self.items_size, self.items_panel:top() + 20))
@@ -224,6 +235,7 @@ function ComboBox:scroll_up()
         return true
     end
 end
+
 function ComboBox:scroll_down()
     if self.items_panel:h() > self._scroll_panel:h() then
         self.items_panel:set_bottom(math.max(self.items_panel:bottom() - 20, self._scroll_panel:h()))
@@ -231,6 +243,7 @@ function ComboBox:scroll_down()
         return true
     end
 end
+
 function ComboBox:scroll(y)
     if self.items_panel:h() > self._scroll_panel:h() then
         self.items_panel:set_y(math.clamp(-y, -self.items_panel:h(), self.items_size))
@@ -240,6 +253,7 @@ function ComboBox:scroll(y)
         return true
     end
 end
+
 function ComboBox:KeyPressed(o, k)
     if not alive(self.list) then
         return
@@ -248,6 +262,7 @@ function ComboBox:KeyPressed(o, k)
         self.menu._openlist:hide()
     end
 end
+
 function ComboBox:update_search()
     local text = self.text_panel:child("text"):text()
     self.found_items = {}
@@ -265,7 +280,8 @@ function ComboBox:update_search()
     end
     self:CreateItems()
 end
-function ComboBox:MouseMoved( x, y )
+
+function ComboBox:MouseMoved(x, y)
     self.super.MouseMoved(self, x, y)
     if self.menu._openlist == self then
         if self._grabbed_scroll_bar then
@@ -275,7 +291,6 @@ function ComboBox:MouseMoved( x, y )
     end
 end
 
-function ComboBox:MouseReleased( button, x, y )
-    self.super.MouseReleased( button, x, y )
+function ComboBox:MouseReleased(button, x, y)
     self._grabbed_scroll_bar = false
 end

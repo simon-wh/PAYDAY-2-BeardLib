@@ -1,17 +1,17 @@
 Slider = Slider or class(Item)
 
-function Slider:init( parent, params )
+function Slider:init(parent, params)
     params.value = params.value or 1
     self.type_name = "Slider"
     self.size_by_text = false
-	self.super.init( self, parent, params )
+	self.super.init(self, parent, params)
     self.step = self.step or 1
     self.value = tonumber(self.value) or 0
     self.floats = self.floats or 2
     self.filter = "number"
     self.min = self.min or 0
     self.max = self.max or self.min
-    local item_width = params.panel:w() / 2
+    local item_width = params.panel:w() / self.control_slice
 	local slider_bg = params.panel:bitmap({
         name = "slider_bg",
         w = item_width,
@@ -72,11 +72,11 @@ function Slider:SetValue(value, run_callback, reset_selection, no_format)
     self.super.SetValue(self, value, run_callback)
 end
 
-function Slider:SetValueByPercentage( percent )
+function Slider:SetValueByPercentage(percent)
     self:SetValue(self.min + (self.max - self.min) * percent, true, true)
 end
 
-function Slider:MousePressed( button, x, y )
+function Slider:MousePressed(button, x, y)
 	self.super.MousePressed(self, button, x, y)
     if not self.enabled or not alive(self.panel) then
         return
@@ -107,8 +107,4 @@ function Slider:SetValueByMouseXPos(x)
     end
     local slider_bg = self.panel:child("slider_bg")
     self:SetValueByPercentage((x - slider_bg:world_left()) / (slider_bg:world_right() - slider_bg:world_left()))
-end
-
-function Slider:MouseReleased( button, x, y )
-    self.super.MouseReleased( self, button, x, y )
 end

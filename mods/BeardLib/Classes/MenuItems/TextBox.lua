@@ -11,13 +11,14 @@ function TextBox:init(parent, params)
     end
 	TextBoxBase.init(self, {
         panel = self.panel,
-        w = params.panel:w() / 2,
+        w = params.panel:w() / (self.text == nil and 1 or self.control_slice),
         value = self.value,
     })
 end
 
 function TextBox:SetValue(value, run_callback, reset_selection)
 	local text = self.text_panel:child("text")
+
 	if self.filter == "number" then
 		value = tonumber(value) or 0
 		if self.max then
@@ -35,7 +36,7 @@ function TextBox:SetValue(value, run_callback, reset_selection)
 	if reset_selection then
 		text:set_selection(text:text():len())
 	end
-	self:update_caret()
+	self:update_caret()	
 	self.super.SetValue(self, value, run_callback)
 end
 
@@ -85,6 +86,4 @@ function TextBox:SetValueByMouseXPos(x)
         self:SetValue(self.value + move, true, true)
 	end      
 end
-function TextBox:MouseReleased( button, x, y )
-    self.super.MouseReleased( self, button, x, y )
-end
+ 

@@ -40,9 +40,11 @@ function ContextMenu:init( parent, params )
         h = bar_h,
     })
 end
+
 function ContextMenu:SetItems( items )
     self.items = items or {}
 end
+
 function ContextMenu:SetValue(value)
     self.super.SetValue(self, value)
     if alive(self.panel) then
@@ -59,6 +61,7 @@ function ContextMenu:hide()
     self.menu._openlist = nil
     self.cantype = false
 end
+
 function ContextMenu:show()
     self.items_panel:clear()
     for k, item in pairs(self.items) do
@@ -204,6 +207,5 @@ function ContextMenu:MouseMoved( x, y )
 end
 
 function ContextMenu:MouseReleased( button, x, y )
-    self.super.MouseReleased( button, x, y )
     self._grabbed_scroll_bar = false
 end

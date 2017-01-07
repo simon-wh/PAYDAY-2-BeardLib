@@ -12,6 +12,17 @@ local sync_game_settings = function(peer_id)
     end
 end
 
+local o_toggle_menu_state = MenuManager.toggle_menu_state
+function MenuManager:toggle_menu_state(...)
+    if BeardLib.DialogOpened then
+        BeardLib.DialogOpened:hide()
+        BeardLib.DialogOpened = nil
+        return
+    else
+        return o_toggle_menu_state(self, ...) 
+    end
+end
+
 function MenuCallbackHandler:start_job(job_data)
     if not managers.job:activate_job(job_data.job_id) then
         return
