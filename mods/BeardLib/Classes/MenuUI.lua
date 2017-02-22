@@ -7,8 +7,9 @@ function MenuUI:init(params)
     ws:connect_mouse(Input:mouse())
     params.position = params.position or "Left"
     params.override_size_limit = params.override_size_limit or true
+    params.layer = params.layer or 0
 	self._fullscreen_ws = ws
-    self._fullscreen_ws_pnl = ws:panel():panel({alpha = 0, layer = params.layer or 500})
+    self._fullscreen_ws_pnl = ws:panel():panel({alpha = 0, layer = (tweak_data.gui.MOUSE_LAYER - 190) + params.layer})
     self._menus = {}
 
     if params.w == "full" then
@@ -180,18 +181,20 @@ function MenuUI:MouseInside()
 end
 
 function MenuUI:KeyPressed(o, k)
+    self._key_pressed = k
+    if self._openlist then
+        self._openlist:KeyPressed(o, k)
+    end
     if self.toggle_key and k == Idstring(self.toggle_key) then
         self:toggle()
     end
     if self._menu_closed then
         return
     end
-	self._key_pressed = k
-	for _, menu in pairs(self._menus) do
-        if menu:KeyPressed(o, k) then
-            return true
-        end
-	end
+    if self._highlighted and self._highlighted.parent:Visible() then
+        self._highlighted:KeyPressed(o, k) 
+        return 
+    end   
     if self.key_press then
         self.key_press(o, k)
     end
@@ -204,6 +207,11 @@ function MenuUI:SetParam(param, value)
 end
 function MenuUI:MouseReleased(o, button, x, y)
 	self._slider_hold = nil
+    if self._highlighted and self._highlighted.parent:Visible() then
+        if self._highlighted.MouseReleased and self._highlighted:MouseReleased(button, x, y) then
+            return 
+        end
+    end
     for _, menu in ipairs(self._menus) do
         if menu:MouseReleased(button, x, y) then
             return
@@ -224,11 +232,21 @@ function MenuUI:MouseDoubleClick(o, button, x, y)
     end
 end
 function MenuUI:MousePressed(o, button, x, y)
-	for _, menu in ipairs(self._menus) do
-		if menu:MousePressed(button, x, y) then
-            return
-		end
-	end
+    if self._openlist then
+        if self._openlist.parent:Visible() then
+            if self._openlist:MousePressed(button, x, y) then
+                return
+            end
+        else
+            self._openlist:hide()
+        end
+    else    
+    	for _, menu in ipairs(self._menus) do
+    		if menu:MousePressed(button, x, y) then
+                return
+    		end
+    	end
+    end
     if self.mouse_press then
         self.mouse_press(button, x, y)
     end
@@ -247,11 +265,27 @@ function MenuUI:ShouldClose()
 	return false
 end
 function MenuUI:MouseMoved(o, x, y)
-	for _, menu in ipairs(self._menus) do
-        if menu:MouseMoved(x, y) then
-            return
+    if self._openlist then
+        if self._openlist.parent:Visible() then
+            if self._openlist:MouseMoved(x, y) then
+                return
+            end
+        else
+            self._openlist:hide()
         end
-	end
+    else
+        if not self:MouseInside() then
+            if self._highlighted then
+                self._highlighted:UnHighlight()
+            end
+        else
+            for _, menu in ipairs(self._menus) do
+                if menu:MouseMoved(x, y) then
+                    return
+                end
+            end
+        end        
+    end
     if self.mouse_move then
         self.mouse_move(x, y)
     end
@@ -261,8 +295,18 @@ function MenuUI:SwitchMenu(menu)
     menu:SetVisible(true)
     self._current_menu = menu
 end
+
+function MenuUI:GetMenu(name)
+    for _, menu in pairs(self._menus) do
+        if menu.name == name then
+            return menu
+        end
+    end
+    return false
+end
+
 function MenuUI:GetItem(name, menu_wanted)
-	for _,menu in pairs(self._menus) do
+	for _, menu in pairs(self._menus) do
 		if menu.name == name then
 			return menu
 		elseif not menu_wanted then
@@ -272,4 +316,5 @@ function MenuUI:GetItem(name, menu_wanted)
 			end
 		end
 	end
+    return false
 end

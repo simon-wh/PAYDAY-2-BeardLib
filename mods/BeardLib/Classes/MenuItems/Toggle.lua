@@ -14,6 +14,11 @@ function Toggle:init(parent, params)
     }):set_right(params.panel:w())
 end
 
+function Toggle:SetEnabled(enabled)
+	self.super.SetEnabled(self, enabled)
+	self.panel:child("toggle"):set_alpha(enabled and 1 or 0.5)
+end
+
 function Toggle:SetValue(value, run_callback)
 	self.super.SetValue(self, value, run_callback)
 	if alive(self.panel) then

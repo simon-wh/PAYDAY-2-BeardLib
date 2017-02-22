@@ -25,7 +25,7 @@ function Menu:init(menu, params)
         w = params.w,
         h = params.h,
         visible = params.visible == true,
-        layer = 21,
+        layer = 1,
     })
     params.panel:rect({
         name = "bg",
@@ -36,7 +36,7 @@ function Menu:init(menu, params)
         alpha = params.background_alpha,
         layer = 0
     })
-    self._scroll = ScrollablePanel:new(params.panel, "ItemsPanel", {padding = 0.0001, scroll_width = params.scrollbar == false and 0 or 8, hide_shade = true})
+    self._scroll = ScrollablePanel:new(params.panel, "ItemsPanel", {layer = 4, padding = 0.0001, scroll_width = params.scrollbar == false and 0 or 8, hide_shade = true})
     params.items_panel = self._scroll:canvas()
 
     if not menu._first_parent then
@@ -50,32 +50,28 @@ function Menu:init(menu, params)
     self.menu = menu
     self.items = {}
     self._items = {}
+    self._visible_items = {}
     self:Reposition()
+    self:AlignItems()
 end
 
 function Menu:Reposition()
-    if type(self.position) == "table" then
+    local t = type(self.position)
+    if t == "table" then
         self:SetPosition(unpack(self.position))
-    else
+    elseif t == "function" then
+        self:position()
+    elseif t == "string" then
         self:SetPositionByString(self.position)
     end
 end
 
 function Menu:SetPositionByString(pos)
-    if string.match(pos, "Center") then
-       self.panel:set_world_center(self.menu._panel:world_center())
-    end
-    if string.match(pos, "Bottom") then
-       self.panel:set_world_bottom(self.menu._panel:world_bottom())
-    end
-    if string.match(pos, "Top") then
-        self.panel:set_world_top(self.menu._panel:world_top())
-    end
-    if string.match(pos, "Right") then
-        self.panel:set_world_right(self.menu._panel:world_right())
-    end
-    if string.match(pos, "Left") then
-        self.panel:set_world_left(self.menu._panel:world_left())
+    local pos_panel = self.menu._panel
+    for _, p in pairs({"center", "bottom", "top", "right", "left"}) do
+        if pos:lower():match(p) then
+            self.panel["set_world_"..p](self.panel, pos_panel["world_"..p](pos_panel))
+        end
     end
 end
 
@@ -126,7 +122,7 @@ function Menu:MouseDoubleClick(button, x, y)
     local menu = self.menu
     if self.visible then
         if menu._highlighted and menu._highlighted.parent == self then
-            if menu._highlighted.MouseDoubleClick and menu._highlighted:MouseDoubleClick( button, x, y ) then
+            if menu._highlighted.MouseDoubleClick and menu._highlighted:MouseDoubleClick(button, x, y) then
                 return true
             end
         end
@@ -136,25 +132,26 @@ end
 function Menu:MousePressed(button, x, y)
     local menu = self.menu
     if self.visible then
-        if not self.menu._openlist then
-            if button == Idstring("0") then
-                if self._scroll:mouse_pressed(button, x, y) then
-                    return true
-                end     
-            elseif button == Idstring("mouse wheel down") then
-                if self._scroll:scroll(x, y, -1) then
-                    if menu._highlighted and menu._highlighted.parent == self then
-                        menu._highlighted:MouseMoved(x,y)
-                    end 
-                    return true
-                end
-            elseif button == Idstring("mouse wheel up") then
-                if self._scroll:scroll(x, y, 1) then
-                    if menu._highlighted and menu._highlighted.parent == self then
-                        menu._highlighted:MouseMoved(x,y)
-                    end 
-                    return true
-                end
+        if button == Idstring("0") then
+            if self._scroll:mouse_pressed(button, x, y) then
+                self:CheckItems()
+                return true
+            end     
+        elseif button == Idstring("mouse wheel down") then
+            if self._scroll:scroll(x, y, -1) then
+                if menu._highlighted and menu._highlighted.parent == self then
+                    menu._highlighted:MouseMoved(x,y)
+                end 
+                self:CheckItems()
+                return true
+            end
+        elseif button == Idstring("mouse wheel up") then
+            if self._scroll:scroll(x, y, 1) then
+                if menu._highlighted and menu._highlighted.parent == self then
+                    menu._highlighted:MouseMoved(x,y)
+                end 
+                self:CheckItems()
+                return true
             end
         end
         if menu._highlighted and menu._highlighted.parent == self then
@@ -166,43 +163,40 @@ function Menu:MousePressed(button, x, y)
 end
 
 function Menu:MouseMoved(x, y)
-    if self.menu._openlist then
-        self.menu._openlist:MouseMoved(x, y)
-        return
-    end
     if self.visible and self.panel:inside(x,y) then
         local _, pointer = self._scroll:mouse_moved(nil, x, y) 
         if pointer then
+            self:CheckItems()
             managers.mouse_pointer:set_pointer_image(pointer)
             return true
         else
             managers.mouse_pointer:set_pointer_image("arrow")
         end
-        for _, item in ipairs(self._items) do
+        for _, item in ipairs(self._visible_items) do
             item:MouseMoved(x, y) 
         end
     end
 end
 
-function Menu:MouseReleased(button, x, y)
-    self._scroll:mouse_released(button, x, y)
-    if self:Visible() then
-        if self.menu._highlighted.MouseReleased and self.menu._highlighted:MouseReleased(button, x, y) then
-            return true
-        end
+function Menu:CheckItems()
+    self._visible_items = {}
+    for _, item in ipairs(self._items) do
+        if item:TryRendering() then
+            table.insert(self._visible_items, item)
+        end                
     end
 end
 
-function Menu:KeyPressed(o, k)
-    if self:Visible() then
-        if self.menu._highlighted:KeyPressed( o, k ) then
-            return true
-        end
-    end
+function Menu:MouseReleased(button, x, y)
+    self._scroll:mouse_released(button, x, y)
+end
+
+function Menu:Focused()
+    return self:Visible() and self.menu._highlighted
 end
 
 function Menu:Visible()
-    return self.visible and self.menu._highlighted
+    return self.visible 
 end
 
 function Menu:SetVisible(visible)
@@ -237,11 +231,11 @@ function Menu:AlignItems()
             end
         end
     end
-   -- self._scroll:set_canvas_size(self.panel:w(), self.row_max and self.row_max == 1 and self.panel:h() or h)
     self._scroll:update_canvas_size()
+    self:CheckItems()
 end
 
-function Menu:GetItem( name )
+function Menu:GetItem(name)
     for _, item in pairs(self._items) do
         if item.name == name then
             return item
@@ -404,11 +398,6 @@ function Menu:Table(params)
     return self:NewItem(Table:new(self, params))
 end
 
-function Menu:ContextMenu(params)
-    self:ConfigureItem(params)
-    return self:NewItem(ContextMenu:new(self, params))
-end
-
 function Menu:GetIndex(name)
     for k, item in pairs(self._items) do
         if item.name == name then
@@ -432,7 +421,7 @@ end
 
 function Menu:ConfigureItem(item)
     if type(item) ~= "table" then
-        log(tostring( debug.traceback() ))
+        log(tostring(debug.traceback()))
         return
     end
     item.parent = self

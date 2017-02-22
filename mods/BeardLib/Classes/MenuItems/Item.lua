@@ -25,7 +25,7 @@ function Item:init(parent, params)
 		w = params.panel:w(),
 		h = params.items_size,
 		x = 4,
-		layer = 6,
+		layer = 3,
 		color = params.text_color or Color.black,
 		font = "fonts/font_large_mf",
 		font_size = params.items_size
@@ -58,10 +58,23 @@ function Item:init(parent, params)
 			BeardLib:log(self.name .. " group is not a group item!")
 		end
 	end
+    if self.items then
+		self._list = ContextMenu:new(self, 20) 
+    end
 end
 
 function Item:SetParam(param, value)
     self[param] = value
+end
+
+function Item:TryRendering()
+	local p = self.parent_panel
+	local visible = false
+	if alive(self.panel) then		
+	 	visible = p:inside(p:world_x(), self.panel:world_y()) == true or p:inside(p:world_x(), self.panel:world_bottom()) == true
+		self.panel:set_visible(visible)
+	end
+	return visible
 end
 
 function Item:Panel()
@@ -70,6 +83,10 @@ end
 
 function Item:__tostring()
 	return string.format("[%s - %s]", tostring(self.name), tostring(self.type_name))
+end
+
+function Item:alive()
+	return alive(self.panel) 
 end
 
 function Item:SetPosition(x,y)
@@ -117,6 +134,7 @@ end
 
 function Item:SetEnabled(enabled)
 	self.enabled = enabled
+	self.title:set_alpha(enabled and 1 or 0.5)
 end
 
 function Item:Index()
@@ -142,9 +160,15 @@ function Item:MousePressed(button, x, y)
 			return true
 		end
 	end
-	if alive(self.panel) and self.parent.panel:inside(x,y) and self.panel:inside(x,y) and button == Idstring("0") then
-		self:RunCallback()
-		return true
+	if self:alive() and self.parent.panel:inside(x,y) and self.panel:inside(x,y) then
+		if button == Idstring("0") then
+			self:RunCallback()
+			return true
+		elseif button == Idstring("1") then
+			if self._list then
+				self._list:show()
+			end
+		end
 	end
 end
 
@@ -178,32 +202,49 @@ function Item:SetCallback(callback)
 	self.callback = callback
 end
 
-function Item:MouseMoved(x, y, highlight)
-	if not alive(self.panel) or not self.enabled or self.type_name == "Divider" then
+function Item:Highlight()
+	if not self:alive() then
+		return
+	end
+	self.bg:set_color(self.marker_highlight_color)
+	if self.title then
+		self.title:set_color(self.text_highlight_color)
+	end
+	self.highlight = true
+	self.menu._highlighted = self
+end
+
+function Item:UnHighlight()
+	if not self:alive() then
+		return 
+	end
+	self.bg:set_color(self.marker_color)
+	if self.title then
+		self.title:set_color(self.text_color)
+	end
+	if self.menu._highlighted == self then
+		self.menu._highlighted = nil
+	end
+	self.highlight = false
+end
+
+function Item:MouseMoved(x, y)
+	if not self:alive() or not self.enabled or self.type_name == "Divider" then
 		return false
 	end
 	if not self.menu._openlist and not self.menu._slider_hold then
 		if self.panel:inside(x, y) then
-			if highlight ~= false then
-				self.bg:set_color(self.marker_highlight_color)
-				if self.title then
-					self.title:set_color(self.text_highlight_color)
-				end
-			end
-			self.highlight = true
-			self.menu._highlighted = self
+			self:Highlight()
+			return true
 		else
-			self.bg:set_color(self.marker_color)
-			if self.title then
-				self.title:set_color(self.text_color)
-			end
-			if self.menu._highlighted == self then
-				self.menu._highlighted = nil
-			end
-			self.highlight = false
+			self:UnHighlight()
+			return true
 		end
 	end
 end
 
-
- 
+function Item:MouseReleased(button, x, y)
+	if self._list then
+		self._list:MouseReleased(button, x, y)
+	end
+end

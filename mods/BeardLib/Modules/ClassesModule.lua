@@ -19,7 +19,7 @@ function ClassesModule:Load()
             if io.file_is_readable(class_file) then
                 dofile(class_file)
             else
-                BeardLib:log("[ERROR] Class file not readable by the lua state! File: %s", hook_file)
+                BeardLib:log("[ERROR] Class file not readable by the lua state! File: %s", class_file)
             end
         end
     end

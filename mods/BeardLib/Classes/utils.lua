@@ -162,6 +162,36 @@ function table.script_merge(base_tbl, new_tbl)
     end
 end
 
+function Hooks:RemovePostHookWithObject(object, id)
+    local hooks = self._posthooks[object]
+    if not hooks then
+        BeardLib:log("[Error] No post hooks for object '%s' while trying to remove id '%s'", tostring(object), tostring(id))
+        return
+    end
+    for func_i, func in pairs(hooks) do
+        for override_i, override in ipairs(func.overrides) do
+            if override and override.id == id then
+                table.remove(func.overrides, override_i)
+            end
+        end
+    end         
+end
+
+function Hooks:RemovePreHookWithObject(object, id)
+    local hooks = self._prehooks[object]
+    if not hooks then
+        BeardLib:log("[Error] No pre hooks for object '%s' while trying to remove id '%s'", tostring(object), tostring(id))
+        return
+    end
+    for func_i, func in pairs(hooks) do
+        for override_i, override in ipairs(func.overrides) do
+            if override and override.id == id then
+                table.remove(func.overrides, override_i)
+            end
+        end
+    end         
+end
+
 function mrotation.copy(rot)
     if rot then
         return Rotation(rot:yaw(), rot:pitch(), rot:roll())

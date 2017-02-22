@@ -1,11 +1,10 @@
 ItemsGroup = ItemsGroup or class(Item)
-
 function ItemsGroup:init(parent, params)    
     self.type_name = "ItemsGroup"
     params.items = params.items or {}
     params.panel = parent.items_panel:panel({ 
         name = params.name,
-        y = 10, 
+        w = params.w,
         h = math.max(#params.items, 1) * parent.items_size,
     }) 
     params.toggle = params.panel:bitmap({
@@ -44,7 +43,7 @@ function ItemsGroup:init(parent, params)
     self.menu = parent.menu
 end
 
-function ItemsGroup:MousePressed( button, x, y )
+function ItemsGroup:MousePressed(button, x, y)
     if button == Idstring("0") and alive(self.panel) and self.panel:child("bg"):inside(x,y) then
         self:Toggle()
         return true
@@ -112,18 +111,36 @@ function ItemsGroup:SetCallback(callback)
     self.callback = callback
 end
 
-function ItemsGroup:MouseMoved(x, y, highlight)
-    if not alive(self.panel) or not self.enabled then
+function ItemsGroup:Highlight()
+    if not alive(self.panel) then 
         return
+    end
+    self.panel:child("bg"):show()
+    self.highlight = true
+    self.menu._highlighted = self
+end
+
+function ItemsGroup:UnHighlight()
+    if not alive(self.panel) or not self.closed then
+        return
+    end
+    self.panel:child("bg"):hide()
+    if self.menu._highlighted == self then
+        self.menu._highlighted = nil
+    end
+    self.highlight = false
+end
+
+function ItemsGroup:MouseMoved(x, y)
+    if not alive(self.panel) or not self.enabled then
+        return false
     end    
     if not self.menu._openlist and not self.menu._slider_hold then
         if self.panel:inside(x, y) then
-            self.menu._highlighted = self 
-            self.panel:child("bg"):show()  
+            self:Highlight()
         elseif self.closed then
-            self.panel:child("bg"):hide()
+            self:UnHighlight()
         end 
-        self.menu._highlighted = self.menu._highlighted and (alive(self.menu._highlighted.panel) and self.menu._highlighted.panel:inside(x,y)) and self.menu._highlighted or nil
     end   
 end
 

@@ -10,6 +10,7 @@
 	mod_override_dir="assets/mod_overrides/"
 	>
 	<classes>
+		<class file="FileIO.lua"/>
 		<class file="ModCore.lua"/>
 		<class file="CustomPackageManager.lua"/>
 		<class file="CustomAchievementManager.lua"/>
@@ -27,6 +28,7 @@
 		<class file="Dialogs/SelectListDialog.lua"/>
 		<class file="MenuItems/Menu.lua"/>
 		<class file="MenuItems/TextBoxBase.lua"/>
+		<class file="MenuItems/ContextMenu.lua"/>
 		<class file="MenuItems/Item.lua"/>
 		<class file="MenuItems/KeyBind.lua"/>
 		<class file="MenuItems/ItemsGroup.lua"/>
@@ -35,7 +37,6 @@
 		<class file="MenuItems/ComboBox.lua"/>
 		<class file="MenuItems/Slider.lua"/>
 		<class file="MenuItems/TextBox.lua"/>
-		<class file="MenuItems/ContextMenu.lua"/>
 		<class file="MenuHelperPlus.lua"/>
 		<class file="json_utils.lua"/>
 		<class file="utils.lua"/>

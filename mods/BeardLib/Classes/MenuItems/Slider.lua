@@ -15,10 +15,10 @@ function Slider:init(parent, params)
 	local slider_bg = params.panel:bitmap({
         name = "slider_bg",
         w = item_width,
-        layer = 5,
+        layer = 1,
         color = ((parent.background_color or Color.white) / 1.2):with_alpha(1),
     })
-    local text_panel = TextBoxBase.init(self, {
+    self._textbox = TextBoxBase:new(self, {
         text_color = not parent.background_color and Color.black,
         lines = 1,
         btn = "1",
@@ -30,24 +30,22 @@ function Slider:init(parent, params)
     })
     local slider = self.panel:rect({
         name = "slider",
-        x = text_panel:x(),
+        x = self._textbox.panel:x(),
         w = item_width * (self.value / self.max),
         h = slider_bg:h(),
-        layer = 6,
+        layer = 2,
         color = parent.marker_highlight_color / 1.4
     })
-    slider_bg:set_x(text_panel:x())
-    local slider_icon = self.panel:rect({
-        color = (parent.background_color and self.text_color) or Color.black,
-        name = "slider_icon",
-        w = 2,
-        alpha = 0,
-        h = slider_bg:h(),
-        layer = 7,
-    })
-    slider_icon:set_rightbottom(slider:right(), slider:bottom())
+    slider_bg:set_x(self._textbox.panel:x())
     self._mouse_pos_x, self._mouse_pos_y = 0,0
 end
+
+function Slider:SetEnabled(enabled)
+    self.super.SetEnabled(self, enabled)
+    self.panel:child("slider_bg"):set_alpha(enabled and 1 or 0.5)
+    self._textbox.panel:child("text"):set_alpha(enabled and 1 or 0.5)
+end
+
 function Slider:SetStep(step)
     self.step = step
 end
@@ -58,10 +56,9 @@ function Slider:SetValue(value, run_callback, reset_selection, no_format)
     end      
     value = tonumber(not no_format and format or value)     
     local format = string.format("%." .. self.floats .. "f", value)
-    local text = self.text_panel:child("text")
+    local text = self._textbox.panel:child("text")
 	local slider = self.panel:child("slider")
     slider:set_w(self.panel:child("slider_bg"):w() * ((value - self.min) / (self.max - self.min)))
-    self.panel:child("slider_icon"):set_left(slider:right())
     if not no_format then
         text:set_text(format)
     end
@@ -76,8 +73,23 @@ function Slider:SetValueByPercentage(percent)
     self:SetValue(self.min + (self.max - self.min) * percent, true, true)
 end
 
+function Slider:MouseMoved(x, y)
+    self.super.MouseMoved(self, x, y)
+    self._textbox:MouseMoved(x, y)
+end
+
+function Slider:MouseReleased(button, x, y)
+    self._textbox:MouseReleased(button, x, y)
+end
+
+function Slider:KeyPressed(o, k)
+    self.super.KeyPressed(self, o, k)
+    self._textbox:KeyPressed(o, k)
+end
+
 function Slider:MousePressed(button, x, y)
 	self.super.MousePressed(self, button, x, y)
+    self._textbox:MousePressed(button, x, y)
     if not self.enabled or not alive(self.panel) then
         return
     end

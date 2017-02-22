@@ -1,7 +1,7 @@
 MenuDialog = MenuDialog or class()
 function MenuDialog:init(params)
     params = params or {}
-    params.layer = 999
+    params.layer = 100
     params.w = nil
     params.marker_color = params.marker_color or Color.white:with_alpha(0)
     params.marker_highlight_color = params.marker_highlight_color or Color("4385ef")   

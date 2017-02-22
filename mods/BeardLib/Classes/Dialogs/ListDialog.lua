@@ -27,11 +27,12 @@ function ListDialog:Show(params)
     params = params or self._params or {}
     self._filter = ""
     self._params = params
+    self._params.limit = true
     self._menu:ClearItems()
     self._list_menu:ClearItems()  
     self._menu:TextBox({
         name = "Search",
-        w = 800,
+        w = 758,
         control_slice = 1.25,
         text = "Search",
         callback = callback(self, self, "Search"),  
@@ -43,7 +44,18 @@ function ListDialog:Show(params)
         text = "Aa",
         value = self._params.case_sensitive,
         callback = function(menu, item)
-            self._params.case_sensitive = item.value
+            self._params.case_sensitive = item:Value()
+            self:MakeListItems()
+        end,  
+        label = "temp"
+    })    
+    self._menu:Toggle({
+        name = "Limit",
+        w = 42,
+        text = ">|",
+        value = self._params.limit,
+        callback = function(menu, item)
+            self._params.limit = item:Value()
             self:MakeListItems()
         end,  
         label = "temp"
@@ -67,19 +79,29 @@ end
 function ListDialog:MakeListItems()
     self._list_menu:ClearItems("temp2")  
     local case = self._params.case_sensitive
+    local limit = self._params.limit
     for _,v in pairs(self._params.list) do
         local t = type(v) == "table" and v.name or v
         if self._filter == "" or (case and string.match(t, self._filter) or not case and string.match(t:lower(), self._filter:lower())) then
-            self._list_menu:Button(table.merge(type(v) == "table" and v or {}, {
-                name = t,
-                text = t,
-                callback = function(menu, item)
-                    if self._params.callback then
-                        self._params.callback(v)
-                    end
-                end, 
-                label = "temp2"
-            }))     
+            if not limit or #self._list_menu._items <= 250 then
+                if type(v) == "table" and v.create_group then 
+                    v.group = self._list_menu:GetItem(v.create_group) or self._list_menu:ItemsGroup({
+                        name = v.create_group,
+                        text = v.create_group,
+                        label = "temp2"
+                    })             
+                end
+                self._list_menu:Button(table.merge(type(v) == "table" and v or {}, {
+                    name = t,
+                    text = t,
+                    callback = function(menu, item)
+                        if self._params.callback then
+                            self._params.callback(v)
+                        end
+                    end, 
+                    label = "temp2"
+                }))     
+            end
         end
     end    
     self._list_menu:AlignItems()

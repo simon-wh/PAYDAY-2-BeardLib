@@ -15,7 +15,7 @@ local ids_unit = Idstring("unit")
 local key_unit = ids_unit:key()
 
 overwrite_meta_function(World, "spawn_unit", function(self, unit_name, ...)
-	log("Spawned unit: " .. tostring(unit_name:key()))
+	--log("Spawned unit: " .. tostring(unit_name:key()))
 	if (unit_name and Global.fm.added_files[key_unit] and Global.fm.added_files[key_unit][unit_name:key()]) or unit_name:key() == "0d8ea9bdcebaaf64" then
 		FileManager:LoadAsset(ids_unit, unit_name)
 		--while not managers.dyn_resource:is_resource_ready(ids_unit, unit_name, managers.dyn_resource.DYN_RESOURCES_PACKAGE) do end

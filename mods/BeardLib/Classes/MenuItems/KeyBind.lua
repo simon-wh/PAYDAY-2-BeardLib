@@ -17,6 +17,11 @@ function KeyBindItem:init(parent, params)
     }):set_right(self.panel:w())
 end
 
+function KeyBindItem:SetEnabled(enabled)
+    self.super.SetEnabled(self, enabled)
+    self.panel:child("keybind_key"):set_alpha(enabled and 1 or 0.5)
+end
+
 function KeyBindItem:SetValue(value, run_callback)
     self.super.SetValue(self, value, run_callback)
     if not alive(self.panel) then

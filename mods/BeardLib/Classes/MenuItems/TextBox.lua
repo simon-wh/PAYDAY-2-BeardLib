@@ -9,15 +9,21 @@ function TextBox:init(parent, params)
     if self.filter == "number" then
     	self.value = tonumber(self.value) or 0
     end
-	TextBoxBase.init(self, {
+	self._textbox = TextBoxBase:new(self, {
         panel = self.panel,
         w = params.panel:w() / (self.text == nil and 1 or self.control_slice),
         value = self.value,
     })
 end
 
+function TextBox:SetEnabled(enabled)
+	self.super.SetEnabled(self, enabled)
+	self._textbox.panel:child("line"):set_alpha(enabled and 1 or 0.5)
+	self._textbox.panel:child("text"):set_alpha(enabled and 1 or 0.5)
+end
+
 function TextBox:SetValue(value, run_callback, reset_selection)
-	local text = self.text_panel:child("text")
+	local text = self._textbox.panel:child("text")
 
 	if self.filter == "number" then
 		value = tonumber(value) or 0
@@ -36,7 +42,7 @@ function TextBox:SetValue(value, run_callback, reset_selection)
 	if reset_selection then
 		text:set_selection(text:text():len())
 	end
-	self:update_caret()	
+	self._textbox:update_caret()	
 	self.super.SetValue(self, value, run_callback)
 end
 
@@ -49,13 +55,23 @@ function TextBox:MousePressed(button, x, y)
 		return
 	end
 	if not self.cantype then
-		self:SetValue(self.text_panel:child("text"):text(), true, true)
+		self:SetValue(self._textbox.panel:child("text"):text(), true, true)
 	end
-	if button == Idstring("1") and self.type_name == "NumberBox" and not self.no_slide and self.text_panel:inside(x,y) then
+	if button == Idstring("1") and self.type_name == "NumberBox" and not self.no_slide and self._textbox.panel:inside(x,y) then
 		self.menu._slider_hold = self
 		return true
 	end
+	self._textbox:MousePressed(button, x, y)
 	return self.cantype
+end
+
+function TextBox:MouseReleased(button, x, y)
+	self._textbox:MouseReleased(button, x, y)
+end
+
+function TextBox:KeyPressed(o, k)
+	self.super.KeyPressed(self, o, k)
+	self._textbox:KeyPressed(o, k)
 end
 
 function TextBox:MouseMoved(x, y)
@@ -63,8 +79,9 @@ function TextBox:MouseMoved(x, y)
     	return 
     end
     if self.cantype then
-        self:SetValue(self.text_panel:child("text"):text())
+        self:SetValue(self._textbox.panel:child("text"):text())
     end    
+    self._textbox:MouseMoved(x, y)
 end
 
 function TextBox:SetValueByMouseXPos(x)
