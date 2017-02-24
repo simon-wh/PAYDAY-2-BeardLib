@@ -60,7 +60,7 @@ function Menu:Reposition()
     if t == "table" then
         self:SetPosition(unpack(self.position))
     elseif t == "function" then
-        self:position()
+        self:position(self)
     elseif t == "string" then
         self:SetPositionByString(self.position)
     end

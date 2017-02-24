@@ -71,7 +71,7 @@ function ComboBox:SetValue(value, run_callback, no_items_clbk)
         v = v.text
     end
     if alive(self.panel) then
-       self.panel:child("combo_selected"):set_text(self.localized_items and v and managers.localization:text(v) or v or "")
+       self.panel:child("combo_selected"):set_text(self.localized_items and v and managers.localization:text(tostring(v)) or tostring(v) or "")
     end    
     self.super.SetValue(self, value, run_callback)
 end

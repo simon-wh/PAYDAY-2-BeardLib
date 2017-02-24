@@ -3,27 +3,71 @@ function FileIO:Open(path, flags)
 	return io.open(path, flags)
 end
 
-function FileIO:WriteTo(path, data)
- 	local file = self:Open(path, "w")
+function FileIO:WriteTo(path, data, flags)
+ 	local file = self:Open(path, flags or "w")
  	if file then
 	 	file:write(data)
 	 	file:close()
+	 	return true
 	else
 		log("[FileIO][ERROR] Failed opening file at path " .. tostring(path))
+		return false
 	end
 end
 
-function FileIO:ReadFrom(path, method)
- 	local file = self:Open(path, "r")
+function FileIO:ReadFrom(path, flags, method)
+ 	local file = self:Open(path, flags or "r")
  	if file then
  		local data = file:read(method or "*all")
 	 	file:close()
 	 	return data
 	else
 		log("[FileIO][ERROR] Failed opening file at path " .. tostring(path))
+		return false
 	end
 end
 
+function FileIO:ConvertScriptData(data, typ) 
+	local new_data
+    if typ == "json" then
+        new_data = json.custom_decode(data)
+    elseif typ == "xml" then
+        new_data = ScriptSerializer:from_xml(data)
+    elseif typ == "custom_xml" then
+        new_data = ScriptSerializer:from_custom_xml(data)
+    elseif typ == "generic_xml" then
+        new_data = ScriptSerializer:from_generic_xml(data)
+    elseif typ == "binary" then
+        new_data = ScriptSerializer:from_binary(data)
+    end
+    return new_data
+end
+
+function FileIO:ConvertToScriptData(data, typ) 
+	local new_data
+    if typ == "json" then
+        new_data = json.custom_encode(data, true)
+    elseif typ == "custom_xml" then
+        new_data = ScriptSerializer:to_custom_xml(data)
+    elseif typ == "generic_xml" then
+        new_data = ScriptSerializer:to_generic_xml(data)
+    elseif typ == "binary" then
+        new_data = ScriptSerializer:to_binary(data)
+    end
+    return new_data
+end
+
+function FileIO:ReadScriptDataFrom(path, typ) 
+	local read = self:ReadFrom(path, typ == "binary" and "rb")
+	if read then
+		return self:ConvertScriptData(read, typ)
+	end
+    return false
+end
+
+function FileIO:WriteScriptDataTo(path, data, typ) 
+	return self:WriteTo(path, self:ConvertToScriptData(data, typ), typ == "binary" and "wb")
+end
 
 function FileIO:Exists(path) 
 	if SystemFS then

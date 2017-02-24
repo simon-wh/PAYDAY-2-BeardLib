@@ -5,24 +5,15 @@ function MenuUI:init(params)
 	local ws = managers.gui_data:create_fullscreen_workspace()
  	ws:connect_keyboard(Input:keyboard())
     ws:connect_mouse(Input:mouse())
-    params.position = params.position or "Left"
     params.override_size_limit = params.override_size_limit or true
     params.layer = params.layer or 0
 	self._fullscreen_ws = ws
     self._fullscreen_ws_pnl = ws:panel():panel({alpha = 0, layer = (tweak_data.gui.MOUSE_LAYER - 190) + params.layer})
     self._menus = {}
-
-    if params.w == "full" then
-        params.w = self._fullscreen_ws_pnl:w()
-    elseif params.w == "half" then
-        params.w = self._fullscreen_ws_pnl:w() / 2
-    end
     self._panel = self._fullscreen_ws_pnl:panel({
         name = "menu_panel",
         halign = "center",
         align = "center",
-        h = params.h or self._fullscreen_ws_pnl:h(),
-        w = params.w or self._fullscreen_ws_pnl:w(),
     })
     self._panel:rect({
         name = "bg",
@@ -33,22 +24,6 @@ function MenuUI:init(params)
         alpha = params.background_alpha,
         layer = 0
     })
-    if type(params.position) == "table" then
-        self._panel:position(params.position[1] or self._panel:x(), params.position[2] or self._panel:y())
-    else
-         if string.match(params.position, "Center") then
-            self._panel:set_center(self._fullscreen_ws_pnl:center())
-        end
-        if string.match(params.position, "Bottom") then
-            self._panel:set_bottom(self._fullscreen_ws_pnl:bottom())
-        end
-        if string.match(params.position, "Top") then
-            self._panel:set_top(self._fullscreen_ws_pnl:top())
-        end
-        if string.match(params.position, "Right") then
-            self._panel:set_right(self._fullscreen_ws_pnl:right())
-        end
-    end
     table.merge(self, params)
 	if params.create_items then
 		params.create_items(self)
@@ -83,23 +58,7 @@ function MenuUI:UpdateParams(params)
         visible = params.background_color ~= nil,
         color = params.background_color,
         alpha = params.background_alpha,        
-    })    
-    if type(self.position) == "table" then
-        self._panel:position(self.position[1] or self._panel:x(), self.position[2] or self._panel:y())
-    else
-         if string.match(self.position, "Center") then
-            self._panel:set_center(self._fullscreen_ws_pnl:center())
-        end
-        if string.match(self.position, "Bottom") then
-            self._panel:set_bottom(self._fullscreen_ws_pnl:bottom())
-        end
-        if string.match(self.position, "Top") then
-            self._panel:set_top(self._fullscreen_ws_pnl:top())
-        end
-        if string.match(self.position, "Right") then
-            self._panel:set_right(self._fullscreen_ws_pnl:right())
-        end
-    end    
+    })      
 end
 
 function MenuUI:NewMenu(params)
@@ -108,18 +67,6 @@ function MenuUI:NewMenu(params)
     return menu
 end
 
-function MenuUI:SetSize(w, h)
-    self._panel:set_size(w, h)
-    if self.position == "right" then
-        self._panel:set_right(self._fullscreen_ws_pnl:right())
-    elseif self.position == "center" then
-        self._panel:set_center(self._fullscreen_ws_pnl:center())
-    end
-    for i, menu in pairs(self._menus) do
-        menu.items_panel:set_size(w- 12, h)
-        menu:RecreateItems()
-    end
-end
 function MenuUI:enable()
 	self._fullscreen_ws_pnl:set_alpha(1)
 	self._menu_closed = false

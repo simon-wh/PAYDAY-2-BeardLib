@@ -4,18 +4,16 @@ function ListDialog:show(...)
 end
 
 function ListDialog:create_items(params, menu)  
-    params.w = 900
-    params.h = 600
+    params.w = params.w or 900
+    params.h = params.h and params.h - 20 or 600
     params.name = "List"
     params.auto_align = false
-    params.position = "CenterLeft"
+    params.position = params.position or "Center"
     params.background_color = params.background_color or Color(0.2, 0.2, 0.2)
     params.background_alpha = params.background_alpha or 0.6
     params.override_size_limit = true
     params.visible = true
     self._list_menu = menu:NewMenu(params) 
-    self._list_menu:Panel():move(200)
-    params.w = 900
     params.h = 20
     params.row_max = 1
     params.auto_align = true
@@ -32,7 +30,7 @@ function ListDialog:Show(params)
     self._list_menu:ClearItems()  
     self._menu:TextBox({
         name = "Search",
-        w = 758,
+        w = self._menu.w - 142,
         control_slice = 1.25,
         text = "Search",
         callback = callback(self, self, "Search"),  

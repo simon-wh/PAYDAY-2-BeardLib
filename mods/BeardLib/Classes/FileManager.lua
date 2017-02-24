@@ -49,31 +49,11 @@ function fm:Process(ids_ext, ids_path, name_mt)
 					if to_replace and #mods > 1 then
 						BeardLib:log("[WARNING] Script Mod with ID:'%s', Path:'%s.%s' may potentially overwrite changes from other mods! Continuing...", tostring(data.id), k_path, k_ext)
 					end
-
-                    local fileType = mdata.type
-
-					local file = io.open(mdata.file, fileType == "binary" and "rb" or 'r')
-					if (file ~= nil) then
-                        local read_data = file:read("*all")
-
-                        local new_data
-                        if fileType == "json" then
-                            new_data = json.custom_decode(read_data)
-                        elseif fileType == "xml" then
-                            new_data = ScriptSerializer:from_xml(read_data)
-                        elseif fileType == "custom_xml" then
-                            new_data = ScriptSerializer:from_custom_xml(read_data)
-                        elseif fileType == "generic_xml" then
-                            new_data = ScriptSerializer:from_generic_xml(read_data)
-                        elseif fileType == "binary" then
-                            new_data = ScriptSerializer:from_binary(read_data)
-                        else
-                            new_data = json.custom_decode(read_data)
-                        end
-
+					local new_data = FileIO:ReadScriptDataFrom(mdata.file, mdata.type)
+					if new_data then
                         if ids_ext == Idstring("nav_data") then
                             BeardLib.Utils:RemoveMetas(new_data)
-                        elseif (ids_ext == Idstring("continents") or ids_ext == Idstring("mission")) and fileType=="custom_xml" then
+                        elseif (ids_ext == Idstring("continents") or ids_ext == Idstring("mission")) and mdata.type=="custom_xml" then
                             BeardLib.Utils:RemoveAllNumberIndexes(new_data, true)
                         end
 
@@ -82,8 +62,6 @@ function fm:Process(ids_ext, ids_path, name_mt)
 						else
 							fm.process_modes[mdata.mode](data, new_data)
 						end
-
-                        file:close()
 					else
 						BeardLib:log("[ERROR] The file '%s' does not exist!", mdata.file)
 					end

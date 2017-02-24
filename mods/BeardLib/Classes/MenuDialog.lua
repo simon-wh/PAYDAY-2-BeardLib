@@ -1,8 +1,12 @@
 MenuDialog = MenuDialog or class()
-function MenuDialog:init(params)
+function MenuDialog:init(params, existing_menu)
+    if exisiting_menu then
+        self._dialog = existing_menu
+        self:create_items({}, self._dialog)
+        return
+    end
     params = params or {}
     params.layer = 100
-    params.w = nil
     params.marker_color = params.marker_color or Color.white:with_alpha(0)
     params.marker_highlight_color = params.marker_highlight_color or Color("4385ef")   
     params.create_items = callback(self, self, "create_items", params)
