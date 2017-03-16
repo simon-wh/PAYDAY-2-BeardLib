@@ -4,7 +4,7 @@ function ComboBox:init(parent, params)
     self.type_name = "ComboBox"
     self.size_by_text = false
     self.items = self.items or {}
-    self.searchbox = true
+    self.searchbox = self.searchbox == nil and true or self.searchbox
     self.super.init(self, parent, params)
     local text = self.items[self.value]
     if type(text) == "table" then
@@ -21,7 +21,7 @@ function ComboBox:init(parent, params)
         vertical = "center",
         layer = 2,
         color = self.parent.background_color and self.text_color or Color.black,
-        font = "fonts/font_medium_mf",
+        font = self.font,
         font_size = self.items_size - 2
     })
     local combo_bg = self.panel:bitmap({

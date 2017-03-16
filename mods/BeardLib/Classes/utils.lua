@@ -213,7 +213,7 @@ end
 
 function string.pretty2(str)
     str = tostring(str)
-    return str:gsub("%u", " %1"):gsub("^%s+", "")
+    return str:gsub("([^A-Z ])([A-Z])", "%1 %2"):gsub("([A-Z]+)([A-Z][^A-Z$])", "%1 %2")
 end
 
 function string.key(str)
@@ -451,27 +451,47 @@ function BeardLib.Utils:RemoveAllNumberIndexes(tbl, shallow)
     return tbl
 end
 
-function BeardLib.Utils:GetNodeByMeta(tbl, meta)
+function BeardLib.Utils:GetNodeByMeta(tbl, meta, multi)
     if not tbl then return nil end
-
+    local t = {}
     for _, v in pairs(tbl) do
         if type(v) == "table" and v._meta == meta then
-            return v
+            if multi then
+                table.insert(t, v)
+            else
+                return v
+            end
         end
     end
 
-    return nil
+    return multi and t or nil
 end
 
-function BeardLib.Utils:CleanCustomXmlTable(tbl)
+function BeardLib.Utils:GetIndexNodeByMeta(tbl, meta, multi)
+    if not tbl then return nil end
+    local t = {}
+    for i, v in pairs(tbl) do
+        if type(v) == "table" and v._meta == meta then
+            if multi then
+                table.insert(t, i)
+            else
+                return i
+            end
+        end
+    end
+
+    return multi and t or nil
+end
+
+function BeardLib.Utils:CleanCustomXmlTable(tbl, shallow)
     if not tbl then return nil end
 
     for i, v in pairs(tbl) do
         if type(v) == "table" then
             if tonumber(i) == nil then
                 tbl[i] = nil
-            else
-                self:CleanCustomXmlTable(v)
+            elseif not shallow then
+                self:CleanCustomXmlTable(v, shallow)
             end
         end
     end
@@ -553,17 +573,30 @@ function BeardLib.Utils.Path:GetFileName(str)
 end
 
 function BeardLib.Utils.Path:GetFileNameWithoutExtension(str)
+    local filename = self:GetFileName(str)
+    if not filename then
+        return nil
+    end
+
+    if string.find(filename, "%.") then
+        local split = string.split(filename, "%.")
+        table.remove(split)
+        filename = table.concat(split, ".")
+    end
+    return filename
+end
+
+function BeardLib.Utils.Path:GetFileExtension(str)
 	local filename = self:GetFileName(str)
 	if not filename then
 		return nil
 	end
-
+    local ext = ""
 	if string.find(filename, "%.") then
 		local split = string.split(filename, "%.")
-		table.remove(split)
-		filename = table.concat(split, ".")
+		ext = split[#split]
 	end
-	return filename
+	return ext
 end
 
 function BeardLib.Utils.Path:Normalize(str)

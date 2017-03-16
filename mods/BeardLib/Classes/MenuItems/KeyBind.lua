@@ -12,7 +12,7 @@ function KeyBindItem:init(parent, params)
         align = "center",
         layer = 1,
         color = self.text_color or Color.black,
-        font = "fonts/font_large_mf",
+        font = params.font,
         font_size = self.items_size - 2
     }):set_right(self.panel:w())
 end

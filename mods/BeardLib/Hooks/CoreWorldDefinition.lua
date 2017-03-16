@@ -46,7 +46,7 @@ end
 
 local WorldDefinition_load_continent_init_package = WorldDefinition._load_continent_init_package
 function WorldDefinition:_load_continent_init_package(path, ...)
-    if not self._has_package then
+    if not self._has_package and not PackageManager:package_exists(path) then
         return
     end
 
@@ -55,7 +55,7 @@ end
 
 local WorldDefinition_load_continent_package =  WorldDefinition._load_continent_package
 function WorldDefinition:_load_continent_package(path, ...)
-    if not self._has_package then
+    if not self._has_package and not PackageManager:package_exists(path) then
         return
     end
 

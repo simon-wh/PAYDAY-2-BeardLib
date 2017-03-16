@@ -83,6 +83,7 @@ function QuickMenuPlus:new( ... )
 end
 
 function QuickMenuPlus:init(title, text, options, dialog_merge)
+    options = options or {}
     for _, opt in pairs(options) do
         if not opt.callback then
             opt.is_cancel_button = true

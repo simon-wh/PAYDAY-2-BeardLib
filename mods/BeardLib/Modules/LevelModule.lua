@@ -14,7 +14,7 @@ end
 
 function LevelModule:Load()
     if Global.level_data and Global.level_data.level_id == self._config.id then
-        BeardLib.current_map_mod = self._mod
+        BeardLib.current_level = self
         if self._config.include then
             for i, include_data in ipairs(self._config.include) do
                 if include_data.file then
@@ -49,49 +49,61 @@ function LevelModule:Load()
     end
 end
 
-function LevelModule:RegisterHook()
-    Hooks:PostHook(LevelsTweakData, "init", self._config.id .. "AddLevelData", function(l_self)
-        local data = {
-            name_id = self._config.name_id or "heist_" .. self._config.id .. "_name",
-            briefing_id = self._config.brief_id or "heist_" .. self._config.id .. "_brief",
-            briefing_dialog = self._config.briefing_dialog,
-            world_name = "mods/" .. self._config.id,
-            ai_group_type = l_self.ai_groups[self._config.ai_group_type] or l_self.ai_groups.default,
-            intro_event = self._config.intro_event or "nothing",
-            outro_event = self._config.outro_event or "nothing",
-            music = self._config.music or "heist",
-            custom_packages = self._config.packages or self._config.custom_packages,
-            cube = self._config.cube,
-            ghost_bonus = self._config.ghost_bonus,
-            max_bags = self._config.max_bags,
-            team_ai_off = self._config.team_ai_off,
-            custom = true
-        }
-        if self._config.merge_data then
-            table.merge(data, BeardLib.Utils:RemoveMetas(self._config.merge_data, true))
+function LevelModule:AddLevelDataToTweak(l_self)
+    local data = {
+        name_id = self._config.name_id or "heist_" .. self._config.id .. "_name",
+        briefing_id = self._config.brief_id or "heist_" .. self._config.id .. "_brief",
+        briefing_dialog = self._config.briefing_dialog,
+        world_name = "mods/" .. self._config.id,
+        ai_group_type = l_self.ai_groups[self._config.ai_group_type] or l_self.ai_groups.default,
+        intro_event = self._config.intro_event or "nothing",
+        outro_event = self._config.outro_event or "nothing",
+        music = self._config.music or "heist",
+        custom_packages = self._config.packages or self._config.custom_packages,
+        cube = self._config.cube,
+        ghost_bonus = self._config.ghost_bonus,
+        max_bags = self._config.max_bags,
+        team_ai_off = self._config.team_ai_off,
+        custom = true
+    }
+    if self._config.merge_data then
+        table.merge(data, BeardLib.Utils:RemoveMetas(self._config.merge_data, true))
+    end
+    l_self[self._config.id] = data
+    table.insert(l_self._level_index, self._config.id)
+end
+
+function LevelModule:AddAssetsDataToTweak(a_self)
+    for _, value in ipairs(self._config.assets) do
+        if value._meta == "asset" then
+            if a_self[value.name] ~= nil then
+                table.insert(value.exclude and a_self[value.name].exclude_stages or a_self[value.name].stages, self._config.id)
+            else
+                self:log("[ERROR] Asset %s does not exist! (Map: %s)", value.name, name)
+            end
+        else
+            if not a_self[value._meta] then
+                a_self[value._meta] = value
+            else
+                self:log("[ERROR] Asset with name: %s already exists! (Map: %s)", value._meta, name)
+            end
         end
-        l_self[self._config.id] = data
-        table.insert(l_self._level_index, self._config.id)
-    end)
+    end
+end
+
+function LevelModule:RegisterHook()
+    if tweak_data and tweak_data.levels then    
+        self:AddLevelDataToTweak(tweak_data.levels)
+    else
+        Hooks:PostHook(LevelsTweakData, "init", self._config.id .. "AddLevelData", callback(self, self, "AddLevelDataToTweak"))
+    end
 
     if self._config.assets then
-        Hooks:PostHook(AssetsTweakData, "init", self._config.id .. "AddAssetsData", function(a_self)
-            for _, value in ipairs(self._config.assets) do
-                if value._meta == "asset" then
-                    if a_self[value.name] ~= nil then
-                        table.insert(value.exclude and a_self[value.name].exclude_stages or a_self[value.name].stages, self._config.id)
-                    else
-                        self:log("[ERROR] Asset %s does not exist! (Map: %s)", value.name, name)
-                    end
-                else
-                    if not a_self[value._meta] then
-                        a_self[value._meta] = value
-                    else
-                        self:log("[ERROR] Asset with name: %s already exists! (Map: %s)", value._meta, name)
-                    end
-                end
-            end
-        end)
+        if tweak_data and tweak_data.assets then
+            self:AddAssetsDataToTweak(tweak_data.assets)
+        else
+            Hooks:PostHook(AssetsTweakData, "init", self._config.id .. "AddAssetsData", callback(self, self, "AddAssetsDataToTweak"))
+        end
     end
 end
 

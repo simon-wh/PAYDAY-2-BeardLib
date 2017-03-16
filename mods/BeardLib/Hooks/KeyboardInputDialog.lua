@@ -206,7 +206,7 @@ function KeyboardInputDialog:button_pressed(button_index, success)
 	end
 	local callback_func = self._data.callback_func
 	if callback_func then
-		callback_func(success, self._panel_script._panel:child("info_area"):child("scroll_panel"):child("text"):text())
+		callback_func(success, self._panel_script._panel:child("info_area"):child("scroll_panel"):child("text"):text(), self._data.callback_args and unpack(self._data.callback_args))
 	end
 end
 

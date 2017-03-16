@@ -62,6 +62,10 @@ function MenuUI:UpdateParams(params)
 end
 
 function MenuUI:NewMenu(params)
+    return self:Menu(params)
+end
+
+function MenuUI:Menu(params)
     local menu = Menu:new(self, params)
     table.insert(self._menus, menu)
     return menu
@@ -80,6 +84,9 @@ function MenuUI:enable()
 end
 
 function MenuUI:disable()
+    if self._menu_closed then
+        return
+    end
 	self._fullscreen_ws_pnl:set_alpha(0)
 	self._menu_closed = true
 	self._highlighted = nil

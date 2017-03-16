@@ -59,7 +59,7 @@ overwrite_meta_function(PackageManager, "load", function(self, pck, ...)
 		return true
 	end
 
-	log("Load package: " .. tostring(pck:key()))
+	log("Load package: " .. tostring(pck))
 	if CustomPackageManager:LoadPackage(pck) then
 		return
 	end

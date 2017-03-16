@@ -24,6 +24,7 @@
 		<class file="MenuUI.lua"/>
 		<class file="MenuDialog.lua"/>
 		<class file="Dialogs/FileBrowserDialog.lua"/>
+		<class file="Dialogs/ColorDialog.lua"/>
 		<class file="Dialogs/ListDialog.lua"/>
 		<class file="Dialogs/SelectListDialog.lua"/>
 		<class file="MenuItems/Menu.lua"/>

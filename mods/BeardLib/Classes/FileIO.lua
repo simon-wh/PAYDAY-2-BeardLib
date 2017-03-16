@@ -27,7 +27,7 @@ function FileIO:ReadFrom(path, flags, method)
 	end
 end
 
-function FileIO:ConvertScriptData(data, typ) 
+function FileIO:ConvertScriptData(data, typ, clean) 
 	local new_data
     if typ == "json" then
         new_data = json.custom_decode(data)
@@ -40,7 +40,7 @@ function FileIO:ConvertScriptData(data, typ)
     elseif typ == "binary" then
         new_data = ScriptSerializer:from_binary(data)
     end
-    return new_data
+    return clean and BeardLib.Utils:CleanCustomXmlTable(new_data) or new_data
 end
 
 function FileIO:ConvertToScriptData(data, typ) 
@@ -65,7 +65,11 @@ function FileIO:ReadScriptDataFrom(path, typ)
     return false
 end
 
-function FileIO:WriteScriptDataTo(path, data, typ) 
+function FileIO:WriteScriptDataTo(path, data, typ)
+	local dir = BeardLib.Utils.Path:GetDirectory(path)
+	if not self:Exists(dir) then
+		self:MakeDir(dir)
+	end
 	return self:WriteTo(path, self:ConvertToScriptData(data, typ), typ == "binary" and "wb")
 end
 
@@ -79,6 +83,10 @@ function FileIO:Exists(path)
 			return false
 		end
 	end
+end
+
+function FileIO:CopyFileTo(path, to_path) 
+	os.execute(string.format("echo f | xcopy \"%s\" \"%s\" /e /i /h /y /c", path, to_path))
 end
 
 function FileIO:CopyTo(path, to_path) 
@@ -99,9 +107,9 @@ function FileIO:Delete(path)
 end
 
 function FileIO:MakeDir(path) 
-	if SystemFS then
-        SystemFS:make_dir(map_path)
-	else
-		os.execute("mkdir -p " .. path)
-	end
+    if SystemFS then
+        SystemFS:make_dir(path)
+    else
+        os.execute(string.format("mkdir \"%s\"", path))
+    end
 end

@@ -19,20 +19,21 @@ function Item:init(parent, params)
 	})
 	params.title = params.panel:text({
 		name = "title",
-		text = params.localized and params.text and managers.localization:text(params.text) or params.text,
-		vertical = "center",
 		align = params.align,
-		w = params.panel:w(),
+		w = params.panel:w() - 4,
 		h = params.items_size,
+		wrap = true,
+		word_wrap = true,
+		text = params.text,
 		x = 4,
 		layer = 3,
 		color = params.text_color or Color.black,
-		font = "fonts/font_large_mf",
+		font = params.font,
 		font_size = params.items_size
 	})
 	params.div = params.panel:rect({
 		color = params.color,
-		visible = params.color ~= nil,
+		visible = not not params.color,
 		w = 2,
 	})
 	local _,_,w,h = params.title:text_rect()
@@ -49,8 +50,9 @@ function Item:init(parent, params)
 	self._items = {}
 	params.option = params.option or params.name
 	table.merge(self, params)
-	self.override_parent = params.override_parent --Not sure why table merge doesn't want to add it it might be doing that to other values as well..
-	self:SetPositionByString(params.position)
+	self.override_parent = params.override_parent
+	self:SetText(self.text)
+	self:SetPosition(params.position)
 	if params.group then
 		if params.group.type_name == "ItemsGroup" then
 			params.group:AddItem(self)
@@ -90,28 +92,24 @@ function Item:alive()
 end
 
 function Item:SetPosition(x,y)
-	self.panel:set_position(x,y)
+	self.parent.SetPosition(self, x, y)
+end
+
+function Item:Reposition()
+	self.parent.Reposition(self)
 end
 
 function Item:SetPositionByString(pos)
 	if not pos then
+		BeardLib:log("[ERROR] Position for item %s in menu %s is nil!", tostring(self.name), tostring(self.parent.name))
 		return
 	end
-	if string.match(pos, "Center") then
-	   self.panel:set_world_center(self.parent_panel:world_center())
-	end
-	if string.match(pos, "Bottom") then
-	   self.panel:set_bottom(self.parent_panel:h())
-	end
-	if string.match(pos, "Top") then
-		self.panel:set_y(0)
-	end
-	if string.match(pos, "Right") then
-		self.panel:set_right(self.parent_panel:w())
-	end
-	if string.match(pos, "Left") then
-		self.panel:set_x(0)
-	end
+    local pos_panel = self.parent_panel
+    for _, p in pairs({"center", "bottom", "top", "right", "left"}) do
+        if pos:lower():match(p) then
+            self.panel["set_world_"..p](self.panel, pos_panel["world_"..p](pos_panel))
+        end
+    end
 end
 
 function Item:AddItem(item)
@@ -190,8 +188,11 @@ function Item:SetColor(color)
 end
 
 function Item:SetText(text)
+	local title = self.panel:child("title")
 	self.text = text
-	self.panel:child("title"):set_text(self.localized and text and managers.localization:text(text) or text)
+	title:set_text(self.localized and text and managers.localization:text(text) or text)
+	local lines = math.max(1, title:number_of_lines()) 
+	self.panel:set_h(math.max(self.items_size * lines, self.panel:h()))
 end
 
 function Item:SetLabel(label)

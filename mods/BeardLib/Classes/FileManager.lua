@@ -76,6 +76,10 @@ function fm:Process(ids_ext, ids_path, name_mt)
 end
 
 function fm:AddFile(ext, path, file)
+	if not DB.create_entry then
+		BeardLib:log("[ERROR] Cannot add files!")
+		return
+	end
 	--Add check for supported file types (or unsupported) to give warning
     DB:create_entry(ext:id(), path:id(), file)
     local k_ext = ext:key()

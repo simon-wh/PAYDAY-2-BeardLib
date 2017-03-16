@@ -30,7 +30,9 @@ function FrameworkBase:Load()
             local p = path:Combine(self._directory, dir)
             local main_file = path:Combine(p, self.main_file_name)
             if io.file_is_readable(main_file) then
-                self:LoadMod(dir, p, main_file)
+                if not self._loaded_mods[dir] then
+                    self:LoadMod(dir, p, main_file)
+                end
             elseif not self._ignore_detection_errors then
                 BeardLib:log("[ERROR] Could not read %s", main_file)
             end

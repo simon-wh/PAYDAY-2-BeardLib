@@ -22,11 +22,12 @@ end
 function Toggle:SetValue(value, run_callback)
 	self.super.SetValue(self, value, run_callback)
 	if alive(self.panel) then
+		if managers.menu_component then
+			managers.menu_component:post_event(value and "box_tick" or "box_untick")
+		end
 		if value == true then
-			managers.menu_component:post_event("box_tick")
 			self.panel:child("toggle"):set_texture_rect(24,0,24,24)
 		else
-			managers.menu_component:post_event("box_untick")
 			self.panel:child("toggle"):set_texture_rect(0,0,24,24)			
 		end
 	end

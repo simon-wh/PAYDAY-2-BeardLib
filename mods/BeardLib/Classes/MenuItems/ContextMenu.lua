@@ -4,9 +4,10 @@ function ContextMenu:init(parent, layer)
     self._parent = parent
     self.parent = parent.parent
     self.menu = parent.menu
+    local control_size = self._parent.panel:w() / self._parent.control_slice
     self.panel = self.menu._panel:panel({
         name = parent.name.."list",
-        w = parent.panel:w(),
+        w = control_size,
         layer = layer,
         visible = false,
         halign = "left",
@@ -49,7 +50,7 @@ function ContextMenu:CreateItems()
             h = 12,
             y = (k - 1) * 14,
             color = self.parent.background_color and self.parent.text_color or Color.black,
-            font = "fonts/font_medium_mf",
+            font = self.parent.font,
             font_size = 12
         })
     end
@@ -75,14 +76,14 @@ function ContextMenu:reposition()
     else
         self.panel:set_h(items_h)
     end
-    self.panel:set_world_x(self._parent.panel:world_x())
+    self.panel:set_world_right(self._parent.panel:world_right())
     if normal_pos then
         self.panel:set_world_y(self._parent.panel:world_bottom())
     else
         self.panel:set_world_bottom(self._parent.panel:world_y())
     end
-    self._scroll:panel():set_y(self._parent.items_size) 
-    self._scroll:set_size(self.panel:w(), self.panel:h() - (self._parent.items_size or 0))
+    self._scroll:panel():set_y(self._parent.searchbox and self._parent.items_size or 0) 
+    self._scroll:set_size(self.panel:w(), self.panel:h() - (self._parent.searchbox and self._parent.items_size or 0))
     self._scroll:panel():child("scroll_up_indicator_arrow"):set_top(6 - self._scroll:padding())
     self._scroll:panel():child("scroll_down_indicator_arrow"):set_bottom(self._scroll:panel():h() - 6 - self._scroll:padding())
 

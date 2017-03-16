@@ -179,13 +179,14 @@ end
 
 function TextBoxBase:update_caret()
 	local text = self.panel:child("text")
-	local lines = math.max(1,text:number_of_lines())
+	local lines = math.max(1, text:number_of_lines())
 
  	if not self.lines or (self.lines > 1 and self.lines <= lines) then
 		self.panel:set_h(self.items_size * lines)
  		self.panel:parent():set_h(self.panel:h())
 		text:set_h(self.panel:h())
 		self.panel:child("line"):set_bottom(text:h())
+        self._parent:SetText(self._parent.text)
 	end
 	if self._parent.group then
         self._parent.group:AlignItems()

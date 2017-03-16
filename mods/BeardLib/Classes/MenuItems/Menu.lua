@@ -9,6 +9,7 @@ function Menu:init(menu, params)
     params.marker_alpha = params.marker_alpha or menu.marker_alpha 
     params.align = params.align or menu.align
     params.position = params.position or "Left"
+    params.font = params.font or tweak_data.menu.pd2_large_font or tweak_data.menu.default_font
     params.offset = params.offset and self:ConvertOffset(params.offset) or self:ConvertOffset(menu.offset) 
     params.override_size_limit = params.override_size_limit or menu.override_size_limit
     params.control_slice = params.control_slice or menu.control_slice or 2
@@ -58,7 +59,7 @@ end
 function Menu:Reposition()
     local t = type(self.position)
     if t == "table" then
-        self:SetPosition(unpack(self.position))
+        self.panel:set_position(unpack(self.position))
     elseif t == "function" then
         self:position(self)
     elseif t == "string" then
@@ -67,6 +68,10 @@ function Menu:Reposition()
 end
 
 function Menu:SetPositionByString(pos)
+    if not pos then
+        BeardLib:log("[ERROR] Position for menu %s is nil!", tostring(self.name))
+        return
+    end
     local pos_panel = self.menu._panel
     for _, p in pairs({"center", "bottom", "top", "right", "left"}) do
         if pos:lower():match(p) then
@@ -91,7 +96,12 @@ function Menu:AnimatePosition(pos, position_number)
 end
 
 function Menu:SetPosition(x,y)
-    self.panel:set_position(x,y)
+    if type(x) == "number" or type(y) == "number" then
+        self.position = {x or self.panel:x(),y or self.panel:y()}
+    else
+        self.position = x
+    end
+    self:Reposition()
 end
 
 function Menu:Panel()
@@ -106,16 +116,18 @@ function Menu:SetMaxRow(max)
 end
 
 function Menu:MouseInside()
-    return self.panel:inside(managers.mouse_pointer._mouse:world_position())
+    return self.panel:inside(managers.mouse_pointer._mouse:world_position()) and self:Visible()
 end
 
-function Menu:SetSize(w,h)
+function Menu:SetSize(w,h, no_recreate)
     self.panel:set_size(w or self.w,h or self.h)
     self._scroll:set_size(self.panel:size())
     self.w = w or self.w
     self.h = h or self.h
     self:Reposition()
-    self:RecreateItems()
+    if not no_recreate then
+        self:RecreateItems()
+    end
 end
 
 function Menu:MouseDoubleClick(button, x, y)
@@ -167,10 +179,14 @@ function Menu:MouseMoved(x, y)
         local _, pointer = self._scroll:mouse_moved(nil, x, y) 
         if pointer then
             self:CheckItems()
-            managers.mouse_pointer:set_pointer_image(pointer)
+            if managers.mouse_pointer.set_pointer_image then
+                managers.mouse_pointer:set_pointer_image(pointer)
+            end
             return true
         else
-            managers.mouse_pointer:set_pointer_image("arrow")
+            if managers.mouse_pointer.set_pointer_image then
+                managers.mouse_pointer:set_pointer_image("arrow")
+            end
         end
         for _, item in ipairs(self._visible_items) do
             item:MouseMoved(x, y) 
@@ -207,7 +223,36 @@ function Menu:SetVisible(visible)
     end
 end
 
+function Menu:AlignItemsGrid()
+    local base_h = self.items_size
+    local x
+    local y = 0
+    for i, item in ipairs(self.items) do
+        local offset = item.offset
+        x = x or offset[1]
+        item.panel:set_position(x,y + offset[2])
+        x = x + item.panel:w() + offset[1]
+        if x > self.panel:w() then
+            x = offset[1]
+            y = y + item.panel:h() + offset[2]
+            item.panel:set_position(x,y)
+            x = x + item.panel:w() + offset[1]
+        end
+    end
+    self._scroll:update_canvas_size()
+    self:CheckItems()
+end
+
+
 function Menu:AlignItems()
+    if self.align_method == "grid" then
+        self:AlignItemsGrid()
+    else
+        self:AlignItemsNormal()
+    end
+end
+
+function Menu:AlignItemsNormal()
     local h = 0
     local rows = 1
     for i, item in ipairs(self.items) do
@@ -231,6 +276,9 @@ function Menu:AlignItems()
             end
         end
     end
+    if self.automatic_height and self.h ~= h then
+        self:SetSize(nil, h + self.offset[1], true)
+    end
     self._scroll:update_canvas_size()
     self:CheckItems()
 end
@@ -248,25 +296,18 @@ function Menu:ClearItems(label)
     local temp = clone(self._items)
     self._items = {}
     self.items = {}
-    for k, item in pairs(temp) do
-        if not label or item.label == label then
-            if alive(item.panel) then
-                if item.group then
-                    table.delete(item.group.items, item)
-                    item.group:AlignItems()
-                end
-                if item.override_parent then
-                    table.delete(item.group._items, item)
-                end
-                item.panel:parent():remove(item.panel)
-            end
+    for _, item in pairs(temp) do
+        if not label or (type(label) == "table" and (item.group == label or item.override_parent == label) or item.label == label) then
+            self:RemoveItem(item)
         else
-            table.insert(self._items, item)
-            if not item.group and item.override_parent == nil then
-                table.insert(self.items, item)
+            if not item.group or alive(item.group) and not item.override_parent or alive(item.override_parent) then
+                table.insert(self._items, item)
+                if not item.group and item.override_parent == nil then
+                    table.insert(self.items, item)
+                end
             end
         end
-    end
+    end    
     if self.menu._openlist then
         self.menu._openlist:hide()
     end
@@ -287,11 +328,22 @@ function Menu:RecreateItems()
 end
 
 function Menu:RemoveItem(item)       
-    if alive(item.panel) then
+    if alive(item) then
         item.panel:parent():remove(item.panel)
     end
     if item.type_name == "ItemsGroup" and item.items then
+        for _, v in pairs(item.items) do
+            table.delete(self.items, v)
+            table.delete(self._items, v)            
+        end
         item.items = {}
+    end
+    if item.override_parent then
+        table.delete(item.override_parent._items, item)
+    end
+    if item.group then
+        table.delete(item.group.items, item)
+        item.group:AlignItems()
     end
     if item.list then
         item.list:parent():remove(item.list)
@@ -438,8 +490,9 @@ function Menu:ConfigureItem(item)
     item.parent_panel = (item.group and item.group.panel) or (item.override_parent and item.override_parent.panel) or self.items_panel
     item.offset = item.offset and self:ConvertOffset(item.offset) or self.offset
     item.override_size_limit = item.override_size_limit or self.override_size_limit
-    item.w = (item.w or (item.parent_panel:w() > 300 and not item.override_size_limit and 300 or item.parent_panel:w())) - (item.size_by_text and 0 or item.offset[1])
+    item.w = (item.w or (item.parent_panel:w() > 300 and not item.override_size_limit and 300 or item.parent_panel:w())) - (item.size_by_text and 0 or item.offset[1] * 2)
     item.control_slice = item.control_slice or self.control_slice
+    item.font = item.font or self.font
     if type(item.index) == "string" then
         local split = string.split(item.index, "|")
         local wanted_item = self:GetItem(split[2] or split[1]) 
@@ -453,7 +506,7 @@ function Menu:ConfigureItem(item)
 end
 
 function Menu:NewItem(item)
-    if item.index then
+    if not item.group and not item.override_parent and item.index then
         table.insert(self._items, item.index, item)
     else
         table.insert(self._items, item)
@@ -468,5 +521,6 @@ function Menu:NewItem(item)
     if self.auto_align then
         self:AlignItems()
     end
+    item:SetEnabled(item.enabled)
     return item
 end

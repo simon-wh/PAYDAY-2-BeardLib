@@ -15,7 +15,9 @@ function ListDialog:create_items(params, menu)
     params.visible = true
     self._list_menu = menu:NewMenu(params) 
     params.h = 20
-    params.row_max = 1
+    params.items_size = 20
+    params.offset = 0
+    params.align_method = "grid"
     params.auto_align = true
     ListDialog.super.create_items(self, params, menu) 
     self._menu:Panel():set_leftbottom(self._list_menu:Panel():left(), self._list_menu:Panel():top() - 1)
@@ -30,7 +32,7 @@ function ListDialog:Show(params)
     self._list_menu:ClearItems()  
     self._menu:TextBox({
         name = "Search",
-        w = self._menu.w - 142,
+        w = self._menu.w - 152,
         control_slice = 1.25,
         text = "Search",
         callback = callback(self, self, "Search"),  
@@ -38,7 +40,7 @@ function ListDialog:Show(params)
     })
     self._menu:Toggle({
         name = "CaseSensitive",
-        w = 32,
+        w = 42,
         text = "Aa",
         value = self._params.case_sensitive,
         callback = function(menu, item)
