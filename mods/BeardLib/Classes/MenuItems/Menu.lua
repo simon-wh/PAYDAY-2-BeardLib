@@ -333,17 +333,25 @@ function Menu:RemoveItem(item)
     end
     if item.type_name == "ItemsGroup" and item.items then
         for _, v in pairs(item.items) do
-            table.delete(self.items, v)
-            table.delete(self._items, v)            
+            v.group = nil
+            self:RemoveItem(v)
         end
         item.items = {}
+    end
+    if item._items then
+        for _, v in pairs(item._items) do
+            v.override_parent = nil
+            self:RemoveItem(v)
+        end       
     end
     if item.override_parent then
         table.delete(item.override_parent._items, item)
     end
     if item.group then
         table.delete(item.group.items, item)
-        item.group:AlignItems()
+        if item.group:alive() then
+            item.group:AlignItems()
+        end
     end
     if item.list then
         item.list:parent():remove(item.list)
