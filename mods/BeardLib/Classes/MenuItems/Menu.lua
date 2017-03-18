@@ -257,7 +257,7 @@ function Menu:AlignItemsNormal()
     local rows = 1
     for i, item in ipairs(self.items) do
         local offset = item.offset
-        item.panel:set_x(offset[1])            
+        item.panel:set_x(offset[1])
         item.panel:set_y(offset[2])
         if self.row_max and i == (self.row_max * rows) + 1 then
             if i > 1 then
@@ -300,7 +300,7 @@ function Menu:ClearItems(label)
         if not label or (type(label) == "table" and (item.group == label or item.override_parent == label) or item.label == label) then
             self:RemoveItem(item)
         else
-            if not item.group or alive(item.group) and not item.override_parent or alive(item.override_parent) then
+            if item:alive() and (not item.group or alive(item.group) and not item.override_parent or alive(item.override_parent)) then
                 table.insert(self._items, item)
                 if not item.group and item.override_parent == nil then
                     table.insert(self.items, item)
