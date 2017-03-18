@@ -260,15 +260,24 @@ function MenuUI:GetMenu(name)
 end
 
 function MenuUI:GetItem(name, menu_wanted)
+    for _, menu in pairs(self._menus) do
+        if menu.name == name then
+            return menu
+        elseif not menu_wanted then
+            local item = menu:GetItem(name)
+            if item and item.name then
+                return item
+            end
+        end
+    end
+    return false
+end
+
+function MenuUI:Focused()
 	for _, menu in pairs(self._menus) do
-		if menu.name == name then
-			return menu
-		elseif not menu_wanted then
-			local item = menu:GetItem(name)
-			if item and item.name then
-				return item
-			end
-		end
+		if menu:Focused() then
+            return true
+        end
 	end
     return false
 end

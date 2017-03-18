@@ -170,15 +170,17 @@ function ItemsGroup:Highlight()
     self.menu._highlighted = self
 end
 
-function ItemsGroup:UnHighlight()
-    if not alive(self.panel) or not self.closed then
-        return
-    end
-    self.panel:child("bg"):hide()
-    if self.menu._highlighted == self then
+function ItemsGroup:UnHighlight()   
+ 	if self.menu._highlighted == self then
         self.menu._highlighted = nil
     end
     self.highlight = false
+    if not alive(self.panel) then
+        return
+    end
+    if self.closed then
+		self.panel:child("bg"):hide()
+    end
 end
 
 function ItemsGroup:MouseMoved(x, y)

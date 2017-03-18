@@ -216,6 +216,10 @@ function Item:Highlight()
 end
 
 function Item:UnHighlight()
+	if self.menu._highlighted == self then
+		self.menu._highlighted = nil
+	end
+	self.highlight = false	
 	if not self:alive() then
 		return 
 	end
@@ -223,10 +227,6 @@ function Item:UnHighlight()
 	if self.title then
 		self.title:set_color(self.text_color)
 	end
-	if self.menu._highlighted == self then
-		self.menu._highlighted = nil
-	end
-	self.highlight = false
 end
 
 function Item:MouseMoved(x, y)
