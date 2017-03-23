@@ -78,7 +78,7 @@ function ModCore:init_modules()
                     else
                         self:log("[ERROR] An error occured on initilization of module: %s. Error:\n%s", module_tbl._meta, tostring(node_obj))
                     end
-                else
+                elseif not self._config.ignore_errors then
                     self:log("[ERROR] Unable to find module with key %s", module_tbl._meta)
                 end
             end

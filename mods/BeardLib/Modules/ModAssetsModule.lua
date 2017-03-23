@@ -9,14 +9,15 @@ function ModAssetsModule:init(core_mod, config)
     end
 
     self._providers = {
-        lastbullet = {
-            version_api_url = "http://manager.lastbullet.net/GetDownloadVersion/$id$.txt",
-            download_file_func = callback(self, self, "LastBulletDownloadAssets"),
-            download_info_url = "http://manager.lastbullet.net/GetSingleDownload/$id$.json",
-            download_api_url = "http://lastbullet.net/mydownloads/downloads/$download$",
-            page_url = "http://downloads.lastbullet.net/$id$"
+        modworkshop = {
+            version_api_url = "http://manager.modworkshop.net/GetDownloadVersion/$id$.txt",
+            download_file_func = callback(self, self, "MWSDownloadAssets"),
+            download_info_url = "http://manager.modworkshop.net/GetSingleDownload/$id$.json",
+            download_api_url = "http://modworkshop.net/mydownloads/downloads/$download$",
+            page_url = "http://downloads.modworkshop.net/$id$"
         }
     }
+    self._providers.lastbullet = clone(self._providers.modworkshop)
 
     self.id = self._config.id
 
@@ -235,7 +236,7 @@ function ModAssetsModule:StoreDownloadedAssets(data, id)
 	end
 end
 
-function ModAssetsModule:LastBulletDownloadAssets()
+function ModAssetsModule:MWSDownloadAssets()
     local download_info_url = self._mod:GetRealFilePath(self.provider.download_info_url, self)
 
     dohttpreq( download_info_url,
@@ -244,7 +245,7 @@ function ModAssetsModule:LastBulletDownloadAssets()
             if ret then
                 self:_DownloadAssets(d_data[tostring(self.id)])
             else
-                self:log("Failed to parse the data received from LastBullet!")
+                self:log("Failed to parse the data received from Modworkshop!")
             end
         end
     )

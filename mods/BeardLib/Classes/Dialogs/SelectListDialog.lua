@@ -1,37 +1,48 @@
 SelectListDialog = SelectListDialog or class(ListDialog) 
 function SelectListDialog:MakeListItems()
     self._list_menu:ClearItems("temp2")  
-    local case = self._params.case_sensitive
-    local limit = self._params.limit
+    local function ShowItem(t) 
+        if self._filter == "" or (self._params.case_sensitive and string.match(t, self._filter) or not self._params.case_sensitive and string.match(t:lower(), self._filter:lower())) then
+            if not self._params.limit or #self._list_menu._items <= 250 then
+                return true
+            end
+        end
+        return false
+    end
+    for _,v in pairs(self._params.selected_list) do
+        local t = type(v) == "table" and v.name or v
+        if ShowItem(t) then
+            self:Toggle(t, true, v)
+        end
+    end
     for _,v in pairs(self._params.list) do
         local t = type(v) == "table" and v.name or v
-        if self._filter == "" or (case and string.match(t, self._filter) or not case and string.match(t:lower(), self._filter:lower())) then
-            if not limit or #self._list_menu._items <= 250 then 
-            	local selected = table.contains(self._params.selected_list, v)
-                self._list_menu:Toggle({
-                    name = t,
-                    text = t,
-                    value = selected,
-                    index = selected and 1,
-                    callback = function(menu, item)
-                    	if item:Value() == true then
-                            if not table.contains(self._params.selected_list, v) then
-                                table.insert(self._params.selected_list, v)
-                            end
-                    	else
-                    		table.delete(self._params.selected_list, v)
-                    	end
-       				    if self._params.callback then
-    				        self._params.callback(self._params.selected_list)
-    				    end
-                    end, 
-                    group = items,
-                    label = "temp2"
-                })  
-            end   
+        if ShowItem(t) and not self._list_menu:GetItem(t) then
+            self:Toggle(t, false, v)
         end
     end    
     self._list_menu:AlignItems()
+end
+
+function SelectListDialog:Toggle(name, selected, value)
+    self._list_menu:Toggle({
+        name = name,
+        text = name,
+        value = selected,
+        callback = function(menu, item)
+            if item:Value() == true then
+                if not table.contains(self._params.selected_list, value) then
+                    table.insert(self._params.selected_list, value)
+                end
+            else
+                table.delete(self._params.selected_list, value)
+            end
+            if self._params.callback then
+                self._params.callback(self._params.selected_list)
+            end
+        end, 
+        label = "temp2"
+    })
 end
 
 function SelectListDialog:hide()

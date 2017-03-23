@@ -1,8 +1,8 @@
 {
 	"name" : "BeardLib",
 	"description" : "Library for easier script file manipulation and mod creation",
-	"author" : "GREAT BIG BUSHY BEARD",
-	"contact" : "simon@lastbullet.net",
+	"author" : "GREAT BIG BUSHY BEARD & Luffy",
+	"contact" : "simon@modworkshop.net",
 	"priority" : 500,
 	"pre_hooks" : [
 		{ "hook_id" : "core/lib/system/coresystem", "script_path" : "BeardLibCore.lua" }

@@ -8,7 +8,7 @@ function ScriptReplacementsModule:init(core_mod, config)
         return false
     end
 
-    self.ScriptDirectory = self._config.directory and self._mod.ModPath .. self._config.directory or self._mod.ModPath
+    self.ScriptDirectory = self._config.directory and BeardLib.Utils.Path:Combine(self._mod.ModPath, self._config.directory) or self._mod.ModPath
 
     return true
 end

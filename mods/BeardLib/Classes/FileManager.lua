@@ -125,6 +125,11 @@ function fm:ScriptReplaceFile(ext, path, file, options)
 	table.insert(fm.modded_files[k_ext][k_path], table.merge(options, {file = file}))
 end
 
+function fm:Has(ext, path)
+	local k_ext = ext:key()
+	return Global.fm.added_files[k_ext] and Global.fm.added_files[k_ext][path:key()]
+end
+
 function fm:HasScriptMod(ext, path)
 	local k_ext = ext:key()
 	return self.modded_files[k_ext] and self.modded_files[k_ext][path:key()]
