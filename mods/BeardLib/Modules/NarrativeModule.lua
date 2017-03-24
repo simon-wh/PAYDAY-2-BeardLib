@@ -8,7 +8,12 @@ function NarrativeModule:init(core_mod, config)
         {
             param = "chain",
             action = {"number_indexes", "remove_metas"}
-        },
+        },        
+        {
+            param = "chain",
+            shallow = true,
+            action = "children_no_number_indexes"
+        },        
         {
             param = "crimenet_callouts",
             action = "number_indexes"
