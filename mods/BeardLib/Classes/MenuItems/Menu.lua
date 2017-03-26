@@ -14,6 +14,7 @@ function Menu:init(menu, params)
     params.override_size_limit = params.override_size_limit or menu.override_size_limit
     params.control_slice = params.control_slice or menu.control_slice or 2
     params.auto_align = params.auto_align == nil and true or params.auto_align
+    params.text_offset = params.text_offset or menu.text_offset or 4
     local w = menu._panel:w()  
     if params.w == "full" then
         params.w = menu._panel:w()
@@ -501,6 +502,7 @@ function Menu:ConfigureItem(item)
     item.w = (item.w or (item.parent_panel:w() > 300 and not item.override_size_limit and 300 or item.parent_panel:w())) - (item.size_by_text and 0 or item.offset[1] * 2)
     item.control_slice = item.control_slice or self.control_slice
     item.font = item.font or self.font
+    item.text_offset = item.text_offset or self.text_offset
     if type(item.index) == "string" then
         local split = string.split(item.index, "|")
         local wanted_item = self:GetItem(split[2] or split[1]) 

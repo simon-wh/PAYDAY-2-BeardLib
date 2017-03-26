@@ -33,7 +33,8 @@ if not _G.BeardLib then
     self.custom_mission_elements = {
         "MoveUnit",
         "TeleportPlayer",
-        "Environment"
+        "Environment",
+        "PushInstigator"
     }
     self.modules = {}
 

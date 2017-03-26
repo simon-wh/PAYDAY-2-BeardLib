@@ -17,15 +17,16 @@ function Item:init(parent, params)
 		valign="grow",
 		layer = 0
 	})
+	local offset = math.max(params.color and 2 or 0, params.text_offset)
 	params.title = params.panel:text({
 		name = "title",
+		x = offset,
+		w = params.panel:w() - offset,
+		h = params.panel:h(),
 		align = params.align,
-		w = params.panel:w() - 4,
-		h = params.items_size,
-		wrap = true,
-		word_wrap = true,
+		wrap = not params.size_by_text,
+		word_wrap = not params.size_by_text,
 		text = params.text,
-		x = 4,
 		layer = 3,
 		color = params.text_color or Color.black,
 		font = params.font,
@@ -36,14 +37,6 @@ function Item:init(parent, params)
 		visible = not not params.color,
 		w = 2,
 	})
-	local _,_,w,h = params.title:text_rect()
-	params.title:set_h(h)
-	params.title:set_y(0)
-	if params.size_by_text then
-		params.panel:set_size(w + params.items_size,h)
-		params.title:set_size(params.panel:size())
-		params.title:set_x(params.color and 2 or 0)
-	end
 	if self.type_name == "Divider" then
 		params.title:set_world_center_y(params.panel:world_center_y())
 	end
@@ -185,6 +178,7 @@ function Item:SetColor(color)
 	if alive(self.div) then
 		self.div:set_visible(color ~= nil)
 	end
+	self:SetText(self.text)
 end
 
 function Item:SetText(text)
@@ -193,6 +187,14 @@ function Item:SetText(text)
 	title:set_text(self.localized and text and managers.localization:text(text) or text)
 	local lines = math.max(1, title:number_of_lines()) 
 	self.panel:set_h(math.max(self.items_size * lines, self.panel:h()))
+	local offset = math.max(self.color and 2 or 0, self.text_offset)
+	title:set_shape(offset, 0, self.panel:w() - offset, self.panel:h())
+	local _,_,w,h = self.title:text_rect()
+	if self.size_by_text then		
+		self.panel:set_size(w + (offset * 2) + (self.type_name == "Toggle" and self.items_size or 0), h)
+		self.w, self.h = self.panel:size()
+		self.title:set_shape(offset, 0, w, h)
+	end
 end
 
 function Item:SetLabel(label)

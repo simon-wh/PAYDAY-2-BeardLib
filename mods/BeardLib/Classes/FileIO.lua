@@ -113,3 +113,11 @@ function FileIO:MakeDir(path)
         os.execute(string.format("mkdir \"%s\"", path))
     end
 end
+
+function FileIO:GetFiles(path) --Same but having the idea that we use one class for all 
+	return file.GetFiles(path)
+end
+
+function FileIO:GetFolders(path)
+	return file.GetDirectories(path)
+end
