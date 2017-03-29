@@ -66,3 +66,12 @@ function ElementEnvironment:on_executed(instigator)
  
     self.super.on_executed(self, instigator)
 end
+
+function ElementEnvironment:save(data)
+    data.save_me = true
+    data.enabled = self._values.enabled
+end
+
+function ElementEnvironment:load(data)
+    self:set_enabled(data.enabled)
+end
