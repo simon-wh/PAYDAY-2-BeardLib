@@ -85,12 +85,21 @@ function FileIO:Exists(path)
 	end
 end
 
-function FileIO:CopyFileTo(path, to_path) 
-	os.execute(string.format("echo f | xcopy \"%s\" \"%s\" /e /i /h /y /c", path, to_path))
+function FileIO:CopyFileTo(path, to_path)
+	if SystemFS then
+		SystemFS:copy_file(path, to_path)
+	else
+		os.execute(string.format("copy \"%s\" \"%s\" /e /i /h /y /c", path, to_path))
+	end
 end
 
 function FileIO:CopyTo(path, to_path) 
 	os.execute(string.format("xcopy \"%s\" \"%s\" /e /i /h /y /c", path, to_path))
+end
+
+function FileIO:MoveFileTo(path, to_path)
+	self:CopyFileTo(path, to_path)
+	self:Delete(path)
 end
 
 function FileIO:MoveTo(path, to_path)

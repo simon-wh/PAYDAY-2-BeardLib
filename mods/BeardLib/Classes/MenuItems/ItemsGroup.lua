@@ -104,6 +104,8 @@ function ItemsGroup:AlignItemsGrid()
     local base_h = self.parent.items_size
     local x
     local y = self.use_as_menu ~= true and base_h or 0
+    local max_h = base_h
+    local row_max_h = 0
     for i, item in ipairs(self.items) do
         local offset = item.offset
         x = x or offset[1]
@@ -111,12 +113,15 @@ function ItemsGroup:AlignItemsGrid()
         x = x + item.panel:w() + offset[1]
         if x > self.panel:w() then
             x = offset[1]
-            y = y + item.panel:h() + offset[2]
+            y = y + row_max_h + offset[2]
             item.panel:set_position(x,y)
             x = x + item.panel:w() + offset[1]
+            row_max_h = 0
         end
+        max_h = math.max(max_h, item.panel:y() + item.panel:h())
+        row_max_h = math.max(row_max_h, item.panel:h())
     end
-    self.panel:set_h(base_h + (self.closed and 0 or y))
+    self.panel:set_h(max_h)
 end
 
 function ItemsGroup:AlignItemsNormal()

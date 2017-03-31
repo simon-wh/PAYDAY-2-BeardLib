@@ -47,10 +47,12 @@ end
 function ElementMoveUnit:done_callback(instigator)
 	ElementMoveUnit.super.on_executed(self, instigator)
 end
+
 function ElementMoveUnit:save(data)
 	data.save_me = true
 	data.enabled = self._values.enabled
 end
+
 function ElementMoveUnit:load(data)
 	if not self._has_fetched_units then
 		self:on_script_activated()

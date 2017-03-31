@@ -316,7 +316,7 @@ BeardLib.Utils.WeapConv = {
 }
 function BeardLib.Utils:GetCleanedWeaponData(unit)
     local player_inv = unit and unit:inventory() or managers.player:player_unit():inventory()
-    local new_weap_name = self.WeapConv[tweak_data.weapon[managers.weapon_factory:get_weapon_id_by_factory_id(HuskPlayerInventory._get_weapon_name_from_sync_index(PlayerInventory._get_weapon_sync_index(player_inv:equipped_unit():base()._factory_id or player_inv:equipped_unit():name())))].use_data.selection_index]
+    local new_weap_name = self.WeapConv[tweak_data.weapon[managers.weapon_factory:get_weapon_id_by_factory_id(player_inv:equipped_unit():base()._factory_id or player_inv:equipped_unit():name())].use_data.selection_index]
     return PlayerInventory._get_weapon_sync_index(new_weap_name), managers.weapon_factory:blueprint_to_string(new_weap_name, tweak_data.weapon.factory[new_weap_name].default_blueprint)
 end
 

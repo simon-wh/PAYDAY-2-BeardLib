@@ -26,22 +26,8 @@ Hooks:Add("LocalizationManagerPostInit", "BeardLibLocalization", function(loc)
     })
 end)
 
-Hooks:Add("MenuManagerSetupCustomMenus", "Base_SetupBeardLibMenu", function( menu_manager, nodes )
+Hooks:Add("MenuManagerSetupCustomMenus", "Base_SetupBeardLibMenu", function(menu_manager, nodes)
     managers.menu = managers.menu or menu_manager
-    local main_node = MenuHelperPlus:NewNode(nil, {
-        name = BeardLib.config.main_menu,
-        menu_components =  managers.menu._is_start_menu and "player_profile menuscene_info news game_installing" or nil
-    })
-
-    managers.menu:add_back_button(main_node)
-
-    MenuHelperPlus:AddButton({
-        id = "BeardLibMainMenu",
-        title = "BeardLibMainMenu",
-        node_name = "options",
-        position = managers.menu._is_start_menu and 9 or 7,
-        next_node = BeardLib.config.main_menu,
-    })
 end)
 
 Hooks:Register("BeardLibCreateCustomMenus")
