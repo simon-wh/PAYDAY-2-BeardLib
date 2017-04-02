@@ -101,7 +101,7 @@ function ModAssetsModule:_CheckVersion(force)
                 self:ShowNoChangePrompt()
             end
         else
-            self:ShowErrorPrompt()
+            --self:ShowErrorPrompt()
             self:log("[ERROR] Unable to parse string '%s' as a version number", data)
         end
     end)

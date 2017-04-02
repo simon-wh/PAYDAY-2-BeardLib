@@ -73,6 +73,10 @@ function ItemModuleBase:init(core_mod, config)
                     tbl[i] = BeardLib.Utils:RemoveMetas(tbl[i], clean.shallow)
                 elseif action == "normalize" then
                     tbl[i] = BeardLib.Utils:normalize_string_value(tbl[i])
+                elseif action == "children_no_number_indexes" then
+                    for _, v in pairs(tbl[i]) do
+                        v = BeardLib.Utils:RemoveAllNumberIndexes(v, clean.shallow)
+                    end
                 end
             end
         end

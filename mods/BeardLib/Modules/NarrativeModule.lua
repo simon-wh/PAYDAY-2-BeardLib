@@ -8,7 +8,12 @@ function NarrativeModule:init(core_mod, config)
         {
             param = "chain",
             action = {"number_indexes", "remove_metas"}
-        },
+        },        
+        {
+            param = "chain",
+            shallow = true,
+            action = "children_no_number_indexes"
+        },        
         {
             param = "crimenet_callouts",
             action = "number_indexes"
@@ -57,6 +62,7 @@ function NarrativeModule:RegisterHook()
             contact = self._config.contact or "bain",
             jc = self._config.jc or 50,
             chain = self._config.chain,
+            dlc = self._config.dlc,
             briefing_event = self._config.briefing_event,
             debrief_event = self._config.debrief_event,
             crimenet_callouts = self._config.crimenet_callouts,
