@@ -92,17 +92,31 @@ function FileBrowserDialog:Browse(where, params)
     self._dialog:enable()    
     self._trigger = managers.menu._controller:add_trigger(Idstring("esc"), callback(self, self, "hide"))    
     BeardLib.DialogOpened = self
-end 
+end
+
 function FileBrowserDialog:MakeFilesAndFolders(files, folders)
     for _,v in pairs(files) do
         local tbl = type(v) == "table"
-        self._files_menu:Button({
-            name = tbl and v.name or v,
-            text = tbl and v.name or v,
-            path = tbl and v.path or self._current_dir .. "/" .. v,
-            callback = callback(self, self, "FileClick"), 
-            label = "temp2",
-        })        
+        local pass = true
+        if self._params.extensions then
+            for _, ext in pairs(self._params.extensions) do
+                if ext == BeardLib.Utils.Path:GetFileExtension(v) then
+                    pass = true
+                    break
+                else
+                    pass = false
+                end
+            end
+        end
+        if pass then
+            self._files_menu:Button({
+                name = tbl and v.name or v,
+                text = tbl and v.name or v,
+                path = tbl and v.path or BeardLib.Utils.Path:Combine(self._current_dir, v),
+                callback = callback(self, self, "FileClick"), 
+                label = "temp2",
+            })
+        end       
     end       
     for _,v in pairs(folders) do
          self._folders_menu:Button({
@@ -136,7 +150,7 @@ end
 
 function FileBrowserDialog:FileClick(menu, item)
     if self._params.file_click then
-        self._params.file_click(item)
+        self._params.file_click(item.path)
     end
 end 
 

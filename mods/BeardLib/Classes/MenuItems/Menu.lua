@@ -15,6 +15,7 @@ function Menu:init(menu, params)
     params.control_slice = params.control_slice or menu.control_slice or 2
     params.auto_align = params.auto_align == nil and true or params.auto_align
     params.text_offset = params.text_offset or menu.text_offset or 4
+    params.scroll_width = params.scroll_width or 8
     local w = menu._panel:w()  
     if params.w == "full" then
         params.w = menu._panel:w()
@@ -38,7 +39,7 @@ function Menu:init(menu, params)
         alpha = params.background_alpha,
         layer = 0
     })
-    self._scroll = ScrollablePanel:new(params.panel, "ItemsPanel", {layer = 4, padding = 0.0001, scroll_width = params.scrollbar == false and 0 or 8, hide_shade = true})
+    self._scroll = ScrollablePanel:new(params.panel, "ItemsPanel", {layer = 4, padding = 0.0001, scroll_width = params.scrollbar == false and 0 or params.scroll_width, hide_shade = true})
     params.items_panel = self._scroll:canvas()
 
     if not menu._first_parent then
