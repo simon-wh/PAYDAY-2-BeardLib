@@ -68,6 +68,8 @@
         <hook source="lib/units/beings/player/playermovement" file="PlayerMovement.lua"/>
         <hook source="lib/units/beings/player/huskplayermovement" file="HuskPlayerMovement.lua"/>
         <hook source="lib/units/beings/player/playerinventory" file="PlayerInventory.lua"/>
+        <hook source="core/lib/managers/viewport/environment/coreenvironmentfeeder" file="EnvironmentFeeder.lua"/>
+        <hook source="core/lib/managers/viewport/environment/coreenvironmentmanager" file="EnvironmentManager.lua"/>
 		<hook source="lib/setups/setup" file="Setup.lua"/>
 	</hooks>
 	<script_data_types>

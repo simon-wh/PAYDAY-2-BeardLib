@@ -1,6 +1,10 @@
 FileIO = FileIO or class()
 function FileIO:Open(path, flags)
-	return io.open(path, flags)
+	if SystemFS then
+		return SystemFS:open(path, flags)
+	else
+		return io.open(path, flags)
+	end
 end
 
 function FileIO:WriteTo(path, data, flags)
@@ -86,8 +90,12 @@ function FileIO:Exists(path)
 end
 
 function FileIO:CopyFileTo(path, to_path)
+	local dir = BeardLib.Utils.Path:GetDirectory(to_path)
+	if not self:Exists(dir) then
+		self:MakeDir(dir)
+	end
 	if SystemFS then
-		SystemFS:copy_file(path, to_path)
+		SystemFS:copy_file(path, dir)
 	else
 		os.execute(string.format("copy \"%s\" \"%s\" /e /i /h /y /c", path, to_path))
 	end
@@ -117,7 +125,13 @@ end
 
 function FileIO:MakeDir(path) 
     if SystemFS then
-        SystemFS:make_dir(path)
+    	local p
+    	for _, s in pairs(string.split(path, "/")) do
+    		p = p and p .. "/" .. s  or s
+    		if not self:Exists(p) then
+    			SystemFS:make_dir(p)
+    		end
+    	end
     else
         os.execute(string.format("mkdir \"%s\"", path))
     end

@@ -47,7 +47,7 @@ overwrite_meta_function(PackageManager, "script_data", function(self, ext, path,
 end)
 
 overwrite_meta_function(PackageManager, "has", function(self, ext, path)
-    if FileManager:Has(ext, path) then
+    if FileManager:Has(ext, path) or FileManager:HasScriptMod(ext, path) then
         return true
     end
 
