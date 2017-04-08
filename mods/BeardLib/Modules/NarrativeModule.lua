@@ -75,7 +75,10 @@ function NarrativeModule:AddNarrativeData(narr_self)
         },
         allowed_gamemodes = self._config.allowed_gamemodes,
         custom = true
-    }
+    }    
+    for _, stage in pairs(data.chain) do
+        narr_self.stages[stage.level_id] = stage
+    end
     if self._config.merge_data then
         table.merge(data, BeardLib.Utils:RemoveMetas(self._config.merge_data, true))
     end

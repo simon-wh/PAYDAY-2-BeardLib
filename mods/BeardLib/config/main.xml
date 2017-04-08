@@ -60,7 +60,7 @@
         <hook source="core/lib/utils/dev/editor/coreworlddefinition" file="CoreWorldDefinition.lua"/>
         <hook source="lib/managers/menu/scrollablepanel" file="ScrollablePanel.lua"/>
         <hook source="core/lib/system/coresystem" file="CoreSystem.lua"/>
-        <hook source="lib/tweak_data/enveffecttweakdata" file="PreTweakData.lua"/>
+        <hook source="lib/tweak_data/crimespreetweakdata" file="PreTweakData.lua"/>
         <hook source="lib/tweak_data/tweakdata" file="TweakData.lua"/>
         <hook source="lib/network/matchmaking/networkmatchmakingsteam" file="NetworkMatchmakingSteam.lua"/>
         <hook source="lib/network/base/networkpeer" file="NetworkPeer.lua"/>

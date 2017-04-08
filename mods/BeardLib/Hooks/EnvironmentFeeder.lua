@@ -12,7 +12,7 @@ function SkyTexturePathFeeder:apply(handler, viewport, scene)
 		local texture = self._current
 		if texture then
 		    local material = Underlay:material(Idstring("sky"))
-		    if material then
+		    if material and DB:has(Idstring("texture"), texture:id()) then
 		        Application:set_material_texture(material, Idstring("diffuse_texture"), texture:id(), Idstring("normal"))
 		    end
 		end
