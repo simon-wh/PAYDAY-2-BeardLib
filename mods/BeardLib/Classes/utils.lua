@@ -320,6 +320,12 @@ function BeardLib.Utils:GetCleanedWeaponData(unit)
     return PlayerInventory._get_weapon_sync_index(new_weap_name), managers.weapon_factory:blueprint_to_string(new_weap_name, tweak_data.weapon.factory[new_weap_name].default_blueprint)
 end
 
+function BeardLib.Utils:OutfitStringFromList(outfit)
+    local str = managers.blackmarket:outfit_string_from_list(outfit)
+    --Remove when overkill decides to add armor_skin to BlackMarketManager:outfit_string_from_list
+    return str:gsub(outfit.armor_current_state, outfit.armor_current_state.."-"..outfit.armor_skin)
+end
+
 function BeardLib.Utils:CleanOutfitString(str)
 	local outfit_list = managers.blackmarket:unpack_outfit_from_string(str)
 
@@ -357,7 +363,7 @@ function BeardLib.Utils:CleanOutfitString(str)
 		end
 	end
 
-	return managers.blackmarket:outfit_string_from_list(outfit_list)
+	return self:OutfitStringFromList(outfit_list)
 end
 
 function BeardLib.Utils:GetSubValues(tbl, key)
