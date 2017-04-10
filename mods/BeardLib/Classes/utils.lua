@@ -323,8 +323,7 @@ end
 function BeardLib.Utils:OutfitStringFromList(outfit)
     local str = managers.blackmarket:outfit_string_from_list(outfit)
     --Remove when overkill decides to add armor_skin to BlackMarketManager:outfit_string_from_list
-    local armor_s = outfit.armor.."-"..outfit.armor_current.."-"..outfit.armor_current_state
-    return str:gsub(armor_s, armor_s.."-"..outfit.armor_skin)
+    return str:gsub(outfit.armor.."%-"..outfit.armor_current.."%-"..outfit.armor_current_state, outfit.armor.."-"..outfit.armor_current.."-"..outfit.armor_current_state.."-"..outfit.armor_skin)
 end
 
 function BeardLib.Utils:CleanOutfitString(str)

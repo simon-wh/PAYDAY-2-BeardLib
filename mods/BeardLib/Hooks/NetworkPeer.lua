@@ -166,7 +166,7 @@ function NetworkPeer:set_outfit_string(outfit_string, outfit_version, outfit_sig
             old_outfit_list.secondary.blueprint = new_outfit_list.secondary.blueprint
         end]]--
 
-    	self._profile.outfit_string = managers.blackmarket:outfit_string_from_list(old_outfit_list)
+    	self._profile.outfit_string = BeardLib.Utils:OutfitStringFromList(old_outfit_list)
     	--[[if not self._ticket_wait_response then
     		self:verify_outfit()
     	end]]--
