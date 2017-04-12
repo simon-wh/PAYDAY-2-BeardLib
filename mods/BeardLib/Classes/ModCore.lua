@@ -85,7 +85,7 @@ function ModCore:init_modules()
         end
     end
 
-    if self._auto_post_init then
+    if self._auto_post_init or self._config.post_init then
         self:post_init()
     end
     self.modules_initialized = true

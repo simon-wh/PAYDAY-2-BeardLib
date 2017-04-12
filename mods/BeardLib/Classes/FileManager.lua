@@ -137,8 +137,9 @@ end
 
 local _LoadAsset = function(ids_ext, ids_path)
     if not managers.dyn_resource:has_resource(ids_ext, ids_path, managers.dyn_resource.DYN_RESOURCES_PACKAGE) then
-        BeardLib:log("loaded file %s.%s", ids_path:key(), ids_ext:key())
-        managers.dyn_resource:load(ids_ext, ids_path, managers.dyn_resource.DYN_RESOURCES_PACKAGE)
+        managers.dyn_resource:load(ids_ext, ids_path, managers.dyn_resource.DYN_RESOURCES_PACKAGE, function()
+        	BeardLib:log("loaded file %s.%s", ids_path:key(), ids_ext:key())
+        end)
     end
 end
 
