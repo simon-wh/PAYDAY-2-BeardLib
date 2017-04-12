@@ -238,50 +238,63 @@ function BeardLib.Utils:GetCleanedWeaponData(unit)
     return PlayerInventory._get_weapon_sync_index(new_weap_name), managers.weapon_factory:blueprint_to_string(new_weap_name, tweak_data.weapon.factory[new_weap_name].default_blueprint)
 end
 
-function BeardLib.Utils:OutfitStringFromList(outfit)
-    local str = managers.blackmarket:outfit_string_from_list(outfit)
+function BeardLib.Utils:OutfitStringFromList(outfit, is_henchman)
+    local bm = managers.blackmarket
+    local str = (is_henchman and bm.henchman_loadout_string_from_loadout) and bm:henchman_loadout_string_from_loadout(outfit) or bm:outfit_string_from_list(outfit)
     --Remove when overkill decides to add armor_skin to BlackMarketManager:outfit_string_from_list
-    return str:gsub(outfit.armor.."%-"..outfit.armor_current.."%-"..outfit.armor_current_state, outfit.armor.."-"..outfit.armor_current.."-"..outfit.armor_current_state.."-"..outfit.armor_skin)
+    return is_henchman and str or str:gsub(outfit.armor.."%-"..outfit.armor_current.."%-"..outfit.armor_current_state, outfit.armor.."-"..outfit.armor_current.."-"..outfit.armor_current_state.."-"..outfit.armor_skin)
 end
 
-function BeardLib.Utils:CleanOutfitString(str)
-	local outfit_list = managers.blackmarket:unpack_outfit_from_string(str)
+function BeardLib.Utils:CleanOutfitString(str, is_henchman)
+    local bm = managers.blackmarket
+    local list = (is_henchman and bm.unpack_henchman_loadout_string) and bm:unpack_henchman_loadout_string(str) or bm:unpack_outfit_from_string(str)
 
-	if tweak_data.blackmarket.masks[outfit_list.mask.mask_id].custom then
-		outfit_list.mask.mask_id = "character_locked"
-	end
+    if tweak_data.blackmarket.masks[is_henchman and list.mask or list.mask.mask_id].custom then
+        if is_henchman then
+            list.mask = "character_locked"
+        else
+            list.mask.mask_id = "character_locked"
+        end
+    end
 
-	if tweak_data.blackmarket.textures[outfit_list.mask.blueprint.pattern.id].custom then
-		outfit_list.mask.blueprint.pattern.id = "no_color_no_material"
-	end
+    local pattern = is_henchman and list.mask_blueprint.pattern or list.mask.blueprint.pattern
+    if tweak_data.blackmarket.textures[pattern.id].custom then
+        pattern.id = "no_color_no_material"
+    end
 
-	if tweak_data.blackmarket.materials[outfit_list.mask.blueprint.material.id].custom then
-		outfit_list.mask.blueprint.material.id = "plastic"
-	end
+    local material = is_henchman and list.mask_blueprint.material or list.mask.blueprint.material
+    if tweak_data.blackmarket.materials[material.id].custom then
+        material.id = "plastic"
+    end
 
-	if tweak_data.blackmarket.melee_weapons[outfit_list.melee_weapon].custom then
-		outfit_list.melee_weapon = "weapon"
-	end
+    if tweak_data.weapon.factory[is_henchman and list.primary or list.primary.factory_id].custom then
+        if is_henchman then
+            list.primary = self.WeapConv[2]
+        else
+            list.primary.factory_id = self.WeapConv[2]
+            list.primary.blueprint = tweak_data.weapon.factory[list.primary.factory_id].default_blueprint
+        end
+    end
 
-	if tweak_data.weapon.factory[outfit_list.primary.factory_id].custom then
-		outfit_list.primary.factory_id = self.WeapConv[2]
-        outfit_list.primary.blueprint = tweak_data.weapon.factory[outfit_list.primary.factory_id].default_blueprint
-	end
+    if not is_henchman then
+        if tweak_data.weapon.factory[list.secondary.factory_id].custom then
+            list.secondary.factory_id = self.WeapConv[1]
+            list.secondary.blueprint = tweak_data.weapon.factory[list.secondary.factory_id].default_blueprint
+        end
 
-	if tweak_data.weapon.factory[outfit_list.secondary.factory_id].custom then
-		outfit_list.secondary.factory_id = self.WeapConv[1]
-        outfit_list.secondary.blueprint = tweak_data.weapon.factory[outfit_list.secondary.factory_id].default_blueprint
-	end
+        if tweak_data.blackmarket.melee_weapons[list.melee_weapon].custom then
+            list.melee_weapon = "weapon"
+        end
 
-	for _, weap in pairs({outfit_list.primary, outfit_list.secondary}) do
-		for i, part_id in pairs(weap.blueprint) do
-			if tweak_data.weapon.factory.parts[part_id] and tweak_data.weapon.factory.parts[part_id].custom then
-				table.remove(weap.blueprint, i)
-			end
-		end
-	end
-
-	return self:OutfitStringFromList(outfit_list)
+        for _, weap in pairs({list.primary, list.secondary}) do
+            for i, part_id in pairs(weap.blueprint) do
+                if tweak_data.weapon.factory.parts[part_id] and tweak_data.weapon.factory.parts[part_id].custom then
+                    table.remove(weap.blueprint, i)
+                end
+            end
+        end
+    end
+    return self:OutfitStringFromList(list, is_henchman)
 end
 
 function BeardLib.Utils:GetSubValues(tbl, key)
