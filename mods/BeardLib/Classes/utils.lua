@@ -239,16 +239,16 @@ function BeardLib.Utils:GetCleanedWeaponData(unit)
 end
 
 function BeardLib.Utils:OutfitStringFromList(outfit, is_henchman)
-    is_henchman = is_henchman and bm.henchman_loadout_string_from_loadout
     local bm = managers.blackmarket
+    is_henchman = is_henchman and bm.henchman_loadout_string_from_loadout
     local str = is_henchman and bm:henchman_loadout_string_from_loadout(outfit) or bm:outfit_string_from_list(outfit)
     --Remove when overkill decides to add armor_skin to BlackMarketManager:outfit_string_from_list
     return is_henchman and str or str:gsub(outfit.armor.."%-"..outfit.armor_current.."%-"..outfit.armor_current_state, outfit.armor.."-"..outfit.armor_current.."-"..outfit.armor_current_state.."-"..outfit.armor_skin)
 end
 
 function BeardLib.Utils:CleanOutfitString(str, is_henchman)
-    is_henchman = is_henchman and bm.unpack_henchman_loadout_string
     local bm = managers.blackmarket
+    is_henchman = is_henchman and bm.unpack_henchman_loadout_string
     local list = is_henchman and bm:unpack_henchman_loadout_string(str) or bm:unpack_outfit_from_string(str)
 
     if tweak_data.blackmarket.masks[is_henchman and list.mask or list.mask.mask_id].custom then
