@@ -80,11 +80,8 @@ function MenuUI:disable()
     end
 	self._ws_pnl:set_alpha(0)
 	self._menu_closed = true
-	self._highlighted = nil
-	if self._openlist then
-	 	self._openlist.list:hide()
-	 	self._openlist = nil
-	end
+	if self._highlighted then self._highlighted:UnHighlight() end
+	if self._openlist then self._openlist:hide() end
 	managers.mouse_pointer:remove_mouse(self._mouse_id)
 end
 
