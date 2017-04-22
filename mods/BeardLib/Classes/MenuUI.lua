@@ -81,11 +81,6 @@ function MenuUI:disable()
 	self._ws_pnl:set_alpha(0)
 	self._menu_closed = true
 	self._highlighted = nil
-	if self._current_menu then
-		for _, item in pairs(self._current_menu._items) do
-			item.highlight = false
-		end
-	end
 	if self._openlist then
 	 	self._openlist.list:hide()
 	 	self._openlist = nil
@@ -205,11 +200,9 @@ end
 function MenuUI:ShouldClose()
 	if not self._slider_hold and not self._grabbed_scroll_bar then
 		for _, menu in pairs(self._menus) do
-			for _, item in pairs(menu._items) do
-				if item.cantype or item.CanEdit then
-					return false
-				end
-			end
+            if not menu:ShouldClose() then
+                return false
+            end
 		end
 		return true
 	end
@@ -241,7 +234,7 @@ function MenuUI:MouseMoved(o, x, y)
     end
 end
 
-function MenuUI:SwitchMenu(menu)
+function MenuUI:SwitchMenu(menu) --Deprecated--
     self._current_menu:SetVisible(false)
     menu:SetVisible(true)
     self._current_menu = menu

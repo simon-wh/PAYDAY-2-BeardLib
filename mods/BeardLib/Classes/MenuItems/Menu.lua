@@ -347,6 +347,18 @@ function Menu:RemoveItem(item)
     end
 end
 
+function Menu:ShouldClose()
+    for _, item in pairs(menu._all_items) do
+        if item.menu_type and not item:ShouldClose() then
+            return false
+        end
+        if item.cantype or item.CanEdit then
+            return false
+        end
+    end
+    return true
+end
+
 function Menu:KeyBind(params)
     self:ConfigureItem(params)
     return self:NewItem(KeyBindItem:new(params))
