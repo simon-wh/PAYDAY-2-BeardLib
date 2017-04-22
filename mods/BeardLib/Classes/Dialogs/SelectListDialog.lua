@@ -3,7 +3,7 @@ function SelectListDialog:MakeListItems()
     self._list_menu:ClearItems("temp2")  
     local function ShowItem(t) 
         if self._filter == "" or (self._params.case_sensitive and string.match(t, self._filter) or not self._params.case_sensitive and string.match(t:lower(), self._filter:lower())) then
-            if not self._params.limit or #self._list_menu._items <= 250 then
+            if not self._params.limit or #self._list_menu._all_items <= 250 then
                 return true
             end
         end

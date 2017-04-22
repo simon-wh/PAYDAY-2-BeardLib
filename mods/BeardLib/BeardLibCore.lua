@@ -1,14 +1,13 @@
 if not _G.BeardLib then
     _G.BeardLib = {}
 
-
     local self = BeardLib
 	self._mod = nil
     self.Name = "BeardLib"
+    self.Version = 2.2 --for compatibility checks
     self.ModPath = ModPath
     self.SavePath = SavePath
     self.sequence_mods = self.sequence_mods or {}
-
 
 	function self:read_config(file, tbl)
 		local file = io.open(ModPath .. "config/" .. file)
@@ -45,14 +44,11 @@ if not _G.BeardLib then
 		self:LoadClasses()
 		self:LoadModules()
 
-		--self._mod = ModCore:new(path:Combine(ModPath, "main.xml"))
-
 		if not file.DirectoryExists(self.config.maps_dir) then
 			os.execute("mkdir " .. self.config.maps_dir)
 		end
 
 		local languages = {}
-
 		for i, file in pairs(file.GetFiles(self.config.localization_dir)) do
 			local lang = path:GetFileNameWithoutExtension(file)
 			table.insert(languages, {
@@ -62,15 +58,12 @@ if not _G.BeardLib then
 			})
 		end
         languages.directory = path:GetFileNameWithoutExtension(self.config.localization_dir)
-
 		LocalizationModule:new(self, languages)
-
 		for k, manager in pairs(self.managers) do
 			if manager.new then
 				self.managers[k] = manager:new()
 			end
 		end
-
 		--Load mod_overrides adds
 		self:RegisterTweak()
 	end

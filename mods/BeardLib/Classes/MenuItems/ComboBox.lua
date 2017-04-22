@@ -1,11 +1,10 @@
 ComboBox = ComboBox or class(Item)
-
-function ComboBox:init(parent, params)
-    self.type_name = "ComboBox"
+ComboBox.type_name = "ComboBox"
+function ComboBox:Init()
     self.size_by_text = false
     self.items = self.items or {}
     self.searchbox = self.searchbox == nil and true or self.searchbox
-    self.super.init(self, parent, params)
+    self.super.Init(self)
     local text = self.items[self.value]
     if type(text) == "table" then
         text = text.text
@@ -29,7 +28,7 @@ function ComboBox:init(parent, params)
         w = control_size,
         h = self.items_size,
         layer = 1,
-        color = ((parent.background_color or Color.white) / 1.2):with_alpha(1),
+        color = ((self.parent.background_color or Color.white) / 1.2):with_alpha(1),
     })
     combo_bg:set_right(self.panel:w())
     combo_selected:set_left(combo_bg:left() + 2)
@@ -39,7 +38,7 @@ function ComboBox:init(parent, params)
         h = self.items_size - 4,
         texture = "guis/textures/menuicons",
         texture_rect = {4,0,16,16},
-        color = not parent.background_color and Color.black,
+        color = not self.parent.background_color and Color.black,
         layer = 2,
     }):set_right(combo_bg:right() - 2.5)
     local h = math.max(1, #self.items) * 18
@@ -85,6 +84,9 @@ function ComboBox:SelectedItem()
 end
 
 function ComboBox:MousePressed(button, x, y)
+    if not self:MouseCheck(true) then
+        return
+    end
     if not self.menu._openlist and self.parent.panel:inside(x,y) and self.panel:inside(x,y) then
         if button == Idstring("0") then
             self._list:update_search()

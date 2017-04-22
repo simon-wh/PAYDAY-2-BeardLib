@@ -8,6 +8,10 @@ function FileIO:Open(path, flags)
 end
 
 function FileIO:WriteTo(path, data, flags)
+	local dir = BeardLib.Utils.Path:GetDirectory(path)
+	if not self:Exists(dir) then
+		self:MakeDir(dir)
+	end
  	local file = self:Open(path, flags or "w")
  	if file then
 	 	file:write(data)
@@ -70,10 +74,6 @@ function FileIO:ReadScriptDataFrom(path, typ)
 end
 
 function FileIO:WriteScriptDataTo(path, data, typ)
-	local dir = BeardLib.Utils.Path:GetDirectory(path)
-	if not self:Exists(dir) then
-		self:MakeDir(dir)
-	end
 	return self:WriteTo(path, self:ConvertToScriptData(data, typ), typ == "binary" and "wb")
 end
 

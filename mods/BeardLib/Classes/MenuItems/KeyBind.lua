@@ -1,9 +1,8 @@
 KeyBindItem = KeyBindItem or class(Item)
-
-function KeyBindItem:init(parent, params)
-    self.type_name = "KeyBind"
+KeyBindItem.type_name = "KeyBind"
+function KeyBindItem:Init()
     self.size_by_text = false
-    self.super.init(self, parent, params)
+    self.super.Init(self)
     self.panel:text({
         name = "keybind_key",
         text = string.upper(self.value or "None"),
@@ -12,7 +11,7 @@ function KeyBindItem:init(parent, params)
         align = "center",
         layer = 1,
         color = self.text_color or Color.black,
-        font = params.font,
+        font = self.font,
         font_size = self.items_size - 2
     }):set_right(self.panel:w())
 end
@@ -86,9 +85,9 @@ function KeyBindItem:MouseMoved(x, y)
 end
 
 function KeyBindItem:MousePressed(button, x, y)
-    if not alive(self.panel) then
+    if not self:MouseCheck(true) then
         return
-    end    
+    end   
     if self.menu._highlighted == self and button == Idstring("0") then
         if self.panel:child("keybind_key"):inside(x, y) then
             self:SetCanEdit(true)

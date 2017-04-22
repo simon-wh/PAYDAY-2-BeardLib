@@ -1,113 +1,72 @@
-Menu = Menu or class()
-function Menu:init(menu, params)
-    params.text_color = params.text_color or menu.text_color or Color.white
-    params.text_highlight_color = params.text_highlight_color or menu.text_highlight_color or Color.white
-    params.items_size = params.items_size or menu.items_size or 16
-    params.background_color = params.background_color
-    params.marker_highlight_color = params.marker_highlight_color or menu.marker_highlight_color or Color(0.2, 0.5, 1)
-    params.marker_color = params.marker_color or menu.marker_color or Color.white:with_alpha(0)
-    params.marker_alpha = params.marker_alpha or menu.marker_alpha 
-    params.align = params.align or menu.align
-    params.position = params.position or "Left"
-    params.font = params.font or tweak_data.menu.pd2_large_font or tweak_data.menu.default_font
-    params.offset = params.offset and self:ConvertOffset(params.offset) or self:ConvertOffset(menu.offset) 
-    params.override_size_limit = params.override_size_limit or menu.override_size_limit
-    params.control_slice = params.control_slice or menu.control_slice or 2
-    params.auto_align = params.auto_align == nil and true or params.auto_align
-    params.text_offset = params.text_offset or menu.text_offset or 4
-    params.scroll_width = params.scroll_width or 8
-    local w = menu._panel:w()  
-    if params.w == "full" then
-        params.w = menu._panel:w()
-    elseif params.w == "half" then
-        params.w = menu._panel:w() / 2
-    end
-    params.w = params.w or (w < 400 and w or 400)
-    params.panel = menu._panel:panel({
-        name = params.name .. "_panel",
-        w = params.w,
-        h = params.h,
-        visible = params.visible == true,
+Menu = Menu or class(Item)
+Menu.type_name = "Menu"
+function Menu:Init()
+    self:WorkParams()
+    self.menu_type = true
+    self.panel = self.parent_panel:panel({
+        name = self.name .. "_panel",
+        w = self.w,
+        h = self.h,
+        visible = self.visible == true,
         layer = 1,
     })
-    params.panel:rect({
-        name = "bg",
+    self.panel:rect({
+        name = "background",
         halign="grow",
         valign="grow",
-        visible = params.background_color ~= nil,
-        color = params.background_color,
-        alpha = params.background_alpha,
+        visible = self.background_color ~= nil and self.background_visible,
+        color = self.background_color,
+        alpha = self.background_alpha,
         layer = 0
     })
-    self._scroll = ScrollablePanel:new(params.panel, "ItemsPanel", {layer = 4, padding = 0.0001, scroll_width = params.scrollbar == false and 0 or params.scroll_width, hide_shade = true})
-    params.items_panel = self._scroll:canvas()
-
-    if not menu._first_parent then
-        self.visible = self.visible or true
-        menu._first_parent = self
-        menu._current_menu = self
-    else
-        self.visible = self.visible or false
-    end
-    table.merge(self, params)
-    self.menu = menu
-    self.items = {}
-    self._items = {}
+    self._scroll = ScrollablePanelModified:new(self.panel, "ItemsPanel", {
+        layer = 4, 
+        padding = 0.0001, 
+        scroll_width = self.scrollbar == false and 0 or self.scroll_width, 
+        hide_shade = true, 
+        scroll_color = self.marker_highlight_color,
+        scroll_speed = 48
+    })
+    self.items_panel = self._scroll:canvas()
+    self._my_items = {}
+    self._all_items = {}
     self._visible_items = {}
     self:Reposition()
     self:AlignItems()
 end
 
-function Menu:Reposition()
-    local t = type(self.position)
-    if t == "table" then
-        self.panel:set_position(unpack(self.position))
-    elseif t == "function" then
-        self:position(self)
-    elseif t == "string" then
-        self:SetPositionByString(self.position)
-    end
-end
-
-function Menu:SetPositionByString(pos)
-    if not pos then
-        BeardLib:log("[ERROR] Position for menu %s is nil!", tostring(self.name))
-        return
-    end
-    local pos_panel = self.menu._panel
-    for _, p in pairs({"center", "bottom", "top", "right", "left"}) do
-        if pos:lower():match(p) then
-            self.panel["set_world_"..p](self.panel, pos_panel["world_"..p](pos_panel))
+function Menu:WorkParams()
+    local NotNilOr = function(a,b)
+        if a == nil then
+            return b
         end
+        return a
     end
-end
-
-function Menu:AnimatePosition(pos, position_number)
-    pos = pos:lower()
-    local v = position_number or self.menu._panel["world_" .. pos](self.menu._panel)
-    local o_v = self.panel["world_" .. pos](self.panel)
-    self.panel:animate(function(o)
-        local t = 0
-        while t < 0.25 do
-            t = t + coroutine.yield()
-            local n = 1 - math.sin(t * 360)
-            o["set_world_" .. pos](o, math.lerp(v, o_v, n))
-        end
-        o["set_world_" .. pos](o, v)
-    end)
-end
-
-function Menu:SetPosition(x,y)
-    if type(x) == "number" or type(y) == "number" then
-        self.position = {x or self.panel:x(),y or self.panel:y()}
-    else
-        self.position = x
+    self.text_color = self.text_color or self.menu.text_color or Color.white
+    self.text_highlight_color = self.text_highlight_color or self.menu.text_highlight_color or Color.white
+    self.items_size = self.items_size or self.menu.items_size or 16
+    self.marker_highlight_color = self.marker_highlight_color or self.menu.marker_highlight_color or Color(0.2, 0.5, 1)
+    self.marker_color = self.marker_color or self.menu.marker_color or Color.white:with_alpha(0)
+    self.marker_alpha = self.marker_alpha or self.menu.marker_alpha 
+    self.align = self.align or self.menu.align
+    self.background_visible = NotNilOr(self.background_visible, self.type_name == "Menu" and true or false)
+    self.position = self.position or "Left"
+    self.font = self.font or tweak_data.menu.pd2_large_font or tweak_data.menu.default_font
+    self.offset = self.offset and self:ConvertOffset(self.offset) or self:ConvertOffset(self.menu.offset) 
+    self.override_size_limit = self.override_size_limit or self.menu.override_size_limit
+    self.control_slice = self.control_slice or self.menu.control_slice or 2
+    self.auto_align = NotNilOr(self.auto_align, true)
+    self.text_offset = self.text_offset or self.menu.text_offset or 4
+    self.scroll_width = self.scroll_width or 8
+    self.automatic_height = NotNilOr(self.automatic_height, self.type_name == "Group" and true or false)
+    self.scrollbar = NotNilOr(self.scrollbar, self.automatic_height ~= true)
+    local w = self.menu._panel:w()
+    if self.w == "full" then
+        self.w = self.menu._panel:w()
+    elseif self.w == "half" then
+        self.w = self.menu._panel:w() / 2
     end
-    self:Reposition()
-end
-
-function Menu:Panel()
-    return self.panel
+    self.w = self.w or (w < 400 and w or 400)
 end
 
 function Menu:SetMaxRow(max)
@@ -117,15 +76,16 @@ function Menu:SetMaxRow(max)
     end
 end
 
-function Menu:MouseInside()
-    return self.panel:inside(managers.mouse_pointer._mouse:world_position()) and self:Visible()
-end
-
-function Menu:SetSize(w,h, no_recreate)
-    self.panel:set_size(w or self.w,h or self.h)
+function Menu:SetSize(w, h, no_recreate, temp)
+    if not self:alive() then
+        return
+    end
+    self.panel:set_size(w or self.w, h or self.h)
     self._scroll:set_size(self.panel:size())
-    self.w = w or self.w
-    self.h = h or self.h
+    if not temp then
+        self.w = w or self.w
+        self.h = h or self.h
+    end
     self:Reposition()
     if not no_recreate then
         self:RecreateItems()
@@ -146,12 +106,18 @@ end
 function Menu:MousePressed(button, x, y)
     local menu = self.menu
     if self.visible then
+        for _, item in ipairs(self._visible_items) do
+            if item:MousePressed(button, x, y) then
+                return true
+            end
+        end
         if button == Idstring("0") then
             if self._scroll:mouse_pressed(button, x, y) then
+                menu._scroll_hold = true
                 self:CheckItems()
                 return true
             end     
-        elseif button == Idstring("mouse wheel down") then
+        elseif button == Idstring("mouse wheel down") and self.scrollbar and self._scroll:is_scrollable() then
             if self._scroll:scroll(x, y, -1) then
                 if menu._highlighted and menu._highlighted.parent == self then
                     menu._highlighted:MouseMoved(x,y)
@@ -159,7 +125,7 @@ function Menu:MousePressed(button, x, y)
                 self:CheckItems()
                 return true
             end
-        elseif button == Idstring("mouse wheel up") then
+        elseif button == Idstring("mouse wheel up") and self.scrollbar and self._scroll:is_scrollable() then
             if self._scroll:scroll(x, y, 1) then
                 if menu._highlighted and menu._highlighted.parent == self then
                     menu._highlighted:MouseMoved(x,y)
@@ -168,16 +134,11 @@ function Menu:MousePressed(button, x, y)
                 return true
             end
         end
-        if menu._highlighted and menu._highlighted.parent == self then
-            if menu._highlighted:MousePressed(button, x, y) then 
-                return true
-            end
-        end
     end
 end
 
 function Menu:MouseMoved(x, y)
-    if self.visible and self.panel:inside(x,y) then
+    if self.visible and self:MouseFocused(x, y) then
         local _, pointer = self._scroll:mouse_moved(nil, x, y) 
         if pointer then
             self:CheckItems()
@@ -191,14 +152,16 @@ function Menu:MouseMoved(x, y)
             end
         end
         for _, item in ipairs(self._visible_items) do
-            item:MouseMoved(x, y) 
+            if item:MouseMoved(x, y) then
+                return true
+            end
         end
     end
 end
 
 function Menu:CheckItems()
     self._visible_items = {}
-    for _, item in ipairs(self._items) do
+    for _, item in ipairs(self._my_items) do
         if item:TryRendering() then
             table.insert(self._visible_items, item)
         end                
@@ -207,14 +170,15 @@ end
 
 function Menu:MouseReleased(button, x, y)
     self._scroll:mouse_released(button, x, y)
+    for _, item in ipairs(self._all_items) do
+        if item:MouseReleased(button, x, y) then
+            return true
+        end
+    end
 end
 
 function Menu:Focused()
-    return self:Visible() and self.menu._highlighted
-end
-
-function Menu:Visible()
-    return self.visible 
+    return self:Visible() and self.menu._highlighted and self:MouseFocused(x, y)
 end
 
 function Menu:SetVisible(visible)
@@ -226,20 +190,32 @@ function Menu:SetVisible(visible)
 end
 
 function Menu:AlignItemsGrid()
+    local max_h = self.items_size
     local base_h = self.items_size
+    local max_offset = self.offset[2]
     local x
-    local y = 0
-    for i, item in ipairs(self.items) do
+    local y = self.type_name == "Group" and base_h or 0
+    for i, item in ipairs(self._my_items) do
         local offset = item.offset
         x = x or offset[1]
         item.panel:set_position(x,y + offset[2])
         x = x + item.panel:w() + offset[1]
         if x > self.panel:w() then
+            max_h = item.panel:h()
+            max_offset = item.offset[2]
             x = offset[1]
             y = y + item.panel:h() + offset[2]
             item.panel:set_position(x,y)
             x = x + item.panel:w() + offset[1]
+        else
+            max_h = math.max(max_h, item.panel:h())
+            max_offset = math.max(max_offset, item.offset[2])
         end
+    end    
+    local h = y + max_h + max_offset
+    local result_h = self.closed and base_h or h
+    if self.automatic_height and self.h ~= result_h then
+        self:SetSize(nil, result_h, true, self.type_name == "Group")
     end
     self._scroll:update_canvas_size()
     self:CheckItems()
@@ -252,60 +228,76 @@ function Menu:AlignItems()
     else
         self:AlignItemsNormal()
     end
+    if self.parent.AlignItems then
+        self.parent:AlignItems()
+    end
 end
 
 function Menu:AlignItemsNormal()
-    local h = 0
+    if not self:alive() then
+        return
+    end
+    local base_h = self.type_name == "Group" and self.items_size or 0
+    local h = base_h
     local rows = 1
-    for i, item in ipairs(self.items) do
+    for i, item in ipairs(self._my_items) do
         local offset = item.offset
         item.panel:set_x(offset[1])
-        item.panel:set_y(offset[2])
+        item.panel:set_y(base_h + offset[2])
         if self.row_max and i == (self.row_max * rows) + 1 then
             if i > 1 then
-                item.panel:set_x(self.items[self.row_max * rows].panel:right() + offset[1])
+                item.panel:set_x(self._my_items[self.row_max * rows].panel:right() + offset[1])
             end
             rows = rows + 1
         else
-            if self.row_max and self.items[(self.row_max * (rows - 1)) + 1] then
-                item.panel:set_x(self.items[(self.row_max * (rows - 1)) + 1].panel:x() + offset[1])
+            if self.row_max and self._my_items[(self.row_max * (rows - 1)) + 1] then
+                item.panel:set_x(self._my_items[(self.row_max * (rows - 1)) + 1].panel:x() + offset[1])
             end
             if i > 1 then
-                item.panel:set_y(self.items[i - 1].panel:bottom() + offset[2])
+                item.panel:set_y(self._my_items[i - 1].panel:bottom() + offset[2])
             end
             if not self.row_max or i <= self.row_max then
-                h = h + item.panel:h() + offset[2]
+                h = h + item.panel:h() + item.offset[2]
             end
         end
     end
-    if self.automatic_height and self.h ~= h then
-        self:SetSize(nil, h + self.offset[1], true)
+    local result_h = self.closed and base_h or h
+    if self.automatic_height and self.h ~= result_h then
+        self:SetSize(nil, result_h, true, self.type_name == "Group")
     end
     self._scroll:update_canvas_size()
     self:CheckItems()
 end
 
-function Menu:GetItem(name)
-    for _, item in pairs(self._items) do
+function Menu:GetItem(name, shallow)
+    for _, item in pairs(self._all_items) do
         if item.name == name then
             return item
+        elseif item.menu_type and not shallow then
+            local i = item:GetItem(name)
+            if i then
+                return i
+            end
         end
     end
     return nil
 end
 
 function Menu:ClearItems(label)
-    local temp = clone(self._items)
-    self._items = {}
-    self.items = {}
+    local temp = clone(self._all_items)
+    self._all_items = {}
+    self._my_items = {}
     for _, item in pairs(temp) do
-        if not label or (type(label) == "table" and (item.group == label or item.override_parent == label) or item.label == label) then
+        if item.menu_type then
+            item:ClearItems(label)
+        end
+        if not label or type(label) == "table" and item.override_parent == label or item.label == label then
             self:RemoveItem(item)
         else
-            if item:alive() and (not item.group or alive(item.group) and not item.override_parent or alive(item.override_parent)) then
-                table.insert(self._items, item)
-                if not item.group and item.override_parent == nil then
-                    table.insert(self.items, item)
+            if item:alive() and not item.override_parent or alive(item.override_parent) then
+                table.insert(self._all_items, item)
+                if item.override_parent == nil then
+                    table.insert(self._my_items, item)
                 end
             end
         end
@@ -320,8 +312,8 @@ function Menu:ClearItems(label)
 end
 
 function Menu:RecreateItems()
-    self.items = {}
-    local temp = clone(self._items)     
+    self._my_items = {}
+    local temp = clone(self._all_items)     
     for k, item in pairs(temp) do
         self:RemoveItem(item)
         self[item.type_name](self, item)
@@ -330,138 +322,109 @@ function Menu:RecreateItems()
 end
 
 function Menu:RemoveItem(item)       
-    if alive(item) then
-        item.panel:parent():remove(item.panel)
-    end
-    if item.type_name == "ItemsGroup" and item.items then
-        for _, v in pairs(item.items) do
-            v.group = nil
-            self:RemoveItem(v)
-        end
-        item.items = {}
-    end
-    if item._items then
-        for _, v in pairs(item._items) do
+    if item.menu_type then
+        item:ClearItems()
+    elseif item._my_items then
+        for _, v in pairs(item._my_items) do
             v.override_parent = nil
             self:RemoveItem(v)
-        end       
-    end
-    if item.override_parent then
-        table.delete(item.override_parent._items, item)
-    end
-    if item.group then
-        table.delete(item.group.items, item)
-        if item.group:alive() then
-            item.group:AlignItems()
         end
+    end
+
+    if item.override_parent then
+        table.delete(item.override_parent._my_items, item)
     end
     if item.list then
         item.list:parent():remove(item.list)
     end
-    table.delete(self.items, item)
-    table.delete(self._items, item)
+    table.delete(self._my_items, item)
+    table.delete(self._all_items, item)
+    if alive(item) then
+        item.panel:parent():remove(item.panel)
+    end
     if self.auto_align then
         self:AlignItems()
     end
 end
 
-function Menu:UpdateParams(params)
-    params = params or {}
-    self.text_color = params.text_color or self.menu.text_color
-    self.items_size = params.items_size or self.menu.items_size or 16
-    self.background_color = params.background_color
-    self.marker_highlight_color = params.marker_highlight_color or self.menu.marker_highlight_color or Color(0.2, 0.5, 1)
-    self.marker_color = params.marker_color or Color.white:with_alpha(0) 
-    self.position = params.position or self.position
-    self.panel:child("bg"):configure({
-        visible = self.background_color ~= nil,
-        color = self.background_color,
-        alpha = self.background_alpha,        
-    })
-    self:SetSize(params.w, params.h)
-    if params.visible then
-        self:SetVisible(params.visible)
-    end
-    if type(self.position) == "table" then
-        self:SetPosition(self.position[1], self.position[2])
-    else
-        self:SetPositionByString(self.position)
-    end    
-    for k, item in pairs(self._items) do
-        item.text_color = item.text_color or self.text_color
-        item.items_size = item.items_size or self.items_size
-        item.marker_highlight_color = item.marker_highlight_color or self.marker_highlight_color
-        item.marker_color = item.marker_color or self.marker_color
-        item.w = item.w or (self.items_panel:w() > 300 and not item.override_size_limit and 300 or self.items_panel:w())
-    end        
-    self:RecreateItems()
-end
-
 function Menu:KeyBind(params)
     self:ConfigureItem(params)
-    return self:NewItem(KeyBindItem:new(self, params))
+    return self:NewItem(KeyBindItem:new(params))
 end
 
 function Menu:Toggle(params)
     self:ConfigureItem(params)
-    return self:NewItem(Toggle:new(self, params))
+    return self:NewItem(Toggle:new(params))
 end
 
-function Menu:ItemsGroup(params)
-    self:ConfigureItem(params)
-    return self:NewItem(ItemsGroup:new(self, params))
+function Menu:ItemsGroup(params) return self:Group(params) end --Deprecated--
+
+function Menu:Group(params)
+    self:ConfigureItem(params, true)
+    return self:NewItem(Group:new(params))
 end
 
 function Menu:ImageButton(params)
     self:ConfigureItem(params)
-    return self:NewItem(ImageButton:new(self, params))
+    return self:NewItem(ImageButton:new(params))
 end
 
 function Menu:Button(params)
     self:ConfigureItem(params)
-    return self:NewItem(Item:new(self, params))
+    return self:NewItem(Item:new(params))
 end
 
 function Menu:ComboBox(params)
     self:ConfigureItem(params)
-    return self:NewItem(ComboBox:new(self, params))
+    return self:NewItem(ComboBox:new(params))
 end
 
 function Menu:TextBox(params)
     self:ConfigureItem(params)
-    return self:NewItem(TextBox:new(self, params))
+    return self:NewItem(TextBox:new(params))
 end
 
 function Menu:NumberBox(params)
     self:ConfigureItem(params)
     params.type_name = "NumberBox"
     params.filter = "number"
-    return self:NewItem(TextBox:new(self, params))
+    return self:NewItem(TextBox:new(params))
 end
 
 function Menu:ComboBox(params)
     self:ConfigureItem(params)
-    return self:NewItem(ComboBox:new(self, params))
+    return self:NewItem(ComboBox:new(params))
 end
 
 function Menu:Slider(params)
     self:ConfigureItem(params)
-    return self:NewItem(Slider:new(self, params))
+    return self:NewItem(Slider:new(params))
 end
 
 function Menu:Divider(params)
     self:ConfigureItem(params)
-    params.type_name = "Divider"
-    return self:NewItem(Item:new(self, params))
+    params.divider_type = true
+    return self:NewItem(Item:new(params))
+end
+
+function Menu:DivGroup(params)
+    self:ConfigureItem(params)
+    params.divider_type = true
+    return self:NewItem(Group:new(params))
+end
+
+function Menu:Menu(params)
+    self:ConfigureItem(params, true)
+    return self:NewItem(Menu:new(params))
 end
 
 function Menu:Table(params)
     self:ConfigureItem(params)
-    return self:NewItem(Table:new(self, params))
+    return self:NewItem(Table:new(params))
 end
 
 function Menu:GetIndex(name)
-    for k, item in pairs(self._items) do
+    for k, item in pairs(self._all_items) do
         if item.name == name then
             return k
         end
@@ -477,27 +440,38 @@ function Menu:ConvertOffset(offset)
             return offset
         end
     else
-        return {2,1}
+        return {6,2}
     end
 end
 
-function Menu:ConfigureItem(item)
+function Menu:ConfigureItem(item, menu)
     if type(item) ~= "table" then
         log(tostring(debug.traceback()))
         return
     end
+    local NotNilOr = function(a,b)
+        if a == nil then
+            return b
+        end
+        return a
+    end
     item.parent = self
     item.menu = self.menu
-    item.enabled = item.enabled == nil and true or item.enabled
+    item.enabled = NotNilOr(item.enabled, true)
+    item.visible = NotNilOr(item.visible, true)
     item.text_color = item.text_color or self.text_color
+    item.text = item.text or item.name
     item.text_highlight_color = item.text_highlight_color or self.text_highlight_color
     item.items_size = item.items_size or self.items_size
     item.marker_highlight_color = item.marker_highlight_color or self.marker_highlight_color
     item.marker_color = item.marker_color or self.marker_color
+    item.background_color = item.background_color or self.background_color
+    item.background_alpha = item.background_alpha or self.background_alpha
     item.marker_alpha = item.marker_alpha or self.marker_alpha
-    item.align = item.align or self.align or "left"
-    item.size_by_text = item.size_by_text or self.size_by_text
-    item.parent_panel = (item.group and item.group.panel) or (item.override_parent and item.override_parent.panel) or self.items_panel
+    item.text_align = item.text_align or self.text_align or "left"
+    item.text_vertical = item.text_vertical or self.text_vertical or "top"
+    item.size_by_text = NotNilOr(item.size_by_text, self.size_by_text)
+    item.parent_panel = (item.override_parent and item.override_parent.panel) or self.items_panel
     item.offset = item.offset and self:ConvertOffset(item.offset) or self.offset
     item.override_size_limit = item.override_size_limit or self.override_size_limit
     item.w = (item.w or (item.parent_panel:w() > 300 and not item.override_size_limit and 300 or item.parent_panel:w())) - (item.size_by_text and 0 or item.offset[1] * 2)
@@ -517,21 +491,19 @@ function Menu:ConfigureItem(item)
 end
 
 function Menu:NewItem(item)
-    if not item.group and not item.override_parent and item.index then
-        table.insert(self._items, item.index, item)
+    if not item.override_parent and item.index then
+        table.insert(self._all_items, item.index, item)
     else
-        table.insert(self._items, item)
+        table.insert(self._all_items, item)
     end
-    if not item.group and item.override_parent == nil then
+    if item.override_parent == nil then
         if item.index then
-            table.insert(self.items, item.index, item)
+            table.insert(self._my_items, item.index, item)
         else
-            table.insert(self.items, item)
+            table.insert(self._my_items, item)
         end
     end
-    if self.auto_align then
-        self:AlignItems()
-    end
+    if self.auto_align then self:AlignItems() end
     item:SetEnabled(item.enabled)
     return item
 end

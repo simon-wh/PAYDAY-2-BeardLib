@@ -1,17 +1,16 @@
 TextBox = TextBox or class(Item)
-
-function TextBox:init(parent, params)
-	params.value = params.value or ""
+TextBox.type_name = "TextBox"
+function TextBox:Init()
+	self.value = self.value or ""
 	self.size_by_text = false
-	self.super.init(self, parent, params)	
-	self.type_name = self.type_name or "TextBox"
+	self.super.Init(self)	
     self.floats = self.floats or 2
     if self.filter == "number" then
     	self.value = tonumber(self.value) or 0
     end
 	self._textbox = TextBoxBase:new(self, {
         panel = self.panel,
-        w = params.panel:w() / (self.text == nil and 1 or self.control_slice),
+        w = self.panel:w() / (self.text == nil and 1 or self.control_slice),
         value = self.value,
     })
 end
@@ -51,7 +50,7 @@ function TextBox:SetStep(step)
 end
 
 function TextBox:MousePressed(button, x, y)
-	if not alive(self.panel) then
+	if not self:MouseCheck(true) then
 		return
 	end
 	if not self.cantype then
@@ -85,15 +84,18 @@ function TextBox:MouseMoved(x, y)
 end
 
 function TextBox:SetValueByMouseXPos(x)
-    if not alive(self.panel) then
+    if not alive(self.panel) or self.ignore_next then
+    	self.ignore_next = false
         return
     end
     if self.menu._old_x ~= x then
         local move = 0
         if managers.mouse_pointer._mouse:world_x() == self.menu._fullscreen_ws_pnl:w() then
             managers.mouse_pointer:set_mouse_world_position(1, managers.mouse_pointer._mouse:world_y())
+            self.ignore_next = true
         elseif managers.mouse_pointer._mouse:world_x() == 0 then
             managers.mouse_pointer:set_mouse_world_position(self.menu._fullscreen_ws_pnl:w() - 1, managers.mouse_pointer._mouse:world_y())
+            self.ignore_next = true
         else
             move = ctrl() and 1 or self.step or (x - self.menu._old_x)
             if self.step and (x - self.menu._old_x) < 0 then
@@ -103,4 +105,3 @@ function TextBox:SetValueByMouseXPos(x)
         self:SetValue(self.value + move, true, true)
 	end      
 end
- 

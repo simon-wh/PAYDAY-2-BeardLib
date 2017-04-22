@@ -1,5 +1,4 @@
 ContextMenu = ContextMenu or class()
-
 function ContextMenu:init(parent, layer)
     self._parent = parent
     self.parent = parent.parent
@@ -114,7 +113,7 @@ function ContextMenu:MousePressed(button, x, y)
         end
         if button == Idstring("0") then
             if self._scroll:mouse_pressed(button, x, y) then return true end
-            for k, item in pairs(self._parent.items) do
+            for k, item in pairs(self._parent._my_items) do
                 if alive(self.items_panel:child("item"..k)) and self.items_panel:child("item"..k):inside(x,y) then
                     if self._parent.ContextMenuCallback then
                         self._parent:ContextMenuCallback(item)
@@ -148,7 +147,7 @@ end
 function ContextMenu:update_search()
     local text = self._textbox and self._textbox.panel:child("text"):text() or ""
     self.found_items = {}
-    for _, v in pairs(self._parent.items) do
+    for _, v in pairs(self._parent._my_items) do
         if type(v) == "table" then
             v = v.text
         end

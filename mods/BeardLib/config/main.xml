@@ -21,18 +21,20 @@
 		<class file="MapFramework.lua" manager="MapFramework"/>
 		<class file="AddFramework.lua" manager="AddFramework"/>
 		<class file="Definitions.lua"/>
+		<class file="QuickAnimGUI.lua"/>
 		<class file="MenuUI.lua"/>
 		<class file="MenuDialog.lua"/>
 		<class file="Dialogs/FileBrowserDialog.lua"/>
 		<class file="Dialogs/ColorDialog.lua"/>
 		<class file="Dialogs/ListDialog.lua"/>
 		<class file="Dialogs/SelectListDialog.lua"/>
-		<class file="MenuItems/Menu.lua"/>
 		<class file="MenuItems/TextBoxBase.lua"/>
 		<class file="MenuItems/ContextMenu.lua"/>
+		<class file="MenuItems/BaseItem.lua"/>
 		<class file="MenuItems/Item.lua"/>
+		<class file="MenuItems/Menu.lua"/>
 		<class file="MenuItems/KeyBind.lua"/>
-		<class file="MenuItems/ItemsGroup.lua"/>
+		<class file="MenuItems/Group.lua"/>
 		<class file="MenuItems/ImageButton.lua"/>
 		<class file="MenuItems/Toggle.lua"/>
 		<class file="MenuItems/ComboBox.lua"/>

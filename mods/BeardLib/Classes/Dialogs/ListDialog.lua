@@ -83,7 +83,7 @@ function ListDialog:MakeListItems()
     for _,v in pairs(self._params.list) do
         local t = type(v) == "table" and v.name or v
         if self._filter == "" or (case and string.match(t, self._filter) or not case and string.match(t:lower(), self._filter:lower())) then
-            if not limit or #self._list_menu._items <= 250 then
+            if not limit or #self._list_menu._all_items <= 250 then
                 if type(v) == "table" and v.create_group then 
                     v.group = self._list_menu:GetItem(v.create_group) or self._list_menu:ItemsGroup({
                         name = v.create_group,

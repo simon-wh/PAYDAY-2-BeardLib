@@ -1,52 +1,43 @@
 ImageButton = ImageButton or class(Item)
+ImageButton.type_name = "ImageButton"
+function ImageButton:Init()
+    self.w = self.w or self.items_size
+    self.h = self.h or self.items_size
+    self.super.Init(self)
+end
 
-function ImageButton:init(parent, params)
-    self.type_name = "ImageButton"
-    params.w = params.w or params.items_size
-    params.h = params.h or params.items_size
-    params.panel = params.parent_panel:panel({ 
-        name = params.name,
-        w = params.w,
-        h = params.h,
-    }) 
-    params.bg = params.panel:rect({
+function ImageButton:InitBasicItem()
+    self.panel = self.parent_panel:panel({ 
+        name = self.name,
+        w = self.w,
+        h = self.h,
+    })
+    self.bg = self.panel:rect({
         name = "bg", 
-        color = params.marker_color,
-        alpha = params.marker_alpha,
-        halign="grow", 
-        valign="grow", 
-        layer = -1 
-    })    
-    params.icon = params.panel:bitmap({
+        color = self.marker_color,
+        alpha = self.marker_alpha,
+        halign = "grow",
+        valign = "grow",
+        layer = 0
+    })
+    self.icon = self.panel:bitmap({
         name = "icon", 
-        texture = params.texture,
-        texture_rect = params.texture_rect,
-        color = params.icon_color,
-        alpha = params.icon_alpha,
-        w = params.icon_w or params.w - 4,
-        h = params.icon_h or params.h - 4,
-        halign="center", 
-        valign="center",         
+        texture = self.texture,
+        texture_rect = self.texture_rect,
+        color = self.icon_color,
+        alpha = self.icon_alpha,
+        w = self.icon_w or self.w - 4,
+        h = self.icon_h or self.h - 4,
+        halign = "center", 
+        valign = "center",
         layer = 1
     })
-    params.icon:set_world_center(params.panel:world_center())
-    params.div = params.panel:rect({
-        color = params.color,
-        visible = params.color ~= nil,
+    self.icon:set_world_center(self.panel:world_center())
+    self.div = self.panel:rect({
+        color = self.color,
+        visible = self.color ~= nil,
         w = 2,
     })
-    params.option = params.option or params.name    
-    table.merge(self, params)
-    self.parent = parent
-    self.menu = parent.menu    
-    self._items = {}
-    if params.group then
-      if params.group.type_name == "group" then
-          params.group:AddItem(self)
-      else
-          BeardLib:log(self.name .. " group is not a groupitem!")
-      end
-    end
 end
 
 function ImageButton:SetEnabled(enabled)
@@ -55,5 +46,5 @@ function ImageButton:SetEnabled(enabled)
 end
 
 function ImageButton:SetImage(texture, texture_rect)
-    self.panel:child("icon"):set_image(texture, texture_rect)
+    self.icon:set_image(texture, texture_rect)
 end

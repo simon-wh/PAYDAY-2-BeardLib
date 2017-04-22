@@ -1,4 +1,6 @@
-Hooks:PostHook(ScrollablePanel, "init", "BeardLibScrollablePanelInit", function(self, panel, name, data)
+ScrollablePanelModified = ScrollablePanelModified or class(ScrollablePanel)
+function ScrollablePanelModified:init(panel, name, data)
+	self.super.init(self, panel, name, data)
 	data = data or {}
 	self._scroll_speed = data.scroll_speed or 28
 	if data.scroll_width then
@@ -15,18 +17,37 @@ Hooks:PostHook(ScrollablePanel, "init", "BeardLibScrollablePanelInit", function(
 		self:panel():child("scroll_up_indicator_shade"):hide()
 		self:panel():child("scroll_down_indicator_shade"):hide()
 	end
-end)
+	self:set_scroll_color(data.scroll_color)
+end
 
-Hooks:PostHook(ScrollablePanel, "set_size", "BeardLibScrollablePanelSetSize", function(self)
+function ScrollablePanelModified:set_scroll_color(color)
+	color = color or Color.white
+	local function set_boxgui_img(pnl)
+		for _, child in pairs(pnl:children()) do
+			if CoreClass.type_name(child) == "Panel" then
+				set_boxgui_img(child)
+			elseif CoreClass.type_name(child) == "Bitmap" and child:texture_name() == Idstring("guis/textures/pd2/shared_lines") then
+				child:set_image("units/white_df")
+				child:set_color(color)
+			end
+		end
+	end
+	set_boxgui_img(self:panel():child("scroll_up_indicator_shade"))
+	set_boxgui_img(self:panel():child("scroll_down_indicator_shade"))
+	set_boxgui_img(self._scroll_bar_box_class._panel)
+end
+
+function ScrollablePanelModified:set_size(...)
+	self.super.set_size(self, ...)
 	if self._scroll_width then
 		self:canvas():set_w(self:canvas_max_width())
 		self:panel():child("scroll_up_indicator_arrow"):set_world_left(self:canvas():world_right() + 2)
 		self:panel():child("scroll_down_indicator_arrow"):set_world_left(self:canvas():world_right() + 2)
 		self._scroll_bar:set_center_x(self:panel():child("scroll_down_indicator_arrow"):center_x())
 	end
-end)
+end
 
-function ScrollablePanel:canvas_max_width()
+function ScrollablePanelModified:canvas_max_width()
 	if self._scroll_width then
 		return self:canvas_scroll_width()
 	else
@@ -34,14 +55,14 @@ function ScrollablePanel:canvas_max_width()
 	end 
 end
 
-function ScrollablePanel:scroll(x, y, direction)
+function ScrollablePanelModified:scroll(x, y, direction)
 	if self:panel():inside(x, y) then
 		self:perform_scroll(self._scroll_speed * TimerManager:main():delta_time() * 200, direction)
 		return true
 	end
 end
 
-function ScrollablePanel:mouse_moved(button, x, y)
+function ScrollablePanelModified:mouse_moved(button, x, y)
 	if self._grabbed_scroll_bar then
 		self:scroll_with_bar(y, self._current_y)
 		self._current_y = y
@@ -61,7 +82,7 @@ function ScrollablePanel:mouse_moved(button, x, y)
 	end
 end
 
-function ScrollablePanel:canvas_scroll_width()
+function ScrollablePanelModified:canvas_scroll_width()
 	if self._scroll_width then
 		return self:scroll_panel():w() - ((self._scroll_bar:w() * 2) - 2)
 	else

@@ -1,25 +1,24 @@
 Slider = Slider or class(Item)
-
-function Slider:init(parent, params)
-    params.value = params.value or 1
-    self.type_name = "Slider"
+Slider.type_name = "Slider"
+function Slider:Init()
+    self.value = self.value or 1
     self.size_by_text = false
-	self.super.init(self, parent, params)
+	self.super.Init(self)
     self.step = self.step or 1
     self.value = tonumber(self.value) or 0
     self.floats = self.floats or 2
     self.filter = "number"
     self.min = self.min or 0
     self.max = self.max or self.min
-    local item_width = params.panel:w() / self.control_slice
-	local slider_bg = params.panel:bitmap({
+    local item_width = self.panel:w() / self.control_slice
+	local slider_bg = self.panel:rect({
         name = "slider_bg",
         w = item_width,
         layer = 1,
-        color = ((parent.background_color or Color.white) / 1.2):with_alpha(1),
+        color = ((self.parent.background_color or Color.white) / 1.2):with_alpha(1),
     })
     self._textbox = TextBoxBase:new(self, {
-        text_color = not parent.background_color and Color.black,
+        text_color = not self.parent.background_color and Color.black,
         lines = 1,
         btn = "1",
         panel = self.panel,
@@ -34,7 +33,7 @@ function Slider:init(parent, params)
         w = item_width * (self.value / self.max),
         h = slider_bg:h(),
         layer = 2,
-        color = parent.marker_highlight_color / 1.4
+        color = self.parent.marker_highlight_color / 1.4
     })
     slider_bg:set_x(self._textbox.panel:x())
     self._mouse_pos_x, self._mouse_pos_y = 0,0
@@ -96,7 +95,7 @@ function Slider:MousePressed(button, x, y)
     local inside = self.panel:child("slider_bg"):inside(x,y) or self.panel:child("slider"):inside(x,y)
     if inside then
         local wheelup = (button == Idstring("mouse wheel up") and 0) or (button == Idstring("mouse wheel down") and 1) or -1
-        if wheelup ~= -1 then
+        if self.wheel_control and wheelup ~= -1 then
             self:SetValue(self.value + ((wheelup == 1) and -self.step or self.step), true, true)
             return true
         end
