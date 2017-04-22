@@ -196,20 +196,22 @@ function Menu:AlignItemsGrid()
     local x
     local y = self.type_name == "Group" and base_h or 0
     for i, item in ipairs(self._my_items) do
-        local offset = item.offset
-        x = x or offset[1]
-        item.panel:set_position(x,y + offset[2])
-        x = x + item.panel:w() + offset[1]
-        if x > self.panel:w() then
-            max_h = item.panel:h()
-            max_offset = item.offset[2]
-            x = offset[1]
-            y = y + item.panel:h() + offset[2]
-            item.panel:set_position(x,y)
+        if not item.ignore_align then
+            local offset = item.offset
+            x = x or offset[1]
+            item.panel:set_position(x,y + offset[2])
             x = x + item.panel:w() + offset[1]
-        else
-            max_h = math.max(max_h, item.panel:h())
-            max_offset = math.max(max_offset, item.offset[2])
+            if x > self.panel:w() then
+                max_h = item.panel:h()
+                max_offset = item.offset[2]
+                x = offset[1]
+                y = y + item.panel:h() + offset[2]
+                item.panel:set_position(x,y)
+                x = x + item.panel:w() + offset[1]
+            else
+                max_h = math.max(max_h, item.panel:h())
+                max_offset = math.max(max_offset, item.offset[2])
+            end
         end
     end    
     local h = y + max_h + max_offset
@@ -241,23 +243,25 @@ function Menu:AlignItemsNormal()
     local h = base_h
     local rows = 1
     for i, item in ipairs(self._my_items) do
-        local offset = item.offset
-        item.panel:set_x(offset[1])
-        item.panel:set_y(base_h + offset[2])
-        if self.row_max and i == (self.row_max * rows) + 1 then
-            if i > 1 then
-                item.panel:set_x(self._my_items[self.row_max * rows].panel:right() + offset[1])
-            end
-            rows = rows + 1
-        else
-            if self.row_max and self._my_items[(self.row_max * (rows - 1)) + 1] then
-                item.panel:set_x(self._my_items[(self.row_max * (rows - 1)) + 1].panel:x() + offset[1])
-            end
-            if i > 1 then
-                item.panel:set_y(self._my_items[i - 1].panel:bottom() + offset[2])
-            end
-            if not self.row_max or i <= self.row_max then
-                h = h + item.panel:h() + item.offset[2]
+        if not item.ignore_align then
+            local offset = item.offset
+            item.panel:set_x(offset[1])
+            item.panel:set_y(base_h + offset[2])
+            if self.row_max and i == (self.row_max * rows) + 1 then
+                if i > 1 then
+                    item.panel:set_x(self._my_items[self.row_max * rows].panel:right() + offset[1])
+                end
+                rows = rows + 1
+            else
+                if self.row_max and self._my_items[(self.row_max * (rows - 1)) + 1] then
+                    item.panel:set_x(self._my_items[(self.row_max * (rows - 1)) + 1].panel:x() + offset[1])
+                end
+                if i > 1 then
+                    item.panel:set_y(self._my_items[i - 1].panel:bottom() + offset[2])
+                end
+                if not self.row_max or i <= self.row_max then
+                    h = h + item.panel:h() + item.offset[2]
+                end
             end
         end
     end
@@ -348,7 +352,7 @@ function Menu:RemoveItem(item)
 end
 
 function Menu:ShouldClose()
-    for _, item in pairs(menu._all_items) do
+    for _, item in pairs(self._all_items) do
         if item.menu_type and not item:ShouldClose() then
             return false
         end

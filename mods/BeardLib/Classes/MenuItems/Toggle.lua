@@ -2,7 +2,7 @@ Toggle = Toggle or class(Item)
 Toggle.type_name = "Toggle"
 function Toggle:Init()    
 	self.super.Init(self)
-    self.panel:bitmap({
+    self.toggle = self.panel:bitmap({
         name = "toggle",
         w = self.items_size,
         h = self.items_size,
@@ -10,12 +10,13 @@ function Toggle:Init()
         color = self.text_color or Color.black,
         texture = "guis/textures/menu_tickbox",
         texture_rect = self.value and {24,0,24,24} or {0,0,24,24},
-    }):set_right(self.panel:w())
+    })
+    self.toggle:set_right(self.panel:w())
 end
 
 function Toggle:SetEnabled(enabled)
 	self.super.SetEnabled(self, enabled)
-	self.panel:child("toggle"):set_alpha(enabled and 1 or 0.5)
+	self.toggle:set_alpha(enabled and 1 or 0.5)
 end
 
 function Toggle:SetValue(value, run_callback)
@@ -24,11 +25,8 @@ function Toggle:SetValue(value, run_callback)
 		if managers.menu_component then
 			managers.menu_component:post_event(value and "box_tick" or "box_untick")
 		end
-		if value == true then
-			self.panel:child("toggle"):set_texture_rect(24,0,24,24)
-		else
-			self.panel:child("toggle"):set_texture_rect(0,0,24,24)			
-		end
+		local rect = value == true and {24,0,24,24} or {0,0,24,24}
+		self.toggle:set_texture_rect(unpack(rect))
 	end
 end
 
@@ -50,9 +48,7 @@ function Toggle:KeyPressed(o, k)
 	end
 end
 
-function Toggle:MouseMoved(x, y)
-    if not self.super.MouseMoved(self, x, y) then
-        return
-    end    
-    self.panel:child("toggle"):set_color(self.panel:child("title"):color())
+function Toggle:DoHighlight(highlight)
+    self.super.DoHighlight(self, highlight) 
+    self.toggle:set_color(self.title:color())
 end

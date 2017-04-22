@@ -175,6 +175,7 @@ function MenuUI:MouseDoubleClick(o, button, x, y)
 end
 
 function MenuUI:MousePressed(o, button, x, y)
+    if self.always_mouse_press then self.always_mouse_press(button, x, y) end
     if self._openlist then
         if self._openlist.parent:Visible() then
             if self._openlist:MousePressed(button, x, y) then
@@ -210,6 +211,7 @@ function MenuUI:ShouldClose()
 end
 
 function MenuUI:MouseMoved(o, x, y)
+    if self.always_mouse_move then self.always_mouse_move(x, y) end
     if self._openlist then
         if self._openlist.parent:Visible() then
             if self._openlist:MouseMoved(x, y) then
@@ -229,9 +231,7 @@ function MenuUI:MouseMoved(o, x, y)
             end
         end        
     end
-    if self.mouse_move then
-        self.mouse_move(x, y)
-    end
+    if self.mouse_move then self.mouse_move(x, y) end
 end
 
 function MenuUI:SwitchMenu(menu) --Deprecated--

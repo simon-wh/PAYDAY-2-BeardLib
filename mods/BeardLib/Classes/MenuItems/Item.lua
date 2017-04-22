@@ -88,14 +88,16 @@ function Item:SetText(text)
 	end
 end
 
+function Item:DoHighlight(highlight)
+	self.bg:set_color(highlight and self.marker_highlight_color or self.marker_color)
+	if self.title then self.title:set_color(highlight and self.text_highlight_color or self.text_color) end
+end
+
 function Item:Highlight()
 	if not self:alive() then
 		return
 	end
-	self.bg:set_color(self.marker_highlight_color)
-	if self.title then
-		self.title:set_color(self.text_highlight_color)
-	end
+	self:DoHighlight(true)
 	if self.menu._highlighted and self.menu._highlighted ~= self then
 		self.menu._highlighted:UnHighlight()
 	end
@@ -111,10 +113,7 @@ function Item:UnHighlight()
 	if not self:alive() then
 		return 
 	end
-	self.bg:set_color(self.marker_color)
-	if self.title then
-		self.title:set_color(self.text_color)
-	end
+	self:DoHighlight(false)
 end
 
 function Item:MouseMoved(x, y)
