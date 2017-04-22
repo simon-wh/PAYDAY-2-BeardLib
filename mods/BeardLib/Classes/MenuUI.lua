@@ -82,7 +82,11 @@ function MenuUI:disable()
 	self._menu_closed = true
 	self._highlighted = nil
 	if self._openlist then
-	 	self._openlist.list:hide()
+		if self._openlist.list then
+			self._openlist.list:hide()
+		else
+			self._openlist:hide()
+		end
 	 	self._openlist = nil
 	end
 	managers.mouse_pointer:remove_mouse(self._mouse_id)
