@@ -1,51 +1,37 @@
 MenuUI = MenuUI or class()
 function MenuUI:init(params)
+    table.merge(self, params)
     self.type_name = "MenuUI"
-    local texture = "guis/textures/menuicons"
-    FileManager:AddFile("texture", texture, BeardLib.Utils.Path:Combine(BeardLib.config.assets_dir, texture .. ".texture"))
-	local ws = managers.gui_data:create_fullscreen_workspace()
- 	ws:connect_keyboard(Input:keyboard())
-    ws:connect_mouse(Input:mouse())
-    params.override_size_limit = params.override_size_limit or true
-    params.layer = params.layer or 0
-	self._ws = ws
-    self._ws_pnl = ws:panel():panel({alpha = 0, layer = (tweak_data.gui.MOUSE_LAYER - 190) + params.layer})
-    self._menus = {}
-    self._panel = self._ws_pnl:panel({
-        name = "menu_panel",
-        halign = "center",
-        align = "center",
+    self._ws = managers.gui_data:create_fullscreen_workspace()
+	self._ws:connect_keyboard(Input:keyboard())
+    self._panel = self._ws:panel():panel({
+        name = self.name or self.type_name, 
+        alpha = 0, layer = (tweak_data.gui.MOUSE_LAYER - 190) + (self.layer or 0)
     })
+    self._panel:key_press(callback(self, self, "KeyPressed"))
+    self._panel:key_release(callback(self, self, "KeyReleased"))
+
     self._panel:rect({
         name = "bg",
         halign="grow",
         valign="grow",
-        visible = params.background_color ~= nil,
-        color = params.background_color,
-        alpha = params.background_alpha,
-        layer = 0
+        visible = self.background_color ~= nil,
+        color = self.background_color,
+        alpha = self.background_alpha,
     })
-    table.merge(self, params)
-	if params.create_items then
-		params.create_items(self)
-	end
-	self._menu_closed = true
-	if params.closed == false then
-		if managers.mouse_pointer then
-			self:enable()
-		end
-	end
-    self._ws_pnl:key_press(callback(self, self, "KeyPressed"))
-    self._ws_pnl:key_release(callback(self, self, "KeyReleased"))
-    BeardLib:AddUpdater("MenuUI"..tostring(self), function() --Using this way for sliders weirdly fixes the glitch problems caused by normal mouse_moved
+    self._menus = {}
+	if self.visible == true and managers.mouse_pointer then self:enable() end
+
+    BeardLib:AddUpdater("MouseMoveSlideFix"..tostring(self), function()
         local x,y = managers.mouse_pointer:world_position()
-        if self._slider_hold then
-            self._slider_hold:SetValueByMouseXPos(x)
-        end
+        if self._slider_hold then self._slider_hold:SetValueByMouseXPos(x) end
         self._old_x = x
-        self._old_y = y       
-    end, true)    
-    return self
+        self._old_y = y
+    end, true)
+
+    local texture = "guis/textures/menuicons"
+    FileManager:AddFile("texture", texture, BeardLib.Utils.Path:Combine(BeardLib.config.assets_dir, texture .. ".texture"))
+    if self.create_items then self.create_items(self) end
 end
 
 --Deprecated Function--
@@ -63,7 +49,7 @@ function MenuUI:Menu(params)
 end
 
 function MenuUI:enable()
-	self._ws_pnl:set_alpha(1)
+	self._panel:set_alpha(1)
 	self._menu_closed = false
 	managers.mouse_pointer:use_mouse({
 		mouse_move = callback(self, self, "MouseMoved"),
@@ -78,7 +64,7 @@ function MenuUI:disable()
     if self._menu_closed then
         return
     end
-	self._ws_pnl:set_alpha(0)
+	self._panel:set_alpha(0)
 	self._menu_closed = true
 	if self._highlighted then self._highlighted:UnHighlight() end
 	if self._openlist then self._openlist:hide() end
@@ -97,7 +83,7 @@ function MenuUI:toggle()
         if self.toggle_clbk then
             self.toggle_clbk(self._menu_closed)
         end
-    elseif self:ShouldClose() then    
+    elseif self:ShouldClose() then
         self:disable()
         if self.toggle_clbk then
             self.toggle_clbk(self._menu_closed)

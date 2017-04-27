@@ -4,7 +4,7 @@ function BaseItem:init(params)
 	self.type_name = self.type_name or "Button"
 	local mitem = getmetatable(self)
 	function mitem:__tostring() --STOP FUCKING RESETING
-		return string.format("[%s - %s]", tostring(self.name), tostring(self.type_name)) 
+		return string.format("[%s][%s] %s", self:alive() and "Alive" or "Dead", tostring(self.type_name), tostring(self.name)) 
 	end
 	self:Init()
 end

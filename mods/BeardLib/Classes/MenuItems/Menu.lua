@@ -53,7 +53,7 @@ function Menu:WorkParams()
     self.position = self.position or "Left"
     self.font = self.font or tweak_data.menu.pd2_large_font or tweak_data.menu.default_font
     self.offset = self.offset and self:ConvertOffset(self.offset) or self:ConvertOffset(self.menu.offset) 
-    self.override_size_limit = self.override_size_limit or self.menu.override_size_limit
+    self.override_size_limit = NotNilOr(self.override_size_limit, true)
     self.control_slice = self.control_slice or self.menu.control_slice or 2
     self.auto_align = NotNilOr(self.auto_align, true)
     self.text_offset = self.text_offset or self.menu.text_offset or 4
@@ -178,7 +178,7 @@ function Menu:MouseReleased(button, x, y)
 end
 
 function Menu:Focused()
-    return self:Visible() and self.menu._highlighted and self:MouseFocused(x, y)
+    return self:Visible() and self.menu._highlighted
 end
 
 function Menu:SetVisible(visible)

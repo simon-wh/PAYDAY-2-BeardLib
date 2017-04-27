@@ -87,27 +87,6 @@ function WeaponModule:RegisterHook()
             table.merge(data, self._config.merge_data)
         end
         w_self[self._config.id] = data
-        local npc_data = table.merge(deep_clone(self._config.based_on and (w_self[self._config.based_on .. "_npc"] ~= nil and w_self[self._config.based_on]) or w_self.g17_npc), {
-            usage = self._config.third_usage,
-            AMMO_MAX = data.AMMO_MAX,
-            sounds = self._config.third_sounds,
-            muzzleflash = data.muzzleflash,
-            muzzleflash_silenced = data.muzzleflash_silenced,
-            shell_ejection = data.shell_ejection,
-            CLIP_AMMO_MAX = data.CLIP_AMMO_MAX,
-            NR_CLIPS_MAX = data.NR_CLIPS_MAX,
-            hold = self._config.hold,
-            shell_ejection = data.alert_size,
-            shell_ejection = data.suppression,
-            use_data = data.use_data,
-            custom = true
-        })
-
-        if self._config.npc_merge_data then
-            table.merge(npc_data, self._config.npc_merge_data)
-        end
-
-        --w_self[self._config.id .. "_npc"] = npc_data
     end)
 
     Hooks:Add("BeardLibCreateCustomWeapons", self._config.fac_id .. "AddWeaponFactoryTweakData", function(w_self)
