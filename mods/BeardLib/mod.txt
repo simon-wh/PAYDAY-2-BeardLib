@@ -26,6 +26,7 @@
 		{ "hook_id" : "lib/managers/menu/menuscenemanager", "script_path" : "BeardLibCore.lua" },
 		{ "hook_id" : "lib/managers/menu/menuinput", "script_path" : "BeardLibCore.lua" },
 		{ "hook_id" : "lib/managers/menu/textboxgui", "script_path" : "BeardLibCore.lua" },
+		{ "hook_id" : "lib/managers/menu/crewmanagementgui", "script_path" : "BeardLibCore.lua" },
 		{ "hook_id" : "lib/managers/systemmenumanager", "script_path" : "BeardLibCore.lua" },
 		{ "hook_id" : "lib/managers/weaponfactorymanager", "script_path" : "BeardLibCore.lua" },
 		{ "hook_id" : "lib/units/beings/player/playermovement", "script_path" : "BeardLibCore.lua" },
