@@ -34,11 +34,6 @@ function MenuUI:init(params)
     if self.create_items then self.create_items(self) end
 end
 
---Deprecated Function--
-function MenuUI:NewMenu(params)
-    return self:Menu(params)
-end
-
 function MenuUI:Menu(params)
     params.parent_panel = self._panel
     params.parent = self
@@ -48,9 +43,15 @@ function MenuUI:Menu(params)
     return menu
 end
 
-function MenuUI:enable()
+function MenuUI:Enabled() return self._enabled end
+
+function MenuUI:Enable()
+    if self:Enabled() then
+        return
+    end
 	self._panel:set_alpha(1)
-	self._menu_closed = false
+	self._enabled = true
+    self._mouse_id = self._mouse_id or managers.mouse_pointer:get_id()
 	managers.mouse_pointer:use_mouse({
 		mouse_move = callback(self, self, "MouseMoved"),
 		mouse_press = callback(self, self, "MousePressed"),
@@ -60,12 +61,12 @@ function MenuUI:enable()
 	})
 end
 
-function MenuUI:disable()
-    if self._menu_closed then
+function MenuUI:Disable()
+    if not self:Enabled() then
         return
     end
 	self._panel:set_alpha(0)
-	self._menu_closed = true
+	self._enabled = false
 	if self._highlighted then self._highlighted:UnHighlight() end
 	if self._openlist then self._openlist:hide() end
 	managers.mouse_pointer:remove_mouse(self._mouse_id)
@@ -73,25 +74,28 @@ end
 
 function MenuUI:RunToggleClbk()
     if self.toggle_clbk then
-        self.toggle_clbk(self._menu_closed)
+        self.toggle_clbk(self:Enabled())
     end           
 end
 
 function MenuUI:toggle()
-    if self._menu_closed then
+    if not self:Enabled() then
         self:enable()
         if self.toggle_clbk then
-            self.toggle_clbk(self._menu_closed)
+            self.toggle_clbk(self:Enabled())
         end
     elseif self:ShouldClose() then
         self:disable()
         if self.toggle_clbk then
-            self.toggle_clbk(self._menu_closed)
+            self.toggle_clbk(self:Enabled())
         end
     end        
 end
 
-function MenuUI:KeyReleased( o, k )
+function MenuUI:KeyReleased(o, k)
+    if not self:Enabled() then
+        return
+    end
 	self._key_pressed = nil
     if self.key_released then
         self.key_release(o, k)
@@ -114,7 +118,7 @@ function MenuUI:KeyPressed(o, k)
     if self.toggle_key and k == Idstring(self.toggle_key) then
         self:toggle()
     end
-    if self._menu_closed then
+    if not self:Enabled() then
         return
     end
     if self._highlighted and self._highlighted.parent:Visible() then
@@ -217,12 +221,6 @@ function MenuUI:MouseMoved(o, x, y)
     if self.mouse_move then self.mouse_move(x, y) end
 end
 
-function MenuUI:SwitchMenu(menu) --Deprecated--
-    self._current_menu:SetVisible(false)
-    menu:SetVisible(true)
-    self._current_menu = menu
-end
-
 function MenuUI:GetMenu(name)
     for _, menu in pairs(self._menus) do
         if menu.name == name then
@@ -254,3 +252,14 @@ function MenuUI:Focused()
 	end
     return false
 end
+
+--Deprecated Functions--
+function MenuUI:SwitchMenu(menu)
+    self._current_menu:SetVisible(false)
+    menu:SetVisible(true)
+    self._current_menu = menu
+end
+
+function MenuUI:NewMenu(params) return self:Menu(params) end
+function MenuUI:enable() return self:Enable() end
+function MenuUI:disable() return self:Disable() end

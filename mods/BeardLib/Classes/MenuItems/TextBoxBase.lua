@@ -148,7 +148,7 @@ end
 
 function TextBoxBase:enter_text(text, s)
     local number = self._parent.filter == "number"
-    if self.menu._menu_closed or (number and (tonumber(s) == nil and s ~= "-" and s ~= ".") or (s == "%" or s == "(" or s == ")" or s == "[" or s == "]")) then
+    if self.menu:Enabled() or (number and (tonumber(s) == nil and s ~= "-" and s ~= ".") or (s == "%" or s == "(" or s == ")" or s == "[" or s == "]")) then
         return
     end
     if (self.menu._highlighted == self._parent or self.menu._openlist == self._parent) and self.cantype and not Input:keyboard():down(Idstring("left ctrl")) then
