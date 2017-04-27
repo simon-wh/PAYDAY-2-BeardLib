@@ -54,6 +54,7 @@ if not _G.BeardLib then
         ["lib/managers/missionmanager"] = "MissionManager.lua",
         ["lib/managers/menumanager"] = "MenuManager.lua",
         ["lib/managers/weaponfactorymanager"] = "WeaponFactoryManager.lua",
+        ["lib/managers/menu/crewmanagementgui"] = "CrewManagementGUI.lua",
         ["lib/managers/dialogs/keyboardinputdialog"] = "KeyboardInputDialog.lua",
         ["core/lib/utils/dev/editor/coreworlddefinition"] = "CoreWorldDefinition.lua",
         ["core/lib/system/coresystem"] = "CoreSystem.lua",
