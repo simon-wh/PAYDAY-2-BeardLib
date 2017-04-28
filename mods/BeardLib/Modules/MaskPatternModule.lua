@@ -26,10 +26,10 @@ function MaskPatternModule:RegisterHook()
         end
         local data = table.merge({
             name_id = "pattern_" .. self._config.id .. "_title",
-            dlc = BeardLib.definitions.module_defaults.item.default_dlc,
+            dlc = self.defaults.dlc,
             pcs = {},
             value = 0,
-            global_value = BeardLib.definitions.module_defaults.item.default_global_value,
+            global_value = self.defaults.global_value,
             custom = true
         }, self._config)
         bm_self.textures[self._config.id] = data

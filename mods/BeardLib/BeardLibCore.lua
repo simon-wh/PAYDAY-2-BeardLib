@@ -10,7 +10,7 @@ if not _G.BeardLib then
     self.sequence_mods = self.sequence_mods or {}
 
 	function self:read_config(file, tbl)
-		local file = io.open(ModPath .. "config/" .. file)
+		local file = io.open(ModPath..file)
 		local config = ScriptSerializer:from_custom_xml(file:read("*all"))
 		for i, var in pairs(config) do
 			if type(var) == "string" then
@@ -20,7 +20,7 @@ if not _G.BeardLib then
 		return config
 	end
 
-	self.config = self:read_config("main.xml")
+	self.config = self:read_config("Config.xml")
 	local _hooks = self.config.hooks
 	self.config.hooks = {}
 	for _, hook in ipairs(_hooks) do

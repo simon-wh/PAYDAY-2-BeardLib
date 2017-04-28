@@ -27,12 +27,12 @@ function AddFramework:Load()
             local p = path:Combine(self._directory, dir)
             local main_file = path:Combine(p, self.main_file_name)
 			local add_file = path:Combine(p, self.add_file)
-            if io.file_is_readable(main_file) then
+            if FileIO:Exists(main_file) then
                 self:LoadMod(dir, p, main_file)
             elseif not self._ignore_detection_errors then
                 BeardLib:log("[ERROR] Could not read %s", main_file)
             end
-			if io.file_is_readable(add_file) then
+			if FileIO:Exists(add_file) then
 				local file = io.open(add_file, "r")
 				local config = ScriptSerializer:from_custom_xml(file:read("*all"))
 				CustomPackageManager:LoadPackageConfig(p, config)

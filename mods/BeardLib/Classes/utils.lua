@@ -654,3 +654,21 @@ function BeardLib.Utils.Math:Round(val, dp)
 	local rounded = math.floor(val * mult + 0.5) / mult
 	return rounded
 end
+
+BeardLib.Utils.Input = {}
+
+function BeardLib.Utils.Input:Keyboard() return Input:keyboard() end
+function BeardLib.Utils.Input:Mouse() return Input:mouse() end
+
+--Keyboard
+function BeardLib.Utils.Input:Down(key) return self:Keyboard():down(key:id()) end
+function BeardLib.Utils.Input:Released(key) return self:Keyboard():released(key:id()) end
+function BeardLib.Utils.Input:Trigger(key, clbk) return self:Keyboard():add_trigger(key:id(), clbk) end
+function BeardLib.Utils.Input:RemoveTrigger(key) return self:Keyboard():remove_trigger(key:id()) end
+function BeardLib.Utils.Input:TriggerRelease(key, clbk) return self:Keyboard():add_release_trigger(key:id(), clbk) end
+--Mouse
+function BeardLib.Utils.Input:MouseDown(key) return self:Mouse():down(key:id()) end
+function BeardLib.Utils.Input:MouseReleased(key) return self:Mouse():released(key:id()) end
+function BeardLib.Utils.Input:MouseTrigger(key, clbk) return self:Mouse():add_trigger(key:id(), clbk) end
+function BeardLib.Utils.Input:MouseRemoveTrigger(key) return self:Mouse():remove_trigger(key:id()) end
+function BeardLib.Utils.Input:MouseTriggerRelease(key, clbk) return self:Mouse():add_release_trigger(key:id(), clbk) end

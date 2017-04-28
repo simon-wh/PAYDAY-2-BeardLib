@@ -49,7 +49,7 @@ function WeaponModule:init(core_mod, config)
 end
 
 function WeaponModule:RegisterHook()
-    local dlc = self._config.dlc or BeardLib.definitions.module_defaults.item.default_dlc
+    local dlc = self._config.dlc or self.defaults.dlc
     self._config.unlock_level = self._config.unlock_level or 1
 
     --Old eh? lets convert it!
@@ -100,7 +100,7 @@ function WeaponModule:RegisterHook()
             aim_assist = default_aim_assist[config.default_aim_assist],
             damage_melee = damage_melee_default,
             damage_melee_effect_mul = damage_melee_effect_multiplier_default,
-            global_value = BeardLib.definitions.module_defaults.item.default_global_value,
+            global_value = self.defaults.global_value,
             custom = true
         }, config))
         data.AMMO_MAX = data.CLIP_AMMO_MAX * data.NR_CLIPS_MAX

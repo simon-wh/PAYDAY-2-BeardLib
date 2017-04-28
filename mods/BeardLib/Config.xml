@@ -1,15 +1,14 @@
 <table
 	main_menu="BeardLibMainMenu"
-
 	localization_dir="$ModPath$Localization"
 	maps_dir="Maps"
 	hooks_dir="$ModPath$Hooks/"
 	modules_dir="$ModPath$Modules/"
 	classes_dir="$ModPath$Classes/"
 	assets_dir="$ModPath$Assets/"
-	mod_override_dir="assets/mod_overrides/"
-	>
+	mod_override_dir="assets/mod_overrides/">
 	<classes>
+		<class file="utils.lua"/>
 		<class file="FileIO.lua"/>
 		<class file="ModCore.lua"/>
 		<class file="CustomPackageManager.lua"/>
@@ -20,7 +19,6 @@
 		<class file="FrameworkBase.lua"/>
 		<class file="MapFramework.lua" manager="MapFramework"/>
 		<class file="AddFramework.lua" manager="AddFramework"/>
-		<class file="Definitions.lua"/>
 		<class file="QuickAnimGUI.lua"/>
 		<class file="MenuUI.lua"/>
 		<class file="MenuDialog.lua"/>
@@ -42,7 +40,6 @@
 		<class file="MenuItems/TextBox.lua"/>
 		<class file="MenuHelperPlus.lua"/>
 		<class file="json_utils.lua"/>
-		<class file="utils.lua"/>
 		<class file="ModAssetUpdateManager.lua" manager="asset_update"/>
 		<class file="ModuleBase.lua"/>
 	</classes>
@@ -100,7 +97,6 @@
 		<value_node value="network_settings"/>
 		<value_node value="physics_settings"/>
 	</script_data_types>
-
 	<file_types>
 		<value_node value="achievment"/>
 		<value_node value="action_message"/>
@@ -171,7 +167,6 @@
 		<value_node value="xbox_live"/>
 		<value_node value="xml"/>
 	</file_types>
-
 	<script_data_formats>
 		<value_node value="json"/>
 		<value_node value="xml"/>

@@ -21,7 +21,7 @@ function MeleeModule:RegisterHook()
 
         local data = table.merge(deep_clone(self._config.based_on and (bm_self.melee_weapons[self._config.based_on] ~= nil and bm_self.melee_weapons[self._config.based_on]) or bm_self.melee_weapons.kabar), table.merge({
             name_id = "bm_melee_" .. self._config.id,
-            dlc = BeardLib.definitions.module_defaults.item.default_dlc,
+            dlc = self.defaults.dlc,
             custom = true,
             free = not self._config.unlock_level
         }, self._config.item or self._config))

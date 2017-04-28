@@ -1,8 +1,6 @@
 ModuleBase = ModuleBase or class()
-
 ModuleBase.type_name = "ModuleBase"
 ModuleBase.required_params = {}
-
 function ModuleBase:init(core_mod, config)
     self._mod = core_mod
     self._name = config.name or self.type_name
@@ -47,13 +45,14 @@ ItemModuleBase = ItemModuleBase or class(ModuleBase)
 ItemModuleBase.type_name = "ItemModuleBase"
 ItemModuleBase.required_params = {"id"}
 ItemModuleBase.clean_table = {}
+ItemModuleBase.defaults = {global_value= "mod", dlc= "mod"}
 ItemModuleBase._loose = true
-
 local remove_last = function(str)
     local tbl = string.split(str, "%.")
 
     return table.remove(tbl), #tbl > 0 and table.concat(tbl, ".")
 end
+
 function ItemModuleBase:init(core_mod, config)
     if not ModuleBase.init(self, core_mod, config) then
         return false
@@ -84,6 +83,4 @@ function ItemModuleBase:init(core_mod, config)
     return true
 end
 
-function ItemModuleBase:RegisterHook()
-
-end
+function ItemModuleBase:RegisterHook() end

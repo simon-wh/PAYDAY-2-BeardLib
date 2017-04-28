@@ -4,14 +4,14 @@ function MenuDialog:init(params, existing_menu)
         self._dialog = existing_menu
         self:create_items({}, self._dialog)
         return
-    end
+    end    
     params = params or {}
-    params.layer = 100
-    params.marker_color = params.marker_color or Color.white:with_alpha(0)
-    params.marker_highlight_color = params.marker_highlight_color or Color("4385ef")   
-    params.create_items = callback(self, self, "create_items", params)
-    params.background_color = nil
-    params.background_alpha = nil
+    table.merge(params, {
+        layer = 100,
+        marker_color = params.marker_color or Color.white:with_alpha(0),
+        marker_highlight_color = params.marker_highlight_color or Color("4385ef"),
+        create_items = callback(self, self, "create_items", params)        
+    })
     self._dialog = MenuUI:new(params)    
 end
 

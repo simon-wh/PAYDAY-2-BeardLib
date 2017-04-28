@@ -1,5 +1,4 @@
 _G.ModManager = {}
-
 local mm = ModManager
 
 function mm:RegisterHook(source_file, path, file, type)
@@ -18,10 +17,5 @@ function mm:RegisterHook(source_file, path, file, type)
     end
 end
 
-function mm:RegisterKeybind()
-
-end
-
-function mm:RegisterLibrary()
-
-end
+function mm:RegisterKeybind() end
+function mm:RegisterLibrary() end

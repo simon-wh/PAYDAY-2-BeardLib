@@ -1,7 +1,6 @@
 TextBox = TextBox or class(Item)
 TextBox.type_name = "TextBox"
 function TextBox:Init()
-	self.value = self.value or ""
 	self.size_by_text = false
 	self.super.Init(self)	
     self.floats = self.floats or 2
@@ -13,6 +12,7 @@ function TextBox:Init()
         w = self.panel:w() / (self.text == nil and 1 or self.control_slice),
         value = self.value,
     })
+    self.value = self.value or ""
 end
 
 function TextBox:SetEnabled(enabled)
@@ -21,7 +21,7 @@ function TextBox:SetEnabled(enabled)
 	self._textbox.panel:child("text"):set_alpha(enabled and 1 or 0.5)
 end
 
-function TextBox:SetValue(value, run_callback, reset_selection)
+function TextBox:_SetValue(value, run_callback, reset_selection)
 	local text = self._textbox.panel:child("text")
 
 	if self.filter == "number" then
@@ -45,6 +45,13 @@ function TextBox:SetValue(value, run_callback, reset_selection)
 	self.super.SetValue(self, value, run_callback)
 end
 
+function TextBox:SetValue(value, ...)
+	if self.value ~= value then
+		self._textbox:add_history_point(value)
+	end
+	self:_SetValue(value, ...)
+end
+
 function TextBox:SetStep(step)
 	self.step = step
 end
@@ -53,15 +60,12 @@ function TextBox:MousePressed(button, x, y)
 	if not self:MouseCheck(true) then
 		return
 	end
-	if not self.cantype then
-		self:SetValue(self._textbox.panel:child("text"):text(), true, true)
-	end
 	if button == Idstring("1") and self.type_name == "NumberBox" and not self.no_slide and self._textbox.panel:inside(x,y) then
 		self.menu._slider_hold = self
 		return true
 	end
 	self._textbox:MousePressed(button, x, y)
-	return self.cantype
+	return self._textbox.cantype
 end
 
 function TextBox:MouseReleased(button, x, y)
@@ -77,9 +81,6 @@ function TextBox:MouseMoved(x, y)
     if not self.super.MouseMoved(self, x, y) then
     	return 
     end
-    if self.cantype then
-        self:SetValue(self._textbox.panel:child("text"):text())
-    end    
     self._textbox:MouseMoved(x, y)
 end
 
@@ -90,11 +91,11 @@ function TextBox:SetValueByMouseXPos(x)
     end
     if self.menu._old_x ~= x then
         local move = 0
-        if managers.mouse_pointer._mouse:world_x() == self.menu._fullscreen_ws_pnl:w() then
+        if managers.mouse_pointer._mouse:world_x() == self.menu._panel:w() then
             managers.mouse_pointer:set_mouse_world_position(1, managers.mouse_pointer._mouse:world_y())
             self.ignore_next = true
         elseif managers.mouse_pointer._mouse:world_x() == 0 then
-            managers.mouse_pointer:set_mouse_world_position(self.menu._fullscreen_ws_pnl:w() - 1, managers.mouse_pointer._mouse:world_y())
+            managers.mouse_pointer:set_mouse_world_position(self.menu._panel:w() - 1, managers.mouse_pointer._mouse:world_y())
             self.ignore_next = true
         else
             move = ctrl() and 1 or self.step or (x - self.menu._old_x)
