@@ -21,25 +21,13 @@ function FileBrowserDialog:create_items(params, menu)
     params.w = 901
     params.h = 16
     params.row_max = 1
+    params.offset = 0
     FileBrowserDialog.super.create_items(self, params, menu) 
     self._menu:Panel():set_leftbottom(self._folders_menu:Panel():left(), self._folders_menu:Panel():top() - 1)
-end
 
-function FileBrowserDialog:Browse(where, params)   
-    params = params or self._params or {}
-    self._params = params
-    self._menu:ClearItems()
-    self._files_menu:ClearItems()
-    self._folders_menu:ClearItems()
-    self._current_dir = where or ""
-    local enabled = where ~= params.base_path
     self._menu:Button({
         name = "Backward",
         w = 30,
-        enabled = enabled,
-        text_color = not enabled and Color(.8, .8, .8),
-        text_highlight_color = not enabled and Color(.8, .8, .8),
-        marker_highlight_color = not enabled and Color(0,0,0,0),
         text = "<",
         callback = callback(self, self, "FolderBack"),  
         label = "temp"
@@ -48,26 +36,24 @@ function FileBrowserDialog:Browse(where, params)
     self._menu:Button({
         name = "Forward",
         w = 30,
-        enabled = enabled,
-        text_color = not enabled and Color(.8, .8, .8),
-        text_highlight_color = not enabled and Color(.8, .8, .8),
-        marker_highlight_color = not enabled and Color(0,0,0,0),
         text = ">",
         callback = function()
             self:Browse(self._old_dir)
         end,  
         label = "temp"
     })    
-    self._menu:Button({
+    self._menu:TextBox({
         w = 540,
-        callback = callback(self, self, "OpenPathSetDialog"),  
+        control_slice = 1.01,
+        forbidden_chars = {':','*','?','"','<','>','|'},
+        callback = callback(self, self, "OpenPathSetDialog"),
+        text = false,
         name = "CurrentPath",
-        text = tostring(where),
     })
     self._menu:TextBox({
         name = "Search",
         w = 200,
-        --callback = callback(self, self, "Search"),  
+        callback = callback(self, self, "Search"),  
         label = "temp"
     })
     self._menu:Button({
@@ -77,6 +63,26 @@ function FileBrowserDialog:Browse(where, params)
         callback = callback(self, self, "hide"),  
         label = "temp"
     })
+    self._search = ""
+end
+
+function FileBrowserDialog:Browse(where, params)
+    if not FileIO:Exists(where) then
+        return
+    end
+    params = params or self._params or {}
+    self._params = params
+    self._files_menu:ClearItems()
+    self._folders_menu:ClearItems()
+    if self._current_dir ~= where then
+        self._search = ""
+        self._menu:GetItem("Search"):SetValue("")
+    end
+    self._current_dir = where or ""
+    local enabled = where ~= params.base_path
+    self._menu:GetItem("CurrentPath"):SetValue(where)
+    self._menu:GetItem("Backward"):SetEnabled(enabled)
+    self._menu:GetItem("Forward"):SetEnabled(enabled)
     local f = {}
     local d = {}
     if params.browse_func then  
@@ -84,7 +90,23 @@ function FileBrowserDialog:Browse(where, params)
     else
         f = SystemFS:list(where)
         d = SystemFS:list(where, true)
-    end         
+    end
+    if self._search:len() > 0 then
+        local temp_f = clone(f)
+        local temp_d = clone(d)
+        f = {}
+        d = {}
+        for _, v in pairs(temp_f) do
+            if v:match(self._search) then
+                table.insert(f, v)
+            end
+        end
+        for _, v in pairs(temp_d) do
+            if v:match(self._search) then
+                table.insert(d, v)
+            end
+        end
+    end
     self:MakeFilesAndFolders(f, d)
     if BeardLib.DialogOpened == self then
         return
@@ -129,23 +151,12 @@ function FileBrowserDialog:MakeFilesAndFolders(files, folders)
 end
 
 function FileBrowserDialog:Search(menu, item)
-    self._files_menu:ClearItems()
-    self._folders_menu:ClearItems()
-    self._menu:GetItem("CurrentPath"):SetText("Searching.. " .. tostring( item.value ))
-    self:MakeFilesAndFolders(SystemFS:list(where, item.value), SystemFS:list(where, item.value, true))
+    self._search = item:Value()
+    self:Browse(self._current_dir)
 end
 
 function FileBrowserDialog:OpenPathSetDialog(menu, item)
-    managers.system_menu:show_keyboard_input({
-        text = self._current_dir,
-        title = "Set path to:",
-        callback_func = function(success, search)
-            if not success or search == self._current_dir then
-                return
-            end    
-            self:Browse(search)            
-        end
-    })
+    self:Browse(item:Value())
 end
 
 function FileBrowserDialog:FileClick(menu, item)
@@ -175,7 +186,9 @@ function FileBrowserDialog:FolderBack()
 end
 
 function FileBrowserDialog:hide( ... )
-    self.super.hide(self, ...)
-    self._params = nil
-    self._old_dir = nil
+    if self.super.hide(self, ...) then
+        self._params = nil
+        self._old_dir = nil
+        return true
+    end
 end

@@ -46,6 +46,10 @@ function SelectListDialog:Toggle(name, selected, value)
 end
 
 function SelectListDialog:hide()
+    if BeardLib.IgnoreDialogOnce then
+        BeardLib.IgnoreDialogOnce = false
+        return
+    end
     managers.menu:post_event("prompt_exit")
     self._dialog:disable()
     self._menu:ClearItems()
@@ -54,4 +58,5 @@ function SelectListDialog:hide()
     end
    	managers.menu._controller:remove_trigger(self._trigger)     
    	BeardLib.DialogOpened = nil
+    return true
 end

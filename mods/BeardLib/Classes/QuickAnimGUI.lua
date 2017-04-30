@@ -61,6 +61,12 @@ function QuickAnim:Work(o, ...)
         opt.callback()
     end)
 end
+
+function QuickAnim:Stop(o)
+    o:stop()
+    o:script().animating = false
+end
+
 function QuickAnim:WorkColor(o, color, speed, clbk)
     o:animate(function()
         speed = speed or 5

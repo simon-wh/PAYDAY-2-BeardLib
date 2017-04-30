@@ -50,7 +50,6 @@ function Menu:WorkParams()
     self.marker_alpha = self.marker_alpha or self.menu.marker_alpha 
     self.align = self.align or self.menu.align
     self.background_visible = NotNilOr(self.background_visible, self.type_name == "Menu" and true or false)
-    self.position = self.position or "Left"
     self.font = self.font or tweak_data.menu.pd2_large_font or tweak_data.menu.default_font
     self.offset = self.offset and self:ConvertOffset(self.offset) or self:ConvertOffset(self.menu.offset) 
     self.override_size_limit = NotNilOr(self.override_size_limit, true)
@@ -263,6 +262,7 @@ function Menu:AlignItemsNormal()
                     h = h + item.panel:h() + item.offset[2]
                 end
             end
+            item:Aligned()
         end
     end
     local result_h = self.closed and base_h or h
@@ -381,7 +381,11 @@ function Menu:Group(params)
 end
 
 function Menu:ImageButton(params)
+    local w = params.w
+    local h = params.h
     self:ConfigureItem(params)
+    params.w = w or params.items_size
+    params.h = h or params.items_size
     return self:NewItem(ImageButton:new(params))
 end
 
@@ -471,29 +475,30 @@ function Menu:ConfigureItem(item, menu)
         end
         return a
     end
+    local inherit = item.inherit_from or item.override_parent or self
     item.parent = self
     item.menu = self.menu
     item.enabled = NotNilOr(item.enabled, true)
     item.visible = NotNilOr(item.visible, true)
-    item.text_color = item.text_color or self.text_color
-    item.text = item.text or item.name
-    item.text_highlight_color = item.text_highlight_color or self.text_highlight_color
-    item.items_size = item.items_size or self.items_size
-    item.marker_highlight_color = item.marker_highlight_color or self.marker_highlight_color
-    item.marker_color = item.marker_color or self.marker_color
-    item.background_color = item.background_color or self.background_color
-    item.background_alpha = item.background_alpha or self.background_alpha
-    item.marker_alpha = item.marker_alpha or self.marker_alpha
-    item.text_align = item.text_align or self.text_align or "left"
-    item.text_vertical = item.text_vertical or self.text_vertical or "top"
-    item.size_by_text = NotNilOr(item.size_by_text, self.size_by_text)
+    item.text_color = item.text_color or inherit.text_color
+    item.text = item.text or item.text ~= false and item.name
+    item.text_highlight_color = item.text_highlight_color or inherit.text_highlight_color
+    item.items_size = item.items_size or inherit.items_size
+    item.marker_highlight_color = item.marker_highlight_color or inherit.marker_highlight_color
+    item.marker_color = item.marker_color or inherit.marker_color
+    item.background_color = item.background_color or inherit.background_color
+    item.background_alpha = item.background_alpha or inherit.background_alpha
+    item.marker_alpha = item.marker_alpha or inherit.marker_alpha
+    item.text_align = item.text_align or inherit.text_align or "left"
+    item.text_vertical = item.text_vertical or inherit.text_vertical or "top"
+    item.size_by_text = NotNilOr(item.size_by_text, inherit.size_by_text)
     item.parent_panel = (item.override_parent and item.override_parent.panel) or self.items_panel
-    item.offset = item.offset and self:ConvertOffset(item.offset) or self.offset
-    item.override_size_limit = item.override_size_limit or self.override_size_limit
+    item.offset = item.offset and self:ConvertOffset(item.offset) or inherit.offset
+    item.override_size_limit = item.override_size_limit or inherit.override_size_limit
     item.w = (item.w or (item.parent_panel:w() > 300 and not item.override_size_limit and 300 or item.parent_panel:w())) - (item.size_by_text and 0 or item.offset[1] * 2)
-    item.control_slice = item.control_slice or self.control_slice
-    item.font = item.font or self.font
-    item.text_offset = item.text_offset or self.text_offset
+    item.control_slice = item.control_slice or inherit.control_slice
+    item.font = item.font or inherit.font
+    item.text_offset = item.text_offset or inherit.text_offset
     if type(item.index) == "string" then
         local split = string.split(item.index, "|")
         local wanted_item = self:GetItem(split[2] or split[1]) 

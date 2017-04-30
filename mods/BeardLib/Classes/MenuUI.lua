@@ -2,27 +2,49 @@ MenuUI = MenuUI or class()
 function MenuUI:init(params)
     table.merge(self, params)
     self.type_name = "MenuUI"
+    self.layer = self.layer or 200 --Some fucking layer that is higher than most vanilla menus
     self._ws = managers.gui_data:create_fullscreen_workspace()
 	self._ws:connect_keyboard(Input:keyboard())
+    tweak_data.gui.MOUSE_LAYER = 999999999 --nothing should have a layer that is bigger than mouse tbh
     self._panel = self._ws:panel():panel({
         name = self.name or self.type_name, 
-        alpha = 0, layer = (tweak_data.gui.MOUSE_LAYER - 190) + (self.layer or 0)
+        alpha = 0, layer = self.layer
     })
     self._panel:key_press(callback(self, self, "KeyPressed"))
     self._panel:key_release(callback(self, self, "KeyReleased"))
 
     self._panel:rect({
         name = "bg",
-        halign="grow",
-        valign="grow",
+        halign = "grow",
+        valign = "grow",
         visible = self.background_color ~= nil,
         color = self.background_color,
         alpha = self.background_alpha,
     })
+
+    self._help = self._panel:panel({name = "help", alpha = 0, layer = 50, w = self.help_width or 300})
+    self._help:rect({
+        name = "bg",
+        halign ="grow",
+        valign ="grow",
+        color = self.help_background_color or self.background_color,
+        alpha = self.help_background_alpha or self.background_alpha,
+    })    
+    self._help:text({
+        name = "text",
+        font = self.help_font or "fonts/font_large_mf",
+        font_size = self.help_font_size or 16,
+        layer = 2,
+        wrap = true,
+        word_wrap = true,
+        text = "",
+        color = self.help_color or Color.black
+    })
+
     self._menus = {}
 	if self.visible == true and managers.mouse_pointer then self:enable() end
 
-    BeardLib:AddUpdater("MouseMoveSlideFix"..tostring(self), function()
+    BeardLib:AddUpdater("MenuUIUpdate"..tostring(self), function()
         local x,y = managers.mouse_pointer:world_position()
         if self._slider_hold then self._slider_hold:SetValueByMouseXPos(x) end
         self._old_x = x
@@ -32,6 +54,34 @@ function MenuUI:init(params)
     local texture = "guis/textures/menuicons"
     FileManager:AddFile("texture", texture, BeardLib.Utils.Path:Combine(BeardLib.config.assets_dir, texture .. ".texture"))
     if self.create_items then self.create_items(self) end
+end
+
+function MenuUI:ShowDelayedHelp(item)
+    DelayedCalls:Add("ShowItemHelp", self.show_help_time or 1, function()
+        if self._highlighted == item then
+            help_text = self._help:child("text")
+            help_text:set_w(300)
+            help_text:set_text(item.help)
+            local _,_,w,h  = help_text:text_rect()
+            w = math.min(w, 300)
+            self._help:set_size(w + 8, h + 8)
+            help_text:set_shape(4, 4, w, h)
+
+            local mouse = managers.mouse_pointer:mouse()
+            local mouse_p = mouse:parent()
+            local bottom_h = (mouse_p:world_bottom() - mouse:world_bottom()) 
+            local top_h = (mouse:world_y() - mouse_p:world_y()) 
+            local normal_pos = h <= bottom_h or bottom_h >= top_h
+            self._help:set_world_left(mouse:world_left() + 7)
+            if normal_pos then
+                self._help:set_world_y(mouse:world_bottom() - 5)
+            else
+                self._help:set_world_bottom(mouse:world_y() - 5)
+            end
+            QuickAnim:Work(self._help, "alpha", 1, "speed", 3)
+            self._showing_help = true
+        end
+    end)
 end
 
 function MenuUI:Menu(params)
@@ -198,6 +248,10 @@ function MenuUI:ShouldClose()
 end
 
 function MenuUI:MouseMoved(o, x, y)
+    if self._showing_help then
+        QuickAnim:Stop(self._help)
+        self._help:set_alpha(0)
+    end
     if self.always_mouse_move then self.always_mouse_move(x, y) end
     if self._openlist then
         if self._openlist.parent:Visible() then

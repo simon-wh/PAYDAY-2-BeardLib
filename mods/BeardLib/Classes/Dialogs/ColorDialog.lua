@@ -72,6 +72,10 @@ function ColorDialog:update_color(menu)
 end
 
 function ColorDialog:hide(yes)
+    if BeardLib.IgnoreDialogOnce then
+        BeardLib.IgnoreDialogOnce = false
+        return
+    end
     managers.menu:post_event("prompt_exit")
     self._dialog:disable()
     self._menu:ClearItems()
@@ -81,4 +85,5 @@ function ColorDialog:hide(yes)
     end
    managers.menu._controller:remove_trigger(self._trigger)     
    BeardLib.DialogOpened = nil
+   return true
 end

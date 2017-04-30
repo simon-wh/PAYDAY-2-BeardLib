@@ -5,6 +5,10 @@ function TextBoxBase:init(parent, params)
     self.parent = parent.parent
     self.menu = parent.menu
     self.items_size = params.items_size or parent.items_size
+    self._forbidden = {'%', '(', ")", "[", "]"}
+    if self._parent.forbidden_chars then
+        table.merge(self._forbidden, self._parent.forbidden_chars)
+    end
 	self.panel = params.panel:panel({
 		name = "text_panel",
 		w = params.w,
@@ -166,8 +170,13 @@ end
 
 function TextBoxBase:enter_text(text, s)
     local number = self._parent.filter == "number"
-    if not self.menu:Enabled() or (number and (tonumber(s) == nil and s ~= "-" and s ~= ".") or (s == "%" or s == "(" or s == ")" or s == "[" or s == "]")) then
+    if not self.menu:Enabled() or number and (tonumber(s) == nil and s ~= "-" and s ~= ".") then
         return
+    end
+    for _, c in pairs(self._forbidden) do
+        if s == c then
+            return
+        end
     end
     if (self.menu._highlighted == self._parent or self.menu._openlist == self._parent) and self.cantype and not ctrl() then
         text:replace_text(s)       
@@ -196,6 +205,10 @@ function TextBoxBase:KeyPressed(o, k)
 end
 
 function TextBoxBase:update_caret()
+    if not self._parent:alive() then
+        self.cantype = false
+        return
+    end
     local text = self.panel:child("text")
     local lines = math.max(1, text:number_of_lines())
 
@@ -236,14 +249,18 @@ function TextBoxBase:MousePressed(button, x, y)
         BeardLib:AddUpdater("CheckMouseOut"..tostring(self), function()
             local x,y = managers.mouse_pointer:world_position()
             local cantype = self.cantype
-            self.cantype = self.panel:inside(x,y) and self.cantype or false
+            if x ~= self._old_x or y ~= self._old_y then
+                self.cantype = self.panel:inside(x,y) and self.cantype or false
+            end
             if cantype and not self.cantype then
                 self:CheckText(text)
             end
             self:update_caret()
             if not self.cantype then
                 BeardLib:RemoveUpdater("CheckMouseOut"..tostring(self))
-            end    
+            end
+            self._old_x = x
+            self._old_y = y
         end, true)
         local i = text:point_to_index(x, y)
         self._start_select = i
@@ -252,8 +269,8 @@ function TextBoxBase:MousePressed(button, x, y)
         self:update_caret()
         return true
     elseif cantype == true and self.cantype == false then
-    	self:update_text(text:text(), false, true, true)
-    	return true
+        self:update_text(text:text(), false, true, true)
+        return true
     end
 end
 

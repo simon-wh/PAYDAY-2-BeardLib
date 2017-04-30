@@ -6,8 +6,9 @@ function MenuDialog:init(params, existing_menu)
         return
     end    
     params = params or {}
+    BeardLib.LastIndex = (BeardLib.LastIndex or 800) + 1
     table.merge(params, {
-        layer = 100,
+        layer = BeardLib.LastIndex,
         marker_color = params.marker_color or Color.white:with_alpha(0),
         marker_highlight_color = params.marker_highlight_color or Color("4385ef"),
         create_items = callback(self, self, "create_items", params)        
@@ -74,10 +75,15 @@ function MenuDialog:show(params)
             callback = callback(self, self, "hide")
         })
     end
-    self._trigger = managers.menu._controller:add_trigger(Idstring("esc"), callback(self, self, "hide"))    
+    self._trigger = managers.menu._controller:add_trigger("cancel", callback(self, self, "hide"))
     BeardLib.DialogOpened = self
 end
+
 function MenuDialog:hide(yes)
+    if BeardLib.IgnoreDialogOnce then
+        BeardLib.IgnoreDialogOnce = false
+        return false 
+    end
     managers.menu:post_event("prompt_exit")
     self._dialog:disable()
     self._menu:ClearItems()
@@ -87,4 +93,6 @@ function MenuDialog:hide(yes)
     end
    managers.menu._controller:remove_trigger(self._trigger)     
    BeardLib.DialogOpened = nil
+   BeardLib.LastIndex = BeardLib.LastIndex - 1
+   return true
 end

@@ -84,6 +84,12 @@ function BaseItem:SetParam(k,v) self[k] = v end
 function BaseItem:SetEnabled(enabled) self.enabled = enabled end
 
 --Position Func--
+function BaseItem:Aligned()
+	for _, item in pairs(self._my_items) do
+		item:Reposition()
+	end
+end
+
 function BaseItem:Reposition()
 	if not self:alive() then
 		return

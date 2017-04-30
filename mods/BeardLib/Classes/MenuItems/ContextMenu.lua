@@ -29,11 +29,19 @@ function ContextMenu:init(parent, layer)
             update_text = callback(self, self, "update_search"),
         })
     end
-    self._scroll = ScrollablePanel:new(self.panel, "ItemsPanel", {layer = 4, padding = 0.0001, scroll_width = parent.scrollbar == false and 0 or 8, hide_shade = true})
-    self.items_panel = self._scroll:canvas()   
-    
+    self._scroll = ScrollablePanelModified:new(self.panel, "ItemsPanel", {
+        layer = 4, 
+        padding = 0.0001, 
+        scroll_width = parent.scrollbar == false and 0 or self.parent.scroll_width or 8,
+        hide_shade = true, 
+        scroll_color = parent.marker_highlight_color,
+        scroll_speed = 48
+    })
+    self.items_panel = self._scroll:canvas()
     self:update_search()
 end
+
+function ContextMenu:alive() return alive(self.panel) end
 
 function ContextMenu:CreateItems()
     self.items_panel:clear()
@@ -59,7 +67,7 @@ function ContextMenu:CreateItems()
 end
 
 function ContextMenu:hide()
-    if alive(self.panel) then
+    if self:alive() then
         self.panel:hide()
     end
     self.menu._openlist = nil
@@ -86,7 +94,7 @@ function ContextMenu:reposition()
     self._scroll:panel():child("scroll_up_indicator_arrow"):set_top(6 - self._scroll:padding())
     self._scroll:panel():child("scroll_down_indicator_arrow"):set_bottom(self._scroll:panel():h() - 6 - self._scroll:padding())
 
-    self._scroll:update_canvas_size()    
+    self._scroll:update_canvas_size()
 end
 
 function ContextMenu:show()    
@@ -136,7 +144,7 @@ function ContextMenu:KeyPressed(o, k)
     if self._textbox then
         self._textbox:KeyPressed(o, k)
     end
-    if not alive(self.panel) then
+    if not self:alive() then
         return
     end
     if self.menu._openlist and k == Idstring("esc") then

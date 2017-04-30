@@ -84,14 +84,15 @@ function ListDialog:MakeListItems()
         local t = type(v) == "table" and v.name or v
         if self._filter == "" or (case and string.match(t, self._filter) or not case and string.match(t:lower(), self._filter:lower())) then
             if not limit or #self._list_menu._all_items <= 250 then
+                local menu = self._list_menu
                 if type(v) == "table" and v.create_group then 
-                    v.group = self._list_menu:GetItem(v.create_group) or self._list_menu:ItemsGroup({
+                    menu = self._list_menu:GetItem(v.create_group) or self._list_menu:ItemsGroup({
                         name = v.create_group,
                         text = v.create_group,
                         label = "temp2"
                     })             
                 end
-                self._list_menu:Button(table.merge(type(v) == "table" and v or {}, {
+                menu:Button(table.merge(type(v) == "table" and v or {}, {
                     name = t,
                     text = t,
                     callback = function(menu, item)
@@ -113,9 +114,14 @@ function ListDialog:Search(menu, item)
 end
 
 function ListDialog:hide()
+    if BeardLib.IgnoreDialogOnce then
+        BeardLib.IgnoreDialogOnce = false
+        return
+    end
     managers.menu:post_event("prompt_exit")
     self._dialog:disable()
     self._menu:ClearItems()
    managers.menu._controller:remove_trigger(self._trigger)     
    BeardLib.DialogOpened = nil
+   return true
 end

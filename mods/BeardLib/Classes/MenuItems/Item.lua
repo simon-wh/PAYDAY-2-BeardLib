@@ -14,7 +14,7 @@ function Item:Init()
 	end
 	self._my_items = {}
 	self.override_parent = self.override_parent
-	self:SetPosition(self.position)
+	self:Reposition()
     if self.items then
 		self._list = ContextMenu:new(self, 20) 
     end
@@ -103,6 +103,9 @@ function Item:Highlight()
 	end
 	self.highlight = true
 	self.menu._highlighted = self
+	if self.help then
+		self.menu:ShowDelayedHelp(self)
+	end
 end
 
 function Item:UnHighlight()
