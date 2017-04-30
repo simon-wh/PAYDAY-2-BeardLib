@@ -248,9 +248,10 @@ end
 
 function BeardLib.Utils:CleanOutfitString(str, is_henchman)
     local bm = managers.blackmarket
-    is_henchman = is_henchman and bm.unpack_henchman_loadout_string
-    local list = is_henchman and bm:unpack_henchman_loadout_string(str) or bm:unpack_outfit_from_string(str)
-
+    if is_henchman and not bm.unpack_henchman_loadout_string then --thx ovk for the headaches henchman beta caused me <3
+        is_henchman = false
+    end
+    local list = (is_henchman and bm.unpack_henchman_loadout_string) and bm:unpack_henchman_loadout_string(str) or bm:unpack_outfit_from_string(str)
     if tweak_data.blackmarket.masks[is_henchman and list.mask or list.mask.mask_id].custom then
         if is_henchman then
             list.mask = "character_locked"
