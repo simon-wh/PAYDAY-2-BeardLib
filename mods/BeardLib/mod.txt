@@ -19,6 +19,7 @@
         { "hook_id" : "lib/managers/trademanager", "script_path" : "BeardLibCore.lua"},
 		{ "hook_id" : "lib/managers/missionmanager", "script_path" : "BeardLibCore.lua"},
 		{ "hook_id" : "lib/managers/menumanager", "script_path" : "BeardLibCore.lua"},
+		{ "hook_id" : "lib/managers/crimenetmanager", "script_path" : "BeardLibCore.lua"},
 		{ "hook_id" : "lib/managers/jobmanager", "script_path" : "BeardLibCore.lua"},
         { "hook_id" : "lib/managers/achievmentmanager", "script_path" : "BeardLibCore.lua"},
         { "hook_id" : "lib/managers/menu/scrollablepanel", "script_path" : "BeardLibCore.lua" },

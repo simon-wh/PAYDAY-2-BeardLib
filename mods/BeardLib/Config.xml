@@ -54,6 +54,7 @@
         <hook source="lib/managers/trademanager" file="TradeManager.lua"/>
         <hook source="lib/managers/missionmanager" file="MissionManager.lua"/>
         <hook source="lib/managers/menumanager" file="MenuManager.lua"/>
+        <hook source="lib/managers/crimenetmanager" file="CrimeNetManager.lua"/>
         <hook source="lib/managers/weaponfactorymanager" file="WeaponFactoryManager.lua"/>
         <hook source="lib/managers/dialogs/keyboardinputdialog" file="KeyboardInputDialog.lua"/>
         <hook source="core/lib/utils/dev/editor/coreworlddefinition" file="CoreWorldDefinition.lua"/>

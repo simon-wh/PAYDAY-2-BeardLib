@@ -12,8 +12,8 @@ function Menu:Init()
     })
     self.panel:rect({
         name = "background",
-        halign="grow",
-        valign="grow",
+        halign = "grow",
+        valign = "grow",
         visible = self.background_color ~= nil and self.background_visible,
         color = self.background_color,
         alpha = self.background_alpha,
@@ -36,12 +36,6 @@ function Menu:Init()
 end
 
 function Menu:WorkParams()
-    local NotNilOr = function(a,b)
-        if a == nil then
-            return b
-        end
-        return a
-    end
     self.text_color = self.text_color or self.menu.text_color or Color.white
     self.text_highlight_color = self.text_highlight_color or self.menu.text_highlight_color or Color.white
     self.items_size = self.items_size or self.menu.items_size or 16
@@ -49,16 +43,16 @@ function Menu:WorkParams()
     self.marker_color = self.marker_color or self.menu.marker_color or Color.white:with_alpha(0)
     self.marker_alpha = self.marker_alpha or self.menu.marker_alpha 
     self.align = self.align or self.menu.align
-    self.background_visible = NotNilOr(self.background_visible, self.type_name == "Menu" and true or false)
+    self.background_visible = NotNil(self.background_visible, self.type_name == "Menu" and true or false)
     self.font = self.font or tweak_data.menu.pd2_large_font or tweak_data.menu.default_font
     self.offset = self.offset and self:ConvertOffset(self.offset) or self:ConvertOffset(self.menu.offset) 
-    self.override_size_limit = NotNilOr(self.override_size_limit, true)
+    self.override_size_limit = NotNil(self.override_size_limit, true)
     self.control_slice = self.control_slice or self.menu.control_slice or 2
-    self.auto_align = NotNilOr(self.auto_align, true)
+    self.auto_align = NotNil(self.auto_align, true)
     self.text_offset = self.text_offset or self.menu.text_offset or 4
     self.scroll_width = self.scroll_width or 8
-    self.automatic_height = NotNilOr(self.automatic_height, self.type_name == "Group" and true or false)
-    self.scrollbar = NotNilOr(self.scrollbar, self.automatic_height ~= true)
+    self.automatic_height = NotNil(self.automatic_height, self.type_name == "Group" and true or false)
+    self.scrollbar = NotNil(self.scrollbar, self.automatic_height ~= true)
     local w = self.menu._panel:w()
     if self.w == "full" then
         self.w = self.menu._panel:w()
@@ -89,6 +83,7 @@ function Menu:SetSize(w, h, no_recreate, temp)
     if not no_recreate then
         self:RecreateItems()
     end
+    self:MakeBorder()
 end
 
 function Menu:MouseDoubleClick(button, x, y)
@@ -241,28 +236,19 @@ function Menu:AlignItemsNormal()
     local base_h = self.type_name == "Group" and self.items_size or 0
     local h = base_h
     local rows = 1
+    local prev_item
     for i, item in ipairs(self._my_items) do
         if not item.ignore_align then
             local offset = item.offset
             item.panel:set_x(offset[1])
             item.panel:set_y(base_h + offset[2])
-            if self.row_max and i == (self.row_max * rows) + 1 then
-                if i > 1 then
-                    item.panel:set_x(self._my_items[self.row_max * rows].panel:right() + offset[1])
-                end
-                rows = rows + 1
-            else
-                if self.row_max and self._my_items[(self.row_max * (rows - 1)) + 1] then
-                    item.panel:set_x(self._my_items[(self.row_max * (rows - 1)) + 1].panel:x() + offset[1])
-                end
-                if i > 1 then
-                    item.panel:set_y(self._my_items[i - 1].panel:bottom() + offset[2])
-                end
-                if not self.row_max or i <= self.row_max then
-                    h = h + item.panel:h() + item.offset[2]
-                end
+            if alive(prev_item) then
+                item.panel:set_y(prev_item:Panel():bottom() + offset[2])
             end
-            item:Aligned()
+            if not item:Reposition() then
+                h = h + item.panel:h() + item.offset[2]
+                prev_item = item
+            end
         end
     end
     local result_h = self.closed and base_h or h
@@ -469,17 +455,14 @@ function Menu:ConfigureItem(item, menu)
         log(tostring(debug.traceback()))
         return
     end
-    local NotNilOr = function(a,b)
-        if a == nil then
-            return b
-        end
-        return a
+    if item.override_parent == self then
+        item.override_parent = nil
     end
     local inherit = item.inherit_from or item.override_parent or self
     item.parent = self
     item.menu = self.menu
-    item.enabled = NotNilOr(item.enabled, true)
-    item.visible = NotNilOr(item.visible, true)
+    item.enabled = NotNil(item.enabled, true)
+    item.visible = NotNil(item.visible, true)
     item.text_color = item.text_color or inherit.text_color
     item.text = item.text or item.text ~= false and item.name
     item.text_highlight_color = item.text_highlight_color or inherit.text_highlight_color
@@ -491,7 +474,7 @@ function Menu:ConfigureItem(item, menu)
     item.marker_alpha = item.marker_alpha or inherit.marker_alpha
     item.text_align = item.text_align or inherit.text_align or "left"
     item.text_vertical = item.text_vertical or inherit.text_vertical or "top"
-    item.size_by_text = NotNilOr(item.size_by_text, inherit.size_by_text)
+    item.size_by_text = NotNil(item.size_by_text, inherit.size_by_text)
     item.parent_panel = (item.override_parent and item.override_parent.panel) or self.items_panel
     item.offset = item.offset and self:ConvertOffset(item.offset) or inherit.offset
     item.override_size_limit = item.override_size_limit or inherit.override_size_limit
@@ -499,6 +482,7 @@ function Menu:ConfigureItem(item, menu)
     item.control_slice = item.control_slice or inherit.control_slice
     item.font = item.font or inherit.font
     item.text_offset = item.text_offset or inherit.text_offset
+    item.border_width = item.border_width or inherit.border_width or 2
     if type(item.index) == "string" then
         local split = string.split(item.index, "|")
         local wanted_item = self:GetItem(split[2] or split[1]) 

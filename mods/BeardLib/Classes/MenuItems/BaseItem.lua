@@ -11,7 +11,7 @@ end
 function BaseItem:Init() end
 
 function BaseItem:InitBasicItem()
-	local offset = math.max(self.color and 2 or 0, self.text_offset)
+	local offset = math.max(self.border_left and self.border_width or 0, self.text_offset)
 	self.title = self.panel:text({
 		name = "title",
 		x = offset,
@@ -36,12 +36,64 @@ function BaseItem:InitBasicItem()
 		valign = self.type_name ~= "Group" and "grow",
 		layer = 0
 	})
-	self.div = self.panel:rect({
-		color = self.color,
-		visible = not not self.color,
-		h = self.items_size,
-		w = 2,
-	})
+	self:MakeBorder()
+end
+
+function BaseItem:MakeBorder()
+	if not self:alive() then
+		return
+	end
+	
+	for _, v in pairs({"left", "top", "right", "bottom"}) do
+		local side = self.panel:child(v)
+		if alive(side) then
+			self.panel:remove(side)
+		end
+	end
+
+	if self.color then
+		self.border_left = NotNil(self.border_left, true)
+		self.border_color = NotNil(self.border_color, self.color)
+		self.border_lock_height = NotNil(self.border_lock_height, true)
+		self.color = nil
+	end
+
+	local opt = {
+		halign = "left",
+		valign = "top",
+		rotation = 360,
+		layer = 4,
+		color = self.border_color,
+	}
+	opt.name = "left"
+	local left = self.panel:bitmap(opt)
+	opt.name = "bottom"
+	opt.valign = "bottom"
+	local bottom = self.panel:bitmap(opt)
+	opt.name = "top"
+	opt.halign = "right"
+	local top = self.panel:bitmap(opt)
+	opt.name = "right"
+	opt.valign = "bottom"
+	local right = self.panel:bitmap(opt)
+
+	local vis = self.border_visible
+	local w,h = self.border_width, self.border_lock_height and self.items_size or self.panel:h()
+    bottom:set_size(self.panel:w(), w)
+    right:set_size(w, h)
+    top:set_size(self.panel:w(), w)
+    left:set_size(w, h)
+    bottom:set_halign("grow")
+    top:set_halign("grow")
+    bottom:set_visible(vis or self.border_bottom)
+    left:set_visible(vis or self.border_left)
+    right:set_visible(vis or self.border_right)
+    top:set_visible(vis or self.border_top)
+
+	right:set_rightbottom(self.panel:size())
+	top:set_right(self.panel:w())
+	bottom:set_bottom(self.panel:h())
+
 	self:SetText(self.text)
 end
 
@@ -71,8 +123,6 @@ function BaseItem:MouseFocused(x, y)
     if not x and not y then
         x,y = managers.mouse_pointer._mouse:world_position()
     end
-    local parent = self.override_parent or self.parent
-   --local parent_check = (parent.type_name == "MenuUI" or parent:MouseFocused(x,y))
     return self:alive() and self.panel:inside(x,y) and self:Visible()
 end
 
@@ -84,15 +134,9 @@ function BaseItem:SetParam(k,v) self[k] = v end
 function BaseItem:SetEnabled(enabled) self.enabled = enabled end
 
 --Position Func--
-function BaseItem:Aligned()
-	for _, item in pairs(self._my_items) do
-		item:Reposition()
-	end
-end
-
 function BaseItem:Reposition()
 	if not self:alive() then
-		return
+		return false
 	end
     local t = type(self.position)
     if t == "table" then
@@ -102,6 +146,7 @@ function BaseItem:Reposition()
     elseif t == "string" then
         self:SetPositionByString(self.position)
     end
+    return t ~= "nil"
 end
 
 function BaseItem:SetPosition(x,y)

@@ -23,9 +23,11 @@ function Group:InitBasicItem()
 end
 
 function Group:RePositionToggle()
-    local _,_,w,_ = self.title:text_rect()
-    if self.toggle then
-        self.toggle:set_left(w + 4)
+    if self.title then
+        local _,_,w,_ = self.title:text_rect()
+        if self.toggle then
+            self.toggle:set_left(w + 4)
+        end
     end
 end
 

@@ -1,22 +1,22 @@
 ModAssetsModule = ModAssetsModule or class(ModuleBase)
 ModAssetsModule.type_name = "AssetUpdates"
 ModAssetsModule._default_version_file = "version.txt"
+ModAssetsModule._providers = {
+    modworkshop = {
+        version_api_url = "http://manager.modworkshop.net/GetDownloadVersion/$id$.txt",
+        download_info_url = "http://manager.modworkshop.net/GetSingleDownload/$id$.json",
+        download_api_url = "http://modworkshop.net/mydownloads/downloads/$download$",
+        page_url = "http://downloads.modworkshop.net/$id$"
+    }
+}
 
 function ModAssetsModule:init(core_mod, config)
-    self.required_params = table.add(clone(self.required_params), {"id", "folder_name"})
+    self.required_params = table.add(clone(self.required_params), {"id"})
     if not self.super.init(self, core_mod, config) then
         return false
     end
 
-    self._providers = {
-        modworkshop = {
-            version_api_url = "http://manager.modworkshop.net/GetDownloadVersion/$id$.txt",
-            download_file_func = callback(self, self, "MWSDownloadAssets"),
-            download_info_url = "http://manager.modworkshop.net/GetSingleDownload/$id$.json",
-            download_api_url = "http://modworkshop.net/mydownloads/downloads/$download$",
-            page_url = "http://downloads.modworkshop.net/$id$"
-        }
-    }
+    self._providers.download_file_func = callback(self, self, "MWSDownloadAssets")
     self._providers.lastbullet = clone(self._providers.modworkshop)
 
     self.id = self._config.id
@@ -45,7 +45,7 @@ function ModAssetsModule:init(core_mod, config)
     self._version = 0
 
     self._update_manager_id = self._mod.Name .. self._name
-
+    self._mod.update_key = self.id
     self:RetrieveCurrentVersion()
 
     if not self._config.manual_check then
@@ -192,16 +192,17 @@ function ModAssetsModule:_DownloadAssets(data)
     local download_url = self._mod:GetRealFilePath(self.provider.download_api_url, data or self)
     self:log("Downloading assets from url: %s", download_url)
     managers.menu:show_download_progress( self._mod.Name .. " " .. managers.localization:text("mod_assets_title"))
-    dohttpreq( download_url, callback(self, self, "StoreDownloadedAssets"), LuaModUpdates.UpdateDownloadDialog)
+    dohttpreq( download_url, callback(self, self, "StoreDownloadedAssets", false), LuaModUpdates.UpdateDownloadDialog)
 end
 
-function ModAssetsModule:StoreDownloadedAssets(data, id)
+function ModAssetsModule:StoreDownloadedAssets(config, data, id)
+    config = config or self._config
 	local ret, pdata = pcall(function()
         LuaModUpdates:SetDownloadDialogKey("mod_download_complete", true)
-    	self:log("[INFO] Finished downloading assets")
+    	BeardLib:log("[INFO] Finished downloading assets")
 
     	if string.is_nil_or_empty(data) then
-    		self:log("[ERROR] Assets download failed, received data was invalid")
+    		BeardLib:log("[ERROR] Assets download failed, received data was invalid")
     		LuaModUpdates:SetDownloadDialogKey("mod_download_failed", true)
     		return
     	end
@@ -216,7 +217,7 @@ function ModAssetsModule:StoreDownloadedAssets(data, id)
             self:log("[ERROR] An error occured while trying to store the downloaded asset data")
             return
     	end
-        if not self._config.dont_delete then
+        if self._config and not self._config.dont_delete then
             for _, dir in pairs(self.folder_names) do
                 local path = BeardLib.Utils.Path:Combine(self.install_directory, dir)
                 if _G.file.DirectoryExists(path) then
@@ -224,15 +225,18 @@ function ModAssetsModule:StoreDownloadedAssets(data, id)
                 end
             end
         end
-        unzip(temp_zip_path, self.install_directory)
+        unzip(temp_zip_path, config.install_directory)
         LuaModUpdates:SetDownloadDialogKey("mod_extraction_complete", true)
         os.remove(temp_zip_path)
 
     	LuaModUpdates._current_download_dialog = nil
-        self:SetReady()
+        ModAssetsModule:SetReady()
+        if config.done_callback then
+            config.done_callback()
+        end
 	end)
 	if not ret then
-		self:log("[ERROR] " .. pdata)
+		BeardLib:log("[ERROR] " .. pdata)
 	end
 end
 

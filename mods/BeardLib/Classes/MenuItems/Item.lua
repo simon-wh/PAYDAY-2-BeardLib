@@ -60,14 +60,14 @@ function Item:MousePressed(button, x, y)
     end
 end
 
+function Item:SetBorder(color)
+	self.border_color = color
+	self:MakeBorder()
+end
+
 function Item:SetColor(color)
-	self.color = color
-	if color then
-		self.div:set_color(color)
-	end
-	if alive(self.div) then
-		self.div:set_visible(color ~= nil)
-	end
+	self.border_left = NotNil(self.border_left, true)
+	self:SetBorder(color)
 	self:SetText(self.text)
 end
 
@@ -77,7 +77,7 @@ function Item:SetText(text)
 		self.title:set_text(self.localized and text and managers.localization:text(text) or text)
 		local lines = math.max(1, self.title:number_of_lines()) 
 		self.panel:set_h(math.max(self.items_size * lines, self.panel:h()))
-		local offset = math.max(self.color and 2 or 0, self.text_offset)
+		local offset = math.max(self.border_left and self.border_width or 0, self.text_offset)
 		self.title:set_shape(offset, 0, self.panel:w() - offset, self.panel:h())
 		local _,_,w,h = self.title:text_rect()
 		if self.size_by_text then

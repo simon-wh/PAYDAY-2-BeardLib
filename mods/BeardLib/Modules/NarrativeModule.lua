@@ -73,6 +73,7 @@ function NarrativeModule:AddNarrativeData(narr_self)
             min_mission_xp = self._config.min_mission_xp or {0.001,0.001,0.001,0.001,0.001},
             max_mission_xp = self._config.max_mission_xp or {0.001,0.001,0.001,0.001,0.001}
         },
+        ignore_heat = true,
         allowed_gamemodes = self._config.allowed_gamemodes,
         custom = true
     }    
@@ -85,7 +86,8 @@ function NarrativeModule:AddNarrativeData(narr_self)
     narr_self.jobs[self._config.id] = data
     if #data.chain > 0 then 
         table.insert(narr_self._jobs_index, self._config.id)
-    end 
+    end
+    narr_self:set_job_wrappers()
 end
 
 function NarrativeModule:RegisterHook()

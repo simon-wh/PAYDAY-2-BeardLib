@@ -8,6 +8,19 @@ function FrameworkBase:init()
     self:Load()
 end
 
+function FrameworkBase:GetModByDir(dir)
+    return self._loaded_mods[dir]
+end
+
+function FrameworkBase:GetModByName(name)
+    for _, mod in pairs(self._loaded_mods) do
+        if mod.Name == name then
+            return mod
+        end
+    end
+    return nil
+end
+
 function FrameworkBase:LoadMod(dir, path, main_file)
 	declare("ModPath", path)
 	local success, node_obj = pcall(function() return self._mod_core:new(main_file, self.auto_init_modules) end)

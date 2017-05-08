@@ -674,3 +674,12 @@ function BeardLib.Utils.Input:MouseReleased(key) return self:Mouse():released(ke
 function BeardLib.Utils.Input:MouseTrigger(key, clbk) return self:Mouse():add_trigger(key:id(), clbk) end
 function BeardLib.Utils.Input:MouseRemoveTrigger(key) return self:Mouse():remove_trigger(key:id()) end
 function BeardLib.Utils.Input:MouseTriggerRelease(key, clbk) return self:Mouse():add_release_trigger(key:id(), clbk) end
+
+function NotNil(...)
+    local args = {...}
+    for k, v in pairs(args) do
+        if v ~= nil or k == #args then
+            return v
+        end
+    end
+end

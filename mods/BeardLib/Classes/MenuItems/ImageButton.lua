@@ -27,11 +27,7 @@ function ImageButton:InitBasicItem()
         layer = 1
     })
     self.img:set_world_center(self.panel:world_center())
-    self.div = self.panel:rect({
-        color = self.color,
-        visible = self.color ~= nil,
-        w = 2,
-    })
+    self:MakeBorder()
 end
 
 function ImageButton:SetEnabled(enabled)
