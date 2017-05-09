@@ -22,7 +22,7 @@ end
 
 function CrimeSpreeMissionModule:RegisterHook()
     if tweak_data and tweak_data.crime_spree then    
-        self:AddMissionDataToTweak(tweak_data.crime_spree)
+        self:AddMissionDataToTweak(tweak_data.crime_spree, tweak_data)
     else
         Hooks:PostHook(CrimeSpreeTweakData, "init_missions", self._config.id .. "AddMissionData", callback(self, self, "AddMissionDataToTweak"))
     end

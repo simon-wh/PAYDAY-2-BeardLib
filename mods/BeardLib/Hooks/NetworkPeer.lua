@@ -13,7 +13,14 @@ local is_custom = function()
 end
 
 local get_job_string = function()
-    return string.format("%s|%s|%s", managers.job:current_job_id(), Global.game_settings.level_id, Global.game_settings.difficulty)
+    local level_id = Global.game_settings.level_id
+    local job_id = managers.job:current_job_id()
+    local level = tweak_data.levels[level_id]
+    local str = string.format("%s|%s|%s|%s", job_id, level_id, Global.game_settings.difficulty, managers.localization:to_upper_text(level and level.name_id or ""))
+    local mod = BeardLib.managers.MapFramework:GetModByName(job_id)
+    local update_key = mod and mod.update_key
+    str = str .. (update_key and ("|" .. update_key) or "")
+    return str
 end
 
 local parse_as_lnetwork_string = function(type_prm, data)

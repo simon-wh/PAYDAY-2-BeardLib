@@ -683,3 +683,8 @@ function NotNil(...)
         end
     end
 end
+
+function SimpleClbk(func, ...)
+    local params = {...}
+    return function(...) return func(unpack(params), ...) end
+end

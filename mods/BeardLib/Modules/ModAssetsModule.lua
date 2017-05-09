@@ -75,8 +75,10 @@ function ModAssetsModule:RetrieveCurrentVersion()
         else
             self:log("[ERROR] Unable to parse version '%s' as a number. File: %s", version, self.version_file)
         end
+    elseif tonumber(self._config.version) then
+        self._version = tonumber(self._config.version)
     else
-        self:log("[ERROR] Unable to read version file for '%s's assets. File: %s", self._mod.Name, self.version_file)
+        self:log("[ERROR] Unable to get version for '%s's assets. File: %s", self._mod.Name, self.version_file)
     end
 end
 

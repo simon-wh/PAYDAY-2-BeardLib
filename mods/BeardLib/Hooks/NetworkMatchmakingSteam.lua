@@ -27,31 +27,34 @@ function NetworkMatchMakingSTEAM:_lobby_to_numbers(lobby, ...)
 	log("Received level: " .. tostring(lobby:key_value("level_id")))
 	log("Received narrative: " .. tostring(lobby:key_value("job_key")))
 	local data = orig_NetworkMatchMakingSTEAM_lobby_to_numbers(self, lobby, ...)
-	local is_key_valid = function(key)
-		return key ~= "value_missing" and key ~= "value_pending"
+	local is_key_valid = function(key) return key ~= "value_missing" and key ~= "value_pending" end
+    if is_key_valid(lobby:key_value("level_id")) or is_key_valid(lobby:key_value("job_key")) then
+        local _level_index = table.index_of(tweak_data.levels._level_index, lobby:key_value("level_id"))
+        local _job_index = table.index_of(tweak_data.narrative._jobs_index, lobby:key_value("job_key"))
+        if _level_index ~= -1 or _job_index ~= -1 then
+            local level_index = _level_index == -1 and tonumber(lobby:key_value("level")) or _level_index
+            local job_index = _job_index == -1 and tonumber(lobby:key_value("job_id")) or _job_index
+			--log("level_index: " .. tostring(level_index))
+			--log("job_index: " .. tostring(job_index))
+			data[1] = level_index + 1000 * job_index
+			return data
+		end
 	end
-
-	if is_key_valid(lobby:key_value("custom_level_name")) then
-	    if not is_key_valid(lobby:key_value("level_id")) or not is_key_valid(lobby:key_value("job_key")) then
-	        local _level_index = table.index_of(tweak_data.levels._level_index, lobby:key_value("level_id"))
-	        local _job_index = table.index_of(tweak_data.narrative._jobs_index, lobby:key_value("job_key"))
-	        if _level_index ~= -1 or _job_index ~= -1 then
-	            local level_index = _level_index == -1 and tonumber(lobby:key_value("level")) or _level_index
-	            local job_index = _job_index == -1 and tonumber(lobby:key_value("job_id")) or _job_index
-				log("level_index: " .. tostring(level_index))
-				log("job_index: " .. tostring(job_index))
-				data[1] = level_index + 1000 * job_index
-			elseif is_key_valid(lobby:key_value("level_update_key")) then
-				data[1] = 1001
-				data["level_update_key"] = lobby:key_value("level_update_key")
-				data["level_id"] = lobby:key_value("level_id")
-				data["job_key"] = lobby:key_value("job_key")
-				data["custom_level_name"] = lobby:key_value("custom_level_name")
-			else
-			 	data[1] = 0
-	        end
-	    end
-	end
+	local level_name = lobby:key_value("custom_level_name")
+	local level_update_key = lobby:key_value("level_update_key")
+	if is_key_valid(level_name) then
+		log("Received level real name: " .. tostring(level_name))
+		if is_key_valid(level_update_key) then
+			log("Received level update key: " .. tostring(level_update_key))
+			data["level_id"] = lobby:key_value("level_id")
+			data["job_key"] = lobby:key_value("job_key")
+			data["level_update_key"] = level_update_key
+			data["custom_level_name"] = level_name
+			data[1] = 1001
+		else
+		 	data[1] = 0
+        end
+    end
 	return data
 end
 
@@ -60,44 +63,17 @@ Hooks:PostHook(NetworkMatchMakingSTEAM, "_call_callback", "BeardLibSearchLobbyFi
 		local attribute_list = info.attribute_list
 		for i, room in ipairs(info.room_list) do
 			local numbers = attribute_list[i].numbers
+			local state_string_id = tweak_data:index_to_server_state(numbers[4])
+			local state_name = state_string_id and managers.localization:text("menu_lobby_server_state_" .. state_string_id) or "UNKNOWN"
 			if numbers.level_update_key then
 				local comp = managers.menu_component
 				local cmgui = comp and comp._crimenet_gui
-				local state_string_id = tweak_data:index_to_server_state(numbers[4])
-				local difficulty_id = numbers[2]
-				local is_friend = false
-				if Steam:logged_on() and Steam:friends() then
-					for _, friend in ipairs(Steam:friends()) do
-						if friend:id() == room.owner_id then
-							is_friend = true
-						end
-					end
-				end
 				if cmgui and cmgui._jobs and cmgui._jobs[room.room_id] then
-					cmgui._jobs[room.room_id].job_id = nil
-					cmgui._jobs[room.room_id].level_id = nil
-					local level_name = "Custom Heist: "..tostring(numbers.custom_level_name)
-					comp:update_crimenet_server_job({
-						room_id = room.room_id,
-						id = room.room_id,
-						difficulty = tweak_data:index_to_difficulty(difficulty_id),
-						difficulty_id = difficulty_id,
-						num_plrs = numbers[5],
-						host_name = tostring(room.owner_name),
-						state_name = state_string_id and managers.localization:text("menu_lobby_server_state_" .. state_string_id) or "UNKNOWN",
-						state = numbers[4],
-						is_friend = is_friend,
-						kick_option = numbers[8],
-						job_plan = numbers[10],
-						mutators = numbers.mutators,
-						is_crime_spree = numbers.crime_spree and 0 <= numbers.crime_spree,
-						crime_spree = numbers.crime_spree,
-						crime_spree_mission = numbers.crime_spree_mission,
-						custom = true,
-						level_name = level_name,
-					})
-					cmgui._jobs[room.room_id].update_key = numbers.level_update_key
-					cmgui._jobs[room.room_id].level_name = level_name
+					local job = cmgui._jobs[room.room_id]
+					job.update_key = numbers.level_update_key
+					job.level_name = tostring(numbers.custom_level_name)
+					job.state_name = state_name
+					cmgui:change_to_custom_job_gui(job)
 				end
 			end
 		end
@@ -106,7 +82,7 @@ end)
 
 -- BEARDLIB API ADDITIONS --
 
-Hooks:Add(seta_hook, "BeardLibCorrectCustomHeist", function( self, new_data, settings, ... )
+Hooks:Add(seta_hook, "BeardLibCorrectCustomHeist", function(self, new_data, settings, ...)
 	self.lobby_handler:delete_lobby_data("level_id")
 	self.lobby_handler:delete_lobby_data("job_key")
 
