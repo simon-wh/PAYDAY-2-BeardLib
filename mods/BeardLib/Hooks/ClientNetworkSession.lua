@@ -38,7 +38,7 @@ Hooks:PreHook(ClientNetworkSession, "on_join_request_reply", "BeardLib_on_join_r
                     end
                 end
                 if tweak_data.levels[split_data[2]] then
-                    continue_load({...})
+                    continue_load({...}, true)
                 else
                     local update_key = tonumber(split_data[5])
                     local level_name = split_data[4]

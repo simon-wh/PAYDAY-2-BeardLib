@@ -38,8 +38,8 @@ function CrimeNetGui:change_to_custom_job_gui(job)
 	local difficulty_stars = job.difficulty_id - 2
 	local num_difficulties = Global.SKIP_OVERKILL_290 and 5 or 6
 	for i = 1, num_difficulties do
-		stars_panel:clear()
 		local stars_panel = panel:child("stars_panel")
+		stars_panel:clear()
 		stars_panel:bitmap({
 			texture = "guis/textures/pd2/cn_miniskull",
 			x = x,
