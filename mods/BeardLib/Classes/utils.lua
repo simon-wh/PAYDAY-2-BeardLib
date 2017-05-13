@@ -665,15 +665,15 @@ function BeardLib.Utils.Input:Mouse() return Input:mouse() end
 --Keyboard
 function BeardLib.Utils.Input:Down(key) return self:Keyboard():down(key:id()) end
 function BeardLib.Utils.Input:Released(key) return self:Keyboard():released(key:id()) end
-function BeardLib.Utils.Input:Trigger(key, clbk) return self:Keyboard():add_trigger(key:id(), clbk) end
+function BeardLib.Utils.Input:Trigger(key, clbk) return self:Keyboard():add_trigger(key:id(), SafeClbk(clbk)) end
 function BeardLib.Utils.Input:RemoveTrigger(key) return self:Keyboard():remove_trigger(key:id()) end
-function BeardLib.Utils.Input:TriggerRelease(key, clbk) return self:Keyboard():add_release_trigger(key:id(), clbk) end
+function BeardLib.Utils.Input:TriggerRelease(key, clbk) return self:Keyboard():add_release_trigger(key:id(), SafeClbk(clbk)) end
 --Mouse
 function BeardLib.Utils.Input:MouseDown(key) return self:Mouse():down(key:id()) end
 function BeardLib.Utils.Input:MouseReleased(key) return self:Mouse():released(key:id()) end
-function BeardLib.Utils.Input:MouseTrigger(key, clbk) return self:Mouse():add_trigger(key:id(), clbk) end
+function BeardLib.Utils.Input:MouseTrigger(key, clbk) return self:Mouse():add_trigger(key:id(), SafeClbk(clbk)) end
 function BeardLib.Utils.Input:MouseRemoveTrigger(key) return self:Mouse():remove_trigger(key:id()) end
-function BeardLib.Utils.Input:MouseTriggerRelease(key, clbk) return self:Mouse():add_release_trigger(key:id(), clbk) end
+function BeardLib.Utils.Input:MouseTriggerRelease(key, clbk) return self:Mouse():add_release_trigger(key:id(), SafeClbk(clbk)) end
 
 function NotNil(...)
     local args = {...}
@@ -687,4 +687,17 @@ end
 function SimpleClbk(func, ...)
     local params = {...}
     return function(...) return func(unpack(params), ...) end
+end
+
+function SafeClbk(func, ...)
+    local params = {...}
+    return function(...)
+        local ret
+        local p = {...}
+        local _, err = pcall(function() ret = func(unpack(params), unpack(p)) end)
+        if err then
+            log(tostring( err.code ))
+        end
+        return ret
+    end
 end

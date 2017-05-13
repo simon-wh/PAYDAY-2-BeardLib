@@ -9,7 +9,7 @@ function ColorDialog:create_items(params, menu)
     params.background_alpha = params.background_alpha or 0.6
     params.override_size_limit = true
     params.visible = true
-    params.w = 400
+    params.w = 420
     params.offset = 8
     params.automatic_height = true
     params.items_size = 20
@@ -25,6 +25,8 @@ function ColorDialog:Show(params)
     self._menu:ClearItems()
     local preview = self._menu:Divider({
         name = "ColorPreview",
+        text = "",
+        items_size = 32,
         offset = 0,
         marker_color = self._params.color,
     })

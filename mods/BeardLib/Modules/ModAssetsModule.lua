@@ -16,7 +16,7 @@ function ModAssetsModule:init(core_mod, config)
         return false
     end
 
-    self._providers.download_file_func = callback(self, self, "MWSDownloadAssets")
+    self._providers.modworkshop.download_file_func = callback(self, self, "MWSDownloadAssets")
     self._providers.lastbullet = clone(self._providers.modworkshop)
 
     self.id = self._config.id
@@ -193,8 +193,8 @@ end
 function ModAssetsModule:_DownloadAssets(data)
     local download_url = self._mod:GetRealFilePath(self.provider.download_api_url, data or self)
     self:log("Downloading assets from url: %s", download_url)
-    managers.menu:show_download_progress( self._mod.Name .. " " .. managers.localization:text("mod_assets_title"))
-    dohttpreq( download_url, callback(self, self, "StoreDownloadedAssets", false), LuaModUpdates.UpdateDownloadDialog)
+    managers.menu:show_download_progress(self._mod.Name .. " " .. managers.localization:text("mod_assets_title"))
+    dohttpreq(download_url, callback(self, self, "StoreDownloadedAssets", false), LuaModUpdates.UpdateDownloadDialog)
 end
 
 function ModAssetsModule:StoreDownloadedAssets(config, data, id)
@@ -227,7 +227,7 @@ function ModAssetsModule:StoreDownloadedAssets(config, data, id)
                 end
             end
         end
-        unzip(temp_zip_path, config.install_directory)
+        unzip(temp_zip_path, config.install_directory or self.install_directory)
         LuaModUpdates:SetDownloadDialogKey("mod_extraction_complete", true)
         os.remove(temp_zip_path)
 
@@ -245,7 +245,7 @@ end
 function ModAssetsModule:MWSDownloadAssets()
     local download_info_url = self._mod:GetRealFilePath(self.provider.download_info_url, self)
 
-    dohttpreq( download_info_url,
+    dohttpreq(download_info_url,
         function(data, id)
             local ret, d_data = pcall(function() return json.decode(data) end)
             if ret then

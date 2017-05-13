@@ -58,14 +58,14 @@ end
 
 function MenuUI:ShowDelayedHelp(item)
     DelayedCalls:Add("ShowItemHelp", self.show_help_time or 1, function()
-        if self._highlighted == item then
+        if self._highlighted == item and not self:Typing() then
             help_text = self._help:child("text")
             help_text:set_w(300)
             help_text:set_text(item.help)
             local _,_,w,h  = help_text:text_rect()
             w = math.min(w, 300)
             self._help:set_size(w + 8, h + 8)
-            help_text:set_shape(4, 4, w, h)
+            help_text:set_shape(4, 4, w + 0.00001, h)
 
             local mouse = managers.mouse_pointer:mouse()
             local mouse_p = mouse:parent()
@@ -82,6 +82,13 @@ function MenuUI:ShowDelayedHelp(item)
             self._showing_help = true
         end
     end)
+end
+
+function MenuUI:HideHelp()
+    if self._showing_help then
+        QuickAnim:Stop(self._help)
+        self._help:set_alpha(0)
+    end
 end
 
 function MenuUI:Menu(params)
@@ -128,7 +135,7 @@ function MenuUI:RunToggleClbk()
     end           
 end
 
-function MenuUI:toggle()
+function MenuUI:Toggle()
     if not self:Enabled() then
         self:enable()
         if self.toggle_clbk then
@@ -139,7 +146,7 @@ function MenuUI:toggle()
         if self.toggle_clbk then
             self.toggle_clbk(self:Enabled())
         end
-    end        
+    end
 end
 
 function MenuUI:KeyReleased(o, k)
@@ -212,6 +219,7 @@ function MenuUI:MouseDoubleClick(o, button, x, y)
 end
 
 function MenuUI:MousePressed(o, button, x, y)
+    self:HideHelp()
     if self.always_mouse_press then self.always_mouse_press(button, x, y) end
     if self._openlist then
         if self._openlist.parent:Visible() then
@@ -248,10 +256,7 @@ function MenuUI:ShouldClose()
 end
 
 function MenuUI:MouseMoved(o, x, y)
-    if self._showing_help then
-        QuickAnim:Stop(self._help)
-        self._help:set_alpha(0)
-    end
+    self:HideHelp()
     if self.always_mouse_move then self.always_mouse_move(x, y) end
     if self._openlist then
         if self._openlist.parent:Visible() then
@@ -307,9 +312,15 @@ function MenuUI:Focused()
     return false
 end
 
+function MenuUI:Typing()
+    return self._highlighted and self._highlighted._textbox and self._highlighted._textbox.cantype
+end
+
 --Deprecated Functions--
 function MenuUI:SwitchMenu(menu)
-    self._current_menu:SetVisible(false)
+    if self._current_menu then
+        self._current_menu:SetVisible(false)
+    end
     menu:SetVisible(true)
     self._current_menu = menu
 end
@@ -317,3 +328,4 @@ end
 function MenuUI:NewMenu(params) return self:Menu(params) end
 function MenuUI:enable() return self:Enable() end
 function MenuUI:disable() return self:Disable() end
+function MenuUI:toggle() return self:Toggle() end

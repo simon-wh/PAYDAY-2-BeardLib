@@ -184,6 +184,9 @@ function Menu:SetVisible(visible)
 end
 
 function Menu:AlignItemsGrid()
+    if not self:alive() then
+        return
+    end
     local max_h = self.items_size
     local base_h = self.items_size
     local max_offset = self.offset[2]
@@ -213,8 +216,7 @@ function Menu:AlignItemsGrid()
     if self.automatic_height and self.h ~= result_h then
         self:SetSize(nil, result_h, true, self.type_name == "Group")
     end
-    self._scroll:update_canvas_size()
-    self:CheckItems()
+    self:UpdateCanvas(max_offset)
 end
 
 
@@ -251,11 +253,19 @@ function Menu:AlignItemsNormal()
             end
         end
     end
-    local result_h = self.closed and base_h or h
+    local last_offset = (prev_item and prev_item.offset[2] or 0)
+    local result_h = self.closed and base_h or h + last_offset
     if self.automatic_height and self.h ~= result_h then
         self:SetSize(nil, result_h, true, self.type_name == "Group")
     end
+    self:UpdateCanvas(last_offset)
+end
+
+function Menu:UpdateCanvas(offset)
     self._scroll:update_canvas_size()
+    if self._scroll:canvas():h() > self._scroll:scroll_panel():h() then
+        self._scroll:set_canvas_size(nil, self._scroll:canvas():h() + offset)
+    end
     self:CheckItems()
 end
 

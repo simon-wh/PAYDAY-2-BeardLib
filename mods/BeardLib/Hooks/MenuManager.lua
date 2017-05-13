@@ -24,7 +24,9 @@ end
 
 core:import("SystemMenuManager")
 Hooks:PostHook(SystemMenuManager.GenericSystemMenuManager, "event_dialog_shown", "BeardLibEventDialogShown", function(self)
-    BeardLib.IgnoreDialogOnce = true
+    if BeardLib.DialogOpened then
+        BeardLib.IgnoreDialogOnce = true
+    end
 end)
 
 function MenuCallbackHandler:start_job(job_data)
