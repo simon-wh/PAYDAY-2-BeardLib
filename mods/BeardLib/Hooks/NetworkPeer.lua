@@ -32,19 +32,13 @@ local peer_send_hook = "NetworkPeerSend"
 Hooks:Register(peer_send_hook)
 
 Hooks:Add(peer_send_hook, "BeardLibCustomHeistFix", function(self, func_name, params)
-    if self ~= managers.network:session():local_peer() then
-        if func_name == "sync_game_settings" then
-	        if is_custom() then
-				orig_NetworkPeer_send(self, "send_chat_message", LuaNetworking.HiddenChannel, parse_as_lnetwork_string(sync_game_settings_id, get_job_string()))
-	            return
-	        end
+    if self ~= managers.network:session():local_peer() and is_custom() then
+        if func_name == "sync_game_settings" or func_name == "sync_lobby_data" or func_name == "lobby_sync_update_level_id" then
+            orig_NetworkPeer_send(self, "send_chat_message", LuaNetworking.HiddenChannel, parse_as_lnetwork_string(sync_game_settings_id, get_job_string()))
 	    elseif func_name == "sync_stage_settings" then
-	        if is_custom() then
-				orig_NetworkPeer_send(self, "send_chat_message", LuaNetworking.HiddenChannel, parse_as_lnetwork_string(sync_stage_settings_id, string.format("%s|%s|%s|%s", Global.game_settings.level_id, tostring(self._global.current_job.current_stage), tostring(self._global.alternative_stage or 0), tostring(self._global.interupt_stage))))
-	            return
-	        end
+            orig_NetworkPeer_send(self, "send_chat_message", LuaNetworking.HiddenChannel, parse_as_lnetwork_string(sync_stage_settings_id, string.format("%s|%s|%s|%s", Global.game_settings.level_id, tostring(self._global.current_job.current_stage), tostring(self._global.alternative_stage or 0), tostring(self._global.interupt_stage))))
 		elseif string.ends(func_name,"join_request_reply") then
-            if params[1] == 1 and is_custom() then
+            if params[1] == 1 then
                 params[14] = get_job_string()
             end
         end

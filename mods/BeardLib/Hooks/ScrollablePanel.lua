@@ -17,24 +17,25 @@ function ScrollablePanelModified:init(panel, name, data)
 		self:panel():child("scroll_up_indicator_shade"):hide()
 		self:panel():child("scroll_down_indicator_shade"):hide()
 	end
-	self:set_scroll_color(data.scroll_color)
+	self:set_scroll_color(data.color)
 end
 
 function ScrollablePanelModified:set_scroll_color(color)
 	color = color or Color.white
 	local function set_boxgui_img(pnl)
 		for _, child in pairs(pnl:children()) do
-			if CoreClass.type_name(child) == "Panel" then
+			local typ = CoreClass.type_name(child)
+			if typ == "Panel" then
 				set_boxgui_img(child)
-			elseif CoreClass.type_name(child) == "Bitmap" and child:texture_name() == Idstring("guis/textures/pd2/shared_lines") then
-				child:set_image("units/white_df")
+			elseif typ == "Bitmap" then
+				if child:texture_name() == Idstring("guis/textures/pd2/shared_lines") then
+					child:set_image("units/white_df")
+				end
 				child:set_color(color)
 			end
 		end
 	end
-	set_boxgui_img(self:panel():child("scroll_up_indicator_shade"))
-	set_boxgui_img(self:panel():child("scroll_down_indicator_shade"))
-	set_boxgui_img(self._scroll_bar_box_class._panel)
+	set_boxgui_img(self:panel())
 end
 
 function ScrollablePanelModified:set_size(...)

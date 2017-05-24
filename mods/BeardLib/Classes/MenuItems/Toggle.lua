@@ -16,7 +16,9 @@ end
 
 function Toggle:SetEnabled(enabled)
 	self.super.SetEnabled(self, enabled)
-	self.toggle:set_alpha(enabled and 1 or 0.5)
+	if self.toggle and self:alive() then
+		self.toggle:set_alpha(enabled and 1 or 0.5)
+	end
 end
 
 function Toggle:SetValue(value, run_callback)

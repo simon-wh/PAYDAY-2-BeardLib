@@ -6,7 +6,7 @@ function CrewManagementGui:populate_primaries(i, data, ...)
         local fac_id = managers.weapon_factory:get_factory_id_by_weapon_id(v.name)
         if fac_id then
             local factory = tweak_data.weapon.factory[fac_id.."_npc"]
-            if factory and factory.custom and not PackageManager:has(Idstring("unit"), factory.unit:id()) then
+            if factory and factory.custom and not DB:has(Idstring("unit"), factory.unit:id()) then
                 v.buttons = {} 
                 v.unlocked = false
                 v.lock_texture = "guis/textures/pd2/lock_incompatible"

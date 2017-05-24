@@ -13,17 +13,29 @@ function Item:Init()
 		self.title:set_world_center_y(self.panel:world_center_y())
 	end
 	self._my_items = {}
-	self.override_parent = self.override_parent
 	self:Reposition()
     if self.items then
 		self._list = ContextMenu:new(self, 20) 
     end
 end
 
+function Item:Get2ndBackground(color)
+	return (color or self.background_color or Color.white):contrast(Color(0.85, 0.85, 0.85), Color(0.15, 0.15, 0.15))
+end
+
 function Item:SetEnabled(enabled)
+	if not self.visible then
+		enabled = false
+	end
 	Item.super.SetEnabled(self, enabled)
 	if self.title then
 		self.title:set_alpha(enabled and 1 or 0.5)
+	end
+	for _, v in pairs({"left", "top", "right", "bottom"}) do
+		local side = self.panel:child(v)
+		if alive(side) then
+			side:set_alpha(enabled and 1 or 0.5)
+		end
 	end
 end
 
@@ -60,19 +72,23 @@ function Item:MousePressed(button, x, y)
     end
 end
 
-function Item:SetBorder(color)
-	self.border_color = color
+function Item:SetBorder(config)
+	self.border_color = NotNil(config.color, self.border_color)
+	self.border_left = NotNil(config.left, self.border_left)
+	self.border_right = NotNil(config.right, self.border_right)
+	self.border_top = NotNil(config.top, self.border_top)
+	self.border_bottom = NotNil(config.bottom, self.border_bottom)
 	self:MakeBorder()
 end
 
 function Item:SetColor(color)
 	self.border_left = NotNil(self.border_left, true)
-	self:SetBorder(color)
+	self:SetBorder({color = color})
 	self:SetText(self.text)
 end
 
 function Item:SetText(text)
-	if self.title then
+	if self:alive() and self.title then
 		self.text = text
 		self.title:set_text(self.localized and text and managers.localization:text(text) or text)
 		local lines = math.max(1, self.title:number_of_lines()) 
@@ -80,17 +96,31 @@ function Item:SetText(text)
 		local offset = math.max(self.border_left and self.border_width or 0, self.text_offset)
 		self.title:set_shape(offset, 0, self.panel:w() - offset, self.panel:h())
 		local _,_,w,h = self.title:text_rect()
+		self.title:set_h(h)
 		if self.size_by_text then
 			self.panel:set_size(w + (offset * 2) + (self.type_name == "Toggle" and self.items_size or 0), h)
 			self.w, self.h = self.panel:size()
 			self.title:set_shape(offset, 0, w, h)
 		end
+		if self.SetSize then
+			self:SetSize(nil, nil, true)
+		end
+		return true
 	end
+	return false
 end
 
 function Item:DoHighlight(highlight)
-	self.bg:set_color(highlight and self.marker_highlight_color or self.marker_color)
+	if self.bg then self.bg:set_color(highlight and self.marker_highlight_color or self.marker_color) end
 	if self.title then self.title:set_color(highlight and self.text_highlight_color or self.text_color) end
+	if self.border_highlight_color then
+		for _, v in pairs({"left", "top", "right", "bottom"}) do
+			local side = self.panel:child(v)
+			if alive(side) and side:visible() then
+				side:set_color(highlight and self.border_highlight_color or self.border_color)
+			end
+		end
+	end
 end
 
 function Item:Highlight()

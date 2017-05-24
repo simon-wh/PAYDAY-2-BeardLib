@@ -1,5 +1,11 @@
 MenuUI = MenuUI or class()
 function MenuUI:init(params)
+    if not managers.gui_data then
+        Hooks:Add("SetupInitManagers", "CreateMenuUI"..tostring(self), function()
+            self:init(params)
+        end)
+        return
+    end
     table.merge(self, params)
     self.type_name = "MenuUI"
     self.layer = self.layer or 200 --Some fucking layer that is higher than most vanilla menus
@@ -13,11 +19,15 @@ function MenuUI:init(params)
     self._panel:key_press(callback(self, self, "KeyPressed"))
     self._panel:key_release(callback(self, self, "KeyReleased"))
 
-    self._panel:rect({
+    self._panel:bitmap({
         name = "bg",
         halign = "grow",
         valign = "grow",
-        visible = self.background_color ~= nil,
+        visible = self.background_blur ~= nil or self.background_color ~= nil,
+        render_template = self.background_blur and "VertexColorTexturedBlur3D",
+        texture = self.background_blur and "guis/textures/test_blur_df",
+        w = self.background_blur and self._panel:w(),
+        h = self.background_blur and self._panel:h(),
         color = self.background_color,
         alpha = self.background_alpha,
     })
@@ -44,24 +54,25 @@ function MenuUI:init(params)
     self._menus = {}
 	if self.visible == true and managers.mouse_pointer then self:enable() end
 
-    BeardLib:AddUpdater("MenuUIUpdate"..tostring(self), function()
-        local x,y = managers.mouse_pointer:world_position()
-        if self._slider_hold then self._slider_hold:SetValueByMouseXPos(x) end
-        self._old_x = x
-        self._old_y = y
-    end, true)
+    BeardLib:AddUpdater("MenuUIUpdate"..tostring(self), callback(self, self, "Update"), true)
 
     local texture = "guis/textures/menuicons"
     FileManager:AddFile("texture", texture, BeardLib.Utils.Path:Combine(BeardLib.config.assets_dir, texture .. ".texture"))
-    if self.create_items then self.create_items(self) end
+    if self.create_items then self:create_items() end
 end
 
 function MenuUI:ShowDelayedHelp(item)
-    DelayedCalls:Add("ShowItemHelp", self.show_help_time or 1, function()
+    DelayedCalls:Add("ShowItemHelp"..tostring(item), self.show_help_time or 1, function()
+        if self._showing_help and (self._old_x ~= self._saved_help_x or self._old_y ~= self._saved_help_y) then
+            self._saved_help_x = self._old_x
+            self._saved_help_y = self._old_y
+            self:HideHelp()
+            return
+        end
         if self._highlighted == item and not self:Typing() then
             help_text = self._help:child("text")
             help_text:set_w(300)
-            help_text:set_text(item.help)
+            help_text:set_text(item.help_localized and managers.localization:text(item.help) or item.help)
             local _,_,w,h  = help_text:text_rect()
             w = math.min(w, 300)
             self._help:set_size(w + 8, h + 8)
@@ -80,6 +91,8 @@ function MenuUI:ShowDelayedHelp(item)
             end
             QuickAnim:Work(self._help, "alpha", 1, "speed", 3)
             self._showing_help = true
+            self._saved_help_x = self._old_x
+            self._saved_help_y = self._old_y
         end
     end)
 end
@@ -149,11 +162,19 @@ function MenuUI:Toggle()
     end
 end
 
+function MenuUI:Update()
+    local x,y = managers.mouse_pointer:world_position()
+    if self._slider_hold then self._slider_hold:SetValueByMouseXPos(x) end
+    self._old_x = x
+    self._old_y = y
+end
+
 function MenuUI:KeyReleased(o, k)
+    self._scroll_hold = nil
+    self._key_pressed = nil   
     if not self:Enabled() then
         return
     end
-	self._key_pressed = nil
     if self.key_released then
         self.key_release(o, k)
     end
@@ -178,10 +199,14 @@ function MenuUI:KeyPressed(o, k)
     if not self:Enabled() then
         return
     end
-    if self._highlighted and self._highlighted.parent:Visible() then
-        self._highlighted:KeyPressed(o, k) 
+    if self._highlighted and self._highlighted.parent:Visible() and self._highlighted:KeyPressed(o, k) then
         return 
-    end   
+    end 
+    for _, menu in pairs(self._menus) do
+        if menu:KeyPressed(o, k) then
+            return
+        end
+    end 
     if self.key_press then
         self.key_press(o, k)
     end
@@ -256,7 +281,6 @@ function MenuUI:ShouldClose()
 end
 
 function MenuUI:MouseMoved(o, x, y)
-    self:HideHelp()
     if self.always_mouse_move then self.always_mouse_move(x, y) end
     if self._openlist then
         if self._openlist.parent:Visible() then
@@ -280,10 +304,15 @@ function MenuUI:MouseMoved(o, x, y)
     if self.mouse_move then self.mouse_move(x, y) end
 end
 
-function MenuUI:GetMenu(name)
+function MenuUI:GetMenu(name, shallow)
     for _, menu in pairs(self._menus) do
         if menu.name == name then
             return menu
+        elseif not shallow then
+            local item = menu:GetMenu(name)
+            if item and item.name then
+                return item
+            end
         end
     end
     return false
@@ -305,8 +334,8 @@ end
 
 function MenuUI:Focused()
 	for _, menu in pairs(self._menus) do
-		if menu:Focused() then
-            return true
+		if menu:Visible() then
+            return self._highlighted
         end
 	end
     return false

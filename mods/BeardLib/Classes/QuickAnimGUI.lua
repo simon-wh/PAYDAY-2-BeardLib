@@ -16,6 +16,7 @@ function QuickAnim:Work(o, ...)
     local opt = {
         speed = 1,
         stop = false,
+        wait = false,
         after = function() end,
         before = function() end,
         callback = function() end
@@ -34,19 +35,24 @@ function QuickAnim:Work(o, ...)
         o:stop()
         anim_tbl.stop = nil
     end
-    o:script().animating = tbl 
-    o:animate(function()
-        local mys = {}
+    o:script().animating = tbl
+    local abs = math.abs
+    local step = math.step
+    o:animate(function(o)
+        local speeds = {}           
+        if opt.wait then
+            wait(opt.wait)
+        end
         while not done do
             for _, anim in pairs(anim_tbl) do 
                 for k,v in pairs(anim) do
                     local cv = o[k](o)
-                    mys[k] = mys[k] or (math.abs(cv - v) * opt.speed)
-                    mys[k] = mys[k] < 1 and 1 or mys[k]
-                    opt.before()
-                    o["set_"..k](o, math.step(cv, v, self:dt() * mys[k]))
-                    opt.after()
-                    done = o[k](o) == v 
+                    speeds[k] = speeds[k] or (abs(cv - v) * opt.speed)
+                    speeds[k] = speeds[k] < 1 and 1 or speeds[k]
+                    opt.before(o)
+                    o["set_"..k](o, step(cv, v, self:dt() * speeds[k]))
+                    opt.after(o)
+                    done = o[k](o) == v
                 end
             end
         end
@@ -55,10 +61,25 @@ function QuickAnim:Work(o, ...)
                 o["set_"..k](o, v)    
             end
         end
-        opt.before()
-        opt.after()
+        opt.before(o)
+        opt.after(o)
         o:script().animating = nil
-        opt.callback()
+        opt.callback(o)
+    end)
+end
+
+function QuickAnim:LightWork(o, nv, cv, nv, speed)
+    o:animate(function(o)
+        o:script().animating = {}
+        local done
+        local speed = speed and (abs(cv - v) * opt.speed) or 1
+        speed = speed < 1 and 1 or speed
+        while not done do
+            local current_value = cv()
+            local v = step(current_value, nv, self:dt() * speed)
+            nv(v)
+            done = cv() == v
+        end
     end)
 end
 
@@ -67,7 +88,11 @@ function QuickAnim:Stop(o)
     o:script().animating = false
 end
 
-function QuickAnim:WorkColor(o, color, speed, clbk)
+function QuickAnim:Working(o)
+    return o:script().animating
+end
+
+function QuickAnim:WorkColor(o, color, clbk, speed)
     o:animate(function()
         speed = speed or 5
         while o:color() ~= color do

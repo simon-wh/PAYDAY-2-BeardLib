@@ -11,14 +11,15 @@ function Slider:Init()
     self.min = self.min or 0
     self.max = self.max or self.min
     local item_width = self.panel:w() / self.control_slice
+    local bgcolor = self:Get2ndBackground()
 	local slider_bg = self.panel:rect({
         name = "slider_bg",
         w = item_width,
-        layer = 1,
-        color = ((self.parent.background_color or Color.white) / 1.2):with_alpha(1),
+        layer = 2,
+        color = bgcolor,
     })
     self._textbox = TextBoxBase:new(self, {
-        text_color = not self.parent.background_color and Color.black,
+        text_color = bgcolor:contrast(),
         lines = 1,
         btn = "1",
         panel = self.panel,
@@ -31,9 +32,8 @@ function Slider:Init()
         name = "slider",
         x = self._textbox.panel:x(),
         w = item_width * (self.value / self.max),
-        h = slider_bg:h(),
-        layer = 2,
-        color = self.parent.marker_highlight_color / 1.4
+        layer = 1,
+        color = self.slider_color or self:Get2ndBackground(bgcolor)
     })
     slider_bg:set_x(self._textbox.panel:x())
     self._mouse_pos_x, self._mouse_pos_y = 0,0
@@ -41,8 +41,10 @@ end
 
 function Slider:SetEnabled(enabled)
     self.super.SetEnabled(self, enabled)
-    self.panel:child("slider_bg"):set_alpha(enabled and 1 or 0.5)
-    self._textbox.panel:child("text"):set_alpha(enabled and 1 or 0.5)
+    if self._textbox and self:alive() then
+        self.panel:child("slider_bg"):set_alpha(enabled and 1 or 0.5)
+        self._textbox.panel:child("text"):set_alpha(enabled and 1 or 0.5)
+    end
 end
 
 function Slider:SetStep(step)

@@ -15,16 +15,19 @@ function TextBoxBase:init(parent, params)
 		h = params.h or params.items_size,
         layer = 4
 	})
-	self.panel:set_right(params.panel:w() - 1)
-	self.panel:rect({
+	self.panel:set_right(params.panel:w())
+    self.line_color = params.line_color
+    self.text_color = params.text_color or parent.text_color or self.parent.text_color
+    self.text_highlight_color = params.text_highlight_color or parent.text_highlight_color or self.parent.text_highlight_color
+	local line = self.panel:rect({
         name = "line",
 		halign = "grow",
 		visible = params.line,
         h = 1,
         layer = 2,
-        color = params.marker_highlight_color or parent.marker_highlight_color or self.parent.marker_highlight_color,
-    }):set_bottom(self.panel:h())
-    local text_color = params.text_color or parent.text_color
+        color = self.line_color or self.text_color,
+    })
+    line:set_bottom(self.panel:h())
     local text = self.panel:text({
         name = "text",
         text = params.value and (parent.filter == "number" and string.format("%." .. parent.floats .. "f", tonumber(params.value)) or tostring(params.value)) or "",
@@ -32,18 +35,18 @@ function TextBoxBase:init(parent, params)
         wrap = not params.lines or params.lines > 1,
         word_wrap = not params.lines or params.lines > 1,
         h = self.panel:h() - 2,
-        color = text_color,
-        selection_color = params.text_selection_color or (text_color / 1.5):with_alpha(1),
+        color = self.text_color,
+        selection_color = self.text_color:with_alpha(0.5), --I fucking wish there was something better..
         font = parent.parent.font or "fonts/font_large_mf",
         font_size = self.items_size - 2
     })
     text:set_selection(text:text():len())
     local caret = self.panel:rect({
         name = "caret",
-        w = 1,
+        w = 2,
         visible = false,
         color = text:color():with_alpha(1),
-        h = self.items_size - 2,
+        h = text:font_size() - (line:h() * 2),
         layer = 3,
     })
 	self.lines = params.lines
@@ -52,6 +55,15 @@ function TextBoxBase:init(parent, params)
  	text:enter_text(callback(self, TextBoxBase, "enter_text"))
  	self.update_text = params.update_text or function(self, ...) self._parent:_SetValue(...) end
     self:update_caret()
+end
+
+function TextBoxBase:DoHighlight(highlight)
+    local color = highlight and self.text_highlight_color or self.text_color
+    local line = self.panel:child("line")
+    local text = self.panel:child("text")
+    line:set_color(self.line_color or color)
+    text:set_color(color)
+    self.panel:child("caret"):set_color(text:color():with_alpha(1))
 end
 
 function TextBoxBase:CheckText(text)
@@ -233,8 +245,10 @@ function TextBoxBase:update_caret()
             x = x + text:w() / 2
         end
     end
-    self.panel:child("caret"):set_world_position(x, y + 1)
-    self.panel:child("caret"):set_visible(self.cantype)
+    local caret = self.panel:child("caret")
+    caret:set_world_position(x, y + 1)
+    caret:set_visible(self.cantype)
+    caret:set_color(text:color():with_alpha(1))
     self.caret_visible = self.cantype
 end
 

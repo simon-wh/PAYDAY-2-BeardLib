@@ -62,6 +62,8 @@ function fm:Process(ids_ext, ids_path, name_mt)
 						else
 							fm.process_modes[mdata.mode](data, new_data)
 						end
+					elseif FileIO:Exists(mdata.file) then
+						BeardLib:log("[ERROR] Failed reading file '%s', are you trying to load a file with different format?", mdata.file)
 					else
 						BeardLib:log("[ERROR] The file '%s' does not exist!", mdata.file)
 					end

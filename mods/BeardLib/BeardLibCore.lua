@@ -68,7 +68,7 @@ if not _G.BeardLib then
 		self:RegisterTweak()
 	end
 
-	function self:AddUpdater(id, clbk, pasued)
+	function self:AddUpdater(id, clbk, paused)
 		self._updaters[id] = clbk
 		if paused then
 			self._paused_updaters[id] = clbk
@@ -198,8 +198,13 @@ if not _G.BeardLib then
 				manager:update(t, dt)
 			end
 		end
-		for _, clbk in pairs(self._updaters) do
-			clbk()
+		for id, clbk in pairs(self._updaters) do
+			local success, e = pcall(function()
+				clbk()
+			end)
+			if not success then
+				BeardLib:log("[Updater-ERROR(%s)] " .. tostring(e.code), tostring(id))
+			end
 		end
 	end
 
@@ -209,8 +214,13 @@ if not _G.BeardLib then
 				manager:paused_update(t, dt)
 			end
 		end
-		for _, clbk in pairs(self._paused_updaters) do
-			clbk()
+		for id, clbk in pairs(self._paused_updaters) do
+			local success, e = pcall(function()
+				clbk()
+			end)
+			if not success then
+				BeardLib:log("[Updater-ERROR(%s)] " .. tostring(e.code), tostring(id))
+			end
 		end
 	end
 end
@@ -218,6 +228,6 @@ end
 if RequiredScript then
     local requiredScript = RequiredScript:lower()
     if BeardLib.config.hooks[requiredScript] then
-        dofile( BeardLib.config.hooks_dir .. BeardLib.config.hooks[requiredScript] )
+        dofile(BeardLib.config.hooks_dir .. BeardLib.config.hooks[requiredScript])
     end
 end

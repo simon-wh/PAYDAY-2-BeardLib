@@ -1,5 +1,5 @@
 Hooks:PreHook(MenuInput, "mouse_pressed", "BeardLibMenuInputMousePressed", function(self, o, button, x, y)
-    self.BeardLib_mouse_pressed(self, o, button, x, y)
+    self:BeardLib_mouse_pressed(o, button, x, y)
 end)
 
 function MenuInput:BeardLib_mouse_pressed(o, button, x, y)
@@ -22,7 +22,7 @@ end
 function MenuInput:ValueEnteredCallback(success, value)
     if success and self._current_item then
         if self._current_item._value then
-            self._current_item:set_value( math.clamp(tonumber(value), self._current_item._min, self._current_item._max) or self._current_item._min )
+            self._current_item:set_value(math.clamp(tonumber(value), self._current_item._min, self._current_item._max) or self._current_item._min )
         else
             self._current_item._parameters.help_id = value
         end
@@ -30,4 +30,13 @@ function MenuInput:ValueEnteredCallback(success, value)
         managers.viewport:resolution_changed()
         self._current_item:trigger()
     end
+end
+
+local o_back = MenuInput.back
+function MenuInput:back(...)
+    if BeardLib.IgnoreBackOnce then
+        BeardLib.IgnoreBackOnce = nil
+        return false
+    end
+    return o_back(self, ...)
 end

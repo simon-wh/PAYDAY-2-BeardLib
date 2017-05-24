@@ -42,6 +42,8 @@
 		<class file="json_utils.lua"/>
 		<class file="ModAssetUpdateManager.lua" manager="asset_update"/>
 		<class file="ModuleBase.lua"/>
+		<class file="UpdatesMenu.lua" manager="updates_menu"/>
+		<class file="MenuDialogManager.lua" manager="dialog"/>
 	</classes>
 	<hooks>
 		<hook source="core/lib/managers/coresequencemanager" file="CoreSequenceManager.lua"/>

@@ -18,7 +18,7 @@ function ImageButton:InitBasicItem()
         name = "img", 
         texture = self.texture,
         texture_rect = self.texture_rect,
-        color = self.img_color,
+        color = self.img_color or self.text_color,
         alpha = self.img_alpha,
         w = self.icon_w or self.w - 4,
         h = self.icon_h or self.h - 4,
@@ -30,9 +30,16 @@ function ImageButton:InitBasicItem()
     self:MakeBorder()
 end
 
+function ImageButton:DoHighlight(highlight)
+    self.super.DoHighlight(self, highlight)
+    self.img:set_color(highlight and (self.img_highlight_color or self.text_highlight_color) or (self.img_color or self.text_color))
+end
+
 function ImageButton:SetEnabled(enabled)
     self.enabled = enabled
-    self.img:set_alpha(enabled and 1 or 0.5)
+    if self.img and self:alive() then
+        self.img:set_alpha(enabled and 1 or 0.5)
+    end
 end
 
 function ImageButton:SetImage(texture, texture_rect)

@@ -1,6 +1,6 @@
 BaseItem = BaseItem or class()
 function BaseItem:init(params)
-	table.merge(self, clone(params))
+	table.merge(self, params)
 	self.type_name = self.type_name or "Button"
 	local mitem = getmetatable(self)
 	function mitem:__tostring() --STOP FUCKING RESETING
@@ -16,7 +16,7 @@ function BaseItem:InitBasicItem()
 		name = "title",
 		x = offset,
 		w = self.panel:w() - offset,
-		h = self.panel:h(),
+		h = 0,
 		align = self.text_align,
 		vertical = self.text_vertical,
 		wrap = not self.size_by_text,
@@ -36,6 +36,7 @@ function BaseItem:InitBasicItem()
 		valign = self.type_name ~= "Group" and "grow",
 		layer = 0
 	})
+	self:SetText(self.text)
 	self:MakeBorder()
 end
 
@@ -61,7 +62,6 @@ function BaseItem:MakeBorder()
 	local opt = {
 		halign = "left",
 		valign = "top",
-		rotation = 360,
 		layer = 4,
 		color = self.border_color,
 	}
@@ -78,11 +78,11 @@ function BaseItem:MakeBorder()
 	local right = self.panel:bitmap(opt)
 
 	local vis = self.border_visible
-	local w,h = self.border_width, self.border_lock_height and self.items_size or self.panel:h()
-    bottom:set_size(self.panel:w(), w)
-    right:set_size(w, h)
-    top:set_size(self.panel:w(), w)
-    left:set_size(w, h)
+	local w,h = self.border_size, self.border_lock_height and self.items_size or self.panel:h()
+    bottom:set_size(self.border_width or self.panel:w(), w)
+    right:set_size(w, self.border_height or h)
+    top:set_size(self.border_width or self.panel:w(), w)
+    left:set_size(w, self.border_height or h)
     bottom:set_halign("grow")
     top:set_halign("grow")
     bottom:set_visible(vis or self.border_bottom)
@@ -90,25 +90,39 @@ function BaseItem:MakeBorder()
     right:set_visible(vis or self.border_right)
     top:set_visible(vis or self.border_top)
 
-	right:set_rightbottom(self.panel:size())
+	right:set_rightbottom(self.panel:size())    
 	top:set_right(self.panel:w())
 	bottom:set_bottom(self.panel:h())
 
-	self:SetText(self.text)
+	if self.title and self.border_center_as_title then
+		left:set_center_y(self.title:center_y())
+		right:set_center_y(self.title:center_y())	
+		top:set_center_x(self.title:center_x())
+		bottom:set_center_x(self.title:center_x())
+	end
 end
 
 function BaseItem:TryRendering()
+	if not self.visible then
+		return false
+	end
 	local p = self.parent_panel
 	local visible = false
 	if alive(self.panel) then		
 	 	visible = p:inside(p:world_x(), self.panel:world_y()) == true or p:inside(p:world_x(), self.panel:world_bottom()) == true
 		self.panel:set_visible(visible)
-		self.visible = visible
+		self.should_render = visible
 		if self.debug then
 			BeardLib:log("Item %s has been set to rendering=%s", tostring(self), tostring(visible))
 		end
 	end
 	return visible
+end
+
+function BaseItem:SetVisible(visible)
+	self.visible = visible
+	self.panel:set_visible(visible)
+	self:SetEnabled(self.enabled and visible)
 end
 
 --Return Funcs--
@@ -118,7 +132,7 @@ function BaseItem:Value() return self.value end
 function BaseItem:Enabled() return self.enabled end
 function BaseItem:Index() return self.parent:GetIndex(self.name) end
 function BaseItem:MouseInside(x, y) return self.panel:inside(x,y) end
-function BaseItem:Visible() return self.visible end
+function BaseItem:Visible() return self.visible and self.should_render end
 function BaseItem:MouseFocused(x, y)
     if not x and not y then
         x,y = managers.mouse_pointer._mouse:world_position()
@@ -164,8 +178,8 @@ function BaseItem:SetPositionByString(pos)
 		return
 	end
     local pos_panel = self.parent_panel
-    for _, p in pairs({"center", "bottom", "top", "right", "left"}) do
-        if pos:lower():match(p) then
+    for _, p in pairs({"center", "bottom", "top", "right", "left", "center_x", "center_y"}) do
+        if (p ~= "center" or not pos:lower():match("center_")) and pos:lower():match(p) then
             self.panel["set_world_"..p](self.panel, pos_panel["world_"..p](pos_panel))
         end
     end
@@ -193,4 +207,9 @@ function BaseItem:RunCallback(clbk, ...)
 	if clbk then
 		clbk(self.parent, self, ...)
 	end
+end
+
+function BaseItem:Configure(params)
+	table.merge(self, params)
+	self.parent:RecreateItem(self, true)
 end

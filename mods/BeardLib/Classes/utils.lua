@@ -6,7 +6,7 @@ end
 function table.merge(og_table, new_table)
 	for i, data in pairs(new_table) do
 		i = type(data) == "table" and data.index or i
-		if type(data) == "table" and og_table[i] then
+		if type(data) == "table" and type(og_table[i]) == "table" then
 			og_table[i] = table.merge(og_table[i], data)
 		else
 			og_table[i] = data
@@ -314,9 +314,22 @@ BeardLib.Utils.WeapConv = {
     [1] = "wpn_fps_pis_g17",
     [2] = "wpn_fps_ass_amcar"
 }
+
+function BeardLib.Utils:GetBasedOnFactoryId(id)
+    local wep = tweak_data.weapon[managers.weapon_factory:get_weapon_id_by_factory_id(id)]
+    local based_on = wep.based_on and tweak_data.upgrades[wep.based_on]
+    return based_on and based_on.factory_id or nil
+end
+
 function BeardLib.Utils:GetCleanedWeaponData(unit)
     local player_inv = unit and unit:inventory() or managers.player:player_unit():inventory()
-    local new_weap_name = self.WeapConv[tweak_data.weapon[managers.weapon_factory:get_weapon_id_by_factory_id(player_inv:equipped_unit():base()._factory_id or player_inv:equipped_unit():name())].use_data.selection_index]
+    local wep = tweak_data.weapon[managers.weapon_factory:get_weapon_id_by_factory_id(player_inv:equipped_unit():base()._factory_id or player_inv:equipped_unit():name())]
+
+    local based_on_upgrade = wep.based_on and tweak_data.upgrades.definitions[wep.based_on]
+    if based_on_upgrade and (based_on_upgrade.dlc and not managers.dlc:is_dlc_unlocked(based_on_upgrade.dlc)) then
+        based_on_upgrade = nil
+    end
+    local new_weap_name = based_on_upgrade and based_on_upgrade.factory_id or self.WeapConv[wep.use_data.selection_index]
     return PlayerInventory._get_weapon_sync_index(new_weap_name), managers.weapon_factory:blueprint_to_string(new_weap_name, tweak_data.weapon.factory[new_weap_name].default_blueprint)
 end
 
@@ -333,7 +346,7 @@ function BeardLib.Utils:CleanOutfitString(str, is_henchman)
         is_henchman = false
     end
 	local list = (is_henchman and bm.unpack_henchman_loadout_string) and bm:unpack_henchman_loadout_string(str) or bm:unpack_outfit_from_string(str)
-	if tweak_data.blackmarket.masks[is_henchman and list.mask or list.mask.mask_id].custom then
+	if list.mask and tweak_data.blackmarket.masks[is_henchman and list.mask or list.mask.mask_id].custom then
         if is_henchman then
             list.mask = "character_locked"
         else
@@ -342,27 +355,38 @@ function BeardLib.Utils:CleanOutfitString(str, is_henchman)
 	end
 
     local pattern = is_henchman and list.mask_blueprint.pattern or list.mask.blueprint.pattern
-	if tweak_data.blackmarket.textures[pattern.id].custom then
+	if pattern and tweak_data.blackmarket.textures[pattern.id].custom then
 		pattern.id = "no_color_no_material"
 	end
 
     local material = is_henchman and list.mask_blueprint.material or list.mask.blueprint.material
-	if tweak_data.blackmarket.materials[material.id].custom then
+	if material and tweak_data.blackmarket.materials[material.id].custom then
 		material.id = "plastic"
 	end
 
-	if tweak_data.weapon.factory[is_henchman and list.primary or list.primary.factory_id].custom then
-        if is_henchman then
-            list.primary = self.WeapConv[2]
-        else
-            list.primary.factory_id = self.WeapConv[2]
-            list.primary.blueprint = tweak_data.weapon.factory[list.primary.factory_id].default_blueprint
-        end
-	end
+    local function get_based_on_fac(id)
+        local wep = tweak_data.weapon[managers.weapon_factory:get_weapon_id_by_factory_id(id)]
+        local based_on = wep.based_on and twaek_data.upgrades[wep.based_on]
+        return based_on and based_on.factory_id or nil
+    end
 
-	if not is_henchman then
-        if tweak_data.weapon.factory[list.secondary.factory_id].custom then
-    		list.secondary.factory_id = self.WeapConv[1]
+    if list.primary then
+        local primary = is_henchman and list.primary or list.primary.factory_id
+    	if tweak_data.weapon.factory[primary].custom then
+            local based_on = self:GetBasedOnFactoryId(primary) or self.WeapConv[2]
+            if is_henchman then
+                list.primary = based_on
+            else
+                list.primary.factory_id = based_on
+                list.primary.blueprint = tweak_data.weapon.factory[list.primary.factory_id].default_blueprint
+            end
+    	end
+    end
+
+	if not is_henchman and list.secondary then
+        local secondary = list.secondary.factory_id
+        if tweak_data.weapon.factory[secondary].custom then
+    		list.secondary.factory_id = self:GetBasedOnFactoryId(secondary) or self.WeapConv[1]
             list.secondary.blueprint = tweak_data.weapon.factory[list.secondary.factory_id].default_blueprint
     	end
 
@@ -659,21 +683,50 @@ end
 
 BeardLib.Utils.Input = {}
 
-function BeardLib.Utils.Input:Keyboard() return Input:keyboard() end
-function BeardLib.Utils.Input:Mouse() return Input:mouse() end
+function BeardLib.Utils.Input:Class() return Input:keyboard() end
+function BeardLib.Utils.Input:Id(str) return str:id() end
 
 --Keyboard
-function BeardLib.Utils.Input:Down(key) return self:Keyboard():down(key:id()) end
-function BeardLib.Utils.Input:Released(key) return self:Keyboard():released(key:id()) end
-function BeardLib.Utils.Input:Trigger(key, clbk) return self:Keyboard():add_trigger(key:id(), SafeClbk(clbk)) end
-function BeardLib.Utils.Input:RemoveTrigger(key) return self:Keyboard():remove_trigger(key:id()) end
-function BeardLib.Utils.Input:TriggerRelease(key, clbk) return self:Keyboard():add_release_trigger(key:id(), SafeClbk(clbk)) end
+function BeardLib.Utils.Input:Down(key) return self:Class():down(self:Id(key)) end
+function BeardLib.Utils.Input:Released(key) return self:Class():released(self:Id(key)) end
+function BeardLib.Utils.Input:Pressed(key) return self:Class():pressed(self:Id(key)) end
+function BeardLib.Utils.Input:Trigger(key, clbk) return self:Class():add_trigger(self:Id(key), SafeClbk(clbk)) end
+function BeardLib.Utils.Input:RemoveTrigger(key) return self:Class():remove_trigger(self:Id(key)) end
+function BeardLib.Utils.Input:TriggerRelease(key, clbk) return self:Class():add_release_trigger(self:Id(key), SafeClbk(clbk)) end
 --Mouse
-function BeardLib.Utils.Input:MouseDown(key) return self:Mouse():down(key:id()) end
-function BeardLib.Utils.Input:MouseReleased(key) return self:Mouse():released(key:id()) end
-function BeardLib.Utils.Input:MouseTrigger(key, clbk) return self:Mouse():add_trigger(key:id(), SafeClbk(clbk)) end
-function BeardLib.Utils.Input:MouseRemoveTrigger(key) return self:Mouse():remove_trigger(key:id()) end
-function BeardLib.Utils.Input:MouseTriggerRelease(key, clbk) return self:Mouse():add_release_trigger(key:id(), SafeClbk(clbk)) end
+BeardLib.Utils.MouseInput = clone(BeardLib.Utils.Input)
+function BeardLib.Utils.MouseInput:Class() return Input:mouse() end
+--Keyboard doesn't work without Idstring however mouse works and if you don't use Idstring you can use strings like 'mouse 0' to differentiate between keyboard and mouse
+--For example keyboard has the number 0 which is counted as left mouse button for mouse input, this solves it.
+function BeardLib.Utils.MouseInput:Id(str) return str end
+
+function BeardLib.Utils.Input:TriggerDataFromString(str, clbk)
+    local additional_key
+    local key = str
+    if str:match("+") then
+        local split = string.split(str, "+")
+        key = split[1]
+        additional_key = split[2]
+    end
+    return {key = key, additional_key = additional_key, clbk = clbk}
+end
+
+function BeardLib.Utils.Input:Triggered(trigger, check_mouse_too)
+    if not trigger.key then
+        return false
+    end
+    if check_mouse_too and trigger.key:match("mouse") then
+        return BeardLib.Utils.MouseInput:Pressed(trigger.key)
+    end
+    if trigger.additional_key then
+        if self:Down(trigger.key) and self:Pressed(trigger.additional_key) then
+            return true
+        end
+    elseif self:Pressed(trigger.key) then
+        return true
+    end
+    return false
+end
 
 function NotNil(...)
     local args = {...}
@@ -692,12 +745,50 @@ end
 function SafeClbk(func, ...)
     local params = {...}
     return function(...)
-        local ret
         local p = {...}
-        local _, err = pcall(function() ret = func(unpack(params), unpack(p)) end)
-        if err then
-            log(tostring( err.code ))
+        local success, ret = pcall(function() ret = func(unpack(params), unpack(p)) end)
+        if not success then
+            BeardLib:log("[Safe Callback Error] %s", tostring(ret.code))
+            return nil
         end
         return ret
     end
+end
+
+function ClassClbk(clss, func, ...)
+    return SimpleClbk(clss[func], clss, ...)
+end
+
+function Color:to_hex()
+    local s = "%x"
+    local result = ""
+    for _, v in pairs({self.r,self.g,self.b}) do
+        local hex = s:format(255*v)
+        if hex:len() == 0 then
+            hex = "00"
+        end
+        if hex:len() == 1 then
+            hex = "0"..hex
+        end
+        result = result .. hex
+    end
+    return result
+end
+
+function Color:contrast(white, black)
+    local col = {r = self.r, g = self.g, b = self.b}
+
+    for k, c in pairs(col) do
+        if c <= 0.03928 then 
+            col[k] = c/12.92 
+        else 
+            col[k] = ((c+0.055)/1.055) ^ 2.4 
+        end
+    end
+    local L = 0.2126 * col.r + 0.7152 * col.g + 0.0722 * col.b
+    local color = white or Color.white
+    if L > 0.179 then
+        color = black or Color.black 
+    end
+    return color
 end

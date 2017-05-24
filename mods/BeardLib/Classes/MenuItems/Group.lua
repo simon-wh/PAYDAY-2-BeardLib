@@ -32,7 +32,9 @@ function Group:RePositionToggle()
 end
 
 function Group:SetText(...)
-    self.super.SetText(self, ...)
+    if self.super.SetText(self, ...) then
+        self:SetScrollPanelSize()
+    end
     self:RePositionToggle()
 end
 

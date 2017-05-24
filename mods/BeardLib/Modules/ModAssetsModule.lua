@@ -141,7 +141,7 @@ end
 
 function ModAssetsModule:ShowRequiresUpdatePrompt()
     local lookup_tbl = {
-        ["mod"] = self._mod.Name
+        ["mod"] = self._mod.Name,
     }
 
     QuickMenu:new(
@@ -167,6 +167,7 @@ function ModAssetsModule:ShowRequiresUpdatePrompt()
         },
         true
     )
+    BeardLib.managers.updates_menu:AddUpdate(self)
 end
 
 function ModAssetsModule:SetReady()

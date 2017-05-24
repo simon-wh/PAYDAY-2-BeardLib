@@ -1,11 +1,12 @@
 ContextMenu = ContextMenu or class()
-function ContextMenu:init(parent, layer)
-    self._parent = parent
-    self.parent = parent.parent
-    self.menu = parent.menu
-    local control_size = self._parent.panel:w() / self._parent.control_slice
+function ContextMenu:init(owner, layer)
+    self.owner = owner
+    self.parent = owner.parent
+    self.menu = owner.menu
+    local control_size = owner.bigger_context_menu and owner:Panel():w() or owner.panel:w() / owner.control_slice
+    local bgcolor = owner:Get2ndBackground()
     self.panel = self.menu._panel:panel({
-        name = parent.name.."list",
+        name = owner.name.."list",
         w = control_size,
         layer = layer,
         visible = false,
@@ -14,27 +15,27 @@ function ContextMenu:init(parent, layer)
     })
     self.panel:rect({
         name = "bg",
-        color = (self.parent.background_color or Color.white) / 1.2,
+        color = bgcolor,
         layer = -1,
         halign = "grow",
         valign = "grow",
     })
-    if self._parent.searchbox then
+    if owner.searchbox then
         self._textbox = TextBoxBase:new(self, {
-            text_color = self.parent.background_color and self.parent.text_color or Color.black,
+            text_color = bgcolor:contrast(),
             panel = self.panel,
             align = "center",
             lines = 1,
-            items_size = parent.items_size,
+            items_size = owner.items_size,
             update_text = callback(self, self, "update_search"),
         })
     end
     self._scroll = ScrollablePanelModified:new(self.panel, "ItemsPanel", {
         layer = 4, 
         padding = 0.0001, 
-        scroll_width = parent.scrollbar == false and 0 or self.parent.scroll_width or 8,
+        scroll_width = owner.scrollbar == false and 0 or self.parent.scroll_width or 8,
         hide_shade = true, 
-        scroll_color = parent.marker_highlight_color,
+        color = owner.scroll_color or owner.marker_highlight_color,
         scroll_speed = 48
     })
     self.items_panel = self._scroll:canvas()
@@ -46,17 +47,18 @@ function ContextMenu:alive() return alive(self.panel) end
 function ContextMenu:CreateItems()
     self.items_panel:clear()
     local bg = self.panel:child("bg")
+    local color = bg:color():contrast()
     for k, text in pairs(self.found_items) do
         if type(text) == "table" then
             text = text.text
         end
         self.items_panel:text({
             name = "item"..k,
-            text = self._parent.localized_items and managers.localization:text(tostring(text)) or tostring(text),
+            text = self.owner.localized_items and managers.localization:text(tostring(text)) or tostring(text),
             align = "center",
             h = 12,
             y = (k - 1) * 14,
-            color = self.parent.background_color and self.parent.text_color or Color.black,
+            color = color,
             font = self.parent.font,
             font_size = 12
         })
@@ -74,23 +76,23 @@ function ContextMenu:hide()
 end
 
 function ContextMenu:reposition()    
-    local bottom_h = (self.menu._panel:world_bottom() - self._parent.panel:world_bottom()) 
-    local top_h = (self._parent.panel:world_y() - self.menu._panel:world_y()) 
-    local items_h = (#self.found_items * 14) + (self._parent.searchbox and self._parent.items_size or 0)
+    local bottom_h = (self.menu._panel:world_bottom() - self.owner.panel:world_bottom()) 
+    local top_h = (self.owner.panel:world_y() - self.menu._panel:world_y()) 
+    local items_h = (#self.found_items * 14) + (self.owner.searchbox and self.owner.items_size or 0)
     local normal_pos = items_h <= bottom_h or bottom_h >= top_h
     if (normal_pos and items_h > bottom_h) or (not normal_pos and items_h > top_h) then
         self.panel:set_h(math.min(bottom_h, top_h))
     else
         self.panel:set_h(items_h)
     end
-    self.panel:set_world_right(self._parent.panel:world_right())
+    self.panel:set_world_right(self.owner.panel:world_right())
     if normal_pos then
-        self.panel:set_world_y(self._parent.panel:world_bottom())
+        self.panel:set_world_y(self.owner.panel:world_bottom())
     else
-        self.panel:set_world_bottom(self._parent.panel:world_y())
+        self.panel:set_world_bottom(self.owner.panel:world_y())
     end
-    self._scroll:panel():set_y(self._parent.searchbox and self._parent.items_size or 0) 
-    self._scroll:set_size(self.panel:w(), self.panel:h() - (self._parent.searchbox and self._parent.items_size or 0))
+    self._scroll:panel():set_y(self.owner.searchbox and self.owner.items_size or 0) 
+    self._scroll:set_size(self.panel:w(), self.panel:h() - (self.owner.searchbox and self.owner.items_size or 0))
     self._scroll:panel():child("scroll_up_indicator_arrow"):set_top(6 - self._scroll:padding())
     self._scroll:panel():child("scroll_down_indicator_arrow"):set_bottom(self._scroll:panel():h() - 6 - self._scroll:padding())
 
@@ -121,12 +123,12 @@ function ContextMenu:MousePressed(button, x, y)
         end
         if button == Idstring("0") then
             if self._scroll:mouse_pressed(button, x, y) then return true end
-            for k, item in pairs(self._parent.items) do
+            for k, item in pairs(self.owner.items) do
                 if alive(self.items_panel:child("item"..k)) and self.items_panel:child("item"..k):inside(x,y) then
-                    if self._parent.ContextMenuCallback then
-                        self._parent:ContextMenuCallback(item)
+                    if self.owner.ContextMenuCallback then
+                        self.owner:ContextMenuCallback(item)
                     else
-                        if item.callback then self._parent:RunCallback(item.callback, item) end            
+                        if item.callback then self.owner:RunCallback(item.callback, item) end            
                     end        
                     self:hide()
                     return true
@@ -155,7 +157,7 @@ end
 function ContextMenu:update_search()
     local text = self._textbox and self._textbox.panel:child("text"):text() or ""
     self.found_items = {}
-    for _, v in pairs(self._parent.items) do
+    for _, v in pairs(self.owner.items) do
         if type(v) == "table" then
             v = v.text
         end

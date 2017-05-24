@@ -3,27 +3,41 @@ function FileBrowserDialog:show(...)
     self:Browse(...)
 end
 
-function FileBrowserDialog:create_items(params, menu)  
-    params.w = 300
-    params.h = 600
-    params.name = "Folders"
-    params.position = "CenterLeft"
-    params.background_color = params.background_color or Color(0.2, 0.2, 0.2)
-    params.background_alpha = params.background_alpha or 0.6
-    params.override_size_limit = true
-    params.visible = true
-    self._folders_menu = menu:NewMenu(params) 
-    self._folders_menu:Panel():move(200)
-    params.name = "Files"
-    params.position = table.pack(self._folders_menu:Panel():right() + 1, self._folders_menu:Panel():top())
-    params.w = 600
-    self._files_menu = menu:NewMenu(params) 
-    params.w = 901
-    params.h = 16
-    params.row_max = 1
-    params.offset = 0
-    FileBrowserDialog.super.create_items(self, params, menu) 
-    self._menu:Panel():set_leftbottom(self._folders_menu:Panel():left(), self._folders_menu:Panel():top() - 1)
+function FileBrowserDialog:init(params, menu)  
+    menu = menu or BeardLib.managers.dialog:Menu()
+    params = params or {}
+
+    self._folders_menu = menu:Menu(table.merge(params, {
+        w = 300,
+        h = 600,
+        name = "Folders",
+        position = "CenterLeft",
+        position = function(item)
+            item:SetPositionByString("CenterLeft")
+            item:Panel():move(200)
+        end,
+        background_color = params.background_color or Color(0.2, 0.2, 0.2),
+        background_alpha = params.background_alpha or 0.6,
+        visible = false        
+    })) 
+
+    self._files_menu = menu:Menu(table.merge(params, {
+        name = "Files",
+        position = function(item)
+            item:Panel():set_position(self._folders_menu:Panel():right() + 1, self._folders_menu:Panel():top())
+        end,
+        w = 600
+    }))
+    table.merge(params, {
+        w = 901,
+        h = 16,
+        position = function(item)
+            item:Panel():set_leftbottom(self._folders_menu:Panel():left(), self._folders_menu:Panel():top() - 1)
+        end,
+        row_max = 1,
+        offset = 0
+    })
+    FileBrowserDialog.super.init(self, params, menu) 
 
     self._menu:Button({
         name = "Backward",

@@ -1,35 +1,42 @@
 ListDialog = ListDialog or class(MenuDialog)
+function ListDialog:init(params, menu)
+    params = params or {}
+    menu = menu or BeardLib.managers.dialog:Menu()
+    self._list_menu = menu:Menu(table.merge({
+        w = 900,
+        h = params.h and params.h - 20 or 600,
+        name = "List",
+        auto_align = false,
+        position = params.position or "Center",
+        background_color = params.background_color or Color(0.2, 0.2, 0.2),
+        layer = BeardLib.managers.dialog:GetNewIndex(),
+        visible = false,
+    }, params))
+    
+    ListDialog.super.init(self, table.merge({
+        h = 20,
+        w = 900,
+        items_size = 20,
+        offset = 0,
+        align_method = "grid",
+        auto_align = true    
+    }, params), menu) 
+    self._menu:Panel():set_leftbottom(self._list_menu:Panel():left(), self._list_menu:Panel():top() - 1)
+end
+
 function ListDialog:show(...)
     self:Show(...)
 end
 
-function ListDialog:create_items(params, menu)  
-    params.w = params.w or 900
-    params.h = params.h and params.h - 20 or 600
-    params.name = "List"
-    params.auto_align = false
-    params.position = params.position or "Center"
-    params.background_color = params.background_color or Color(0.2, 0.2, 0.2)
-    params.background_alpha = params.background_alpha or 0.6
-    params.override_size_limit = true
-    params.visible = true
-    self._list_menu = menu:NewMenu(params) 
-    params.h = 20
-    params.items_size = 20
-    params.offset = 0
-    params.align_method = "grid"
-    params.auto_align = true
-    ListDialog.super.create_items(self, params, menu) 
-    self._menu:Panel():set_leftbottom(self._list_menu:Panel():left(), self._list_menu:Panel():top() - 1)
-end
-
-function ListDialog:Show(params)   
-    params = params or self._params or {}
+function ListDialog:Show(params)
+    if not self:basic_show(params) then
+        return
+    end
     self._filter = ""
-    self._params = params
-    self._params.limit = true
-    self._menu:ClearItems()
-    self._list_menu:ClearItems()  
+    self._case_sensitive = params.case_sensitive
+    self._limit = NotNil(params.limit, true)
+    self._list = params.list
+
     self._menu:TextBox({
         name = "Search",
         w = self._menu.w - 152,
@@ -42,9 +49,9 @@ function ListDialog:Show(params)
         name = "CaseSensitive",
         w = 42,
         text = "Aa",
-        value = self._params.case_sensitive,
+        value = self._case_sensitive,
         callback = function(menu, item)
-            self._params.case_sensitive = item:Value()
+            self._case_sensitive = item:Value()
             self:MakeListItems()
         end,  
         label = "temp"
@@ -53,9 +60,9 @@ function ListDialog:Show(params)
         name = "Limit",
         w = 42,
         text = ">|",
-        value = self._params.limit,
+        value = self._limit,
         callback = function(menu, item)
-            self._params.limit = item:Value()
+            self._limit = item:Value()
             self:MakeListItems()
         end,  
         label = "temp"
@@ -63,24 +70,19 @@ function ListDialog:Show(params)
     self._menu:Button({
         name = "Close",
         w = 68,
+        text_align = "center",
         text = "Close",
         callback = callback(self, self, "hide"),  
         label = "temp"
     })
     self:MakeListItems()
-    if BeardLib.DialogOpened == self then
-        return
-    end
-    self._dialog:enable()    
-    self._trigger = managers.menu._controller:add_trigger(Idstring("esc"), callback(self, self, "hide"))    
-    BeardLib.DialogOpened = self
 end
 
 function ListDialog:MakeListItems()
     self._list_menu:ClearItems("temp2")  
-    local case = self._params.case_sensitive
-    local limit = self._params.limit
-    for _,v in pairs(self._params.list) do
+    local case = self._case_sensitive
+    local limit = self._limit
+    for _,v in pairs(self._list) do
         local t = type(v) == "table" and v.name or v
         if self._filter == "" or (case and string.match(t, self._filter) or not case and string.match(t:lower(), self._filter:lower())) then
             if not limit or #self._list_menu._all_items <= 250 then
@@ -96,8 +98,8 @@ function ListDialog:MakeListItems()
                     name = t,
                     text = t,
                     callback = function(menu, item)
-                        if self._params.callback then
-                            self._params.callback(v)
+                        if self._callback then
+                            self._callback(v)
                         end
                     end, 
                     label = "temp2"
@@ -113,15 +115,20 @@ function ListDialog:Search(menu, item)
     self:MakeListItems()
 end
 
-function ListDialog:hide()
-    if BeardLib.IgnoreDialogOnce then
-        BeardLib.IgnoreDialogOnce = false
-        return
-    end
-    managers.menu:post_event("prompt_exit")
-    self._dialog:disable()
-    self._menu:ClearItems()
-   managers.menu._controller:remove_trigger(self._trigger)     
-   BeardLib.DialogOpened = nil
-   return true
+function ListDialog:basic_show(params)
+    self._list_menu:ClearItems()
+    self._list_menu:SetVisible(true)
+    return ListDialog.super.basic_show(self, params)
+end
+
+function ListDialog:run_callback(clbk)
+end
+
+function ListDialog:should_close()
+    return self._menu:ShouldClose() or self._list_menu:ShouldClose()
+end
+
+function ListDialog:hide(yes)
+    self._list_menu:SetVisible(false)
+    return ListDialog.super.hide(self, yes)
 end

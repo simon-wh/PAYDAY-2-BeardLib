@@ -10,25 +10,26 @@ function ComboBox:Init()
         text = text.text
     end
     local control_size = self.panel:w() / self.control_slice
+    local bgcolor = self:Get2ndBackground()
+    local combo_bg = self.panel:bitmap({
+        name = "combo_bg",
+        w = control_size,
+        h = self.items_size,
+        layer = 1,
+        color = bgcolor,
+    })
     local combo_selected = self.panel:text({
         name = "combo_selected",
-        text = self.localized_items and text and managers.localization:text(text) or text or "",
+        text = self.localized_items and text and managers.localization:text(tostring(text)) or type(text) ~= "nil" and tostring(text) or "",
         w = control_size - 10,
         h = self.items_size,
         valign = "center",
         align = "center",
         vertical = "center",
         layer = 2,
-        color = self.parent.background_color and self.text_color or Color.black,
+        color = bgcolor:contrast(),
         font = self.font,
         font_size = self.items_size - 2
-    })
-    local combo_bg = self.panel:bitmap({
-        name = "combo_bg",
-        w = control_size,
-        h = self.items_size,
-        layer = 1,
-        color = ((self.parent.background_color or Color.white) / 1.2):with_alpha(1),
     })
     combo_bg:set_right(self.panel:w())
     combo_selected:set_left(combo_bg:left() + 2)
@@ -38,7 +39,7 @@ function ComboBox:Init()
         h = self.items_size - 4,
         texture = "guis/textures/menuicons",
         texture_rect = {4,0,16,16},
-        color = not self.parent.background_color and Color.black,
+        color = bgcolor:contrast(),
         layer = 2,
     }):set_right(combo_bg:right() - 2.5)
     local h = math.max(1, #self.items) * 18
@@ -46,10 +47,14 @@ end
 
 function ComboBox:SetEnabled(enabled)
     self.super.SetEnabled(self, enabled)
-    self.panel:child("combo_selected"):set_alpha(enabled and 1 or 0.5)
-    self.panel:child("combo_bg"):set_alpha(enabled and 1 or 0.5)
-    self.panel:child("combo_icon"):set_alpha(enabled and 1 or 0.5)
-    self._list:hide()
+    if self:alive() and self.panel:child("combo_bg") then
+        self.panel:child("combo_selected"):set_alpha(enabled and 1 or 0.5)
+        self.panel:child("combo_bg"):set_alpha(enabled and 1 or 0.5)
+        self.panel:child("combo_icon"):set_alpha(enabled and 1 or 0.5)
+        if self._list then
+            self._list:hide()
+        end
+    end
 end
 
 function ComboBox:ContextMenuCallback(item)
@@ -70,7 +75,7 @@ function ComboBox:SetValue(value, run_callback, no_items_clbk)
         v = v.text
     end
     if alive(self.panel) then
-       self.panel:child("combo_selected"):set_text(self.localized_items and v and managers.localization:text(tostring(v)) or tostring(v) or "")
+       self.panel:child("combo_selected"):set_text(self.localized_items and v and managers.localization:text(tostring(v)) or type(v) ~= "nil" and tostring(v) or "")
     end    
     self.super.SetValue(self, value, run_callback)
 end

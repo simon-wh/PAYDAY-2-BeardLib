@@ -14,17 +14,25 @@ end
 
 local o_toggle_menu_state = MenuManager.toggle_menu_state
 function MenuManager:toggle_menu_state(...)
-    if BeardLib.DialogOpened then
-        BeardLib.DialogOpened:hide()
+    if BeardLib.managers.dialog:DialogOpened() then
+        BeardLib.managers.dialog:CloseLastDialog()
+        BeardLib.IgnoreBackOnce = true
         return
     else
         return o_toggle_menu_state(self, ...) 
     end
 end
 
+local o_resume_game = MenuCallbackHandler.resume_game
+function MenuCallbackHandler:resume_game(...)
+    if not BeardLib.managers.dialog:DialogOpened() then
+        return o_resume_game(self, ...) 
+    end
+end
+
 core:import("SystemMenuManager")
 Hooks:PostHook(SystemMenuManager.GenericSystemMenuManager, "event_dialog_shown", "BeardLibEventDialogShown", function(self)
-    if BeardLib.DialogOpened then
+    if BeardLib.managers.dialog:DialogOpened() then
         BeardLib.IgnoreDialogOnce = true
     end
 end)

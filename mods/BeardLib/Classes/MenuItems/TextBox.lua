@@ -9,6 +9,8 @@ function TextBox:Init()
     end
 	self._textbox = TextBoxBase:new(self, {
         panel = self.panel,
+        lines = self.lines,
+        line_color = self.line_color or self.marker_highlight_color,
         w = self.panel:w() / (self.text == nil and 1 or self.control_slice),
         value = self.value,
     })
@@ -17,8 +19,10 @@ end
 
 function TextBox:SetEnabled(enabled)
 	self.super.SetEnabled(self, enabled)
-	self._textbox.panel:child("line"):set_alpha(enabled and 1 or 0.5)
-	self._textbox.panel:child("text"):set_alpha(enabled and 1 or 0.5)
+	if self._textbox and self:alive() then
+		self._textbox.panel:child("line"):set_alpha(enabled and 1 or 0.5)
+		self._textbox.panel:child("text"):set_alpha(enabled and 1 or 0.5)
+	end
 end
 
 function TextBox:_SetValue(value, run_callback, reset_selection)
@@ -82,6 +86,11 @@ function TextBox:MouseMoved(x, y)
     	return 
     end
     self._textbox:MouseMoved(x, y)
+end
+
+function TextBox:DoHighlight(highlight)
+    self.super.DoHighlight(self, highlight)
+    self._textbox:DoHighlight(highlight)
 end
 
 function TextBox:SetValueByMouseXPos(x)

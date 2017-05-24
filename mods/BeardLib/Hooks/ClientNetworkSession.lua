@@ -16,8 +16,6 @@ Hooks:PreHook(ClientNetworkSession, "on_join_request_reply", "BeardLib_on_join_r
                         orig_cb("CANCELLED")
                         return
                     end
-                    Global.game_settings.level_id = split_data[2]
-                    Global.game_settings.difficulty = split_data[3]
                     if job_id_index ~= 0 then
                         managers.job:activate_job(split_data[1], job_stage)
                         if alternative_job_stage ~= 0 then
@@ -31,6 +29,8 @@ Hooks:PreHook(ClientNetworkSession, "on_join_request_reply", "BeardLib_on_join_r
                         self._server_peer:verify_job(job_id)
                     end
                     orig_cb(state, unpack(params))
+                    Global.game_settings.level_id = split_data[2]
+                    Global.game_settings.difficulty = split_data[3]
                     self._ignore_load = nil
                     if self._ignored_load then
                         self:ok_to_load_level(unpack(self._ignored_load))

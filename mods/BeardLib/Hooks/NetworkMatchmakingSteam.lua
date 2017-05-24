@@ -22,40 +22,42 @@ function NetworkMatchMakingSTEAM:set_attributes(settings, ...)
 end
 
 local orig_NetworkMatchMakingSTEAM_lobby_to_numbers = NetworkMatchMakingSTEAM._lobby_to_numbers
-
 function NetworkMatchMakingSTEAM:_lobby_to_numbers(lobby, ...)
 	log("Received level: " .. tostring(lobby:key_value("level_id")))
 	log("Received narrative: " .. tostring(lobby:key_value("job_key")))
-	local data = orig_NetworkMatchMakingSTEAM_lobby_to_numbers(self, lobby, ...)
-	local is_key_valid = function(key) return key ~= "value_missing" and key ~= "value_pending" end
-    if is_key_valid(lobby:key_value("level_id")) or is_key_valid(lobby:key_value("job_key")) then
-        local _level_index = table.index_of(tweak_data.levels._level_index, lobby:key_value("level_id"))
-        local _job_index = table.index_of(tweak_data.narrative._jobs_index, lobby:key_value("job_key"))
-        if _level_index ~= -1 or _job_index ~= -1 then
-            local level_index = _level_index == -1 and tonumber(lobby:key_value("level")) or _level_index
-            local job_index = _job_index == -1 and tonumber(lobby:key_value("job_id")) or _job_index
-			--log("level_index: " .. tostring(level_index))
-			--log("job_index: " .. tostring(job_index))
-			data[1] = level_index + 1000 * job_index
-			return data
+	if tonumber(lobby:key_value("job_id")) then
+		local data = orig_NetworkMatchMakingSTEAM_lobby_to_numbers(self, lobby, ...)
+		local is_key_valid = function(key) return key ~= "value_missing" and key ~= "value_pending" end
+	    if is_key_valid(lobby:key_value("level_id")) or is_key_valid(lobby:key_value("job_key")) then
+	        local _level_index = table.index_of(tweak_data.levels._level_index, lobby:key_value("level_id"))
+	        local _job_index = table.index_of(tweak_data.narrative._jobs_index, lobby:key_value("job_key"))
+	        if _level_index ~= -1 or _job_index ~= -1 then
+	            local level_index = _level_index == -1 and tonumber(lobby:key_value("level")) or _level_index
+	            local job_index = _job_index == -1 and tonumber(lobby:key_value("job_id")) or _job_index
+				--log("level_index: " .. tostring(level_index))
+				--log("job_index: " .. tostring(job_index))
+				data[1] = level_index + 1000 * job_index
+				return data
+			end
 		end
+		local level_name = lobby:key_value("custom_level_name")
+		local level_update_key = lobby:key_value("level_update_key")
+		if is_key_valid(level_name) then
+			log("Received level real name: " .. tostring(level_name))
+			if is_key_valid(level_update_key) then
+				log("Received level update key: " .. tostring(level_update_key))
+				data["level_id"] = lobby:key_value("level_id")
+				data["job_key"] = lobby:key_value("job_key")
+				data["level_update_key"] = level_update_key
+				data["custom_level_name"] = level_name
+				data[1] = 1001
+			else
+			 	data[1] = 0
+	        end
+	    end
+		return data
 	end
-	local level_name = lobby:key_value("custom_level_name")
-	local level_update_key = lobby:key_value("level_update_key")
-	if is_key_valid(level_name) then
-		log("Received level real name: " .. tostring(level_name))
-		if is_key_valid(level_update_key) then
-			log("Received level update key: " .. tostring(level_update_key))
-			data["level_id"] = lobby:key_value("level_id")
-			data["job_key"] = lobby:key_value("job_key")
-			data["level_update_key"] = level_update_key
-			data["custom_level_name"] = level_name
-			data[1] = 1001
-		else
-		 	data[1] = 0
-        end
-    end
-	return data
+	return {}
 end
 
 Hooks:PostHook(NetworkMatchMakingSTEAM, "_call_callback", "BeardLibSearchLobbyFix", function(self, name, info)
