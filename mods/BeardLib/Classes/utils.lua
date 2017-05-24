@@ -235,7 +235,7 @@ BeardLib.Utils.WeapConv = {
 
 function BeardLib.Utils:GetBasedOnFactoryId(id)
     local wep = tweak_data.weapon[managers.weapon_factory:get_weapon_id_by_factory_id(id)]
-    local based_on = wep.based_on and tweak_data.upgrades[wep.based_on]
+    local based_on = wep.based_on and tweak_data.upgrades.definitions[wep.based_on]
     return based_on and based_on.factory_id or nil
 end
 
