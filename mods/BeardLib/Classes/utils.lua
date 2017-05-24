@@ -232,9 +232,22 @@ BeardLib.Utils.WeapConv = {
     [1] = "wpn_fps_pis_g17",
     [2] = "wpn_fps_ass_amcar"
 }
+
+function BeardLib.Utils:GetBasedOnFactoryId(id)
+    local wep = tweak_data.weapon[managers.weapon_factory:get_weapon_id_by_factory_id(id)]
+    local based_on = wep.based_on and tweak_data.upgrades[wep.based_on]
+    return based_on and based_on.factory_id or nil
+end
+
 function BeardLib.Utils:GetCleanedWeaponData(unit)
     local player_inv = unit and unit:inventory() or managers.player:player_unit():inventory()
-    local new_weap_name = self.WeapConv[tweak_data.weapon[managers.weapon_factory:get_weapon_id_by_factory_id(player_inv:equipped_unit():base()._factory_id or player_inv:equipped_unit():name())].use_data.selection_index]
+    local wep = tweak_data.weapon[managers.weapon_factory:get_weapon_id_by_factory_id(player_inv:equipped_unit():base()._factory_id or player_inv:equipped_unit():name())]
+
+    local based_on_upgrade = wep.based_on and tweak_data.upgrades.definitions[wep.based_on]
+    if based_on_upgrade and (based_on_upgrade.dlc and not managers.dlc:is_dlc_unlocked(based_on_upgrade.dlc)) then
+        based_on_upgrade = nil
+    end
+    local new_weap_name = based_on_upgrade and based_on_upgrade.factory_id or self.WeapConv[wep.use_data.selection_index]
     return PlayerInventory._get_weapon_sync_index(new_weap_name), managers.weapon_factory:blueprint_to_string(new_weap_name, tweak_data.weapon.factory[new_weap_name].default_blueprint)
 end
 
@@ -252,7 +265,7 @@ function BeardLib.Utils:CleanOutfitString(str, is_henchman)
         is_henchman = false
     end
     local list = (is_henchman and bm.unpack_henchman_loadout_string) and bm:unpack_henchman_loadout_string(str) or bm:unpack_outfit_from_string(str)
-    if tweak_data.blackmarket.masks[is_henchman and list.mask or list.mask.mask_id].custom then
+    if list.mask and tweak_data.blackmarket.masks[is_henchman and list.mask or list.mask.mask_id].custom then
         if is_henchman then
             list.mask = "character_locked"
         else
@@ -261,27 +274,32 @@ function BeardLib.Utils:CleanOutfitString(str, is_henchman)
     end
 
     local pattern = is_henchman and list.mask_blueprint.pattern or list.mask.blueprint.pattern
-    if tweak_data.blackmarket.textures[pattern.id].custom then
+    if pattern and tweak_data.blackmarket.textures[pattern.id].custom then
         pattern.id = "no_color_no_material"
     end
 
     local material = is_henchman and list.mask_blueprint.material or list.mask.blueprint.material
-    if tweak_data.blackmarket.materials[material.id].custom then
+    if material and tweak_data.blackmarket.materials[material.id].custom then
         material.id = "plastic"
     end
 
-    if tweak_data.weapon.factory[is_henchman and list.primary or list.primary.factory_id].custom then
-        if is_henchman then
-            list.primary = self.WeapConv[2]
-        else
-            list.primary.factory_id = self.WeapConv[2]
-            list.primary.blueprint = tweak_data.weapon.factory[list.primary.factory_id].default_blueprint
+    if list.primary then
+        local primary = is_henchman and list.primary or list.primary.factory_id
+        if tweak_data.weapon.factory[primary].custom then
+            local based_on = self:GetBasedOnFactoryId(primary) or self.WeapConv[2]
+            if is_henchman then
+                list.primary = based_on
+            else
+                list.primary.factory_id = based_on
+                list.primary.blueprint = tweak_data.weapon.factory[list.primary.factory_id].default_blueprint
+            end
         end
     end
 
-    if not is_henchman then
-        if tweak_data.weapon.factory[list.secondary.factory_id].custom then
-            list.secondary.factory_id = self.WeapConv[1]
+    if not is_henchman and list.secondary then
+        local secondary = list.secondary.factory_id
+        if tweak_data.weapon.factory[secondary].custom then
+            list.secondary.factory_id = self:GetBasedOnFactoryId(secondary) or self.WeapConv[1]
             list.secondary.blueprint = tweak_data.weapon.factory[list.secondary.factory_id].default_blueprint
         end
 
