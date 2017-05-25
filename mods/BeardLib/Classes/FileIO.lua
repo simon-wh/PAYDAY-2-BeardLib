@@ -106,13 +106,17 @@ function FileIO:CopyTo(path, to_path)
 end
 
 function FileIO:MoveFileTo(path, to_path)
-	self:CopyFileTo(path, to_path)
-	self:Delete(path)
+	if BeardLib.Utils.Path:Normalize(path) ~= BeardLib.Utils.Path:Normalize(to_path) then
+		self:CopyFileTo(path, to_path)
+		self:Delete(path)
+	end
 end
 
 function FileIO:MoveTo(path, to_path)
-	self:CopyTo(path, to_path)
-	self:Delete(path)
+	if BeardLib.Utils.Path:Normalize(path) ~= BeardLib.Utils.Path:Normalize(to_path) then
+		self:CopyTo(path, to_path)
+		self:Delete(path)
+	end
 end
 
 function FileIO:Delete(path) 

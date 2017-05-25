@@ -315,27 +315,34 @@ BeardLib.Utils.WeapConv = {
     [2] = "wpn_fps_ass_amcar"
 }
 
-function BeardLib.Utils:GetBasedOnFactoryId(id)
-    local wep = tweak_data.weapon[managers.weapon_factory:get_weapon_id_by_factory_id(id)]
-    local based_on = wep.based_on and tweak_data.upgrades[wep.based_on]
-    return based_on and based_on.factory_id or nil
+function BeardLib.Utils:GetBasedOnFactoryId(id, wep)
+    wep = wep or tweak_data.weapon[managers.weapon_factory:get_weapon_id_by_factory_id(id)]
+    local based_on
+    if wep then
+        based_on = wep.based_on and tweak_data.upgrades.definitions[wep.based_on]
+        if based_on then
+            local based_on_wep = tweak_data.weapon[wep.based_on]
+            if not based_on_wep or (based_on_wep.use_data.selection_index ~= wep.use_data.selection_index) then
+                based_on = nil --Unsupported!
+            end
+        end
+    end
+    return based_on and (not based_on.dlc or managers.dlc:is_dlc_unlocked(based_on.dlc)) and based_on.factory_id or nil
 end
 
 function BeardLib.Utils:GetCleanedWeaponData(unit)
     local player_inv = unit and unit:inventory() or managers.player:player_unit():inventory()
     local wep = tweak_data.weapon[managers.weapon_factory:get_weapon_id_by_factory_id(player_inv:equipped_unit():base()._factory_id or player_inv:equipped_unit():name())]
+    local based_on_fac = self:GetBasedOnFactoryId(nil, wep)
 
-    local based_on_upgrade = wep.based_on and tweak_data.upgrades.definitions[wep.based_on]
-    if based_on_upgrade and (based_on_upgrade.dlc and not managers.dlc:is_dlc_unlocked(based_on_upgrade.dlc)) then
-        based_on_upgrade = nil
-    end
-    local new_weap_name = based_on_upgrade and based_on_upgrade.factory_id or self.WeapConv[wep.use_data.selection_index]
+    local new_weap_name = based_on_fac or self.WeapConv[wep.use_data.selection_index]
     return PlayerInventory._get_weapon_sync_index(new_weap_name), managers.weapon_factory:blueprint_to_string(new_weap_name, tweak_data.weapon.factory[new_weap_name].default_blueprint)
 end
 
 function BeardLib.Utils:OutfitStringFromList(outfit, is_henchman)
     local bm = managers.blackmarket
-    local str = (is_henchman and bm.henchman_loadout_string_from_loadout) and bm:henchman_loadout_string_from_loadout(outfit) or bm:outfit_string_from_list(outfit)
+    is_henchman = is_henchman and bm.henchman_loadout_string_from_loadout
+    local str = is_henchman and bm:henchman_loadout_string_from_loadout(outfit) or bm:outfit_string_from_list(outfit)
     --Remove when overkill decides to add armor_skin to BlackMarketManager:outfit_string_from_list
     return is_henchman and str or str:gsub(outfit.armor.."%-"..outfit.armor_current.."%-"..outfit.armor_current_state, outfit.armor.."-"..outfit.armor_current.."-"..outfit.armor_current_state.."-"..outfit.armor_skin)
 end
@@ -345,34 +352,28 @@ function BeardLib.Utils:CleanOutfitString(str, is_henchman)
     if is_henchman and not bm.unpack_henchman_loadout_string then --thx ovk for the headaches henchman beta caused me <3
         is_henchman = false
     end
-	local list = (is_henchman and bm.unpack_henchman_loadout_string) and bm:unpack_henchman_loadout_string(str) or bm:unpack_outfit_from_string(str)
-	if list.mask and tweak_data.blackmarket.masks[is_henchman and list.mask or list.mask.mask_id].custom then
+    local list = (is_henchman and bm.unpack_henchman_loadout_string) and bm:unpack_henchman_loadout_string(str) or bm:unpack_outfit_from_string(str)
+    if list.mask and tweak_data.blackmarket.masks[is_henchman and list.mask or list.mask.mask_id].custom then
         if is_henchman then
             list.mask = "character_locked"
         else
             list.mask.mask_id = "character_locked"
         end
-	end
+    end
 
     local pattern = is_henchman and list.mask_blueprint.pattern or list.mask.blueprint.pattern
-	if pattern and tweak_data.blackmarket.textures[pattern.id].custom then
-		pattern.id = "no_color_no_material"
-	end
+    if pattern and tweak_data.blackmarket.textures[pattern.id].custom then
+        pattern.id = "no_color_no_material"
+    end
 
     local material = is_henchman and list.mask_blueprint.material or list.mask.blueprint.material
-	if material and tweak_data.blackmarket.materials[material.id].custom then
-		material.id = "plastic"
-	end
-
-    local function get_based_on_fac(id)
-        local wep = tweak_data.weapon[managers.weapon_factory:get_weapon_id_by_factory_id(id)]
-        local based_on = wep.based_on and twaek_data.upgrades[wep.based_on]
-        return based_on and based_on.factory_id or nil
+    if material and tweak_data.blackmarket.materials[material.id].custom then
+        material.id = "plastic"
     end
 
     if list.primary then
         local primary = is_henchman and list.primary or list.primary.factory_id
-    	if tweak_data.weapon.factory[primary].custom then
+        if tweak_data.weapon.factory[primary].custom then
             local based_on = self:GetBasedOnFactoryId(primary) or self.WeapConv[2]
             if is_henchman then
                 list.primary = based_on
@@ -380,29 +381,29 @@ function BeardLib.Utils:CleanOutfitString(str, is_henchman)
                 list.primary.factory_id = based_on
                 list.primary.blueprint = tweak_data.weapon.factory[list.primary.factory_id].default_blueprint
             end
-    	end
+        end
     end
 
-	if not is_henchman and list.secondary then
+    if not is_henchman and list.secondary then
         local secondary = list.secondary.factory_id
         if tweak_data.weapon.factory[secondary].custom then
-    		list.secondary.factory_id = self:GetBasedOnFactoryId(secondary) or self.WeapConv[1]
+            list.secondary.factory_id = self:GetBasedOnFactoryId(secondary) or self.WeapConv[1]
             list.secondary.blueprint = tweak_data.weapon.factory[list.secondary.factory_id].default_blueprint
-    	end
+        end
 
         if tweak_data.blackmarket.melee_weapons[list.melee_weapon].custom then
             list.melee_weapon = "weapon"
         end
 
-    	for _, weap in pairs({list.primary, list.secondary}) do
-    		for i, part_id in pairs(weap.blueprint) do
-    			if tweak_data.weapon.factory.parts[part_id] and tweak_data.weapon.factory.parts[part_id].custom then
-    				table.remove(weap.blueprint, i)
-    			end
-    		end
-    	end
+        for _, weap in pairs({list.primary, list.secondary}) do
+            for i, part_id in pairs(weap.blueprint) do
+                if tweak_data.weapon.factory.parts[part_id] and tweak_data.weapon.factory.parts[part_id].custom then
+                    table.remove(weap.blueprint, i)
+                end
+            end
+        end
     end
-	return self:OutfitStringFromList(list, is_henchman)
+    return self:OutfitStringFromList(list, is_henchman)
 end
 
 function BeardLib.Utils:GetSubValues(tbl, key)
