@@ -233,21 +233,27 @@ BeardLib.Utils.WeapConv = {
     [2] = "wpn_fps_ass_amcar"
 }
 
-function BeardLib.Utils:GetBasedOnFactoryId(id)
-    local wep = tweak_data.weapon[managers.weapon_factory:get_weapon_id_by_factory_id(id)]
-    local based_on = wep.based_on and tweak_data.upgrades.definitions[wep.based_on]
-    return based_on and based_on.factory_id or nil
+function BeardLib.Utils:GetBasedOnFactoryId(id, wep)
+    wep = wep or tweak_data.weapon[managers.weapon_factory:get_weapon_id_by_factory_id(id)]
+    local based_on
+    if wep then
+        based_on = wep.based_on and tweak_data.upgrades.definitions[wep.based_on]
+        if based_on then
+            local based_on_wep = tweak_data.weapon[wep.based_on]
+            if not based_on_wep or (based_on_wep.use_data.selection_index ~= wep.use_data.selection_index) then
+                based_on = nil --Unsupported!
+            end
+        end
+    end
+    return based_on and (not based_on.dlc or managers.dlc:is_dlc_unlocked(based_on.dlc)) and based_on.factory_id or nil
 end
 
 function BeardLib.Utils:GetCleanedWeaponData(unit)
     local player_inv = unit and unit:inventory() or managers.player:player_unit():inventory()
     local wep = tweak_data.weapon[managers.weapon_factory:get_weapon_id_by_factory_id(player_inv:equipped_unit():base()._factory_id or player_inv:equipped_unit():name())]
+    local based_on_fac = self:GetBasedOnFactoryId(nil, wep)
 
-    local based_on_upgrade = wep.based_on and tweak_data.upgrades.definitions[wep.based_on]
-    if based_on_upgrade and (based_on_upgrade.dlc and not managers.dlc:is_dlc_unlocked(based_on_upgrade.dlc)) then
-        based_on_upgrade = nil
-    end
-    local new_weap_name = based_on_upgrade and based_on_upgrade.factory_id or self.WeapConv[wep.use_data.selection_index]
+    local new_weap_name = based_on_fac or self.WeapConv[wep.use_data.selection_index]
     return PlayerInventory._get_weapon_sync_index(new_weap_name), managers.weapon_factory:blueprint_to_string(new_weap_name, tweak_data.weapon.factory[new_weap_name].default_blueprint)
 end
 
