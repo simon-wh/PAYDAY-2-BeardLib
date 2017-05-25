@@ -62,7 +62,7 @@ function MenuUI:init(params)
 end
 
 function MenuUI:ShowDelayedHelp(item)
-    DelayedCalls:Add("ShowItemHelp"..tostring(item), self.show_help_time or 1, function()
+    DelayedCalls:Add("ShowItemHelp"..tostring(self), self.show_help_time or 1, function()
         if self._showing_help and (self._old_x ~= self._saved_help_x or self._old_y ~= self._saved_help_y) then
             self._saved_help_x = self._old_x
             self._saved_help_y = self._old_y

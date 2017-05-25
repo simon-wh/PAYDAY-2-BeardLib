@@ -54,7 +54,9 @@ function Menu:WorkParams()
     self.text_offset = self.text_offset or self.menu.text_offset or 4
     self.scroll_width = self.scroll_width or 8
     self.automatic_height = NotNil(self.automatic_height, self.type_name == "Group" and true or false)
-    self.scroll_color = NotNil(self.scroll_color, self.menu.scroll_color)
+    self.accent_color = NotNil(self.accent_color, self.menu.accent_color)
+    self.scroll_color = NotNil(self.scroll_color, self.menu.scroll_color, self.accent_color)
+    self.slider_color = NotNil(self.slider_color, self.menu.slider_color, self.accent_color)
     self.scrollbar = NotNil(self.scrollbar, self.automatic_height ~= true)
     self.visible = NotNil(self.visible, true)
     self.should_render = true
@@ -514,7 +516,8 @@ function Menu:ConfigureItem(item, menu)
     if item.override_parent == self then
         item.override_parent = nil
     end
-    local inherit = item.inherit_from or item.override_parent or self
+    local inherit = NotNil(item.inherit_from, item.override_parent, self)
+    item.inherit_from = inherit
     item.parent = self
     item.menu = self.menu
     item.enabled = NotNil(item.enabled, true)
@@ -540,7 +543,8 @@ function Menu:ConfigureItem(item, menu)
     item.font = item.font or inherit.font
     item.text_offset = item.text_offset or inherit.text_offset
     item.border_size = item.border_size or inherit.border_size or 2
-    item.scroll_color = item.scroll_color or inherit.scroll_color
+    item.accent_color = item.accent_color or inherit.accent_color
+    item.scroll_color = item.scroll_color or inherit.scroll_color or item.accent_color
     item.should_render = true
     if type(item.index) == "string" then
         local split = string.split(item.index, "|")

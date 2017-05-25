@@ -28,12 +28,14 @@ function Slider:Init()
         w = item_width,
         value = self.value,
     })
+    self.slider_color = NotNil(self.slider_color, self.inherit_from.slider_color, self.accent_color)
+    local marker_color = (self.marker_color and self.marker_color.a > 0 and self.marker_color) or self.marker_highlight_color and self.marker_highlight_color.a > 0 and self.marker_highlight_color
     local slider = self.panel:rect({
         name = "slider",
         x = self._textbox.panel:x(),
         w = item_width * (self.value / self.max),
-        layer = 1,
-        color = self.slider_color or self:Get2ndBackground(bgcolor)
+        layer = 3,
+        color = self.slider_color or marker_color or self:Get2ndBackground(bgcolor)
     })
     slider_bg:set_x(self._textbox.panel:x())
     self._mouse_pos_x, self._mouse_pos_y = 0,0
