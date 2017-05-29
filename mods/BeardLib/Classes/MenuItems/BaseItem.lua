@@ -122,7 +122,14 @@ end
 function BaseItem:SetVisible(visible)
 	self.visible = visible
 	self.panel:set_visible(visible)
-	self:SetEnabled(self.enabled and visible)
+	if not visible then
+		if self:Enabled() then
+			self._was_enabled = self.enabled
+			self:SetEnabled(visible)
+		end
+	elseif self._was_enabled then
+		self:SetEnabled(true)
+	end
 end
 
 --Return Funcs--

@@ -2,6 +2,7 @@ MapFramework = MapFramework or class(FrameworkBase)
 
 function MapFramework:init()
     self._directory = BeardLib.config.maps_dir
+    self._ignore_folders = {"backups", "prefabs"}
     self.super.init(self)
 end
 

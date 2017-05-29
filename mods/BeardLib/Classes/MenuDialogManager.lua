@@ -12,6 +12,7 @@ function MenuDialogManager:Init()
     self.select_list = SelectListDialog:new()
     self.color = ColorDialog:new()
     self.filebrowser = FileBrowserDialog:new()
+    self.input = InputDialog:new()
 end
 
 function MenuDialogManager:OpenDialog(dialog)
@@ -61,6 +62,7 @@ function MenuDialogManager:List() return self.list end
 function MenuDialogManager:SelectList() return self.select_list end
 function MenuDialogManager:Color() return self.color end
 function MenuDialogManager:FileBrowser() return self.filebrowser end
+function MenuDialogManager:Input() return self.input end
 function MenuDialogManager:Menu() return self._menu end
 function MenuDialogManager:Show() self._menu:enable() end
 function MenuDialogManager:Hide() self._menu:disable() end

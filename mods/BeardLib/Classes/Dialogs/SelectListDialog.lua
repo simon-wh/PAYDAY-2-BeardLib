@@ -4,6 +4,7 @@ function SelectListDialog:Show(params)
     self._selected_list = params.selected_list or {}
     SelectListDialog.super.Show(self, params)
 end
+
 function SelectListDialog:MakeListItems()
     self._list_menu:ClearItems("temp2")
     local function ShowItem(t) 

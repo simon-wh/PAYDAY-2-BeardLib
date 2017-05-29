@@ -31,7 +31,7 @@ function TextBoxBase:init(parent, params)
     local text = self.panel:text({
         name = "text",
         text = params.value and (parent.filter == "number" and string.format("%." .. parent.floats .. "f", tonumber(params.value)) or tostring(params.value)) or "",
-        align  = params.align,
+        align = params.align,
         wrap = not params.lines or params.lines > 1,
         word_wrap = not params.lines or params.lines > 1,
         h = self.panel:h() - 2,

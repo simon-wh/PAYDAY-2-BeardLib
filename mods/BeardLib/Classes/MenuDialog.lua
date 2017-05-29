@@ -15,32 +15,39 @@ function MenuDialog:init(params, menu)
     BeardLib.managers.dialog:AddDialog(self)
 end
 
-function MenuDialog:show(params)
+function MenuDialog:show(...)
+    return self:Show(params)
+end
+
+function MenuDialog:Show(params)
     if not self:basic_show(params) then
-        return
+        return false
     end
     if params.title then
         self._menu:Divider(table.merge({
-            name = "title",
+            name = "Title",
             text = params.title,
-            items_size = 30,
+            items_size = self._menu.items_size + 4,
         }, params.title_merge or {}))
     end
     if params.create_items then
         params.create_items(self._menu)
     end
     self._menu:Button({
-        name = "yes_btn",
+        name = "Yes",
+        text_align = "right",
         text = params.yes or (params.no and "Yes") or "Close",
         callback = callback(self, self, "hide", true)
     })
     if params.no then
         self._menu:Button({
-            name = "no_btn",
+            name = "No",
+            text_align = "right",
             text = params.no,
             callback = callback(self, self, "hide")
         })
     end
+    return true
 end
 
 function MenuDialog:basic_show(params)

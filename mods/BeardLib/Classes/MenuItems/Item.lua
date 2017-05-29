@@ -24,9 +24,6 @@ function Item:Get2ndBackground(color)
 end
 
 function Item:SetEnabled(enabled)
-	if not self.visible then
-		enabled = false
-	end
 	Item.super.SetEnabled(self, enabled)
 	if self.title then
 		self.title:set_alpha(enabled and 1 or 0.5)

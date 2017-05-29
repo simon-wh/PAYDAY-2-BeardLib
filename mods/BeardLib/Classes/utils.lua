@@ -600,6 +600,7 @@ end
 BeardLib.Utils.Path = {}
 
 _G.path = BeardLib.Utils.Path
+_G.Path = path
 
 BeardLib.Utils.Path._separator_char = "/"
 
@@ -692,7 +693,7 @@ function BeardLib.Utils.Input:Down(key) return self:Class():down(self:Id(key)) e
 function BeardLib.Utils.Input:Released(key) return self:Class():released(self:Id(key)) end
 function BeardLib.Utils.Input:Pressed(key) return self:Class():pressed(self:Id(key)) end
 function BeardLib.Utils.Input:Trigger(key, clbk) return self:Class():add_trigger(self:Id(key), SafeClbk(clbk)) end
-function BeardLib.Utils.Input:RemoveTrigger(key) return self:Class():remove_trigger(self:Id(key)) end
+function BeardLib.Utils.Input:RemoveTrigger(trigger) return self:Class():remove_trigger(trigger) end
 function BeardLib.Utils.Input:TriggerRelease(key, clbk) return self:Class():add_release_trigger(self:Id(key), SafeClbk(clbk)) end
 --Mouse
 BeardLib.Utils.MouseInput = clone(BeardLib.Utils.Input)

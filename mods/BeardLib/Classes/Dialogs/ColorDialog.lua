@@ -1,17 +1,12 @@
 ColorDialog = ColorDialog or class(MenuDialog)
-function ColorDialog:show(...)
-    self:Show(...)
-end
-
 function ColorDialog:init(params, menu)
-    params = table.merge(params or {}, {
+    self.super.init(self, table.merge(params or {}, {
         w = 420,
         offset = 8,
         automatic_height = true,
         items_size = 20,
         auto_align = true
-    })
-    self.super.init(self, params, menu)
+    }), menu)
 end
 
 function ColorDialog:Show(params)   

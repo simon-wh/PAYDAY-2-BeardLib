@@ -1,5 +1,6 @@
 FrameworkBase = FrameworkBase or class()
 FrameworkBase._directory = ""
+FrameworkBase._ignore_folders = {}
 FrameworkBase.auto_init_modules = true
 FrameworkBase.main_file_name = "main.xml"
 FrameworkBase._mod_core = ModCore
@@ -36,14 +37,16 @@ function FrameworkBase:Load()
     local dirs = file.GetDirectories(self._directory)
     if dirs then
         for _, dir in pairs(dirs) do
-            local p = path:Combine(self._directory, dir)
-            local main_file = path:Combine(p, self.main_file_name)
-            if FileIO:Exists(main_file) then
-                if not self._loaded_mods[dir] then
-                    self:LoadMod(dir, p, main_file)
+            if not table.contains(self._ignore_folders) then
+                local p = path:Combine(self._directory, dir)
+                local main_file = path:Combine(p, self.main_file_name)
+                if FileIO:Exists(main_file) then
+                    if not self._loaded_mods[dir] then
+                        self:LoadMod(dir, p, main_file)
+                    end
+                elseif not self._ignore_detection_errors then
+                    BeardLib:log("[ERROR] Could not read %s", main_file)
                 end
-            elseif not self._ignore_detection_errors then
-                BeardLib:log("[ERROR] Could not read %s", main_file)
             end
         end
     end

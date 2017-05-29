@@ -3,6 +3,10 @@ function FileBrowserDialog:show(...)
     self:Browse(...)
 end
 
+function FileBrowserDialog:Show(...)
+    self:Browse(...)
+end
+
 function FileBrowserDialog:init(params, menu)  
     menu = menu or BeardLib.managers.dialog:Menu()
     params = params or {}
