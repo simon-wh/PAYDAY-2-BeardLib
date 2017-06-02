@@ -89,7 +89,6 @@ function Item:SetText(text)
 		self.text = text
 		self.title:set_text(self.localized and text and managers.localization:text(text) or text)
 		local lines = math.max(1, self.title:number_of_lines()) 
-		self.panel:set_h(math.max(self.items_size * lines, self.panel:h()))
 		local offset = math.max(self.border_left and self.border_width or 0, self.text_offset)
 		self.title:set_shape(offset, 0, self.panel:w() - offset, self.panel:h())
 		local _,_,w,h = self.title:text_rect()
@@ -101,6 +100,8 @@ function Item:SetText(text)
 		end
 		if self.SetSize then
 			self:SetSize(nil, nil, true)
+		else
+			self.panel:set_h(math.max(self.items_size * lines, self.panel:h()))
 		end
 		return true
 	end

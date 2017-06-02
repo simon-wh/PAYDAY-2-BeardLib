@@ -1,6 +1,10 @@
 MenuDialog = MenuDialog or class()
+MenuDialog.type_name = "MenuDialog"
 function MenuDialog:init(params, menu)
     params = params or {}
+    if self.type_name == "MenuDialog" then
+        params = deep_clone(params)
+    end
     menu = menu or BeardLib.managers.dialog:Menu()
     self._menu = menu:Menu(table.merge({
         name = "dialog",
@@ -58,7 +62,9 @@ function MenuDialog:basic_show(params)
     BeardLib.managers.dialog:OpenDialog(self)
     self._callback = params.callback
     self._no_callback = params.no_callback
-    self._menu:ClearItems()
+    if not self._no_clearing_menu then
+        self._menu:ClearItems()
+    end
     self._menu:SetVisible(true)
     if params.w or params.h then
         self._menu:SetSize(params.w, params.h)
@@ -88,7 +94,9 @@ function MenuDialog:hide(yes, menu, item)
 
     local clbk = yes == true and self._callback or self._no_callback
     self:run_callback(clbk)
-    self._menu:ClearItems()
+    if not self._no_clearing_menu then
+        self._menu:ClearItems()
+    end
     self._menu:SetVisible(false)
     self._callback = nil
     self._no_callback = nil

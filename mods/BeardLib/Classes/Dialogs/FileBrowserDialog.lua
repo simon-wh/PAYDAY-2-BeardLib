@@ -1,28 +1,32 @@
 FileBrowserDialog = FileBrowserDialog or class(MenuDialog)
-function FileBrowserDialog:show(...)
-    self:Browse(...)
-end
-
-function FileBrowserDialog:Show(...)
-    self:Browse(...)
+FileBrowserDialog._no_clearing_menu = true
+FileBrowserDialog.type_name = "FileBrowserDialog"
+function FileBrowserDialog:Show(params)
+    if not self:basic_show(params, true) then
+        return
+    end
+    self._extensions = params.extensions
+    self._file_click = params.file_click
+    self._base_path = params.base_path
+    self._browse_func = params.browse_func
+    self:Browse(params.where)
 end
 
 function FileBrowserDialog:init(params, menu)  
     menu = menu or BeardLib.managers.dialog:Menu()
     params = params or {}
-
+    params = deep_clone(params)
     self._folders_menu = menu:Menu(table.merge(params, {
         w = 300,
         h = 600,
+        background_color = params.background_color or Color(0.6, 0.2, 0.2, 0.2),
         name = "Folders",
-        position = "CenterLeft",
         position = function(item)
             item:SetPositionByString("CenterLeft")
             item:Panel():move(200)
         end,
-        background_color = params.background_color or Color(0.2, 0.2, 0.2),
-        background_alpha = params.background_alpha or 0.6,
-        visible = false        
+        automatic_height = false,
+        visible = false
     })) 
 
     self._files_menu = menu:Menu(table.merge(params, {
@@ -32,21 +36,21 @@ function FileBrowserDialog:init(params, menu)
         end,
         w = 600
     }))
-    table.merge(params, {
+    FileBrowserDialog.super.init(self, table.merge(params, {
         w = 901,
         h = 16,
         position = function(item)
             item:Panel():set_leftbottom(self._folders_menu:Panel():left(), self._folders_menu:Panel():top() - 1)
         end,
-        row_max = 1,
+        align_method = "grid",
         offset = 0
-    })
-    FileBrowserDialog.super.init(self, params, menu) 
+    }), menu) 
 
     self._menu:Button({
         name = "Backward",
         w = 30,
         text = "<",
+        text_align = "center",
         callback = callback(self, self, "FolderBack"),  
         label = "temp"
     })    
@@ -55,18 +59,19 @@ function FileBrowserDialog:init(params, menu)
         name = "Forward",
         w = 30,
         text = ">",
+        text_align = "center",
         callback = function()
             self:Browse(self._old_dir)
         end,  
         label = "temp"
     })    
     self._menu:TextBox({
+        name = "CurrentPath",
+        text = false,
         w = 540,
         control_slice = 1.01,
         forbidden_chars = {':','*','?','"','<','>','|'},
         callback = callback(self, self, "OpenPathSetDialog"),
-        text = false,
-        name = "CurrentPath",
     })
     self._menu:TextBox({
         name = "Search",
@@ -78,6 +83,7 @@ function FileBrowserDialog:init(params, menu)
         name = "Close",
         w = 100,
         text = "Close",
+        text_align = "center",
         callback = callback(self, self, "hide"),  
         label = "temp"
     })
@@ -88,23 +94,23 @@ function FileBrowserDialog:Browse(where, params)
     if not FileIO:Exists(where) then
         return
     end
-    params = params or self._params or {}
-    self._params = params
     self._files_menu:ClearItems()
     self._folders_menu:ClearItems()
+    self._folders_menu:SetVisible(true)
+    self._files_menu:SetVisible(true)
     if self._current_dir ~= where then
         self._search = ""
         self._menu:GetItem("Search"):SetValue("")
     end
     self._current_dir = where or ""
-    local enabled = where ~= params.base_path
+    local enabled = where ~= self._base_path
     self._menu:GetItem("CurrentPath"):SetValue(where)
     self._menu:GetItem("Backward"):SetEnabled(enabled)
     self._menu:GetItem("Forward"):SetEnabled(enabled)
     local f = {}
     local d = {}
-    if params.browse_func then  
-        f, d = params.browse_func(self)
+    if self._browse_func then  
+        f, d = self._browse_func(self)
     else
         f = SystemFS:list(where)
         d = SystemFS:list(where, true)
@@ -126,20 +132,14 @@ function FileBrowserDialog:Browse(where, params)
         end
     end
     self:MakeFilesAndFolders(f, d)
-    if BeardLib.DialogOpened == self then
-        return
-    end
-    self._dialog:enable()    
-    self._trigger = managers.menu._controller:add_trigger(Idstring("esc"), callback(self, self, "hide"))    
-    BeardLib.DialogOpened = self
 end
 
 function FileBrowserDialog:MakeFilesAndFolders(files, folders)
     for _,v in pairs(files) do
         local tbl = type(v) == "table"
         local pass = true
-        if self._params.extensions then
-            for _, ext in pairs(self._params.extensions) do
+        if self._extensions then
+            for _, ext in pairs(self._extensions) do
                 if ext == BeardLib.Utils.Path:GetFileExtension(v) then
                     pass = true
                     break
@@ -178,8 +178,8 @@ function FileBrowserDialog:OpenPathSetDialog(menu, item)
 end
 
 function FileBrowserDialog:FileClick(menu, item)
-    if self._params.file_click then
-        self._params.file_click(item.path)
+    if self._file_click then
+        self._file_click(item.path)
     end
 end 
 
@@ -205,8 +205,14 @@ end
 
 function FileBrowserDialog:hide( ... )
     if self.super.hide(self, ...) then
-        self._params = nil
+        self._current_dir = nil
         self._old_dir = nil
+        self._extensions = nil
+        self._file_click = nil
+        self._browse_func = nil
+        self._base_path = nil
+        self._folders_menu:SetVisible(false)
+        self._files_menu:SetVisible(false)        
         return true
     end
 end

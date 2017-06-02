@@ -1,6 +1,8 @@
 SelectListDialog = SelectListDialog or class(ListDialog)
+SelectListDialog.type_name = "SelectListDialog"
 function SelectListDialog:Show(params)
     params = params or {}
+    self._single_select = params.single_select or false
     self._selected_list = params.selected_list or {}
     SelectListDialog.super.Show(self, params)
 end
@@ -38,10 +40,18 @@ function SelectListDialog:Toggle(name, selected, value)
         callback = function(menu, item)
             if item:Value() == true then
                 if not table.contains(self._selected_list, value) then
-                    table.insert(self._selected_list, value)
+                    if self._single_select then
+                        self._selected_list = {value}
+                    else
+                        table.insert(self._selected_list, value)
+                    end
                 end
             else
-                table.delete(self._selected_list, value)
+                if self._single_select then
+                    self._selected_list = {}
+                else
+                    table.delete(self._selected_list, value)
+                end
             end
         end, 
         label = "temp2"

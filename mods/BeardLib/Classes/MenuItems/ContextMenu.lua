@@ -53,7 +53,7 @@ function ContextMenu:CreateItems()
             text = text.text
         end
         self.items_panel:text({
-            name = "item"..k,
+            name = "Item-"..tostring(text),
             text = self.owner.localized_items and managers.localization:text(tostring(text)) or tostring(text),
             align = "center",
             h = 12,
@@ -124,7 +124,8 @@ function ContextMenu:MousePressed(button, x, y)
         if button == Idstring("0") then
             if self._scroll:mouse_pressed(button, x, y) then return true end
             for k, item in pairs(self.owner.items) do
-                if alive(self.items_panel:child("item"..k)) and self.items_panel:child("item"..k):inside(x,y) then
+                local item_p = self.items_panel:child("Item-"..tostring(item))
+                if alive(item_p) and item_p:inside(x,y) then
                     if self.owner.ContextMenuCallback then
                         self.owner:ContextMenuCallback(item)
                     else

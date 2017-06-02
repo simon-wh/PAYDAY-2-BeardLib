@@ -1,6 +1,9 @@
 ColorDialog = ColorDialog or class(MenuDialog)
+ColorDialog.type_name = "ColorDialog"
 function ColorDialog:init(params, menu)
-    self.super.init(self, table.merge(params or {}, {
+    params = params or {}
+    params = deep_clone(params)
+    self.super.init(self, table.merge(params, {
         w = 420,
         offset = 8,
         automatic_height = true,

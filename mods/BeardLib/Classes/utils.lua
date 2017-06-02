@@ -4,15 +4,28 @@ function table.pack(...)
 end
 
 function table.merge(og_table, new_table)
-	for i, data in pairs(new_table) do
-		i = type(data) == "table" and data.index or i
-		if type(data) == "table" and type(og_table[i]) == "table" then
-			og_table[i] = table.merge(og_table[i], data)
-		else
-			og_table[i] = data
-		end
-	end
-	return og_table
+    for i, data in pairs(new_table) do
+        i = type(data) == "table" and data.index or i
+        if type(data) == "table" and type(og_table[i]) == "table" then
+            og_table[i] = table.merge(og_table[i], data)
+        else
+            og_table[i] = data
+        end
+    end
+    return og_table
+end
+
+--When you want to merge but don't want to merge things like menu items together.
+function table.careful_merge(og_table, new_table)
+    for i, data in pairs(new_table) do
+        i = type_name(data) == "table" and data.index or i
+        if type_name(data) == "table" and type_name(og_table[i]) == "table" then
+            og_table[i] = table.merge(og_table[i], data)
+        else
+            og_table[i] = data
+        end
+    end
+    return og_table
 end
 
 function table.add_merge(og_table, new_table)
@@ -343,7 +356,7 @@ function BeardLib.Utils:OutfitStringFromList(outfit, is_henchman)
     local bm = managers.blackmarket
     is_henchman = is_henchman and bm.henchman_loadout_string_from_loadout
     local str = is_henchman and bm:henchman_loadout_string_from_loadout(outfit) or bm:outfit_string_from_list(outfit)
-    --Remove when overkill decides to add armor_skin to BlackMarketManager:outfit_string_from_list
+     --Remove when overkill decides to add armor_skin to BlackMarketManager:outfit_string_from_list
     return is_henchman and str or str:gsub(outfit.armor.."%-"..outfit.armor_current.."%-"..outfit.armor_current_state, outfit.armor.."-"..outfit.armor_current.."-"..outfit.armor_current_state.."-"..outfit.armor_skin)
 end
 
@@ -352,28 +365,28 @@ function BeardLib.Utils:CleanOutfitString(str, is_henchman)
     if is_henchman and not bm.unpack_henchman_loadout_string then --thx ovk for the headaches henchman beta caused me <3
         is_henchman = false
     end
-    local list = (is_henchman and bm.unpack_henchman_loadout_string) and bm:unpack_henchman_loadout_string(str) or bm:unpack_outfit_from_string(str)
-    if list.mask and tweak_data.blackmarket.masks[is_henchman and list.mask or list.mask.mask_id].custom then
+	local list = (is_henchman and bm.unpack_henchman_loadout_string) and bm:unpack_henchman_loadout_string(str) or bm:unpack_outfit_from_string(str)
+	if list.mask and tweak_data.blackmarket.masks[is_henchman and list.mask or list.mask.mask_id].custom then
         if is_henchman then
             list.mask = "character_locked"
         else
             list.mask.mask_id = "character_locked"
         end
-    end
+	end
 
     local pattern = is_henchman and list.mask_blueprint.pattern or list.mask.blueprint.pattern
-    if pattern and tweak_data.blackmarket.textures[pattern.id].custom then
-        pattern.id = "no_color_no_material"
-    end
+	if pattern and tweak_data.blackmarket.textures[pattern.id].custom then
+		pattern.id = "no_color_no_material"
+	end
 
     local material = is_henchman and list.mask_blueprint.material or list.mask.blueprint.material
-    if material and tweak_data.blackmarket.materials[material.id].custom then
-        material.id = "plastic"
-    end
+	if material and tweak_data.blackmarket.materials[material.id].custom then
+		material.id = "plastic"
+	end
 
     if list.primary then
         local primary = is_henchman and list.primary or list.primary.factory_id
-        if tweak_data.weapon.factory[primary].custom then
+    	if tweak_data.weapon.factory[primary].custom then
             local based_on = self:GetBasedOnFactoryId(primary) or self.WeapConv[2]
             if is_henchman then
                 list.primary = based_on
@@ -381,29 +394,29 @@ function BeardLib.Utils:CleanOutfitString(str, is_henchman)
                 list.primary.factory_id = based_on
                 list.primary.blueprint = tweak_data.weapon.factory[list.primary.factory_id].default_blueprint
             end
-        end
+    	end
     end
 
-    if not is_henchman and list.secondary then
+	if not is_henchman and list.secondary then
         local secondary = list.secondary.factory_id
         if tweak_data.weapon.factory[secondary].custom then
-            list.secondary.factory_id = self:GetBasedOnFactoryId(secondary) or self.WeapConv[1]
+    		list.secondary.factory_id = self:GetBasedOnFactoryId(secondary) or self.WeapConv[1]
             list.secondary.blueprint = tweak_data.weapon.factory[list.secondary.factory_id].default_blueprint
-        end
+    	end
 
         if tweak_data.blackmarket.melee_weapons[list.melee_weapon].custom then
             list.melee_weapon = "weapon"
         end
 
-        for _, weap in pairs({list.primary, list.secondary}) do
-            for i, part_id in pairs(weap.blueprint) do
-                if tweak_data.weapon.factory.parts[part_id] and tweak_data.weapon.factory.parts[part_id].custom then
-                    table.remove(weap.blueprint, i)
-                end
-            end
-        end
+    	for _, weap in pairs({list.primary, list.secondary}) do
+    		for i, part_id in pairs(weap.blueprint) do
+    			if tweak_data.weapon.factory.parts[part_id] and tweak_data.weapon.factory.parts[part_id].custom then
+    				table.remove(weap.blueprint, i)
+    			end
+    		end
+    	end
     end
-    return self:OutfitStringFromList(list, is_henchman)
+	return self:OutfitStringFromList(list, is_henchman)
 end
 
 function BeardLib.Utils:GetSubValues(tbl, key)
@@ -793,4 +806,13 @@ function Color:contrast(white, black)
         color = black or Color.black 
     end
     return color
+end
+
+--Pretty much CoreClass.type_name with support for tables.
+function type_name(value)
+    local t = type(value)
+    if t == "userdata" or t == "table" and value.type_name then
+        return value.type_name
+    end
+    return t
 end

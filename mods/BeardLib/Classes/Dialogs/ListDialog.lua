@@ -1,6 +1,8 @@
 ListDialog = ListDialog or class(MenuDialog)
+ListDialog.type_name = "ListDialog"
 function ListDialog:init(params, menu)
     params = params or {}
+    params = deep_clone(params)
     menu = menu or BeardLib.managers.dialog:Menu()
     self._list_menu = menu:Menu(table.merge({
         w = 900,
@@ -8,7 +10,6 @@ function ListDialog:init(params, menu)
         name = "List",
         auto_align = false,
         position = params.position or "Center",
-        background_color = params.background_color or Color(0.2, 0.2, 0.2),
         layer = BeardLib.managers.dialog:GetNewIndex(),
         visible = false,
     }, params))

@@ -1,7 +1,7 @@
 Menu = Menu or class(Item)
 Menu.type_name = "Menu"
-function Menu:Init()
-    self:WorkParams()
+function Menu:Init(params)
+    self:WorkParams(params)
     self.menu_type = true
     self.panel = self.parent_panel:panel({
         name = self.name .. "_panel",
@@ -38,7 +38,9 @@ function Menu:Init()
     self:SetScrollPanelSize()
 end
 
-function Menu:WorkParams()
+function Menu:WorkParams(params)
+    params = params or {}
+    table.careful_merge(self, clone(params))
     self.name = self.name or ""
     self.text_color = self.text_color or self.menu.text_color or (self.background_color and self.background_color:contrast() or Color.white)
     self.text_highlight_color = self.text_highlight_color or self.menu.text_highlight_color
@@ -76,7 +78,8 @@ function Menu:SetSize(w, h, no_recreate)
     w = w or self.w
     h = h or self.h
     if self.title and CoreClass.type_name(self.title) == "Text" then
-        h = h + self.title:h()
+        local _,_,_,th = self.title:text_rect()
+        h = h + th
     end
     self.panel:set_size(w, h)
     self:SetScrollPanelSize()
@@ -92,7 +95,8 @@ end
 function Menu:SetScrollPanelSize()
     local has_title = self.title and CoreClass.type_name(self.title) == "Text"
     if not self.automatic_height and has_title then
-        self._scroll:set_size(self.panel:w(), self.panel:h() - (self.title:h() * 2))
+        local _,_,_,h = self.title:text_rect()
+        self._scroll:set_size(self.panel:w(), self.panel:h() - (h * 2))
     else
         self._scroll:set_size(self.panel:size()) 
     end

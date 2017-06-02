@@ -1,6 +1,6 @@
 BaseItem = BaseItem or class()
 function BaseItem:init(params)
-	table.merge(self, params)
+	table.careful_merge(self, params)
 	self.type_name = self.type_name or "Button"
 	local mitem = getmetatable(self)
 	function mitem:__tostring() --STOP FUCKING RESETING
