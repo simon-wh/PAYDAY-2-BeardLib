@@ -250,10 +250,12 @@ end
 
 function BeardLib.Utils:GetCleanedWeaponData(unit)
     local player_inv = unit and unit:inventory() or managers.player:player_unit():inventory()
-    local wep = tweak_data.weapon[managers.weapon_factory:get_weapon_id_by_factory_id(player_inv:equipped_unit():base()._factory_id or player_inv:equipped_unit():name())]
+    local name = tostring(player_inv:equipped_unit():base()._factory_id or player_inv:equipped_unit():name())
+    local is_npc = string.ends(name, "_npc")
+    local wep = tweak_data.weapon[managers.weapon_factory:get_weapon_id_by_factory_id(is_npc and name:gsub("_npc", "") or name)]
     local based_on_fac = self:GetBasedOnFactoryId(nil, wep)
 
-    local new_weap_name = based_on_fac or self.WeapConv[wep.use_data.selection_index]
+    local new_weap_name = (not is_npc and based_on_fac) or self.WeapConv[wep.use_data.selection_index] .. (is_npc and "_npc" or "")
     return PlayerInventory._get_weapon_sync_index(new_weap_name), managers.weapon_factory:blueprint_to_string(new_weap_name, tweak_data.weapon.factory[new_weap_name].default_blueprint)
 end
 
