@@ -2,19 +2,25 @@ MenuDialog = MenuDialog or class()
 MenuDialog.type_name = "MenuDialog"
 function MenuDialog:init(params, menu)
     params = params or {}
+    self._default_width = 420
+    self._tbl = {}
     if self.type_name == "MenuDialog" then
         params = deep_clone(params)
     end
     menu = menu or BeardLib.managers.dialog:Menu()
     self._menu = menu:Menu(table.merge({
-        name = "dialog",
+        name = "dialog"..tostring(self),
         position = "Center",
-        layer = BeardLib.managers.dialog:GetNewIndex(),
+        w = MenuDialog._default_width,
         visible = false,
+        auto_height = true,
+        always_highlighting = true,
+        reach_ignore_focus = true,
         scrollbar = false,
+        items_size = 20,
+        offset = 8,
+        marker_highlight_color = Color("719ee8"),
         background_color = Color(0.6, 0.2, 0.2, 0.2),
-        w = 600,
-        h = 500
     }, params)) 
     BeardLib.managers.dialog:AddDialog(self)
 end
@@ -31,46 +37,75 @@ function MenuDialog:Show(params)
         self._menu:Divider(table.merge({
             name = "Title",
             text = params.title,
+            border_bottom = true,
+            border_color = self._menu.marker_highlight_color,
             items_size = self._menu.items_size + 4,
         }, params.title_merge or {}))
+    end
+    if params.message then
+        self._menu:Divider({
+            name = "Message",
+            text = params.message,
+            items_size = self._menu.items_size + 2,
+        })
     end
     if params.create_items then
         params.create_items(self._menu)
     end
-    self._menu:Button({
-        name = "Yes",
-        text_align = "right",
-        text = params.yes or (params.no and "Yes") or "Close",
-        callback = callback(self, self, "hide", true)
-    })
+    if params.yes ~= false then
+        self._menu:Button({
+            name = "Yes",
+            text = params.yes or (params.no and "Yes") or "Close",
+            reachable = true,
+            highlight = true,
+            callback = callback(self, self, "hide", true)
+        })
+    end
     if params.no then
         self._menu:Button({
             name = "No",
-            text_align = "right",
             text = params.no,
+            reachable = true,
             callback = callback(self, self, "hide")
         })
     end
+    self:show_dialog()
     return true
+end
+
+function MenuDialog:show_dialog()
+    self._menu:SetVisible(true, true)
+    if self._menus then
+        for _, menu in pairs(self._menus) do
+            menu:SetVisible(true, true)
+        end
+    end
 end
 
 function MenuDialog:basic_show(params)
     if BeardLib.managers.dialog:DialogOpened(self) then
         return false
     end
-    params = params or {}
+    self._tbl = {}
+    params = type_name(params) == "table" and params or {}
     BeardLib.managers.dialog:OpenDialog(self)
     self._callback = params.callback
     self._no_callback = params.no_callback
     if not self._no_clearing_menu then
         self._menu:ClearItems()
     end
-    self._menu:SetVisible(true)
-    if params.w or params.h then
-        self._menu:SetSize(params.w, params.h)
+    self._menu:SetLayer(BeardLib.managers.dialog:GetMyIndex(self) * 50)
+    if not self._no_reshaping_menu then
+        self._menu:SetSize(params.w or self._default_width, params.h)
+        self._menu:SetPosition(params.position or "Center")
     end
-    if params.position then
-        self._menu:SetPosition(params.position)
+    if self._menus then
+        for _, menu in pairs(self._menus) do
+            menu:SetLayer(BeardLib.managers.dialog:GetMyIndex(self) * 50)
+            if not self._no_clearing_menu then
+                menu:ClearItems()
+            end
+        end
     end
     return true
 end
@@ -91,14 +126,42 @@ end
 
 function MenuDialog:hide(yes, menu, item)
     BeardLib.managers.dialog:CloseDialog(self)
-
-    local clbk = yes == true and self._callback or self._no_callback
+    local clbk = yes == true and self._callback or yes ~= false and self._no_callback
     self:run_callback(clbk)
     if not self._no_clearing_menu then
         self._menu:ClearItems()
     end
-    self._menu:SetVisible(false)
+    self._menu:SetVisible(false, true)
+    if self._menus then
+        for _, menu in pairs(self._menus) do
+            menu:SetVisible(false, true)
+            if not self._no_clearing_menu then
+                menu:ClearItems()
+            end
+        end
+    end
+    self._tbl = {}
     self._callback = nil
     self._no_callback = nil
     return true
+end
+
+function QuickDialog(opt, items)
+    opt = opt or {}
+    local dialog = opt.dialog or BeardLib.managers.dialog.simple
+    opt.dialog = nil
+    opt.title = opt.title or "Info"
+    dialog:Show(table.merge({no = "Close", yes = false, create_items = function(menu)
+        for i, item in pairs(items) do
+            if item[3] == true then
+                dialog._no_callback = item[2]
+            end
+            menu:Button({highlight = true, reachable = true, name =  type_name(item) == "table" and item[1] or item, callback = function() 
+                if type(item[2]) == "function" then
+                    item[2]()
+                end
+                dialog:hide(false)
+            end, type_name(item) == "table" and item[2]})
+        end
+    end}, opt))
 end

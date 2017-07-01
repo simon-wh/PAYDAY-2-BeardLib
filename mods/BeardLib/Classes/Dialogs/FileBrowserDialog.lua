@@ -1,5 +1,6 @@
 FileBrowserDialog = FileBrowserDialog or class(MenuDialog)
 FileBrowserDialog._no_clearing_menu = true
+FileBrowserDialog._no_reshaping_menu = true
 FileBrowserDialog.type_name = "FileBrowserDialog"
 function FileBrowserDialog:Show(params)
     if not self:basic_show(params, true) then
@@ -10,6 +11,7 @@ function FileBrowserDialog:Show(params)
     self._base_path = params.base_path
     self._browse_func = params.browse_func
     self:Browse(params.where)
+    self:show_dialog()
 end
 
 function FileBrowserDialog:init(params, menu)  
@@ -25,7 +27,7 @@ function FileBrowserDialog:init(params, menu)
             item:SetPositionByString("CenterLeft")
             item:Panel():move(200)
         end,
-        automatic_height = false,
+        auto_height = false,
         visible = false
     })) 
 
@@ -39,13 +41,14 @@ function FileBrowserDialog:init(params, menu)
     FileBrowserDialog.super.init(self, table.merge(params, {
         w = 901,
         h = 16,
+        auto_height = false,
         position = function(item)
             item:Panel():set_leftbottom(self._folders_menu:Panel():left(), self._folders_menu:Panel():top() - 1)
         end,
         align_method = "grid",
         offset = 0
     }), menu) 
-
+    self._menus = {self._files_menu, self._folders_menu}
     self._menu:Button({
         name = "Backward",
         w = 30,
@@ -96,8 +99,6 @@ function FileBrowserDialog:Browse(where, params)
     end
     self._files_menu:ClearItems()
     self._folders_menu:ClearItems()
-    self._folders_menu:SetVisible(true)
-    self._files_menu:SetVisible(true)
     if self._current_dir ~= where then
         self._search = ""
         self._menu:GetItem("Search"):SetValue("")
@@ -211,8 +212,6 @@ function FileBrowserDialog:hide( ... )
         self._file_click = nil
         self._browse_func = nil
         self._base_path = nil
-        self._folders_menu:SetVisible(false)
-        self._files_menu:SetVisible(false)        
         return true
     end
 end

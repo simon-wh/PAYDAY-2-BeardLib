@@ -23,9 +23,9 @@ function Group:InitBasicItem()
 end
 
 function Group:RePositionToggle()
-    if self.title then
+    if self:title_alive() then
         local _,_,w,_ = self.title:text_rect()
-        if self.toggle then
+        if self.toggle and alive(self.toggle) then
             self.toggle:set_left(w + 4)
         end
     end
@@ -46,8 +46,7 @@ function Group:ToggleGroup()
         self.panel:set_h(self.parent.items_size)
     end
     for i, item in ipairs(self._my_items) do
-        item:SetEnabled(not self.closed)
-        item.panel:set_visible(not self.closed)
+        item:SetVisible(not self.closed)
     end
     self.toggle:set_texture_rect(self.closed and 42 or 2, self.closed and 2 or 0, 16, 16)
     self:AlignItems()

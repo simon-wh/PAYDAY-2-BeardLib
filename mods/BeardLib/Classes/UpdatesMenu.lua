@@ -24,7 +24,7 @@ function UpdatesMenu:CreateMenu(menu)
     self._menu:Button({text = "mod_assets_update_all", localized = true, callback = callback(menu, menu, "disable"), size_by_text = true, position = function(item)
         item:Panel():set_righttop(close:Panel():lefttop())
     end})
-    self._mods = self._menu:DivGroup({name = "Mods", automatic_height = false, h = self._menu.h})
+    self._mods = self._menu:DivGroup({name = "Mods", auto_height = false, h = self._menu.h})
 end
 
 function UpdatesMenu:AddUpdate(module)
@@ -38,7 +38,8 @@ function UpdatesMenu:AddUpdate(module)
     })
     local Actions = Holder:Menu({
         name = "Actions",
-        automatic_height = true,
+        auto_height = true,
+        auto_height = true,
         count_height = true,
         offset = {0, Holder.offset[2]},
         background_visible = false,

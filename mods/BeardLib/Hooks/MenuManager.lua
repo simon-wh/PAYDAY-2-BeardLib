@@ -36,6 +36,9 @@ Hooks:PostHook(SystemMenuManager.GenericSystemMenuManager, "event_dialog_shown",
         BeardLib.IgnoreDialogOnce = true
     end
 end)
+Hooks:PostHook(SystemMenuManager.GenericSystemMenuManager, "event_dialog_closed", "BeardLibEventDialogClosed", function(self)
+    BeardLib.IgnoreDialogOnce = false
+end)
 
 function MenuCallbackHandler:start_job(job_data)
     if not managers.job:activate_job(job_data.job_id) then

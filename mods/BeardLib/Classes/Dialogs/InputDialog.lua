@@ -4,12 +4,11 @@ function InputDialog:init(params, menu)
     params = params or {}
     params = deep_clone(params)
     self.super.init(self, table.merge(params, {
-        w = 420,
         offset = 8,
-        automatic_height = true,
+        auto_height = true,
         items_size = 20,
-        auto_align = true
     }), menu)
+    self._default_width = 500
 end
 
 function InputDialog:Show(params)
@@ -20,18 +19,27 @@ function InputDialog:Show(params)
     if not self.super.Show(self, params) then
         return
     end
-    self._text = self._menu:TextBox(table.merge({
+    local body = self._menu:Menu({
+        name = "TextBody",
+        background_color = self._menu.background_color:contrast():with_alpha(0.25),
+        index = params.title and "After|Title" or 1,
+        auto_height = true,
+        scroll_color = self._menu.text_color,
+        scrollbar = true,
+        max_height = 500,
+    })
+    self._text = body:TextBox(table.merge({
         name = "Text",
         text = "",
-        index = params.title and "After|Title" or 1,
-        marker_highlight_color = Color.transparent,
+        offset = 0,
+        marker_highlight_color = false,
         line_color = Color.transparent,
         control_slice = 1,
-        textbox_align = "center",
         filter = params.filter,
         value = params.text
     }, params.merge_text or {}))
 	self._enter = BeardLib.Utils.Input:Trigger("enter", callback(self, self, "hide", true))
+    self:show_dialog()
 end
 
 function InputDialog:run_callback(clbk)

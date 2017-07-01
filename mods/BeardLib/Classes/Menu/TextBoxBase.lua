@@ -54,6 +54,10 @@ function TextBoxBase:init(parent, params)
     self.history = {params.value and text:text()}
  	text:enter_text(callback(self, TextBoxBase, "enter_text"))
  	self.update_text = params.update_text or function(self, ...) self._parent:_SetValue(...) end
+end
+
+function TextBoxBase:PostInit()
+    self:CheckText(self.panel:child("text"), true)
     self:update_caret()
 end
 
@@ -66,15 +70,15 @@ function TextBoxBase:DoHighlight(highlight)
     self.panel:child("caret"):set_color(text:color():with_alpha(1))
 end
 
-function TextBoxBase:CheckText(text)
+function TextBoxBase:CheckText(text, no_clbk)
     if self.filter == "number" then
         if tonumber(text:text()) ~= nil then
-            self:update_text(self:tonumber(text:text()), true, true)
+            self:update_text(self:tonumber(text:text()), not no_clbk, true)
         else
-            self:update_text(self:tonumber(self:one_point_back()), true, true)
+            self:update_text(self:tonumber(self:one_point_back()), not no_clbk, true)
         end
     else
-        self:update_text(text:text(), true, true)
+        self:update_text(text:text(), not no_clbk, true)
     end
 end
  
@@ -115,7 +119,7 @@ function TextBoxBase:key_hold(text, k)
                 end
             end
         else
-            if k == Idstring("backspace") then
+            if k == Idstring("backspace") or k == Idstring("delete") then
                 if not (utf8.len(text:text()) < 1) then
                     if s == e and s > 0 then
                         text:set_selection(s - 1, e)
@@ -201,9 +205,12 @@ function TextBoxBase:enter_text(text, s)
 end
 
 function TextBoxBase:KeyPressed(o, k)
+    if not alive(self.panel) then
+        return
+    end
 	local text = self.panel:child("text")
 
- 	if k == Idstring("enter") then
+ 	if k == Idstring("enter") or k == Idstring("esc") then
  		self.cantype = false
         text:stop()
  		self:CheckText(text)
@@ -223,17 +230,16 @@ function TextBoxBase:update_caret()
     end
     local text = self.panel:child("text")
     local lines = math.max(1, text:number_of_lines())
-
+    local _,_,_,h = text:text_rect()
+    h = math.max(h, text:font_size())
     if not self.lines or (self.lines > 1 and self.lines <= lines) then
-        self.panel:set_h(self.items_size * lines)
-        self.panel:parent():set_h(self.panel:h())
-        text:set_h(self.panel:h())
-        self.panel:child("line"):set_bottom(text:h())
+        self.panel:set_h(h)
+        self.panel:parent():set_h(h)
+        text:set_h(h)
+        self.panel:child("line"):set_bottom(h)
         self._parent:SetText(self._parent.text)
     end
-    if self._parent.group then
-        self._parent.group:AlignItems()
-    else
+    if self.parent then
         self.parent:AlignItems()
     end
     local s, e = text:selection()

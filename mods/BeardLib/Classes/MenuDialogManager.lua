@@ -3,11 +3,13 @@ function MenuDialogManager:Init()
     self._menu = MenuUI:new({
         name = "BeardLibDialogs",
         layer = 800,
+        background_blur = true,
         marker_color = Color.white:with_alpha(0),
         marker_highlight_color = Color("4385ef"),
     })
     self._dialogs = {}
     self._opened_dialogs = {}
+    self.simple = MenuDialog:new()
     self.list = ListDialog:new()
     self.select_list = SelectListDialog:new()
     self.color = ColorDialog:new()
@@ -17,13 +19,29 @@ end
 
 function MenuDialogManager:OpenDialog(dialog)
     table.insert(self._opened_dialogs, dialog)
+    self:EnableOnlyLast()
     if dialog._menu and dialog._menu.menu == self._menu then
         self:Show()
     end
 end
 
+function MenuDialogManager:EnableOnlyLast()
+    for k, dialog in pairs(self._opened_dialogs) do
+        local enabled = k == #self._opened_dialogs
+        if dialog._menu then
+            dialog._menu:SetEnabled(enabled)
+        end
+        if dialog._menus then
+            for _, menu in pairs(dialog._menus) do
+                menu:SetEnabled(enabled)
+            end
+        end
+    end
+end
+
 function MenuDialogManager:CloseDialog(dialog)
     table.delete(self._opened_dialogs, dialog)
+    self:EnableOnlyLast()
     local opened
     for _, d in pairs(self._opened_dialogs) do
         if d._menu and d._menu.menu == self._menu then
@@ -66,7 +84,7 @@ function MenuDialogManager:Input() return self.input end
 function MenuDialogManager:Menu() return self._menu end
 function MenuDialogManager:Show() self._menu:enable() end
 function MenuDialogManager:Hide() self._menu:disable() end
-function MenuDialogManager:GetNewIndex() return #self._dialogs + 1 end
+function MenuDialogManager:GetMyIndex(dialog) return tonumber(table.get_key(self._opened_dialogs, dialog)) or 0 end
 function MenuDialogManager:AddDialog(dialog) table.insert(self._dialogs, dialog) end
 
 return MenuDialogManager

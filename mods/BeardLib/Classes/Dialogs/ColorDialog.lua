@@ -1,12 +1,13 @@
 ColorDialog = ColorDialog or class(MenuDialog)
 ColorDialog.type_name = "ColorDialog"
+ColorDialog._default_width = 420
 function ColorDialog:init(params, menu)
     params = params or {}
     params = deep_clone(params)
     self.super.init(self, table.merge(params, {
-        w = 420,
+        w = ColorDialog._default_width,
         offset = 8,
-        automatic_height = true,
+        auto_height = true,
         items_size = 20,
         auto_align = true
     }), menu)
@@ -72,6 +73,7 @@ function ColorDialog:Show(params)
         label = "temp"
     })
     self:update_color(self._menu)
+    self:show_dialog()
 end
 
 --http://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color

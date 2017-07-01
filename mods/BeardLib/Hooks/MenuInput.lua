@@ -40,3 +40,12 @@ function MenuInput:back(...)
     end
     return o_back(self, ...)
 end
+
+local o_mouse_moved = MenuInput.mouse_moved
+function MenuInput:mouse_moved(...)
+    local mc = managers.mouse_pointer._mouse_callbacks
+    local last = mc[#mc]
+    if not last or type_name(last.parent) ~= "MenuUI" then
+        return o_mouse_moved(self, ...)
+    end
+end

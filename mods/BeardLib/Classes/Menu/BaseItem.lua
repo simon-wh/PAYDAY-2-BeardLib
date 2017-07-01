@@ -25,7 +25,7 @@ function BaseItem:InitBasicItem()
 		layer = 3,
 		color = self.text_color or Color.black,
 		font = self.font,
-		font_size = self.items_size
+		font_size = self.font_size or self.items_size
 	})
 	self.bg = self.panel:rect({
 		name = "bg",
@@ -119,27 +119,40 @@ function BaseItem:TryRendering()
 	return visible
 end
 
-function BaseItem:SetVisible(visible)
-	self.visible = visible
-	self.panel:set_visible(visible)
-	if not visible then
-		if self:Enabled() then
-			self._was_enabled = self.enabled
-			self:SetEnabled(visible)
-		end
-	elseif self._was_enabled then
-		self:SetEnabled(true)
+function BaseItem:SetVisible(visible, no_align)
+	if not self:alive() then
+		return
 	end
+    self.visible = visible
+    self.panel:set_visible(visible)
+    if not visible then
+        if self:Enabled() then
+            self._was_enabled = self.enabled
+            self:SetEnabled(visible)
+        end
+    elseif self._was_enabled then
+        self:SetEnabled(true)
+    end
+    if not no_align and self.parent.auto_align then
+    	self.parent:AlignItems()
+    end
 end
 
 --Return Funcs--
 function BaseItem:Panel() return self.panel end
+function BaseItem:Position() return self.position end
+function BaseItem:Text() return type(self.text) == "string" and self.text or "" end
+function BaseItem:Height() return self:Panel():h() end
+function BaseItem:OuterHeight() return self:Height() + self:Offset()[2] end
+function BaseItem:Width() return self:Panel():w() end
+function BaseItem:Offset() return self.private_offset or self.offset end
 function BaseItem:alive() return alive(self.panel) end
+function BaseItem:title_alive() return type_name(self.title) == "Text" and alive(self.title) end
 function BaseItem:Value() return self.value end
 function BaseItem:Enabled() return self.enabled end
 function BaseItem:Index() return self.parent:GetIndex(self.name) end
 function BaseItem:MouseInside(x, y) return self.panel:inside(x,y) end
-function BaseItem:Visible() return self.visible and self.should_render end
+function BaseItem:Visible() return self:alive() and self.visible and self.should_render end
 function BaseItem:MouseFocused(x, y)
     if not x and not y then
         x,y = managers.mouse_pointer._mouse:world_position()
@@ -186,7 +199,7 @@ function BaseItem:SetPositionByString(pos)
 	end
     local pos_panel = self.parent_panel
     for _, p in pairs({"center", "bottom", "top", "right", "left", "center_x", "center_y"}) do
-        if (p ~= "center" or not pos:lower():match("center_")) and pos:lower():match(p) then
+		if (p ~= "center" or not pos:lower():match("center_")) and pos:lower():match(p) then
             self.panel["set_world_"..p](self.panel, pos_panel["world_"..p](pos_panel))
         end
     end
@@ -207,6 +220,11 @@ function BaseItem:MouseCheck(press)
 		return false
 	end
 	return not self.divider_type, true
+end
+
+function BaseItem:SetLayer(layer)
+    self:Panel():set_layer(layer)
+    self.layer = layer
 end
 
 function BaseItem:RunCallback(clbk, ...)

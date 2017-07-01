@@ -109,6 +109,6 @@ function QuickAnim:dt()
     local dt = coroutine.yield()
     if Application:paused() then
         dt = TimerManager:main():delta_time()
-    end           
+    end
     return dt
 end

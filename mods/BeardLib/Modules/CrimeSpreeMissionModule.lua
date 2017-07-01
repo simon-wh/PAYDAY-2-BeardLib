@@ -17,7 +17,8 @@ function CrimeSpreeMissionModule:AddMissionDataToTweak(c_self, tweak_data)
     if self._config.merge_data then
         table.merge(data, BeardLib.Utils:RemoveMetas(self._config.merge_data, true))
     end
-    table.insert(c_self.missions[self._config.type or "medium"], data)
+    local types = {["short"] = 1, ["medium"] = 2, ["long"] = 3} -- I guess
+    table.insert(c_self.missions[types[self._config.type or "medium"]], data)
 end
 
 function CrimeSpreeMissionModule:RegisterHook()

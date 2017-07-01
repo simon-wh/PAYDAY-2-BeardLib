@@ -105,18 +105,30 @@ function FileIO:CopyTo(path, to_path)
 	os.execute(string.format("xcopy \"%s\" \"%s\" /e /i /h /y /c", path, to_path))
 end
 
-function FileIO:MoveFileTo(path, to_path)
-	if BeardLib.Utils.Path:Normalize(path) ~= BeardLib.Utils.Path:Normalize(to_path) then
-		self:CopyFileTo(path, to_path)
-		self:Delete(path)
+function FileIO:CopyToAsync(path, to_path, callback)
+	local files = {}
+	local function PrepareCopyAsync(p)
+	    for _, file in pairs(FileIO:GetFiles(p)) do
+	        table.insert(files, {Path:Combine(p,file), Path:Combine(p:gsub(path, to_path), file)})
+	    end
+	    for _, folder in pairs(FileIO:GetFolders(p)) do
+	        PrepareCopyAsync(Path:Combine(p, folder))
+	        FileIO:MakeDir(Path:Combine(p:gsub(path, to_path), folder))
+	    end
 	end
+	PrepareCopyAsync(path)
+
+	SystemFS:copy_files_async(files, callback or function(success, message)
+	    if success then
+	        BeardLib:log("[FileIO] Done copying directory %s to %s", path, to_path)
+	    else
+	        BeardLib:log("[FileIO] Something went wrong when copying directory %s to %s, \n %s", path, to_path, message)
+	    end
+	end)
 end
 
 function FileIO:MoveTo(path, to_path)
-	if BeardLib.Utils.Path:Normalize(path) ~= BeardLib.Utils.Path:Normalize(to_path) then
-		self:CopyTo(path, to_path)
-		self:Delete(path)
-	end
+	SystemFS:rename_file(path, to_path)
 end
 
 function FileIO:Delete(path) 

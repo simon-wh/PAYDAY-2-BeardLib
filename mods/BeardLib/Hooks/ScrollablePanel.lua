@@ -39,13 +39,19 @@ function ScrollablePanelModified:set_scroll_color(color)
 end
 
 function ScrollablePanelModified:set_size(...)
-	self.super.set_size(self, ...)
-	if self._scroll_width then
-		self:canvas():set_w(self:canvas_max_width())
-		self:panel():child("scroll_up_indicator_arrow"):set_world_left(self:canvas():world_right() + 2)
-		self:panel():child("scroll_down_indicator_arrow"):set_world_left(self:canvas():world_right() + 2)
-		self._scroll_bar:set_center_x(self:panel():child("scroll_down_indicator_arrow"):center_x())
-	end
+    self.super.set_size(self, ...)
+    if self._scroll_width then
+        self:canvas():set_w(self:canvas_max_width())
+        local scroll_down_indicator_arrow = self:panel():child("scroll_down_indicator_arrow")
+        scroll_down_indicator_arrow:set_world_rightbottom(self:panel():world_right() - 2, self:panel():world_bottom())
+        self:panel():child("scroll_up_indicator_arrow"):set_world_righttop(self:panel():world_right() - 2, self:panel():world_top())
+        self._scroll_bar:set_center_x(scroll_down_indicator_arrow:center_x())
+        self._scroll_bar:set_world_bottom(scroll_down_indicator_arrow:world_top())
+    end
+end
+
+function ScrollablePanelModified:is_scrollable()
+	return (self:canvas():h() - self:scroll_panel():h()) > 1
 end
 
 function ScrollablePanelModified:canvas_max_width()
@@ -89,4 +95,33 @@ function ScrollablePanelModified:canvas_scroll_width()
 	else
 		return self:scroll_panel():w() - self:padding() - 5
 	end
+end
+function ScrollablePanelModified:set_canvas_size(w, h)
+	w = w or self:canvas():w()
+	h = h or self:canvas():h()
+	if h <= self:scroll_panel():h() then
+		h = self:scroll_panel():h()
+		self:canvas():set_y(0)
+	end
+	self:canvas():set_size(w, h)
+	local show_scrollbar = (h - self:scroll_panel():h()) > 0.5
+	if not show_scrollbar then
+		self._scroll_bar:set_alpha(0)
+		self._scroll_bar:set_visible(false)
+		self._scroll_bar_box_class:hide()
+		self:set_element_alpha_target("scroll_up_indicator_arrow", 0)
+		self:set_element_alpha_target("scroll_down_indicator_arrow", 0)
+		self:set_element_alpha_target("scroll_up_indicator_shade", 0)
+		self:set_element_alpha_target("scroll_down_indicator_shade", 0)
+	else
+		self._scroll_bar:set_alpha(1)
+		self._scroll_bar:set_visible(true)
+		self._scroll_bar_box_class:show()
+		self:_set_scroll_indicator()
+		self:_check_scroll_indicator_states()
+	end
+end
+
+function ScrollablePanelModified:set_element_alpha_target(element, target, speed)
+	QuickAnim:Work(self:panel():child(element), "alpha", target)
 end
