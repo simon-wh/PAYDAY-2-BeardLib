@@ -73,6 +73,7 @@ function ColorDialog:Show(params)
         label = "temp"
     })
     self:update_color(self._menu)
+    self._enter = BeardLib.Utils.Input:Trigger("enter", callback(self, self, "hide", true))
     self:show_dialog()
 end
 
@@ -87,20 +88,24 @@ function ColorDialog:update_hex_color()
     item:SetVisible(self._color.a == 1)
 end
 
-function ColorDialog:update_hex(menu, item)
-   self._color.color = Color(item:Value())
-   menu:GetItem("Alpha"):SetValue(self._color.alpha * 100)
-   menu:GetItem("Red"):SetValue(self._color.red * 255)
-   menu:GetItem("Green"):SetValue(self._color.green * 255)
-   menu:GetItem("Blue"):SetValue(self._color.blue * 255)
-   menu:GetItem("ColorPreview"):Panel():child("bg"):set_color(self._color)
+function ColorDialog:set_color(color)
+   self._color = color
+   self._menu:GetItem("Alpha"):SetValue(self._color.alpha * 100)
+   self._menu:GetItem("Red"):SetValue(self._color.red * 255)
+   self._menu:GetItem("Green"):SetValue(self._color.green * 255)
+   self._menu:GetItem("Blue"):SetValue(self._color.blue * 255)
+   self._menu:GetItem("ColorPreview"):Panel():child("bg"):set_color(self._color)
    self:update_hex_color()
 end
 
-function ColorDialog:update_color(menu)
-    self._color = Color(menu:GetItem("Alpha"):Value() / 100, menu:GetItem("Red"):Value() / 255, menu:GetItem("Green"):Value() / 255, menu:GetItem("Blue"):Value() / 255)
-    menu:GetItem("ColorPreview"):Panel():child("bg"):set_color(self._color)
-    local Hex = menu:GetItem("Hex")
+function ColorDialog:update_hex(menu, item)
+    self:set_color(Color(item:Value()))
+end
+
+function ColorDialog:update_color()
+    self._color = Color(self._menu:GetItem("Alpha"):Value() / 100, self._menu:GetItem("Red"):Value() / 255, self._menu:GetItem("Green"):Value() / 255, self._menu:GetItem("Blue"):Value() / 255)
+    self._menu:GetItem("ColorPreview"):Panel():child("bg"):set_color(self._color)
+    local Hex = self._menu:GetItem("Hex")
     Hex:SetValue(self._color:to_hex())
     self:update_hex_color()
 end
@@ -109,4 +114,9 @@ function ColorDialog:run_callback(clbk)
     if clbk then
         clbk(self._color, self._menu)
     end
+end
+
+function ColorDialog:hide(...)
+	BeardLib.Utils.Input:RemoveTrigger(self._enter)
+	return self.super.hide(self, ...)
 end

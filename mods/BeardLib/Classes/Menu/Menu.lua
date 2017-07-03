@@ -426,8 +426,7 @@ function Menu:RecreateItems()
     end
 end
 
-function Menu:RecreateItem(item, save_index)
-    item.indx = save_index and item:Index() or nil
+function Menu:RecreateItem(item, align_items)
     if item.list then
         item.list:parent():remove(item.list)
     end
@@ -442,6 +441,9 @@ function Menu:RecreateItem(item, save_index)
     item:Init()
     if item.menu_type then
         item:RecreateItems()
+    end
+    if align_items then
+        self:AlignItems(true)
     end
 end
 

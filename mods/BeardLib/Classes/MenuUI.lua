@@ -61,9 +61,10 @@ function MenuUI:init(params)
     if self.create_items then self:create_items() end
 end
 
-function MenuUI:ReloadInterface()
+function MenuUI:ReloadInterface(params, shallow)
+    table.merge(self, params or {})
     self._panel:child("bg"):configure({
-        visible = self.background_blur ~= nil or self.background_color ~= nil,
+        visible = not not self.background_blur or self.background_color ~= nil,
         render_template = self.background_blur and "VertexColorTexturedBlur3D" or "VertexColorTextured",
         texture = self.background_blur and "guis/textures/test_blur_df",
         w = self.background_blur and self._panel:w(),
@@ -80,8 +81,10 @@ function MenuUI:ReloadInterface()
         font_size = self.help_font_size or 16,       
         color = self.help_color or Color.black       
     })
-    for _, menu in ipairs(self._menus) do
-        menu:ReloadInterface()
+    if not shallow then
+        for _, menu in ipairs(self._menus) do
+            menu:ReloadInterface()
+        end
     end
 end
 

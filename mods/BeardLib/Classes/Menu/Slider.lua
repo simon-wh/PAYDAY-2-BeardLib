@@ -35,7 +35,7 @@ function Slider:Init()
         x = self._textbox.panel:x(),
         w = item_width * (self.value / self.max),
         layer = 3,
-        color = self.slider_color or marker_color or self:Get2ndBackground(bgcolor)
+        color = (self.slider_color or marker_color or self:Get2ndBackground(bgcolor)):with_alpha(0.5)
     })
     slider_bg:set_x(self._textbox.panel:x())
     self._mouse_pos_x, self._mouse_pos_y = 0,0

@@ -114,13 +114,13 @@ function Item:SetText(text)
 end
 
 function Item:DoHighlight(highlight)
-	if self.bg then self.bg:set_color(highlight and self.marker_highlight_color or self.marker_color) end
-	if self.title then self.title:set_color(highlight and self.text_highlight_color or self.text_color) end
+	if self.bg then self.bg:set_color(highlight and self.marker_highlight_color or self.marker_color or Color.white) end
+	if self.title then self.title:set_color(highlight and self.text_highlight_color or self.text_color or Color.white) end
 	if self.border_highlight_color then
 		for _, v in pairs({"left", "top", "right", "bottom"}) do
 			local side = self.panel:child(v)
 			if alive(side) and side:visible() then
-				side:set_color(highlight and self.border_highlight_color or self.border_color)
+				side:set_color(highlight and self.border_highlight_color or self.border_color or Color.white)
 			end
 		end
 	end

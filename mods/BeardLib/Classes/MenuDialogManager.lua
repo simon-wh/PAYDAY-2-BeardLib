@@ -76,13 +76,20 @@ function MenuDialogManager:CloseLastDialog()
     return true
 end
 
+function MenuDialogManager:Show() 
+    self._menu:enable()
+    local dialog = self._opened_dialogs[#self._opened_dialogs]
+    if dialog then
+        self._menu:ReloadInterface({background_blur = not dialog._no_blur})
+    end 
+end
+
 function MenuDialogManager:List() return self.list end
 function MenuDialogManager:SelectList() return self.select_list end
 function MenuDialogManager:Color() return self.color end
 function MenuDialogManager:FileBrowser() return self.filebrowser end
 function MenuDialogManager:Input() return self.input end
 function MenuDialogManager:Menu() return self._menu end
-function MenuDialogManager:Show() self._menu:enable() end
 function MenuDialogManager:Hide() self._menu:disable() end
 function MenuDialogManager:GetMyIndex(dialog) return tonumber(table.get_key(self._opened_dialogs, dialog)) or 0 end
 function MenuDialogManager:AddDialog(dialog) table.insert(self._dialogs, dialog) end

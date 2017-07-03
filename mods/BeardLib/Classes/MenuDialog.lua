@@ -3,6 +3,7 @@ MenuDialog.type_name = "MenuDialog"
 function MenuDialog:init(params, menu)
     params = params or {}
     self._default_width = 420
+    self._no_blur = params.no_blur
     self._tbl = {}
     if self.type_name == "MenuDialog" then
         params = deep_clone(params)

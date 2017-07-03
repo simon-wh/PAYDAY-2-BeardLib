@@ -237,4 +237,7 @@ end
 function BaseItem:Configure(params)
 	table.merge(self, params)
 	self.parent:RecreateItem(self, true)
+    if self.auto_align then
+        self:AlignItems(true)
+    end
 end
