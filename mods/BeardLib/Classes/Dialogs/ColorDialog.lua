@@ -13,7 +13,7 @@ function ColorDialog:init(params, menu)
     }), menu)
 end
 
-function ColorDialog:Show(params)   
+function ColorDialog:_Show(params)
     if not self:basic_show(params) then
         return
     end

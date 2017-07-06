@@ -1,6 +1,6 @@
 SelectListDialog = SelectListDialog or class(ListDialog)
 SelectListDialog.type_name = "SelectListDialog"
-function SelectListDialog:Show(params)
+function SelectListDialog:_Show(params)
     params = params or {}
     self._single_select = params.single_select or false
     self._selected_list = params.selected_list or {}

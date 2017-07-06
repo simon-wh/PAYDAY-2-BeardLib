@@ -28,7 +28,7 @@ function ListDialog:init(params, menu)
     self._menu:Panel():set_leftbottom(self._list_menu:Panel():left(), self._list_menu:Panel():top() - 1)
 end
 
-function ListDialog:Show(params)
+function ListDialog:_Show(params)
     if not self:basic_show(params) then
         return
     end

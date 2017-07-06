@@ -26,11 +26,15 @@ function MenuDialog:init(params, menu)
     BeardLib.managers.dialog:AddDialog(self)
 end
 
-function MenuDialog:show(...)
-    return self:Show(params)
+function MenuDialog:Show(params)
+    BeardLib.managers.dialog:OpenDialog(self, params) 
 end
 
-function MenuDialog:Show(params)
+function MenuDialog:show(...)
+    return self:Show(...)
+end
+
+function MenuDialog:_Show(params)
     if not self:basic_show(params) then
         return false
     end
@@ -83,13 +87,9 @@ function MenuDialog:show_dialog()
     end
 end
 
-function MenuDialog:basic_show(params)
-    if BeardLib.managers.dialog:DialogOpened(self) then
-        return false
-    end
+function MenuDialog:basic_show(params, force)
     self._tbl = {}
     params = type_name(params) == "table" and params or {}
-    BeardLib.managers.dialog:OpenDialog(self)
     self._callback = params.callback
     self._no_callback = params.no_callback
     if not self._no_clearing_menu then
@@ -118,7 +118,7 @@ function MenuDialog:run_callback(clbk)
 end
 
 function MenuDialog:Hide(yes, menu, item)
-    self:hide(yes, menu, item)
+    return self:hide(yes, menu, item)
 end
 
 function MenuDialog:should_close()
@@ -128,7 +128,6 @@ end
 function MenuDialog:hide(yes, menu, item)
     BeardLib.managers.dialog:CloseDialog(self)
     local clbk = yes == true and self._callback or yes ~= false and self._no_callback
-    self:run_callback(clbk)
     if not self._no_clearing_menu then
         self._menu:ClearItems()
     end
@@ -141,9 +140,10 @@ function MenuDialog:hide(yes, menu, item)
             end
         end
     end
-    self._tbl = {}
     self._callback = nil
     self._no_callback = nil
+    self:run_callback(clbk)
+    self._tbl = {}
     return true
 end
 

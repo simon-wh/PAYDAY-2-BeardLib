@@ -2,8 +2,8 @@ FileBrowserDialog = FileBrowserDialog or class(MenuDialog)
 FileBrowserDialog._no_clearing_menu = true
 FileBrowserDialog._no_reshaping_menu = true
 FileBrowserDialog.type_name = "FileBrowserDialog"
-function FileBrowserDialog:Show(params)
-    if not self:basic_show(params, true) then
+function FileBrowserDialog:_Show(params, force)
+    if not self:basic_show(params) then
         return
     end
     self._extensions = params.extensions

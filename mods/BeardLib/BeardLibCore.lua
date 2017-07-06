@@ -203,7 +203,7 @@ if not _G.BeardLib then
 				clbk()
 			end)
 			if not success then
-				BeardLib:log("[Updater-ERROR(%s)] " .. tostring(e.code), tostring(id))
+				BeardLib:log("[Updater-ERROR(%s)] " .. tostring(e and e.code or ""), tostring(id))
 			end
 		end
 	end
@@ -219,7 +219,7 @@ if not _G.BeardLib then
 				clbk()
 			end)
 			if not success then
-				BeardLib:log("[Updater-ERROR(%s)] " .. tostring(e.code), tostring(id))
+				BeardLib:log("[Updater-ERROR(%s)] " .. tostring(e and e.code or ""), tostring(id))
 			end
 		end
 	end

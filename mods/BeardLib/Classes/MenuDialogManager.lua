@@ -9,16 +9,23 @@ function MenuDialogManager:Init()
     })
     self._dialogs = {}
     self._opened_dialogs = {}
+    self._waiting_to_open = {}
     self.simple = MenuDialog:new()
     self.list = ListDialog:new()
     self.select_list = SelectListDialog:new()
     self.color = ColorDialog:new()
     self.filebrowser = FileBrowserDialog:new()
     self.input = InputDialog:new()
+    self._ready_to_open = true
 end
 
-function MenuDialogManager:OpenDialog(dialog)
-    table.insert(self._opened_dialogs, dialog)
+function MenuDialogManager:OpenDialog(dialog, params)
+    if not table.has(self._opened_dialogs, dialog) then
+        table.insert(self._opened_dialogs, dialog)
+    end
+    if params then
+        table.insert(self._waiting_to_open, {dialog = dialog, params = params})
+    end
     self:EnableOnlyLast()
     if dialog._menu and dialog._menu.menu == self._menu then
         self:Show()
@@ -52,6 +59,11 @@ function MenuDialogManager:CloseDialog(dialog)
     if #self._opened_dialogs == 0 or not opened then
         self:Hide()
     end
+    self._ready_to_open = true
+end
+
+function MenuDialogManager:OpenAfterClose(dialog, params)
+    table.insert(self._delay_open, {dialog = dialog, params = params})
 end
 
 function MenuDialogManager:DialogOpened(dialog)
@@ -82,6 +94,17 @@ function MenuDialogManager:Show()
     if dialog then
         self._menu:ReloadInterface({background_blur = not dialog._no_blur})
     end 
+end
+
+function MenuDialogManager:update()
+    if self._ready_to_open then
+        local to_open = self._waiting_to_open[1]
+        if to_open then
+            to_open.dialog:_Show(to_open.params)
+            table.remove(self._waiting_to_open, 1)
+            self._ready_to_open = false
+        end
+    end
 end
 
 function MenuDialogManager:List() return self.list end

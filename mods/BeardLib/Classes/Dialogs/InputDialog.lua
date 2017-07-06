@@ -11,12 +11,12 @@ function InputDialog:init(params, menu)
     self._default_width = 500
 end
 
-function InputDialog:Show(params)
+function InputDialog:_Show(params)
 	table.merge(params, {
 		yes = params.yes or "Apply",
 		no = params.no or "Cancel",
 	})
-    if not self.super.Show(self, params) then
+    if not self.super._Show(self, params) then
         return
     end
     local body = self._menu:Menu({
@@ -46,6 +46,7 @@ function InputDialog:run_callback(clbk)
     if clbk then
         clbk(self._text:Value(), self._menu)
     end
+    self._text = nil
 end
 
 function InputDialog:hide(...)
