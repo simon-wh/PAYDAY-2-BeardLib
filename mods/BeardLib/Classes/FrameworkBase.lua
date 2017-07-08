@@ -37,7 +37,7 @@ function FrameworkBase:Load()
     local dirs = file.GetDirectories(self._directory)
     if dirs then
         for _, dir in pairs(dirs) do
-            if not table.contains(self._ignore_folders) then
+            if not table.contains(self._ignore_folders, dir) then
                 local p = path:Combine(self._directory, dir)
                 local main_file = path:Combine(p, self.main_file_name)
                 if FileIO:Exists(main_file) then

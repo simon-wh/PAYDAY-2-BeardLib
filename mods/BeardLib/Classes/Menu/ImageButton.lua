@@ -35,13 +35,6 @@ function ImageButton:DoHighlight(highlight)
     self.img:set_color(highlight and (self.img_highlight_color or self.text_highlight_color) or (self.img_color or self.text_color))
 end
 
-function ImageButton:SetEnabled(enabled)
-    self.enabled = enabled
-    if self.img and self:alive() then
-        self.img:set_alpha(enabled and 1 or 0.5)
-    end
-end
-
 function ImageButton:SetImage(texture, texture_rect)
     self.img:set_image(texture, texture_rect)
 end

@@ -34,11 +34,10 @@ function TextBoxBase:init(parent, params)
         align = params.align,
         wrap = not params.lines or params.lines > 1,
         word_wrap = not params.lines or params.lines > 1,
-        h = self.panel:h() - 2,
         color = self.text_color,
         selection_color = self.text_color:with_alpha(0.5), --I fucking wish there was something better..
-        font = parent.parent.font or "fonts/font_large_mf",
-        font_size = self.items_size - 2
+		font = parent.font,
+		font_size = self.items_size
     })
     text:set_selection(text:text():len())
     local caret = self.panel:rect({
@@ -224,7 +223,7 @@ function TextBoxBase:KeyPressed(o, k)
 end
 
 function TextBoxBase:update_caret()
-    if not self._parent:alive() then
+    if not self._parent:alive() or not alive(self.panel) then
         self.cantype = false
         return
     end

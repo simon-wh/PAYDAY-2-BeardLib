@@ -11,8 +11,17 @@ function NarrativeModule:init(core_mod, config)
         },        
         {
             param = "chain",
-            shallow = true,
-            action = "children_no_number_indexes"
+            action = function(tbl)
+                for _, v in pairs(tbl) do
+                    if v.level_id then
+                        v = BeardLib.Utils:RemoveAllNumberIndexes(v, true)
+                    else
+                        for _, _v in pairs(v) do
+                            _v = BeardLib.Utils:RemoveAllNumberIndexes(_v, true)
+                        end
+                    end
+                end
+            end
         },        
         {
             param = "crimenet_callouts",
@@ -78,7 +87,13 @@ function NarrativeModule:AddNarrativeData(narr_self)
         custom = true
     }    
     for _, stage in pairs(data.chain) do
-        narr_self.stages[stage.level_id] = stage
+        if stage.level_id then
+            narr_self.stages[stage.level_id] = stage
+        else
+            for _, _stage in pairs(stage) do
+                narr_self.stages[_stage.level_id] = _stage
+            end
+        end
     end
     if self._config.merge_data then
         table.merge(data, BeardLib.Utils:RemoveMetas(self._config.merge_data, true))

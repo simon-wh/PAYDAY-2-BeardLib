@@ -4,6 +4,7 @@ ColorDialog._default_width = 420
 function ColorDialog:init(params, menu)
     params = params or {}
     params = deep_clone(params)
+    self._is_input = true
     self.super.init(self, table.merge(params, {
         w = ColorDialog._default_width,
         offset = 8,
@@ -73,7 +74,6 @@ function ColorDialog:_Show(params)
         label = "temp"
     })
     self:update_color(self._menu)
-    self._enter = BeardLib.Utils.Input:Trigger("enter", callback(self, self, "hide", true))
     self:show_dialog()
 end
 
@@ -114,9 +114,4 @@ function ColorDialog:run_callback(clbk)
     if clbk then
         clbk(self._color, self._menu)
     end
-end
-
-function ColorDialog:hide(...)
-	BeardLib.Utils.Input:RemoveTrigger(self._enter)
-	return self.super.hide(self, ...)
 end

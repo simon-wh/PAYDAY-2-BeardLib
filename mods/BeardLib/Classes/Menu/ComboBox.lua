@@ -45,18 +45,6 @@ function ComboBox:Init()
     local h = math.max(1, #self.items) * 18
 end
 
-function ComboBox:SetEnabled(enabled)
-    self.super.SetEnabled(self, enabled)
-    if self:alive() and self.panel:child("combo_bg") then
-        self.panel:child("combo_selected"):set_alpha(enabled and 1 or 0.5)
-        self.panel:child("combo_bg"):set_alpha(enabled and 1 or 0.5)
-        self.panel:child("combo_icon"):set_alpha(enabled and 1 or 0.5)
-        if self._list then
-            self._list:hide()
-        end
-    end
-end
-
 function ComboBox:ContextMenuCallback(item)
     self:SetSelectedItem(item, true)
 end

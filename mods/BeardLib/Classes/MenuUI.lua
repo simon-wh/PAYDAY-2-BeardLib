@@ -52,6 +52,7 @@ function MenuUI:init(params)
     })
 
     self._menus = {}
+    self.private = {}
 	if self.visible == true and managers.mouse_pointer then self:enable() end
 
     BeardLib:AddUpdater("MenuUIUpdate"..tostring(self), callback(self, self, "Update"), true)
@@ -134,11 +135,30 @@ function MenuUI:HideHelp()
     end
 end
 
+function MenuUI:Group(params)
+    return self:AddMenu(Group:new(self:ConfigureMenu(params)))
+end
+
+function MenuUI:DivGroup(params)
+    local _params = self:ConfigureMenu(params)
+    _params.divider_type = true
+    return self:AddMenu(Group:new(_params))
+end
+
 function MenuUI:Menu(params)
-    params.parent_panel = self._panel
-    params.parent = self
-    params.menu = self
-    local menu = Menu:new(params)
+    return self:AddMenu(Menu:new(self:ConfigureMenu(params)))
+end
+
+function MenuUI:ConfigureMenu(params)
+    local _params = clone(params)
+    _params.parent_panel = self._panel
+    _params.parent = self
+    _params.menu = self
+    _params.inherit = NotNil(_params.inherit, self)
+    return _params
+end
+
+function MenuUI:AddMenu(menu)
     table.insert(self._menus, menu)
     return menu
 end
@@ -218,14 +238,13 @@ function MenuUI:Update()
 end
 
 function MenuUI:KeyReleased(o, k)
+    if self.always_key_released then self.always_key_released(o, k) end
     self._scroll_hold = nil
     self._key_pressed = nil   
     if not self:Enabled() then
         return
     end
-    if self.key_released then
-        self.key_release(o, k)
-    end
+    if self.key_released then self.key_release(o, k) end
 end
 
 function MenuUI:MouseInside()
@@ -237,6 +256,7 @@ function MenuUI:MouseInside()
 end
 
 function MenuUI:KeyPressed(o, k)
+    if self.always_key_press then self.always_key_press(o, k) end
     self._key_pressed = k
     if self._openlist then
         self._openlist:KeyPressed(o, k)
@@ -255,9 +275,7 @@ function MenuUI:KeyPressed(o, k)
             return
         end
     end 
-    if self.key_press then
-        self.key_press(o, k)
-    end
+    if self.key_press then self.key_press(o, k) end
 end
 
 function MenuUI:Param(param)
@@ -281,14 +299,13 @@ function MenuUI:MouseReleased(o, button, x, y)
 end
 
 function MenuUI:MouseDoubleClick(o, button, x, y)
+    if self.always_mouse_double_click then self.always_mouse_double_click(button, x, y) end
 	for _, menu in ipairs(self._menus) do
 		if menu:MouseDoubleClick(button, x, y) then
             return
 		end
 	end
-    if self.mouse_double_click then
-        self.mouse_double_click(button, x, y)
-    end
+    if self.mouse_double_click then self.mouse_double_click(button, x, y) end
 end
 
 function MenuUI:MousePressed(o, button, x, y)
@@ -311,9 +328,7 @@ function MenuUI:MousePressed(o, button, x, y)
             end
     	end
     end
-    if self.mouse_press then
-        self.mouse_press(button, x, y)
-    end
+    if self.mouse_press then self.mouse_press(button, x, y) end
 end
 
 function MenuUI:ShouldClose()

@@ -1,5 +1,6 @@
 Item = Item or class(BaseItem)
-function Item:Init()
+function Item:Init(params)
+	self:WorkParams(params)
 	if self.override_parent then
 		self.override_parent:AddItem(self)
 	end
@@ -26,14 +27,11 @@ end
 
 function Item:SetEnabled(enabled)
 	Item.super.SetEnabled(self, enabled)
-	if self.title then
-		self.title:set_alpha(enabled and 1 or self.disabled_alpha)
+	if self:alive() then
+		self.panel:set_alpha(self.enabled and 1 or self.disabled_alpha)
 	end
-	for _, v in pairs({"left", "top", "right", "bottom"}) do
-		local side = self.panel:child(v)
-		if alive(side) then
-			side:set_alpha(enabled and 1 or self.disabled_alpha)
-		end
+	if self._list then
+		self._list:hide()
 	end
 end
 
@@ -94,7 +92,7 @@ function Item:SetText(text)
         self.title:set_text(self.localized and text and managers.localization:text(text) or text)
         local lines = math.max(1, self.title:number_of_lines()) 
         local offset = math.max(self.border_left and self.border_width or 0, self.text_offset)
-        self.title:set_shape(offset, 0, self.panel:w() - offset, self.panel:h())
+        self.title:set_shape(offset, 0, self.panel:w() - (offset * 2), self.panel:h())
         local _,_,w,h = self.title:text_rect()
         self.title:set_h(h)
         if self.size_by_text then

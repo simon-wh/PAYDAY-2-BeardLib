@@ -3,6 +3,7 @@ InputDialog.type_name = "InputDialog"
 function InputDialog:init(params, menu)
     params = params or {}
     params = deep_clone(params)
+    self._is_input = true
     self.super.init(self, table.merge(params, {
         offset = 8,
         auto_height = true,
@@ -19,6 +20,7 @@ function InputDialog:_Show(params)
     if not self.super._Show(self, params) then
         return
     end
+    self._check_value = params.check_value
     local body = self._menu:Menu({
         name = "TextBody",
         background_color = self._menu.background_color:contrast():with_alpha(0.25),
@@ -38,7 +40,6 @@ function InputDialog:_Show(params)
         filter = params.filter,
         value = params.text
     }, params.merge_text or {}))
-	self._enter = BeardLib.Utils.Input:Trigger("enter", callback(self, self, "hide", true))
     self:show_dialog()
 end
 
@@ -49,7 +50,10 @@ function InputDialog:run_callback(clbk)
     self._text = nil
 end
 
-function InputDialog:hide(...)
-	BeardLib.Utils.Input:RemoveTrigger(self._enter)
-	return self.super.hide(self, ...)
+function InputDialog:hide(yes, ...)
+    if yes == true and self._check_value and not self._check_value(self._text:Value()) then
+        return
+    end
+    self._check_value = nil
+	return self.super.hide(self, yes, ...)
 end

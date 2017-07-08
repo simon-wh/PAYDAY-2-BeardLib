@@ -22,12 +22,12 @@ function MenuDialog:init(params, menu)
         offset = 8,
         marker_highlight_color = Color("719ee8"),
         background_color = Color(0.6, 0.2, 0.2, 0.2),
-    }, params)) 
+    }, params))
     BeardLib.managers.dialog:AddDialog(self)
 end
 
 function MenuDialog:Show(params)
-    BeardLib.managers.dialog:OpenDialog(self, params) 
+    BeardLib.managers.dialog:OpenDialog(self, type_name(params) == "table" and params or nil)
 end
 
 function MenuDialog:show(...)
@@ -88,7 +88,9 @@ function MenuDialog:show_dialog()
 end
 
 function MenuDialog:basic_show(params, force)
+    BeardLib.managers.dialog:ShowDialog(self)
     self._tbl = {}
+    self._params = params
     params = type_name(params) == "table" and params or {}
     self._callback = params.callback
     self._no_callback = params.no_callback
@@ -142,7 +144,10 @@ function MenuDialog:hide(yes, menu, item)
     end
     self._callback = nil
     self._no_callback = nil
-    self:run_callback(clbk)
+    self._params = nil
+    if type(clbk) == "function" then
+        self:run_callback(clbk)
+    end
     self._tbl = {}
     return true
 end

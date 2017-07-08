@@ -76,6 +76,8 @@ function ItemModuleBase:init(core_mod, config)
                     for _, v in pairs(tbl[i]) do
                         v = BeardLib.Utils:RemoveAllNumberIndexes(v, clean.shallow)
                     end
+                elseif type(action) == "function" then
+                    action(tbl[i])
                 end
             end
         end

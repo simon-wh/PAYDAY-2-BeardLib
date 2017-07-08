@@ -28,7 +28,6 @@ function Slider:Init()
         w = item_width,
         value = self.value,
     })
-    self.slider_color = NotNil(self.slider_color, self.inherit_from.slider_color, self.accent_color)
     local marker_color = (self.marker_color and self.marker_color.a > 0 and self.marker_color) or self.marker_highlight_color and self.marker_highlight_color.a > 0 and self.marker_highlight_color
     local slider = self.panel:rect({
         name = "slider",
@@ -40,14 +39,6 @@ function Slider:Init()
     slider_bg:set_x(self._textbox.panel:x())
     self._mouse_pos_x, self._mouse_pos_y = 0,0
     self._textbox:PostInit()
-end
-
-function Slider:SetEnabled(enabled)
-    self.super.SetEnabled(self, enabled)
-    if self._textbox and self:alive() then
-        self.panel:child("slider_bg"):set_alpha(enabled and 1 or 0.5)
-        self._textbox.panel:child("text"):set_alpha(enabled and 1 or 0.5)
-    end
 end
 
 function Slider:SetStep(step)

@@ -7,19 +7,13 @@ function KeyBindItem:Init()
         name = "keybind_key",
         h = self.items_size,
         align = "center",
+        vertical = self.text_vertical,
         layer = 1,
         color = self.text_color or Color.black,
         font = self.font,
         font_size = self.items_size - 2
     })
     self:SetKeybindKey()
-end
-
-function KeyBindItem:SetEnabled(enabled)
-    self.super.SetEnabled(self, enabled)
-    if self.keybind_key and self:alive() then
-        self.keybind_key:set_alpha(enabled and 1 or 0.5)
-    end
 end
 
 function KeyBindItem:SetValue(value, run_callback)
@@ -34,7 +28,7 @@ function KeyBindItem:SetKeybindKey()
     self.keybind_key:set_text(string.upper(self.value or "None"))
     local _,_,w,h = self.keybind_key:text_rect()
     self.keybind_key:set_size(w,h)
-    self.keybind_key:set_right(self.panel:w())
+    self.keybind_key:set_right(self.panel:w() - self.text_offset)
 end
 
 function KeyBindItem:SetCanEdit(CanEdit)

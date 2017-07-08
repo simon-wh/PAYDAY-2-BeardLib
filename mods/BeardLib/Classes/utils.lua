@@ -755,8 +755,8 @@ function NotNil(...)
 end
 
 function SimpleClbk(func, ...)
-    local params = {...}
-    return function(...) return func(unpack(params), ...) end
+    local args = {...}
+    return function(...) return func(unpack(table.list_add(args, {...}))) end
 end
 
 function SafeClbk(func, ...)
@@ -765,7 +765,7 @@ function SafeClbk(func, ...)
         local p = {...}
         local success, ret = pcall(function() ret = func(unpack(params), unpack(p)) end)
         if not success then
-            BeardLib:log("[Safe Callback Error] %s", tostring(ret.code))
+            BeardLib:log("[Safe Callback Error] %s", tostring(ret and ret.code or ""))
             return nil
         end
         return ret

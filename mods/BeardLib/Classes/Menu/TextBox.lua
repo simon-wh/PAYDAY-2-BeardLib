@@ -19,14 +19,6 @@ function TextBox:Init()
     self._textbox:PostInit()
 end
 
-function TextBox:SetEnabled(enabled)
-	self.super.SetEnabled(self, enabled)
-	if self._textbox and self:alive() then
-		self._textbox.panel:child("line"):set_alpha(enabled and 1 or 0.5)
-		self._textbox.panel:child("text"):set_alpha(enabled and 1 or 0.5)
-	end
-end
-
 function TextBox:_SetValue(value, run_callback, reset_selection)
 	local text = self._textbox.panel:child("text")
 

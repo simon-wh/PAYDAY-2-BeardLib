@@ -39,8 +39,8 @@ function FileBrowserDialog:init(params, menu)
         w = 600
     }))
     FileBrowserDialog.super.init(self, table.merge(params, {
-        w = 901,
-        h = 16,
+        w = 900,
+        h = self._files_menu.items_size + 4,
         auto_height = false,
         position = function(item)
             item:Panel():set_leftbottom(self._folders_menu:Panel():left(), self._folders_menu:Panel():top() - 1)

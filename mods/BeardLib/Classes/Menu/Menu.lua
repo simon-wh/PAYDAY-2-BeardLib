@@ -56,38 +56,17 @@ function Menu:ReloadInterface()
 end
 
 function Menu:WorkParams(params)
+    Menu.super.WorkParams(self, params)
     params = params or {}
-    table.careful_merge(self, clone(params))
-    self.name = self.name or ""
-    self.text_color = self.text_color or self.menu.text_color or (self.background_color and self.background_color:contrast() or Color.white)
-    self.text_highlight_color = self.text_highlight_color or self.menu.text_highlight_color
-    self.items_size = self.items_size or self.menu.items_size or 16
-    self.marker_color = self.marker_color or self.menu.marker_color or Color.white:with_alpha(0)
-    self.marker_alpha = self.marker_alpha or self.menu.marker_alpha 
-    self.align = self.align or self.menu.align
+    self:WorkParam("scroll_width", 8)
     self.background_visible = NotNil(self.background_visible, self.type_name == "Menu" and true or false)
-    self.font = self.font or tweak_data.menu.pd2_large_font or tweak_data.menu.default_font
-    self.offset = self.offset and self:ConvertOffset(self.offset) or self:ConvertOffset(self.menu.offset)
-    self.private_offset = self.private_offset and self:ConvertOffset(self.private_offset)
-    self.control_slice = self.control_slice or self.menu.control_slice or 2
     self.auto_align = NotNil(self.auto_align, true)
-    self.text_offset = self.text_offset or self.menu.text_offset or 4
-    self.scroll_width = self.scroll_width or 8
     self.auto_height = NotNil(self.auto_height, self.type_name == "Group" and true or false)
-    self.accent_color = NotNil(self.accent_color, self.menu.accent_color)
-    self.scroll_color = NotNil(self.scroll_color, self.menu.scroll_color, self.accent_color)
-    self.slider_color = NotNil(self.slider_color, self.menu.slider_color, self.accent_color)
     self.scrollbar = NotNil(self.scrollbar, self.auto_height ~= true)
-    self.visible = NotNil(self.visible, true)
-    self.enabled = NotNil(self.enabled, true)
-    self.disabled_alpha = NotNil(self.disabled_alpha, 0.5)
-    self.should_render = true
-    local w = self.menu._panel:w()
-    if self.w == "full" then
-        self.w = self.menu._panel:w()
-    elseif self.w == "half" then
-        self.w = self.menu._panel:w() / 2
+    if self.w == "half" then
+        self.w = self.parent_panel:w() / 2
     end
+    self.w, self.h = NotNil(self.w, self.parent_panel:w()), NotNil(self.h, self.parent_panel:h())
 end
 
 function Menu:SetLayer(layer)
@@ -239,17 +218,6 @@ function Menu:MouseReleased(button, x, y)
             return true
         end
     end
-end
-
-function Menu:SetEnabled(enabled)
-	Item.super.SetEnabled(self, enabled)
-	self.panel:set_alpha(enabled and 1 or self.disabled_alpha)
-	for _, v in pairs({"left", "top", "right", "bottom"}) do
-		local side = self.panel:child(v)
-		if alive(side) then
-			side:set_alpha(enabled and 1 or self.disabled_alpha)
-		end
-	end
 end
 
 function Menu:SetVisible(visible, animate)
@@ -439,6 +407,7 @@ function Menu:RecreateItem(item, align_items)
     end
     item.parent_panel = (item.override_parent and item.override_parent:Panel()) or self.items_panel
     item:Init()
+    item:PostInit()
     if item.menu_type then
         item:RecreateItems()
     end
@@ -542,18 +511,6 @@ function Menu:GetIndex(name)
     return 1
 end
 
-function Menu:ConvertOffset(offset)
-    if offset then
-        if type(offset) == "number" then
-            return {offset, offset}
-        else
-            return offset
-        end
-    else
-        return {6,2}
-    end
-end
-
 function Menu:ConfigureItem(item, menu)
     item = clone(item)
     if type(item) ~= "table" then
@@ -563,39 +520,11 @@ function Menu:ConfigureItem(item, menu)
     if item.override_parent == self then
         item.override_parent = nil
     end
-    local inherit = NotNil(item.inherit_from, item.override_parent, self)
-    item.inherit_from = inherit
+    local inherit = NotNil(item.inherit, item.override_parent, self)
+    item.inherit = inherit
     item.parent = self
     item.menu = self.menu
-    item.enabled = NotNil(item.enabled, true)
-    item.visible = NotNil(item.visible, true)
-    item.text_color = item.text_color or (item.marker_color and item.marker_color.a > 0.5 and item.marker_color:contrast()) or inherit.text_color
-    item.name = NotNil(item.name, item.text)
-    item.text = item.text or item.text ~= false and item.name
-    item.text_highlight_color = NotNil(item.text_highlight_color, item.marker_highlight_color and item.marker_highlight_color.a > 0.5 and item.marker_highlight_color:contrast(), inherit.text_highlight_color)
-    item.items_size = item.items_size or inherit.items_size
-    item.marker_highlight_color = NotNil(item.marker_highlight_color, inherit.marker_highlight_color)
-    item.marker_color = item.marker_color or inherit.marker_color
-    item.background_color = item.background_color or inherit.background_color
-    item.background_alpha = item.background_alpha or inherit.background_alpha
-    item.marker_alpha = item.marker_alpha or inherit.marker_alpha
-    item.text_align = item.text_align or inherit.text_align or "left"
-    item.text_vertical = item.text_vertical or inherit.text_vertical or "top"
-    item.border_color = item.border_color or inherit.border_color
-    item.size_by_text = NotNil(item.size_by_text, inherit.size_by_text)
     item.parent_panel = (item.override_parent and item.override_parent.panel) or self.items_panel
-    item.offset = item.offset and self:ConvertOffset(item.offset) or self:ConvertOffset(inherit.offset)
-    item.private_offset = item.private_offset and self:ConvertOffset(item.private_offset)
-    item.w = (item.w or item.parent_panel:w()) - (item.size_by_text and 0 or item.offset[1] * 2)
-    item.w = math.clamp(item.w, item.min_width or 0, item.max_width or item.w)
-    item.control_slice = item.control_slice or inherit.control_slice
-    item.font = item.font or inherit.font
-    item.text_offset = item.text_offset or inherit.text_offset
-    item.border_size = item.border_size or inherit.border_size or 2
-    item.accent_color = item.accent_color or inherit.accent_color
-    item.scroll_color = item.scroll_color or inherit.scroll_color or item.accent_color
-    item.should_render = true
-    item.disabled_alpha = NotNil(item.disabled_alpha, 0.5)
     if type(item.index) == "string" then
         local split = string.split(item.index, "|")
         local wanted_item = self:GetItem(split[2] or split[1]) 
@@ -630,11 +559,6 @@ function Menu:NewItem(item)
         table.insert(self._reachable_items, item)
     end
     item.indx = item.indx or index
-    item:SetEnabled(item.enabled)
-    item:SetVisible(item.visible)
-    if item.highlight then
-        item:Highlight()
-    end
     if self.auto_align then self:AlignItems() end
     return item
 end

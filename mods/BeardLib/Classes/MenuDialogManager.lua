@@ -4,6 +4,7 @@ function MenuDialogManager:Init()
         name = "BeardLibDialogs",
         layer = 800,
         background_blur = true,
+        always_key_press = callback(self, self, "KeyPressed"),
         marker_color = Color.white:with_alpha(0),
         marker_highlight_color = Color("4385ef"),
     })
@@ -19,12 +20,9 @@ function MenuDialogManager:Init()
     self._ready_to_open = true
 end
 
-function MenuDialogManager:OpenDialog(dialog, params)
+function MenuDialogManager:ShowDialog(dialog)
     if not table.has(self._opened_dialogs, dialog) then
-        table.insert(self._opened_dialogs, dialog)
-    end
-    if params then
-        table.insert(self._waiting_to_open, {dialog = dialog, params = params})
+        table.insert(self._opened_dialogs, 1, dialog)
     end
     self:EnableOnlyLast()
     if dialog._menu and dialog._menu.menu == self._menu then
@@ -32,9 +30,18 @@ function MenuDialogManager:OpenDialog(dialog, params)
     end
 end
 
+function MenuDialogManager:OpenDialog(dialog, params)
+    if params and params.force then
+        table.insert(self._waiting_to_open, 1, {dialog = dialog, params = params})
+        self._ready_to_open = true
+    else
+        table.insert(self._waiting_to_open, {dialog = dialog, params = params})
+    end
+end
+
 function MenuDialogManager:EnableOnlyLast()
     for k, dialog in pairs(self._opened_dialogs) do
-        local enabled = k == #self._opened_dialogs
+        local enabled = k == 1
         if dialog._menu then
             dialog._menu:SetEnabled(enabled)
         end
@@ -56,14 +63,18 @@ function MenuDialogManager:CloseDialog(dialog)
             break
         end
     end
+    for i, to_open in pairs(self._waiting_to_open) do
+        if dialog._params == to_open.params then
+            table.remove(self._waiting_to_open, i)
+            break
+        end
+    end
     if #self._opened_dialogs == 0 or not opened then
         self:Hide()
     end
-    self._ready_to_open = true
-end
-
-function MenuDialogManager:OpenAfterClose(dialog, params)
-    table.insert(self._delay_open, {dialog = dialog, params = params})
+    if not self._opened_dialogs[1] or not self._opened_dialogs[1]._Show then
+        self._ready_to_open = true
+    end
 end
 
 function MenuDialogManager:DialogOpened(dialog)
@@ -78,7 +89,7 @@ function MenuDialogManager:CloseLastDialog()
         BeardLib.IgnoreDialogOnce = false
         return false 
     end
-    local dialog = self._opened_dialogs[#self._opened_dialogs]
+    local dialog = self._opened_dialogs[1]
     if not dialog then
         return false
     end
@@ -88,25 +99,32 @@ function MenuDialogManager:CloseLastDialog()
     return true
 end
 
-function MenuDialogManager:Show() 
+function MenuDialogManager:Show()
     self._menu:enable()
-    local dialog = self._opened_dialogs[#self._opened_dialogs]
+    local dialog = self._opened_dialogs[1]
     if dialog then
         self._menu:ReloadInterface({background_blur = not dialog._no_blur})
     end 
 end
 
+function MenuDialogManager:KeyPressed(o, k)
+    local dialog = self._opened_dialogs[1]
+    if self._menu:Enabled() and dialog and dialog._is_input and k == Idstring("enter") then
+        dialog:hide(true)
+    end
+end
+
 function MenuDialogManager:update()
     if self._ready_to_open then
         local to_open = self._waiting_to_open[1]
-        if to_open then
+        if to_open and (not to_open.dialog._params or to_open.dialog._params ~= to_open.params) then
             to_open.dialog:_Show(to_open.params)
-            table.remove(self._waiting_to_open, 1)
             self._ready_to_open = false
         end
     end
 end
 
+function MenuDialogManager:paused_update() self:update() end
 function MenuDialogManager:List() return self.list end
 function MenuDialogManager:SelectList() return self.select_list end
 function MenuDialogManager:Color() return self.color end
@@ -114,7 +132,7 @@ function MenuDialogManager:FileBrowser() return self.filebrowser end
 function MenuDialogManager:Input() return self.input end
 function MenuDialogManager:Menu() return self._menu end
 function MenuDialogManager:Hide() self._menu:disable() end
-function MenuDialogManager:GetMyIndex(dialog) return tonumber(table.get_key(self._opened_dialogs, dialog)) or 0 end
+function MenuDialogManager:GetMyIndex(dialog) return (#self._opened_dialogs + 1) - tonumber(table.get_key(self._opened_dialogs, dialog)) or 0 end
 function MenuDialogManager:AddDialog(dialog) table.insert(self._dialogs, dialog) end
 
 return MenuDialogManager
