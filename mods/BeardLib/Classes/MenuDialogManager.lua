@@ -21,7 +21,7 @@ function MenuDialogManager:Init()
 end
 
 function MenuDialogManager:ShowDialog(dialog)
-    if not table.has(self._opened_dialogs, dialog) then
+    if not table.contains(self._opened_dialogs, dialog) then
         table.insert(self._opened_dialogs, 1, dialog)
     end
     self:EnableOnlyLast()
@@ -115,7 +115,7 @@ function MenuDialogManager:KeyPressed(o, k)
 end
 
 function MenuDialogManager:update()
-    if self._ready_to_open then
+    if self._ready_to_open or #self._opened_dialogs == 0 then
         local to_open = self._waiting_to_open[1]
         if to_open and (not to_open.dialog._params or to_open.dialog._params ~= to_open.params) then
             to_open.dialog:_Show(to_open.params)

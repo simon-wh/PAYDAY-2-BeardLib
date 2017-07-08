@@ -4,7 +4,7 @@ function SelectListDialog:_Show(params)
     params = params or {}
     self._single_select = params.single_select or false
     self._selected_list = params.selected_list or {}
-    SelectListDialog.super.Show(self, params)
+    SelectListDialog.super._Show(self, params)
 end
 
 function SelectListDialog:MakeListItems(params)
