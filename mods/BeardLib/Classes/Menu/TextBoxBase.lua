@@ -28,7 +28,7 @@ function TextBoxBase:init(parent, params)
         color = self.line_color or self.text_color,
     })
     line:set_bottom(self.panel:h())
-    local text = self.panel:text({
+    self.text = self.panel:text({
         name = "text",
         text = params.value and (parent.filter == "number" and string.format("%." .. parent.floats .. "f", tonumber(params.value)) or tostring(params.value)) or "",
         align = params.align,
@@ -36,22 +36,22 @@ function TextBoxBase:init(parent, params)
         word_wrap = not params.lines or params.lines > 1,
         color = self.text_color,
         selection_color = self.text_color:with_alpha(0.5), --I fucking wish there was something better..
-		font = parent.font,
+		font = parent.font or "fonts/font_medium_mf",
 		font_size = self.items_size
     })
-    text:set_selection(text:text():len())
+    self.text:set_selection(self.text:text():len())
     local caret = self.panel:rect({
         name = "caret",
         w = 2,
         visible = false,
-        color = text:color():with_alpha(1),
-        h = text:font_size() - (line:h() * 2),
+        color = self.text:color():with_alpha(1),
+        h = self.text:font_size() - (line:h() * 2),
         layer = 3,
     })
 	self.lines = params.lines
 	self.btn = params.btn or "0"
-    self.history = {params.value and text:text()}
- 	text:enter_text(callback(self, TextBoxBase, "enter_text"))
+    self.history = {params.value and self.text:text()}
+ 	self.text:enter_text(callback(self, TextBoxBase, "enter_text"))
  	self.update_text = params.update_text or function(self, ...) self._parent:_SetValue(...) end
 end
 
@@ -67,6 +67,14 @@ function TextBoxBase:DoHighlight(highlight)
     line:set_color(self.line_color or color)
     text:set_color(color)
     self.panel:child("caret"):set_color(text:color():with_alpha(1))
+end
+
+function TextBoxBase:Value()
+    return self.text:text()
+end
+
+function TextBoxBase:Text()
+    return self.text
 end
 
 function TextBoxBase:CheckText(text, no_clbk)
@@ -258,7 +266,7 @@ function TextBoxBase:update_caret()
 end
 
 function TextBoxBase:MousePressed(button, x, y)
-    if not alive(self.panel) then
+    if not alive(self.panel) or not alive(self.panel:child("text")) then
         return
     end
     local text = self.panel:child("text")

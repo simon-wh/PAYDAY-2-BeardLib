@@ -3,7 +3,7 @@ ComboBox.type_name = "ComboBox"
 function ComboBox:Init()
     self.size_by_text = false
     self.items = self.items or {}
-    self.searchbox = self.searchbox == nil and true or self.searchbox
+    self.searchbox = false -- self.searchbox == nil and true or self.searchbox
     self.super.Init(self)
     local text = self.items[self.value]
     if type(text) == "table" then
@@ -14,34 +14,34 @@ function ComboBox:Init()
     local combo_bg = self.panel:bitmap({
         name = "combo_bg",
         w = control_size,
+        alpha = 0,
         h = self.items_size,
         layer = 1,
         color = bgcolor,
     })
-    local combo_selected = self.panel:text({
-        name = "combo_selected",
-        text = self.localized_items and text and managers.localization:text(tostring(text)) or type(text) ~= "nil" and tostring(text) or "",
-        w = control_size - 10,
-        h = self.items_size,
-        valign = "center",
-        align = "center",
-        vertical = "center",
-        layer = 2,
-        color = bgcolor:contrast(),
-        font = self.font,
-        font_size = self.items_size - 2
+	self._textbox = TextBoxBase:new(self, {
+        panel = self.panel,
+        lines = 1,
+        align = self.textbox_align,
+        line_color = self.line_color or self.marker_highlight_color,
+        w = self.panel:w() / (self.text == nil and 1 or self.control_slice),
+        update_text = callback(self._list, self._list, "update_search", true),
+        value = self.localized_items and text and managers.localization:text(tostring(text)) or type(text) ~= "nil" and tostring(text) or "",
     })
+    self._textbox:PostInit()
     combo_bg:set_right(self.panel:w())
-    combo_selected:set_left(combo_bg:left() + 2)
-    self.panel:bitmap({
+    --combo_selected:set_left(combo_bg:left() + 2)
+    local icon = self.panel:bitmap({
         name = "combo_icon",
-        w = self.items_size - 4,
-        h = self.items_size - 4,
+        w = self.items_size - 6,
+        h = self.items_size - 6,
         texture = "guis/textures/menuicons",
         texture_rect = {4,0,16,16},
-        color = bgcolor:contrast(),
+        color = self.text_color,
         layer = 2,
-    }):set_right(combo_bg:right() - 2.5)
+    })
+    icon:set_right(combo_bg:right() - 2)
+    icon:set_center_y(self._textbox.panel:center_y() - 2)
     local h = math.max(1, #self.items) * 18
 end
 
@@ -63,7 +63,7 @@ function ComboBox:SetValue(value, run_callback, no_items_clbk)
         v = v.text
     end
     if alive(self.panel) then
-       self.panel:child("combo_selected"):set_text(self.localized_items and v and managers.localization:text(tostring(v)) or type(v) ~= "nil" and tostring(v) or "")
+       self._textbox:Text():set_text(self.localized_items and v and managers.localization:text(tostring(v)) or type(v) ~= "nil" and tostring(v) or "")
     end    
     self.super.SetValue(self, value, run_callback)
 end
