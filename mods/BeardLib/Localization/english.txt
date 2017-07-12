@@ -28,5 +28,7 @@
     "custom_map_needs_download" : "You need to download the heist before joining, begin download?",
     "custom_map_host_old_version" : "Cannot begin download of custom heist because the host is running an old version of BeardLib!",
     "custom_map_failed_download" : "Failed to download custom heist",
-    "custom_map_missing_updater" : "Cannot begin download of custom heist because the map does not have an updater!"
+    "custom_map_missing_updater" : "Cannot begin download of custom heist because the map does not have an updater!",
+    "heist_contact_custom" : "Custom Heists",
+    "heist_contact_custom_description" : "Custom heists are completely new heists added to the game and are made by the community"
 }

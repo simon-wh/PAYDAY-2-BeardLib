@@ -67,7 +67,7 @@ function NarrativeModule:AddNarrativeData(narr_self)
     local data = {
         name_id = self._config.name_id or "heist_" .. self._config.id .. "_name",
         briefing_id = self._config.brief_id or "heist_" .. self._config.id .. "_brief",
-        contact = self._config.contact or "bain",
+        contact = self._config.contact or "custom",
         jc = self._config.jc or 50,
         chain = self._config.chain,
         dlc = self._config.dlc,

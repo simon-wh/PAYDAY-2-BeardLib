@@ -14,7 +14,6 @@ function Item:Init(params)
 	if self.divider_type then
 		self.title:set_world_center_y(self.panel:world_center_y())
 	end
-	self._my_items = {}
 	self:Reposition()
     if self.items then
 		self._list = ContextMenu:new(self, self.parent_panel:layer() + 100) 
@@ -36,8 +35,8 @@ function Item:SetEnabled(enabled)
 end
 
 function Item:KeyPressed(o, k)
-	if self._my_items then
-		for _, item in pairs(self._my_items) do
+	if self._adopted_items then
+		for _, item in pairs(self._adopted_items) do
 			if item.KeyPressed and item:KeyPressed(o, k) then
 				return true
 			end
@@ -50,7 +49,7 @@ end
 
 function Item:MousePressed(button, x, y)
 	if not self.menu_type then
-	    for _, item in pairs(self._my_items) do
+	    for _, item in pairs(self._adopted_items) do
 	        if item:MousePressed(button, x, y) then
 	            return true
 	        end
@@ -153,7 +152,7 @@ end
 
 function Item:MouseMoved(x, y)
 	if not self.menu_type then
-	    for _, item in ipairs(self._my_items) do
+	    for _, item in ipairs(self._adopted_items) do
 	        if item:MouseMoved(x, y) then
 	            return true
 	        end

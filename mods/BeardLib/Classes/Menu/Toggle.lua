@@ -17,9 +17,6 @@ end
 function Toggle:SetValue(value, run_callback)
 	self.super.SetValue(self, value, run_callback)
 	if alive(self.panel) then
-		if managers.menu_component then
-			managers.menu_component:post_event(value and "box_tick" or "box_untick")
-		end
 		local rect = value == true and {24,0,24,24} or {0,0,24,24}
 		self.toggle:set_texture_rect(unpack(rect))
 	end
@@ -30,7 +27,10 @@ function Toggle:MousePressed(button, x, y)
 		return
 	end
 	if button == Idstring("0") then
-		self:SetValue(not self.value)	
+		self:SetValue(not self.value)
+		if managers.menu_component then
+			managers.menu_component:post_event(self.value and "box_tick" or "box_untick")
+		end
 		self.super.MousePressed(self, button, x, y)
         return true
 	end

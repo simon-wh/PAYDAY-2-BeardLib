@@ -206,7 +206,7 @@ function Menu:CheckItems()
     for _, item in ipairs(self._all_items) do
         if item:TryRendering() then
             table.insert(self._visible_items, item)
-        end                
+        end
     end
 end
 
@@ -261,7 +261,7 @@ function Menu:AlignItemsGrid()
             end
         end
     end    
-    max_h = max_h + (prev_item and prev_item:Offset()[2] or 0)
+    max_h = max_h + (self.last_y_offset or (prev_item and prev_item:Offset()[2] or 0))
     if self.auto_height and self.orig_h ~= max_h then
         self:SetSize(nil, max_h, true)
     end
@@ -310,7 +310,7 @@ function Menu:AlignItemsNormal()
             end
         end
     end
-    max_h = max_h + (prev_item and prev_item:Offset()[2] or 0)
+    max_h = max_h + (self.last_y_offset or (prev_item and prev_item:Offset()[2] or 0))
     if self.auto_height and self.orig_h ~= max_h then
         self:SetSize(nil, max_h, true)
     end
@@ -403,7 +403,7 @@ function Menu:RecreateItem(item, align_items)
         panel:parent():remove(panel)
     end
     if item.override_parent then
-        table.delete(item.override_parent._my_items, item)
+        table.delete(item.override_parent._adopted_items, item)
     end
     item.parent_panel = (item.override_parent and item.override_parent:Panel()) or self.items_panel
     item:Init()
@@ -422,15 +422,16 @@ function Menu:RemoveItem(item)
     end
     if item.menu_type then
         item:ClearItems()
-    elseif item._my_items then
-        for _, v in pairs(item._my_items) do
+    end
+    if item._adopted_items then
+        for _, v in pairs(item._adopted_items) do
             v.override_parent = nil
             self:RemoveItem(v)
         end
     end
 
     if item.override_parent then
-        table.delete(item.override_parent._my_items, item)
+        table.delete(item.override_parent._adopted_items, item)
     end
     if item.list then
         item.list:parent():remove(item.list)
@@ -438,6 +439,7 @@ function Menu:RemoveItem(item)
     table.delete(self._reachable_items, item)
     table.delete(self._my_items, item)
     table.delete(self._all_items, item)
+    table.delete(self._adopted_items, item)
     local panel = item:Panel()
     if alive(panel) then
         panel:parent():remove(panel)

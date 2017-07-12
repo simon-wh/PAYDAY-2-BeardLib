@@ -7,6 +7,7 @@ function MapFramework:init()
 end
 
 function MapFramework:RegisterHooks()
+    self:AddCustomContact()
     for _, mod in pairs(self._loaded_mods) do
         for _, module in pairs(mod._modules) do
             if module.RegisterHook and not module.Registered then
@@ -18,6 +19,16 @@ function MapFramework:RegisterHooks()
             end
         end
     end
+end
+
+function MapFramework:AddCustomContact()
+    ContactModule:new(BeardLib, {
+        id = "custom",
+        name_id = "heist_contact_custom",
+        description_id = "heist_contact_custom_description",
+        package = "packages/contact_bain",
+        assets_gui = "guis/mission_briefing/preload_contact_bain"
+    }):RegisterHook()
 end
 
 return MapFramework

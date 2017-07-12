@@ -15,6 +15,14 @@ function table.merge(og_table, new_table)
     return og_table
 end
 
+function table.map_indices(og_table)
+    local tbl = {}
+    for i=1, #og_table do
+        table.insert(tbl, i)
+    end
+    return tbl
+end
+
 --When you want to merge but don't want to merge things like menu items together.
 function table.careful_merge(og_table, new_table)
     for i, data in pairs(new_table) do
@@ -226,7 +234,7 @@ end
 
 function string.pretty2(str)
     str = tostring(str)
-    return str:gsub("([^A-Z ])([A-Z])", "%1 %2"):gsub("([A-Z]+)([A-Z][^A-Z$])", "%1 %2")
+    return str:gsub("([^A-Z%W])([A-Z])", "%1 %2"):gsub("([A-Z]+)([A-Z][^A-Z$])", "%1 %2")
 end
 
 function string.key(str)

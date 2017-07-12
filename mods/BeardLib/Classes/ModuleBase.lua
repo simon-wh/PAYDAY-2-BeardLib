@@ -57,9 +57,14 @@ function ItemModuleBase:init(core_mod, config)
     if not ModuleBase.init(self, core_mod, config) then
         return false
     end
+    self:do_clean_table(self._config)
+    return true
+end
+
+function ItemModuleBase:do_clean_table(config)
     for _, clean in pairs(self.clean_table) do
         local i, search_string = remove_last(clean.param)
-        local tbl = search_string and BeardLib.Utils:StringToTable(search_string, self._config, true) or self._config
+        local tbl = search_string and BeardLib.Utils:StringToTable(search_string, config, true) or config
         if tbl and tbl[i] then
             for _, action in pairs(type(clean.action) == "table" and clean.action or {clean.action}) do
                 if action == "no_subtables" then
@@ -82,7 +87,6 @@ function ItemModuleBase:init(core_mod, config)
             end
         end
     end
-    return true
 end
 
 function ItemModuleBase:RegisterHook() end

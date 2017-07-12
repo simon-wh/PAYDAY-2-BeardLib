@@ -4,6 +4,7 @@ function BaseItem:init(params)
 	table.careful_merge(self, params or {})
 	self.type_name = self.type_name or "Button"
 	self.private = self.private or {}
+	self._adopted_items = {}
 	local mitem = getmetatable(self)
 	function mitem:__tostring() --STOP FUCKING RESETING
 		return string.format("[%s][%s] %s", self:alive() and "Alive" or "Dead", tostring(self.type_name), tostring(self.name)) 
@@ -75,6 +76,7 @@ function BaseItem:WorkParams(params)
 	self:WorkParam("font", tweak_data.menu.pd2_large_font or tweak_data.menu.default_font)
 	self:WorkParam("text_offset", 4)
 	self:WorkParam("border_size", 2)
+	self:WorkParam("last_y_offset")
 	self:WorkParam("accent_color")
 	self:WorkParam("scroll_color", self.accent_color)
 	self:WorkParam("slider_color", self.accent_color)
@@ -145,11 +147,16 @@ function BaseItem:MakeBorder()
 	top:set_right(self.panel:w())
 	bottom:set_bottom(self.panel:h())
 
-	if self.title and self.border_center_as_title then
-		left:set_center_y(self.title:center_y())
-		right:set_center_y(self.title:center_y())	
-		top:set_center_x(self.title:center_x())
-		bottom:set_center_x(self.title:center_x())
+	if self.title then
+		if self.border_center_as_title then
+			left:set_center_y(self.title:center_y())
+			right:set_center_y(self.title:center_y())	
+			top:set_center_x(self.title:center_x())
+			bottom:set_center_x(self.title:center_x())
+		end
+		if self.border_position_below_title then
+			bottom:set_top(self.title:bottom())
+		end
 	end
 end
 
@@ -213,12 +220,12 @@ function BaseItem:MouseFocused(x, y)
 end
 
 --Add/Set Funcs--
-function BaseItem:AddItem(item) table.insert(self._my_items, item) end
+function BaseItem:AddItem(item) table.insert(self._adopted_items, item) end
 function BaseItem:SetCallback(callback) self.callback = callback end
 function BaseItem:SetLabel(label) self.label = label end
 function BaseItem:SetParam(k,v) self[k] = v end
 function BaseItem:SetEnabled(enabled) self.enabled = enabled == true end
-function BaseItem:WorkParam(param, ...)  self[param] = NotNil(self[param], self.private[param], not self.parent.private[param] and self.parent[param], ...) end
+function BaseItem:WorkParam(param, ...) self[param] = NotNil(self[param], self.private[param], not self.parent.private[param] and self.parent[param], ...) end
 
 function BaseItem:ConvertOffset(offset)
     if offset then
@@ -297,6 +304,10 @@ function BaseItem:RunCallback(clbk, ...)
 	if clbk then
 		clbk(self.parent, self, ...)
 	end
+end
+
+function BaseItem:Destroy()
+	self.parent:RemoveItem(self)
 end
 
 function BaseItem:Configure(params)
