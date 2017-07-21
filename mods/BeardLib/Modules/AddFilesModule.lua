@@ -3,7 +3,7 @@ AddFilesModule = AddFilesModule or class(ModuleBase)
 AddFilesModule.type_name = "AddFiles"
 
 function AddFilesModule:init(core_mod, config)
-    if not self.super.init(self, core_mod, config) then
+    if not AddFilesModule.super.init(self, core_mod, config) then
         return false
     end
 
@@ -14,11 +14,18 @@ end
 
 function AddFilesModule:Load()
     local directory = BeardLib.Utils.Path:Combine(self._mod.ModPath, self._config.directory)
-    BeardLib:LoadAddConfig(directory, self._config)
+    if self._config.force_all then
+    	for _, v in pairs(self._config) do
+    		if type(v) == "table" then
+    			v.force = true
+    		end
+    	end
+    end
+    CustomPackageManager:LoadPackageConfig(directory, self._config)
 end
 
 function AddFilesModule:Unload()
-    BeardLib:UnloadAddConfig(self._config)
+    CustomPackageManager:UnloadPackageConfig(self._config)
 end
 
 BeardLib:RegisterModule(AddFilesModule.type_name, AddFilesModule)

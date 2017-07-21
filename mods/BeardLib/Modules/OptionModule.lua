@@ -5,7 +5,7 @@ OptionModule.type_name = "Options"
 
 function OptionModule:init(core_mod, config)
     self.required_params = table.add(clone(self.required_params), {"options"})
-    if not self.super.init(self, core_mod, config) then
+    if not OptionModule.super.init(self, core_mod, config) then
         return false
     end
 
@@ -39,7 +39,7 @@ function OptionModule:post_init()
         self:Load()
     end
 
-    self.super.post_init(self)
+    OptionModule.super.post_init(self)
 
     return true
 end
@@ -237,10 +237,10 @@ function OptionModule:GetValue(name, real)
         end
         return option.value
     else
-        return
+        return nil
     end
 
-    return option.value
+    return option.value or nil
 end
 
 function OptionModule:LoadDefaultValues()

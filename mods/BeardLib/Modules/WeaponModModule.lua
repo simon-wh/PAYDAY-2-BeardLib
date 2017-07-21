@@ -3,7 +3,7 @@ WeaponModModule = WeaponModModule or class(ItemModuleBase)
 WeaponModModule.type_name = "WeaponMod"
 
 function WeaponModModule:init(core_mod, config)
-    if not self.super.init(self, core_mod, config) then
+    if not WeaponModModule.super.init(self, core_mod, config) then
         return false
     end
     return true
@@ -11,7 +11,7 @@ end
 
 function WeaponModModule:RegisterHook()
     self._config.default_amount = self._config.default_amount and tonumber(self._config.default_amount) or 1
-    self._config.global_value = self._config.global_value or BeardLib.definitions.module_defaults.item.default_global_value
+    self._config.global_value = self._config.global_value or self.defaults.global_value
     self._config.drop = self._config.drop ~= nil and self._config.drop or true
     Hooks:Add("BeardLibCreateCustomWeaponMods", self._config.id .. "AddWeaponModTweakData", function(w_self)
         if w_self.parts[self._config.id] then
@@ -23,7 +23,7 @@ function WeaponModModule:RegisterHook()
             unit = self._config.unit,
             third_unit = self._config.third_unit,
             a_obj = self._config.a_obj,
-            dlc = self._config.drop and (self._config.dlc or BeardLib.definitions.module_defaults.item.default_dlc),
+            dlc = self._config.drop and (self._config.dlc or self.defaults.dlc),
             texture_bundle_folder = self._config.texture_bundle_folder,
             pcs = self._config.pcs and BeardLib.Utils:RemoveNonNumberIndexes(self._config.pcs),
             stats = table.merge({value=0}, BeardLib.Utils:RemoveMetas(self._config.stats, true) or {}),
@@ -36,14 +36,13 @@ function WeaponModModule:RegisterHook()
             table.merge(data, self._config.merge_data)
         end
         w_self.parts[self._config.id] = data
-        if self._config.drop and data.dlc == BeardLib.definitions.module_defaults.item.default_dlc then
-            table.insert(BeardLib._mod_lootdrop_items, {
+        if data.drop ~= false and data.dlc then
+            TweakDataHelper:ModifyTweak({{
                 type_items = "weapon_mods",
                 item_entry = self._config.id,
                 amount = self._config.default_amount,
-                global_value = self._config.global_value ~= BeardLib.definitions.module_defaults.item.default_global_value and self._config.global_value or nil
-            })
-
+                global_value = data.global_value
+            }}, "dlc", data.dlc, "content", "loot_drops")
         end
 
         if self._config.weapons then

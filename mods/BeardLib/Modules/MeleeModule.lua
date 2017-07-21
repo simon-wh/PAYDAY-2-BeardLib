@@ -3,7 +3,7 @@ MeleeModule = MeleeModule or class(ItemModuleBase)
 MeleeModule.type_name = "Melee"
 
 function MeleeModule:init(core_mod, config)
-    if not self.super.init(self, core_mod, config) then
+    if not MeleeModule.super.init(self, core_mod, config) then
         return false
     end
 
@@ -21,13 +21,16 @@ function MeleeModule:RegisterHook()
 
         local data = table.merge(deep_clone(self._config.based_on and (bm_self.melee_weapons[self._config.based_on] ~= nil and bm_self.melee_weapons[self._config.based_on]) or bm_self.melee_weapons.kabar), table.merge({
             name_id = "bm_melee_" .. self._config.id,
-            dlc = BeardLib.definitions.module_defaults.item.default_dlc,
+            dlc = self.defaults.dlc,
             custom = true,
             free = not self._config.unlock_level
         }, self._config.item or self._config))
         dlc = data.dlc
         bm_self.melee_weapons[self._config.id] = data
-        table.insert(BeardLib._mod_upgrade_items, self._config.id)
+
+        if dlc then
+            TweakDataHelper:ModifyTweak({self._config.id}, "dlc", dlc, "content", "upgrades")
+        end
     end)
 
     Hooks:PostHook(UpgradesTweakData, "init", self._config.id .. "AddMeleeUpgradesData", function(u_self)

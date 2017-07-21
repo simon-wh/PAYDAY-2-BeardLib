@@ -1,13 +1,10 @@
 if CoreSequenceManager then
-	SequenceManager = CoreSequenceManager.SequenceManager
-	CloneClass(SequenceManager)
-    
     Hooks:Register("BeardLibCreateScriptDataMods")
-    Hooks:PostHook(SequenceManager, "init", "BeardLibSequenceManagerPostInit", function() 
+    Hooks:PostHook(CoreSequenceManager.SequenceManager, "init", "BeardLibSequenceManagerPostInit", function() 
         Hooks:Call("BeardLibCreateScriptDataMods")
     end)
 	
-	MaterialElement = CoreSequenceManager.MaterialElement
+	local MaterialElement = CoreSequenceManager.MaterialElement
 	MaterialElement.FUNC_MAP["texture"] = "set_texture"
 	
 	function MaterialElement:set_texture(env, old_material, key)
@@ -23,6 +20,22 @@ if CoreSequenceManager then
 			local name = self:run_parsed_func(env, self._name)
 			local new_material = env.dest_unit:material(name:id())
 			Application:set_material_texture(new_material, Idstring("diffuse_texture"), texture)
+		end
+	end
+	
+	local BodyElement = CoreSequenceManager.BodyElement
+	function BodyElement.load(unit, data)
+		for body_id, cat_data in pairs(data) do
+			for _, sub_data in pairs(cat_data) do
+				local body = unit:body(body_id)
+				local param = sub_data[2]
+				if type(param) == "string" then
+					param = Idstring(param)
+				end
+				if body then --Seems to fix it I guess.
+					body[sub_data[1]](body, param) 
+				end
+			end
 		end
 	end
 end

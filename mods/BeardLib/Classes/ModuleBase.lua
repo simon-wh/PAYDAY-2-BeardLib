@@ -1,8 +1,6 @@
 ModuleBase = ModuleBase or class()
-
 ModuleBase.type_name = "ModuleBase"
 ModuleBase.required_params = {}
-
 function ModuleBase:init(core_mod, config)
     self._mod = core_mod
     self._name = config.name or self.type_name
@@ -47,20 +45,26 @@ ItemModuleBase = ItemModuleBase or class(ModuleBase)
 ItemModuleBase.type_name = "ItemModuleBase"
 ItemModuleBase.required_params = {"id"}
 ItemModuleBase.clean_table = {}
+ItemModuleBase.defaults = {global_value= "mod", dlc= "mod"}
 ItemModuleBase._loose = true
-
 local remove_last = function(str)
     local tbl = string.split(str, "%.")
 
     return table.remove(tbl), #tbl > 0 and table.concat(tbl, ".")
 end
+
 function ItemModuleBase:init(core_mod, config)
     if not ModuleBase.init(self, core_mod, config) then
         return false
     end
+    self:do_clean_table(self._config)
+    return true
+end
+
+function ItemModuleBase:do_clean_table(config)
     for _, clean in pairs(self.clean_table) do
         local i, search_string = remove_last(clean.param)
-        local tbl = search_string and BeardLib.Utils:StringToTable(search_string, self._config, true) or self._config
+        local tbl = search_string and BeardLib.Utils:StringToTable(search_string, config, true) or config
         if tbl and tbl[i] then
             for _, action in pairs(type(clean.action) == "table" and clean.action or {clean.action}) do
                 if action == "no_subtables" then
@@ -77,13 +81,12 @@ function ItemModuleBase:init(core_mod, config)
                     for _, v in pairs(tbl[i]) do
                         v = BeardLib.Utils:RemoveAllNumberIndexes(v, clean.shallow)
                     end
+                elseif type(action) == "function" then
+                    action(tbl[i])
                 end
             end
         end
     end
-    return true
 end
 
-function ItemModuleBase:RegisterHook()
-
-end
+function ItemModuleBase:RegisterHook() end

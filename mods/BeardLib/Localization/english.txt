@@ -2,6 +2,9 @@
     "mod_assets_updates_available" : "Mod Assets Update Required!",
     "mod_assets_updates_available_desc" : "$mod requires an update for it's assets!",
     "mod_assets_updates_download_now" : "Download Now",
+    "mod_assets_visit_page" : "Visit Page",
+    "mod_assets_close" : "Close",
+    "mod_assets_update_all" : "Update all",
     "mod_assets_updates_ignore" : "Ignore update",
     "mod_assets_updates_remind_later" : "Remind me later",
     "mod_assets_title" : "Mod Assets",
@@ -17,5 +20,17 @@
     "mod_assets_error_desc" : "An error occured while trying to get the server version number for the assets",
     "menu_ok" : "OK",
     "bm_global_value_mod" : "MODS",
-    "menu_l_global_value_mod" : "This is a modding community item!"
+    "menu_l_global_value_mod" : "This is a modding community item!",
+    "custom_map_title" : "Custom Heist: $map",
+    "custom_map_download_available" : "Download Available",
+    "custom_map_download_complete" : "Download Complete, No need to restart.",
+    "custom_map_alert" : "Custom Heist Alert",
+    "custom_map_needs_download" : "You need to download the heist before joining, begin download?",
+    "custom_map_host_old_version" : "Cannot begin download of custom heist because the host is running an old version of BeardLib!",
+    "custom_map_failed_download" : "Failed to download custom heist",
+    "custom_map_missing_updater" : "Cannot begin download of custom heist because the map does not have an updater!",
+    "heist_contact_custom" : "Custom Heists",
+    "heist_contact_custom_description" : "Custom heists are completely new heists added to the game and are made by the community",
+    "custom_map_cant_download" : "The heist that the host has set cannot be downloaded, disconnecting.",
+    "custom_map_failed" : "Something went wrong when downloading the heist."
 }

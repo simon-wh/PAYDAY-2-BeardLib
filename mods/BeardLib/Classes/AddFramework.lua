@@ -1,8 +1,9 @@
 AddFramework = AddFramework or class(FrameworkBase)
 AddFramework._ignore_detection_errors = true
+AddFramework.add_file = "add.xml"
 function AddFramework:init()
-    self._directory = BeardLib.definitions.mod_override
-    self.super.init(self)
+    self._directory = BeardLib.config.mod_override_dir
+    AddFramework.super.init(self)
 end
 
 function AddFramework:RegisterHooks()
@@ -18,3 +19,26 @@ function AddFramework:RegisterHooks()
         end
     end
 end
+
+function AddFramework:Load()
+    local dirs = file.GetDirectories(self._directory)
+    if dirs then
+        for _, dir in pairs(dirs) do
+            local p = path:Combine(self._directory, dir)
+            local main_file = path:Combine(p, self.main_file_name)
+			local add_file = path:Combine(p, self.add_file)
+            if FileIO:Exists(main_file) then
+                self:LoadMod(dir, p, main_file)
+            elseif not self._ignore_detection_errors then
+                BeardLib:log("[ERROR] Could not read %s", main_file)
+            end
+			if FileIO:Exists(add_file) then
+				local file = io.open(add_file, "r")
+				local config = ScriptSerializer:from_custom_xml(file:read("*all"))
+				CustomPackageManager:LoadPackageConfig(p, config)
+            end
+        end
+    end
+end
+
+return AddFramework

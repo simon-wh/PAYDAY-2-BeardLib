@@ -119,6 +119,7 @@ end
 
 function MenuHelperPlus:GetNode(menu_name, node_name)
 	menu_name = menu_name or managers.menu._is_start_menu and "menu_main" or "menu_pause"
+	node_name = node_name or managers.menu._is_start_menu and "main" or "pause"
     return managers.menu._registered_menus[menu_name] and managers.menu._registered_menus[menu_name].logic._data._nodes[node_name] or nil
 end
 

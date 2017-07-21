@@ -1,21 +1,23 @@
 ModAssetsModule = ModAssetsModule or class(ModuleBase)
 ModAssetsModule.type_name = "AssetUpdates"
 ModAssetsModule._default_version_file = "version.txt"
+ModAssetsModule._providers = {
+    modworkshop = {
+        version_api_url = "http://manager.modworkshop.net/GetDownloadVersion/$id$.txt",
+        download_info_url = "http://manager.modworkshop.net/GetSingleDownload/$id$.json",
+        download_api_url = "http://modworkshop.net/mydownloads/downloads/$download$",
+        page_url = "http://downloads.modworkshop.net/$id$"
+    }
+}
 
 function ModAssetsModule:init(core_mod, config)
-    self.required_params = table.add(clone(self.required_params), {"id", "folder_name"})
-    if not self.super.init(self, core_mod, config) then
+    self.required_params = table.add(clone(self.required_params), {"id"})
+    if not ModAssetsModule.super.init(self, core_mod, config) then
         return false
     end
 
-    self._providers = {
-        lastbullet = {
-            version_api_url = "http://manager.lastbullet.net/GetDownloadVersion/$id$.txt",
-            download_file_func = callback(self, self, "LastBulletDownloadAssets"),
-            download_info_url = "http://manager.lastbullet.net/GetSingleDownload/$id$.json",
-            download_api_url = "http://lastbullet.net/mydownloads/downloads/$download$"
-        }
-    }
+    self._providers.modworkshop.download_file_func = callback(self, self, "MWSDownloadAssets")
+    self._providers.lastbullet = clone(self._providers.modworkshop)
 
     self.id = self._config.id
 
@@ -36,14 +38,13 @@ function ModAssetsModule:init(core_mod, config)
         return
     end
 
-    self.folder_names = self._config.use_local_dir and table.remove(string.split(self._mod.ModPath, "/")) or (type(self._config.folder_name) == "string" and {self._config.folder_name} or BeardLib.Utils:RemoveNonNumberIndexes(self._config.folder_name))
-    self.install_directory = self._config.use_local_path and BeardLib.Utils.Path:GetDirectory(self._mod.ModPath) or (self._config.install_directory and self._mod:GetRealFilePath(self._config.install_directory, self) or BeardLib.definitions.mod_override)
-
+    self.folder_names = self._config.use_local_dir and {table.remove(string.split(self._mod.ModPath, "/"))} or (type(self._config.folder_name) == "string" and {self._config.folder_name} or BeardLib.Utils:RemoveNonNumberIndexes(self._config.folder_name))
+    self.install_directory = self._config.use_local_path and BeardLib.Utils.Path:GetDirectory(self._mod.ModPath) or (self._config.install_directory and self._mod:GetRealFilePath(self._config.install_directory, self) or BeardLib.config.mod_override_dir)
     self.version_file = self._config.version_file and self._mod:GetRealFilePath(self._config.version_file, self) or BeardLib.Utils.Path:Combine(self.install_directory, self.folder_names[1], self._default_version_file)
     self._version = 0
-
+    
     self._update_manager_id = self._mod.Name .. self._name
-
+    self._mod.update_key = (self._config.is_standalone ~= false) and self.id
     self:RetrieveCurrentVersion()
 
     if not self._config.manual_check then
@@ -59,7 +60,7 @@ end
 
 function ModAssetsModule:RegisterAutoUpdateCheckHook()
     Hooks:Add("MenuManagerOnOpenMenu", self._mod.Name .. self._name .. "UpdateCheck", function( self_menu, menu, index )
-        if menu == "menu_main" then
+        if menu == "menu_main" and not LuaNetworking:IsMultiplayer() then
             self:CheckVersion()
         end
     end)
@@ -73,8 +74,10 @@ function ModAssetsModule:RetrieveCurrentVersion()
         else
             self:log("[ERROR] Unable to parse version '%s' as a number. File: %s", version, self.version_file)
         end
+    elseif tonumber(self._config.version) then
+        self._version = tonumber(self._config.version)
     else
-        self:log("[ERROR] Unable to read version file for '%s's assets. File: %s", self._mod.Name, self.version_file)
+        self:log("[ERROR] Unable to get version for '%s's assets. File: %s", self._mod.Name, self.version_file)
     end
 end
 
@@ -137,7 +140,7 @@ end
 
 function ModAssetsModule:ShowRequiresUpdatePrompt()
     local lookup_tbl = {
-        ["mod"] = self._mod.Name
+        ["mod"] = self._mod.Name,
     }
 
     QuickMenu:new(
@@ -147,6 +150,10 @@ function ModAssetsModule:ShowRequiresUpdatePrompt()
             {
                 text = managers.localization:text("mod_assets_updates_download_now"),
                 callback = callback(self, self, "DownloadAssets")
+            },
+            {
+                text = managers.localization:text("mod_assets_visit_page"),
+                callback = callback(self, self, "ViewMod")
             },
             {
                 text = managers.localization:text("mod_assets_updates_ignore"),
@@ -159,6 +166,7 @@ function ModAssetsModule:ShowRequiresUpdatePrompt()
         },
         true
     )
+    --BeardLib.managers.updates_menu:AddUpdate(self)
 end
 
 function ModAssetsModule:SetReady()
@@ -178,20 +186,25 @@ function ModAssetsModule:DownloadAssets()
     end
 end
 
+function ModAssetsModule:ViewMod()
+    Steam:overlay_activate("url", self._mod:GetRealFilePath(self.provider.page_url, self))
+end
+
 function ModAssetsModule:_DownloadAssets(data)
     local download_url = self._mod:GetRealFilePath(self.provider.download_api_url, data or self)
     self:log("Downloading assets from url: %s", download_url)
-    managers.menu:show_download_progress( self._mod.Name .. " " .. managers.localization:text("mod_assets_title"))
-    dohttpreq( download_url, callback(self, self, "StoreDownloadedAssets"), LuaModUpdates.UpdateDownloadDialog)
+    managers.menu:show_download_progress(self._mod.Name .. " " .. managers.localization:text("mod_assets_title"))
+    dohttpreq(download_url, callback(self, self, "StoreDownloadedAssets", false), LuaModUpdates.UpdateDownloadDialog)
 end
 
-function ModAssetsModule:StoreDownloadedAssets(data, id)
+function ModAssetsModule:StoreDownloadedAssets(config, data, id)
+    config = config or self._config
 	local ret, pdata = pcall(function()
         LuaModUpdates:SetDownloadDialogKey("mod_download_complete", true)
-    	self:log("[INFO] Finished downloading assets")
+    	BeardLib:log("[INFO] Finished downloading assets")
 
     	if string.is_nil_or_empty(data) then
-    		self:log("[ERROR] Assets download failed, received data was invalid")
+    		BeardLib:log("[ERROR] Assets download failed, received data was invalid")
     		LuaModUpdates:SetDownloadDialogKey("mod_download_failed", true)
     		return
     	end
@@ -206,7 +219,7 @@ function ModAssetsModule:StoreDownloadedAssets(data, id)
             self:log("[ERROR] An error occured while trying to store the downloaded asset data")
             return
     	end
-        if not self._config.dont_delete then
+        if self._config and not self._config.dont_delete then
             for _, dir in pairs(self.folder_names) do
                 local path = BeardLib.Utils.Path:Combine(self.install_directory, dir)
                 if _G.file.DirectoryExists(path) then
@@ -214,28 +227,31 @@ function ModAssetsModule:StoreDownloadedAssets(data, id)
                 end
             end
         end
-        unzip(temp_zip_path, self.install_directory)
+        unzip(temp_zip_path, config.install_directory or self.install_directory)
         LuaModUpdates:SetDownloadDialogKey("mod_extraction_complete", true)
         os.remove(temp_zip_path)
 
     	LuaModUpdates._current_download_dialog = nil
-        self:SetReady()
+        ModAssetsModule:SetReady()
+        if config.done_callback then
+            config.done_callback()
+        end
 	end)
 	if not ret then
-		self:log("[ERROR] " .. pdata)
+		BeardLib:log("[ERROR] " .. pdata)
 	end
 end
 
-function ModAssetsModule:LastBulletDownloadAssets()
+function ModAssetsModule:MWSDownloadAssets()
     local download_info_url = self._mod:GetRealFilePath(self.provider.download_info_url, self)
 
-    dohttpreq( download_info_url,
+    dohttpreq(download_info_url,
         function(data, id)
             local ret, d_data = pcall(function() return json.decode(data) end)
             if ret then
                 self:_DownloadAssets(d_data[tostring(self.id)])
             else
-                self:log("Failed to parse the data received from LastBullet!")
+                self:log("Failed to parse the data received from Modworkshop!")
             end
         end
     )

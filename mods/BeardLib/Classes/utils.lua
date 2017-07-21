@@ -4,34 +4,52 @@ function table.pack(...)
 end
 
 function table.merge(og_table, new_table)
+    for i, data in pairs(new_table) do
+        i = type(data) == "table" and data.index or i
+        if type(data) == "table" and type(og_table[i]) == "table" then
+            og_table[i] = table.merge(og_table[i], data)
+        else
+            og_table[i] = data
+        end
+    end
+    return og_table
+end
+
+function table.map_indices(og_table)
+    local tbl = {}
+    for i=1, #og_table do
+        table.insert(tbl, i)
+    end
+    return tbl
+end
+
+--When you want to merge but don't want to merge things like menu items together.
+function table.careful_merge(og_table, new_table)
+    for i, data in pairs(new_table) do
+        i = type_name(data) == "table" and data.index or i
+        if type_name(data) == "table" and type_name(og_table[i]) == "table" then
+            og_table[i] = table.merge(og_table[i], data)
+        else
+            og_table[i] = data
+        end
+    end
+    return og_table
+end
+
+function table.add_merge(og_table, new_table)
 	for i, data in pairs(new_table) do
-		i = type(data) == "table" and data.index or i
-		if type(data) == "table" and og_table[i] then
-			og_table[i] = table.merge(og_table[i], data)
-		else
-			og_table[i] = data
-		end
+		i = (type(data) == "table" and data.index) or i
+        if type(i) == "number" and og_table[i] then
+            table.insert(og_table, data)
+        else
+    		if type(data) == "table" and og_table[i] then
+    			og_table[i] = table.add_merge(og_table[i], data)
+    		else
+    			og_table[i] = data
+    		end
+        end
 	end
 	return og_table
-end
-
-function mrotation.copy(rot)
-    if rot then
-        return Rotation(rot:yaw(), rot:pitch(), rot:roll())
-    end
-    return Rotation()
-end
-
-function mrotation.set_yaw(rot, yaw)
-    return mrotation.set_yaw_pitch_roll(rot, yaw, rot:pitch(), rot:roll())
-end
-
-function mrotation.set_pitch(rot, pitch)
-    return mrotation.set_yaw_pitch_roll(rot, rot:yaw(), pitch, rot:roll())
-end
-
-function mrotation.set_roll(rot, roll)
-    return mrotation.set_yaw_pitch_roll(rot, rot:yaw(), rot:pitch(), roll)
 end
 
 function table.add(t, items)
@@ -165,6 +183,59 @@ function table.script_merge(base_tbl, new_tbl)
     end
 end
 
+function Hooks:RemovePostHookWithObject(object, id)
+    local hooks = self._posthooks[object]
+    if not hooks then
+        BeardLib:log("[Error] No post hooks for object '%s' while trying to remove id '%s'", tostring(object), tostring(id))
+        return
+    end
+    for func_i, func in pairs(hooks) do
+        for override_i, override in ipairs(func.overrides) do
+            if override and override.id == id then
+                table.remove(func.overrides, override_i)
+            end
+        end
+    end         
+end
+
+function Hooks:RemovePreHookWithObject(object, id)
+    local hooks = self._prehooks[object]
+    if not hooks then
+        BeardLib:log("[Error] No pre hooks for object '%s' while trying to remove id '%s'", tostring(object), tostring(id))
+        return
+    end
+    for func_i, func in pairs(hooks) do
+        for override_i, override in ipairs(func.overrides) do
+            if override and override.id == id then
+                table.remove(func.overrides, override_i)
+            end
+        end
+    end         
+end
+
+function mrotation.copy(rot)
+    if rot then
+        return Rotation(rot:yaw(), rot:pitch(), rot:roll())
+    end
+    return Rotation()
+end
+
+function mrotation.set_yaw(rot, yaw)
+    return mrotation.set_yaw_pitch_roll(rot, yaw, rot:pitch(), rot:roll())
+end
+
+function mrotation.set_pitch(rot, pitch)
+    return mrotation.set_yaw_pitch_roll(rot, rot:yaw(), pitch, rot:roll())
+end
+
+function mrotation.set_roll(rot, roll)
+    return mrotation.set_yaw_pitch_roll(rot, rot:yaw(), rot:pitch(), roll)
+end
+
+function string.pretty2(str)
+    str = tostring(str)
+    return str:gsub("([^A-Z%W])([A-Z])", "%1 %2"):gsub("([A-Z]+)([A-Z][^A-Z$])", "%1 %2")
+end
 
 function string.key(str)
     local ids = Idstring(str)
@@ -228,6 +299,91 @@ function math.QuaternionToEuler(x, y, z, w)
 end
 
 BeardLib.Utils = {}
+
+_G.utils = BeardLib.Utils
+
+function BeardLib.Utils:RefreshCurrentNode()
+    local selected_node = managers.menu:active_menu().logic:selected_node()
+    managers.menu:active_menu().renderer:refresh_node(selected_node)
+    local selected_item = selected_node:selected_item()
+    selected_node:select_item(selected_item and selected_item:name())
+    managers.menu:active_menu().renderer:highlight_item(selected_item)
+end
+
+function BeardLib.Utils:CheckParamsValidty(tbl, schema)
+    local ret = true
+    for i = 1, #schema.params do
+        local var = tbl[i]
+        local sc = schema.params[i]
+        if not self:CheckParamValidty(schema.func_name, i, var, sc.type, sc.allow_nil) then
+            ret = false
+        end
+    end
+    return ret
+end
+
+function BeardLib.Utils:CheckParamValidty(func_name, vari, var, desired_type, allow_nil)
+    if (var == nil and not allow_nil) or type(var) ~= desired_type then
+        log(string.format("[%s] Parameter #%s, expected %s, got %s", func_name, vari, desired_type, tostring(var and type(var) or nil)))
+        return false
+    end
+
+    return true
+end
+
+function BeardLib.Utils:DownloadMap(level_name, update_key, done_callback)
+    local function done_map_download()
+        BeardLib.managers.MapFramework:Load()
+        BeardLib.managers.MapFramework:RegisterHooks()
+        managers.job:_check_add_heat_to_jobs()
+        managers.crimenet:find_online_games(Global.game_settings.search_friends_only)
+        if done_callback then
+            done_callback(true)
+        end
+    end
+    QuickMenuPlus:new(managers.localization:text("custom_map_alert"), managers.localization:text("custom_map_needs_download"), {{text = "Yes", callback = function()
+        local provider = ModAssetsModule._providers.modworkshop --temporarily will support only mws
+        dohttpreq(ModCore:GetRealFilePath(provider.download_info_url, tostring(update_key)), function(data, id)
+            local ret, d_data = pcall(function() return json.decode(data) end)
+            if ret then			
+                local download_url = ModCore:GetRealFilePath(provider.download_api_url, d_data[tostring(update_key)])
+                BeardLib:log("Downloading map from url: %s", download_url)					
+                local orig = DownloadProgressBoxGui._update
+                function DownloadProgressBoxGui._update(o, this)
+                    orig(o, this)
+                    this._anim_data.download_amt_text:set_text(managers.localization:to_upper_text("custom_map_download_complete"))
+                    BlackMarketGui:make_fine_text(this._anim_data.download_amt_text)
+                    DownloadProgressBoxGui._update = orig
+                end
+                managers.system_menu:show_download_progress({
+                    title = managers.localization:text("base_mod_download_downloading_mod", {mod_name = level_name or "No Map Name"}),
+                    focus_button = 1,
+                    force = true,
+                    button_list = {{cancel_button = true, text = managers.localization:text("dialog_ok")}}
+                })
+                dohttpreq(download_url, callback(ModAssetsModule, ModAssetsModule, "StoreDownloadedAssets", {install_directory = "Maps", done_callback = done_map_download}), LuaModUpdates.UpdateDownloadDialog)
+            else
+                QuickMenuPlus:new(managers.localization:text("mod_assets_error"), managers.localization:text("custom_map_failed_download"))
+                BeardLib:log("Failed to parse the data received from Modworkshop(Invalid map?)")
+            end
+        end)
+    end},{text = "No", is_cancel_button = true, callback = function()
+        if done_callback then
+            done_callback(false)
+        end
+    end}}, {force = true})
+end
+
+function BeardLib.Utils:GetJobString()
+    local level_id = Global.game_settings.level_id
+    local job_id = managers.job:current_job_id()
+    local level = tweak_data.levels[level_id]
+    local mod = BeardLib.managers.MapFramework:GetModByName(job_id)
+    local update_key = mod and mod.update_key
+    local str = string.format("%s|%s|%s|%s|%s", job_id, level_id, Global.game_settings.difficulty, managers.localization:to_upper_text(level and level.name_id or ""), update_key or "")
+    return str
+end
+
 BeardLib.Utils.WeapConv = {
     [1] = "wpn_fps_pis_g17",
     [2] = "wpn_fps_ass_amcar"
@@ -263,7 +419,7 @@ function BeardLib.Utils:OutfitStringFromList(outfit, is_henchman)
     local bm = managers.blackmarket
     is_henchman = is_henchman and bm.henchman_loadout_string_from_loadout
     local str = is_henchman and bm:henchman_loadout_string_from_loadout(outfit) or bm:outfit_string_from_list(outfit)
-    --Remove when overkill decides to add armor_skin to BlackMarketManager:outfit_string_from_list
+     --Remove when overkill decides to add armor_skin to BlackMarketManager:outfit_string_from_list
     return is_henchman and str or str:gsub(outfit.armor.."%-"..outfit.armor_current.."%-"..outfit.armor_current_state, outfit.armor.."-"..outfit.armor_current.."-"..outfit.armor_current_state.."-"..outfit.armor_skin)
 end
 
@@ -272,28 +428,28 @@ function BeardLib.Utils:CleanOutfitString(str, is_henchman)
     if is_henchman and not bm.unpack_henchman_loadout_string then --thx ovk for the headaches henchman beta caused me <3
         is_henchman = false
     end
-    local list = (is_henchman and bm.unpack_henchman_loadout_string) and bm:unpack_henchman_loadout_string(str) or bm:unpack_outfit_from_string(str)
-    if list.mask and tweak_data.blackmarket.masks[is_henchman and list.mask or list.mask.mask_id].custom then
+	local list = (is_henchman and bm.unpack_henchman_loadout_string) and bm:unpack_henchman_loadout_string(str) or bm:unpack_outfit_from_string(str)
+	if list.mask and tweak_data.blackmarket.masks[is_henchman and list.mask or list.mask.mask_id].custom then
         if is_henchman then
             list.mask = "character_locked"
         else
             list.mask.mask_id = "character_locked"
         end
-    end
+	end
 
     local pattern = is_henchman and list.mask_blueprint.pattern or list.mask.blueprint.pattern
-    if pattern and tweak_data.blackmarket.textures[pattern.id].custom then
-        pattern.id = "no_color_no_material"
-    end
+	if pattern and tweak_data.blackmarket.textures[pattern.id].custom then
+		pattern.id = "no_color_no_material"
+	end
 
     local material = is_henchman and list.mask_blueprint.material or list.mask.blueprint.material
-    if material and tweak_data.blackmarket.materials[material.id].custom then
-        material.id = "plastic"
-    end
+	if material and tweak_data.blackmarket.materials[material.id].custom then
+		material.id = "plastic"
+	end
 
     if list.primary then
         local primary = is_henchman and list.primary or list.primary.factory_id
-        if tweak_data.weapon.factory[primary].custom then
+    	if tweak_data.weapon.factory[primary].custom then
             local based_on = self:GetBasedOnFactoryId(primary) or self.WeapConv[2]
             if is_henchman then
                 list.primary = based_on
@@ -301,29 +457,29 @@ function BeardLib.Utils:CleanOutfitString(str, is_henchman)
                 list.primary.factory_id = based_on
                 list.primary.blueprint = tweak_data.weapon.factory[list.primary.factory_id].default_blueprint
             end
-        end
+    	end
     end
 
-    if not is_henchman and list.secondary then
+	if not is_henchman and list.secondary then
         local secondary = list.secondary.factory_id
         if tweak_data.weapon.factory[secondary].custom then
-            list.secondary.factory_id = self:GetBasedOnFactoryId(secondary) or self.WeapConv[1]
+    		list.secondary.factory_id = self:GetBasedOnFactoryId(secondary) or self.WeapConv[1]
             list.secondary.blueprint = tweak_data.weapon.factory[list.secondary.factory_id].default_blueprint
-        end
+    	end
 
         if tweak_data.blackmarket.melee_weapons[list.melee_weapon].custom then
             list.melee_weapon = "weapon"
         end
 
-        for _, weap in pairs({list.primary, list.secondary}) do
-            for i, part_id in pairs(weap.blueprint) do
-                if tweak_data.weapon.factory.parts[part_id] and tweak_data.weapon.factory.parts[part_id].custom then
-                    table.remove(weap.blueprint, i)
-                end
-            end
-        end
+    	for _, weap in pairs({list.primary, list.secondary}) do
+    		for i, part_id in pairs(weap.blueprint) do
+    			if tweak_data.weapon.factory.parts[part_id] and tweak_data.weapon.factory.parts[part_id].custom then
+    				table.remove(weap.blueprint, i)
+    			end
+    		end
+    	end
     end
-    return self:OutfitStringFromList(list, is_henchman)
+	return self:OutfitStringFromList(list, is_henchman)
 end
 
 function BeardLib.Utils:GetSubValues(tbl, key)
@@ -417,6 +573,54 @@ function BeardLib.Utils:RemoveAllNumberIndexes(tbl, shallow)
     return tbl
 end
 
+function BeardLib.Utils:GetNodeByMeta(tbl, meta, multi)
+    if not tbl then return nil end
+    local t = {}
+    for _, v in pairs(tbl) do
+        if type(v) == "table" and v._meta == meta then
+            if multi then
+                table.insert(t, v)
+            else
+                return v
+            end
+        end
+    end
+
+    return multi and t or nil
+end
+
+function BeardLib.Utils:GetIndexNodeByMeta(tbl, meta, multi)
+    if not tbl then return nil end
+    local t = {}
+    for i, v in pairs(tbl) do
+        if type(v) == "table" and v._meta == meta then
+            if multi then
+                table.insert(t, i)
+            else
+                return i
+            end
+        end
+    end
+
+    return multi and t or nil
+end
+
+function BeardLib.Utils:CleanCustomXmlTable(tbl, shallow)
+    if not tbl then return nil end
+
+    for i, v in pairs(tbl) do
+        if type(v) == "table" then
+            if tonumber(i) == nil then
+                tbl[i] = nil
+            elseif not shallow then
+                self:CleanCustomXmlTable(v, shallow)
+            end
+        end
+    end
+
+    return tbl
+end
+
 function BeardLib.Utils:RemoveNonNumberIndexes(tbl)
 	if not tbl then return nil end
 
@@ -471,6 +675,9 @@ end
 
 BeardLib.Utils.Path = {}
 
+_G.path = BeardLib.Utils.Path
+_G.Path = path
+
 BeardLib.Utils.Path._separator_char = "/"
 
 function BeardLib.Utils.Path:GetDirectory(path)
@@ -489,17 +696,30 @@ function BeardLib.Utils.Path:GetFileName(str)
 end
 
 function BeardLib.Utils.Path:GetFileNameWithoutExtension(str)
+    local filename = self:GetFileName(str)
+    if not filename then
+        return nil
+    end
+
+    if string.find(filename, "%.") then
+        local split = string.split(filename, "%.")
+        table.remove(split)
+        filename = table.concat(split, ".")
+    end
+    return filename
+end
+
+function BeardLib.Utils.Path:GetFileExtension(str)
 	local filename = self:GetFileName(str)
 	if not filename then
 		return nil
 	end
-
+    local ext = ""
 	if string.find(filename, "%.") then
 		local split = string.split(filename, "%.")
-		table.remove(split)
-		filename = table.concat(split, ".")
+		ext = split[#split]
 	end
-	return filename
+	return ext
 end
 
 function BeardLib.Utils.Path:Normalize(str)
@@ -537,4 +757,140 @@ function BeardLib.Utils.Math:Round(val, dp)
 	local mult = 10^(dp or 0)
 	local rounded = math.floor(val * mult + 0.5) / mult
 	return rounded
+end
+
+BeardLib.Utils.Input = {}
+
+function BeardLib.Utils.Input:Class() return Input:keyboard() end
+function BeardLib.Utils.Input:Id(str) return str:id() end
+
+--Keyboard
+function BeardLib.Utils.Input:Down(key) return self:Class():down(self:Id(key)) end
+function BeardLib.Utils.Input:Released(key) return self:Class():released(self:Id(key)) end
+function BeardLib.Utils.Input:Pressed(key) return self:Class():pressed(self:Id(key)) end
+function BeardLib.Utils.Input:Trigger(key, clbk) return self:Class():add_trigger(self:Id(key), SafeClbk(clbk)) end
+function BeardLib.Utils.Input:RemoveTrigger(trigger) return self:Class():remove_trigger(trigger) end
+function BeardLib.Utils.Input:TriggerRelease(key, clbk) return self:Class():add_release_trigger(self:Id(key), SafeClbk(clbk)) end
+--Mouse
+BeardLib.Utils.MouseInput = clone(BeardLib.Utils.Input)
+function BeardLib.Utils.MouseInput:Class() return Input:mouse() end
+--Keyboard doesn't work without Idstring however mouse works and if you don't use Idstring you can use strings like 'mouse 0' to differentiate between keyboard and mouse
+--For example keyboard has the number 0 which is counted as left mouse button for mouse input, this solves it.
+function BeardLib.Utils.MouseInput:Id(str) return str end
+
+function BeardLib.Utils.Input:TriggerDataFromString(str, clbk)
+    local additional_key
+    local key = str
+    if str:match("+") then
+        local split = string.split(str, "+")
+        key = split[1]
+        additional_key = split[2]
+    end
+    return {key = key, additional_key = additional_key, clbk = clbk}
+end
+
+function BeardLib.Utils.Input:Triggered(trigger, check_mouse_too)
+    if not trigger.key then
+        return false
+    end
+    if check_mouse_too and trigger.key:match("mouse") then
+        return BeardLib.Utils.MouseInput:Pressed(trigger.key)
+    end
+    if trigger.additional_key then
+        if self:Down(trigger.key) and self:Pressed(trigger.additional_key) then
+            return true
+        end
+    elseif self:Pressed(trigger.key) then
+        return true
+    end
+    return false
+end
+
+function NotNil(...)
+    local args = {...}
+    for k, v in pairs(args) do
+        if v ~= nil or k == #args then
+            return v
+        end
+    end
+end
+
+function SimpleClbk(func, ...)
+    local args = {...}
+    return function(...) return func(unpack(table.list_add(args, {...}))) end
+end
+
+function SafeClbk(func, ...)
+    local params = {...}
+    return function(...)
+        local p = {...}
+        local success, ret = pcall(function() ret = func(unpack(params), unpack(p)) end)
+        if not success then
+            BeardLib:log("[Safe Callback Error] %s", tostring(ret and ret.code or ""))
+            return nil
+        end
+        return ret
+    end
+end
+
+function ClassClbk(clss, func, ...)
+    return SimpleClbk(clss[func], clss, ...)
+end
+
+--If only Color supported alpha for hex :P
+function Color:from_hex(hex)
+    if not hex or type(hex) ~= "string" then
+        log(debug.traceback())
+        return Color()
+    end
+    if hex:match("#") then
+        hex = hex:sub(2)
+    end
+    local col = {}
+    for i=1,8,2 do
+        local num = tonumber(hex:sub(i, i+1), 16)
+        if num then
+            table.insert(col, num / 255)
+        end
+    end
+    return Color(unpack(col))
+end
+
+function Color:to_hex()
+    local s = "%x"
+    local result = ""
+    for _, v in pairs({self.a < 1 and self.a or nil,self.r,self.g,self.b}) do
+        local hex = s:format(255*v)
+        if hex:len() == 0 then hex = "00" end
+        if hex:len() == 1 then hex = "0"..hex end
+        result = result .. hex
+    end
+    return result
+end
+
+function Color:contrast(white, black)
+    local col = {r = self.r, g = self.g, b = self.b}
+
+    for k, c in pairs(col) do
+        if c <= 0.03928 then 
+            col[k] = c/12.92 
+        else 
+            col[k] = ((c+0.055)/1.055) ^ 2.4 
+        end
+    end
+    local L = 0.2126 * col.r + 0.7152 * col.g + 0.0722 * col.b
+    local color = white or Color.white
+    if L > 0.179 then
+        color = black or Color.black 
+    end
+    return color
+end
+
+--Pretty much CoreClass.type_name with support for tables.
+function type_name(value)
+    local t = type(value)
+    if t == "userdata" or t == "table" and value.type_name then
+        return value.type_name
+    end
+    return t
 end

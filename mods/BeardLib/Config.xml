@@ -1,0 +1,184 @@
+<table
+	main_menu="BeardLibMainMenu"
+	localization_dir="$ModPath$Localization"
+	maps_dir="Maps"
+	hooks_dir="$ModPath$Hooks/"
+	modules_dir="$ModPath$Modules/"
+	classes_dir="$ModPath$Classes/"
+	assets_dir="$ModPath$Assets/"
+	mod_override_dir="assets/mod_overrides/">
+	<classes>
+		<class file="utils.lua"/>
+		<class file="FileIO.lua"/>
+		<class file="ModCore.lua"/>
+		<class file="CustomPackageManager.lua"/>
+		<class file="CustomAchievementManager.lua"/>
+		<class file="TweakDataHelper.lua"/>
+		<class file="ModManager.lua"/>
+		<class file="FileManager.lua" manager="File"/>
+		<class file="FrameworkBase.lua"/>
+		<class file="MapFramework.lua" manager="MapFramework"/>
+		<class file="AddFramework.lua" manager="AddFramework"/>
+		<class file="QuickAnimGUI.lua"/>
+		<class file="MenuUI.lua"/>
+		<class file="MenuDialog.lua"/>
+		<class file="Dialogs/FileBrowserDialog.lua"/>
+		<class file="Dialogs/ColorDialog.lua"/>
+		<class file="Dialogs/ListDialog.lua"/>
+		<class file="Dialogs/InputDialog.lua"/>
+		<class file="Dialogs/SelectListDialog.lua"/>
+		<class file="Menu/TextBoxBase.lua"/>
+		<class file="Menu/ContextMenu.lua"/>
+		<class file="Menu/BaseItem.lua"/>
+		<class file="Menu/Item.lua"/>
+		<class file="Menu/Menu.lua"/>
+		<class file="Menu/KeyBind.lua"/>
+		<class file="Menu/Group.lua"/>
+		<class file="Menu/ImageButton.lua"/>
+		<class file="Menu/Toggle.lua"/>
+		<class file="Menu/ComboBox.lua"/>
+		<class file="Menu/Slider.lua"/>
+		<class file="Menu/TextBox.lua"/>
+		<class file="MenuHelperPlus.lua"/>
+		<class file="json_utils.lua"/>
+		<class file="ModAssetUpdateManager.lua" manager="asset_update"/>
+		<class file="ModuleBase.lua"/>
+		<class file="MenuDialogManager.lua" manager="dialog"/>
+	</classes>
+	<hooks>
+		<hook source="core/lib/managers/coresequencemanager" file="CoreSequenceManager.lua"/>
+        <hook source="lib/managers/menu/menuinput" file="MenuInput.lua"/>
+        <hook source="lib/managers/menu/textboxgui" file="TextBoxGUI.lua"/>
+        <hook source="lib/managers/systemmenumanager" file="SystemMenuManager.lua"/>
+        <hook source="lib/managers/achievmentmanager" file="AchievementManager.lua"/>
+        <hook source="lib/managers/killzonemanager" file="KillzoneManager.lua"/>
+        <hook source="lib/managers/gameplaycentralmanager" file="GamePlayCentralManager.lua"/>
+        <hook source="lib/managers/trademanager" file="TradeManager.lua"/>
+        <hook source="lib/managers/missionmanager" file="MissionManager.lua"/>
+        <hook source="lib/managers/menumanager" file="MenuManager.lua"/>
+        <hook source="lib/managers/crimenetmanager" file="CrimeNetManager.lua"/>
+        <hook source="lib/managers/weaponfactorymanager" file="WeaponFactoryManager.lua"/>
+		<hook source="core/lib/managers/coresoundenvironmentmanager" file="SoundEnvironmentManager.lua"/>
+        <hook source="lib/managers/dialogs/keyboardinputdialog" file="KeyboardInputDialog.lua"/>
+        <hook source="lib/managers/mission/elementinteraction" file="ElementInteraction.lua"/>
+        <hook source="lib/managers/mission/elementvehiclespawner" file="ElementVehicleSpawner.lua"/>
+        <hook source="core/lib/utils/dev/editor/coreworlddefinition" file="CoreWorldDefinition.lua"/>
+        <hook source="lib/managers/menu/scrollablepanel" file="ScrollablePanel.lua"/>
+        <hook source="core/lib/system/coresystem" file="CoreSystem.lua"/>
+        <hook source="lib/tweak_data/crimespreetweakdata" file="PreTweakData.lua"/>
+        <hook source="lib/tweak_data/tweakdata" file="TweakData.lua"/>
+        <hook source="lib/network/matchmaking/networkmatchmakingsteam" file="NetworkMatchmakingSteam.lua"/>
+        <hook source="lib/network/base/handlers/connectionnetworkhandler" file="ConnectionNetworkHandler.lua"/>
+        <hook source="lib/network/base/networkpeer" file="NetworkPeer.lua"/>
+        <hook source="lib/network/base/clientnetworksession" file="ClientNetworkSession.lua"/>
+        <hook source="lib/units/beings/player/playermovement" file="PlayerMovement.lua"/>
+        <hook source="lib/units/beings/player/huskplayermovement" file="HuskPlayerMovement.lua"/>
+        <hook source="lib/units/beings/player/playerinventory" file="PlayerInventory.lua"/>
+        <hook source="lib/managers/menu/crewmanagementgui" file="CrewManagementGUI.lua"/>
+        <hook source="core/lib/managers/viewport/environment/coreenvironmentfeeder" file="EnvironmentFeeder.lua"/>
+        <hook source="core/lib/managers/viewport/environment/coreenvironmentmanager" file="EnvironmentManager.lua"/>
+		<hook source="lib/setups/setup" file="Setup.lua"/>
+	</hooks>
+	<script_data_types>
+		<value_node value="sequence_manager"/>
+		<value_node value="environment"/>
+		<value_node value="menu"/>
+		<value_node value="continent"/>
+		<value_node value="continents"/>
+		<value_node value="mission"/>
+		<value_node value="nav_data"/>
+		<value_node value="cover_data"/>
+		<value_node value="world"/>
+		<value_node value="world_cameras"/>
+		<value_node value="prefhud"/>
+		<value_node value="objective"/>
+		<value_node value="credits"/>
+		<value_node value="hint"/>
+		<value_node value="comment"/>
+		<value_node value="dialog"/>
+		<value_node value="dialog_index"/>
+		<value_node value="timeline"/>
+		<value_node value="action_message"/>
+		<value_node value="achievment"/>
+		<value_node value="controller_settings"/>
+		<value_node value="network_settings"/>
+		<value_node value="physics_settings"/>
+	</script_data_types>
+	<file_types>
+		<value_node value="achievment"/>
+		<value_node value="action_message"/>
+		<value_node value="animation"/>
+		<value_node value="animation_def"/>
+		<value_node value="animation_state_machine"/>
+		<value_node value="animation_states"/>
+		<value_node value="animation_subset"/>
+		<value_node value="atom_batcher_settings"/>
+		<value_node value="banksinfo"/>
+		<value_node value="bmfc"/>
+		<value_node value="bnk"/>
+		<value_node value="bnkinfo"/>
+		<value_node value="camera_shakes"/>
+		<value_node value="cameras"/>
+		<value_node value="cgb"/>
+		<value_node value="comment"/>
+		<value_node value="continent"/>
+		<value_node value="continents"/>
+		<value_node value="controller_settings"/>
+		<value_node value="cooked_physics"/>
+		<value_node value="cover_data"/>
+		<value_node value="credits"/>
+		<value_node value="decals"/>
+		<value_node value="dialog"/>
+		<value_node value="dialog_index"/>
+		<value_node value="diesel_layers"/>
+		<value_node value="effect"/>
+		<value_node value="environment"/>
+		<value_node value="font"/>
+		<value_node value="gui"/>
+		<value_node value="hint"/>
+		<value_node value="idstring_lookup"/>
+		<value_node value="light_intensities"/>
+		<value_node value="lua"/>
+		<value_node value="massunit"/>
+		<value_node value="material_config"/>
+		<value_node value="menu"/>
+		<value_node value="merged_font"/>
+		<value_node value="mission"/>
+		<value_node value="model"/>
+		<value_node value="movie"/>
+		<value_node value="nav_data"/>
+		<value_node value="network_settings"/>
+		<value_node value="object"/>
+		<value_node value="objective"/>
+		<value_node value="physic_effect"/>
+		<value_node value="physics_settings"/>
+		<value_node value="post_processor"/>
+		<value_node value="prefhud"/>
+		<value_node value="render_config"/>
+		<value_node value="render_template_database"/>
+		<value_node value="scene"/>
+		<value_node value="scenes"/>
+		<value_node value="sequence_manager"/>
+		<value_node value="sfap0"/>
+		<value_node value="shaders"/>
+		<value_node value="stream"/>
+		<value_node value="strings"/>
+		<value_node value="texture"/>
+		<value_node value="texture_channels"/>
+		<value_node value="tga"/>
+		<value_node value="unit"/>
+		<value_node value="world"/>
+		<value_node value="world_cameras"/>
+		<value_node value="world_setting"/>
+		<value_node value="world_sounds"/>
+		<value_node value="xbox_live"/>
+		<value_node value="xml"/>
+	</file_types>
+	<script_data_formats>
+		<value_node value="json"/>
+		<value_node value="xml"/>
+		<value_node value="generic_xml"/>
+		<value_node value="custom_xml"/>
+		<value_node value="binary"/>
+	</script_data_formats>
+</table>

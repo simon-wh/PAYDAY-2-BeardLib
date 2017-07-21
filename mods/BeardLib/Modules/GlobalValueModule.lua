@@ -9,7 +9,7 @@ function GlobalValueModule:init(core_mod, config)
             action = "normalize"
         }
     })
-    if not self.super.init(self, core_mod, config) then
+    if not GlobalValueModule.super.init(self, core_mod, config) then
         return false
     end
 

@@ -10,7 +10,7 @@ function MaskMaterialModule:init(core_mod, config)
         }
     })
     self.required_params = table.add(clone(self.required_params), {"texture"})
-    if not self.super.init(self, core_mod, config) then
+    if not MaskMaterialModule.super.init(self, core_mod, config) then
         return false
     end
 
@@ -26,20 +26,19 @@ function MaskMaterialModule:RegisterHook()
         end
         local data = table.merge({
             name_id = "material_" .. self._config.id .. "_title",
-            dlc = BeardLib.definitions.module_defaults.item.default_dlc,
+            dlc = self.defaults.dlc,
             value = 0,
-            global_value = BeardLib.definitions.module_defaults.item.default_global_value,
+            global_value = self.defaults.global_value,
             custom = true
         }, self._config.item or self._config)
         bm_self.materials[self._config.id] = data
-        if data.dlc == BeardLib.definitions.module_defaults.item.default_dlc then
-            table.insert(BeardLib._mod_lootdrop_items, {
+        if data.dlc then
+            TweakDataHelper:ModifyTweak({{
                 type_items = "materials",
                 item_entry = self._config.id,
                 amount = self._config.default_amount,
-                global_value = data.global_value ~= BeardLib.definitions.module_defaults.item.default_global_value and data.global_value or nil
-            })
-
+                global_value = data.global_value
+            }}, "dlc", data.dlc, "content", "loot_drops")
         end
     end)
 end

@@ -62,9 +62,25 @@ function WorldDefinition:_load_continent_package(path, ...)
     WorldDefinition_load_continent_package(self, path, ...)
 end
 
+function WorldDefinition:convert_mod_path(path)
+    local level_tweak = _G.tweak_data.levels[Global.level_data.level_id]
+    if BeardLib.current_level and level_tweak.custom and path and string.begins(path, ".map/") then
+        path = path:gsub(".map", _G.Path:Combine("levels/mods/", BeardLib.current_level._config.id))
+    end
+    if not DB:has("environment", path) then
+        return "core/environments/default"
+    end
+    return path
+end
+
 local WorldDefinition_create_environment = WorldDefinition._create_environment
 function WorldDefinition:_create_environment(data, offset, ...)
-
+    data.environment_values.environment = self:convert_mod_path(data.environment_values.environment)
+    for _, area in pairs(data.environment_areas) do
+        if type(area) == "table" and area.environment then
+            area.environment = self:convert_mod_path(area.environment)
+        end
+    end
     local shape_data
     if data.dome_occ_shapes and data.dome_occ_shapes[1] and data.dome_occ_shapes[1].world_dir then
         shape_data = data.dome_occ_shapes[1]

@@ -41,6 +41,7 @@ function ModCore:LoadConfigFile(path)
         end
     end
 
+    self._clean_config = deep_clone(config)
     self._config = config
 end
 
@@ -77,14 +78,14 @@ function ModCore:init_modules()
                     else
                         self:log("[ERROR] An error occured on initilization of module: %s. Error:\n%s", module_tbl._meta, tostring(node_obj))
                     end
-                else
+                elseif not self._config.ignore_errors then
                     self:log("[ERROR] Unable to find module with key %s", module_tbl._meta)
                 end
             end
         end
     end
 
-    if self._auto_post_init then
+    if self._auto_post_init or self._config.post_init then
         self:post_init()
     end
     self.modules_initialized = true

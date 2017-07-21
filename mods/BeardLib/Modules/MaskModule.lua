@@ -9,7 +9,7 @@ function MaskModule:init(core_mod, config)
             action = "no_number_indexes"
         }
     })
-    if not self.super.init(self, core_mod, config) then
+    if not MaskModule.super.init(self, core_mod, config) then
         return false
     end
 
@@ -26,21 +26,20 @@ function MaskModule:RegisterHook()
         local data = table.merge({
             name_id = "bm_msk_" .. self._config.id,
             desc_id = "bm_msk_" .. self._config.id .. "_desc",
-            dlc = BeardLib.definitions.module_defaults.item.default_dlc,
+            dlc = self.defaults.dlc,
             pcs = {},
             value = 0,
-            global_value = BeardLib.definitions.module_defaults.item.default_global_value,
+            global_value = self.defaults.global_value,
             custom = true
         }, self._config.item or self._config)
         bm_self.masks[self._config.id] = data
-        if data.dlc == BeardLib.definitions.module_defaults.item.default_dlc then
-            table.insert(BeardLib._mod_lootdrop_items, {
+        if data.drop ~= false and data.dlc then
+            TweakDataHelper:ModifyTweak({{
                 type_items = "masks",
                 item_entry = self._config.id,
                 amount = self._config.default_amount,
-                global_value = data.global_value ~= BeardLib.definitions.module_defaults.item.default_global_value and data.global_value or nil
-            })
-
+                global_value = data.global_value
+            }}, "dlc", data.dlc, "content", "loot_drops")
         end
     end)
 end

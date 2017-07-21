@@ -26,5 +26,14 @@ function ElementTeleportPlayer:on_executed(instigator)
         end
     end
  
-    self.super.on_executed(self, instigator)
+    ElementTeleportPlayer.super.on_executed(self, instigator)
+end
+
+function ElementTeleportPlayer:save(data)
+    data.save_me = true
+    data.enabled = self._values.enabled
+end
+
+function ElementTeleportPlayer:load(data)
+    self:set_enabled(data.enabled)
 end
