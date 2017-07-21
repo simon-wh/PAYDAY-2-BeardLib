@@ -16,9 +16,10 @@ The main documentation can be found on the [wiki](https://github.com/GreatBigBus
 * [BLT](https://github.com/JamesWilko/Payday-2-BLT)
 
 ## A few mods that make use of BeardLib
-* PD:TH Hud: [GitHub](https://github.com/GreatBigBushyBeard/PAYDAY-2-PDTH-Hud/) [LastBullet](http://lastbullet.net/mydownloads.php?action=view_down&did=682)
-* Out of Frame: [LastBullet](http://lastbullet.net/mydownloads.php?action=view_down&did=16831)
-* Death Wish+: [LastBullet](http://lastbullet.net/mydownloads.php?action=view_down&did=14384)
-* SC's Mod: [LastBullet](http://lastbullet.net/mydownloads.php?action=view_down&did=17254)
+* PD:TH Hud: [GitHub](https://github.com/GreatBigBushyBeard/PAYDAY-2-PDTH-Hud/) [ModWorkshop](http://lastbullet.net/mydownloads.php?action=view_down&did=682)
+* Out of Frame: [ModWorkshop](http://lastbullet.net/mydownloads.php?action=view_down&did=16831)
+* Death Wish+: [ModWorkshop](http://lastbullet.net/mydownloads.php?action=view_down&did=14384)
+* SC's Mod: [ModWorkshop](http://lastbullet.net/mydownloads.php?action=view_down&did=17254)
+* HoloUI: [GitHub](https://github.com/Luffyyy/HoloUI) [ModWorkshop](http://modworkshop.net/mydownloads.php?action=view_down&did=12501)
 * [Various Mask addition mods](http://lastbullet.net/mydownloads.php?action=browse_cat&cid=8&tags[]=11)
 * [Various Weapon addition mods](http://lastbullet.net/mydownloads.php?action=browse_cat&cid=308&tags[]=11)
