@@ -24,14 +24,14 @@ function ImageButton:InitBasicItem()
         h = self.icon_h or self.h - 4,
         halign = "center", 
         valign = "center",
-        layer = 1
+        layer = 5
     })
     self.img:set_world_center(self.panel:world_center())
     self:MakeBorder()
 end
 
 function ImageButton:DoHighlight(highlight)
-    self.super.DoHighlight(self, highlight)
+    ImageButton.super.DoHighlight(self, highlight)
     self.img:set_color(highlight and (self.img_highlight_color or self.text_highlight_color) or (self.img_color or self.text_color))
 end
 

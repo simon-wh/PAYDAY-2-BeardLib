@@ -34,6 +34,14 @@ function SelectListDialog:MakeListItems(params)
 end
 
 function SelectListDialog:ToggleClbk(value, menu, item)
+    if self._single_select then
+        for _,v in pairs(self._list) do
+            local toggle = self._list_menu:GetItem(type(v) == "table" and v.name or v)
+            if toggle and toggle ~= item then
+                toggle:SetValue(false)
+            end
+        end
+    end
     if item:Value() == true then
         if not table.contains(self._selected_list, value) then
             if self._single_select then

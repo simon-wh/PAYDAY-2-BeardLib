@@ -3,7 +3,7 @@ KeybindModule = KeybindModule or class(ModuleBase)
 KeybindModule.type_name = "Keybind"
 
 function KeybindModule:init(core_mod, config)
-    if not self.super.init(self, core_mod, config) then
+    if not KeybindModule.super.init(self, core_mod, config) then
         return false
     end
 

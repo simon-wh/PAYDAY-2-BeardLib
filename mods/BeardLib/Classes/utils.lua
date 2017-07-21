@@ -331,6 +331,59 @@ function BeardLib.Utils:CheckParamValidty(func_name, vari, var, desired_type, al
     return true
 end
 
+function BeardLib.Utils:DownloadMap(level_name, update_key, done_callback)
+    local function done_map_download()
+        BeardLib.managers.MapFramework:Load()
+        BeardLib.managers.MapFramework:RegisterHooks()
+        managers.job:_check_add_heat_to_jobs()
+        managers.crimenet:find_online_games(Global.game_settings.search_friends_only)
+        if done_callback then
+            done_callback(true)
+        end
+    end
+    QuickMenuPlus:new(managers.localization:text("custom_map_alert"), managers.localization:text("custom_map_needs_download"), {{text = "Yes", callback = function()
+        local provider = ModAssetsModule._providers.modworkshop --temporarily will support only mws
+        dohttpreq(ModCore:GetRealFilePath(provider.download_info_url, tostring(update_key)), function(data, id)
+            local ret, d_data = pcall(function() return json.decode(data) end)
+            if ret then			
+                local download_url = ModCore:GetRealFilePath(provider.download_api_url, d_data[tostring(update_key)])
+                BeardLib:log("Downloading map from url: %s", download_url)					
+                local orig = DownloadProgressBoxGui._update
+                function DownloadProgressBoxGui._update(o, this)
+                    orig(o, this)
+                    this._anim_data.download_amt_text:set_text(managers.localization:to_upper_text("custom_map_download_complete"))
+                    BlackMarketGui:make_fine_text(this._anim_data.download_amt_text)
+                    DownloadProgressBoxGui._update = orig
+                end
+                managers.system_menu:show_download_progress({
+                    title = managers.localization:text("base_mod_download_downloading_mod", {mod_name = level_name or "No Map Name"}),
+                    focus_button = 1,
+                    force = true,
+                    button_list = {{cancel_button = true, text = managers.localization:text("dialog_ok")}}
+                })
+                dohttpreq(download_url, callback(ModAssetsModule, ModAssetsModule, "StoreDownloadedAssets", {install_directory = "Maps", done_callback = done_map_download}), LuaModUpdates.UpdateDownloadDialog)
+            else
+                QuickMenuPlus:new(managers.localization:text("mod_assets_error"), managers.localization:text("custom_map_failed_download"))
+                BeardLib:log("Failed to parse the data received from Modworkshop(Invalid map?)")
+            end
+        end)
+    end},{text = "No", is_cancel_button = true, callback = function()
+        if done_callback then
+            done_callback(false)
+        end
+    end}}, {force = true})
+end
+
+function BeardLib.Utils:GetJobString()
+    local level_id = Global.game_settings.level_id
+    local job_id = managers.job:current_job_id()
+    local level = tweak_data.levels[level_id]
+    local mod = BeardLib.managers.MapFramework:GetModByName(job_id)
+    local update_key = mod and mod.update_key
+    local str = string.format("%s|%s|%s|%s|%s", job_id, level_id, Global.game_settings.difficulty, managers.localization:to_upper_text(level and level.name_id or ""), update_key or "")
+    return str
+end
+
 BeardLib.Utils.WeapConv = {
     [1] = "wpn_fps_pis_g17",
     [2] = "wpn_fps_ass_amcar"
@@ -784,17 +837,32 @@ function ClassClbk(clss, func, ...)
     return SimpleClbk(clss[func], clss, ...)
 end
 
+--If only Color supported alpha for hex :P
+function Color:from_hex(hex)
+    if not hex or type(hex) ~= "string" then
+        log(debug.traceback())
+        return Color()
+    end
+    if hex:match("#") then
+        hex = hex:sub(2)
+    end
+    local col = {}
+    for i=1,8,2 do
+        local num = tonumber(hex:sub(i, i+1), 16)
+        if num then
+            table.insert(col, num / 255)
+        end
+    end
+    return Color(unpack(col))
+end
+
 function Color:to_hex()
     local s = "%x"
     local result = ""
-    for _, v in pairs({self.r,self.g,self.b}) do
+    for _, v in pairs({self.a < 1 and self.a or nil,self.r,self.g,self.b}) do
         local hex = s:format(255*v)
-        if hex:len() == 0 then
-            hex = "00"
-        end
-        if hex:len() == 1 then
-            hex = "0"..hex
-        end
+        if hex:len() == 0 then hex = "00" end
+        if hex:len() == 1 then hex = "0"..hex end
         result = result .. hex
     end
     return result

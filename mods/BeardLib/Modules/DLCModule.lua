@@ -5,7 +5,7 @@ DLCModule.type_name = "DLC"
 function DLCModule:init(core_mod, config)
     self.required_params = table.add(clone(self.required_params), {"id"})
 
-    if not self.super.init(self, core_mod, config) then
+    if not DLCModule.super.init(self, core_mod, config) then
         return false
     end
 

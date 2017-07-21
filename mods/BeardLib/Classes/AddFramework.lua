@@ -3,7 +3,7 @@ AddFramework._ignore_detection_errors = true
 AddFramework.add_file = "add.xml"
 function AddFramework:init()
     self._directory = BeardLib.config.mod_override_dir
-    self.super.init(self)
+    AddFramework.super.init(self)
 end
 
 function AddFramework:RegisterHooks()

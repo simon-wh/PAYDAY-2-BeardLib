@@ -4,7 +4,7 @@ ContactModule.type_name = "contact"
 ContactModule._loose = true
 
 function ContactModule:init(core_mod, config)
-    if not self.super.init(self, core_mod, config) then
+    if not ContactModule.super.init(self, core_mod, config) then
         return false
     end
 

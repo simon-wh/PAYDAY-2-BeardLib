@@ -3,7 +3,7 @@ AddFilesModule = AddFilesModule or class(ModuleBase)
 AddFilesModule.type_name = "AddFiles"
 
 function AddFilesModule:init(core_mod, config)
-    if not self.super.init(self, core_mod, config) then
+    if not AddFilesModule.super.init(self, core_mod, config) then
         return false
     end
 

@@ -70,7 +70,7 @@ function Menu:WorkParams(params)
 end
 
 function Menu:SetLayer(layer)
-    self.super.SetLayer(self, layer)
+    Menu.super.SetLayer(self, layer)
 end
 
 function Menu:SetSize(w, h, no_recreate)
@@ -212,7 +212,9 @@ end
 
 function Menu:MouseReleased(button, x, y)
     self._scroll:mouse_released(button, x, y)
-    managers.mouse_pointer:set_pointer_image("arrow")
+    if not self.menu._highlighted then
+        managers.mouse_pointer:set_pointer_image("arrow")
+    end
     for _, item in ipairs(self._all_items) do
         if item:MouseReleased(button, x, y) then
             return true
@@ -562,5 +564,8 @@ function Menu:NewItem(item)
     end
     item.indx = item.indx or index
     if self.auto_align then self:AlignItems() end
+	if managers.mouse_pointer then
+		item:MouseMoved(managers.mouse_pointer:world_position())
+	end
     return item
 end

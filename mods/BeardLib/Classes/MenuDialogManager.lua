@@ -2,7 +2,7 @@ MenuDialogManager = MenuDialogManager or class()
 function MenuDialogManager:Init()
     self._menu = MenuUI:new({
         name = "BeardLibDialogs",
-        layer = 800,
+        layer = 1000,
         background_blur = true,
         always_key_press = callback(self, self, "KeyPressed"),
         marker_color = Color.white:with_alpha(0),

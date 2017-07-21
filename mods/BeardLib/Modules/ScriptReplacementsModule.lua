@@ -4,7 +4,7 @@ ScriptReplacementsModule = ScriptReplacementsModule or class(ModuleBase)
 ScriptReplacementsModule.type_name = "ScriptMods"
 
 function ScriptReplacementsModule:init(core_mod, config)
-    if not self.super.init(self, core_mod, config) then
+    if not ScriptReplacementsModule.super.init(self, core_mod, config) then
         return false
     end
 

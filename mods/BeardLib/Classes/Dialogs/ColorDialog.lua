@@ -5,7 +5,7 @@ function ColorDialog:init(params, menu)
     params = params or {}
     params = deep_clone(params)
     self._is_input = true
-    self.super.init(self, table.merge(params, {
+    ColorDialog.super.init(self, table.merge(params, {
         w = ColorDialog._default_width,
         offset = 8,
         auto_height = true,
@@ -32,11 +32,13 @@ function ColorDialog:_Show(params)
         text = "Hex:",
         value = "",
         lines = 1,
+        auto_text_color = false,
+        text_highlight_color = false,
         position = "CenterLeft",
         marker_color = Color.transparent,
         marker_highlight_color = Color.transparent,
         callback = callback(self, self, "update_hex"),
-        w = 100,
+        w = 120,
         items_size = 20,
         override_parent = preview
     })
@@ -85,28 +87,29 @@ function ColorDialog:update_hex_color()
     item._textbox.text_color = color
     item._textbox.line_color = color
     item:DoHighlight(item.highlighted)
-    item:SetVisible(self._color.a == 1)
 end
 
-function ColorDialog:set_color(color)
+function ColorDialog:set_color(color, not_hex)
    self._color = color
    self._menu:GetItem("Alpha"):SetValue(self._color.alpha * 100)
    self._menu:GetItem("Red"):SetValue(self._color.red * 255)
    self._menu:GetItem("Green"):SetValue(self._color.green * 255)
    self._menu:GetItem("Blue"):SetValue(self._color.blue * 255)
    self._menu:GetItem("ColorPreview"):Panel():child("bg"):set_color(self._color)
-   self:update_hex_color()
+   self:update_color(not_hex)
 end
 
 function ColorDialog:update_hex(menu, item)
-    self:set_color(Color(item:Value()))
+    self:set_color(Color:from_hex(item:Value()), true)
 end
 
-function ColorDialog:update_color()
+function ColorDialog:update_color(not_hex)
     self._color = Color(self._menu:GetItem("Alpha"):Value() / 100, self._menu:GetItem("Red"):Value() / 255, self._menu:GetItem("Green"):Value() / 255, self._menu:GetItem("Blue"):Value() / 255)
     self._menu:GetItem("ColorPreview"):Panel():child("bg"):set_color(self._color)
-    local Hex = self._menu:GetItem("Hex")
-    Hex:SetValue(self._color:to_hex())
+    if not_hex ~= true then
+        local Hex = self._menu:GetItem("Hex")
+        Hex:SetValue(self._color:to_hex())
+    end
     self:update_hex_color()
 end
 

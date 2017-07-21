@@ -13,6 +13,7 @@ Hooks:PreHook(ClientNetworkSession, "on_join_request_reply", "BeardLib_on_join_r
                 local split_data = string.split(xuid, "|")
                 local function continue_load(params, success)
                     if not success then
+                        QuickMenuPlus:new(managers.localization:text("mod_assets_error"), managers.localization:text("custom_map_failed"))
                         orig_cb("CANCELLED")
                         return
                     end
@@ -34,7 +35,6 @@ Hooks:PreHook(ClientNetworkSession, "on_join_request_reply", "BeardLib_on_join_r
                     self._ignore_load = nil
                     if self._ignored_load then
                         self:ok_to_load_level(unpack(self._ignored_load))
-                        self._ignored_load = nil
                     end
                 end
                 if tweak_data.levels[split_data[2]] then
@@ -44,7 +44,7 @@ Hooks:PreHook(ClientNetworkSession, "on_join_request_reply", "BeardLib_on_join_r
                     local level_name = split_data[4]
                     if level_name and update_key then
                         self._ignore_load = true
-                        BeardLib:DownloadMap(level_name, update_key, SimpleClbk(continue_load, {...}))
+                        BeardLib.Utils:DownloadMap(level_name, update_key, SimpleClbk(continue_load, {...}))
                     elseif not level_name then
                         QuickMenuPlus:new(managers.localization:text("mod_assets_error"), managers.localization:text("custom_map_host_old_version"))
                         orig_cb("CANCELLED")
@@ -55,6 +55,8 @@ Hooks:PreHook(ClientNetworkSession, "on_join_request_reply", "BeardLib_on_join_r
                         return
                     end
                 end
+			else
+				orig_cb(state, ...)
             end
         end
     end
@@ -64,7 +66,9 @@ local orig_load_level = ClientNetworkSession.ok_to_load_level
 function ClientNetworkSession:ok_to_load_level(...)
     if self._ignore_load then
         self._ignored_load = {...}
+        self._ignore_load = nil
     else
+        self._ignored_load = nil
         orig_load_level(self, ...)
     end
 end

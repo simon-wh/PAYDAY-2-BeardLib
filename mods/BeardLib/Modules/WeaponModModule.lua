@@ -3,7 +3,7 @@ WeaponModModule = WeaponModModule or class(ItemModuleBase)
 WeaponModModule.type_name = "WeaponMod"
 
 function WeaponModModule:init(core_mod, config)
-    if not self.super.init(self, core_mod, config) then
+    if not WeaponModModule.super.init(self, core_mod, config) then
         return false
     end
     return true

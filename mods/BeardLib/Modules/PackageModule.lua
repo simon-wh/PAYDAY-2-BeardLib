@@ -5,7 +5,7 @@ PackageModule._loose = true
 
 function PackageModule:init(core_mod, config)
     self.required_params = table.add(clone(self.required_params), {"id"})
-    if not self.super.init(self, core_mod, config) then
+    if not PackageModule.super.init(self, core_mod, config) then
         return false
     end
     self._id = self._config.id:id()

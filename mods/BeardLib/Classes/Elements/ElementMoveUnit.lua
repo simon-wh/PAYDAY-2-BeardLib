@@ -2,7 +2,7 @@ core:import("CoreMissionScriptElement")
 ElementMoveUnit = ElementMoveUnit or class(CoreMissionScriptElement.MissionScriptElement)
 function ElementMoveUnit:init(...)
 	self._units = {}
-	self.super.init(self, ...)
+	ElementMoveUnit.super.init(self, ...)
 end
 function ElementMoveUnit:on_script_activated()
 	for _, id in pairs(self._values.unit_ids) do

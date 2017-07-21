@@ -4,23 +4,13 @@ end]]
 
 local sync_stage_settings_id = "BeardLib_sync_stage_settings"
 local sync_game_settings_id = "BeardLib_sync_game_settings"
+local lobby_sync_update_level_id = "BeardLib_lobby_sync_update_level_id"
 local send_outfit_id = "BeardLib_check_send_outfit"
 
 local orig_NetworkPeer_send = NetworkPeer.send
 
 local is_custom = function()
-    return managers.job:has_active_job() and (managers.job:current_level_data().custom or managers.job:current_job_data().custom)
-end
-
-local get_job_string = function()
-    local level_id = Global.game_settings.level_id
-    local job_id = managers.job:current_job_id()
-    local level = tweak_data.levels[level_id]
-    local str = string.format("%s|%s|%s|%s", job_id, level_id, Global.game_settings.difficulty, managers.localization:to_upper_text(level and level.name_id or ""))
-    local mod = BeardLib.managers.MapFramework:GetModByName(job_id)
-    local update_key = mod and mod.update_key
-    str = str .. (update_key and ("|" .. update_key) or "")
-    return str
+    return managers.job:has_active_job() and (managers.job:current_level_data() and managers.job:current_level_data().custom or managers.job:current_job_data().custom)
 end
 
 local parse_as_lnetwork_string = function(type_prm, data)
@@ -33,13 +23,15 @@ Hooks:Register(peer_send_hook)
 
 Hooks:Add(peer_send_hook, "BeardLibCustomHeistFix", function(self, func_name, params)
     if self ~= managers.network:session():local_peer() and is_custom() then
-        if func_name == "sync_game_settings" or func_name == "sync_lobby_data" or func_name == "lobby_sync_update_level_id" then
-            orig_NetworkPeer_send(self, "send_chat_message", LuaNetworking.HiddenChannel, parse_as_lnetwork_string(sync_game_settings_id, get_job_string()))
-	    elseif func_name == "sync_stage_settings" then
-            orig_NetworkPeer_send(self, "send_chat_message", LuaNetworking.HiddenChannel, parse_as_lnetwork_string(sync_stage_settings_id, string.format("%s|%s|%s|%s", Global.game_settings.level_id, tostring(self._global.current_job.current_stage), tostring(self._global.alternative_stage or 0), tostring(self._global.interupt_stage))))
+        if func_name == "sync_game_settings" or func_name == "sync_lobby_data" then
+            orig_NetworkPeer_send(self, "send_chat_message", LuaNetworking.HiddenChannel, parse_as_lnetwork_string(sync_game_settings_id, BeardLib.Utils:GetJobString()))
+        elseif func_name == "lobby_sync_update_level_id" then
+            orig_NetworkPeer_send(self, "send_chat_message", LuaNetworking.HiddenChannel, parse_as_lnetwork_string(lobby_sync_update_level_id, Global.game_settings.level_id))
+        elseif func_name == "sync_stage_settings" then
+            orig_NetworkPeer_send(self, "send_chat_message", LuaNetworking.HiddenChannel, parse_as_lnetwork_string(sync_stage_settings_id, string.format("%s|%s|%s|%s", Global.game_settings.level_id, tostring(managers.job._global.current_job.current_stage), tostring(managers.job._global.alternative_stage or 0), tostring(managers.job._global.interupt_stage))))      
 		elseif string.ends(func_name,"join_request_reply") then
             if params[1] == 1 then
-                params[14] = get_job_string()
+                params[14] = BeardLib.Utils:GetJobString()
             end
         end
     end
@@ -75,19 +67,55 @@ function NetworkPeer:send(func_name, ...)
     orig_NetworkPeer_send(self, func_name, unpack(params, 1, params.n))
 end
 
-Hooks:Add("NetworkReceivedData", sync_game_settings_id, function(sender, id, data)
-    if id == sync_game_settings_id then
-        local split_data = string.split(data, "|")
+Hooks:Add("NetworkReceivedData", lobby_sync_update_level_id, function(sender, id, data)
+    if id == lobby_sync_update_level_id then
         local peer = managers.network:session():peer(sender)
         local rpc = peer and peer:rpc()
         if rpc then
-            managers.network._handlers.connection:sync_game_settings(tweak_data.narrative:get_index_from_job_id(split_data[1]),
-            tweak_data.levels:get_index_from_level_id(split_data[2]),
-            tweak_data:difficulty_to_index(split_data[3]),
-            managers.network:session():peer(sender):rpc())
-        else
-            log("[ERROR] RPC is nil!")
+            managers.network._handlers.connection:lobby_sync_update_level_id_ignore_once(data)
         end
+    end
+end)
+
+Hooks:Add("NetworkReceivedData", sync_game_settings_id, function(sender, id, data)
+    if id == sync_game_settings_id then
+        local split_data = string.split(data, "|")
+        local level_name = split_data[1]
+        local update_key = split_data[5]
+        local session = managers.network:session()
+        local function continue_sync()
+            local job_index = tweak_data.narrative:get_index_from_job_id(level_name)
+            local level_index = tweak_data.levels:get_index_from_level_id(split_data[2])
+
+            local peer = session:peer(sender)
+            local rpc = peer and peer:rpc()
+            if rpc then
+                managers.network._handlers.connection:sync_game_settings(job_index, level_index, tweak_data:difficulty_to_index(split_data[3]), rpc)
+            end
+        end
+        if tweak_data.narrative.jobs[level_name] == nil then
+            if update_key then
+                session._ignore_load = true
+                BeardLib.Utils:DownloadMap(level_name, update_key, function()
+                    continue_sync()
+                    session._ignore_load = nil
+                    if session._ignored_load then
+                        session:ok_to_load_level(unpack(session._ignored_load))
+                    end                
+                end)
+            else
+                if managers.network:session() then
+                    managers.network:queue_stop_network()
+                    managers.platform:set_presence("Idle")
+                    managers.network.matchmake:leave_game()
+                    managers.network.voice_chat:destroy_voice(true)
+                    managers.menu:exit_online_menues()
+                end
+                QuickMenuPlus:new(managers.localization:text("mod_assets_error"), managers.localization:text("custom_map_cant_download"))
+                return
+            end
+        end
+        continue_sync()
     end
 end)
 
@@ -97,7 +125,7 @@ Hooks:Add("NetworkReceivedData", sync_stage_settings_id, function(sender, id, da
         local peer = managers.network:session():peer(sender)
         local rpc = peer and peer:rpc()
         if rpc then
-            managers.network._handlers.connection:sync_stage_settings(tweak_data.narrative:get_index_from_job_id(split_data[1]),
+            managers.network._handlers.connection:sync_stage_settings_ignore_once(tweak_data.levels:get_index_from_level_id(split_data[1]),
             tonumber(split_data[2]),
             tonumber(split_data[3]),
             tweak_data.levels:get_index_from_level_id(split_data[4]) or 0,

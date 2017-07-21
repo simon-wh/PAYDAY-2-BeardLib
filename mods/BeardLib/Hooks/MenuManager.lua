@@ -4,10 +4,11 @@ local sync_game_settings_id = "BeardLib_sync_game_settings"
 
 local sync_game_settings = function(peer_id)
     if Network:is_server() and managers.job:current_job_id() and Global.game_settings.level_id and Global.game_settings.difficulty and (managers.job:current_level_data().custom or managers.job:current_job_data().custom) then
+        local data = BeardLib.Utils:GetJobString()
         if peer_id then
-            LuaNetworking:SendToPeer(peer_id, sync_game_settings_id, string.format("%s|%s|%s", managers.job:current_job_id(), Global.game_settings.level_id, Global.game_settings.difficulty))
+            LuaNetworking:SendToPeer(peer_id, sync_game_settings_id, data)
         else
-            LuaNetworking:SendToPeers(sync_game_settings_id, string.format("%s|%s|%s", managers.job:current_job_id(), Global.game_settings.level_id, Global.game_settings.difficulty))
+            LuaNetworking:SendToPeers(sync_game_settings_id, data)
         end
     end
 end

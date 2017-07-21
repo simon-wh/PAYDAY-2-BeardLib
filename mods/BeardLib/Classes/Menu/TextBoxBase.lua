@@ -17,8 +17,8 @@ function TextBoxBase:init(parent, params)
 	})
 	self.panel:set_right(params.panel:w())
     self.line_color = params.line_color
-    self.text_color = params.text_color or parent.text_color or self.parent.text_color
-    self.text_highlight_color = params.text_highlight_color or parent.text_highlight_color or self.parent.text_highlight_color
+    self.text_color =  NotNil(params.text_color, parent.text_color, self.parent.text_color)
+    self.text_highlight_color = NotNil(params.text_highlight_color, parent.text_highlight_color, self.parent.text_highlight_color)
 	local line = self.panel:rect({
         name = "line",
 		halign = "grow",
@@ -61,11 +61,12 @@ function TextBoxBase:PostInit()
 end
 
 function TextBoxBase:DoHighlight(highlight)
-    local color = highlight and self.text_highlight_color or self.text_color
+    local color = highlight and self.text_highlight_color or self.text_color or Color.white
     local line = self.panel:child("line")
     local text = self.panel:child("text")
     line:set_color(self.line_color or color)
     text:set_color(color)
+    text:set_selection_color(color:with_alpha(0.5))
     self.panel:child("caret"):set_color(text:color():with_alpha(1))
 end
 

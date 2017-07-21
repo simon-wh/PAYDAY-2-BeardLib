@@ -4,7 +4,7 @@ LocalizationModule = LocalizationModule or class(ModuleBase)
 LocalizationModule.type_name = "Localization"
 
 function LocalizationModule:init(core_mod, config)
-    if not self.super.init(self, core_mod, config) then
+    if not LocalizationModule.super.init(self, core_mod, config) then
         return false
     end
     self.LocalizationDirectory = self._config.directory and BeardLib.Utils.Path:Combine(self._mod.ModPath, self._config.directory) or self._mod.ModPath

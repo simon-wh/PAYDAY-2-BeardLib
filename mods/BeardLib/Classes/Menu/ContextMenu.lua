@@ -4,7 +4,7 @@ function ContextMenu:init(owner, layer)
     self.parent = owner.parent
     self.menu = owner.menu
     local control_size = owner.bigger_context_menu and owner:Panel():w() or owner.panel:w() / owner.control_slice
-    local bgcolor = self.parent.background_color
+    local bgcolor = self.parent.background_color or Color.white
     bgcolor = bgcolor:with_alpha(math.max(bgcolor.a, 0.85))
     self.panel = self.menu._panel:panel({
         name = owner.name.."list",

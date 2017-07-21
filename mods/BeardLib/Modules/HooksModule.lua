@@ -3,7 +3,7 @@ HooksModule = HooksModule or class(ModuleBase)
 HooksModule.type_name = "Hooks"
 
 function HooksModule:init(core_mod, config)
-    if not self.super.init(self, core_mod, config) then
+    if not HooksModule.super.init(self, core_mod, config) then
         return false
     end
 

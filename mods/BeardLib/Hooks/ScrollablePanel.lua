@@ -1,6 +1,6 @@
 ScrollablePanelModified = ScrollablePanelModified or class(ScrollablePanel)
 function ScrollablePanelModified:init(panel, name, data)
-	self.super.init(self, panel, name, data)
+	ScrollablePanelModified.super.init(self, panel, name, data)
 	data = data or {}
 	self._scroll_speed = data.scroll_speed or 28
 	if data.scroll_width then
@@ -39,7 +39,7 @@ function ScrollablePanelModified:set_scroll_color(color)
 end
 
 function ScrollablePanelModified:set_size(...)
-    self.super.set_size(self, ...)
+    ScrollablePanelModified.super.set_size(self, ...)
     if self._scroll_width then
         self:canvas():set_w(self:canvas_max_width())
         local scroll_down_indicator_arrow = self:panel():child("scroll_down_indicator_arrow")

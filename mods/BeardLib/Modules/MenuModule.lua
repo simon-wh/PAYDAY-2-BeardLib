@@ -3,7 +3,7 @@ MenuModule.type_name = "Menu"
 
 function MenuModule:init(core_mod, config)
     self.required_params = table.add(clone(self.required_params), {"menu"})
-    if not self.super.init(self, core_mod, config) then
+    if not MenuModule.super.init(self, core_mod, config) then
         return false
     end
 

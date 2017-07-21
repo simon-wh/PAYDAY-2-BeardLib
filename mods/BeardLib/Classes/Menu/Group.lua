@@ -1,12 +1,12 @@
 Group = Group or class(Menu)
 Group.type_name = "Group"
 function Group:Init()
-    self.super.Init(self)
+    Group.super.Init(self)
     self:InitBasicItem()
 end
 
 function Group:InitBasicItem()
-    self.super.InitBasicItem(self)
+    Group.super.InitBasicItem(self)
     if not self.divider_type then
 	    self.toggle = self.panel:bitmap({
 	        name = "toggle",
@@ -32,7 +32,7 @@ function Group:RePositionToggle()
 end
 
 function Group:SetText(...)
-    if self.super.SetText(self, ...) then
+    if Group.super.SetText(self, ...) then
         self:SetScrollPanelSize()
     end
     self:RePositionToggle()
@@ -61,12 +61,12 @@ function Group:MousePressed(button, x, y)
         self:ToggleGroup()
         return true
     end
-    return self.super.MousePressed(self, button, x, y)
+    return Group.super.MousePressed(self, button, x, y)
 end
 
 function Group:MouseMoved(x, y)
     if Item.MouseMoved(self, x, y) then
         return true
     end
-    return self.super.MouseMoved(self, x, y)
+    return Group.super.MouseMoved(self, x, y)
 end

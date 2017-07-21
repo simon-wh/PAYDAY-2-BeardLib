@@ -3,7 +3,7 @@ ClassesModule = ClassesModule or class(ModuleBase)
 ClassesModule.type_name = "Classes"
 
 function ClassesModule:init(core_mod, config)
-    if not self.super.init(self, core_mod, config) then
+    if not ClassesModule.super.init(self, core_mod, config) then
         return false
     end
 

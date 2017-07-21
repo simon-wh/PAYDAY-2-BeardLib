@@ -3,7 +3,7 @@ LevelModule = LevelModule or class(ItemModuleBase)
 LevelModule.type_name = "level"
 
 function LevelModule:init(core_mod, config)
-    if not self.super.init(self, core_mod, config) then
+    if not LevelModule.super.init(self, core_mod, config) then
         return false
     end
 

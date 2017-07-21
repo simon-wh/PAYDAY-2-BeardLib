@@ -3,7 +3,7 @@ MeleeModule = MeleeModule or class(ItemModuleBase)
 MeleeModule.type_name = "Melee"
 
 function MeleeModule:init(core_mod, config)
-    if not self.super.init(self, core_mod, config) then
+    if not MeleeModule.super.init(self, core_mod, config) then
         return false
     end
 

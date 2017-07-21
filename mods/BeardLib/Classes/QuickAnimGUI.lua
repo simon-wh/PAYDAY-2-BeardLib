@@ -17,18 +17,22 @@ function QuickAnim:Work(o, ...)
         speed = 1,
         stop = false,
         wait = false,
-        after = function() end,
-        before = function() end,
-        callback = function() end
+        callback = false,
+        after = false
     }
     local done 
     for i=1, #tbl, 2 do
         local k = tbl[i]
+        local sticky
+        if string.begins(k, "sticky_") then
+            k = k:gsub("sticky_", "")
+            sticky = true
+        end
         local v = tbl[i + 1]
         if opt[k] ~= nil then
             opt[k] = v or opt[k]
         else
-            table.insert(anim_tbl, {[k] = v})
+            table.insert(anim_tbl, {key = k, value = v, sticky = sticky})
         end       
     end            
     if anim_tbl.stop or stop == true then
@@ -39,32 +43,38 @@ function QuickAnim:Work(o, ...)
     local abs = math.abs
     local step = math.step
     o:animate(function(o)
-        local speeds = {}           
-        if opt.wait then
-            wait(opt.wait)
-        end
+        local speeds = {}
+        if opt.wait then wait(opt.wait) end
         while not done do
-            for _, anim in pairs(anim_tbl) do 
-                for k,v in pairs(anim) do
-                    local cv = o[k](o)
-                    speeds[k] = speeds[k] or (abs(cv - v) * opt.speed)
-                    speeds[k] = speeds[k] < 1 and 1 or speeds[k]
-                    opt.before(o)
-                    o["set_"..k](o, step(cv, v, self:dt() * speeds[k]))
-                    opt.after(o)
-                    done = o[k](o) == v
+            for i, anim in pairs(anim_tbl) do
+                local k = anim.key
+                local v = anim.value
+                local sticky = anim.sticky
+                if not alive(o) then
+                    if opt.callback then opt.callback() end
+                    return
+                end
+
+                local cv = o[k](o)
+                speeds[k] = speeds[k] or (abs(cv - v) * opt.speed)
+                speeds[k] = speeds[k] < 1 and 1 or speeds[k]
+                o["set_"..k](o, sticky and v or step(cv, v, self:dt() * speeds[k]))
+                if opt.after then opt.after(o) end
+                if i == #anim_tbl and alive(o) then
+                    done = true
+                    for _, anim in pairs(anim_tbl) do
+                        done = done and o[anim.key](o) == anim.value
+                    end
                 end
             end
         end
-        for _, anim in pairs(anim_tbl) do 
-            for k,v in pairs(anim) do
-                o["set_"..k](o, v)    
+        if alive(o) then
+            for _, anim in pairs(anim_tbl) do 
+                o["set_"..anim.key](o, anim.value)    
             end
+            o:script().animating = nil
         end
-        opt.before(o)
-        opt.after(o)
-        o:script().animating = nil
-        opt.callback(o)
+        if opt.callback then opt.callback(o) end
     end)
 end
 

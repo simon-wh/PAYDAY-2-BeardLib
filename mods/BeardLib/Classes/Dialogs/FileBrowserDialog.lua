@@ -205,7 +205,7 @@ function FileBrowserDialog:FolderBack()
 end
 
 function FileBrowserDialog:hide( ... )
-    if self.super.hide(self, ...) then
+    if FileBrowserDialog.super.hide(self, ...) then
         self._current_dir = nil
         self._old_dir = nil
         self._extensions = nil

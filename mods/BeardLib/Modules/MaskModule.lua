@@ -9,7 +9,7 @@ function MaskModule:init(core_mod, config)
             action = "no_number_indexes"
         }
     })
-    if not self.super.init(self, core_mod, config) then
+    if not MaskModule.super.init(self, core_mod, config) then
         return false
     end
 

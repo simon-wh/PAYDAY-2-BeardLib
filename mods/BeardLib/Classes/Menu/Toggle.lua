@@ -1,7 +1,7 @@
 Toggle = Toggle or class(Item)
 Toggle.type_name = "Toggle"
 function Toggle:Init()    
-	self.super.Init(self)
+	Toggle.super.Init(self)
     self.toggle = self.panel:bitmap({
         name = "toggle",
         w = self.items_size,
@@ -15,7 +15,7 @@ function Toggle:Init()
 end
 
 function Toggle:SetValue(value, run_callback)
-	self.super.SetValue(self, value, run_callback)
+	Toggle.super.SetValue(self, value, run_callback)
 	if alive(self.panel) then
 		local rect = value == true and {24,0,24,24} or {0,0,24,24}
 		self.toggle:set_texture_rect(unpack(rect))
@@ -31,7 +31,7 @@ function Toggle:MousePressed(button, x, y)
 		if managers.menu_component then
 			managers.menu_component:post_event(self.value and "box_tick" or "box_untick")
 		end
-		self.super.MousePressed(self, button, x, y)
+		Toggle.super.MousePressed(self, button, x, y)
         return true
 	end
 end
@@ -44,6 +44,6 @@ function Toggle:KeyPressed(o, k)
 end
 
 function Toggle:DoHighlight(highlight)
-    self.super.DoHighlight(self, highlight) 
+    Toggle.super.DoHighlight(self, highlight) 
     self.toggle:set_color(self.title:color())
 end

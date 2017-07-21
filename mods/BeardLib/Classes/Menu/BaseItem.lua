@@ -58,12 +58,22 @@ function BaseItem:WorkParams(params)
 	params = params or {}
 	self.enabled = NotNil(self.enabled, true)
 	self.visible = NotNil(self.visible, true)
-	local bg = self.background_color or self.marker_color
-	local bg2 = self.background_color or self.marker_highlight_color
-	self:WorkParam("text_color", bg and bg.a > 0.5 and bg:contrast() or Color.white)
-	self:WorkParam("text_highlight_color", bg2 and bg2.a > 0.5 and bg2:contrast() or Color.white)
 	self:WorkParam("marker_color", Color.transparent)
 	self:WorkParam("marker_highlight_color")
+	local bg_alpha = self.background_color and self.background_color.a or 0
+	local bg = self.marker_color and self.marker_color.a > 0.5 and self.marker_color or self.background_color
+	local bg2 = self.marker_highlight_color and self.marker_highlight_color.a > 0.5 and self.marker_highlight_color or self.background_color
+	self:WorkParam("auto_text_color")
+	local text_color = bg and bg.a > 0.5 and bg:contrast() or Color.white
+	self:WorkParam("text_color", text_color)
+	if self.auto_text_color and self.text_color ~= false then
+		self.text_color = text_color
+	end
+	self:WorkParam("text_highlight_color")
+	local text_highlight_color = bg2 and bg2.a > 0.5 and bg2:contrast() or Color.white
+	if self.auto_text_color and self.text_highlight_color ~= false then
+		self.text_highlight_color = text_highlight_color
+	end
 	self:WorkParam("marker_alpha")
 	self:WorkParam("items_size", 16)
 	self:WorkParam("disabled_alpha", 0.5)
@@ -225,7 +235,7 @@ function BaseItem:SetCallback(callback) self.callback = callback end
 function BaseItem:SetLabel(label) self.label = label end
 function BaseItem:SetParam(k,v) self[k] = v end
 function BaseItem:SetEnabled(enabled) self.enabled = enabled == true end
-function BaseItem:WorkParam(param, ...) self[param] = NotNil(self[param], self.private[param], not self.parent.private[param] and self.parent[param], ...) end
+function BaseItem:WorkParam(param, ...) self[param] = NotNil(self[param], self.private[param], not self.inherit.private[param] and self.inherit[param] or nil, ...) end
 
 function BaseItem:ConvertOffset(offset)
     if offset then

@@ -2,7 +2,7 @@ core:import("CoreMissionScriptElement")
 ElementEnvironment = ElementEnvironment or class(CoreMissionScriptElement.MissionScriptElement)
  
 function ElementEnvironment:init(...)
-    self.super.init(self, ...)
+    ElementEnvironment.super.init(self, ...)
 end
  
 function ElementEnvironment:on_script_activated()
@@ -64,7 +64,7 @@ function ElementEnvironment:on_executed(instigator)
    
     managers.environment_controller:refresh_render_settings()
  
-    self.super.on_executed(self, instigator)
+    ElementEnvironment.super.on_executed(self, instigator)
 end
 
 function ElementEnvironment:save(data)

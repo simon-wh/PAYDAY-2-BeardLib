@@ -149,7 +149,7 @@ function KeyboardInputDialog:key_release(o, k)
 end
 
 function KeyboardInputDialog:update(t, dt)
-    self.super.update(self, t, dt)
+    KeyboardInputDialog.super.update(self, t, dt)
     if self._backspace_pressed and t - self._last_backspace_tick > (self._backspace_pressed_num == 0 and 0 or (0.7 / self._backspace_pressed_num)) then
         local text = self._panel_script._panel:child("info_area"):child("scroll_panel"):child("text")
         local s, e = text:selection()

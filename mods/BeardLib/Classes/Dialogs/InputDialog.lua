@@ -4,7 +4,7 @@ function InputDialog:init(params, menu)
     params = params or {}
     params = deep_clone(params)
     self._is_input = true
-    self.super.init(self, table.merge(params, {
+    InputDialog.super.init(self, table.merge(params, {
         offset = 8,
         auto_height = true,
         items_size = 20,
@@ -17,7 +17,7 @@ function InputDialog:_Show(params)
 		yes = params.yes or "Apply",
 		no = params.no or "Cancel",
 	})
-    if not self.super._Show(self, params) then
+    if not InputDialog.super._Show(self, params) then
         return
     end
     self._check_value = params.check_value
@@ -55,5 +55,5 @@ function InputDialog:hide(yes, ...)
         return
     end
     self._check_value = nil
-	return self.super.hide(self, yes, ...)
+	return InputDialog.super.hide(self, yes, ...)
 end

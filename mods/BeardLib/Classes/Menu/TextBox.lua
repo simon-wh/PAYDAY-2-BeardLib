@@ -2,7 +2,7 @@ TextBox = TextBox or class(Item)
 TextBox.type_name = "TextBox"
 function TextBox:Init()
 	self.size_by_text = false
-	self.super.Init(self)	
+	TextBox.super.Init(self)	
     self.floats = self.floats or 2
     if self.filter == "number" then
     	self.value = tonumber(self.value) or 0
@@ -40,7 +40,7 @@ function TextBox:_SetValue(value, run_callback, reset_selection)
 		text:set_selection(text:text():len())
 	end
 	self._textbox:update_caret()	
-	self.super.SetValue(self, value, run_callback)
+	TextBox.super.SetValue(self, value, run_callback)
 end
 
 function TextBox:SetValue(value, ...)
@@ -71,19 +71,19 @@ function TextBox:MouseReleased(button, x, y)
 end
 
 function TextBox:KeyPressed(o, k)
-	self.super.KeyPressed(self, o, k)
+	TextBox.super.KeyPressed(self, o, k)
 	self._textbox:KeyPressed(o, k)
 end
 
 function TextBox:MouseMoved(x, y)
-    if not self.super.MouseMoved(self, x, y) then
+    if not TextBox.super.MouseMoved(self, x, y) then
     	return 
     end
     self._textbox:MouseMoved(x, y)
 end
 
 function TextBox:DoHighlight(highlight)
-    self.super.DoHighlight(self, highlight)
+    TextBox.super.DoHighlight(self, highlight)
     self._textbox:DoHighlight(highlight)
 end
 

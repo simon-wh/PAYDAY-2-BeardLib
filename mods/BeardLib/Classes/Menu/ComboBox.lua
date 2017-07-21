@@ -4,7 +4,7 @@ function ComboBox:Init()
     self.size_by_text = false
     self.items = self.items or {}
     self.searchbox = false -- self.searchbox == nil and true or self.searchbox
-    self.super.Init(self)
+    ComboBox.super.Init(self)
     local text = self.items[self.value]
     if type(text) == "table" then
         text = text.text
@@ -65,7 +65,7 @@ function ComboBox:SetValue(value, run_callback, no_items_clbk)
     if alive(self.panel) then
        self._textbox:Text():set_text(self.localized_items and v and managers.localization:text(tostring(v)) or type(v) ~= "nil" and tostring(v) or "")
     end    
-    self.super.SetValue(self, value, run_callback)
+    ComboBox.super.SetValue(self, value, run_callback)
 end
 
 function ComboBox:SetSelectedItem(value, ...)    

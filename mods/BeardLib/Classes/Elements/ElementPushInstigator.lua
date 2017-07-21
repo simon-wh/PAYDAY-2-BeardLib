@@ -18,7 +18,7 @@ function ElementPushInstigator:on_executed(instigator)
         mvector3.multiply(pos, self._values.multiply or 1)
         instigator:push(self._values.mass, pos:with_z(self._values.no_z and 0 or pos.z))
     end
-    self.super.on_executed(self, instigator)
+    ElementPushInstigator.super.on_executed(self, instigator)
 end
 
 function ElementPushInstigator:save(data)

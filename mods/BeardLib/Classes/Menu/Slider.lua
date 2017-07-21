@@ -3,7 +3,7 @@ Slider.type_name = "Slider"
 function Slider:Init()
     self.value = self.value or 1
     self.size_by_text = false
-	self.super.Init(self)
+	Slider.super.Init(self)
     self.step = self.step or 1
     self.value = tonumber(self.value) or 0
     self.floats = self.floats or 2
@@ -62,7 +62,7 @@ function Slider:_SetValue(value, run_callback, reset_selection, no_format)
         text:set_selection(text:text():len())
     end
     self._before_text = self.value
-    self.super.SetValue(self, value, run_callback)
+    Slider.super.SetValue(self, value, run_callback)
 end
 
 function Slider:SetValue(value, ...)
@@ -77,7 +77,7 @@ function Slider:SetValueByPercentage(percent)
 end
 
 function Slider:MouseMoved(x, y)
-    self.super.MouseMoved(self, x, y)
+    Slider.super.MouseMoved(self, x, y)
     self._textbox:MouseMoved(x, y)
 end
 
@@ -86,12 +86,12 @@ function Slider:MouseReleased(button, x, y)
 end
 
 function Slider:KeyPressed(o, k)
-    self.super.KeyPressed(self, o, k)
+    Slider.super.KeyPressed(self, o, k)
     self._textbox:KeyPressed(o, k)
 end
 
 function Slider:MousePressed(button, x, y)
-	self.super.MousePressed(self, button, x, y)
+	Slider.super.MousePressed(self, button, x, y)
     self._textbox:MousePressed(button, x, y)
     if not self.enabled or not alive(self.panel) then
         return

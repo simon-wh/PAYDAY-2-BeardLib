@@ -56,7 +56,7 @@ function NarrativeModule:init(core_mod, config)
             action = "number_indexes"
         }
     })
-    if not self.super.init(self, core_mod, config) then
+    if not NarrativeModule.super.init(self, core_mod, config) then
         return false
     end
 

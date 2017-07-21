@@ -105,20 +105,31 @@ function FileIO:CopyTo(path, to_path)
 	os.execute(string.format("xcopy \"%s\" \"%s\" /e /i /h /y /c", path, to_path))
 end
 
-function FileIO:CopyToAsync(path, to_path, callback)
+function FileIO:PrepareFilesForCopy(path, to_path)
 	local files = {}
-	local function PrepareCopyAsync(p)
+	local function PrepareCopy(p)
+		local _, e = p:find(path, nil, true)
+		local new_path = Path:Normalize(Path:Combine(to_path, p:sub(e + 1)))
 	    for _, file in pairs(FileIO:GetFiles(p)) do
-	        table.insert(files, {Path:Combine(p,file), Path:Combine(p:gsub(path, to_path), file)})
+	        table.insert(files, {Path:Combine(p,file), Path:Combine(new_path, file)})
 	    end
 	    for _, folder in pairs(FileIO:GetFolders(p)) do
-	        PrepareCopyAsync(Path:Combine(p, folder))
-	        FileIO:MakeDir(Path:Combine(p:gsub(path, to_path), folder))
+	        PrepareCopy(Path:Normalize(Path:Combine(p, folder)))
+	        FileIO:MakeDir(Path:Combine(new_path, folder))
 	    end
 	end
-	PrepareCopyAsync(path)
+	PrepareCopy(path)
+	return files
+end
 
-	SystemFS:copy_files_async(files, callback or function(success, message)
+function FileIO:CopyDirTo(path, to_path)
+	for _, file in pairs(self:PrepareFilesForCopy(path, to_path)) do
+		SystemFS:copy_file(file[1], file[2])
+	end
+end
+
+function FileIO:CopyToAsync(path, to_path, callback)
+	SystemFS:copy_files_async(self:PrepareFilesForCopy(path, to_path), callback or function(success, message)
 	    if success then
 	        BeardLib:log("[FileIO] Done copying directory %s to %s", path, to_path)
 	    else
@@ -152,11 +163,19 @@ function FileIO:MakeDir(path)
         os.execute(string.format("mkdir \"%s\"", path))
     end
 end
-
-function FileIO:GetFiles(path) --Same but having the idea that we use one class for all 
-	return file.GetFiles(path)
+--Changed to SystemFS because blt's one sometimes fucks up the strings.
+function FileIO:GetFiles(path)
+	if SystemFS then
+		return SystemFS:list(path)
+	else
+		return file.GetFiles(path)
+	end
 end
 
 function FileIO:GetFolders(path)
-	return file.GetDirectories(path)
+	if SystemFS then
+		return SystemFS:list(path, true)
+	else
+		return file.GetDirectories(path)
+	end
 end

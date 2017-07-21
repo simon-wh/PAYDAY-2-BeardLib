@@ -30,5 +30,7 @@
     "custom_map_failed_download" : "Failed to download custom heist",
     "custom_map_missing_updater" : "Cannot begin download of custom heist because the map does not have an updater!",
     "heist_contact_custom" : "Custom Heists",
-    "heist_contact_custom_description" : "Custom heists are completely new heists added to the game and are made by the community"
+    "heist_contact_custom_description" : "Custom heists are completely new heists added to the game and are made by the community",
+    "custom_map_cant_download" : "The heist that the host has set cannot be downloaded, disconnecting.",
+    "custom_map_failed" : "Something went wrong when downloading the heist."
 }

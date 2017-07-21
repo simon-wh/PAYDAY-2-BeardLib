@@ -127,7 +127,6 @@ function MenuUI:ShowDelayedHelp(item)
     end)
 end
 
-
 function MenuUI:HideHelp()
     if self._showing_help then
         QuickAnim:Stop(self._help)
@@ -274,7 +273,7 @@ function MenuUI:KeyPressed(o, k)
         if menu:KeyPressed(o, k) then
             return
         end
-    end 
+    end
     if self.key_press then self.key_press(o, k) end
 end
 

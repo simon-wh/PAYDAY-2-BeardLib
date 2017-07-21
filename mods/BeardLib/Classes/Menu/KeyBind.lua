@@ -2,7 +2,7 @@ KeyBindItem = KeyBindItem or class(Item)
 KeyBindItem.type_name = "KeyBind"
 function KeyBindItem:Init()
     self.size_by_text = false
-    self.super.Init(self)
+    KeyBindItem.super.Init(self)
     self.keybind_key = self.panel:text({
         name = "keybind_key",
         h = self.items_size,
@@ -17,7 +17,7 @@ function KeyBindItem:Init()
 end
 
 function KeyBindItem:SetValue(value, run_callback)
-    self.super.SetValue(self, value, run_callback)
+    KeyBindItem.super.SetValue(self, value, run_callback)
     self:SetKeybindKey()
 end
 
@@ -130,7 +130,7 @@ function KeyBindItem:MouseMoved(x, y)
     if self.menu._highlighted ~= self then
         self:SetCanEdit(false)
     end
-    self.super.MouseMoved(self, x, y)
+    KeyBindItem.super.MouseMoved(self, x, y)
     if not alive(self.panel) then
         return
     end

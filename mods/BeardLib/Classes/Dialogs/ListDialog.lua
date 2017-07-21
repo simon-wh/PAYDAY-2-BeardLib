@@ -10,6 +10,7 @@ function ListDialog:init(params, menu)
         h = params.h and params.h - 20 or 600,
         name = "List",
         items_size = 18,
+        auto_text_color = true,
         auto_align = false,
         position = params.position or "Center",
         visible = false,
@@ -75,6 +76,9 @@ function ListDialog:_Show(params)
         callback = callback(self, self, "hide"),  
         label = "temp"
     })
+    table.sort(params.list, function(a, b) 
+        return (type(a) == "table" and a.name or a) < (type(b) == "table" and b.name or b) 
+    end)
     self:MakeListItems(params)
 end
 

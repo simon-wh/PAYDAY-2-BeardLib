@@ -43,7 +43,6 @@
 		<class file="json_utils.lua"/>
 		<class file="ModAssetUpdateManager.lua" manager="asset_update"/>
 		<class file="ModuleBase.lua"/>
-		<class file="UpdatesMenu.lua" manager="updates_menu"/>
 		<class file="MenuDialogManager.lua" manager="dialog"/>
 	</classes>
 	<hooks>
@@ -59,13 +58,17 @@
         <hook source="lib/managers/menumanager" file="MenuManager.lua"/>
         <hook source="lib/managers/crimenetmanager" file="CrimeNetManager.lua"/>
         <hook source="lib/managers/weaponfactorymanager" file="WeaponFactoryManager.lua"/>
+		<hook source="core/lib/managers/coresoundenvironmentmanager" file="SoundEnvironmentManager.lua"/>
         <hook source="lib/managers/dialogs/keyboardinputdialog" file="KeyboardInputDialog.lua"/>
+        <hook source="lib/managers/mission/elementinteraction" file="ElementInteraction.lua"/>
+        <hook source="lib/managers/mission/elementvehiclespawner" file="ElementVehicleSpawner.lua"/>
         <hook source="core/lib/utils/dev/editor/coreworlddefinition" file="CoreWorldDefinition.lua"/>
         <hook source="lib/managers/menu/scrollablepanel" file="ScrollablePanel.lua"/>
         <hook source="core/lib/system/coresystem" file="CoreSystem.lua"/>
         <hook source="lib/tweak_data/crimespreetweakdata" file="PreTweakData.lua"/>
         <hook source="lib/tweak_data/tweakdata" file="TweakData.lua"/>
         <hook source="lib/network/matchmaking/networkmatchmakingsteam" file="NetworkMatchmakingSteam.lua"/>
+        <hook source="lib/network/base/handlers/connectionnetworkhandler" file="ConnectionNetworkHandler.lua"/>
         <hook source="lib/network/base/networkpeer" file="NetworkPeer.lua"/>
         <hook source="lib/network/base/clientnetworksession" file="ClientNetworkSession.lua"/>
         <hook source="lib/units/beings/player/playermovement" file="PlayerMovement.lua"/>

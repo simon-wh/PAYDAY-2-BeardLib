@@ -10,7 +10,7 @@ function MaskMaterialModule:init(core_mod, config)
         }
     })
     self.required_params = table.add(clone(self.required_params), {"texture"})
-    if not self.super.init(self, core_mod, config) then
+    if not MaskMaterialModule.super.init(self, core_mod, config) then
         return false
     end
 

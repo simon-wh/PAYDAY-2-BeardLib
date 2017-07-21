@@ -15,6 +15,7 @@ function MenuDialog:init(params, menu)
         w = MenuDialog._default_width,
         visible = false,
         auto_height = true,
+        auto_text_color = true,
         always_highlighting = true,
         reach_ignore_focus = true,
         scrollbar = false,
