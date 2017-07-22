@@ -1,0 +1,21 @@
+{
+    "mod_assets_updates_available" : "Aggiornamento per gli Assets richiesto!",
+    "mod_assets_updates_available_desc" : "$mod richiede un aggiornamento dei suoi assets!",
+    "mod_assets_updates_download_now" : "Scarica ora",
+    "mod_assets_updates_ignore" : "Ignora aggiornamento",
+    "mod_assets_updates_remind_later" : "Ricordamelo più tardi",
+    "mod_assets_title" : "Mod Assets",
+    "ModAssetsManagementTextID" : "Gestore aggiornamenti per gli Assets",
+    "ModAssetsManagementDescID" : "",
+    "ModAssetsToggleAutoUpdatesTextID" : "Attiva il controllo degli aggiornamenti per gli Assets",
+    "ModAssetsToggleAutoUpdatesDescID" : "",
+    "ModAssetsCheckUpdatesTextID" : "Controlla aggiornamenti per gli Assets adesso!",
+    "ModAssetsCheckUpdatesDescID" : "",
+    "mod_assets_no_change" : "L'ultima versione è installata!",
+    "mod_assets_no_change_desc" : "Hai già l'ultima versione degli assets di questa mod installata!",
+    "mod_assets_error" : "ERRORE!",
+    "mod_assets_error_desc" : "Si è verificato un errore durante il controllo del numero della versione degli Assets",
+    "menu_ok" : "OK",
+    "bm_global_value_mod" : "MOD",
+    "menu_l_global_value_mod" : "Oggetto della comunità del modding!"
+}
