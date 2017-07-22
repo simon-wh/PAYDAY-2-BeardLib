@@ -1,4 +1,5 @@
-TextBox = TextBox or class(Item)
+BeardLib.Items.TextBox = BeardLib.Items.TextBox or class(BeardLib.Items.Item)
+local TextBox = BeardLib.Items.TextBox
 TextBox.type_name = "TextBox"
 function TextBox:Init()
 	self.size_by_text = false
@@ -7,7 +8,7 @@ function TextBox:Init()
     if self.filter == "number" then
     	self.value = tonumber(self.value) or 0
     end
-	self._textbox = TextBoxBase:new(self, {
+	self._textbox = BeardLib.Items.TextBoxBase:new(self, {
         panel = self.panel,
         lines = self.lines,
         align = self.textbox_align,

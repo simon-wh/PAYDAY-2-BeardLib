@@ -1,4 +1,5 @@
-ComboBox = ComboBox or class(Item)
+BeardLib.Items.ComboBox = BeardLib.Items.ComboBox or class(BeardLib.Items.Item)
+local ComboBox = BeardLib.Items.ComboBox
 ComboBox.type_name = "ComboBox"
 function ComboBox:Init()
     self.size_by_text = false
@@ -19,7 +20,7 @@ function ComboBox:Init()
         layer = 1,
         color = bgcolor,
     })
-	self._textbox = TextBoxBase:new(self, {
+	self._textbox = BeardLib.Items.TextBoxBase:new(self, {
         panel = self.panel,
         lines = 1,
         align = self.textbox_align,

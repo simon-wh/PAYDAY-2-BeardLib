@@ -1,4 +1,5 @@
-KeyBindItem = KeyBindItem or class(Item)
+BeardLib.Items.KeyBindItem = BeardLib.Items.KeyBindItem or class(BeardLib.Items.Item)
+local KeyBindItem = BeardLib.Items.KeyBindItem
 KeyBindItem.type_name = "KeyBind"
 function KeyBindItem:Init()
     self.size_by_text = false

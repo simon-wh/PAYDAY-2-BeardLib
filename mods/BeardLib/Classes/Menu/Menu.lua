@@ -1,4 +1,5 @@
-Menu = Menu or class(Item)
+BeardLib.Items.Menu = BeardLib.Items.Menu or class(BeardLib.Items.Item)
+local Menu = BeardLib.Items.Menu
 Menu.type_name = "Menu"
 function Menu:Init(params)
     self:WorkParams(params)
@@ -228,7 +229,7 @@ function Menu:SetVisible(visible, animate)
         return
     end
     local was_visible = self.visible
-    Item.super.SetVisible(self, visible, true)
+    BeardLib.Items.Item.super.SetVisible(self, visible, true)
     if animate and visible and not was_visible then
         panel:set_alpha(0)
         QuickAnim:Work(panel, "alpha", 1, "speed", 5)
@@ -472,38 +473,37 @@ function Menu:ImageButton(params)
     local _params = self:ConfigureItem(params)
     _params.w = w or _params.w
     _params.h = h or _params.h or _params.items_size
-    return self:NewItem(ImageButton:new(_params))
+    return self:NewItem(BeardLib.Items.ImageButton:new(_params))
 end
 
-function Menu:Group(params) return self:NewItem(Group:new(self:ConfigureItem(params, true))) end
-function Menu:Menu(params) return self:NewItem(Menu:new(self:ConfigureItem(params, true))) end
-function Menu:Button(params) return self:NewItem(Item:new(self:ConfigureItem(params))) end
-function Menu:ComboBox(params) return self:NewItem(ComboBox:new(self:ConfigureItem(params))) end
-function Menu:TextBox(params) return self:NewItem(TextBox:new(self:ConfigureItem(params))) end
-function Menu:ComboBox(params) return self:NewItem(ComboBox:new(self:ConfigureItem(params))) end
-function Menu:Slider(params) return self:NewItem(Slider:new(self:ConfigureItem(params))) end
-function Menu:Table(params) return self:NewItem(Table:new(self:ConfigureItem(params)))end
-function Menu:KeyBind(params) return self:NewItem(KeyBindItem:new(self:ConfigureItem(params))) end
-function Menu:Toggle(params) return self:NewItem(Toggle:new(self:ConfigureItem(params))) end
+function Menu:Group(params) return self:NewItem(BeardLib.Items.Group:new(self:ConfigureItem(params, true))) end
+function Menu:Menu(params) return self:NewItem(BeardLib.Items.Menu:new(self:ConfigureItem(params, true))) end
+function Menu:Button(params) return self:NewItem(BeardLib.Items.Item:new(self:ConfigureItem(params))) end
+function Menu:ComboBox(params) return self:NewItem(BeardLib.Items.ComboBox:new(self:ConfigureItem(params))) end
+function Menu:TextBox(params) return self:NewItem(BeardLib.Items.TextBox:new(self:ConfigureItem(params))) end
+function Menu:ComboBox(params) return self:NewItem(BeardLib.Items.ComboBox:new(self:ConfigureItem(params))) end
+function Menu:Slider(params) return self:NewItem(BeardLib.Items.Slider:new(self:ConfigureItem(params))) end
+function Menu:KeyBind(params) return self:NewItem(BeardLib.Items.KeyBindItem:new(self:ConfigureItem(params))) end
+function Menu:Toggle(params) return self:NewItem(BeardLib.Items.Toggle:new(self:ConfigureItem(params))) end
 function Menu:ItemsGroup(params) return self:Group(params) end --Deprecated--
 
 function Menu:NumberBox(params)
     local _params = self:ConfigureItem(params)
     _params.type_name = "NumberBox"
     _params.filter = "number"
-    return self:NewItem(TextBox:new(_params))
+    return self:NewItem(BeardLib.Items.TextBox:new(_params))
 end
 
 function Menu:Divider(params)
     local _params = self:ConfigureItem(params)
     _params.divider_type = true
-    return self:NewItem(Item:new(_params))
+    return self:NewItem(BeardLib.Items.Item:new(_params))
 end
 
 function Menu:DivGroup(params)
     local _params = self:ConfigureItem(params)
     _params.divider_type = true
-    return self:NewItem(Group:new(_params))
+    return self:NewItem(BeardLib.Items.Group:new(_params))
 end
 
 function Menu:GetIndex(name)

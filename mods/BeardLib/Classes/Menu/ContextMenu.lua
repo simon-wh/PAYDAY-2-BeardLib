@@ -1,4 +1,5 @@
-ContextMenu = ContextMenu or class()
+BeardLib.Items.ContextMenu = BeardLib.Items.ContextMenu or class()
+local ContextMenu = BeardLib.Items.ContextMenu
 function ContextMenu:init(owner, layer)
     self.owner = owner
     self.parent = owner.parent
@@ -22,7 +23,7 @@ function ContextMenu:init(owner, layer)
         valign = "grow",
     })
     if owner.searchbox then
-        self._textbox = TextBoxBase:new(self, {
+        self._textbox = BeardLib.Items.TextBoxBase:new(self, {
             text_color = bgcolor:contrast(),
             panel = self.panel,
             align = "center",

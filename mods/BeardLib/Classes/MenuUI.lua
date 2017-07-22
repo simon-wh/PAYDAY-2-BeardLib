@@ -135,17 +135,17 @@ function MenuUI:HideHelp()
 end
 
 function MenuUI:Group(params)
-    return self:AddMenu(Group:new(self:ConfigureMenu(params)))
+    return self:AddMenu(BeardLib.Items.Group:new(self:ConfigureMenu(params)))
 end
 
 function MenuUI:DivGroup(params)
     local _params = self:ConfigureMenu(params)
     _params.divider_type = true
-    return self:AddMenu(Group:new(_params))
+    return self:AddMenu(BeardLib.Items.Group:new(_params))
 end
 
 function MenuUI:Menu(params)
-    return self:AddMenu(Menu:new(self:ConfigureMenu(params)))
+    return self:AddMenu(BeardLib.Items.Menu:new(self:ConfigureMenu(params)))
 end
 
 function MenuUI:ConfigureMenu(params)

@@ -77,7 +77,10 @@ function FileIO:WriteScriptDataTo(path, data, typ)
 	return self:WriteTo(path, self:ConvertToScriptData(data, typ), typ == "binary" and "wb")
 end
 
-function FileIO:Exists(path) 
+function FileIO:Exists(path)
+	if not path then
+		return false
+	end
 	if SystemFS then
 		return SystemFS:exists(path)
 	else

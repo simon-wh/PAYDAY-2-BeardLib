@@ -1,4 +1,5 @@
-Group = Group or class(Menu)
+BeardLib.Items.Group = BeardLib.Items.Group or class(BeardLib.Items.Menu)
+local Group = BeardLib.Items.Group
 Group.type_name = "Group"
 function Group:Init()
     Group.super.Init(self)
@@ -65,7 +66,7 @@ function Group:MousePressed(button, x, y)
 end
 
 function Group:MouseMoved(x, y)
-    if Item.MouseMoved(self, x, y) then
+    if BeardLib.Items.Item.MouseMoved(self, x, y) then
         return true
     end
     return Group.super.MouseMoved(self, x, y)

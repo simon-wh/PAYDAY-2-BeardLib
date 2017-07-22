@@ -1,4 +1,5 @@
-Slider = Slider or class(Item)
+BeardLib.Items.Slider = BeardLib.Items.Slider or class(BeardLib.Items.Item)
+local Slider = BeardLib.Items.Slider
 Slider.type_name = "Slider"
 function Slider:Init()
     self.value = self.value or 1
@@ -18,7 +19,7 @@ function Slider:Init()
         layer = 2,
         color = bgcolor,
     })
-    self._textbox = TextBoxBase:new(self, {
+    self._textbox = BeardLib.Items.TextBoxBase:new(self, {
         text_color = bgcolor:contrast(),
         lines = 1,
         btn = "1",

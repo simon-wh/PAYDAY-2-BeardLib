@@ -6,6 +6,7 @@ if not _G.BeardLib then
     self.Name = "BeardLib"
     self.Version = 2.2 --for compatibility checks
     self.ModPath = ModPath
+	self.Items = {}
     self.SavePath = SavePath
     self.sequence_mods = self.sequence_mods or {}
 

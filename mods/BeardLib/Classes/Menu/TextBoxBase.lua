@@ -1,4 +1,5 @@
-TextBoxBase = TextBoxBase or class()
+BeardLib.Items.TextBoxBase = BeardLib.Items.TextBoxBase or class()
+local TextBoxBase = BeardLib.Items.TextBoxBase
 local KB = BeardLib.Utils.Input
 function TextBoxBase:init(parent, params)
     self._parent = parent

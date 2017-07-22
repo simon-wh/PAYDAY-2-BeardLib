@@ -1,4 +1,5 @@
-BaseItem = BaseItem or class()
+BeardLib.Items.BaseItem = BeardLib.Items.BaseItem or class()
+local BaseItem = BeardLib.Items.BaseItem
 function BaseItem:Init() end
 function BaseItem:init(params)
 	table.careful_merge(self, params or {})

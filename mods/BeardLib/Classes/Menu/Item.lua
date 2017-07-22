@@ -1,4 +1,5 @@
-Item = Item or class(BaseItem)
+BeardLib.Items.Item = BeardLib.Items.Item or class(BeardLib.Items.BaseItem)
+local Item = BeardLib.Items.Item
 function Item:Init(params)
 	self:WorkParams(params)
 	if self.override_parent then
@@ -16,7 +17,7 @@ function Item:Init(params)
 	end
 	self:Reposition()
     if self.items then
-		self._list = ContextMenu:new(self, self.parent_panel:layer() + 100) 
+		self._list = BeardLib.Items.ContextMenu:new(self, self.parent_panel:layer() + 100) 
     end
 end
 
