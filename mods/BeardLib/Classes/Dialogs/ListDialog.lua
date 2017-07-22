@@ -76,9 +76,11 @@ function ListDialog:_Show(params)
         callback = callback(self, self, "hide"),  
         label = "temp"
     })
-    table.sort(params.list, function(a, b) 
-        return (type(a) == "table" and a.name or a) < (type(b) == "table" and b.name or b) 
-    end)
+    if params.sort ~= false then
+        table.sort(params.list, function(a, b) 
+            return (type(a) == "table" and a.name or a) < (type(b) == "table" and b.name or b) 
+        end)
+    end
     self:MakeListItems(params)
 end
 

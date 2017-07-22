@@ -67,7 +67,7 @@ function WorldDefinition:convert_mod_path(path)
     if BeardLib.current_level and level_tweak.custom and path and string.begins(path, ".map/") then
         path = path:gsub(".map", _G.Path:Combine("levels/mods/", BeardLib.current_level._config.id))
     end
-    if not DB:has("environment", path) then
+    if not PackageManager:has(Idstring("environment"), path:id()) then
         return "core/environments/default"
     end
     return path
