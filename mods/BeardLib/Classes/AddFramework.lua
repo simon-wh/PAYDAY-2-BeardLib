@@ -21,7 +21,7 @@ function AddFramework:RegisterHooks()
 end
 
 function AddFramework:Load()
-    local dirs = file.GetDirectories(self._directory)
+    local dirs = FileIO:GetFolders(self._directory)
     if dirs then
         for _, dir in pairs(dirs) do
             local p = path:Combine(self._directory, dir)
