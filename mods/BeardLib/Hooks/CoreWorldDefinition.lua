@@ -1,6 +1,14 @@
 core:module("CoreWorldDefinition")
 WorldDefinition = WorldDefinition or CoreWorldDefinition.WorldDefinition
 
+local WorldDefinition_init = WorldDefinition.init
+function WorldDefinition:init(...)
+    WorldDefinition_init(self, ...)
+    if self._ignore_spawn_list then
+        self._ignore_spawn_list[Idstring("units/dev_tools/level_tools/ai_coverpoint"):key()] = true
+    end
+end
+
 local WorldDefinition_load_world_package = WorldDefinition._load_world_package
 function WorldDefinition:_load_world_package(...)
     local level_tweak = _G.tweak_data.levels[Global.level_data.level_id]
