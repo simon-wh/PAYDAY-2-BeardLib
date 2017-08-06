@@ -22,8 +22,7 @@ You can download a stable release from modworkshop: https://modworkshop.net/mydo
 * PD:TH Hud: [GitHub](https://github.com/GreatBigBushyBeard/PAYDAY-2-PDTH-Hud/) [ModWorkshop](http://lastbullet.net/mydownloads.php?action=view_down&did=682)
 * Death Wish+: [ModWorkshop](http://modworkshop.net/mydownloads.php?action=view_down&did=14384)
 * SC's Mod: [ModWorkshop](http://modworkshop.net/mydownloads.php?action=view_down&did=17254)
-* HoloUI: [GitHub](https://github.com/Luffyyy/HoloUI) [ModWorkshop](http://modworkshop.net/mydownloads.php?action=view_down&
-did=12501)
+* HoloUI: [GitHub](https://github.com/Luffyyy/HoloUI) [ModWorkshop](http://modworkshop.net/mydownloads.php?action=view_down&did=12501)
 * Restoration Mod: [ModWorkshop](https://modworkshop.net/mydownloads.php?action=view_down&did=428)
 
 ## Custom content mods
