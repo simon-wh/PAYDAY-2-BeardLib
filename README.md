@@ -1,5 +1,4 @@
 # PAYDAY-2-BeardLib
-
 A large library that assists in mod creation.
 - Script File Manipulation.
 - Custom Heist framework
@@ -24,6 +23,7 @@ You can download a stable release from modworkshop: https://modworkshop.net/mydo
 * SC's Mod: [ModWorkshop](http://modworkshop.net/mydownloads.php?action=view_down&did=17254)
 * HoloUI: [GitHub](https://github.com/Luffyyy/HoloUI) [ModWorkshop](http://modworkshop.net/mydownloads.php?action=view_down&did=12501)
 * Restoration Mod: [ModWorkshop](https://modworkshop.net/mydownloads.php?action=view_down&did=428)
+* And a lot more in here: [ModWorkshop](https://modworkshop.net/mydownloads.php?action=browse_cat&cid=4&tags[]=11)
 
 ## Custom content mods
 * [Custom heists](https://modworkshop.net/mydownloads.php?action=browse_cat&cid=502)
