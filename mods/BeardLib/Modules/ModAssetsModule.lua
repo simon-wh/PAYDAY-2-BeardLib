@@ -9,15 +9,26 @@ ModAssetsModule._providers = {
         page_url = "http://downloads.modworkshop.net/$id$"
     }
 }
+ModAssetsModule._providers.modworkshop.download_file_func = function(self)
+    local download_info_url = self._mod:GetRealFilePath(self.provider.download_info_url, self)
+    dohttpreq(download_info_url,
+        function(data, id)
+            local ret, d_data = pcall(function() return json.decode(data) end)
+            if ret then
+                self:_DownloadAssets(d_data[tostring(self.id)])
+            else
+                self:log("Failed to parse the data received from Modworkshop!")
+            end
+        end
+    )
+end
+ModAssetsModule._providers.lastbullet = clone(ModAssetsModule._providers.modworkshop)
 
 function ModAssetsModule:init(core_mod, config)
     self.required_params = table.add(clone(self.required_params), {"id"})
     if not ModAssetsModule.super.init(self, core_mod, config) then
         return false
     end
-
-    self._providers.modworkshop.download_file_func = callback(self, self, "MWSDownloadAssets")
-    self._providers.lastbullet = clone(self._providers.modworkshop)
 
     self.id = self._config.id
 
@@ -39,7 +50,7 @@ function ModAssetsModule:init(core_mod, config)
     end
 
     self.folder_names = self._config.use_local_dir and {table.remove(string.split(self._mod.ModPath, "/"))} or (type(self._config.folder_name) == "string" and {self._config.folder_name} or BeardLib.Utils:RemoveNonNumberIndexes(self._config.folder_name))
-    self.install_directory = self._config.use_local_path and BeardLib.Utils.Path:GetDirectory(self._mod.ModPath) or (self._config.install_directory and self._mod:GetRealFilePath(self._config.install_directory, self) or BeardLib.config.mod_override_dir)
+    self.install_directory = (self._config.install_directory and self._mod:GetRealFilePath(self._config.install_directory, self)) or (self._config.use_local_path ~= false and BeardLib.Utils.Path:GetDirectory(self._mod.ModPath)) or BeardLib.config.mod_override_dir
     self.version_file = self._config.version_file and self._mod:GetRealFilePath(self._config.version_file, self) or BeardLib.Utils.Path:Combine(self.install_directory, self.folder_names[1], self._default_version_file)
     self._version = 0
     
@@ -142,7 +153,6 @@ function ModAssetsModule:ShowRequiresUpdatePrompt()
     local lookup_tbl = {
         ["mod"] = self._mod.Name,
     }
-
     QuickMenu:new(
         managers.localization:text("mod_assets_updates_available"),
         managers.localization:text("mod_assets_updates_available_desc", lookup_tbl),
@@ -180,7 +190,7 @@ end
 
 function ModAssetsModule:DownloadAssets()
     if self.provider.download_file_func then
-        self.provider.download_file_func()
+        self.provider.download_file_func(self)
     else
         self:_DownloadAssets()
     end
@@ -240,21 +250,6 @@ function ModAssetsModule:StoreDownloadedAssets(config, data, id)
 	if not ret then
 		BeardLib:log("[ERROR] " .. pdata)
 	end
-end
-
-function ModAssetsModule:MWSDownloadAssets()
-    local download_info_url = self._mod:GetRealFilePath(self.provider.download_info_url, self)
-
-    dohttpreq(download_info_url,
-        function(data, id)
-            local ret, d_data = pcall(function() return json.decode(data) end)
-            if ret then
-                self:_DownloadAssets(d_data[tostring(self.id)])
-            else
-                self:log("Failed to parse the data received from Modworkshop!")
-            end
-        end
-    )
 end
 
 function ModAssetsModule:BuildMenu(node)
