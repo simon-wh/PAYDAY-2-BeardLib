@@ -39,6 +39,7 @@
 		<class file="Menu/ComboBox.lua"/>
 		<class file="Menu/Slider.lua"/>
 		<class file="Menu/TextBox.lua"/>
+		<class file="Menu/ColorTextBox.lua"/>
 		<class file="MenuHelperPlus.lua"/>
 		<class file="json_utils.lua"/>
 		<class file="ModAssetUpdateManager.lua" manager="asset_update"/>

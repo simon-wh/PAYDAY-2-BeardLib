@@ -135,6 +135,10 @@ function ListDialog:MakeListItems(params)
     self._list_menu:AlignItems(true)
 end
 
+function ListDialog:ReloadInterface()
+    self._list_menu:AlignItems(true)    
+end
+
 function ListDialog:Search(menu, item)
     self._filter = {}
     for _, s in pairs(string.split(item:Value(), ",")) do

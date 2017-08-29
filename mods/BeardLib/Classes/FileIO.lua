@@ -145,11 +145,22 @@ function FileIO:MoveTo(path, to_path)
 	SystemFS:rename_file(path, to_path)
 end
 
-function FileIO:Delete(path) 
+function FileIO:Delete(path)
 	if SystemFS then
 		SystemFS:delete_file(path)
 	else
 		os.execute("rm -r " .. path)
+	end
+end
+
+function FileIO:DeleteEmptyFolders(path, delete_current) 
+	for _, folder in pairs(self:GetFolders(path)) do
+		self:DeleteEmptyFolders(Path:Combine(path, folder), true)
+	end
+	if delete_current then
+		if #self:GetFolders(path) == 0 and #self:GetFiles(path) == 0 then
+			self:Delete(path)	
+		end
 	end
 end
 

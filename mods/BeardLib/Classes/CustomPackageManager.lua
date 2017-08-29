@@ -66,7 +66,9 @@ function cmp:LoadPackageConfig(directory, config)
         if type(child) == "table" then
             local typ = child._meta
             local path = child.path
-            if typ and path then
+            if typ == "unit_load" then
+                self:LoadPackageConfig(directory, child)
+            elseif typ and path then
                 path = BeardLib.Utils.Path:Normalize(path)
                 local ids_ext = Idstring(typ)
                 local ids_path = Idstring(path)
@@ -84,10 +86,10 @@ function cmp:LoadPackageConfig(directory, config)
                         end
                     end
                 else
-                    BeardLib:log("[ERROR] File does not exist! %s", file_path)
+                    BeardLib:log("[ERROR] File does not exist! %s", tostring(file_path))
                 end
             else
-                BeardLib:log("[ERROR] Node in %s does not contain a definition for both type and path", add_file_path)
+                BeardLib:log("[ERROR] Node in %s does not contain a definition for both type and path", tostring(directory))
             end
         end
     end
@@ -116,8 +118,10 @@ function cmp:UnloadPackageConfig(config)
                     --self:log("Unloaded %s %s", path, typ)
                     FileManager:RemoveFile(ids_ext, ids_path)
                 end
+            elseif typ == "unit_load" then
+                self:UnloadPackageConfig(child)
             else
-                BeardLib:log("[ERROR] Node in %s does not contain a definition for both type and path", add_file_path)
+                BeardLib:log("[ERROR] Some node does not contain a definition for both type and path")
             end
         end
     end
