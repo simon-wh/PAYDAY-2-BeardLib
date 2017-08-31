@@ -130,9 +130,11 @@ function ContextMenu:reposition()
         self.panel:set_world_bottom(self.owner.panel:world_y())
     end
     self._scroll:panel():set_y(self.owner.searchbox and self.owner.items_size or 0) 
+    self._scroll:panel():set_y(self.owner.searchbox and self.owner.items_size or 0) 
     self._scroll:set_size(self.panel:w(), self.panel:h() - (self.owner.searchbox and self.owner.items_size or 0))
-    self._scroll:panel():child("scroll_up_indicator_arrow"):set_top(6 - self._scroll:padding())
-    self._scroll:panel():child("scroll_down_indicator_arrow"):set_bottom(self._scroll:panel():h() - 6 - self._scroll:padding())
+
+    self._scroll:panel():child("scroll_up_indicator_arrow"):set_top(6 - self._scroll:y_padding())
+    self._scroll:panel():child("scroll_down_indicator_arrow"):set_bottom(self._scroll:panel():h() - 6 - self._scroll:y_padding())
 
     self._scroll:update_canvas_size()
 end

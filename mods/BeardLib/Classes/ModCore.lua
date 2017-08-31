@@ -37,7 +37,7 @@ function ModCore:LoadConfigFile(path)
     if config.global_key then
         self.global = config.global_key
         if not _G[self.global] then
-            declare(self.global, self)
+            rawset( _G, self.global, self)
         end
     end
 

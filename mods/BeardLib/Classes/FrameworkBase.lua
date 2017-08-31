@@ -23,7 +23,7 @@ function FrameworkBase:GetModByName(name)
 end
 
 function FrameworkBase:LoadMod(dir, path, main_file)
-	declare("ModPath", path)
+	rawset( _G, "ModPath", path)
 	local success, node_obj = pcall(function() return self._mod_core:new(main_file, self.auto_init_modules) end)
 	if success then
 		BeardLib:log("Loaded Config: %s", path)

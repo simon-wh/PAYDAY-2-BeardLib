@@ -3,7 +3,7 @@ local mm = ModManager
 
 function mm:RegisterHook(source_file, path, file, type)
     local hook_file = BeardLib.Utils.Path:Combine(path, file)
-    local dest_tbl = type == "pre" and (_prehooks or (BLTBase and BLTBase.hook_tables.pre)) or (_posthooks or (BLTBase and BLTBase.hook_tables.post))
+    local dest_tbl = type == "pre" and (_prehooks or Hooks._prehooks) or (_posthooks or Hooks._prehooks)
     if dest_tbl and io.file_is_readable(hook_file) then
         local req_script = source_file:lower()
 
