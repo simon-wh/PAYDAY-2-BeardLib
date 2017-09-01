@@ -19,7 +19,11 @@ function KeybindModule:Load()
 	end
 	self._config.run_in_menu = self._config.run_in_menu or true
 	self._config.run_in_game = self._config.run_in_game or true
-	LuaModManager:AddJsonKeybinding(self._config, self._mod.ModPath .. "/")
+	if BLTKeybindsManager then
+		BLTKeybindsManager:register_keybind(self._mod, self._config)
+	else
+		LuaModManager:AddJsonKeybinding(self._config, self._mod.ModPath .. "/")		
+	end
 end
 
 BeardLib:RegisterModule(KeybindModule.type_name, KeybindModule)

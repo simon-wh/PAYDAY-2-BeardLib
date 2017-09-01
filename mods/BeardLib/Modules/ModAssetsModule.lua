@@ -1,3 +1,4 @@
+--TEMPORARILY BROKEN!
 ModAssetsModule = ModAssetsModule or class(ModuleBase)
 ModAssetsModule.type_name = "AssetUpdates"
 ModAssetsModule._default_version_file = "version.txt"
@@ -153,7 +154,7 @@ function ModAssetsModule:ShowRequiresUpdatePrompt()
     local lookup_tbl = {
         ["mod"] = self._mod.Name,
     }
-    QuickMenu:new(
+    --[[QuickMenu:new(
         managers.localization:text("mod_assets_updates_available"),
         managers.localization:text("mod_assets_updates_available_desc", lookup_tbl),
         {
@@ -175,7 +176,7 @@ function ModAssetsModule:ShowRequiresUpdatePrompt()
             }
         },
         true
-    )
+    )]]
     --BeardLib.managers.updates_menu:AddUpdate(self)
 end
 

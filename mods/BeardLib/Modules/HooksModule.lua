@@ -13,12 +13,16 @@ function HooksModule:init(core_mod, config)
 end
 
 function HooksModule:Load()
-    local path = BeardLib.Utils.Path:Combine(self._mod.ModPath, self._config.directory)
+    local path = self:GetPath()
     for _, hook in ipairs(self._config) do
         if hook._meta == "hook" then
-            ModManager:RegisterHook(hook.source_file, path, hook.file, hook.type)
+            ModManager:RegisterHook(hook.source_file, path, hook.file, hook.type, self)
         end
     end
+end
+
+function HooksModule:GetPath()
+    return BeardLib.Utils.Path:Combine(self._mod.ModPath, self._config.directory, "")
 end
 
 BeardLib:RegisterModule(HooksModule.type_name, HooksModule)

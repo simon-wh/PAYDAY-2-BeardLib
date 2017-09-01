@@ -134,3 +134,7 @@ function ModCore:StringToCallback(str, self_tbl)
         return nil
     end
 end
+
+function ModCore:GetPath()
+    return self.ModPath
+end

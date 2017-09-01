@@ -546,7 +546,7 @@ end
 
 function OptionModule:BuildMenuHook()
     Hooks:Add("MenuManagerSetupCustomMenus", self._mod.Name .. "Build" .. self._name .. "Menu", function(self_menu, nodes)
-        self:BuildMenu(nodes[LuaModManager.Constants._lua_mod_options_menu_id])
+        self:BuildMenu(nodes.lua_mod_options_menu)
     end)
 end
 
