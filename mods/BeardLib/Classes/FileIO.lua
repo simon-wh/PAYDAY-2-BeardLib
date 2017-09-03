@@ -189,7 +189,9 @@ end
 function FileIO:GetFolders(path)
 	if SystemFS then
 		return SystemFS:list(path, true)
-	else
+	elseif self:Exists(path) then
 		return file.GetDirectories(path)
+	else
+		return {}
 	end
 end

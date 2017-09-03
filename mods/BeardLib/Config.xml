@@ -27,6 +27,7 @@
 		<class file="Dialogs/ListDialog.lua"/>
 		<class file="Dialogs/InputDialog.lua"/>
 		<class file="Dialogs/SelectListDialog.lua"/>
+		<class file="Dialogs/DownloadDialog.lua"/>
 		<class file="Menu/TextBoxBase.lua"/>
 		<class file="Menu/ContextMenu.lua"/>
 		<class file="Menu/BaseItem.lua"/>
@@ -45,7 +46,15 @@
 		<class file="ModAssetUpdateManager.lua" manager="asset_update"/>
 		<class file="ModuleBase.lua"/>
 		<class file="MenuDialogManager.lua" manager="dialog"/>
+		<class file="BeardLibModsMenu.lua" manager="mods_menu"/>
 	</classes>
+	<options build_menu="false" auto_load="true">
+		<options>
+			 <option name="DisabledMods" type="table">
+			 	<default_value/>
+			 </option>
+		</options>
+	</options>
 	<hooks>
 		<hook source="core/lib/managers/coresequencemanager" file="CoreSequenceManager.lua"/>
         <hook source="lib/managers/menu/menuinput" file="MenuInput.lua"/>
@@ -56,6 +65,7 @@
         <hook source="lib/managers/gameplaycentralmanager" file="GamePlayCentralManager.lua"/>
         <hook source="lib/managers/trademanager" file="TradeManager.lua"/>
         <hook source="lib/managers/missionmanager" file="MissionManager.lua"/>
+        <hook source="lib/managers/menu/menucomponentmanager" file="MenuComponentManager.lua"/>
         <hook source="lib/managers/menumanager" file="MenuManager.lua"/>
         <hook source="lib/managers/crimenetmanager" file="CrimeNetManager.lua"/>
         <hook source="lib/managers/weaponfactorymanager" file="WeaponFactoryManager.lua"/>

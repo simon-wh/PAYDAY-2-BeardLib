@@ -347,21 +347,16 @@ function BeardLib.Utils:DownloadMap(level_name, update_key, done_callback)
             local ret, d_data = pcall(function() return json.decode(data) end)
             if ret then			
                 local download_url = ModCore:GetRealFilePath(provider.download_api_url, d_data[tostring(update_key)])
-                BeardLib:log("Downloading map from url: %s", download_url)					
-                local orig = DownloadProgressBoxGui._update
-                function DownloadProgressBoxGui._update(o, this)
-                    orig(o, this)
-                    this._anim_data.download_amt_text:set_text(managers.localization:to_upper_text("custom_map_download_complete"))
-                    BlackMarketGui:make_fine_text(this._anim_data.download_amt_text)
-                    DownloadProgressBoxGui._update = orig
-                end
-                managers.system_menu:show_download_progress({
-                    title = managers.localization:text("base_mod_download_downloading_mod", {mod_name = level_name or "No Map Name"}),
-                    focus_button = 1,
-                    force = true,
-                    button_list = {{cancel_button = true, text = managers.localization:text("dialog_ok")}}
-                })
-                dohttpreq(download_url, callback(ModAssetsModule, ModAssetsModule, "StoreDownloadedAssets", {install_directory = "Maps", done_callback = done_map_download}), LuaModUpdates.UpdateDownloadDialog)
+                BeardLib:log("Downloading map from url: %s", download_url)
+                local dialog = BeardLib.managers.dialog.download
+                dialog:Show({title = managers.localization:text("beardlib_downloading")..level_name or "No Map Name", force = true})				
+                dohttpreq(download_url, callback(ModAssetsModule, ModAssetsModule, "StoreDownloadedAssets", {
+                    install_directory = "Maps", 
+                    done_callback = done_map_download,
+                    install = callback(dialog, dialog, "SetInstalling"),
+                    failed = callback(dialog, dialog, "SetFailed"),
+                    finish = callback(dialog, dialog, "SetFinished"),
+                }), callback(dialog, dialog, "SetProgress"))
             else
                 QuickMenuPlus:new(managers.localization:text("mod_assets_error"), managers.localization:text("custom_map_failed_download"))
                 BeardLib:log("Failed to parse the data received from Modworkshop(Invalid map?)")

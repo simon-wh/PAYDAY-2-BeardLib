@@ -166,14 +166,21 @@ end
 
 --Only for use by the SetValue function
 function OptionModule:_SetValue(tbl, name, value, full_name)
-    if tbl[name] == nil then
-        BeardLib:log(string.format("[ERROR] Option of name %q does not exist in mod, %s", name, self._mod.Name))
-        return
-    end
-    tbl[name].value = value
+    if tbl.type == "table" then
+        tbl.value[name] = value
+        if tbl.value_changed then
+            tbl.value_changed(full_name, value)
+        end
+    else
+        if tbl[name] == nil then
+            BeardLib:log(string.format("[ERROR] Option of name %q does not exist in mod, %s", name, self._mod.Name))
+            return
+        end
+        tbl[name].value = value
 
-    if tbl[name].value_changed then
-        tbl[name].value_changed(full_name, value)
+        if tbl[name].value_changed then
+            tbl[name].value_changed(full_name, value)
+        end
     end
 end
 
@@ -209,7 +216,9 @@ function OptionModule:GetOption(name)
         local tbl = self._storage
         for _, part in pairs(string_split) do
             if tbl[part] == nil then
-                BeardLib:log(string.format("[ERROR] Option of name %q does not exist in mod, %s", name, self._mod.Name))
+                if tbl.type ~= "table" then
+                    BeardLib:log(string.format("[ERROR] Option of name %q does not exist in mod, %s", name, self._mod.Name))
+                end
                 return
             end
             tbl = tbl[part]
@@ -235,7 +244,7 @@ function OptionModule:GetValue(name, real)
                 end
             end
         end
-        return option.value
+        return (type(option) ~= "table" and option) or option.value
     else
         return nil
     end
@@ -546,7 +555,7 @@ end
 
 function OptionModule:BuildMenuHook()
     Hooks:Add("MenuManagerSetupCustomMenus", self._mod.Name .. "Build" .. self._name .. "Menu", function(self_menu, nodes)
-        self:BuildMenu(nodes.lua_mod_options_menu)
+        self:BuildMenu(nodes.lua_mod_options_menu or nodes.blt_options)
     end)
 end
 

@@ -173,7 +173,11 @@ function MenuUI:Enable()
     if self:Enabled() then
         return
     end
-	self._panel:set_alpha(1)
+    if self.animate_toggle then
+        QuickAnim:Work(self._panel, "alpha", 1, "speed", 5)
+    else
+        self._panel:set_alpha(1)
+    end
 	self._enabled = true
     self._mouse_id = self._mouse_id or managers.mouse_pointer:get_id()
 	managers.mouse_pointer:use_mouse({
@@ -190,7 +194,11 @@ function MenuUI:Disable()
     if not self:Enabled() then
         return
     end
-	self._panel:set_alpha(0)
+    if self.animate_toggle then
+        QuickAnim:Work(self._panel, "alpha", 0, "speed", 5)
+    else
+        self._panel:set_alpha(0)
+    end
 	self._enabled = false
 	if self._highlighted then self._highlighted:UnHighlight() end
 	if self._openlist then self._openlist:hide() end
@@ -392,6 +400,20 @@ function MenuUI:GetItem(name, shallow)
         end
     end
     return false
+end
+
+function MenuUI:GetItemByLabel(label, shallow)
+    for _, item in pairs(self._all_items) do
+        if item.label == label then
+            return item
+        elseif item.menu_type and not shallow then
+            local i = item:GetItemByLabel(label)
+            if i then
+                return i
+            end
+        end
+    end
+    return nil
 end
 
 function MenuUI:Focused()

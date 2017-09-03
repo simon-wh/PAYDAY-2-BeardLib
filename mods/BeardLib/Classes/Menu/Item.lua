@@ -12,7 +12,7 @@ function Item:Init(params)
 		h = self.h or self.items_size,
 	})
 	self:InitBasicItem()
-	if self.divider_type then
+	if self.divider_type and alive(self.title) then
 		self.title:set_world_center_y(self.panel:world_center_y())
 	end
 	self:Reposition()
@@ -32,6 +32,9 @@ function Item:SetEnabled(enabled)
 	end
 	if self._list then
 		self._list:hide()
+	end
+	if not self.enabled then
+		self:UnHighlight()
 	end
 end
 
@@ -83,10 +86,10 @@ end
 function Item:SetColor(color)
 	self.border_left = NotNil(self.border_left, true)
 	self:SetBorder({color = color})
-	self:SetText(self.text)
+	self:_SetText(self.text)
 end
 
-function Item:SetText(text)
+function Item:_SetText(text)
     if self:alive() and self:title_alive() then
         self.text = text
         self.title:set_text(self.localized and text and managers.localization:text(text) or text)
@@ -109,6 +112,13 @@ function Item:SetText(text)
         return true
     end
     return false
+end
+
+function Item:SetText(text)
+	self:_SetText(text)
+	if self.parent.auto_align then
+		self.parent:AlignItems()
+	end
 end
 
 function Item:DoHighlight(highlight)
@@ -142,6 +152,9 @@ end
 
 function Item:UnHighlight()
 	if self.menu._highlighted == self then
+		if managers.mouse_pointer.set_pointer_image then
+			managers.mouse_pointer:set_pointer_image("arrow")
+		end
 		self.menu._highlighted = nil
 	end
 	self.highlight = false	

@@ -96,6 +96,7 @@ end
 function QuickAnim:Stop(o)
     o:stop()
     o:script().animating = false
+    o:script().animating_color = false
 end
 
 function QuickAnim:Working(o)
@@ -103,8 +104,11 @@ function QuickAnim:Working(o)
 end
 
 function QuickAnim:WorkColor(o, color, clbk, speed)
+    if o:script().animating_color then
+        self:Stop()
+    end
     o:animate(function()
-        speed = speed or 5
+        speed = speed or 1
         while o:color() ~= color do
             local n = self:dt() * speed
             o:set_color(Color(math.step(o:color().r, color.r, n), math.step(o:color().g, color.g, n), math.step(o:color().b, color.b, n)))
@@ -112,7 +116,8 @@ function QuickAnim:WorkColor(o, color, clbk, speed)
         o:set_color(color)
         if clbk then
             clbk()
-        end   
+        end
+        o:script().animating_color = nil
     end)
 end
 function QuickAnim:dt()

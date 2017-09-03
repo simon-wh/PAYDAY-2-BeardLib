@@ -17,6 +17,7 @@ function MenuDialogManager:Init()
     self.color = ColorDialog:new()
     self.filebrowser = FileBrowserDialog:new()
     self.input = InputDialog:new()
+    self.download = DownloadDialog:new()
     self._ready_to_open = true
 end
 
@@ -42,7 +43,7 @@ end
 function MenuDialogManager:EnableOnlyLast()
     for k, dialog in pairs(self._opened_dialogs) do
         local enabled = k == 1
-        if dialog._menu then
+        if dialog._menu and dialog._menu.SetEnabled then
             dialog._menu:SetEnabled(enabled)
         end
         if dialog._menus then
@@ -135,6 +136,7 @@ function MenuDialogManager:SelectList() return self.select_list end
 function MenuDialogManager:Color() return self.color end
 function MenuDialogManager:FileBrowser() return self.filebrowser end
 function MenuDialogManager:Input() return self.input end
+function MenuDialogManager:Download() return self.download end
 function MenuDialogManager:Menu() return self._menu end
 function MenuDialogManager:Hide() self._menu:disable() end
 function MenuDialogManager:GetMyIndex(dialog) return (#self._opened_dialogs + 1) - tonumber(table.get_key(self._opened_dialogs, dialog)) or 0 end

@@ -14,7 +14,7 @@ end
 
 function MenuModule:create_hooks()
     Hooks:Add("MenuManagerSetupCustomMenus", self._mod.Name .. "Build" .. self._name .. "Menu", function(self_menu, nodes)
-        self:build_node(self._config.menu, nodes.lua_mod_options_menu)
+        self:build_node(self._config.menu, nodes.lua_mod_options_menu or nodes.blt_options)
     end)
 end
 

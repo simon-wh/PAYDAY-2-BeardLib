@@ -51,7 +51,7 @@ function BaseItem:InitBasicItem()
 		valign = self.type_name ~= "Group" and "grow",
 		layer = 0
 	})
-	self:SetText(self.text)
+	self:_SetText(self.text)
 	self:MakeBorder()
 end
 
@@ -61,15 +61,17 @@ function BaseItem:WorkParams(params)
 	self.visible = NotNil(self.visible, true)
 	self:WorkParam("marker_color", Color.transparent)
 	self:WorkParam("marker_highlight_color")
+	self:WorkParam("background_color")
 	local bg_alpha = self.background_color and self.background_color.a or 0
 	local bg = self.marker_color and self.marker_color.a > 0.5 and self.marker_color or self.background_color
 	local bg2 = self.marker_highlight_color and self.marker_highlight_color.a > 0.5 and self.marker_highlight_color or self.background_color
 	self:WorkParam("auto_text_color")
 	local text_color = bg and bg.a > 0.5 and bg:contrast() or Color.white
-	self:WorkParam("text_color", text_color)
+	self:WorkParam("text_color", text_color)		
+
 	if self.auto_text_color and self.text_color ~= false then
 		self.text_color = text_color
-	end
+	end	
 	self:WorkParam("text_highlight_color")
 	local text_highlight_color = bg2 and bg2.a > 0.5 and bg2:contrast() or Color.white
 	if self.auto_text_color and self.text_highlight_color ~= false then
@@ -78,7 +80,6 @@ function BaseItem:WorkParams(params)
 	self:WorkParam("marker_alpha")
 	self:WorkParam("items_size", 16)
 	self:WorkParam("disabled_alpha", 0.5)
-	self:WorkParam("background_color")
 	self:WorkParam("background_alpha")
 	self:WorkParam("text_align", "left")
 	self:WorkParam("text_vertical", "center")
@@ -96,9 +97,10 @@ function BaseItem:WorkParams(params)
 	self.name = NotNil(self.name, self.text, "")
 	self.text = NotNil(self.text, self.text ~= false and self.name)
 	self.offset = self.offset and self:ConvertOffset(self.offset) or self:ConvertOffset(self.inherit.offset)
-
-	if self.parent ~= self.menu and not self.initialized then
-		self.w = (self.w or self.parent_panel:w()) - (self.size_by_text and 0 or self.offset[1] * 2)
+	if not self.initialized and self.parent ~= self.menu then
+		if (not self.w or self.parent.align_method ~= "grid")  then
+			self.w = (self.w or self.parent_panel:w()) - ((self.size_by_text or self.type_name == "ImageButton") and 0 or self.offset[1] * 2)
+		end
 		self.w = math.clamp(self.w, self.min_width or 0, self.max_width or self.w)
 	end
 	self.should_render = true
@@ -303,6 +305,14 @@ function BaseItem:MouseCheck(press)
 		return false
 	end
 	return not self.divider_type, true
+end
+
+function BaseItem:SetIndex(index)
+	table.delete(self.parent._my_items, self)
+	table.insert(self.parent._my_items, index, self)
+    if self.auto_align then
+        self:AlignItems(true)
+    end
 end
 
 function BaseItem:SetLayer(layer)

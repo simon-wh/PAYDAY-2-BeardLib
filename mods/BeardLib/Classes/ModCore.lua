@@ -4,13 +4,23 @@ ModCore = ModCore or class()
 ModCore._ignored_modules = {}
 function ModCore:init(config_path, load_modules, post_init)
     if not io.file_is_readable(config_path) then
-        self:log("[ERROR] Config file is not readable!")
+        BeardLib:log("[ERROR] Config file at path '%s' is not readable!", config_path)
         return
+    end
+    local disabled_mods = BeardLib.Options:GetValue("DisabledMods")
+    local blt_mod = config_path:match("mods")
+
+    if disabled_mods[ModPath] and not blt_mod then
+        BeardLib:log("[Info] Mod at path '%s' is disabled!", tostring(ModPath))
+        self._disabled = true
     end
     self._auto_post_init = post_init
     self.ModPath = ModPath
+    self.Priority = 1001
     self.SavePath = SavePath
-
+    if blt_mod then
+        table.insert(BeardLib.Mods, self)
+    end
     self:LoadConfigFile(config_path)
     if load_modules then
         self:init_modules()
@@ -18,6 +28,9 @@ function ModCore:init(config_path, load_modules, post_init)
 end
 
 function ModCore:post_init(ignored_modules)
+    if self._disabled then
+        return
+    end
     for _, module in pairs(self._modules) do
         if (not ignored_modules or not table.contains(ignored_modules, module._name)) then
             local success, err = pcall(function() module:post_init() end)
@@ -34,10 +47,12 @@ function ModCore:LoadConfigFile(path)
     local config = ScriptSerializer:from_custom_xml(file:read("*all"))
 
     self.Name = config.name or "ERR:" .. tostring(table.remove(string.split(self.ModPath, "/")))
-    if config.global_key then
-        self.global = config.global_key
-        if not _G[self.global] then
-            rawset( _G, self.global, self)
+    if not self._disabled then
+        if config.global_key then
+            self.global = config.global_key
+            if not _G[self.global] then
+                rawset( _G, self.global, self)
+            end
         end
     end
 
@@ -46,7 +61,7 @@ function ModCore:LoadConfigFile(path)
 end
 
 function ModCore:init_modules()
-    if self.modules_initialized then
+    if self.modules_initialized or self._disabled then
         return
     end
 

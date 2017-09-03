@@ -8,13 +8,18 @@ end
 
 function MapFramework:RegisterHooks()
     self:AddCustomContact()
+    table.sort(self._loaded_mods, function(a,b)
+        return a.Priority < b.Priority
+    end)
     for _, mod in pairs(self._loaded_mods) do
-        for _, module in pairs(mod._modules) do
-            if module.RegisterHook and not module.Registered then
-                local success, err = pcall(function() module:RegisterHook() end)
-                module.Registered = true
-                if not success then
-                    BeardLib:log("[ERROR] An error occured on the hook registration of %s. Error:\n%s", module._name, tostring(err))
+        if not mod._disabled and mod._modules then
+            for _, module in pairs(mod._modules) do
+                if module.RegisterHook and not module.Registered then
+                    local success, err = pcall(function() module:RegisterHook() end)
+                    module.Registered = true
+                    if not success then
+                        BeardLib:log("[ERROR] An error occured on the hook registration of %s. Error:\n%s", module._name, tostring(err))
+                    end
                 end
             end
         end

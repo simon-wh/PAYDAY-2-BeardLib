@@ -4,9 +4,10 @@ if not _G.BeardLib then
     local self = BeardLib
 	self._mod = nil
     self.Name = "BeardLib"
-    self.Version = 2.2 --for compatibility checks
+    self.Version = 2.3 --for compatibility checks
     self.ModPath = ModPath
 	self.Items = {}
+	self.Mods = {}
     self.SavePath = SavePath
     self.sequence_mods = self.sequence_mods or {}
 
@@ -50,7 +51,7 @@ if not _G.BeardLib then
 		end
 
 		local languages = {}
-		for i, file in pairs(file.GetFiles(self.config.localization_dir)) do
+		for i, file in pairs(FileIO:GetFiles(self.config.localization_dir)) do
 			local lang = path:GetFileNameWithoutExtension(file)
 			table.insert(languages, {
 				_meta = "localization",
@@ -60,6 +61,8 @@ if not _G.BeardLib then
 		end
         languages.directory = path:GetFileNameWithoutExtension(self.config.localization_dir)
 		LocalizationModule:new(self, languages)
+		self.Options = OptionModule:new(self, self.config.options)
+		self.Options:post_init()
 		for k, manager in pairs(self.managers) do
 			if manager.new then
 				self.managers[k] = manager:new()
@@ -105,7 +108,7 @@ if not _G.BeardLib then
 	end
 
 	function self:LoadModules()
-		local modules = file.GetFiles(self.config.modules_dir)
+		local modules = FileIO:GetFiles(self.config.modules_dir)
 		if modules then
 			for _, mdle in pairs(modules) do
 				dofile(self.config.modules_dir .. mdle)

@@ -43,7 +43,7 @@ function MenuDialog:_Show(params)
         self._menu:Divider(table.merge({
             name = "Title",
             text = params.title,
-            border_bottom = true,
+            border_left = true,
             border_color = self._menu.marker_highlight_color,
             items_size = self._menu.items_size + 4,
         }, params.title_merge or {}))

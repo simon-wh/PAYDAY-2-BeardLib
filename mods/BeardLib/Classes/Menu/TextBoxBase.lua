@@ -246,7 +246,7 @@ function TextBoxBase:update_caret()
         self.panel:parent():set_h(h)
         text:set_h(h)
         self.panel:child("line"):set_bottom(h)
-        self._parent:SetText(self._parent.text)
+        self._parent:_SetText(self._parent.text)
     end
     if self.parent then
         self.parent:AlignItems()

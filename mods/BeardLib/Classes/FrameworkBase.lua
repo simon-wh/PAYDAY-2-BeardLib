@@ -34,7 +34,7 @@ function FrameworkBase:LoadMod(dir, path, main_file)
 end
 
 function FrameworkBase:Load()
-    local dirs = file.GetDirectories(self._directory)
+    local dirs = FileIO:GetFolders(self._directory)
     if dirs then
         for _, dir in pairs(dirs) do
             if not table.contains(self._ignore_folders, dir) then

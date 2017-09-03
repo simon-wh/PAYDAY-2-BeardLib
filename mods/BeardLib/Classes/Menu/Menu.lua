@@ -361,6 +361,20 @@ function Menu:GetItem(name, shallow)
     return nil
 end
 
+function Menu:GetItemByLabel(label, shallow)
+    for _, item in pairs(self._all_items) do
+        if item.label == label then
+            return item
+        elseif item.menu_type and not shallow then
+            local i = item:GetItemByLabel(label)
+            if i then
+                return i
+            end
+        end
+    end
+    return nil
+end
+
 function Menu:ClearItems(label)
     local temp = clone(self._all_items)
     self._all_items = {}
@@ -498,6 +512,12 @@ function Menu:Divider(params)
     local _params = self:ConfigureItem(params)
     _params.divider_type = true
     return self:NewItem(BeardLib.Items.Item:new(_params))
+end
+
+function Menu:Image(params)
+    local _params = self:ConfigureItem(params)
+    _params.divider_type = true
+    return self:NewItem(BeardLib.Items.ImageButton:new(_params))
 end
 
 function Menu:DivGroup(params)

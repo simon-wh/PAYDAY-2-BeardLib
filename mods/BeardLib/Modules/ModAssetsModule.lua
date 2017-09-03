@@ -1,4 +1,3 @@
---TEMPORARILY BROKEN!
 ModAssetsModule = ModAssetsModule or class(ModuleBase)
 ModAssetsModule.type_name = "AssetUpdates"
 ModAssetsModule._default_version_file = "version.txt"
@@ -57,6 +56,7 @@ function ModAssetsModule:init(core_mod, config)
     
     self._update_manager_id = self._mod.Name .. self._name
     self._mod.update_key = (self._config.is_standalone ~= false) and self.id
+    self._mod.update_assets_module = self
     self:RetrieveCurrentVersion()
 
     if not self._config.manual_check then
@@ -91,6 +91,7 @@ function ModAssetsModule:RetrieveCurrentVersion()
     else
         self:log("[ERROR] Unable to get version for '%s's assets. File: %s", self._mod.Name, self.version_file)
     end
+    self._version = BeardLib.Utils.Math:Round(self._version, 4)
 end
 
 function ModAssetsModule:CheckVersion(force)
@@ -108,10 +109,10 @@ end
 function ModAssetsModule:_CheckVersion(force)
     local version_url = self._mod:GetRealFilePath(self.provider.version_api_url, self)
     dohttpreq(version_url, function(data, id)
-        self:log("Received data '%s' from the server", tostring(data))
+        self:log("Received version '%s' from the server(local is %s)", tostring(data), tostring(self._version))
         if tonumber(data) then
             if tonumber(data) > self._version then
-                BeardLib.managers.asset_update:RegisterUpdate(callback(self, self, "ShowRequiresUpdatePrompt"))
+                BeardLib.managers.mods_menu:SetModNeedsUpdate(self._mod)
             elseif force then
                 self:ShowNoChangePrompt()
             end
@@ -124,8 +125,8 @@ end
 
 function ModAssetsModule:ShowNoChangePrompt()
     QuickMenu:new(
-        managers.localization:text("mod_assets_no_change"),
-        managers.localization:text("mod_assets_no_change_desc"),
+        managers.localization:text("beardlib_no_change"),
+        managers.localization:text("beardlib_no_change_desc"),
         {
             {
                 text = managers.localization:text("menu_ok"),
@@ -150,43 +151,8 @@ function ModAssetsModule:ShowErrorPrompt()
     )
 end
 
-function ModAssetsModule:ShowRequiresUpdatePrompt()
-    local lookup_tbl = {
-        ["mod"] = self._mod.Name,
-    }
-    --[[QuickMenu:new(
-        managers.localization:text("mod_assets_updates_available"),
-        managers.localization:text("mod_assets_updates_available_desc", lookup_tbl),
-        {
-            {
-                text = managers.localization:text("mod_assets_updates_download_now"),
-                callback = callback(self, self, "DownloadAssets")
-            },
-            {
-                text = managers.localization:text("mod_assets_visit_page"),
-                callback = callback(self, self, "ViewMod")
-            },
-            {
-                text = managers.localization:text("mod_assets_updates_ignore"),
-                callback = callback(self, self, "IgnoreUpdate")
-            },
-            {
-                text = managers.localization:text("mod_assets_updates_remind_later"),
-                callback = callback(self, self, "SetReady")
-            }
-        },
-        true
-    )]]
-    --BeardLib.managers.updates_menu:AddUpdate(self)
-end
-
 function ModAssetsModule:SetReady()
     BeardLib.managers.asset_update._ready_for_update = true
-end
-
-function ModAssetsModule:IgnoreUpdate()
-    BeardLib.managers.asset_update:SetUpdateStatus(self._update_manager_id, false)
-    self:SetReady()
 end
 
 function ModAssetsModule:DownloadAssets()
@@ -198,38 +164,56 @@ function ModAssetsModule:DownloadAssets()
 end
 
 function ModAssetsModule:ViewMod()
-    Steam:overlay_activate("url", self._mod:GetRealFilePath(self.provider.page_url, self))
+    local url = self._mod:GetRealFilePath(self.provider.page_url, self)
+    if Steam:overlay_enabled() then
+		Steam:overlay_activate("url", url)
+	else
+		os.execute("cmd /c start " .. url)
+	end
 end
 
 function ModAssetsModule:_DownloadAssets(data)
     local download_url = self._mod:GetRealFilePath(self.provider.download_api_url, data or self)
     self:log("Downloading assets from url: %s", download_url)
-    managers.menu:show_download_progress(self._mod.Name .. " " .. managers.localization:text("mod_assets_title"))
-    dohttpreq(download_url, callback(self, self, "StoreDownloadedAssets", false), LuaModUpdates.UpdateDownloadDialog)
+    local mods_menu = BeardLib.managers.mods_menu
+    dohttpreq(download_url, callback(self, self, "StoreDownloadedAssets", false), callback(mods_menu, mods_menu, "SetModProgress", self._mod))
 end
 
 function ModAssetsModule:StoreDownloadedAssets(config, data, id)
     config = config or self._config
-	local ret, pdata = pcall(function()
-        LuaModUpdates:SetDownloadDialogKey("mod_download_complete", true)
-    	BeardLib:log("[INFO] Finished downloading assets")
+    local mods_menu = BeardLib.managers.mods_menu
+    local coroutine = mods_menu._menu._ws:panel():panel({})
+    coroutine:animate(function() --Same reason as BLT uses it, to update the UI properly.
+        wait(0.001)
+        if config.install then
+            config.install()
+        else
+            mods_menu:SetModInstallingUpdate(self._mod)
+        end
+        wait(1)
+        
+        BeardLib:log("[INFO] Finished downloading assets")
 
-    	if string.is_nil_or_empty(data) then
-    		BeardLib:log("[ERROR] Assets download failed, received data was invalid")
-    		LuaModUpdates:SetDownloadDialogKey("mod_download_failed", true)
-    		return
-    	end
+        if string.is_nil_or_empty(data) then
+            BeardLib:log("[ERROR] Assets download failed, received data was invalid")
+            if config.failed then
+                config.failed()
+            else
+                mods_menu:SetModFailedUpdate(self._mod)
+            end
+            return
+        end
 
-    	local temp_zip_path = os.tmpname() .. ".zip"
+        local temp_zip_path = os.tmpname() .. ".zip"
 
-    	local file = io.open(temp_zip_path, "wb+")
-    	if file then
-    		file:write(data)
-    		file:close()
+        local file = io.open(temp_zip_path, "wb+")
+        if file then
+            file:write(data)
+            file:close()
         else
             self:log("[ERROR] An error occured while trying to store the downloaded asset data")
             return
-    	end
+        end
         if self._config and not self._config.dont_delete then
             for _, dir in pairs(self.folder_names) do
                 local path = BeardLib.Utils.Path:Combine(self.install_directory, dir)
@@ -239,18 +223,21 @@ function ModAssetsModule:StoreDownloadedAssets(config, data, id)
             end
         end
         unzip(temp_zip_path, config.install_directory or self.install_directory)
-        LuaModUpdates:SetDownloadDialogKey("mod_extraction_complete", true)
         os.remove(temp_zip_path)
 
-    	LuaModUpdates._current_download_dialog = nil
         ModAssetsModule:SetReady()
         if config.done_callback then
             config.done_callback()
         end
-	end)
-	if not ret then
-		BeardLib:log("[ERROR] " .. pdata)
-	end
+        if config.finish then
+            config.finish()
+        else
+            mods_menu:SetModNormal(self._mod)
+        end
+        if alive(coroutine) then
+            coroutine:parnet():remove(coroutine)
+        end
+    end)
 end
 
 function ModAssetsModule:BuildMenu(node)
