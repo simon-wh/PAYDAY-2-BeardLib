@@ -12,7 +12,7 @@
     "menu_l_global_value_mod" : "Este es un item de la Comunidad!",
     "custom_map_title" : "Mapa Personalizado: $map",
     "custom_map_download_available" : "Descarga disponible",
-    "custom_map_alert" : "Mapa Personalizado Alert",
+    "custom_map_alert" : "Alerta de Mapa Personalizado",
     "custom_map_needs_download" : "Necesitas descargar este mapa antes de unirte, desea comenzar la descarga?",
     "custom_map_host_old_version" : "La descarga no puede iniciar debido a que el anfitrion esta usando una version antigua de BeardLib!",
     "custom_map_failed_download" : "Descarga fallida",
