@@ -4,7 +4,7 @@
 	"author" : "GREAT BIG BUSHY BEARD & Luffy",
 	"contact" : "simon@modworkshop.net",
 	"priority" : 500,
-	"version" : "2.3",
+	"version" : "2.3.1",
 	"blt_version" : 2.0,
 	"undisablable" : true,
 	"color" : "0 0.44 1",

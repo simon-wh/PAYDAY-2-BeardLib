@@ -3,10 +3,10 @@ ModAssetsModule.type_name = "AssetUpdates"
 ModAssetsModule._default_version_file = "version.txt"
 ModAssetsModule._providers = {
     modworkshop = {
-        version_api_url = "http://manager.modworkshop.net/GetDownloadVersion/$id$.txt",
-        download_info_url = "http://manager.modworkshop.net/GetSingleDownload/$id$.json",
-        download_api_url = "http://modworkshop.net/mydownloads/downloads/$download$",
-        page_url = "http://downloads.modworkshop.net/$id$"
+        version_api_url = "https://manager.modworkshop.net/GetDownloadVersion/$id$.txt",
+        download_info_url = "https//manager.modworkshop.net/GetSingleDownload/$id$.json",
+        download_api_url = "https://modworkshop.net/mydownloads/downloads/$download$",
+        page_url = "https://modwork.shop/$id$"
     }
 }
 ModAssetsModule._providers.modworkshop.download_file_func = function(self)
@@ -111,8 +111,9 @@ function ModAssetsModule:_CheckVersion(force)
     dohttpreq(version_url, function(data, id)
         self:log("Received version '%s' from the server(local is %s)", tostring(data), tostring(self._version))
         if tonumber(data) then
-            if tonumber(data) > self._version then
-                BeardLib.managers.mods_menu:SetModNeedsUpdate(self._mod)
+            self._new_version = tonumber(data)
+            if self._new_version > self._version then
+                BeardLib.managers.mods_menu:SetModNeedsUpdate(self._mod, self._new_version)
             elseif force then
                 self:ShowNoChangePrompt()
             end
@@ -229,6 +230,7 @@ function ModAssetsModule:StoreDownloadedAssets(config, data, id)
         if config.done_callback then
             config.done_callback()
         end
+        self._version = self._new_version        
         if config.finish then
             config.finish()
         else

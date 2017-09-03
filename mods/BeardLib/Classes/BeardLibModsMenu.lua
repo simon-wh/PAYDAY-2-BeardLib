@@ -143,11 +143,13 @@ function BeardLibModsMenu:AddMod(mod, type)
         icon_w = 120,
         icon_h = 120,
         offset = 0,
+        text_color = Color.white,
+        auto_text_color = not mod._config.image,
         count_as_aligned = true,
         texture = mod._config.image or "guis/textures/pd2/none_icon",
         position = "CenterTop"
     })
-    text(tostring(name), {items_size = 24, offset = {4, 0}})
+    text(tostring(name), {name = "Title", items_size = 22, offset = {4, 0}})
     text("Type: "..loc:text("beardlib_mod_type_" .. type))
     text("", {name = "Status"})
     mod_item:Toggle({
@@ -174,6 +176,7 @@ function BeardLibModsMenu:AddMod(mod, type)
     mod_item:Button({
         name = "View",
         callback = callback(self, self, "ViewMod", mod),
+        enabled = mod.update_assets_module ~= nil,
         items_size = 20,
         localized = true,
         text = "beardlib_visit_page"
@@ -191,6 +194,15 @@ function BeardLibModsMenu:AddMod(mod, type)
         self:SetModNeedsUpdate(mod)
     else
         self:SetModStatus(mod_item, "beardlib_updated")
+    end
+    self:UpdateTitle(mod)
+end
+
+function BeardLibModsMenu:UpdateTitle(mod)
+    local mod_item = self._list:GetItemByLabel(mod)
+    if mod_item then
+        local title = mod_item:GetItem("Title")
+        title:SetText((mod.Name or "Missing name?") ..(mod.update_assets_module and "("..mod.update_assets_module._version..")" or ""))
     end
 end
 
@@ -257,6 +269,7 @@ function BeardLibModsMenu:SetModNormal(mod)
         self:SetModStatus(mod_item, "beardlib_updated")
         mod_item:Panel():child("DownloadProgress"):set_w(0)
         mod_item:GetItem("Download"):SetEnabled(false)
+        self:UpdateTitle(mod)
     end
     table.delete(self._waiting_for_update, mod)
 end
@@ -267,10 +280,10 @@ function BeardLibModsMenu:SetModStatus(mod_item, status, not_localized)
     end
 end
 
-function BeardLibModsMenu:SetModNeedsUpdate(mod)
+function BeardLibModsMenu:SetModNeedsUpdate(mod, new_version)
     local mod_item = self._list:GetItemByLabel(mod)
     if mod_item then
-        self:SetModStatus(mod_item, "beardlib_waiting_update")
+        self:SetModStatus(mod_item, managers.localization:text("beardlib_waiting_update")..(new_version and "("..new_version..")" or ""), true)
         mod_item:GetItem("Download"):SetEnabled(true)
         mod_item:SetIndex(1)
     else
