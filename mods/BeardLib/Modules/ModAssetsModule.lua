@@ -4,7 +4,7 @@ ModAssetsModule._default_version_file = "version.txt"
 ModAssetsModule._providers = {
     modworkshop = {
         version_api_url = "https://manager.modworkshop.net/GetDownloadVersion/$id$.txt",
-        download_info_url = "https//manager.modworkshop.net/GetSingleDownload/$id$.json",
+        download_info_url = "https://manager.modworkshop.net/GetSingleDownload/$id$.json",
         download_api_url = "https://modworkshop.net/mydownloads/downloads/$download$",
         page_url = "https://modwork.shop/$id$"
     }

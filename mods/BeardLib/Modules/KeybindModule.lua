@@ -19,8 +19,8 @@ function KeybindModule:Load()
 	end
 	self._config.run_in_menu = self._config.run_in_menu or true
 	self._config.run_in_game = self._config.run_in_game or true
-	if BLTKeybindsManager then
-		BLTKeybindsManager:register_keybind(self._mod, self._config)
+	if BLT and BLT.Keybinds then
+		BLT.Keybinds:register_keybind(self._mod, self._config)
 	else
 		LuaModManager:AddJsonKeybinding(self._config, self._mod.ModPath .. "/")		
 	end
