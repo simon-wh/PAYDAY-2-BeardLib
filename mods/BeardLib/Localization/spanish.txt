@@ -18,7 +18,7 @@
     "custom_map_failed_download" : "Descarga fallida",
     "custom_map_missing_updater" : "La descarga no se puede iniciar debido a que el mapa no posee informacion de descarga!",
     "heist_contact_custom" : "Mapa Personalizados",
-    "heist_contact_custom_description" : "Mapa Personalizados are completely new heists added to the game and are made by the community",
+    "heist_contact_custom_description" : "Los Mapas personalizados son atracos creados completamente por la Comunidad",
     "custom_map_cant_download" : "El Mapa del anfitrion no puede ser descargado, desconectando...",
     "custom_map_failed" : "Algo salio mal cuando se intento descargar el mapa"
     "beardlib_mods_manager" : "Administrador de Mods de BeardLib",
