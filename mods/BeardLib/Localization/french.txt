@@ -41,6 +41,6 @@
     "beardlib_downloading" : "Téléchargement ",
     "beardlib_done" : "Terminé!",
     "beardlib_close" : "Fermer",
-    "beardlib_mods_manager_important_title" : "The mod $mod has a new version!",
-    "beardlib_mods_manager_important_help" : "Go to BeardLib Mods Manager to update?"
+    "beardlib_mods_manager_important_title" : "Le mod $mod a une nouvelle version!",
+    "beardlib_mods_manager_important_help" : "Aller au gestionnaire des mods BeardLib pour mettre à jour?"
 }
