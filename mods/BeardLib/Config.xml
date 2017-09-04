@@ -6,10 +6,26 @@
 	modules_dir="$ModPath$Modules/"
 	classes_dir="$ModPath$Classes/"
 	assets_dir="$ModPath$Assets/"
+	image = "guis/textures/beardlib_logo"
+	color="Color(0.8,0.8,0.8)"
+	auto_image_color="true"
 	mod_override_dir="assets/mod_overrides/">
+	<load_modules>
+		<AssetUpdates id="14924" version="2.33" provider="modworkshop" use_local_dir="true" use_local_path="true" important="true"/>
+		<AddFiles directory="Assets">
+			<texture path="guis/textures/menu_ui_icons"/>
+			<texture path="guis/textures/beardlib_logo"/>
+		</AddFiles>
+		<Options build_menu="false" auto_load="true">
+			<options>
+				<option name="DisabledMods" type="table">
+					<default_value/>
+				</option>
+			</options>
+		</Options>
+	</load_modules>
 	<classes>
 		<class file="utils.lua"/>
-		<class file="FileIO.lua"/>
 		<class file="ModCore.lua"/>
 		<class file="CustomPackageManager.lua"/>
 		<class file="CustomAchievementManager.lua"/>
@@ -48,13 +64,6 @@
 		<class file="MenuDialogManager.lua" manager="dialog"/>
 		<class file="BeardLibModsMenu.lua" manager="mods_menu"/>
 	</classes>
-	<options build_menu="false" auto_load="true">
-		<options>
-			 <option name="DisabledMods" type="table">
-			 	<default_value/>
-			 </option>
-		</options>
-	</options>
 	<hooks>
 		<hook source="core/lib/managers/coresequencemanager" file="CoreSequenceManager.lua"/>
         <hook source="lib/managers/menu/menuinput" file="MenuInput.lua"/>
@@ -192,4 +201,10 @@
 		<value_node value="custom_xml"/>
 		<value_node value="binary"/>
 	</script_data_formats>
+	<mission_elements>
+		<value_node value="MoveUnit"/>
+		<value_node value="TeleportPlayer"/>
+		<value_node value="Environment"/>
+		<value_node value="PushInstigator"/>
+	</mission_elements>
 </table>

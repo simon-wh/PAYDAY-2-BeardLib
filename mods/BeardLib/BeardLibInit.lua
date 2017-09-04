@@ -1,5 +1,7 @@
+Hooks:Register("BeardLibCreateCustomNodesAndButtons")
 Hooks:Register("BeardLibPreProcessScriptData")
 Hooks:Register("BeardLibProcessScriptData")
+Hooks:Register("BeardLibCreateCustomMenus")
 Hooks:Register("GameSetupPauseUpdate")
 Hooks:Register("SetupInitManagers")
 
@@ -9,20 +11,9 @@ if GameSetup then
     end)
 end
 
-Hooks:Add("MenuUpdate", "BeardLibMenuUpdate", function(t, dt)
-    BeardLib:update(t, dt)
-end)
-
-Hooks:Add("GameSetupUpdate", "BeardLibGameSetupUpdate", function(t, dt)
-    BeardLib:update(t, dt)
-end)
-
-Hooks:Add("GameSetupPauseUpdate", "BeardLibGameSetupPausedUpdate", function(t, dt)
-    BeardLib:paused_update(t, dt)
-end)
-
-Hooks:Register("BeardLibCreateCustomMenus")
-Hooks:Register("BeardLibCreateCustomNodesAndButtons")
+Hooks:Add("GameSetupPauseUpdate", "BeardLibGameSetupPausedUpdate", callback(BeardLib, BeardLib, "PausedUpdate"))
+Hooks:Add("GameSetupUpdate", "BeardLibGameSetupUpdate", callback(BeardLib, BeardLib, "Update"))
+Hooks:Add("MenuUpdate", "BeardLibMenuUpdate", callback(BeardLib, BeardLib, "Update"))
 
 Hooks:Add("MenuManagerInitialize", "BeardLibCreateMenuHooks", function(menu_manager)
     managers.menu = managers.menu or menu_manager
@@ -32,7 +23,7 @@ Hooks:Add("MenuManagerInitialize", "BeardLibCreateMenuHooks", function(menu_mana
     Hooks:Call("BeardLibCreateCustomNodesAndButtons", menu_manager)
 end)
 
-if not BeardLib.setup then
-    BeardLib:init()
-    BeardLib.setup = true
+if not BeardLib.Setup then
+    BeardLib:Init()
+    BeardLib.Setup = true
 end

@@ -40,5 +40,7 @@
     "beardlib_mod_type_custom_heist" : "Colpo personalizzato",
     "beardlib_downloading" : "Scaricando ",
     "beardlib_done" : "Fatto!",
-    "beardlib_close" : "Chiudi"
+    "beardlib_close" : "Chiudi",
+    "beardlib_mods_manager_important_title" : "The mod $mod has a new version!",
+    "beardlib_mods_manager_important_help" : "Go to BeardLib Mods Manager to update?"    
 }

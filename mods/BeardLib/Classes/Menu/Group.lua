@@ -13,7 +13,7 @@ function Group:InitBasicItem()
 	        name = "toggle",
 	        w = self.parent.items_size - 4,
 	        h = self.parent.items_size - 4,
-	        texture = "guis/textures/menuicons",
+	        texture = "guis/textures/menu_ui_icons",
 	        color = self.text_color or Color.black,
 	        y = 2,
 	        texture_rect = {self.closed and 42 or 2, self.closed and 2 or 0, 16, 16},

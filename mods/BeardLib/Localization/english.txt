@@ -40,5 +40,7 @@
     "beardlib_mod_type_custom_heist" : "Custom heist",
     "beardlib_downloading" : "Downloading ",
     "beardlib_done" : "Done!",
-    "beardlib_close" : "Close"
+    "beardlib_close" : "Close",
+    "beardlib_mods_manager_important_title" : "$mod has a new version!",
+    "beardlib_mods_manager_important_help" : "Go to BeardLib Mods Manager to update?"
 }

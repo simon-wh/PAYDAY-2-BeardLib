@@ -36,7 +36,7 @@ function ComboBox:Init()
         name = "combo_icon",
         w = self.items_size - 6,
         h = self.items_size - 6,
-        texture = "guis/textures/menuicons",
+        texture = "guis/textures/menu_ui_icons",
         texture_rect = {4,0,16,16},
         color = self.text_color,
         layer = 2,

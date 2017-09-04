@@ -9,7 +9,7 @@ Hooks:PostHook(BLTNotificationsGui, "_setup", "BeardLibModsManagerSetup", functi
     self._beardlib_updates:set_lefttop(self._downloads_panel:left() - 8, self._downloads_panel:center_y() + 8)
     local icon = self._beardlib_updates:bitmap({
         name = "Icon",
-        texture = "guis/textures/menuicons",        
+        texture = "guis/textures/menu_ui_icons",        
         texture_rect = {93, 2, 32, 32},
         w = 28,
         h = 28,

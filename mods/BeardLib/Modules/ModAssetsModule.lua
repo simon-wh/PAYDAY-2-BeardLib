@@ -108,12 +108,18 @@ end
 
 function ModAssetsModule:_CheckVersion(force)
     local version_url = self._mod:GetRealFilePath(self.provider.version_api_url, self)
+    local loc = managers.localization
     dohttpreq(version_url, function(data, id)
         self:log("Received version '%s' from the server(local is %s)", tostring(data), tostring(self._version))
         if tonumber(data) then
             self._new_version = tonumber(data)
             if self._new_version > self._version then
                 BeardLib.managers.mods_menu:SetModNeedsUpdate(self._mod, self._new_version)
+                if self._config.important then
+                    QuickMenuPlus:new(loc:text("beardlib_mods_manager_important_title", {mod = self._mod.Name}), loc:text("beardlib_mods_manager_important_help"), {{text = loc:text("dialog_yes"), callback = function()
+                        BeardLib.managers.mods_menu:SetEnabled(true)
+                    end}, {text = loc:text("dialog_no"), is_cancel_button = true}})
+                end
             elseif force then
                 self:ShowNoChangePrompt()
             end
