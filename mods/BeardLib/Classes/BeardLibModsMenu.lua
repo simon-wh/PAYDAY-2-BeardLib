@@ -139,10 +139,10 @@ function BeardLibModsMenu:AddMod(mod, type)
     end
     mod_item:Image({
         name = "Image",
-        w = 120,
-        h = 120,
-        icon_w = 120,
-        icon_h = 120,
+        w = 110,
+        h = 110,
+        icon_w = 110,
+        icon_h = 110,
         offset = 0,
         text_color = Color.white,
         auto_text_color = mod._config.auto_image_color or not mod._config.image,
@@ -150,7 +150,7 @@ function BeardLibModsMenu:AddMod(mod, type)
         texture = mod._config.image or "guis/textures/pd2/none_icon",
         position = "CenterTop"
     })
-    text(tostring(name), {name = "Title", items_size = 22, offset = {4, 0}})
+    text(tostring(name), {name = "Title", items_size = 20, offset = {4, 0}})
     text("Type: "..loc:text("beardlib_mod_type_" .. type))
     text("", {name = "Status"})
     mod_item:Toggle({
