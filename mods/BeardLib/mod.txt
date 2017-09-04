@@ -4,11 +4,11 @@
 	"author" : "GREAT BIG BUSHY BEARD & Luffy",
 	"contact" : "simon@modworkshop.net",
 	"priority" : 500,
-	"version" : "2.3.1",
+	"version" : "2.33",
 	"blt_version" : 2.0,
 	"undisablable" : true,
 	"color" : "0 0.44 1",
-	"image" : "Assets/guis/textures/logo.png",
+	"image" : "Assets/guis/textures/beardlib_logo.texture",
 	"pre_hooks" : [
 		{ "hook_id" : "core/lib/system/coresystem", "script_path" : "BeardLibCore.lua" }
 	],
@@ -52,10 +52,5 @@
 		{ "hook_id" : "core/lib/utils/dev/editor/coreworlddefinition", "script_path" : "BeardLibCore.lua"},
 		{ "hook_id" : "core/lib/managers/mission/coremissionmanager", "script_path" : "BeardLibCore.lua"},
 		{ "hook_id" : "lib/network/matchmaking/networkmatchmakingsteam", "script_path" : "BeardLibCore.lua"}
-	],
-	"updates" : [
-		{
-			"identifier" : "beardlib"
-		}
 	]
 }

@@ -1,4 +1,4 @@
-FileIO = FileIO or class()
+FileIO = FileIO or {}
 function FileIO:Open(path, flags)
 	if SystemFS then
 		return SystemFS:open(path, flags)
@@ -32,6 +32,21 @@ function FileIO:ReadFrom(path, flags, method)
 	else
 		log("[FileIO][ERROR] Failed opening file at path " .. tostring(path))
 		return false
+	end
+end
+
+function FileIO:ReadConfig(path, tbl)
+	local file = self:Open(path, "r")
+	if file then
+		local config = ScriptSerializer:from_custom_xml(file:read("*all"))
+		for i, var in pairs(config) do
+			if type(var) == "string" then
+				config[i] = string.gsub(var, "%$(%w+)%$", tbl or self)
+			end
+		end
+		return config
+	else
+		log("[FileIO][ERROR] Config at %s doesn't exist!", tostring(path))
 	end
 end
 

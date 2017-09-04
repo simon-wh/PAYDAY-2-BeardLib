@@ -1,68 +1,49 @@
 if not _G.BeardLib then
     _G.BeardLib = {}
-
-    local self = BeardLib
-	self._mod = nil
+	local self = BeardLib
     self.Name = "BeardLib"
-    self.Version = 2.3 --for compatibility checks
+    self.Version = 2.3
     self.ModPath = ModPath
+    self.SavePath = SavePath
+    self._paused_updaters = {}
+	self.sequence_mods = {}	
+	self._updaters = {}
+	self.managers = {}	
+    self.modules = {}
 	self.Items = {}
 	self.Mods = {}
-    self.SavePath = SavePath
-    self.sequence_mods = self.sequence_mods or {}
 
-	function self:read_config(file, tbl)
-		local file = io.open(ModPath..file)
-		local config = ScriptSerializer:from_custom_xml(file:read("*all"))
-		for i, var in pairs(config) do
-			if type(var) == "string" then
-				config[i] = string.gsub(var, "%$(%w+)%$", tbl or self)
-			end
-		end
-		return config
-	end
-
-	self.config = self:read_config("Config.xml")
-	local _hooks = self.config.hooks
+	dofile(ModPath.."Classes/FileIO.lua")	
+	self.config = FileIO:ReadConfig(ModPath.."Config.xml", self)
+	self._config = self.config
+	local hooks = self.config.hooks
 	self.config.hooks = {}
-	for _, hook in ipairs(_hooks) do
+	for _, hook in ipairs(hooks) do
 		self.config.hooks[hook.source] = hook.file
 	end
-	_hooks = nil
-    self.managers = {}
+	hooks = nil
 
-    self.custom_mission_elements = {
-        "MoveUnit",
-        "TeleportPlayer",
-        "Environment",
-        "PushInstigator"
-    }
-    self.modules = {}
-
-    self._updaters = {}
-    self._paused_updaters = {}
-
-	function self:init()
+	function self:Init()
 		self:LoadClasses()
 		self:LoadModules()
-
-		if not file.DirectoryExists(self.config.maps_dir) then
-			os.execute("mkdir " .. self.config.maps_dir)
-		end
+		FileIO:MakeDir(self.config.maps_dir)
 
 		local languages = {}
 		for i, file in pairs(FileIO:GetFiles(self.config.localization_dir)) do
-			local lang = path:GetFileNameWithoutExtension(file)
-			table.insert(languages, {
-				_meta = "localization",
-				file = file, --path:GetFileName(file),
-				language = lang
-			})
+			local lang = Path:GetFileNameWithoutExtension(file)
+			table.insert(languages, {_meta = "localization", file = file, language = lang})
 		end
-        languages.directory = path:GetFileNameWithoutExtension(self.config.localization_dir)
+        languages.directory = Path:GetFileNameWithoutExtension(self.config.localization_dir)
 		LocalizationModule:new(self, languages)
-		self.Options = OptionModule:new(self, self.config.options)
-		self.Options:post_init()
+
+		for name, config in pairs(self.config.load_modules) do
+			if BeardLib.modules[name] then
+				local module = BeardLib.modules[name]:new(self, config)
+				self[module._name] = module
+				module:post_init()
+			end
+		end
+
 		for k, manager in pairs(self.managers) do
 			if manager.new then
 				self.managers[k] = manager:new()
@@ -147,38 +128,38 @@ if not _G.BeardLib then
 		ModCore.log(self, str, ...)
 	end
 
+	function self:GetRealFilePath(...)
+		return ModCore.GetRealFilePath(self, ...)
+	end
+	
 	-- kept for compatibility with mods designed for older BeardLib versions --
 	function self:ReplaceScriptData(replacement, replacement_type, target_path, target_ext, options)
 		options = type(options) == "table" and options or {}
 		FileManager:ScriptReplaceFile(target_ext, target_path, replacement, table.merge(options, { type = replacement_type, mode = options.merge_mode }))
 	end
 
-	function self:update(t, dt)
+	function self:Update(t, dt)
 		for _, manager in pairs(self.managers) do
 			if manager.update then
 				manager:update(t, dt)
 			end
 		end
 		for id, clbk in pairs(self._updaters) do
-			local success, e = pcall(function()
-				clbk()
-			end)
+			local success, e = pcall(function() clbk() end)
 			if not success then
 				BeardLib:log("[Updater-ERROR(%s)] " .. tostring(e and e.code or ""), tostring(id))
 			end
 		end
 	end
 
-	function self:paused_update(t, dt)
+	function self:PausedUpdate(t, dt)
 		for _, manager in pairs(self.managers) do
 			if manager.paused_update then
 				manager:paused_update(t, dt)
 			end
 		end
 		for id, clbk in pairs(self._paused_updaters) do
-			local success, e = pcall(function()
-				clbk()
-			end)
+			local success, e = pcall(function() clbk() end)
 			if not success then
 				BeardLib:log("[Updater-ERROR(%s)] " .. tostring(e and e.code or ""), tostring(id))
 			end

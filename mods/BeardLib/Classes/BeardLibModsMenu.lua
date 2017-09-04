@@ -91,6 +91,7 @@ function BeardLibModsMenu:CreateItems(menu)
         end,
         align_method = "grid",
     })
+    self:AddMod(BeardLib, "blt")
     for _, mod in pairs(BeardLib.Mods) do
         self:AddMod(mod, "blt")
     end
@@ -144,7 +145,7 @@ function BeardLibModsMenu:AddMod(mod, type)
         icon_h = 120,
         offset = 0,
         text_color = Color.white,
-        auto_text_color = not mod._config.image,
+        auto_text_color = mod._config.auto_image_color or not mod._config.image,
         count_as_aligned = true,
         texture = mod._config.image or "guis/textures/pd2/none_icon",
         position = "CenterTop"
@@ -282,10 +283,12 @@ end
 
 function BeardLibModsMenu:SetModNeedsUpdate(mod, new_version)
     local mod_item = self._list:GetItemByLabel(mod)
+    local loc = managers.localization
+    
     if mod_item then
-        self:SetModStatus(mod_item, managers.localization:text("beardlib_waiting_update")..(new_version and "("..new_version..")" or ""), true)
+        self:SetModStatus(mod_item, loc:text("beardlib_waiting_update")..(new_version and "("..new_version..")" or ""), true)
         mod_item:GetItem("Download"):SetEnabled(true)
-        mod_item:SetIndex(1)
+        mod_item:SetIndex(mod.Name == "BeardLib" and 1 or 2)
     else
         mod.NeedsUpdate = true
     end

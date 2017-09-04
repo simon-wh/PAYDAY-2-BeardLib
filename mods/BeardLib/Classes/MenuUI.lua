@@ -56,9 +56,6 @@ function MenuUI:init(params)
 	if self.visible == true and managers.mouse_pointer then self:enable() end
 
     BeardLib:AddUpdater("MenuUIUpdate"..tostring(self), callback(self, self, "Update"), true)
-
-    local texture = "guis/textures/menuicons"
-    FileManager:AddFile("texture", texture, BeardLib.Utils.Path:Combine(BeardLib.config.assets_dir, texture .. ".texture"))
     if self.create_items then self:create_items() end
 end
 
