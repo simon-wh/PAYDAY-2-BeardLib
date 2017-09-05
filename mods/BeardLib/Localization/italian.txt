@@ -1,5 +1,5 @@
 {
-    "ModAssetsManagementTextID" : "Gestore aggiornamenti assets",
+    "ModAssetsManagementTextID" : "Gestore aggiornamenti degli assets",
     "ModAssetsManagementDescID" : "",
     "ModAssetsToggleAutoUpdatesTextID" : "Attiva o disattiva il controllo degli aggiornamenti",
     "ModAssetsToggleAutoUpdatesDescID" : "",
@@ -18,12 +18,12 @@
     "custom_map_failed_download" : "Download del colpo personalizzato fallito",
     "custom_map_missing_updater" : "Impossibile iniziare il downlaod del colpo personalizzato poiché la mappa non ha un ID per l'aggiornamento!",
     "heist_contact_custom" : "Colpi personalizzati",
-    "heist_contact_custom_description" : "I colpi personalizzati sono dei colpi aggiunti al gioco totalmente nuovi e sono creati dalla comunità",
+    "heist_contact_custom_description" : "I colpi personalizzati sono delle aggiunte al gioco totalmente nuove e sono creati dalla comunità",
     "custom_map_cant_download" : "Il colpo che ha impostato l'host non può essere scaricato, sarai disconnesso.",
     "custom_map_failed" : "Qualcosa è andato storto durante il download della mappa.",
-    "beardlib_mods_manager" : "Gestione mod BeardLib",
-    "beardlib_updates_available" : "Gestione mod BeardLib: Aggiornamenti disponibili!",
-    "beardlib_updates_available_desc" : "Visita il gestore delle mod BeardLib per aggiornarle (premi il cerchio blu)",
+    "beardlib_mods_manager" : "Gestore delle mod di BeardLib",
+    "beardlib_updates_available" : "Gestore delle mod di BeardLib: Aggiornamenti disponibili!",
+    "beardlib_updates_available_desc" : "Visita il gestore delle mod di BeardLib per aggiornarle (premi il cerchio blu)",
     "beardlib_updates_download_now" : "Scarica ora",
     "beardlib_visit_page" : "Visita la pagina",
     "beardlib_update_all" : "Aggiorna tutto",
@@ -41,6 +41,6 @@
     "beardlib_downloading" : "Scaricando ",
     "beardlib_done" : "Fatto!",
     "beardlib_close" : "Chiudi",
-    "beardlib_mods_manager_important_title" : "The mod $mod has a new version!",
-    "beardlib_mods_manager_important_help" : "Go to BeardLib Mods Manager to update?"    
+    "beardlib_mods_manager_important_title" : "È disponibile una nuova versione di $mod!",
+    "beardlib_mods_manager_important_help" : "Aprire il gestore delle mod di BeardLib ed aggiornarla?"    
 }
