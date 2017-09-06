@@ -4,6 +4,7 @@ function ElementMoveUnit:init(...)
 	self._units = {}
 	ElementMoveUnit.super.init(self, ...)
 end
+
 function ElementMoveUnit:on_script_activated()
 	for _, id in pairs(self._values.unit_ids) do
 		local unit = managers.worlddefinition:get_unit_on_load(id)
@@ -13,9 +14,11 @@ function ElementMoveUnit:on_script_activated()
 	end
 	self._has_fetched_units = true
 end
+
 function ElementMoveUnit:client_on_executed(...)
 	self:on_executed(...)
 end
+
 function ElementMoveUnit:on_executed(instigator)
 	if not self._values.enabled then
 		return
@@ -32,6 +35,7 @@ function ElementMoveUnit:on_executed(instigator)
 			self:register_move_unit(unit)
 		end
 	end
+	ElementMoveUnit.super.on_executed(self, instigator)
 end
 
 function ElementMoveUnit:register_move_unit(unit)
