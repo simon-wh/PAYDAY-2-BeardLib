@@ -116,7 +116,7 @@ function MenuUI:ShowDelayedHelp(item)
             else
                 self._help:set_world_bottom(mouse:world_y() - 5)
             end
-            QuickAnim:Work(self._help, "alpha", 1, "speed", 3)
+            QuickAnim:Play(self._help, {alpha = 1, speed = 3})
             self._showing_help = item
             self._saved_help_x = self._old_x
             self._saved_help_y = self._old_y
@@ -171,7 +171,7 @@ function MenuUI:Enable()
         return
     end
     if self.animate_toggle then
-        QuickAnim:Work(self._panel, "alpha", 1, "speed", 5)
+        QuickAnim:Play(self._panel, {alpha = 1, speed = 5})
     else
         self._panel:set_alpha(1)
     end
@@ -192,7 +192,7 @@ function MenuUI:Disable()
         return
     end
     if self.animate_toggle then
-        QuickAnim:Work(self._panel, "alpha", 0, "speed", 5)
+        QuickAnim:Play(self._panel, {alpha = 0, speed = 5})
     else
         self._panel:set_alpha(0)
     end

@@ -123,5 +123,5 @@ function ScrollablePanelModified:set_canvas_size(w, h)
 end
 
 function ScrollablePanelModified:set_element_alpha_target(element, target, speed)
-	QuickAnim:Work(self:panel():child(element), "alpha", target)
+	QuickAnim:Play(self:panel():child(element), {alpha = target})
 end

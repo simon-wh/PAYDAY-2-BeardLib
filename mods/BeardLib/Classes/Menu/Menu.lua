@@ -232,7 +232,7 @@ function Menu:SetVisible(visible, animate)
     BeardLib.Items.Item.super.SetVisible(self, visible, true)
     if animate and visible and not was_visible then
         panel:set_alpha(0)
-        QuickAnim:Work(panel, "alpha", 1, "speed", 5)
+        QuickAnim:Play(panel, {alpha = 1, speed = 5})
     end
     self.menu:CheckOpenedList()
 end

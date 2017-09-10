@@ -1,51 +1,45 @@
 QuickAnim = QuickAnim or {}
-function QuickAnim:Work(o, ...)
-    local tbl = {...}
+QuickAnim.IgnoredValues = {
+    ["speed"] = true, 
+    ["stop"] = true, 
+    ["wait"] = true, 
+    ["callback"] = true, 
+    ["after"] = true
+}
+function QuickAnim:Play(o, tbl)
     local stop
     if not alive(o) then
         return
     end
+    local anim_tbl = {}
+    local opt = {speed = 1}
+    for k,v in pairs(tbl) do
+        if self.IgnoredValues[k] then
+            opt[k] = v
+        else
+            local sticky = not not k:match("sticky_")
+            table.insert(anim_tbl, {key = sticky and k:gsub("sticky_", "") or k, value = v, sticky = sticky})
+        end
+    end
     if o:script().animating then
-        if table.equals(o:script().animating, tbl) then
+        if table.equals(o:script().animating, anim_tbl) then
             return
         else
             stop = true
         end
     end
-    local anim_tbl = {}
-    local opt = {
-        speed = 1,
-        stop = false,
-        wait = false,
-        callback = false,
-        after = false
-    }
-    local done 
-    for i=1, #tbl, 2 do
-        local k = tbl[i]
-        local sticky
-        if string.begins(k, "sticky_") then
-            k = k:gsub("sticky_", "")
-            sticky = true
-        end
-        local v = tbl[i + 1]
-        if opt[k] ~= nil then
-            opt[k] = v or opt[k]
-        else
-            table.insert(anim_tbl, {key = k, value = v, sticky = sticky})
-        end       
-    end            
-    if anim_tbl.stop or stop == true then
-        o:stop()
-        anim_tbl.stop = nil
+    local done
+    if opt.stop or stop == true then
+        QuickAnim:Stop(o)
     end
-    o:script().animating = tbl
+    o:script().animating = anim_tbl
     local abs = math.abs
     local step = math.step
+    local round = math.round_with_precision
     o:animate(function(o)
         local speeds = {}
         if opt.wait then wait(opt.wait) end
-        while not done do
+        while not done and #anim_tbl > 0 do
             for i, anim in pairs(anim_tbl) do
                 local k = anim.key
                 local v = anim.value
@@ -54,7 +48,6 @@ function QuickAnim:Work(o, ...)
                     if opt.callback then opt.callback() end
                     return
                 end
-
                 local cv = o[k](o)
                 speeds[k] = speeds[k] or (abs(cv - v) * opt.speed)
                 speeds[k] = speeds[k] < 1 and 1 or speeds[k]
@@ -63,7 +56,7 @@ function QuickAnim:Work(o, ...)
                 if i == #anim_tbl and alive(o) then
                     done = true
                     for _, anim in pairs(anim_tbl) do
-                        done = done and o[anim.key](o) == anim.value
+                        done = done and round(o[anim.key](o), 3) == round(anim.value, 3) --Luajit I swear ffs
                     end
                 end
             end
@@ -78,19 +71,13 @@ function QuickAnim:Work(o, ...)
     end)
 end
 
-function QuickAnim:LightWork(o, nv, cv, nv, speed)
-    o:animate(function(o)
-        o:script().animating = {}
-        local done
-        local speed = speed and (abs(cv - v) * opt.speed) or 1
-        speed = speed < 1 and 1 or speed
-        while not done do
-            local current_value = cv()
-            local v = step(current_value, nv, self:dt() * speed)
-            nv(v)
-            done = cv() == v
-        end
-    end)
+function QuickAnim:Work(o, ...) --Deprecated..
+    local tbl = {...}
+    local anim_tbl = {}
+    for i=1, #tbl, 2 do
+        anim_tbl[tbl[i]] = tbl[i + 1]
+    end
+    self:Play(o, anim_tbl)
 end
 
 function QuickAnim:Stop(o)
