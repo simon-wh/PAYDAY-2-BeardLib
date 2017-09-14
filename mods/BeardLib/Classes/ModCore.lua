@@ -3,7 +3,7 @@ core:import("CoreSerialize")
 ModCore = ModCore or class()
 ModCore._ignored_modules = {}
 function ModCore:init(config_path, load_modules, post_init)
-    if not io.file_is_readable(config_path) then
+    if not FileIO:Exists(config_path) then
         BeardLib:log("[ERROR] Config file at path '%s' is not readable!", config_path)
         return
     end

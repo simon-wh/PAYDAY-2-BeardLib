@@ -79,7 +79,7 @@ function ModAssetsModule:RegisterAutoUpdateCheckHook()
 end
 
 function ModAssetsModule:RetrieveCurrentVersion()
-    if io.file_is_readable(self.version_file) then
+    if FileIO:Exists(self.version_file) then
         local version = io.open(self.version_file):read("*all")
         if tonumber(version) then
             self._version = tonumber(version)
@@ -221,16 +221,17 @@ function ModAssetsModule:StoreDownloadedAssets(config, data, id)
             self:log("[ERROR] An error occured while trying to store the downloaded asset data")
             return
         end
+        
         if self._config and not self._config.dont_delete then
             for _, dir in pairs(self.folder_names) do
                 local path = BeardLib.Utils.Path:Combine(self.install_directory, dir)
-                if _G.file.DirectoryExists(path) then
-                    io.remove_directory_and_files(path .. "/")
+                if FileIO:Exists(path) then
+                    FileIO:Delete(path)
                 end
             end
         end
         unzip(temp_zip_path, config.install_directory or self.install_directory)
-        os.remove(temp_zip_path)
+        FileIO:Delete(temp_zip_path)
 
         ModAssetsModule:SetReady()
         if config.done_callback then

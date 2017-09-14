@@ -16,7 +16,7 @@ function ClassesModule:Load()
     for _, c in ipairs(self._config) do
         if c._meta == "class" then
             local class_file = BeardLib.Utils.Path:Combine(path, c.file)
-            if io.file_is_readable(class_file) then
+            if FileIO:Exists(class_file) then
                 dofile(class_file)
             else
                 BeardLib:log("[ERROR] Class file not readable by the lua state! File: %s", class_file)

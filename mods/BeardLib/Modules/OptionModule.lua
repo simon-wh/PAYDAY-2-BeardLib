@@ -45,7 +45,7 @@ function OptionModule:post_init()
 end
 
 function OptionModule:Load()
-    if not io.file_is_readable(self._mod.SavePath .. self.FileName) then
+    if not FileIO:Exists(self._mod.SavePath .. self.FileName) then
         --Save the Options file with the current option values
         self:Save()
         return

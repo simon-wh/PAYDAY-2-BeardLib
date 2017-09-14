@@ -113,7 +113,7 @@ function fm:ScriptReplaceFile(ext, path, file, options)
         BeardLib:log("[ERROR] %s:ReplaceScriptData parameter 5, expected table, got %s", self.Name, tostring(type(extra_data)))
         return
     end
-    if not io.file_is_readable(file) then
+    if not FileIO:Exists(file) then
         BeardLib:log("[ERROR] Lua state is unable to read file '%s'!", file)
         return
     end

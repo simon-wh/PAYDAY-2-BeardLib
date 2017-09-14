@@ -21,7 +21,7 @@ function LevelModule:Load()
                     local file_split = string.split(include_data.file, "[.]")
                     local complete_path = BeardLib.Utils.Path:Combine(self._mod.ModPath, self._config.include.directory, include_data.file)
                     local new_path = BeardLib.Utils.Path:Combine("levels/mods/", self._config.id, file_split[1])
-                    if io.file_is_readable(complete_path) then
+                    if FileIO:Exists(complete_path) then
                         if include_data.type then
                             BeardLib:ReplaceScriptData(complete_path, include_data.type, new_path, file_split[2], {add = true})
                         else
