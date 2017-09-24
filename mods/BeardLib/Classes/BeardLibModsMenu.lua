@@ -4,7 +4,7 @@ function BeardLibModsMenu:init()
 	self._menu = MenuUI:new({
         name = "BeardLibEditorMods",
         layer = 1000,
-        offset = 4,
+        offset = 6,
         animate_toggle = true,
         background_blur = true,
         auto_text_color = true,
@@ -47,13 +47,13 @@ function BeardLibModsMenu:CreateItems(menu)
         name = "title_bg",
         layer = 2,
         color = Color(0.8, 0, 0.25, 1),
-        h = 38,
+        h = 34,
     })
     local text = self._holder:Divider({
         name = "title",
         text = "beardlib_mods_manager",
         localized = true,
-        items_size = 28,
+        items_size = 24,
         position = {4, 6},
         count_as_aligned = true
     })
@@ -62,25 +62,35 @@ function BeardLibModsMenu:CreateItems(menu)
         text = "beardlib_close",
         size_by_text = true,
         localized = true,
-        items_size = 28,
+        items_size = 24,
         position = function(item)
             item:SetPositionByString("RightTop")
             item:Panel():move(-4, 6)
         end,
         callback = callback(self, self, "SetEnabled", false)
     })
-    self._holder:Button({
+    local upall = self._holder:Button({
         name = "UpdateAllMods",
         text = "beardlib_update_all",
         size_by_text = true,
         localized = true,
-        items_size = 28,
+        items_size = 24,
         position = function(item)
             item:Panel():set_righttop(close:Panel():left() - 4, close:Panel():y())
         end,
         callback = callback(self, self, "UpdateAllMods")
     })
-
+    self._holder:TextBox({
+        name = "search",
+        text = "beardlib_search",
+        w = 300,
+        localized = true,
+        items_size = 24,
+        position = function(item)
+            item:Panel():set_righttop(upall:Panel():left() - 4, upall:Panel():y())
+        end,
+        callback = callback(self, self, "SearchMods")
+    })
     self._list = self._holder:Menu({
         name = "ModList",
         h = self._holder:ItemsHeight() - text:OuterHeight() - (self._holder.offset[2] * 2) - 10,
@@ -129,20 +139,21 @@ function BeardLibModsMenu:AddMod(mod, type)
         marker_highlight_color = concol, 
         background_color = color:with_alpha(0.8)
     })
+    self._list:SetScrollSpeed(mod_item:Height())
     local o = {}
     local text = function(t, opt)
         opt = opt or o
-        mod_item:Divider(table.merge({
+        return mod_item:Divider(table.merge({
             text_vertical = "top",
             text = t,
         }, opt))
     end
     mod_item:Image({
         name = "Image",
-        w = 110,
-        h = 110,
-        icon_w = 110,
-        icon_h = 110,
+        w = 100,
+        h = 100,
+        icon_w = 100,
+        icon_h = 100,
         offset = 0,
         text_color = Color.white,
         auto_text_color = mod._config.auto_image_color or not mod._config.image,
@@ -150,16 +161,19 @@ function BeardLibModsMenu:AddMod(mod, type)
         texture = mod._config.image or "guis/textures/pd2/none_icon",
         position = "CenterTop"
     })
-    text(tostring(name), {name = "Title", items_size = 20, offset = {4, 0}})
+    local t = text(tostring(name), {name = "Title", items_size = 20, offset = {4, 0}})
+    if t:Height() == t.items_size then
+        text("")
+    end
     text("Type: "..loc:text("beardlib_mod_type_" .. type))
     text("", {name = "Status"})
     mod_item:Toggle({
         name = "Enabled",
         text = false,
         enabled = not blt_mod,
-        w = 28,
-        h = 28,
-        items_size = 28,
+        w = 24,
+        h = 24,
+        items_size = 24,
         marker_highlight_color = Color.transparent,
         offset = 0,
         value = disabled_mods[mod.ModPath] ~= true,
@@ -178,7 +192,7 @@ function BeardLibModsMenu:AddMod(mod, type)
         name = "View",
         callback = callback(self, self, "ViewMod", mod),
         enabled = mod.update_assets_module ~= nil,
-        items_size = 20,
+        items_size = 16,
         localized = true,
         text = "beardlib_visit_page"
     })
@@ -186,7 +200,7 @@ function BeardLibModsMenu:AddMod(mod, type)
         name = "Download",
         callback = callback(self, self, "BeginModDownload", mod),
         enabled = false,
-        items_size = 20,
+        items_size = 16,
         localized = true,
         text = "beardlib_updates_download_now"
     })
@@ -218,7 +232,19 @@ function BeardLibModsMenu:SetModEnabled(mod)
     BeardLib.Options:Save()
 end
 
-function BeardLibModsMenu:UpdateAllMods(mod)
+function BeardLibModsMenu:SearchMods(menu, item)
+    for _, mod_item in pairs(self._list._my_items) do
+        local search = tostring(item:Value()):lower()
+        local visible = tostring(mod_item.name):lower():match(search) ~= nil
+        if search == " " or search:len() < 1 then
+            visible = true
+        end
+        mod_item:SetVisible(visible)
+    end
+    self._list:AlignItems()
+end
+
+function BeardLibModsMenu:UpdateAllMods()
     for _, mod_item in pairs(self._list._my_items) do
         local download = mod_item:GetItem("Download")
         if download:Enabled() then

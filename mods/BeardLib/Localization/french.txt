@@ -42,5 +42,6 @@
     "beardlib_done" : "Terminé!",
     "beardlib_close" : "Fermer",
     "beardlib_mods_manager_important_title" : "Le mod $mod a une nouvelle version!",
-    "beardlib_mods_manager_important_help" : "Aller au gestionnaire des mods BeardLib pour mettre à jour?"
+    "beardlib_mods_manager_important_help" : "Aller au gestionnaire des mods BeardLib pour mettre à jour?",
+    "beardlib_search" : "Search"
 }

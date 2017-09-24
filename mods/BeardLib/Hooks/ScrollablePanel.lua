@@ -46,8 +46,48 @@ function ScrollablePanelModified:set_size(...)
         scroll_down_indicator_arrow:set_world_rightbottom(self:panel():world_right() - 2, self:panel():world_bottom())
         self:panel():child("scroll_up_indicator_arrow"):set_world_righttop(self:panel():world_right() - 2, self:panel():world_top())
         self._scroll_bar:set_center_x(scroll_down_indicator_arrow:center_x())
-        self._scroll_bar:set_world_bottom(scroll_down_indicator_arrow:world_top())
+		self._scroll_bar:set_world_bottom(scroll_down_indicator_arrow:world_top())
     end
+end
+
+function ScrollablePanelModified:update_canvas_size()
+	local orig_w = self:canvas():w()
+	local max_h = 0
+
+	for i, panel in ipairs(self:canvas():children()) do
+		if panel:visible() then
+			local h = panel:bottom()
+			if max_h < h then
+				max_h = h
+			end
+		end
+	end
+
+	local show_scrollbar = self:canvas_scroll_height() < max_h
+	local max_w = show_scrollbar and self:canvas_scroll_width() or self:canvas_max_width()
+
+	self:canvas():grow(max_w - self:canvas():w(), max_h - self:canvas():h())
+
+	if self._on_canvas_updated then
+		self._on_canvas_updated(max_w)
+	end
+
+	max_h = 0
+
+	for i, panel in ipairs(self:canvas():children()) do
+		if panel:visible() then
+			local h = panel:bottom()
+			if max_h < h then
+				max_h = h
+			end
+		end
+	end
+
+	if max_h <= self:scroll_panel():h() then
+		max_h = self:scroll_panel():h()
+	end
+
+	self:set_canvas_size(nil, max_h)
 end
 
 function ScrollablePanelModified:is_scrollable()

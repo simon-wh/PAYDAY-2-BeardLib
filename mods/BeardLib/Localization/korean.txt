@@ -42,5 +42,6 @@
     "beardlib_done" : "완료!",
     "beardlib_close" : "닫기",
     "beardlib_mods_manager_important_title" : "$모드의 신규 버전이 출시되었습니다!",
-    "beardlib_mods_manager_important_help" : "업데이트하러 비어드립 모드 매니저로 이동하시겠습니까?"
+    "beardlib_mods_manager_important_help" : "업데이트하러 비어드립 모드 매니저로 이동하시겠습니까?",
+    "beardlib_search" : "Search"
 }

@@ -28,7 +28,7 @@ function Menu:Init(params)
         scroll_width = self.scrollbar == false and 0 or self.scroll_width, 
         hide_shade = true, 
         color = self.scroll_color or self.marker_highlight_color,
-        scroll_speed = 48
+        scroll_speed = self.scroll_speed
     })
     self.items_panel = self._scroll:canvas()
     self._my_items = self._my_items or {}
@@ -42,6 +42,11 @@ function Menu:Init(params)
     self:SetScrollPanelSize()
     self:SetEnabled(self.enabled)
     self:SetVisible(self.visible)
+end
+
+function Menu:SetScrollSpeed(speed)
+    self.scroll_speed = speed
+    self._scroll._scroll_speed = self.scroll_speed
 end
 
 function Menu:ReloadInterface()
@@ -60,6 +65,7 @@ function Menu:WorkParams(params)
     Menu.super.WorkParams(self, params)
     params = params or {}
     self:WorkParam("scroll_width", 8)
+    self:WorkParam("scroll_speed", 48)
     self.background_visible = NotNil(self.background_visible, self.type_name == "Menu" and true or false)
     self.auto_align = NotNil(self.auto_align, true)
     self.auto_height = NotNil(self.auto_height, self.type_name == "Group" and true or false)

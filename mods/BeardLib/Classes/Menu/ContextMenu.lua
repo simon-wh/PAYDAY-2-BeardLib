@@ -38,7 +38,7 @@ function ContextMenu:init(owner, layer)
         scroll_width = owner.scrollbar == false and 0 or self.parent.scroll_width or 12,
         hide_shade = true, 
         color = owner.scroll_color or owner.marker_highlight_color,
-        scroll_speed = 48
+        scroll_speed = owner.scroll_speed or 48
     })
     self._my_items = {}
     self._item_panels = {}
