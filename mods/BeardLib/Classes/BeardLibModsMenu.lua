@@ -6,7 +6,6 @@ function BeardLibModsMenu:init()
         layer = 1000,
         offset = 6,
         animate_toggle = true,
-        background_blur = true,
         auto_text_color = true,
         accent_color = accent_color,
         marker_highlight_color = Color.white:with_alpha(0.1),
