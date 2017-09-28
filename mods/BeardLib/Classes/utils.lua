@@ -423,12 +423,14 @@ function BeardLib.Utils:CleanOutfitString(str, is_henchman)
     if is_henchman and not bm.unpack_henchman_loadout_string then --thx ovk for the headaches henchman beta caused me <3
         is_henchman = false
     end
-	local list = (is_henchman and bm.unpack_henchman_loadout_string) and bm:unpack_henchman_loadout_string(str) or bm:unpack_outfit_from_string(str)
-	if list.mask and tweak_data.blackmarket.masks[is_henchman and list.mask or list.mask.mask_id].custom then
+    local list = (is_henchman and bm.unpack_henchman_loadout_string) and bm:unpack_henchman_loadout_string(str) or bm:unpack_outfit_from_string(str)
+    local mask = list.mask and tweak_data.blackmarket.masks[is_henchman and list.mask or list.mask.mask_id]
+    if mask and mask.custom then
+        local mask_id = mask.based_on or "character_locked"
         if is_henchman then
-            list.mask = "character_locked"
+            list.mask = mask_id
         else
-            list.mask.mask_id = "character_locked"
+            list.mask.mask_id = mask_id
         end
 	end
 
@@ -462,14 +464,20 @@ function BeardLib.Utils:CleanOutfitString(str, is_henchman)
             list.secondary.blueprint = tweak_data.weapon.factory[list.secondary.factory_id].default_blueprint
     	end
 
-        if tweak_data.blackmarket.melee_weapons[list.melee_weapon].custom then
-            list.melee_weapon = "weapon"
+        local melee = tweak_data.blackmarket.melee_weapons[list.melee_weapon]
+        if melee and melee.custom then
+            list.melee_weapon = melee.based_on or "weapon"
         end
 
     	for _, weap in pairs({list.primary, list.secondary}) do
-    		for i, part_id in pairs(weap.blueprint) do
-    			if tweak_data.weapon.factory.parts[part_id] and tweak_data.weapon.factory.parts[part_id].custom then
-    				table.remove(weap.blueprint, i)
+            for i, part_id in pairs(weap.blueprint) do
+                local part = tweak_data.weapon.factory.parts[part_id]
+                if part and part.custom then
+                    if part.based_on then
+                        weap.blueprint[i] = part.based_on
+                    else
+                        table.remove(weap.blueprint, i)
+                    end
     			end
     		end
     	end

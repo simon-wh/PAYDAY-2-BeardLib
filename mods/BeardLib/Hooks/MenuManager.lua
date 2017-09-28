@@ -24,10 +24,19 @@ function MenuManager:toggle_menu_state(...)
     end
 end
 
+local o_refresh = MenuManager.refresh_level_select
+function MenuManager.refresh_level_select(...)
+    if Global.game_settings.level_id then
+        return o_refresh(...)
+    else
+        BeardLib:log("[Warning] Refresh level select was called while level id was nil!")
+    end
+end
+
 local o_resume_game = MenuCallbackHandler.resume_game
 function MenuCallbackHandler:resume_game(...)
     if not BeardLib.managers.dialog:DialogOpened() then
-        return o_resume_game(self, ...) 
+        return o_resume_game(self, ...)
     end
 end
 
