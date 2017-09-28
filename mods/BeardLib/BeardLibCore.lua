@@ -2,7 +2,6 @@ if not _G.BeardLib then
     _G.BeardLib = {}
 	local self = BeardLib
     self.Name = "BeardLib"
-    self.Version = 2.3
     self.ModPath = ModPath
     self.SavePath = SavePath
     self._paused_updaters = {}
@@ -44,7 +43,8 @@ if not _G.BeardLib then
 				module:post_init()
 			end
 		end
-
+		self.Version = self.AssetUpdates._version
+		
 		for k, manager in pairs(self.managers) do
 			if manager.new then
 				self.managers[k] = manager:new()
