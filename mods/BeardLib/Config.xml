@@ -11,7 +11,7 @@
 	auto_image_color="true"
 	mod_override_dir="assets/mod_overrides/">
 	<load_modules>
-		<AssetUpdates id="14924" version="2.41" provider="modworkshop" use_local_dir="true" use_local_path="true" important="true"/>
+		<AssetUpdates id="14924" version="2.5" provider="modworkshop" use_local_dir="true" use_local_path="true" important="true"/>
 		<AddFiles directory="Assets">
 			<texture path="guis/textures/menu_ui_icons"/>
 			<texture path="guis/textures/beardlib_logo"/>
@@ -77,7 +77,9 @@
         <hook source="lib/managers/menu/menucomponentmanager" file="MenuComponentManager.lua"/>
         <hook source="lib/managers/menumanager" file="MenuManager.lua"/>
         <hook source="lib/managers/crimenetmanager" file="CrimeNetManager.lua"/>
-        <hook source="lib/managers/weaponfactorymanager" file="WeaponFactoryManager.lua"/>
+        <hook source="lib/managers/weaponfactorymanager" file="Fixes.lua"/>
+        <hook source="lib/managers/blackmarketmanager" file="Fixes.lua"/>
+        <hook source="lib/managers/musicmanager" file="MusicManager.lua"/>
 		<hook source="core/lib/managers/coresoundenvironmentmanager" file="SoundEnvironmentManager.lua"/>
         <hook source="lib/managers/dialogs/keyboardinputdialog" file="KeyboardInputDialog.lua"/>
         <hook source="lib/managers/mission/elementinteraction" file="ElementInteraction.lua"/>
@@ -206,5 +208,6 @@
 		<value_node value="TeleportPlayer"/>
 		<value_node value="Environment"/>
 		<value_node value="PushInstigator"/>
+		<value_node value="CustomSound"/>
 	</mission_elements>
 </table>

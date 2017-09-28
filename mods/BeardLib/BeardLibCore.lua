@@ -12,6 +12,7 @@ if not _G.BeardLib then
     self.modules = {}
 	self.Items = {}
 	self.Mods = {}
+	self.MusicMods = {}
 
 	dofile(ModPath.."Classes/FileIO.lua")	
 	self.config = FileIO:ReadConfig(ModPath.."Config.xml", self)
