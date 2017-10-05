@@ -1,3 +1,6 @@
+--ElementPushInstigator--
+--Created by Luffy
+
 core:import("CoreMissionScriptElement")
 ElementPushInstigator = ElementPushInstigator or class(CoreMissionScriptElement.MissionScriptElement)
 function ElementPushInstigator:on_script_activated()

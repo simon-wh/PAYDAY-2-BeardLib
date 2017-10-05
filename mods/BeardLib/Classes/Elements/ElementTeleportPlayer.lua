@@ -1,3 +1,6 @@
+--ElementTeleportPlayer--
+--Created by Luffy
+
 core:import("CoreMissionScriptElement")
 ElementTeleportPlayer = ElementTeleportPlayer or class(CoreMissionScriptElement.MissionScriptElement)
 

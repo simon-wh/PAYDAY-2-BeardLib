@@ -426,7 +426,13 @@ function BeardLib.Utils:CleanOutfitString(str, is_henchman)
     local list = (is_henchman and bm.unpack_henchman_loadout_string) and bm:unpack_henchman_loadout_string(str) or bm:unpack_outfit_from_string(str)
     local mask = list.mask and tweak_data.blackmarket.masks[is_henchman and list.mask or list.mask.mask_id]
     if mask and mask.custom then
-        local mask_id = mask.based_on or "character_locked"
+        local based_on = mask.based_on
+        local mask = tweak_data.blackmarket.masks[based_on] 
+        if not mask or (mask.dlc and not managers.dlc:is_dlc_unlocked(mask.dlc)) then
+            based_on = nil
+        end
+
+        local mask_id = based_on or "character_locked"
         if is_henchman then
             list.mask = mask_id
         else
@@ -466,7 +472,12 @@ function BeardLib.Utils:CleanOutfitString(str, is_henchman)
 
         local melee = tweak_data.blackmarket.melee_weapons[list.melee_weapon]
         if melee and melee.custom then
-            list.melee_weapon = melee.based_on or "weapon"
+            local based_on = melee.based_on
+            local melee = tweak_data.upgrades.definitions[based_on] 
+            if not melee or (melee.dlc and not managers.dlc:is_dlc_unlocked(melee.dlc)) then
+                based_on = nil
+            end
+            list.melee_weapon = based_on or "weapon"
         end
 
     	for _, weap in pairs({list.primary, list.secondary}) do

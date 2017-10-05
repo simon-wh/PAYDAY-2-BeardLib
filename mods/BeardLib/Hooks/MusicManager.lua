@@ -1,3 +1,7 @@
+if not MusicManager.playlist then
+	return
+end
+
 function MusicManager:check_playlist(is_menu)
     local playlist = is_menu and self:playlist_menu() or self:playlist()
     local tracklist = is_menu and tweak_data.music.track_menu_list or tweak_data.music.track_list

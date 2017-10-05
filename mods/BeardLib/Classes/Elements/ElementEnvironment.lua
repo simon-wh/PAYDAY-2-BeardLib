@@ -1,3 +1,6 @@
+--ElementEnvironment--
+--Created by Luffy
+
 core:import("CoreMissionScriptElement")
 ElementEnvironment = ElementEnvironment or class(CoreMissionScriptElement.MissionScriptElement)
  

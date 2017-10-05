@@ -1,3 +1,6 @@
+--ElementMoveUnit--
+--Created by Luffy, modified by Simon W
+
 core:import("CoreMissionScriptElement")
 ElementMoveUnit = ElementMoveUnit or class(CoreMissionScriptElement.MissionScriptElement)
 function ElementMoveUnit:init(...)
@@ -24,7 +27,7 @@ function ElementMoveUnit:on_executed(instigator)
 		return
 	end
 	if not self._values.end_pos and not self._values.displacement then
-		log("[ERROR] MoveUnit must either have a displacement or end position defined!")
+		BeardLib:log("[ERROR] MoveUnit must either have a displacement or end position defined!")
 		return
 	end
 
@@ -39,7 +42,11 @@ function ElementMoveUnit:on_executed(instigator)
 end
 
 function ElementMoveUnit:register_move_unit(unit)
-	local start_pos = self._values.start_pos or unit:position()
+	if self._values.remember_unit_position then
+		unit:unit_data().orig_pos = unit:unit_data().orig_pos or mvector3.copy(unit:position())
+	end
+
+	local start_pos = self._values.start_pos or unit:unit_data().orig_pos or unit:position()
 	local end_pos = self._values.end_pos
 	if not end_pos and self._values.displacement then
 		end_pos = mvector3.copy(start_pos)

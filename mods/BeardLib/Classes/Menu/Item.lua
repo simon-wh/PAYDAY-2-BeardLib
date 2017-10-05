@@ -104,8 +104,8 @@ function Item:_SetText(text)
             self.w, self.h = self.panel:size()
             self.title:set_shape(offset, 0, self.w - (offset * 2), self.h)
         end
-        if self.SetSize then
-            self:SetSize(nil, nil, true)
+		if self.SetScrollPanelSize then
+            self:SetScrollPanelSize()
         elseif not self.size_by_text then
             self.panel:set_h(math.max(self.items_size * lines, self.items_size, self._textbox and alive(self._textbox.panel) and self._textbox.panel:h() or 0))
         end

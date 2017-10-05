@@ -73,25 +73,29 @@ function Menu:WorkParams(params)
     if self.w == "half" then
         self.w = self.parent_panel:w() / 2
     end
-    self.w, self.h = NotNil(self.w, self.parent_panel:w()), NotNil(self.h, self.parent_panel:h())
+    self:SetSize(NotNil(self.w, self.parent_panel:w()), NotNil(self.h, self.parent_panel:h()))
 end
 
 function Menu:SetLayer(layer)
     Menu.super.SetLayer(self, layer)
 end
 
+function Menu:AdditionalHeight()
+    return self:title_alive() and self.title:h() or 0
+end
+
 function Menu:SetSize(w, h, no_recreate)
+    self.orig_h = h
+    self:_SetSize(w, h, no_recreate)
+end
+
+function Menu:_SetSize(w, h, no_recreate)
     if not self:alive() then
         return
     end
     w = w or self.w
     h = self.closed and 0 or (h or self.orig_h or self.h)
     h = math.clamp(h, self.min_height or 0, self.max_height or h)
-    self.orig_h = h
-    if self:title_alive() then
-        local _,_,_,th = self.title:text_rect()
-        h = h + th
-    end
     self.panel:set_size(w, h)
     self:SetScrollPanelSize()
     self.w = w
@@ -107,17 +111,8 @@ function Menu:SetScrollPanelSize()
     if not self:alive() or not self._scroll:alive() then
         return
     end
-    local has_title = self:title_alive()
-    if has_title then
-        local _,_,_,h = self.title:text_rect()
-        self._scroll:set_size(self.panel:w(), self.panel:h() - h)
-    else
-        self._scroll:set_size(self.panel:size()) 
-    end
-    if has_title then
-       local _,_,_,h = self.title:text_rect()
-       self._scroll:panel():set_bottom(self:Height())
-    end
+    self._scroll:set_size(self.panel:w(), self.panel:h() - self:AdditionalHeight())
+    self._scroll:panel():set_bottom(self:Height())
 end
 
 function Menu:KeyPressed(o, k)
@@ -270,9 +265,9 @@ function Menu:AlignItemsGrid()
             end
         end
     end    
-    max_h = max_h + (self.last_y_offset or (prev_item and prev_item:Offset()[2] or 0))
-    if self.auto_height and self.orig_h ~= max_h then
-        self:SetSize(nil, max_h, true)
+    max_h = max_h + self:AdditionalHeight() + (self.last_y_offset or (prev_item and prev_item:Offset()[2] or 0))
+    if self.auto_height and self.h ~= max_h then
+        self:_SetSize(nil, max_h, true)
     end
     self:UpdateCanvas()
 end
@@ -319,9 +314,9 @@ function Menu:AlignItemsNormal()
             end
         end
     end
-    max_h = max_h + (self.last_y_offset or (prev_item and prev_item:Offset()[2] or 0))
-    if self.auto_height and self.orig_h ~= max_h then
-        self:SetSize(nil, max_h, true)
+    max_h = max_h + self:AdditionalHeight() + (self.last_y_offset or (prev_item and prev_item:Offset()[2] or 0))
+    if self.auto_height and self.h ~= max_h then
+        self:_SetSize(nil, max_h, true)
     end
     self:UpdateCanvas()
 end
