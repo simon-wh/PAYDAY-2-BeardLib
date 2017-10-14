@@ -4,7 +4,7 @@
 	"author" : "GREAT BIG BUSHY BEARD & Luffy",
 	"contact" : "simon@modworkshop.net",
 	"priority" : 500,
-	"version" : "2.5",
+	"version" : "2.51",
 	"blt_version" : 2.0,
 	"undisablable" : true,
 	"color" : "0 0.44 1",
@@ -53,6 +53,8 @@
 		{ "hook_id" : "core/lib/managers/coresoundenvironmentmanager", "script_path" : "BeardLibCore.lua" },
 		{ "hook_id" : "core/lib/utils/dev/editor/coreworlddefinition", "script_path" : "BeardLibCore.lua"},
 		{ "hook_id" : "core/lib/managers/mission/coremissionmanager", "script_path" : "BeardLibCore.lua"},
-		{ "hook_id" : "lib/network/matchmaking/networkmatchmakingsteam", "script_path" : "BeardLibCore.lua"}
+		{ "hook_id" : "lib/network/matchmaking/networkmatchmakingsteam", "script_path" : "BeardLibCore.lua"},
+		{ "hook_id" : "lib/managers/mission/elementvehiclespawner", "script_path" : "BeardLibCore.lua"},
+		{ "hook_id" : "lib/managers/mission/elementinteraction", "script_path" : "BeardLibCore.lua"}
 	]
 }

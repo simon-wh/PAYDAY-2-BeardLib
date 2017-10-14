@@ -146,13 +146,23 @@ function FileIO:CopyDirTo(path, to_path)
 	end
 end
 
+function FileIO:CopyFilesToAsync(copy_data, callback)
+	SystemFS:copy_files_async(copy_data, callback or function(success, message)
+		if success then
+			BeardLib:log("[FileIO] Done copying files")
+		else
+			BeardLib:log("[FileIO] Something went wrong when files")
+		end
+	end)	
+end
+
 function FileIO:CopyToAsync(path, to_path, callback)
-	SystemFS:copy_files_async(self:PrepareFilesForCopy(path, to_path), callback or function(success, message)
-	    if success then
-	        BeardLib:log("[FileIO] Done copying directory %s to %s", path, to_path)
-	    else
-	        BeardLib:log("[FileIO] Something went wrong when copying directory %s to %s, \n %s", path, to_path, message)
-	    end
+	self:CopyFilesToAsync(self:PrepareFilesForCopy(path, to_path), callback or function(success, message)
+		if success then
+			BeardLib:log("[FileIO] Done copying directory %s to %s", path, to_path)
+		else
+			BeardLib:log("[FileIO] Something went wrong when copying directory %s to %s, \n %s", path, to_path, message)
+		end
 	end)
 end
 
