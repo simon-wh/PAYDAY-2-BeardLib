@@ -63,6 +63,7 @@ function LevelModule:AddLevelDataToTweak(l_self)
         cube = self._config.cube,
         ghost_bonus = self._config.ghost_bonus,
         max_bags = self._config.max_bags,
+        load_screen = self._config.load_screen,
         team_ai_off = self._config.team_ai_off,
         custom = true
     }
