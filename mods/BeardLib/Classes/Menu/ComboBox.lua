@@ -10,40 +10,37 @@ function ComboBox:Init()
     if type(text) == "table" then
         text = text.text
     end
-    local control_size = self.panel:w() / self.control_slice
-    local bgcolor = self:Get2ndBackground()
-    local combo_bg = self.panel:bitmap({
+    local control_size = self.panel:w() * self.control_slice
+    local combo_bg = self.panel:rect({
         name = "combo_bg",
         w = control_size,
         alpha = 0,
         h = self.items_size,
         layer = 1,
-        color = bgcolor,
+        color = self:GetForeground(),
     })
 	self._textbox = BeardLib.Items.TextBoxBase:new(self, {
         panel = self.panel,
         lines = 1,
         align = self.textbox_align,
-        line_color = self.line_color or self.marker_highlight_color,
-        w = self.panel:w() / (self.text == nil and 1 or self.control_slice),
+        line_color = self.line_color or self.highlight_color,
+        w = self.panel:w() * (self.text == nil and 1 or self.control_slice),
         update_text = callback(self._list, self._list, "update_search", true),
         value = self.localized_items and text and managers.localization:text(tostring(text)) or type(text) ~= "nil" and tostring(text) or "",
     })
     self._textbox:PostInit()
     combo_bg:set_right(self.panel:w())
-    --combo_selected:set_left(combo_bg:left() + 2)
-    local icon = self.panel:bitmap({
-        name = "combo_icon",
+    self.icon = self.panel:bitmap({
+        name = "icon_arrow",
         w = self.items_size - 6,
         h = self.items_size - 6,
         texture = "guis/textures/menu_ui_icons",
         texture_rect = {4,0,16,16},
-        color = self.text_color,
+        color = self:GetForeground(highlight),
         layer = 2,
     })
-    icon:set_right(combo_bg:right() - 2)
-    icon:set_center_y(self._textbox.panel:center_y() - 2)
-    local h = math.max(1, #self.items) * 18
+    self.icon:set_right(combo_bg:right() - 2)
+    self.icon:set_center_y(self._textbox.panel:center_y() - 2)
 end
 
 function ComboBox:ContextMenuCallback(item)
@@ -75,6 +72,14 @@ end
 
 function ComboBox:SelectedItem()
     return self.items[self.value]
+end
+
+function ComboBox:DoHighlight(highlight)
+    ComboBox.super.DoHighlight(self, highlight)
+    self._textbox:DoHighlight(highlight)
+    if self.icon then
+        play_color(self.icon, self:GetForeground(highlight))
+    end
 end
 
 function ComboBox:MousePressed(button, x, y)

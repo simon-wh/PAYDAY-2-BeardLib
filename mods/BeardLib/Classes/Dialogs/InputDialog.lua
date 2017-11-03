@@ -26,7 +26,7 @@ function InputDialog:_Show(params)
         background_color = self._menu.background_color:contrast():with_alpha(0.25),
         index = params.title and "After|Title" or 1,
         auto_height = true,
-        scroll_color = self._menu.text_color,
+        scroll_color = self._menu.foreground,
         scrollbar = true,
         max_height = 500,
     })
@@ -34,7 +34,7 @@ function InputDialog:_Show(params)
         name = "Text",
         text = "",
         offset = 0,
-        marker_highlight_color = false,
+        highlight_color = false,
         line_color = Color.transparent,
         control_slice = 1,
         filter = params.filter,

@@ -1,5 +1,7 @@
 BeardLib.Items.ColorTextBox = BeardLib.Items.ColorTextBox or class(BeardLib.Items.TextBox)
 local ColorTextBox = BeardLib.Items.ColorTextBox
+ColorTextBox.type_name = "ColoredTextBox"
+
 function ColorTextBox:Init(...)
     ColorTextBox.super.Init(self, ...)
     local panel = self:Panel()

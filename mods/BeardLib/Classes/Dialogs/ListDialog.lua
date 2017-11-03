@@ -10,7 +10,7 @@ function ListDialog:init(params, menu)
         h = params.h and params.h - 20 or 600,
         name = "List",
         items_size = 18,
-        auto_text_color = true,
+        auto_foreground = true,
         auto_align = false,
         position = params.position or "Center",
         visible = false,
@@ -37,29 +37,21 @@ function ListDialog:_Show(params)
     self._case_sensitive = params.case_sensitive
     self._limit = NotNil(params.limit, true)
     self._list = params.list
-
+    local tw = self._menu.w * 0.8
     self._menu:TextBox({
         name = "Search",
-        w = self._menu.w - 152,
-        control_slice = 1.25,
+        w = tw,
+        control_slice = 0.9,
         text = "Search",
         callback = callback(self, self, "Search"),  
         label = "temp"
     })
-    self._menu:Toggle({
-        name = "CaseSensitive",
-        w = 42,
-        text = "Aa",
-        value = self._case_sensitive,
-        callback = function(menu, item)
-            self._case_sensitive = item:Value()
-            self:MakeListItems()
-        end,  
-        label = "temp"
-    })    
+    local bw = (self._menu.w - tw) * 0.25
+    local offset = {bw / 3, 0}
     self._menu:Toggle({
         name = "Limit",
-        w = 42,
+        w = bw,
+        offset = offset,
         text = ">|",
         value = self._limit,
         callback = function(menu, item)
@@ -68,11 +60,27 @@ function ListDialog:_Show(params)
         end,  
         label = "temp"
     })
-    self._menu:Button({
+    self._menu:Toggle({
+        name = "CaseSensitive",
+        w = bw,
+        offset = offset,
+        text = "Aa",
+        value = self._case_sensitive,
+        callback = function(menu, item)
+            self._case_sensitive = item:Value()
+            self:MakeListItems()
+        end,  
+        label = "temp"
+    })
+    self._menu:ImageButton({
         name = "Close",
-        w = 68,
-        text_align = "center",
-        text = "Close",
+        w = bw,
+        h = 20,
+        icon_w = 14,
+        icon_h = 14,
+        position = "Right",
+        texture = "guis/textures/menu_ui_icons",
+        texture_rect = {84, 89, 36, 36},
         callback = callback(self, self, "hide"),  
         label = "temp"
     })

@@ -1,3 +1,7 @@
+if Application:short_game_name() == "RAID WW2" then --Don't run in raid.
+    return
+end
+
 core:module("CoreWorldDefinition")
 WorldDefinition = WorldDefinition or CoreWorldDefinition.WorldDefinition
 

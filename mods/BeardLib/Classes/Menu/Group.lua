@@ -14,7 +14,7 @@ function Group:InitBasicItem()
 	        w = self.parent.items_size - 4,
 	        h = self.parent.items_size - 4,
 	        texture = "guis/textures/menu_ui_icons",
-	        color = self.text_color or Color.black,
+	        color = self:GetForeground(highlight),
 	        y = 2,
 	        texture_rect = {self.closed and 42 or 2, self.closed and 2 or 0, 16, 16},
 	        layer = 3,
@@ -55,7 +55,7 @@ function Group:ToggleGroup()
 end
 
 function Group:MouseInside(x, y) 
-    return self.bg:inside(x,y) 
+    return self.highlight_bg:inside(x,y) 
 end
 
 function Group:MousePressed(button, x, y)

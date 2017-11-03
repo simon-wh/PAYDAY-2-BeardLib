@@ -38,53 +38,83 @@ function BaseItem:InitBasicItem()
 		word_wrap = not self.size_by_text,
 		text = self.text,
 		layer = 3,
-		color = self.text_color or Color.black,
+		color = self:GetForeground(),
 		font = self.font,
-		font_size = self.font_size or self.items_size
+		font_size = self.font_size or self.items_size,
+		kern = self.kerning
 	})
-	self.bg = self.panel:rect({
-		name = "bg",
-		color = self.marker_color,
-		alpha = self.marker_alpha,
+	self:InitBGs()
+	self:_SetText(self.text)
+	self:MakeBorder()
+end
+
+function BaseItem:InitBGs()
+	self.bg = self.bg or self.panel:rect({
+		name = "background",
+		color = self.background_color,
+		visible = self.background_color ~= false,
+		alpha = self.highlight and 0 or 1,
+		h = self.items_size,
+		halign = "grow",
+		valign = "grow",
+		layer = 0
+	})
+	self.highlight_bg = self.panel:rect({
+		name = "highlight",
+		color = self.highlight_color,
+		visible = self.highlight_color ~= false,
+		alpha = self.highlight and 1 or 0,
 		h = self.type_name == "Group" and self.items_size,
 		halign = self.type_name ~= "Group" and "grow",
 		valign = self.type_name ~= "Group" and "grow",
-		layer = 0
+		layer = 1
 	})
-	self:_SetText(self.text)
-	self:MakeBorder()
+end
+
+function BaseItem:BestAlpha(...)
+	local big
+	for _, c in pairs({...}) do
+		if c and (not big or c.alpha > big.alpha) then
+			big = c
+		end
+	end
+	return big
+end
+
+function BaseItem:GetBackground()
+	if not self.background_color and self.menu ~= self.parent then
+		return self.parent:GetBackground()
+	end
+	return self.background_color or Color.black
 end
 
 function BaseItem:WorkParams(params)
 	params = params or {}
 	self.enabled = NotNil(self.enabled, true)
 	self.visible = NotNil(self.visible, true)
-	self:WorkParam("marker_color", Color.transparent)
-	self:WorkParam("marker_highlight_color")
-	self:WorkParam("background_color")
-	local bg_alpha = self.background_color and self.background_color.a or 0
-	local bg = self.marker_color and self.marker_color.a > 0.5 and self.marker_color or self.background_color
-	local bg2 = self.marker_highlight_color and self.marker_highlight_color.a > 0.5 and self.marker_highlight_color or self.background_color
-	self:WorkParam("auto_text_color")
-	local text_color = bg and bg.a > 0.5 and bg:contrast() or Color.white
-	self:WorkParam("text_color", text_color)		
+	self:WorkParam("highlight_color", Color.white:with_alpha(0.1))
+	self:WorkParam("context_background_color", self.background_color, Color.black)	
+	self:WorkParam("background_color", Color.transparent)
 
-	if self.auto_text_color and self.text_color ~= false then
-		self.text_color = text_color
+	local bg = self:GetBackground()
+	local bgh = self:BestAlpha(self.highlight_color, bg)
+	self:WorkParam("auto_foreground")
+	self:WorkParam("foreground", foreground)
+	if self.auto_foreground and self.foreground ~= false then
+		self.foreground = bg:contrast()
 	end	
-	self:WorkParam("text_highlight_color")
-	local text_highlight_color = bg2 and bg2.a > 0.5 and bg2:contrast() or Color.white
-	if self.auto_text_color and self.text_highlight_color ~= false then
-		self.text_highlight_color = text_highlight_color
+	self:WorkParam("foreground_highlight")
+	if self.auto_foreground and self.foreground_highlight ~= false then
+		self.foreground_highlight = bgh:contrast()
 	end
-	self:WorkParam("marker_alpha")
 	self:WorkParam("items_size", 16)
+	self:WorkParam("enabled_alpha", 1)
 	self:WorkParam("disabled_alpha", 0.5)
 	self:WorkParam("background_alpha")
 	self:WorkParam("text_align", "left")
 	self:WorkParam("text_vertical", "center")
 	self:WorkParam("size_by_text")
-	self:WorkParam("control_slice", 2)
+	self:WorkParam("control_slice", 0.5)
 	self:WorkParam("font", tweak_data.menu.pd2_large_font or tweak_data.menu.default_font)
 	self:WorkParam("text_offset", 4)
 	self:WorkParam("border_size", 2)
@@ -211,6 +241,12 @@ end
 
 --Return Funcs--
 function BaseItem:Panel() return self.panel end
+	function BaseItem:X() return self:Panel():x() end
+	function BaseItem:Y() return self:Panel():y() end
+	function BaseItem:W() return self:Panel():w() end
+	function BaseItem:H() return self:Panel():h() end
+	function BaseItem:Right() return self:Panel():right() end
+	function BaseItem:Bottom() return self:Panel():bottom() end
 function BaseItem:Position() return self.position end
 function BaseItem:Name() return self.name end
 function BaseItem:Text() return type(self.text) == "string" and self.text or "" end
@@ -238,7 +274,7 @@ function BaseItem:SetCallback(callback) self.callback = callback end
 function BaseItem:SetLabel(label) self.label = label end
 function BaseItem:SetParam(k,v) self[k] = v end
 function BaseItem:SetEnabled(enabled) self.enabled = enabled == true end
-function BaseItem:WorkParam(param, ...) self[param] = NotNil(self[param], self.private[param], not self.inherit.private[param] and self.inherit[param] or nil, ...) end
+function BaseItem:WorkParam(param, ...) self[param] = NotNil(self[param], self.private[param], not self.inherit.private[param] and self.inherit[param], ...) end
 
 function BaseItem:ConvertOffset(offset)
     if offset then

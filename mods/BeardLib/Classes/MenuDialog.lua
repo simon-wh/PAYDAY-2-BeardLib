@@ -15,13 +15,13 @@ function MenuDialog:init(params, menu)
         w = MenuDialog._default_width,
         visible = false,
         auto_height = true,
-        auto_text_color = true,
+        auto_foreground = true,
         always_highlighting = true,
         reach_ignore_focus = true,
         scrollbar = false,
         items_size = 20,
         offset = 8,
-        marker_highlight_color = Color("719ee8"),
+        accent_color = Color("4385ef"),
         background_color = Color(0.6, 0.2, 0.2, 0.2),
     }, params))
     BeardLib.managers.dialog:AddDialog(self)
@@ -44,7 +44,6 @@ function MenuDialog:_Show(params)
             name = "Title",
             text = params.title,
             border_left = true,
-            border_color = self._menu.marker_highlight_color,
             items_size = self._menu.items_size + 4,
         }, params.title_merge or {}))
     end

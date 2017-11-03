@@ -146,7 +146,7 @@ if not _G.BeardLib then
 			end
 		end
 		for id, clbk in pairs(self._updaters) do
-			local success, e = pcall(function() clbk() end)
+			local success, e = pcall(function() clbk(t, dt) end)
 			if not success then
 				BeardLib:log("[Updater-ERROR(%s)] " .. tostring(e and e.code or ""), tostring(id))
 			end

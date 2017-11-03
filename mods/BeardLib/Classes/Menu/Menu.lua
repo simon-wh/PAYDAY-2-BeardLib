@@ -11,11 +11,11 @@ function Menu:Init(params)
         visible = self.visible == true,
         layer = self.layer or 1,
     })
-    self.panel:rect({
+    self.bg = self.panel:rect({
         name = "background",
         halign = "grow",
         valign = "grow",
-        visible = self.background_color ~= nil and self.background_visible,
+        visible = not not self.background_color and self.background_visible,
         render_template = self.background_blur and "VertexColorTexturedBlur3D",
         texture = self.background_blur and "guis/textures/test_blur_df",
         color = self.background_color,
@@ -27,7 +27,7 @@ function Menu:Init(params)
         padding = 0.0001, 
         scroll_width = self.scrollbar == false and 0 or self.scroll_width, 
         hide_shade = true, 
-        color = self.scroll_color or self.marker_highlight_color,
+        color = self.scroll_color or self.highlight_color,
         scroll_speed = self.scroll_speed
     })
     self.items_panel = self._scroll:canvas()
@@ -57,7 +57,7 @@ function Menu:ReloadInterface()
         color = self.background_color,
         alpha = self.background_alpha,        
     })
-    self._scroll:set_scroll_color(self.scroll_color or self.marker_highlight_color)
+    self._scroll:set_scroll_color(self.scroll_color or self.highlight_color)
     self:RecreateItems()
 end
 
@@ -67,6 +67,7 @@ function Menu:WorkParams(params)
     self:WorkParam("scroll_width", 8)
     self:WorkParam("scroll_speed", 48)
     self.background_visible = NotNil(self.background_visible, self.type_name == "Menu" and true or false)
+    self.private.background_color = NotNil(self.private.background_color, self.background_visible and self.background_color or nil)    
     self.auto_align = NotNil(self.auto_align, true)
     self.auto_height = NotNil(self.auto_height, self.type_name == "Group" and true or false)
     self.scrollbar = NotNil(self.scrollbar, self.auto_height ~= true)
@@ -94,7 +95,7 @@ function Menu:_SetSize(w, h, no_recreate)
         return
     end
     w = w or self.w
-    h = self.closed and 0 or (h or self.orig_h or self.h)
+    h = self.closed and self:AdditionalHeight() or (h or self.orig_h or self.h)
     h = math.clamp(h, self.min_height or 0, self.max_height or h)
     self.panel:set_size(w, h)
     self:SetScrollPanelSize()
@@ -160,7 +161,7 @@ function Menu:MousePressed(button, x, y)
                 menu._scroll_hold = true
                 self:CheckItems()
                 return true
-            end     
+            end
         elseif button == Idstring("mouse wheel down") and self.scrollbar and self._scroll:is_scrollable() then
             if self._scroll:scroll(x, y, -1) then
                 if menu._highlighted and menu._highlighted.parent == self then
@@ -233,7 +234,7 @@ function Menu:SetVisible(visible, animate)
     BeardLib.Items.Item.super.SetVisible(self, visible, true)
     if animate and visible and not was_visible then
         panel:set_alpha(0)
-        QuickAnim:Play(panel, {alpha = 1, speed = 5})
+        play_anim(panel, {set = {alpha = 1}})
     end
     self.menu:CheckOpenedList()
 end
@@ -516,9 +517,8 @@ function Menu:Divider(params)
 end
 
 function Menu:Image(params)
-    local _params = self:ConfigureItem(params)
-    _params.divider_type = true
-    return self:NewItem(BeardLib.Items.ImageButton:new(_params))
+    params.divider_type = true
+    return self:ImageButton(params)
 end
 
 function Menu:DivGroup(params)

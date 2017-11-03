@@ -3,23 +3,51 @@ local Toggle = BeardLib.Items.Toggle
 Toggle.type_name = "Toggle"
 function Toggle:Init()    
 	Toggle.super.Init(self)
+	local s = self.items_size - 4
+	local fgcolor = self:GetForeground()
     self.toggle = self.panel:bitmap({
+		name = "toggle",
+        w = s,
+        h = s,
+		color = fgcolor,
+        texture = "guis/textures/menu_ui_icons",
+        texture_rect = {3, 89, 36, 36},
+		layer = 5,
+	})
+	local s = self.value and s or 0
+	self.toggle_value = self.panel:bitmap({
         name = "toggle",
-        w = self.items_size,
-        h = self.items_size,
-        layer = 6,
-        color = self.text_color or Color.black,
-        texture = "guis/textures/menu_tickbox",
-        texture_rect = self.value and {24,0,24,24} or {0,0,24,24},
-    })
-    self.toggle:set_right(self.panel:w())
+        w = s,
+        h = s,
+        texture = "guis/textures/menu_ui_icons",
+        texture_rect = {41, 89, 36, 36},
+		color = fgcolor,
+		layer = 6,
+	})
+    self.toggle:set_center_y(self.panel:h() / 2)
+    self.toggle:set_right(self.panel:w() - 2)
+	self.toggle_value:set_center(self.toggle:center())
+	self:UpdateToggle(true)
 end
 
 function Toggle:SetValue(value, run_callback)
 	Toggle.super.SetValue(self, value, run_callback)
+	self:UpdateToggle(true)
+end
+
+function Toggle:UpdateToggle(value_changed, highlight)
+	local value = self.value
 	if alive(self.panel) then
-		local rect = value == true and {24,0,24,24} or {0,0,24,24}
-		self.toggle:set_texture_rect(unpack(rect))
+		local fgcolor = self:GetForeground(highlight)		
+		local s = value and self.items_size - 4 or 0
+		self.toggle_value:set_alpha(1)
+		play_color(self.toggle, fgcolor)
+		play_anim(self.toggle_value, {
+			after = function()
+				self.toggle_value:set_center(self.toggle:center())
+			end,
+			set = {w = s, h = s, color = fgcolor}
+		})
 	end
 end
 
@@ -45,6 +73,6 @@ function Toggle:KeyPressed(o, k)
 end
 
 function Toggle:DoHighlight(highlight)
-    Toggle.super.DoHighlight(self, highlight) 
-    self.toggle:set_color(self.title:color())
+	Toggle.super.DoHighlight(self, highlight)
+	self:UpdateToggle(false, highlight)
 end

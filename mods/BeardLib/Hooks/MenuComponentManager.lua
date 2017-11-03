@@ -47,10 +47,10 @@ function BLTNotificationsGui:mouse_moved(o, x, y)
     if alive(self._beardlib_updates) then
         local icon = self._beardlib_updates:child("Icon")
         if self._beardlib_updates:inside(x,y) then
-            QuickAnim:WorkColor(icon, Color(0, 0.1, 1), nil, 0.1)
+            play_color(icon, Color(0, 0.1, 1))
             return true, "link"
         else
-            QuickAnim:WorkColor(icon, Color(0, 0.4, 1), nil, 0.1)
+            play_color(icon, Color(0, 0.4, 1))
         end
     end
     return mouse_move(self, x, y)

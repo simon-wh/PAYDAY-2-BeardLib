@@ -13,6 +13,7 @@ function LevelModule:init(core_mod, config)
 end
 
 function LevelModule:Load()
+    self._config.id = tostring(self._config.id)
     if Global.level_data and Global.level_data.level_id == self._config.id then
         BeardLib.current_level = self
         if self._config.include then

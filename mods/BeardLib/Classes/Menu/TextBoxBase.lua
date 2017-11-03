@@ -2,31 +2,32 @@ BeardLib.Items.TextBoxBase = BeardLib.Items.TextBoxBase or class()
 local TextBoxBase = BeardLib.Items.TextBoxBase
 local KB = BeardLib.Utils.Input
 function TextBoxBase:init(parent, params)
-    self._parent = parent
+    self.owner = parent
     self.parent = parent.parent
     self.menu = parent.menu
     self.items_size = params.items_size or parent.items_size
     self._forbidden = {'%', '(', ")", "[", "]"}
-    if self._parent.forbidden_chars then
-        table.merge(self._forbidden, self._parent.forbidden_chars)
+    if self.owner.forbidden_chars then
+        table.merge(self._forbidden, self.owner.forbidden_chars)
     end
 	self.panel = params.panel:panel({
 		name = "text_panel",
 		w = params.w,
 		h = params.h or params.items_size,
-        layer = 4
+        layer = params.layer or 5
 	})
 	self.panel:set_right(params.panel:w())
     self.line_color = params.line_color
-    self.text_color =  NotNil(params.text_color, parent.text_color, self.parent.text_color)
-    self.text_highlight_color = NotNil(params.text_highlight_color, parent.text_highlight_color, self.parent.text_highlight_color)
+    self.foreground = params.foreground
+    self.foreground_highlight = params.foreground_highlight
+    local color = self:GetForeground()
 	local line = self.panel:rect({
         name = "line",
 		halign = "grow",
 		visible = params.line,
-        h = 1,
+        h = 2,
         layer = 2,
-        color = self.line_color or self.text_color,
+        color = self.line_color or color,
     })
     line:set_bottom(self.panel:h())
     self.text = self.panel:text({
@@ -35,8 +36,8 @@ function TextBoxBase:init(parent, params)
         align = params.align,
         wrap = not params.lines or params.lines > 1,
         word_wrap = not params.lines or params.lines > 1,
-        color = self.text_color,
-        selection_color = self.text_color:with_alpha(0.5), --I fucking wish there was something better..
+        color = color,
+        selection_color = color:with_alpha(0.5), --I fucking wish there was something better..
 		font = parent.font or "fonts/font_medium_mf",
 		font_size = self.items_size
     })
@@ -45,7 +46,7 @@ function TextBoxBase:init(parent, params)
         name = "caret",
         w = 2,
         visible = false,
-        color = self.text:color():with_alpha(1),
+        color = color:with_alpha(1),
         h = self.text:font_size() - (line:h() * 2),
         layer = 3,
     })
@@ -53,7 +54,7 @@ function TextBoxBase:init(parent, params)
 	self.btn = params.btn or "0"
     self.history = {params.value and self.text:text()}
  	self.text:enter_text(callback(self, TextBoxBase, "enter_text"))
- 	self.update_text = params.update_text or function(self, ...) self._parent:_SetValue(...) end
+ 	self.update_text = params.update_text or function(self, ...) self.owner:_SetValue(...) end
 end
 
 function TextBoxBase:PostInit()
@@ -61,14 +62,18 @@ function TextBoxBase:PostInit()
     self:update_caret()
 end
 
+function TextBoxBase:GetForeground(highlight)
+    return NotNil(highlight and self.foreground or self.highlight_foreground, self.owner:GetForeground(highlight))
+end
+
 function TextBoxBase:DoHighlight(highlight)
-    local color = highlight and self.text_highlight_color or self.text_color or Color.white
-    local line = self.panel:child("line")
-    local text = self.panel:child("text")
-    line:set_color(self.line_color or color)
-    text:set_color(color)
-    text:set_selection_color(color:with_alpha(0.5))
-    self.panel:child("caret"):set_color(text:color():with_alpha(1))
+    local color = self:GetForeground(highlight)
+    local caret = self.panel:child("caret")
+    if caret then
+        play_color(caret, color:with_alpha(1))
+        play_color(self.panel:child("line"), self.line_color or color)
+        play_anim(self.panel:child("text"), {set = {color = color, selection_color = color:with_alpha(0.5)}})
+    end
 end
 
 function TextBoxBase:Value()
@@ -92,12 +97,12 @@ function TextBoxBase:CheckText(text, no_clbk)
 end
  
 function TextBoxBase:tonumber(text)
-    return tonumber(string.format("%." .. self._parent.floats .. "f", (text or 0)))
+    return tonumber(string.format("%." .. self.owner.floats .. "f", (text or 0)))
 end
 
 function TextBoxBase:key_hold(text, k)
     local first
-    while self.cantype and self.menu._key_pressed == k and (self.menu._highlighted == self._parent or self.menu._openlist == self._parent) do
+    while self.cantype and self.menu._key_pressed == k and (self.menu._highlighted == self.owner or self.menu._openlist == self.owner) do
         local s, e = text:selection()
         local n = utf8.len(text:text())
         if ctrl() then
@@ -135,7 +140,7 @@ function TextBoxBase:key_hold(text, k)
                     end
                     text:replace_text("")
                     self:add_history_point(text:text())
-                    if (self._parent.filter ~= "number") or (text:text() ~= "" and self:fixed_text(text:text()) == text:text()) then
+                    if (self.owner.filter ~= "number") or (text:text() ~= "" and self:fixed_text(text:text()) == text:text()) then
                         self:update_text(text:text(), true, false, true)
                     end
                 end
@@ -183,10 +188,10 @@ function TextBoxBase:add_history_point(text)
 end
 
 function TextBoxBase:fixed_text(text)
-	if self._parent.filter == "number" then
+	if self.owner.filter == "number" then
 		local num = tonumber(text) 
         if num then
-		    return string.format("%." .. self._parent.floats .."f", math.clamp(num, self._parent.min or num, self._parent.max or num))
+		    return string.format("%." .. self.owner.floats .."f", math.clamp(num, self.owner.min or num, self.owner.max or num))
         end
 	else
 		return text
@@ -194,7 +199,7 @@ function TextBoxBase:fixed_text(text)
 end
 
 function TextBoxBase:enter_text(text, s)
-    local number = self._parent.filter == "number"
+    local number = self.owner.filter == "number"
     if not self.menu:Enabled() or number and (tonumber(s) == nil and s ~= "-" and s ~= ".") then
         return
     end
@@ -203,7 +208,7 @@ function TextBoxBase:enter_text(text, s)
             return
         end
     end
-    if (self.menu._highlighted == self._parent or self.menu._openlist == self._parent) and self.cantype and not ctrl() then
+    if (self.menu._highlighted == self.owner or self.menu._openlist == self.owner) and self.cantype and not ctrl() then
         text:replace_text(s)       
         self:add_history_point(number and (tonumber(text:text()) or self:one_point_back()) or text:text())
         self:update_caret()
@@ -233,7 +238,7 @@ function TextBoxBase:KeyPressed(o, k)
 end
 
 function TextBoxBase:update_caret()
-    if not self._parent:alive() or not alive(self.panel) then
+    if not self.owner:alive() or not alive(self.panel) then
         self.cantype = false
         return
     end
@@ -246,7 +251,7 @@ function TextBoxBase:update_caret()
         self.panel:parent():set_h(h)
         text:set_h(h)
         self.panel:child("line"):set_bottom(h)
-        self._parent:_SetText(self._parent.text)
+        self.owner:_SetText(self.owner.text)
     end
     if self.parent then
         self.parent:AlignItems()
@@ -322,4 +327,8 @@ end
 
 function TextBoxBase:MouseReleased(button, x, y)
     self._start_select = nil
+end
+
+function TextBoxBase:alive()
+    return alive(self.panel)
 end

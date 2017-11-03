@@ -25,18 +25,18 @@ function ColorDialog:_Show(params)
         text = "",
         items_size = 32,
         offset = 0,
-        marker_color = params.color,
+        background_color = params.color,
     })
     self._menu:TextBox({
         name = "Hex",
         text = "Hex:",
         value = "",
         lines = 1,
-        auto_text_color = false,
-        text_highlight_color = false,
+        auto_foreground = false,
+        foreground_highlight = false,
         position = "CenterLeft",
-        marker_color = Color.transparent,
-        marker_highlight_color = Color.transparent,
+        background_color = false,
+        highlight_color = false,
         callback = callback(self, self, "update_hex"),
         w = 120,
         items_size = 20,
@@ -83,8 +83,7 @@ end
 function ColorDialog:update_hex_color()
     local item = self._menu:GetItem("Hex")
     local color = self._color:contrast()
-    item.text_color = color
-    item._textbox.text_color = color
+    item.foreground = color
     item._textbox.line_color = color
     item:DoHighlight(item.highlighted)
 end
@@ -95,7 +94,7 @@ function ColorDialog:set_color(color, not_hex)
    self._menu:GetItem("Red"):SetValue(self._color.red * 255)
    self._menu:GetItem("Green"):SetValue(self._color.green * 255)
    self._menu:GetItem("Blue"):SetValue(self._color.blue * 255)
-   self._menu:GetItem("ColorPreview"):Panel():child("bg"):set_color(self._color)
+   self._menu:GetItem("ColorPreview").bg:set_color(self._color)
    self:update_color(not_hex)
 end
 
@@ -105,7 +104,7 @@ end
 
 function ColorDialog:update_color(not_hex)
     self._color = Color(self._menu:GetItem("Alpha"):Value() / 100, self._menu:GetItem("Red"):Value() / 255, self._menu:GetItem("Green"):Value() / 255, self._menu:GetItem("Blue"):Value() / 255)
-    self._menu:GetItem("ColorPreview"):Panel():child("bg"):set_color(self._color)
+    self._menu:GetItem("ColorPreview").bg:set_color(self._color)
     if not_hex ~= true then
         local Hex = self._menu:GetItem("Hex")
         Hex:SetValue(self._color:to_hex())

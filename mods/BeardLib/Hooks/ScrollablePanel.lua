@@ -6,10 +6,17 @@ function ScrollablePanelModified:init(panel, name, data)
 	if data.scroll_width then
 		self._scroll_width = true
 		self:canvas():set_w(self:panel():w() - (data.scroll_width * 2))
-		self:panel():child("scroll_up_indicator_arrow"):set_size(data.scroll_width, data.scroll_width)
-		self:panel():child("scroll_up_indicator_arrow"):set_world_left(self:canvas():world_right() + 2)
-		self:panel():child("scroll_down_indicator_arrow"):set_size(data.scroll_width, data.scroll_width)
-		self:panel():child("scroll_down_indicator_arrow"):set_world_left(self:canvas():world_right() + 2)
+		local up_arrow = self:panel():child("scroll_up_indicator_arrow")		
+		local down_arrow = self:panel():child("scroll_down_indicator_arrow")
+		up_arrow:set_size(data.scroll_width, data.scroll_width)
+		up_arrow:set_world_left(self:canvas():world_right() + 2)
+		up_arrow:set_rotation(0)
+		down_arrow:set_size(data.scroll_width, data.scroll_width)
+		down_arrow:set_image("guis/textures/menu_ui_icons", 24, 2, 16, 16)
+		down_arrow:set_world_left(self:canvas():world_right() + 2)
+		down_arrow:set_rotation(0)
+		down_arrow:set_image("guis/textures/menu_ui_icons", 4, 0, 16, 16)
+
 		self._scroll_bar:set_w(data.scroll_width)
 		self._scroll_bar:set_center_x(self:panel():child("scroll_down_indicator_arrow"):center_x())
 	end
@@ -53,8 +60,8 @@ end
 function ScrollablePanelModified:update_canvas_size()
 	local orig_w = self:canvas():w()
 	local max_h = 0
-
-	for i, panel in ipairs(self:canvas():children()) do
+	local children = self:canvas():children()
+	for i, panel in pairs(children) do
 		if panel:visible() then
 			local h = panel:bottom()
 			if max_h < h then
@@ -62,8 +69,8 @@ function ScrollablePanelModified:update_canvas_size()
 			end
 		end
 	end
-
-	local show_scrollbar = self:canvas_scroll_height() < max_h
+	local scroll_h = self:canvas_scroll_height()
+	local show_scrollbar = scroll_h > 0 and scroll_h < max_h
 	local max_w = show_scrollbar and self:canvas_scroll_width() or self:canvas_max_width()
 
 	self:canvas():grow(max_w - self:canvas():w(), max_h - self:canvas():h())
@@ -74,7 +81,7 @@ function ScrollablePanelModified:update_canvas_size()
 
 	max_h = 0
 
-	for i, panel in ipairs(self:canvas():children()) do
+	for i, panel in pairs(children) do
 		if panel:visible() then
 			local h = panel:bottom()
 			if max_h < h then
@@ -91,7 +98,7 @@ function ScrollablePanelModified:update_canvas_size()
 end
 
 function ScrollablePanelModified:is_scrollable()
-	return (self:canvas():h() - self:scroll_panel():h()) > 1
+	return (self:canvas():h() - self:scroll_panel():h()) > 2
 end
 
 function ScrollablePanelModified:canvas_max_width()
@@ -163,5 +170,5 @@ function ScrollablePanelModified:set_canvas_size(w, h)
 end
 
 function ScrollablePanelModified:set_element_alpha_target(element, target, speed)
-	QuickAnim:Play(self:panel():child(element), {alpha = target})
+	play_anim(self:panel():child(element), {set = {alpha = target}})
 end

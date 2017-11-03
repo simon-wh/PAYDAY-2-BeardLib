@@ -72,7 +72,7 @@ function FileBrowserDialog:init(params, menu)
         name = "CurrentPath",
         text = false,
         w = 540,
-        control_slice = 1.01,
+        control_slice = 1,
         forbidden_chars = {':','*','?','"','<','>','|'},
         callback = callback(self, self, "OpenPathSetDialog"),
     })

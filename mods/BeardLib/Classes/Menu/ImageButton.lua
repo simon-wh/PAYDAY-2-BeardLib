@@ -3,26 +3,17 @@ local ImageButton = BeardLib.Items.ImageButton
 ImageButton.type_name = "ImageButton"
 function ImageButton:InitBasicItem()
     self.h = self.h or self.w
-    
     self.panel = self.parent_panel:panel({ 
         name = self.name,
         w = self.w,
         h = self.h,
     })
-    self.bg = self.panel:rect({
-        name = "bg", 
-        color = self.marker_color,
-        alpha = self.marker_alpha,
-        halign = "grow",
-        valign = "grow",
-        layer = 0
-    })
+    self:InitBGs()
     self.img = self.panel:bitmap({
         name = "img", 
         texture = self.texture,
         texture_rect = self.texture_rect,
-        color = self.img_color or self.text_color,
-        alpha = self.img_alpha,
+        color = self.img_color or self.foreground,
         w = self.icon_w or self.w - 4,
         h = self.icon_h or self.h - 4,
         halign = "center", 
@@ -35,7 +26,9 @@ end
 
 function ImageButton:DoHighlight(highlight)
     ImageButton.super.DoHighlight(self, highlight)
-    self.img:set_color(highlight and (self.img_highlight_color or self.text_highlight_color) or (self.img_color or self.text_color))
+    if self.highlight_image and self.img then
+        play_color(self.img, self:GetForeground(highlight))
+    end
 end
 
 function ImageButton:SetImage(texture, texture_rect)

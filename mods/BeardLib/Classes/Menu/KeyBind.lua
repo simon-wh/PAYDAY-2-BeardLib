@@ -10,7 +10,7 @@ function KeyBindItem:Init()
         align = "center",
         vertical = self.text_vertical,
         layer = 1,
-        color = self.text_color or Color.black,
+        color = self:GetForeground(highlight),
         font = self.font,
         font_size = self.items_size - 2
     })

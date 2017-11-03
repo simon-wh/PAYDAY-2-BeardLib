@@ -3,29 +3,34 @@ SelectListDialog.type_name = "SelectListDialog"
 function SelectListDialog:_Show(params)
     params = params or {}
     self._single_select = params.single_select or false
+    self._allow_multi_insert = params.allow_multi_insert or false
     self._selected_list = params.selected_list or {}
     SelectListDialog.super._Show(self, params)
 end
 
-function SelectListDialog:MakeListItems(params)
-    self._list_menu:ClearItems("list_items")
-    local function ShowItem(t) 
-        if self:SearchCheck(t) then
-            if not self._limit or self:ItemsCount() <= 250 then
-                return true
-            end
-        end
+function SelectListDialog:ShowItem(t, selected)
+    if not selected and self._list_menu:GetItem(t) then
         return false
     end
+    if self:SearchCheck(t) then
+        if not self._limit or self:ItemsCount() <= 250 then
+            return true
+        end
+    end
+    return false    
+end
+
+function SelectListDialog:MakeListItems(params)
+    self._list_menu:ClearItems("list_items")
     for _,v in pairs(self._selected_list) do
         local t = type(v) == "table" and v.name or v
-        if ShowItem(t) then
+        if self:ShowItem(t, true) then
             self:ToggleItem(t, true, v)
         end
     end
     for _,v in pairs(self._list) do
         local t = type(v) == "table" and v.name or v
-        if ShowItem(t) and not self._list_menu:GetItem(t) then
+        if self:ShowItem(t) then
             self:ToggleItem(t, false, v)
         end
     end
@@ -43,7 +48,7 @@ function SelectListDialog:ToggleClbk(value, menu, item)
         end
     end
     if item:Value() == true then
-        if not table.contains(self._selected_list, value) then
+        if not table.contains(self._selected_list, value) or self._allow_multi_insert then
             if self._single_select then
                 self._selected_list = {value}
             else

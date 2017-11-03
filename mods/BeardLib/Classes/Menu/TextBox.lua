@@ -12,8 +12,8 @@ function TextBox:Init()
         panel = self.panel,
         lines = self.lines,
         align = self.textbox_align,
-        line_color = self.line_color or self.marker_highlight_color,
-        w = self.panel:w() / (self.text == nil and 1 or self.control_slice),
+        line_color = self.line_color or self.highlight_color,
+        w = self.panel:w() * (self.text == nil and 1 or self.control_slice),
         value = self.value,
     })
     self.value = self.value or ""

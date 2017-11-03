@@ -21,14 +21,16 @@ function Item:Init(params)
     end
 end
 
-function Item:Get2ndBackground(color)
-	return (color or self.background_color or Color.white):contrast(Color(0.85, 0.85, 0.85), Color(0.15, 0.15, 0.15))
+function Item:GetForeground(highlight)
+	highlight = highlight or self.highlight
+	local fgcolor = highlight and self.foreground_highlight or self.foreground
+	return fgcolor or (highlight and self.highlight_color or self.background_color or Color.black):contrast()
 end
 
 function Item:SetEnabled(enabled)
 	Item.super.SetEnabled(self, enabled)
 	if self:alive() then
-		self.panel:set_alpha(self.enabled and 1 or self.disabled_alpha)
+		self.panel:set_alpha(self.enabled and self.enabled_alpha or self.disabled_alpha)
 	end
 	if self._list then
 		self._list:hide()
@@ -122,13 +124,15 @@ function Item:SetText(text)
 end
 
 function Item:DoHighlight(highlight)
-	if self.bg then self.bg:set_color(highlight and self.marker_highlight_color or self.marker_color or Color.white) end
-	if self.title then self.title:set_color(highlight and self.text_highlight_color or self.text_color or Color.white) end
+	local foreground = self:GetForeground(highlight)
+	if self.bg then play_anim(self.bg, {set = {alpha = highlight and self.highlight_bg and self.highlight_bg:visible() and 0 or 1}}) end
+	if self.highlight_bg then play_anim(self.highlight_bg, {set = {alpha = highlight and 1 or 0}}) end
+	if self.title then play_color(self.title, foreground) end
 	if self.border_highlight_color then
 		for _, v in pairs({"left", "top", "right", "bottom"}) do
 			local side = self.panel:child(v)
 			if alive(side) and side:visible() then
-				side:set_color(highlight and self.border_highlight_color or self.border_color or Color.white)
+				play_color(side, highlight and self.border_highlight_color or self.border_color or foreground)
 			end
 		end
 	end

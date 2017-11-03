@@ -5,8 +5,6 @@ function MenuDialogManager:Init()
         layer = 5000,
         background_blur = true,
         always_key_press = callback(self, self, "KeyPressed"),
-        marker_color = Color.white:with_alpha(0),
-        marker_highlight_color = Color("4385ef"),
     })
     self._dialogs = {}
     self._opened_dialogs = {}

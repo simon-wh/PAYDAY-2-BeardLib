@@ -29,16 +29,15 @@ function MenuUI:init(params)
         w = self.background_blur and self._panel:w(),
         h = self.background_blur and self._panel:h(),
         color = self.background_color,
-        alpha = self.background_alpha,
     })
 
     self._help = self._panel:panel({name = "help", alpha = 0, w = self.help_width or 300})
+    self.help_background_color = NotNil(self.help_background_color, Color.white)
     self._help:rect({
         name = "bg",
         halign ="grow",
         valign ="grow",
-        color = self.help_background_color or self.background_color,
-        alpha = self.help_background_alpha or self.background_alpha,
+        color = self.help_background_color,
     })    
     self._help:text({
         name = "text",
@@ -116,7 +115,7 @@ function MenuUI:ShowDelayedHelp(item)
             else
                 self._help:set_world_bottom(mouse:world_y() - 5)
             end
-            QuickAnim:Play(self._help, {alpha = 1, speed = 3})
+            play_anim(self._help, {set = {alpha = 1}})
             self._showing_help = item
             self._saved_help_x = self._old_x
             self._saved_help_y = self._old_y
@@ -126,7 +125,7 @@ end
 
 function MenuUI:HideHelp()
     if self._showing_help then
-        QuickAnim:Stop(self._help)
+        stop_anim(self._help)
         self._help:set_alpha(0)
     end
 end
@@ -171,7 +170,7 @@ function MenuUI:Enable()
         return
     end
     if self.animate_toggle then
-        QuickAnim:Play(self._panel, {alpha = 1, speed = 5})
+        play_anim(self._panel, {set = {alpha = 1}})       
     else
         self._panel:set_alpha(1)
     end
@@ -192,7 +191,7 @@ function MenuUI:Disable()
         return
     end
     if self.animate_toggle then
-        QuickAnim:Play(self._panel, {alpha = 0, speed = 5})
+        play_anim(self._panel, {set = {alpha = 0}})
     else
         self._panel:set_alpha(0)
     end

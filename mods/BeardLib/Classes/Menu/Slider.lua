@@ -11,33 +11,60 @@ function Slider:Init()
     self.filter = "number"
     self.min = self.min or 0
     self.max = self.max or self.min
-    local item_width = self.panel:w() / self.control_slice
-    local bgcolor = self:Get2ndBackground()
-	local slider_bg = self.panel:rect({
-        name = "slider_bg",
-        w = item_width,
-        layer = 2,
-        color = bgcolor,
-    })
+    local item_width = self.panel:w() * self.control_slice
+    local slider_width = item_width * 0.66
+    local text_width = item_width - slider_width
+
+    local fgcolor = self:GetForeground()
     self._textbox = BeardLib.Items.TextBoxBase:new(self, {
-        text_color = bgcolor:contrast(),
         lines = 1,
         btn = "1",
         panel = self.panel,
-        line = false,
         align = "center",
-        w = item_width,
+        layer = 10,
+        line = false,
+        w = text_width,
         value = self.value,
     })
-    local marker_color = (self.marker_color and self.marker_color.a > 0 and self.marker_color) or self.marker_highlight_color and self.marker_highlight_color.a > 0 and self.marker_highlight_color
-    local slider = self.panel:rect({
+    self._slider = self.panel:panel({
+        w = slider_width,
         name = "slider",
-        x = self._textbox.panel:x(),
-        w = item_width * (self.value / self.max),
-        layer = 3,
-        color = (self.slider_color or marker_color or self:Get2ndBackground(bgcolor)):with_alpha(0.5)
+        layer = 4,
     })
-    slider_bg:set_x(self._textbox.panel:x())
+    local ch = self._slider:h() - 2
+    self.circle = self._slider:bitmap({
+        name = "circle",
+        w = ch,
+        h = ch,
+        y = 1,
+        texture = "guis/textures/menu_ui_icons",
+        texture_rect = {92, 1, 34, 34},
+        layer = 3,
+        color = fgcolor,
+    })
+
+    self.sfg = self._slider:rect({
+        name = "fg",
+        x = ch / 2,
+        w = self._slider:w() * (self.value / self.max),
+        h = 2,
+        layer = 2,
+        color = fgcolor
+    })
+    self.sfg:set_center_y(self._slider:h() / 2)
+        
+    self.sbg = self._slider:rect({
+        name = "bg",
+        x = ch / 2,        
+        w = self._slider:w() - ch,
+        h = 2,
+        layer = 1,
+        color = fgcolor:with_alpha(0.25),
+    })
+    self.sbg:set_center_y(self._slider:h() / 2)
+
+
+    self._slider:set_right(self._textbox.panel:x())
     self._mouse_pos_x, self._mouse_pos_y = 0,0
     self._textbox:PostInit()
 end
@@ -54,8 +81,8 @@ function Slider:_SetValue(value, run_callback, reset_selection, no_format)
     value = tonumber(not no_format and format or value)     
     local format = string.format("%." .. self.floats .. "f", value)
     local text = self._textbox.panel:child("text")
-	local slider = self.panel:child("slider")
-    slider:set_w(self.panel:child("slider_bg"):w() * ((value - self.min) / (self.max - self.min)))
+    self.sfg:set_w(self.sbg:w() * ((value - self.min) / (self.max - self.min)))
+    self._slider:child("circle"):set_center(self.sfg:right(), self.sfg:center_y())
     if not no_format then
         text:set_text(format)
     end
@@ -91,13 +118,24 @@ function Slider:KeyPressed(o, k)
     self._textbox:KeyPressed(o, k)
 end
 
+function Slider:DoHighlight(highlight)
+    Slider.super.DoHighlight(self, highlight)
+    self._textbox:DoHighlight(highlight)
+    local fgcolor = self:GetForeground(highlight)
+    if self.sfg then
+        play_color(self.sfg, fgcolor)
+        play_color(self.sbg, fgcolor:with_alpha(0.25))
+        play_color(self.circle, fgcolor)
+    end
+end
+
 function Slider:MousePressed(button, x, y)
 	Slider.super.MousePressed(self, button, x, y)
     self._textbox:MousePressed(button, x, y)
     if not self.enabled or not alive(self.panel) then
         return
     end
-    local inside = self.panel:child("slider_bg"):inside(x,y) or self.panel:child("slider"):inside(x,y)
+    local inside = self._slider:inside(x,y)
     if inside then
         local wheelup = (button == Idstring("mouse wheel up") and 0) or (button == Idstring("mouse wheel down") and 1) or -1
         if self.wheel_control and wheelup ~= -1 then
@@ -107,7 +145,7 @@ function Slider:MousePressed(button, x, y)
     	if button == Idstring("0") then
             self.menu._slider_hold = self
             if self.max or self.min then
-                local slider_bg = self.panel:child("slider_bg")
+                local slider_bg = self._slider:child("bg")
                 local where = (x - slider_bg:world_left()) / (slider_bg:world_right() - slider_bg:world_left())
                 managers.menu_component:post_event("menu_enter")
                 self:SetValueByPercentage(where)
@@ -121,6 +159,6 @@ function Slider:SetValueByMouseXPos(x)
     if not alive(self.panel) then
         return
     end
-    local slider_bg = self.panel:child("slider_bg")
+    local slider_bg = self._slider:child("bg")
     self:SetValueByPercentage((x - slider_bg:world_left()) / (slider_bg:world_right() - slider_bg:world_left()))
 end

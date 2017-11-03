@@ -31,7 +31,7 @@ function AddFramework:Load()
         for _, dir in pairs(dirs) do
             local p = path:Combine(self._directory, dir)
             local main_file = path:Combine(p, self.main_file_name)
-			local add_file = path:Combine(p, self.add_file)
+            local add_file = path:Combine(p, self.add_file)
             if FileIO:Exists(main_file) then
                 self:LoadMod(dir, p, main_file)
             elseif not self._ignore_detection_errors then

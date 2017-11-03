@@ -105,9 +105,9 @@ function NarrativeModule:AddNarrativeData(narr_self, tweak_data)
     if self._config.merge_data then
         table.merge(data, BeardLib.Utils:RemoveMetas(self._config.merge_data, true))
     end
-    narr_self.jobs[self._config.id] = data
+    narr_self.jobs[tostring(self._config.id)] = data
     if #data.chain > 0 then 
-        table.insert(narr_self._jobs_index, self._config.id)
+        table.insert(narr_self._jobs_index, tostring(self._config.id))
     end
     narr_self:set_job_wrappers()
 end

@@ -4,9 +4,9 @@ function ContextMenu:init(owner, layer)
     self.owner = owner
     self.parent = owner.parent
     self.menu = owner.menu
-    local control_size = owner.bigger_context_menu and owner:Panel():w() or owner.panel:w() / owner.control_slice
-    local bgcolor = self.parent.background_color or Color.white
-    bgcolor = bgcolor:with_alpha(math.max(bgcolor.a, 0.85))
+    local control_size = owner.bigger_context_menu and owner:Panel():w() or owner.panel:w() * owner.control_slice
+    local bgcolor = self.owner.context_background_color or self.parent.background_color or Color.white
+    bgcolor = bgcolor:with_alpha(math.max(bgcolor.a, 0.75))
     self.panel = self.menu._panel:panel({
         name = owner.name.."list",
         w = control_size,
@@ -24,7 +24,7 @@ function ContextMenu:init(owner, layer)
     })
     if owner.searchbox then
         self._textbox = BeardLib.Items.TextBoxBase:new(self, {
-            text_color = bgcolor:contrast(),
+            foreground = bgcolor:contrast(),
             panel = self.panel,
             align = "center",
             lines = 1,
@@ -37,7 +37,7 @@ function ContextMenu:init(owner, layer)
         padding = 0.0001, 
         scroll_width = owner.scrollbar == false and 0 or self.parent.scroll_width or 12,
         hide_shade = true, 
-        color = owner.scroll_color or owner.marker_highlight_color,
+        color = owner.scroll_color or owner.highlight_color,
         scroll_speed = owner.scroll_speed or 48
     })
     self._my_items = {}
@@ -52,8 +52,8 @@ function ContextMenu:alive() return alive(self.panel) end
 function ContextMenu:CheckItems()
     self._visible_items = {}
     local p = self.items_panel
-    for _, item in ipairs(self._item_panels) do
-        item:set_visible(p:inside(p:world_x(), self.panel:world_y()) == true or p:inside(p:world_x(), self.panel:world_bottom()) == true)
+	for _, item in ipairs(self._item_panels) do
+        item:set_visible(p:inside(p:world_x(), item:world_y()) == true or p:inside(p:world_x(), item:world_bottom()) == true)
         if item:visible() then
             table.insert(self._visible_items, item)
         end
@@ -89,8 +89,8 @@ function ContextMenu:CreateItems()
         })
         panel:rect({
             name = "bg",
-            color = self.owner.marker_color,
-            alpha = self.owner.marker_alpha,
+            color = self.owner.background_color,
+            alpha = 0,
             h = self.type_name == "Group" and self.items_size,
             halign = self.type_name ~= "Group" and "grow",
             valign = self.type_name ~= "Group" and "grow",
@@ -130,7 +130,6 @@ function ContextMenu:reposition()
         self.panel:set_world_bottom(self.owner.panel:world_y())
     end
     self._scroll:panel():set_y(self.owner.searchbox and self.owner.items_size or 0) 
-    self._scroll:panel():set_y(self.owner.searchbox and self.owner.items_size or 0) 
     self._scroll:set_size(self.panel:w(), self.panel:h() - (self.owner.searchbox and self.owner.items_size or 0))
 
     self._scroll:panel():child("scroll_up_indicator_arrow"):set_top(6 - self._scroll:y_padding())
@@ -150,7 +149,7 @@ function ContextMenu:show()
     end
     self:reposition()
     self.panel:show()
-    self:CheckItems()
+    self:update_search()
     self.menu._openlist = self
 end
 
@@ -238,7 +237,7 @@ function ContextMenu:HightlightItem(item, highlight)
         self:HightlightItem(self._highlighting, false)
         self._highlighting = item
     end
-    item:child("bg"):set_color(highlight and self.owner.marker_highlight_color or self.owner.marker_color or Color.white)
+    play_color(item:child("bg"), highlight and self.owner.highlight_color or self.owner.background_color or Color.white)
 end
 
 function ContextMenu:MouseMoved(x, y)
