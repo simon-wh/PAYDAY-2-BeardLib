@@ -1042,11 +1042,11 @@ function play_color(o, color, params)
     local ov = o:color()
     if color then
         o:animate(function()
+            o:script().animating = true        
             if wait_time then
                 time = time + wait_time
                 anim_wait(wait_time)
             end
-            o:script().animating = true
             anim_over(time, function (t)
                 o:set_color(Color(easing(ov.a, color.a, t), easing(ov.r, color.r, t), easing(ov.g, color.g, t), easing(ov.b, color.b, t)))
             end)
@@ -1073,11 +1073,11 @@ function play_value(o, value_name, value, params)
     local func = ClassClbk(o, "set_"..value_name)
     if value then
         o:animate(function()
+            o:script().animating = true
             if wait_time then
                 time = time + wait_time
                 anim_wait(wait_time)
             end
-            o:script().animating = true
             anim_over(time, function (t)
                 func(easing(ov, value, t))
             end)
