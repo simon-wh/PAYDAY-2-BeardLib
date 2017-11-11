@@ -3,25 +3,37 @@ ModAssetsModule.type_name = "AssetUpdates"
 ModAssetsModule._default_version_file = "version.txt"
 ModAssetsModule._providers = {
     modworkshop = {
-        version_api_url = "https://manager.modworkshop.net/GetDownloadVersion/$id$.txt",
-        download_info_url = "https://manager.modworkshop.net/GetSingleDownload/$id$.json",
-        download_api_url = "https://modworkshop.net/mydownloads/downloads/$download$",
-        page_url = "https://modwork.shop/$id$"
+        check_url = "https://api.modwork.shop/api.php?command=CompareVersion&did=$id$&vid=$version$&steamid=$steamid$&token=Je3KeUETqqym6V8b5T7nFdudz74yWXgU",
+        get_files_url = "https://api.modwork.shop/api.php?command=AssocFiles&did=$id$&steamid=$steamid$&token=Je3KeUETqqym6V8b5T7nFdudz74yWXgU",
+        download_url = "https://api.modwork.shop/api.php?command=DownloadFile&fid=$fid$&steamid=$steamid$&token=Je3KeUETqqym6V8b5T7nFdudz74yWXgU",
+        page_url = "https://modwork.shop/$id$",
+        check_func = function(self)
+            if not self.id or self.id <= 0 then
+                return
+            end
+            local check_url = self._mod:GetRealFilePath(self.provider.check_url, self)
+            dohttpreq(check_url, function(data, id)
+                if data then
+                    data = string.sub(data, 0, #data - 1)
+                    if data ~= "false" and data ~= "true" then
+                        self._new_version = data
+                        self:PrepareForUpdate()
+                    end
+                end
+            end)            
+        end,
+        download_file_func = function(self)
+            local get_files_url = self._mod:GetRealFilePath(self.provider.get_files_url, self)
+            dohttpreq(get_files_url, function(data, id)
+                local splt = string.split(data, '"')
+                for i=1, #splt, 2 do
+                    self:_DownloadAssets({fid = splt[i], steamid = self.steamid})
+                    break
+                end
+            end)
+        end
     }
 }
-ModAssetsModule._providers.modworkshop.download_file_func = function(self)
-    local download_info_url = self._mod:GetRealFilePath(self.provider.download_info_url, self)
-    dohttpreq(download_info_url,
-        function(data, id)
-            local ret, d_data = pcall(function() return json.decode(data) end)
-            if ret then
-                self:_DownloadAssets(d_data[tostring(self.id)])
-            else
-                self:log("Failed to parse the data received from Modworkshop!")
-            end
-        end
-    )
-end
 ModAssetsModule._providers.lastbullet = clone(ModAssetsModule._providers.modworkshop)
 
 function ModAssetsModule:init(core_mod, config)
@@ -30,6 +42,7 @@ function ModAssetsModule:init(core_mod, config)
         return false
     end
 
+    self.steamid = Steam:userid()
     self.id = self._config.id
 
     if self._config.provider then
@@ -41,7 +54,7 @@ function ModAssetsModule:init(core_mod, config)
         end
     elseif self._config.custom_provider then
         local provider_details = self._config.custom_provider
-        if provider_details.update_func then provider_details.update_func = self._mod:StringToCallback(provider_details.update_func, self) end
+        if provider_details.check_func then provider_details.check_func = self._mod:StringToCallback(provider_details.check_func, self) end
         if provider_details.download_file_func then provider_details.download_file_func = self._mod:StringToCallback(provider_details.download_file_func, self) end
         self.provider = provider_details
     else
@@ -52,7 +65,7 @@ function ModAssetsModule:init(core_mod, config)
     self.folder_names = self._config.use_local_dir and {table.remove(string.split(self._mod.ModPath, "/"))} or (type(self._config.folder_name) == "string" and {self._config.folder_name} or BeardLib.Utils:RemoveNonNumberIndexes(self._config.folder_name))
     self.install_directory = (self._config.install_directory and self._mod:GetRealFilePath(self._config.install_directory, self)) or (self._config.use_local_path ~= false and BeardLib.Utils.Path:GetDirectory(self._mod.ModPath)) or BeardLib.config.mod_override_dir
     self.version_file = self._config.version_file and self._mod:GetRealFilePath(self._config.version_file, self) or BeardLib.Utils.Path:Combine(self.install_directory, self.folder_names[1], self._default_version_file)
-    self._version = 0
+    self.version = 0
     
     self._update_manager_id = self._mod.Name .. self._name
     self._mod.update_key = (self._config.is_standalone ~= false) and self.id
@@ -82,16 +95,16 @@ function ModAssetsModule:RetrieveCurrentVersion()
     if FileIO:Exists(self.version_file) then
         local version = io.open(self.version_file):read("*all")
         if tonumber(version) then
-            self._version = tonumber(version)
+            self.version = tonumber(version)
         else
             self:log("[ERROR] Unable to parse version '%s' as a number. File: %s", version, self.version_file)
         end
     elseif tonumber(self._config.version) then
-        self._version = tonumber(self._config.version)
+        self.version = tonumber(self._config.version)
     else
         self:log("[ERROR] Unable to get version for '%s's assets. File: %s", self._mod.Name, self.version_file)
     end
-    self._version = BeardLib.Utils.Math:Round(self._version, 4)
+    self.version = BeardLib.Utils.Math:Round(self.version, 4)
 end
 
 function ModAssetsModule:CheckVersion(force)
@@ -99,10 +112,19 @@ function ModAssetsModule:CheckVersion(force)
         return
     end
 
-    if self.provider.update_func then
-        self.provider.update_func(force)
+    if self.provider.check_func then
+        self.provider.check_func(self, force)
     else
         self:_CheckVersion(force)
+    end
+end
+
+function ModAssetsModule:PrepareForUpdate()
+    BeardLib.managers.mods_menu:SetModNeedsUpdate(self._mod, self._new_version)
+    if self._config.important then
+        QuickMenuPlus:new(loc:text("beardlib_mods_manager_important_title", {mod = self._mod.Name}), loc:text("beardlib_mods_manager_important_help"), {{text = loc:text("dialog_yes"), callback = function()
+            BeardLib.managers.mods_menu:SetEnabled(true)
+        end}, {text = loc:text("dialog_no"), is_cancel_button = true}})
     end
 end
 
@@ -110,21 +132,15 @@ function ModAssetsModule:_CheckVersion(force)
     local version_url = self._mod:GetRealFilePath(self.provider.version_api_url, self)
     local loc = managers.localization
     dohttpreq(version_url, function(data, id)
-        self:log("Received version '%s' from the server(local is %s)", tostring(data), tostring(self._version))
+        self:log("Received version '%s' from the server(local is %s)", tostring(data), tostring(self.version))
         if tonumber(data) then
             self._new_version = tonumber(data)
-            if self._new_version > self._version then
-                BeardLib.managers.mods_menu:SetModNeedsUpdate(self._mod, self._new_version)
-                if self._config.important then
-                    QuickMenuPlus:new(loc:text("beardlib_mods_manager_important_title", {mod = self._mod.Name}), loc:text("beardlib_mods_manager_important_help"), {{text = loc:text("dialog_yes"), callback = function()
-                        BeardLib.managers.mods_menu:SetEnabled(true)
-                    end}, {text = loc:text("dialog_no"), is_cancel_button = true}})
-                end
+            if self._new_version and self._new_version ~= self.version then
+                self:PrepareForUpdate()
             elseif force then
                 self:ShowNoChangePrompt()
             end
         else
-            --self:ShowErrorPrompt()
             self:log("[ERROR] Unable to parse string '%s' as a version number", data)
         end
     end)
@@ -134,20 +150,6 @@ function ModAssetsModule:ShowNoChangePrompt()
     QuickMenu:new(
         managers.localization:text("beardlib_no_change"),
         managers.localization:text("beardlib_no_change_desc"),
-        {
-            {
-                text = managers.localization:text("menu_ok"),
-                is_cancel_button = true
-            }
-        },
-        true
-    )
-end
-
-function ModAssetsModule:ShowErrorPrompt()
-    QuickMenu:new(
-        managers.localization:text("mod_assets_error"),
-        managers.localization:text("mod_assets_error_desc"),
         {
             {
                 text = managers.localization:text("menu_ok"),
@@ -180,7 +182,7 @@ function ModAssetsModule:ViewMod()
 end
 
 function ModAssetsModule:_DownloadAssets(data)
-    local download_url = self._mod:GetRealFilePath(self.provider.download_api_url, data or self)
+    local download_url = self._mod:GetRealFilePath(self.provider.download_url, data or self)
     self:log("Downloading assets from url: %s", download_url)
     local mods_menu = BeardLib.managers.mods_menu
     dohttpreq(download_url, callback(self, self, "StoreDownloadedAssets", false), callback(mods_menu, mods_menu, "SetModProgress", self._mod))
@@ -237,7 +239,7 @@ function ModAssetsModule:StoreDownloadedAssets(config, data, id)
         if config.done_callback then
             config.done_callback()
         end
-        self._version = self._new_version        
+        self.version = self._new_version        
         if config.finish then
             config.finish()
         else

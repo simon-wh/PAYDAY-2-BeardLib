@@ -22,12 +22,20 @@ function Toggle:Init()
         texture = "guis/textures/menu_ui_icons",
         texture_rect = {41, 89, 36, 36},
 		color = fgcolor,
-		layer = 6,
+		layer = 5,
 	})
     self.toggle:set_center_y(self.panel:h() / 2)
     self.toggle:set_right(self.panel:w() - 2)
 	self.toggle_value:set_center(self.toggle:center())
 	self:UpdateToggle(true)
+end
+
+function Toggle:SetEnabled(enabled)
+	Toggle.super.SetEnabled(self, enabled)
+	if self:alive() then
+		--toggle and toggle value alpha isn't the same as some cases.. :/
+		self.toggle:set_alpha(self.enabled and 1 or 0.05)
+	end
 end
 
 function Toggle:SetValue(value, run_callback)
@@ -38,9 +46,8 @@ end
 function Toggle:UpdateToggle(value_changed, highlight)
 	local value = self.value
 	if alive(self.panel) then
-		local fgcolor = self:GetForeground(highlight)		
+		local fgcolor = self:GetForeground(highlight)
 		local s = value and self.items_size - 4 or 0
-		self.toggle_value:set_alpha(1)
 		play_color(self.toggle, fgcolor)
 		play_anim(self.toggle_value, {
 			after = function()

@@ -82,6 +82,8 @@ function BeardLibModsMenu:CreateItems(menu)
         name = "search",
         text = "beardlib_search",
         w = 300,
+        line_color = self._holder.foreground,
+        control_slice = 0.7,
         localized = true,
         items_size = 24,
         position = function(item)
@@ -146,6 +148,8 @@ function BeardLibModsMenu:AddMod(mod, type)
             text = t,
         }, opt))
     end
+    local img = mod._config.image
+    img = img and DB:has(Idstring("texture"), Idstring(mod._config.image)) and img or nil
     mod_item:Image({
         name = "Image",
         w = 100,
@@ -156,7 +160,7 @@ function BeardLibModsMenu:AddMod(mod, type)
         foreground = Color.white,
         auto_foreground = mod._config.auto_image_color or not mod._config.image,
         count_as_aligned = true,
-        texture = mod._config.image or "guis/textures/pd2/none_icon",
+        texture = img or "guis/textures/pd2/none_icon",
         position = "CenterTop"
     })
     local t = text(tostring(name), {name = "Title", items_size = 20, offset = {4, 0}})
@@ -215,7 +219,7 @@ function BeardLibModsMenu:UpdateTitle(mod)
     local mod_item = self._list:GetItemByLabel(mod)
     if mod_item then
         local title = mod_item:GetItem("Title")
-        title:SetText((mod.Name or "Missing name?") ..(mod.update_assets_module and "("..mod.update_assets_module._version..")" or ""))
+        title:SetText((mod.Name or "Missing name?") ..(mod.update_assets_module and "("..mod.update_assets_module.version..")" or ""))
     end
 end
 
