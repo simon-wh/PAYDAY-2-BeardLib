@@ -28,6 +28,8 @@ if not _G.BeardLib then
 		self:LoadModules()
 		FileIO:MakeDir(self.config.maps_dir)
 
+		Global.beardlib_checked_updates = Global.beardlib_checked_updates or {}
+		
 		local languages = {}
 		for i, file in pairs(FileIO:GetFiles(self.config.localization_dir)) do
 			local lang = Path:GetFileNameWithoutExtension(file)

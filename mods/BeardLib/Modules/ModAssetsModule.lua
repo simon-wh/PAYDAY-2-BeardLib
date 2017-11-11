@@ -11,13 +11,25 @@ ModAssetsModule._providers = {
             if not self.id or self.id <= 0 then
                 return
             end
+            --optimization, mostly you don't really need to check updates again when going back to menu
+            local upd = Global.beardlib_checked_updates[self.id]
+            if upd then
+                if type(upd) == "string" then
+                    self._new_version = upd
+                    self:PrepareForUpdate()
+                end
+                return
+            end
             local check_url = self._mod:GetRealFilePath(self.provider.check_url, self)
             dohttpreq(check_url, function(data, id)
                 if data then
                     data = string.sub(data, 0, #data - 1)
                     if data ~= "false" and data ~= "true" then
                         self._new_version = data
+                        Global.beardlib_checked_updates[self.id] = data
                         self:PrepareForUpdate()
+                    else
+                        Global.beardlib_checked_updates[self.id] = true
                     end
                 end
             end)            
@@ -28,6 +40,7 @@ ModAssetsModule._providers = {
                 local splt = string.split(data, '"')
                 for i=1, #splt, 2 do
                     self:_DownloadAssets({fid = splt[i], steamid = self.steamid})
+                    Global.beardlib_checked_updates[self.id] = nil --check again later for hotfixes.
                     break
                 end
             end)
