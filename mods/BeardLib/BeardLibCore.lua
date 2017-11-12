@@ -45,7 +45,7 @@ if not _G.BeardLib then
 				module:post_init()
 			end
 		end
-		self.Version = self.AssetUpdates.version
+		self.Version = tonumber(self.AssetUpdates.version)
 		
 		for k, manager in pairs(self.managers) do
 			if manager.new then

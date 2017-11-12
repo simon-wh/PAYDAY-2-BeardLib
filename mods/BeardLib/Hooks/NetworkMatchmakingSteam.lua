@@ -46,7 +46,7 @@ function NetworkMatchMakingSTEAM:_lobby_to_numbers(lobby, ...)
 	if is_key_valid(level_name) then
 		log("Received level real name: " .. tostring(level_name))
 		if is_key_valid(level_update_key) then
-			log("Received level update key: " .. tostring(level_update_key))
+			log("Received custom map did: " .. tostring(level_update_key))
 			data["level_id"] = lobby:key_value("level_id")
 			data["job_key"] = lobby:key_value("job_key")
 			data["level_update_key"] = level_update_key
@@ -92,9 +92,14 @@ Hooks:Add(seta_hook, "BeardLibCorrectCustomHeist", function(self, new_data, sett
 	local _job_key = tweak_data.narrative._jobs_index[job_index]
 	local level_id = (_level_id and tweak_data.levels[_level_id] and tweak_data.levels[_level_id].custom) and _level_id or nil
 	local job_key = (_job_key and tweak_data.narrative.jobs[_job_key] and tweak_data.narrative.jobs[_job_key].custom) and _job_key or nil
-	if level_id or job_key then
-		local mod = BeardLib.managers.MapFramework:GetModByName(_job_key)
+	local mod = BeardLib.managers.MapFramework:GetMapByJobId(_job_key)
+	if mod and (level_id or job_key) then
 		--Localization might be an issue..
-		table.merge(new_data, {custom_level_name = managers.localization:to_upper_text(tweak_data.levels[level_id].name_id), level_id = level_id, job_key = job_key, level_update_key = mod and mod.update_key})
+		table.merge(new_data, {
+			custom_level_name = managers.localization:to_upper_text(tweak_data.levels[level_id].name_id),
+			level_id = level_id, 
+			job_key = job_key,
+			level_update_key = mod and mod.update_key and mod.update_key >= 1 and mod.update_key 
+		})
 	end
 end)

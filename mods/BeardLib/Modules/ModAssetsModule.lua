@@ -8,7 +8,8 @@ ModAssetsModule._providers = {
         download_url = "https://api.modwork.shop/api.php?command=DownloadFile&fid=$fid$&steamid=$steamid$&token=Je3KeUETqqym6V8b5T7nFdudz74yWXgU",
         page_url = "https://modwork.shop/$id$",
         check_func = function(self)
-            if not self.id or self.id <= 0 then
+            local id = tonumber(self.id)
+            if not id or id <= 0 then
                 return
             end
             --optimization, mostly you don't really need to check updates again when going back to menu
@@ -37,12 +38,11 @@ ModAssetsModule._providers = {
         download_file_func = function(self)
             local get_files_url = self._mod:GetRealFilePath(self.provider.get_files_url, self)
             dohttpreq(get_files_url, function(data, id)
-                local splt = string.split(data, '"')
-                for i=1, #splt, 2 do
-                    self:_DownloadAssets({fid = splt[i], steamid = self.steamid})
+                local fid = string.split(data, '"')[1]
+                if fid then
+                    self:_DownloadAssets({fid = fid, steamid = self.steamid})
                     Global.beardlib_checked_updates[self.id] = nil --check again later for hotfixes.
-                    break
-                end
+                end    
             end)
         end
     }
@@ -107,17 +107,17 @@ end
 function ModAssetsModule:RetrieveCurrentVersion()
     if FileIO:Exists(self.version_file) then
         local version = io.open(self.version_file):read("*all")
-        if tonumber(version) then
-            self.version = tonumber(version)
-        else
-            self:log("[ERROR] Unable to parse version '%s' as a number. File: %s", version, self.version_file)
+        if version then
+            self.version = version
         end
-    elseif tonumber(self._config.version) then
-        self.version = tonumber(self._config.version)
+    elseif self._config.version then
+        self.version = self._config.version
     else
         self:log("[ERROR] Unable to get version for '%s's assets. File: %s", self._mod.Name, self.version_file)
     end
-    self.version = BeardLib.Utils.Math:Round(self.version, 4)
+    if tonumber(self.version) then -- has to be here, xml seems to fuckup numbers.
+        self.version = BeardLib.Utils.Math:Round(tonumber(self.version), 4)
+    end
 end
 
 function ModAssetsModule:CheckVersion(force)
@@ -135,6 +135,7 @@ end
 function ModAssetsModule:PrepareForUpdate()
     BeardLib.managers.mods_menu:SetModNeedsUpdate(self._mod, self._new_version)
     if self._config.important then
+        local loc = managers.localization
         QuickMenuPlus:new(loc:text("beardlib_mods_manager_important_title", {mod = self._mod.Name}), loc:text("beardlib_mods_manager_important_help"), {{text = loc:text("dialog_yes"), callback = function()
             BeardLib.managers.mods_menu:SetEnabled(true)
         end}, {text = loc:text("dialog_no"), is_cancel_button = true}})
@@ -146,8 +147,8 @@ function ModAssetsModule:_CheckVersion(force)
     local loc = managers.localization
     dohttpreq(version_url, function(data, id)
         self:log("Received version '%s' from the server(local is %s)", tostring(data), tostring(self.version))
-        if tonumber(data) then
-            self._new_version = tonumber(data)
+        if data then
+            self._new_version = data
             if self._new_version and self._new_version ~= self.version then
                 self:PrepareForUpdate()
             elseif force then

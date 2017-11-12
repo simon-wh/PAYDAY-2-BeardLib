@@ -26,6 +26,19 @@ function MapFramework:RegisterHooks()
     end
 end
 
+function MapFramework:GetMapByJobId(job_id)
+    for _, map in pairs(self._loaded_mods) do
+        if map._modules then
+            for _, module in pairs(map._modules) do
+                if module.type_name == "narrative" and module._config and module._config.id == job_id then
+                    return map
+                end
+            end
+        end
+    end
+    return nil
+end
+
 function MapFramework:AddCustomContact()
     ContactModule:new(BeardLib, {
         id = "custom",

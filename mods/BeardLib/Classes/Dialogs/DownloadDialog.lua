@@ -55,6 +55,7 @@ function DownloadDialog:SetFinished()
     self:SetStatus("beardlib_done")
     self._menu:GetItem("No"):SetEnabled(true)
     self._allowed_to_cancel = true
+    self:hide()
 end
 
 function DownloadDialog:SetStatus(status, not_localized)

@@ -331,7 +331,8 @@ function BeardLib.Utils:CheckParamValidty(func_name, vari, var, desired_type, al
     return true
 end
 
-function BeardLib.Utils:DownloadMap(level_name, update_key, done_callback)
+function BeardLib.Utils:DownloadMap(level_name, id, done_callback)
+    local lookup_tbl = {id = tostring(id), steamid = Steam:userid()}
     local function done_map_download()
         BeardLib.managers.MapFramework:Load()
         BeardLib.managers.MapFramework:RegisterHooks()
@@ -343,10 +344,11 @@ function BeardLib.Utils:DownloadMap(level_name, update_key, done_callback)
     end
     QuickMenuPlus:new(managers.localization:text("custom_map_alert"), managers.localization:text("custom_map_needs_download"), {{text = "Yes", callback = function()
         local provider = ModAssetsModule._providers.modworkshop --temporarily will support only mws
-        dohttpreq(ModCore:GetRealFilePath(provider.download_info_url, tostring(update_key)), function(data, id)
-            local ret, d_data = pcall(function() return json.decode(data) end)
-            if ret then			
-                local download_url = ModCore:GetRealFilePath(provider.download_api_url, d_data[tostring(update_key)])
+        dohttpreq(ModCore:GetRealFilePath(provider.get_files_url, lookup_tbl), function(data, id)
+            local fid = string.split(data, '"')[1]
+            if fid then
+                lookup_tbl.fid = fid
+                local download_url = ModCore:GetRealFilePath(provider.download_url, lookup_tbl)
                 BeardLib:log("Downloading map from url: %s", download_url)
                 local dialog = BeardLib.managers.dialog.download
                 dialog:Show({title = managers.localization:text("beardlib_downloading")..level_name or "No Map Name", force = true})				
@@ -373,8 +375,8 @@ function BeardLib.Utils:GetJobString()
     local level_id = Global.game_settings.level_id
     local job_id = managers.job:current_job_id()
     local level = tweak_data.levels[level_id]
-    local mod = BeardLib.managers.MapFramework:GetModByName(job_id)
-    local update_key = mod and mod.update_key
+    local mod = BeardLib.managers.MapFramework:GetMapByJobId(job_id)
+    local update_key = mod and mod.update_key    
     local str = string.format("%s|%s|%s|%s|%s", job_id, level_id, Global.game_settings.difficulty, managers.localization:to_upper_text(level and level.name_id or ""), update_key or "")
     return str
 end
