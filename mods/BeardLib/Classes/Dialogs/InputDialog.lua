@@ -1,8 +1,9 @@
 InputDialog = InputDialog or class(MenuDialog)
 InputDialog.type_name = "InputDialog"
 function InputDialog:init(params, menu)
-    params = params or {}
-    params = deep_clone(params)
+    if self.type_name == InputDialog.type_name then
+        params = clone(params or {})
+    end
     self._is_input = true
     InputDialog.super.init(self, table.merge(params, {
         offset = 8,
@@ -35,6 +36,7 @@ function InputDialog:_Show(params)
         text = "",
         offset = 0,
         highlight_color = false,
+        reachable = true,
         line_color = Color.transparent,
         control_slice = 1,
         filter = params.filter,

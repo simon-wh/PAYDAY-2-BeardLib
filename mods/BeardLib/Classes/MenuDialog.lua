@@ -1,7 +1,10 @@
 MenuDialog = MenuDialog or class()
 MenuDialog.type_name = "MenuDialog"
 function MenuDialog:init(params, menu)
-    params = params or {}
+    if self.type_name == MenuDialog.type_name then
+        params = deep_clone(params or {})
+        menu = menu or BeardLib.managers.dialog:Menu()
+    end
     self._default_width = 420
     self._no_blur = params.no_blur
     self._tbl = {}
@@ -39,6 +42,12 @@ function MenuDialog:_Show(params)
     if not self:basic_show(params) then
         return false
     end
+    self:CreateCustomStuff(params)
+    self:show_dialog()
+    return true
+end
+
+function MenuDialog:CreateCustomStuff(params)
     if params.title then
         self._menu:Divider(table.merge({
             name = "Title",
@@ -74,8 +83,6 @@ function MenuDialog:_Show(params)
             callback = callback(self, self, "hide")
         })
     end
-    self:show_dialog()
-    return true
 end
 
 function MenuDialog:show_dialog()

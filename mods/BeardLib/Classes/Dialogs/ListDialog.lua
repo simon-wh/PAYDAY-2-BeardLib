@@ -2,22 +2,17 @@ ListDialog = ListDialog or class(MenuDialog)
 ListDialog.type_name = "ListDialog"
 ListDialog._no_reshaping_menu = true
 function ListDialog:init(params, menu)
-    params = params or {}
-    params = deep_clone(params)
+    if self.type_name == ListDialog.type_name then
+        params = clone(params or {})
+    end
+
     menu = menu or BeardLib.managers.dialog:Menu()
-    self._list_menu = menu:Menu(table.merge({
-        w = 900,
-        h = params.h and params.h - 20 or 600,
-        name = "List",
-        items_size = 18,
-        auto_foreground = true,
-        auto_align = false,
-        position = params.position or "Center",
-        visible = false,
-    }, params))
     
+    local w,h = params.w, params.h
+    params.h = nil
+
     ListDialog.super.init(self, table.merge({
-        h = 20,
+        h = params.main_h or 20,
         w = 900,
         items_size = 20,
         offset = 0,
@@ -25,6 +20,22 @@ function ListDialog:init(params, menu)
         align_method = "grid",
         auto_align = true
     }, params), menu)
+
+    params.h = h
+
+    self._list_menu = menu:Menu(table.merge({
+        name = "List",        
+        w = 900,
+        h = params.h and params.h - self._menu.h or 600,
+        items_size = 18,
+        auto_foreground = true,
+        auto_align = false,
+        background_color = self._menu.background_color,
+        accent_color = self._menu.accent_color,
+        position = params.position or "Center",
+        visible = false,
+    }, params))
+    
     self._menus = {self._list_menu}
     self._menu:Panel():set_leftbottom(self._list_menu:Panel():left(), self._list_menu:Panel():top() - 1)
 end
@@ -41,8 +52,8 @@ function ListDialog:_Show(params)
     self._menu:TextBox({
         name = "Search",
         w = tw,
-        control_slice = 0.9,
-        text = "Search",
+        control_slice = 1,
+        text = false,
         callback = callback(self, self, "Search"),  
         label = "temp"
     })

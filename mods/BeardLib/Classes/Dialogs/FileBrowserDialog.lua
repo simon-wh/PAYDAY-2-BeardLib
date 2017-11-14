@@ -15,9 +15,11 @@ function FileBrowserDialog:_Show(params, force)
 end
 
 function FileBrowserDialog:init(params, menu)  
+    if self.type_name == FileBrowserDialog.type_name then
+        params = clone(params or {})
+    end
     menu = menu or BeardLib.managers.dialog:Menu()
-    params = params or {}
-    params = deep_clone(params)
+    
     self._folders_menu = menu:Menu(table.merge(params, {
         w = 300,
         h = 600,

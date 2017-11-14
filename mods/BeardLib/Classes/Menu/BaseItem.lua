@@ -109,7 +109,7 @@ function BaseItem:WorkParams(params)
 	end
 	self:WorkParam("items_size", 16)
 	self:WorkParam("enabled_alpha", 1)
-	self:WorkParam("disabled_alpha", 0.25)
+	self:WorkParam("disabled_alpha", 0.5)
 	self:WorkParam("background_alpha")
 	self:WorkParam("text_align", "left")
 	self:WorkParam("text_vertical", "center")

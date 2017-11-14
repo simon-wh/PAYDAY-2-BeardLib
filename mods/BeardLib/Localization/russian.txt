@@ -43,5 +43,6 @@
     "beardlib_close" : "Закрыть",
     "beardlib_mods_manager_important_title" : "The mod $mod has a new version!",
     "beardlib_mods_manager_important_help" : "Go to BeardLib Mods Manager to update?",
-    "beardlib_search" : "Search"
+    "beardlib_search" : "Search",
+    "beardlib_important_notice" : "Show update notice"
 }

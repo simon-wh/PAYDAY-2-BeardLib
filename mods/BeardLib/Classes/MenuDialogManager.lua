@@ -12,6 +12,8 @@ function MenuDialogManager:Init()
     self.simple = MenuDialog:new()
     self.list = ListDialog:new()
     self.select_list = SelectListDialog:new()
+    self.simple_list = SimpleListDialog:new()
+    self.simple_select_list = SimpleSelectListDialog:new()
     self.color = ColorDialog:new()
     self.filebrowser = FileBrowserDialog:new()
     self.input = InputDialog:new()
@@ -131,6 +133,8 @@ end
 function MenuDialogManager:paused_update() self:update() end
 function MenuDialogManager:List() return self.list end
 function MenuDialogManager:SelectList() return self.select_list end
+function MenuDialogManager:SimpleList() return self.simple_list end
+function MenuDialogManager:SimpleSelectList() return self.simple_select_list end
 function MenuDialogManager:Color() return self.color end
 function MenuDialogManager:FileBrowser() return self.filebrowser end
 function MenuDialogManager:Input() return self.input end

@@ -5,6 +5,7 @@ function BeardLibModsMenu:init()
         name = "BeardLibEditorMods",
         layer = 1000,
         offset = 6,
+        show_help_time = 0.1,
         animate_toggle = true,
         auto_foreground = true,
         accent_color = accent_color,
@@ -51,7 +52,7 @@ function BeardLibModsMenu:CreateItems(menu)
         name = "title",
         text = "beardlib_mods_manager",
         localized = true,
-        items_size = 24,
+        items_size = 20,
         position = {4, 6},
         count_as_aligned = true
     })
@@ -60,7 +61,7 @@ function BeardLibModsMenu:CreateItems(menu)
         text = "beardlib_close",
         size_by_text = true,
         localized = true,
-        items_size = 24,
+        items_size = 20,
         position = function(item)
             item:SetPositionByString("RightTop")
             item:Panel():move(-4, 6)
@@ -72,22 +73,35 @@ function BeardLibModsMenu:CreateItems(menu)
         text = "beardlib_update_all",
         size_by_text = true,
         localized = true,
-        items_size = 24,
+        items_size = 20,
         position = function(item)
             item:Panel():set_righttop(close:Panel():left() - 4, close:Panel():y())
         end,
-        callback = callback(self, self, "UpdateAllMods")
+        callback = callback(self, self, "UpdateAllMods", true),
+        second_callback = callback(self, self, "UpdateAllMods")
+    })
+    self._holder:Toggle({
+        name = "ImportantNotice",
+        text = "beardlib_important_notice",
+        value = BeardLib.Options:GetValue("ImportantNotice"),
+        size_by_text = true,
+        localized = true,
+        items_size = 20,
+        position = function(item)
+            item:Panel():set_righttop(upall:Panel():left() - 4, upall:Panel():y())
+        end,
+        callback = callback(self, self, "SetShowImportantUpdatesNotice")
     })
     self._holder:TextBox({
         name = "search",
-        text = "beardlib_search",
+        text = false,
         w = 300,
         line_color = self._holder.foreground,
-        control_slice = 0.7,
-        localized = true,
-        items_size = 24,
+        control_slice = 1,
+        items_size = 20,
         position = function(item)
-            item:Panel():set_righttop(upall:Panel():left() - 4, upall:Panel():y())
+            item:SetPositionByString("Center")
+            item:Panel():set_y(upall:Panel():y())
         end,
         callback = callback(self, self, "SearchMods")
     })
@@ -115,7 +129,7 @@ end
 
 function BeardLibModsMenu:AddMod(mod, type)
     local loc = managers.localization
-    local disabled_mods = BeardLib.Options:GetValue("DisabledMods")    
+    local disabled_mods = BeardLib.Options:GetValue("DisabledMods")
     local name = mod.Name or "Missing name?"
     local blt_mod = type == "blt"
     local color = blt_mod and Color(0.6, 0, 1) or type == "custom" and Color(0, 0.25, 1) or Color(0.1, 0.6, 0.1)
@@ -246,13 +260,34 @@ function BeardLibModsMenu:SearchMods(menu, item)
     self._list:AlignItems()
 end
 
-function BeardLibModsMenu:UpdateAllMods()
+function BeardLibModsMenu:UpdateAllMods(no_dialog)
+    local tbl = {}
     for _, mod_item in pairs(self._list._my_items) do
         local download = mod_item:GetItem("Download")
         if download:Enabled() then
+            table.insert(tbl, {name = mod_item.name, value = mod_item})
+        end
+    end
+
+    if no_dialog == true then
+        self:UpdatesModsByList(tbl)
+    else
+        BeardLib.managers.dialog:SimpleSelectList():Show({force = true, list = tbl, selected_list = tbl, callback = callback(self, self, "UpdatesModsByList")})
+    end
+end
+
+function BeardLibModsMenu:UpdatesModsByList(list)
+    for _, item in pairs(list) do
+        local download = item.value:GetItem("Download")
+        if download:Enabled() then
+            download:SetEnabled(false)
             download:RunCallback()
         end
     end
+end
+
+function BeardLibModsMenu:SetShowImportantUpdatesNotice(menu, item)
+    BeardLib.Options:SetValue("ImportantNotice", item:Value())    
 end
 
 function BeardLibModsMenu:ViewMod(mod)

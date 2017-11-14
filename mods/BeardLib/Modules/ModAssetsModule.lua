@@ -15,7 +15,7 @@ ModAssetsModule._providers = {
             --optimization, mostly you don't really need to check updates again when going back to menu
             local upd = Global.beardlib_checked_updates[self.id]
             if upd then
-                if type(upd) == "string" then
+                if type(upd) == "string" and upd ~= tostring(self.version) then
                     self._new_version = upd
                     self:PrepareForUpdate()
                 end
@@ -33,7 +33,7 @@ ModAssetsModule._providers = {
                         Global.beardlib_checked_updates[self.id] = true
                     end
                 end
-            end)            
+            end)
         end,
         download_file_func = function(self)
             local get_files_url = self._mod:GetRealFilePath(self.provider.get_files_url, self)
@@ -134,7 +134,7 @@ end
 
 function ModAssetsModule:PrepareForUpdate()
     BeardLib.managers.mods_menu:SetModNeedsUpdate(self._mod, self._new_version)
-    if self._config.important then
+    if self._config.important and BeardLib.Options:GetValue("ImportantNotice") then
         local loc = managers.localization
         QuickMenuPlus:new(loc:text("beardlib_mods_manager_important_title", {mod = self._mod.Name}), loc:text("beardlib_mods_manager_important_help"), {{text = loc:text("dialog_yes"), callback = function()
             BeardLib.managers.mods_menu:SetEnabled(true)

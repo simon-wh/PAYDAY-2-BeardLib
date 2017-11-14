@@ -11,13 +11,14 @@
 	auto_image_color="true"
 	mod_override_dir="assets/mod_overrides/">
 	<load_modules>
-		<AssetUpdates id="14924" version="2.62" provider="modworkshop" use_local_dir="true" use_local_path="true" important="true"/>
+		<AssetUpdates id="14924" version="2.63" provider="modworkshop" use_local_dir="true" use_local_path="true" important="true"/>
 		<AddFiles directory="Assets">
 			<texture path="guis/textures/menu_ui_icons"/>
 			<texture path="guis/textures/beardlib_logo"/>
 		</AddFiles>
 		<Options build_menu="false" auto_load="true">
 			<options>
+				<option name="ImportantNotice" type="boolean" default_value="true"/>
 				<option name="DisabledMods" type="table">
 					<default_value/>
 				</option>
@@ -43,7 +44,9 @@
 		<class file="Dialogs/ListDialog.lua"/>
 		<class file="Dialogs/InputDialog.lua"/>
 		<class file="Dialogs/SelectListDialog.lua"/>
+		<class file="Dialogs/SimpleListDialog.lua"/>
 		<class file="Dialogs/DownloadDialog.lua"/>
+		<class file="Dialogs/SimpleSelectListDialog.lua"/>
 		<class file="Menu/TextBoxBase.lua"/>
 		<class file="Menu/ContextMenu.lua"/>
 		<class file="Menu/BaseItem.lua"/>

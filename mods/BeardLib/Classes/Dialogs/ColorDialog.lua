@@ -2,8 +2,9 @@ ColorDialog = ColorDialog or class(MenuDialog)
 ColorDialog.type_name = "ColorDialog"
 ColorDialog._default_width = 420
 function ColorDialog:init(params, menu)
-    params = params or {}
-    params = deep_clone(params)
+    if self.type_name == ColorDialog.type_name then
+        params = clone(params or {})
+    end
     self._is_input = true
     ColorDialog.super.init(self, table.merge(params, {
         w = ColorDialog._default_width,
