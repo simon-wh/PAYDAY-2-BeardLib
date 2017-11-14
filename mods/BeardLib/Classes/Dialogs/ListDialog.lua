@@ -52,7 +52,7 @@ function ListDialog:_Show(params)
     self._menu:TextBox({
         name = "Search",
         w = tw,
-        control_slice = 1,
+        control_slice = 0.98,
         text = false,
         callback = callback(self, self, "Search"),  
         label = "temp"
