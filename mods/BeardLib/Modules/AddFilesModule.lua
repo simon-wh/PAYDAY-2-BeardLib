@@ -18,7 +18,7 @@ function AddFilesModule:Load()
         return
     end
     
-    local directory = BeardLib.Utils.Path:Combine(self._mod.ModPath, self._config.directory)
+    local directory = self._config.full_directory or BeardLib.Utils.Path:Combine(self._mod.ModPath, self._config.directory)
     if self._config.force_all then
     	for _, v in pairs(self._config) do
     		if type(v) == "table" then

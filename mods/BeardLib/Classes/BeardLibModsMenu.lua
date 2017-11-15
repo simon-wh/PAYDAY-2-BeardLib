@@ -37,6 +37,8 @@ function BeardLibModsMenu:hide()
 end
 
 function BeardLibModsMenu:CreateItems(menu)
+    self._downloading_string = managers.localization:text("beardlib_downloading")    
+    
     self._holder = menu:Menu({
         name = "Main",
         private = {background_color = Color(0.8, 0.2, 0.2, 0.2)},
@@ -271,7 +273,7 @@ function BeardLibModsMenu:UpdateAllMods(no_dialog)
 
     if no_dialog == true then
         self:UpdatesModsByList(tbl)
-    else
+    else        
         BeardLib.managers.dialog:SimpleSelectList():Show({force = true, list = tbl, selected_list = tbl, callback = callback(self, self, "UpdatesModsByList")})
     end
 end
@@ -299,15 +301,19 @@ function BeardLibModsMenu:BeginModDownload(mod)
     mod.update_assets_module:DownloadAssets()
 end
 
+local megabytes = (1024 ^ 2)
 function BeardLibModsMenu:SetModProgress(mod, id, bytes, total_bytes)
     local mod_item = self._list:GetItemByLabel(mod)
-    if mod_item then
+    if mod_item and alive(mod_item) then
         local progress = bytes / total_bytes
-        local mb = bytes / (1024 ^ 2)
-        local total_mb = total_bytes / (1024 ^ 2)
-        self:SetModStatus(mod_item, string.format(managers.localization:text("beardlib_downloading").."%.2f/%.2fmb(%.0f%%)", mb, total_mb, tostring(progress * 100)), true)
+        local mb = bytes / megabytes
+        local total_mb = total_bytes / megabytes
+        mod_item:GetItem("Status"):SetTextLight(string.format(self._downloading_string.."%.2f/%.2fmb(%.0f%%)", mb, total_mb, tostring(progress * 100)))
         mod_item:Panel():child("DownloadProgress"):set_w(mod_item:Panel():w() * progress)
-        mod_item:GetItem("Download"):SetEnabled(false)
+        local downbtn = mod_item:GetItem("Download")
+        if downbtn:Enabled() then
+            downbtn:SetEnabled(false)
+        end
     end
 end
 

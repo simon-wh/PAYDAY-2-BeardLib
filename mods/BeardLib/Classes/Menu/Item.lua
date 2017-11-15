@@ -118,6 +118,11 @@ function Item:_SetText(text)
     return false
 end
 
+function Item:SetTextLight(text)
+	self.text = text
+	self.title:set_text(self.localized and text and managers.localization:text(text) or text)
+end
+
 function Item:SetText(text)
 	self:_SetText(text)
 	if self.parent.auto_align then

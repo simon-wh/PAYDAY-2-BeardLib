@@ -129,8 +129,8 @@ function MenuDialogManager:update()
         end
     end
 end
-
 function MenuDialogManager:paused_update() self:update() end
+function MenuDialogManager:Simple() return self.simple end
 function MenuDialogManager:List() return self.list end
 function MenuDialogManager:SelectList() return self.select_list end
 function MenuDialogManager:SimpleList() return self.simple_list end

@@ -39,8 +39,7 @@ function AddFramework:Load()
             end
 			if FileIO:Exists(add_file) then
 				local file = io.open(add_file, "r")
-				local config = ScriptSerializer:from_custom_xml(file:read("*all"))
-				CustomPackageManager:LoadPackageConfig(p, config)
+                AddFilesModule.Load({_mod = {ModPath = p}, _config = ScriptSerializer:from_custom_xml(file:read("*all"))})
             end
         end
     end
