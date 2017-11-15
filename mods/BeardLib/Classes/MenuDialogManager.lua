@@ -65,7 +65,7 @@ function MenuDialogManager:CloseDialog(dialog)
         end
     end
     for i, to_open in pairs(self._waiting_to_open) do
-        if dialog._params == to_open.params then
+        if table.equals(dialog._params, to_open.params) then
             table.remove(self._waiting_to_open, i)
             break
         end

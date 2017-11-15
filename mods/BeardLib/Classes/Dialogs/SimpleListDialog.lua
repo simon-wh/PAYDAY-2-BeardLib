@@ -17,7 +17,7 @@ function SimpleListDialog:_Show(params)
         return
     end
 
-    params = clone(params or {})
+    params = params or {}
     
     if self.type_name == SimpleSelectListDialog.type_name then
         self._single_select = params.single_select or false

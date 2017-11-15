@@ -52,8 +52,9 @@ function ListDialog:_Show(params)
     self._menu:TextBox({
         name = "Search",
         w = tw,
-        control_slice = 0.98,
-        text = false,
+        control_slice = 0.7,
+        text = "beardlib_search",
+        localized = true,
         callback = callback(self, self, "Search"),  
         label = "temp"
     })

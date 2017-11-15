@@ -10,9 +10,7 @@ function SelectListDialog:init(params, menu)
 end
 
 function SelectListDialog:_Show(params)
-    if self.type_name == SelectListDialog.type_name then
-        params = clone(params or {})
-    end
+    params = params or {}
     self._single_select = params.single_select or false
     self._allow_multi_insert = params.allow_multi_insert or false
     self._selected_list = params.selected_list or {}

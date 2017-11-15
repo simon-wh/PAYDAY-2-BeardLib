@@ -46,7 +46,7 @@ function ModCore:LoadConfigFile(path)
     local file = io.open(path, "r")
     local config = ScriptSerializer:from_custom_xml(file:read("*all"))
 
-    self.Name = config.name or "ERR:" .. tostring(table.remove(string.split(self.ModPath, "/")))
+    self.Name = config.name or tostring(table.remove(string.split(self.ModPath, "/")))
     if not self._disabled then
         if config.global_key then
             self.global = config.global_key

@@ -689,6 +689,22 @@ function BeardLib.Utils:UrlEncode(str)
 	return string.gsub(str, ".", encode_chars)
 end
 
+function BeardLib.Utils:FindMod(name)
+    for _, mod in pairs(BeardLib.Mods) do
+        if mod.Name == name then
+            return mod
+        end
+    end
+    local add = BeardLib.managers.AddFramework:GetModByName(name)
+    if add then
+        return add
+    end
+    local map = BeardLib.managers.MapFramework:GetModByName(name)
+    if map then
+        return map
+    end
+    return nil
+end
 BeardLib.Utils.Path = {}
 
 _G.path = BeardLib.Utils.Path
