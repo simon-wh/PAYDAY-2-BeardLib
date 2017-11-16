@@ -1,11 +1,6 @@
 if CoreSequenceManager then
-    Hooks:Register("BeardLibCreateScriptDataMods")
-    Hooks:PostHook(CoreSequenceManager.SequenceManager, "init", "BeardLibSequenceManagerPostInit", function() 
-        Hooks:Call("BeardLibCreateScriptDataMods")
-    end)
-	
 	local MaterialElement = CoreSequenceManager.MaterialElement
-	MaterialElement.FUNC_MAP["texture"] = "set_texture"
+	MaterialElement.FUNC_MAP.texture = "set_texture"
 	
 	function MaterialElement:set_texture(env, old_material, key)
 		local materials = env.dest_unit:get_objects_by_type(Idstring("material"))
@@ -23,6 +18,7 @@ if CoreSequenceManager then
 		end
 	end
 	
+	--Fixes some random crash
 	local BodyElement = CoreSequenceManager.BodyElement
 	function BodyElement.load(unit, data)
 		for body_id, cat_data in pairs(data) do
@@ -32,7 +28,7 @@ if CoreSequenceManager then
 				if type(param) == "string" then
 					param = Idstring(param)
 				end
-				if body then --Seems to fix it I guess.
+				if body then
 					body[sub_data[1]](body, param) 
 				end
 			end

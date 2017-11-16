@@ -45,33 +45,8 @@ function KillzoneManager:_deal_kill_damage(unit)
 	unit:character_damage():damage_killzone(attack_data)
 end
 
- 
-function KillzoneManager:_add_unit(unit, type)
-	if type == "sniper" then
-		local next_shot = math.rand(1)
-		self._units[unit:key()] = {
-			type = type,
-			timer = 0,
-			next_shot = next_shot,
-			unit = unit
-		}
-	elseif type == "gas" then
-		local next_gas = math.rand(1)
-		self._units[unit:key()] = {
-			type = type,
-			timer = 0,
-			next_gas = next_gas,
-			unit = unit
-		}
-	elseif type == "fire" then
-		local next_fire = math.rand(1)
-		self._units[unit:key()] = {
-			type = type,
-			timer = 0,
-			next_fire = next_fire,
-			unit = unit
-		}	
-	elseif type == "kill" then
+Hooks:PostHook(KillzoneManager, "_add_unit", "BeardLib.AddUnit", function(self, unit, type)
+	if type == "kill" then
 		local next_fire = 0.1
 		self._units[unit:key()] = {
 			type = type,
@@ -80,5 +55,4 @@ function KillzoneManager:_add_unit(unit, type)
 			unit = unit
 		}
 	end
-end
- 
+end)

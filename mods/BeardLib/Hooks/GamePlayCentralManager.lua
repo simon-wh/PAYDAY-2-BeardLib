@@ -15,9 +15,11 @@ function GamePlayCentralManager:add_move_unit(unit, start_pos, end_pos, speed, d
 
 	table.insert(self._move_units, {unit = unit, start_pos = start_pos, end_pos = end_pos, speed = speed, done_callback = done_callback, t=0, total_time = total_time})
 end
+
 function GamePlayCentralManager:add_rotate_unit(unit, from, to, speed)
 
 end
+
 Hooks:PostHook(GamePlayCentralManager, "update", "BeardLibGamePlayCentralManagerpost_update", function(self, t, dt)
 	for k, move_unit in pairs(self._move_units or {}) do
 		if move_unit.t == move_unit.total_time then

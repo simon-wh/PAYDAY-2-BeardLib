@@ -153,3 +153,7 @@ end
 function ModCore:GetPath()
     return self.ModPath
 end
+
+function ModCore:Enabled()
+    return not self._disabled
+end

@@ -8,19 +8,20 @@ function MenuInput:BeardLib_mouse_pressed(o, button, x, y)
 		if (item.TYPE == "slider" or item._parameters.input) then
 			self._current_item = item
             local title = item._parameters.text_id
-            managers.system_menu:show_keyboard_input({
+            BeardLib.managers.dialog:Input():Show({
                 title = item._parameters.override_title or item._parameters.localize ~= false and managers.localization:text(title) or title, 
                 text = tostring(item._value) or item._parameters.string_value or "",
-                filter = item._value and "number" or "string",
-                callback_func = callback(self, self, "ValueEnteredCallback")
+                filter = item._value and "number",
+                force = true,
+                callback = callback(self, self, "ValueEnteredCallback")
             })
 			return true
 		end
 	end
 end
 
-function MenuInput:ValueEnteredCallback(success, value)
-    if success and self._current_item then
+function MenuInput:ValueEnteredCallback(value)
+    if self._current_item then
         if self._current_item._value then
             self._current_item:set_value(math.clamp(tonumber(value), self._current_item._min, self._current_item._max) or self._current_item._min )
         else

@@ -932,6 +932,9 @@ function type_name(value)
     return t
 end
 
+--Deprecated class, use play_anim instead.
+QuickAnim = {Play = function()end, Work = function()end, Stop = function()end, Working=function()end, WorkColor=function()end}
+
 local mstep = math.step
 require("lib/utils/Easing")
 function Easing.step(a, b, t)

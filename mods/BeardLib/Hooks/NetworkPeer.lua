@@ -1,7 +1,3 @@
---[[function NetworkPeer:set_xuid(xuid)
-	self._xuid = ""
-end]]
-
 local sync_stage_settings_id = "BeardLib_sync_stage_settings"
 local sync_game_settings_id = "BeardLib_sync_game_settings"
 local lobby_sync_update_level_id = "BeardLib_lobby_sync_update_level_id"
@@ -44,9 +40,7 @@ Hooks:Add(peer_send_hook, "BeardLibCustomWeaponFix", function(self, func_name, p
 			params[1] = BeardLib.Utils:CleanOutfitString(params[1])
 			orig_NetworkPeer_send(self, "send_chat_message", LuaNetworking.HiddenChannel, parse_as_lnetwork_string(send_outfit_id, orig_outift .. "|" .. params[2]))
 		elseif string.ends(func_name, "set_unit") then
-			--local orig_outift = params[3]
 			params[3] = BeardLib.Utils:CleanOutfitString(params[3], params[4] == 0)
-			--orig_NetworkPeer_send(self, "send_chat_message", LuaNetworking.HiddenChannel, parse_as_lnetwork_string(send_outfit_id, orig_outift .. "|" .. params[4]))
         elseif func_name == "set_equipped_weapon" then
             if params[2] == -1 then
                 local index, data = BeardLib.Utils:GetCleanedWeaponData()
@@ -144,10 +138,6 @@ Hooks:Add("NetworkReceivedData", send_outfit_id, function(sender, id, data)
         if peer then
             peer:set_outfit_string(outfit[1], outfit[2], false)
         end
-        --[[managers.network._handlers.connection:sync_outfit(outfit[1],
-        outfit[2],
-        false,
-        managers.network:session():peer(sender):rpc())]]--
     end
 end)
 
@@ -185,36 +175,11 @@ function NetworkPeer:set_outfit_string(outfit_string, outfit_version, outfit_sig
             old_outfit_list.melee_weapon = new_outfit_list.melee_weapon
         end
 
-        --[[if tweak_data.weapon.factory[new_outfit_list.primary.factory_id] and tweak_data.weapon.factory[new_outfit_list.primary.factory_id].custom then
-            old_outfit_list.primary.factory_id = new_outfit_list.primary.factory_id
-            old_outfit_list.primary.blueprint = new_outfit_list.primary.blueprint
-        end
-
-        if tweak_data.weapon.factory[new_outfit_list.secondary.factory_id] and tweak_data.weapon.factory[new_outfit_list.secondary.factory_id].custom then
-            old_outfit_list.secondary.factory_id = new_outfit_list.secondary.factory_id
-            old_outfit_list.secondary.blueprint = new_outfit_list.secondary.blueprint
-        end]]--
-
-    	self._profile.outfit_string = BeardLib.Utils:OutfitStringFromList(old_outfit_list)
-    	--[[if not self._ticket_wait_response then
-    		self:verify_outfit()
-    	end]]--
+        self._profile.outfit_string = BeardLib.Utils:OutfitStringFromList(old_outfit_list)
+        
         if old_outfit_string ~= self._profile.outfit_string then
     		self:_reload_outfit()
     	end
-    	--self:_update_equipped_armor()
-    	--[[if self == managers.network:session():local_peer() then
-    		self:_increment_outfit_version()
-    		if old_outfit_string ~= outfit_string then
-    			managers.network.account:inventory_outfit_refresh()
-    		end
-    	else
-    		self._outfit_version = outfit_version or 0
-    		if outfit_signature and old_outfit_string ~= outfit_string then
-    			self._signature = outfit_signature
-    			self:tradable_verify_outfit(outfit_signature)
-    		end
-    	end]]--
     end
 
 	return self._profile.outfit_string, self._outfit_version, self._signature

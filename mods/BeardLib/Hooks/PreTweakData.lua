@@ -26,4 +26,3 @@ function HudIconsTweakData:get_icon_data(icon_id, default_rect)
 	end
 	return icon, texture_rect
 end
- 

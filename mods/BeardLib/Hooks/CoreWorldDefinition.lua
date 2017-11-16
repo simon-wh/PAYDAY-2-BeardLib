@@ -42,11 +42,9 @@ function WorldDefinition:unload_packages(...)
     end
 
     if self._custom_loaded_packages then
-        --if not Global.editor_mode then
-            for _, pck in pairs(self._custom_loaded_packages) do
-                self:_unload_package(pck)
-            end
-        --end
+        for _, pck in pairs(self._custom_loaded_packages) do
+            self:_unload_package(pck)
+        end
     end
 
     if not self._has_package then

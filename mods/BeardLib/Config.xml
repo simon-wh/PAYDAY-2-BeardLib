@@ -6,12 +6,12 @@
 	modules_dir="$ModPath$Modules/"
 	classes_dir="$ModPath$Classes/"
 	assets_dir="$ModPath$Assets/"
-	image = "guis/textures/beardlib_logo"
+	image="guis/textures/beardlib_logo"
 	color="Color(0.8,0.8,0.8)"
 	auto_image_color="true"
 	mod_override_dir="assets/mod_overrides/">
 	<load_modules>
-		<AssetUpdates id="14924" version="2.64" provider="modworkshop" use_local_dir="true" use_local_path="true" important="true"/>
+		<AssetUpdates id="14924" version="2.65" provider="modworkshop" use_local_dir="true" use_local_path="true" important="true"/>
 		<AddFiles directory="Assets">
 			<texture path="guis/textures/menu_ui_icons"/>
 			<texture path="guis/textures/beardlib_logo"/>
@@ -26,27 +26,16 @@
 		</Options>
 	</load_modules>
 	<classes>
-		<class file="utils.lua"/>
+		<class file="Utils.lua"/>
 		<class file="ModCore.lua"/>
 		<class file="CustomPackageManager.lua"/>
-		<class file="CustomAchievementManager.lua"/>
 		<class file="TweakDataHelper.lua"/>
 		<class file="ModManager.lua"/>
 		<class file="FileManager.lua" manager="File"/>
 		<class file="FrameworkBase.lua"/>
 		<class file="MapFramework.lua" manager="MapFramework"/>
 		<class file="AddFramework.lua" manager="AddFramework"/>
-		<class file="QuickAnimGUI.lua"/>
-		<class file="MenuUI.lua"/>
-		<class file="MenuDialog.lua"/>
-		<class file="Dialogs/FileBrowserDialog.lua"/>
-		<class file="Dialogs/ColorDialog.lua"/>
-		<class file="Dialogs/ListDialog.lua"/>
-		<class file="Dialogs/InputDialog.lua"/>
-		<class file="Dialogs/SelectListDialog.lua"/>
-		<class file="Dialogs/SimpleListDialog.lua"/>
-		<class file="Dialogs/DownloadDialog.lua"/>
-		<class file="Dialogs/SimpleSelectListDialog.lua"/>
+		<class file="Menu/MenuUI.lua"/>
 		<class file="Menu/TextBoxBase.lua"/>
 		<class file="Menu/ContextMenu.lua"/>
 		<class file="Menu/BaseItem.lua"/>
@@ -60,48 +49,53 @@
 		<class file="Menu/Slider.lua"/>
 		<class file="Menu/TextBox.lua"/>
 		<class file="Menu/ColorTextBox.lua"/>
+		<class file="Dialogs/MenuDialog.lua"/>
+		<class file="Dialogs/FileBrowserDialog.lua"/>
+		<class file="Dialogs/ColorDialog.lua"/>
+		<class file="Dialogs/ListDialog.lua"/>
+		<class file="Dialogs/InputDialog.lua"/>
+		<class file="Dialogs/SelectListDialog.lua"/>
+		<class file="Dialogs/SimpleListDialog.lua"/>
+		<class file="Dialogs/DownloadDialog.lua"/>
+		<class file="Dialogs/SimpleSelectListDialog.lua"/>
 		<class file="MenuHelperPlus.lua"/>
-		<class file="json_utils.lua"/>
+		<class file="JsonUtils.lua"/>
 		<class file="ModAssetUpdateManager.lua" manager="asset_update"/>
 		<class file="ModuleBase.lua"/>
-		<class file="MenuDialogManager.lua" manager="dialog"/>
+		<class file="Dialogs/MenuDialogManager.lua" manager="dialog"/>
 		<class file="BeardLibModsMenu.lua" manager="mods_menu"/>
 	</classes>
 	<hooks>
-		<hook source="core/lib/managers/coresequencemanager" file="CoreSequenceManager.lua"/>
-        <hook source="lib/managers/menu/menuinput" file="MenuInput.lua"/>
-        <hook source="lib/managers/menu/textboxgui" file="TextBoxGUI.lua"/>
-        <hook source="lib/managers/systemmenumanager" file="SystemMenuManager.lua"/>
-        <hook source="lib/managers/achievmentmanager" file="AchievementManager.lua"/>
-        <hook source="lib/managers/killzonemanager" file="KillzoneManager.lua"/>
-        <hook source="lib/managers/gameplaycentralmanager" file="GamePlayCentralManager.lua"/>
-        <hook source="lib/managers/trademanager" file="TradeManager.lua"/>
-        <hook source="lib/managers/missionmanager" file="MissionManager.lua"/>
-        <hook source="lib/managers/menu/menucomponentmanager" file="MenuComponentManager.lua"/>
-        <hook source="lib/managers/menumanager" file="MenuManager.lua"/>
-        <hook source="lib/managers/crimenetmanager" file="CrimeNetManager.lua"/>
-        <hook source="lib/managers/weaponfactorymanager" file="Fixes.lua"/>
+		<hook source="lib/units/beings/player/huskplayermovement" file="NetworkHooks.lua"/>
+	    <hook source="lib/units/beings/player/playerinventory" file="NetworkHooks.lua"/>
+		
+	 	<hook source="lib/network/base/handlers/connectionnetworkhandler" file="Fixes.lua"/>
+		<hook source="core/lib/managers/coresoundenvironmentmanager" file="Fixes.lua"/>
+		<hook source="lib/managers/mission/elementvehiclespawner" file="Fixes.lua"/>
+		<hook source="lib/managers/mission/elementinteraction" file="Fixes.lua"/>
+		<hook source="lib/managers/menu/crewmanagementgui" file="Fixes.lua"/>
+		<hook source="lib/managers/weaponfactorymanager" file="Fixes.lua"/>
         <hook source="lib/managers/blackmarketmanager" file="Fixes.lua"/>
-        <hook source="lib/managers/musicmanager" file="MusicManager.lua"/>
-		<hook source="core/lib/managers/coresoundenvironmentmanager" file="SoundEnvironmentManager.lua"/>
-        <hook source="lib/managers/dialogs/keyboardinputdialog" file="KeyboardInputDialog.lua"/>
-        <hook source="lib/managers/mission/elementinteraction" file="ElementInteraction.lua"/>
-        <hook source="lib/managers/mission/elementvehiclespawner" file="ElementVehicleSpawner.lua"/>
-        <hook source="core/lib/utils/dev/editor/coreworlddefinition" file="CoreWorldDefinition.lua"/>
-        <hook source="lib/managers/menu/scrollablepanel" file="ScrollablePanel.lua"/>
-        <hook source="core/lib/system/coresystem" file="CoreSystem.lua"/>
-        <hook source="lib/tweak_data/crimespreetweakdata" file="PreTweakData.lua"/>
-        <hook source="lib/tweak_data/tweakdata" file="TweakData.lua"/>
-        <hook source="lib/network/matchmaking/networkmatchmakingsteam" file="NetworkMatchmakingSteam.lua"/>
-        <hook source="lib/network/base/handlers/connectionnetworkhandler" file="ConnectionNetworkHandler.lua"/>
-        <hook source="lib/network/base/networkpeer" file="NetworkPeer.lua"/>
-        <hook source="lib/network/base/clientnetworksession" file="ClientNetworkSession.lua"/>
-        <hook source="lib/units/beings/player/playermovement" file="PlayerMovement.lua"/>
-        <hook source="lib/units/beings/player/huskplayermovement" file="HuskPlayerMovement.lua"/>
-        <hook source="lib/units/beings/player/playerinventory" file="PlayerInventory.lua"/>
-        <hook source="lib/managers/menu/crewmanagementgui" file="CrewManagementGUI.lua"/>
-        <hook source="core/lib/managers/viewport/environment/coreenvironmentfeeder" file="EnvironmentFeeder.lua"/>
+
         <hook source="core/lib/managers/viewport/environment/coreenvironmentmanager" file="EnvironmentManager.lua"/>
+        <hook source="lib/network/matchmaking/networkmatchmakingsteam" file="NetworkMatchmakingSteam.lua"/>
+        <hook source="core/lib/utils/dev/editor/coreworlddefinition" file="CoreWorldDefinition.lua"/>
+        <hook source="lib/managers/menu/menucomponentmanager" file="BeardLibModsMenuButton.lua"/>
+        <hook source="lib/network/base/clientnetworksession" file="ClientNetworkSession.lua"/>
+        <hook source="lib/managers/gameplaycentralmanager" file="GamePlayCentralManager.lua"/>
+		<hook source="core/lib/managers/coresequencemanager" file="CoreSequenceManager.lua"/>
+		<hook source="lib/managers/menu/scrollablepanel" file="ScrollablePanel.lua"/>
+        <hook source="lib/managers/systemmenumanager" file="SystemMenuManager.lua"/>
+        <hook source="lib/tweak_data/crimespreetweakdata" file="PreTweakData.lua"/>
+        <hook source="lib/managers/crimenetmanager" file="CrimeNetManager.lua"/>
+        <hook source="lib/network/base/networkpeer" file="NetworkPeer.lua"/>
+        <hook source="lib/managers/musicmanager" file="MusicManager.lua"/>
+		<hook source="lib/managers/menumanager" file="MenuManager.lua"/>
+        <hook source="lib/tweak_data/tweakdata" file="TweakData.lua"/>
+		<hook source="core/lib/system/coresystem" file="CoreSystem.lua"/>
+		<hook source="lib/managers/menu/menuinput" file="MenuInput.lua"/>
+        <hook source="lib/managers/killzonemanager" file="KillzoneManager.lua"/>
+        <hook source="lib/managers/missionmanager" file="MissionManager.lua"/>
 		<hook source="lib/setups/setup" file="Setup.lua"/>
 	</hooks>
 	<script_data_types>

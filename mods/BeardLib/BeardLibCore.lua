@@ -1,19 +1,21 @@
 if not _G.BeardLib then
+	dofile(ModPath.."Classes/FileIO.lua")
+	
     _G.BeardLib = {}
-	local self = BeardLib
+	local self = BeardLib		
     self.Name = "BeardLib"
     self.ModPath = ModPath
-    self.SavePath = SavePath
-    self._paused_updaters = {}
+    self.SavePath = SavePath	
 	self.sequence_mods = {}	
-	self._updaters = {}
+	self.MusicMods = {}
 	self.managers = {}	
     self.modules = {}
 	self.Items = {}
 	self.Mods = {}
-	self.MusicMods = {}
 
-	dofile(ModPath.."Classes/FileIO.lua")	
+	self._paused_updaters = {}
+	self._updaters = {}
+
 	self.config = FileIO:ReadConfig(ModPath.."Config.xml", self)
 	self._config = self.config
 	local hooks = self.config.hooks
@@ -70,7 +72,8 @@ if not _G.BeardLib then
 
 	function self:LoadClasses()
 		for _, clss in ipairs(self.config.classes) do
-            local p = self.config.classes_dir .. clss.file
+			local p = self.config.classes_dir .. clss.file
+			log("[BeardLib] Loading class", tostring(p))
 			local obj = loadstring( "--"..p.. "\n" .. io.open(p):read("*all"))()
 			if clss.manager and obj then
 				self.managers[clss.manager] = obj
@@ -109,10 +112,8 @@ if not _G.BeardLib then
 			chance = 1,
 			value_multiplier = 1,
 			durability_multiplier = 1,
-			--drops = false,
 			track = false,
 			sort_number = -10,
-			--category = "mod"
 		}, "lootdrop", "global_values", "mod")
 
 		TweakDataHelper:ModifyTweak({"mod"}, "lootdrop", "global_value_list_index")
@@ -120,7 +121,6 @@ if not _G.BeardLib then
 		TweakDataHelper:ModifyTweak({
 			free = true,
 			content = {
-				--loot_global_value = "mod",
 				loot_drops = {},
 				upgrades = {}
 			}
@@ -148,10 +148,7 @@ if not _G.BeardLib then
 			end
 		end
 		for id, clbk in pairs(self._updaters) do
-			local success, e = pcall(function() clbk(t, dt) end)
-			if not success then
-				BeardLib:log("[Updater-ERROR(%s)] " .. tostring(e and e.code or ""), tostring(id))
-			end
+			clbk(t, dt)
 		end
 	end
 
@@ -162,10 +159,7 @@ if not _G.BeardLib then
 			end
 		end
 		for id, clbk in pairs(self._paused_updaters) do
-			local success, e = pcall(function() clbk() end)
-			if not success then
-				BeardLib:log("[Updater-ERROR(%s)] " .. tostring(e and e.code or ""), tostring(id))
-			end
+			clbk(t, dt)
 		end
 	end
 end
