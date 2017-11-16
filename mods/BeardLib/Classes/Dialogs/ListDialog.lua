@@ -1,9 +1,10 @@
 ListDialog = ListDialog or class(MenuDialog)
 ListDialog.type_name = "ListDialog"
 ListDialog._no_reshaping_menu = true
+
 function ListDialog:init(params, menu)
     if self.type_name == ListDialog.type_name then
-        params = clone(params or {})
+        params = params and clone(params) or {}
     end
 
     menu = menu or BeardLib.managers.dialog:Menu()

@@ -2,15 +2,11 @@ MenuDialog = MenuDialog or class()
 MenuDialog.type_name = "MenuDialog"
 function MenuDialog:init(params, menu)
     if self.type_name == MenuDialog.type_name then
-        params = deep_clone(params or {})
-        menu = menu or BeardLib.managers.dialog:Menu()
+        params = params and clone(params) or {}
     end
-    self._default_width = 420
+    self._default_width = self._default_width or 420
     self._no_blur = params.no_blur
     self._tbl = {}
-    if self.type_name == "MenuDialog" then
-        params = deep_clone(params)
-    end
     menu = menu or BeardLib.managers.dialog:Menu()
     self._menu = menu:Menu(table.merge({
         name = "dialog"..tostring(self),
@@ -32,6 +28,10 @@ end
 
 function MenuDialog:Show(params)
     BeardLib.managers.dialog:OpenDialog(self, type_name(params) == "table" and params or nil)
+end
+
+function MenuDialog:SetCurrentId(id)
+    self.current_id = id
 end
 
 function MenuDialog:show(...)

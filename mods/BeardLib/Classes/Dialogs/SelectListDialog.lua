@@ -2,10 +2,8 @@ SelectListDialog = SelectListDialog or class(ListDialog)
 SelectListDialog.type_name = "SelectListDialog"
 function SelectListDialog:init(params, menu)
     if self.type_name == SelectListDialog.type_name then
-        params = clone(params or {})
-    end
-    menu = menu or BeardLib.managers.dialog:Menu()
-    
+        params = params and clone(params) or {}
+    end    
     SelectListDialog.super.init(self, params, menu)
 end
 

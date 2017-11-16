@@ -2,7 +2,7 @@ DownloadDialog = DownloadDialog or class(MenuDialog)
 DownloadDialog.type_name = "DownloadDialog"
 function DownloadDialog:init(params, menu)
     if self.type_name == DownloadDialog.type_name then
-        params = clone(params or {})
+        params = params and clone(params) or {}
     end
     DownloadDialog.super.init(self, table.merge(params, {
         offset = 8,

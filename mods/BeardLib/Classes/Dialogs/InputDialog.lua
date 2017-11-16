@@ -2,7 +2,7 @@ InputDialog = InputDialog or class(MenuDialog)
 InputDialog.type_name = "InputDialog"
 function InputDialog:init(params, menu)
     if self.type_name == InputDialog.type_name then
-        params = clone(params or {})
+        params = params and clone(params) or {}
     end
     self._is_input = true
     InputDialog.super.init(self, table.merge(params, {

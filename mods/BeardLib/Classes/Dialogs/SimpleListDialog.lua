@@ -2,7 +2,7 @@ SimpleListDialog = SimpleListDialog or class(ListDialog)
 SimpleListDialog.type_name = "SimpleListDialog"
 function SimpleListDialog:init(params, menu)
     if self.type_name == SimpleListDialog.type_name then
-        params = clone(params or {})
+        params = params and clone(params) or {}
     end
 
     params.w = 400

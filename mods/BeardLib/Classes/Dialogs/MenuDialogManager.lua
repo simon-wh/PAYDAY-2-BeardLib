@@ -1,5 +1,6 @@
 MenuDialogManager = MenuDialogManager or class()
 function MenuDialogManager:Init()
+    self.biggest_id = 0
     self._menu = MenuUI:new({
         name = "BeardLibDialogs",
         layer = 5000,
@@ -32,11 +33,12 @@ function MenuDialogManager:ShowDialog(dialog)
 end
 
 function MenuDialogManager:OpenDialog(dialog, params)
+    self.biggest_id = self.biggest_id + 1
     if params and params.force then
-        table.insert(self._waiting_to_open, 1, {dialog = dialog, params = params})
+        table.insert(self._waiting_to_open, 1, {dialog = dialog, params = params, id = self.biggest_id})
         self._ready_to_open = true
     else
-        table.insert(self._waiting_to_open, {dialog = dialog, params = params})
+        table.insert(self._waiting_to_open, {dialog = dialog, params = params, id = self.biggest_id})
     end
 end
 
@@ -65,7 +67,8 @@ function MenuDialogManager:CloseDialog(dialog)
         end
     end
     for i, to_open in pairs(self._waiting_to_open) do
-        if dialog._params and table.equals(dialog._params, to_open.params) then
+        if dialog.current_id == to_open.id then
+            dialog.current_id = nil
             table.remove(self._waiting_to_open, i)
             break
         end
@@ -124,6 +127,7 @@ function MenuDialogManager:update()
     if self._ready_to_open or #self._opened_dialogs == 0 then
         local to_open = self._waiting_to_open[1]
         if to_open and (not to_open.dialog._params or to_open.dialog._params ~= to_open.params) then
+            to_open.dialog:SetCurrentId(to_open.id)
             to_open.dialog:_Show(to_open.params)
             self._ready_to_open = false
         end
