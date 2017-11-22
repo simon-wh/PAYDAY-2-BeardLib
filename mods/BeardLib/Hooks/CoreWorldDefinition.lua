@@ -6,8 +6,10 @@ core:module("CoreWorldDefinition")
 WorldDefinition = WorldDefinition or CoreWorldDefinition.WorldDefinition
 
 local WorldDefinition_init = WorldDefinition.init
-function WorldDefinition:init(...)
-    WorldDefinition_init(self, ...)
+function WorldDefinition:init(params, ...)
+    self.__bl_vr_main_menu = params.__bl_vr_main_menu
+
+    WorldDefinition_init(self, params, ...)
     if self._ignore_spawn_list then
         self._ignore_spawn_list[Idstring("units/dev_tools/level_tools/ai_coverpoint"):key()] = true
     end
@@ -15,6 +17,12 @@ end
 
 local WorldDefinition_load_world_package = WorldDefinition._load_world_package
 function WorldDefinition:_load_world_package(...)
+    if self.__bl_vr_main_menu then
+        -- Global._level_data isn't set when loading the main VR menu
+        -- And causes all kinds of chaos
+        WorldDefinition_load_world_package(self, ...)
+        return
+    end
     local level_tweak = _G.tweak_data.levels[Global.level_data.level_id]
     self._has_package = not not level_tweak.package
     if level_tweak.custom_packages then
