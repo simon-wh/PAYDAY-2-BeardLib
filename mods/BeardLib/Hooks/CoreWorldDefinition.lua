@@ -15,40 +15,43 @@ end
 
 local WorldDefinition_load_world_package = WorldDefinition._load_world_package
 function WorldDefinition:_load_world_package(...)
-    local level_tweak = _G.tweak_data.levels[Global.level_data.level_id]
-    self._has_package = not not level_tweak.package
-    if level_tweak.custom_packages then
-        self._custom_loaded_packages = {}
-        for _, package in pairs(level_tweak.custom_packages) do
-            if PackageManager:package_exists(package) and not PackageManager:loaded(package) then
-        		PackageManager:load(package)
-                log("Loaded package: "..package)
-        		table.insert(self._custom_loaded_packages, package)
-        	end
+    if Global.level_data then
+        local level_tweak = _G.tweak_data.levels[Global.level_data.level_id]
+        self._has_package = not not level_tweak.package
+        if level_tweak.custom_packages then
+            self._custom_loaded_packages = {}
+            for _, package in pairs(level_tweak.custom_packages) do
+                if PackageManager:package_exists(package) and not PackageManager:loaded(package) then
+                    PackageManager:load(package)
+                    log("Loaded package: "..package)
+                    table.insert(self._custom_loaded_packages, package)
+                end
+            end
         end
-    end
-    if not self._has_package then
-        return
+        if not self._has_package then
+            return
+        end
     end
     WorldDefinition_load_world_package(self, ...)
 end
 
 local WorldDefinitionunload_packages = WorldDefinition.unload_packages
 function WorldDefinition:unload_packages(...)
-
-    if Global.level_data._add then
-        Global.level_data._add:Unload()
-        Global.level_data._add = nil
-    end
-
-    if self._custom_loaded_packages then
-        for _, pck in pairs(self._custom_loaded_packages) do
-            self:_unload_package(pck)
+    if Global.level_data then
+        if Global.level_data._add then
+            Global.level_data._add:Unload()
+            Global.level_data._add = nil
         end
-    end
 
-    if not self._has_package then
-        return
+        if self._custom_loaded_packages then
+            for _, pck in pairs(self._custom_loaded_packages) do
+                self:_unload_package(pck)
+            end
+        end
+
+        if not self._has_package then
+            return
+        end
     end
 
     WorldDefinitionunload_packages(self, ...)
@@ -73,12 +76,14 @@ function WorldDefinition:_load_continent_package(path, ...)
 end
 
 function WorldDefinition:convert_mod_path(path)
-    local level_tweak = _G.tweak_data.levels[Global.level_data.level_id]
-    if BeardLib.current_level and level_tweak.custom and path and string.begins(path, ".map/") then
-        path = path:gsub(".map", _G.Path:Combine("levels/mods/", BeardLib.current_level._config.id))
-    end
-    if not PackageManager:has(Idstring("environment"), path:id()) then
-        return "core/environments/default"
+    if Global.level_data then
+        local level_tweak = _G.tweak_data.levels[Global.level_data.level_id]
+        if BeardLib.current_level and level_tweak.custom and path and string.begins(path, ".map/") then
+            path = path:gsub(".map", _G.Path:Combine("levels/mods/", BeardLib.current_level._config.id))
+        end
+        if not PackageManager:has(Idstring("environment"), path:id()) then
+            return "core/environments/default"
+        end
     end
     return path
 end
