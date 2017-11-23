@@ -25,7 +25,7 @@ ModAssetsModule._providers = {
             dohttpreq(check_url, function(data, id)
                 if data then
                     data = string.sub(data, 0, #data - 1)
-                    if data ~= "false" and data ~= "true" then
+                    if data ~= "false" and data ~= "true" and string.len(data) > 0 then
                         self._new_version = data
                         Global.beardlib_checked_updates[self.id] = data
                         self:PrepareForUpdate()

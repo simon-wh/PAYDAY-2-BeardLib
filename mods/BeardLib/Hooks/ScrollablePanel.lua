@@ -14,12 +14,12 @@ function ScrollablePanelModified:init(panel, name, data)
 		up_arrow:set_image("guis/textures/menu_ui_icons", 24, 2, 16, 16)
 
 		down_arrow:set_size(up_arrow:size())		
-		down_arrow:set_x(down_arrow:x())
+		down_arrow:set_x(up_arrow:x())
 		down_arrow:set_rotation(0)
 		down_arrow:set_image("guis/textures/menu_ui_icons", 4, 0, 16, 16)
 
 		self._scroll_bar:set_w(data.scroll_width)
-		self._scroll_bar:set_center_x(self:panel():child("scroll_down_indicator_arrow"):center_x())
+		self._scroll_bar:set_center_x(down_arrow:center_x())
 	end
 	if data.hide_shade then
 		self:panel():child("scroll_up_indicator_shade"):hide()
