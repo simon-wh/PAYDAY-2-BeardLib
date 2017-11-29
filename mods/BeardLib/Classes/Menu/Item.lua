@@ -24,7 +24,7 @@ end
 function Item:GetForeground(highlight)
 	highlight = highlight or self.highlight
 	local fgcolor = highlight and self.foreground_highlight or self.foreground
-	return fgcolor or (highlight and self.highlight_color or self.background_color or Color.black):contrast()
+	return NotNil(fgcolor) or (highlight and self.highlight_color or self.background_color or Color.black):contrast()
 end
 
 function Item:SetEnabled(enabled)
