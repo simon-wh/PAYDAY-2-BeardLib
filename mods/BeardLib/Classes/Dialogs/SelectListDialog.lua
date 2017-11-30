@@ -59,7 +59,7 @@ function SelectListDialog:ToggleClbk(value, menu, item)
             if self._single_select then
                 self._selected_list = {value}
             else
-                table.insert(self._selected_list, value)
+                table.insert(self._selected_list, clone(value))
             end
         end
     else
