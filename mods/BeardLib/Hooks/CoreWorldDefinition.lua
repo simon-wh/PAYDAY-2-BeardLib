@@ -17,19 +17,21 @@ local WorldDefinition_load_world_package = WorldDefinition._load_world_package
 function WorldDefinition:_load_world_package(...)
     if Global.level_data then
         local level_tweak = _G.tweak_data.levels[Global.level_data.level_id]
-        self._has_package = not not level_tweak.package
-        if level_tweak.custom_packages then
-            self._custom_loaded_packages = {}
-            for _, package in pairs(level_tweak.custom_packages) do
-                if PackageManager:package_exists(package) and not PackageManager:loaded(package) then
-                    PackageManager:load(package)
-                    log("Loaded package: "..package)
-                    table.insert(self._custom_loaded_packages, package)
+        if level_tweak then
+            self._has_package = not not level_tweak.package
+            if level_tweak.custom_packages then
+                self._custom_loaded_packages = {}
+                for _, package in pairs(level_tweak.custom_packages) do
+                    if PackageManager:package_exists(package) and not PackageManager:loaded(package) then
+                        PackageManager:load(package)
+                        log("Loaded package: "..package)
+                        table.insert(self._custom_loaded_packages, package)
+                    end
                 end
             end
-        end
-        if not self._has_package then
-            return
+            if not self._has_package then
+                return
+            end
         end
     end
     WorldDefinition_load_world_package(self, ...)
@@ -78,11 +80,13 @@ end
 function WorldDefinition:convert_mod_path(path)
     if Global.level_data then
         local level_tweak = _G.tweak_data.levels[Global.level_data.level_id]
-        if BeardLib.current_level and level_tweak.custom and path and string.begins(path, ".map/") then
-            path = path:gsub(".map", _G.Path:Combine("levels/mods/", BeardLib.current_level._config.id))
-        end
-        if not PackageManager:has(Idstring("environment"), path:id()) then
-            return "core/environments/default"
+        if level_tweak then
+            if BeardLib.current_level and level_tweak.custom and path and string.begins(path, ".map/") then
+                path = path:gsub(".map", _G.Path:Combine("levels/mods/", BeardLib.current_level._config.id))
+            end
+            if not PackageManager:has(Idstring("environment"), path:id()) then
+                return "core/environments/default"
+            end
         end
     end
     return path
