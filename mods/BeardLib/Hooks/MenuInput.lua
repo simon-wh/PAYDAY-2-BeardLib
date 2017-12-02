@@ -1,8 +1,33 @@
-Hooks:PreHook(MenuInput, "mouse_pressed", "BeardLibMenuInputMousePressed", function(self, o, button, x, y)
-    self:BeardLib_mouse_pressed(o, button, x, y)
-end)
+local back = MenuInput.back
+function MenuInput:back(...)
+    if BeardLib.IgnoreBackOnce then
+        BeardLib.IgnoreBackOnce = nil
+        return false
+    end
+    return back(self, ...)
+end
 
-function MenuInput:BeardLib_mouse_pressed(o, button, x, y)
+local mm = MenuInput.mouse_moved
+function MenuInput:mouse_moved(...)
+    local mc = managers.mouse_pointer._mouse_callbacks
+    local last = mc[#mc]
+    if not last or type_name(last.parent) ~= "MenuUI" or last.parent.allow_full_input then
+        return mm(self, ...)
+    end
+end
+
+local mp = MenuInput.mouse_pressed
+function MenuInput:mouse_pressed(...)
+    local mc = managers.mouse_pointer._mouse_callbacks
+    local last = mc[#mc]
+    if not last or type_name(last.parent) ~= "MenuUI" or last.parent.allow_full_input then
+        if not self:BeardLibMousePressed(...) then
+            return mp(self, ...)
+        end
+    end
+end
+
+function MenuInput:BeardLibMousePressed(o, button, x, y)
 	local item = self._logic:selected_item()
 	if item and button == Idstring("1") then
 		if (item.TYPE == "slider" or item._parameters.input) then
@@ -17,7 +42,8 @@ function MenuInput:BeardLib_mouse_pressed(o, button, x, y)
             })
 			return true
 		end
-	end
+    end
+    return false
 end
 
 function MenuInput:ValueEnteredCallback(value)
@@ -27,26 +53,7 @@ function MenuInput:ValueEnteredCallback(value)
         else
             self._current_item._parameters.help_id = value
         end
-            
         managers.viewport:resolution_changed()
         self._current_item:trigger()
-    end
-end
-
-local o_back = MenuInput.back
-function MenuInput:back(...)
-    if BeardLib.IgnoreBackOnce then
-        BeardLib.IgnoreBackOnce = nil
-        return false
-    end
-    return o_back(self, ...)
-end
-
-local o_mouse_moved = MenuInput.mouse_moved
-function MenuInput:mouse_moved(...)
-    local mc = managers.mouse_pointer._mouse_callbacks
-    local last = mc[#mc]
-    if not last or type_name(last.parent) ~= "MenuUI" then
-        return o_mouse_moved(self, ...)
     end
 end
