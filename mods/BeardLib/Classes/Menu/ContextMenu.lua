@@ -52,7 +52,7 @@ function ContextMenu:alive() return alive(self.panel) end
 function ContextMenu:CheckItems()
     self._visible_items = {}
     local p = self.items_panel
-	for _, item in ipairs(self._item_panels) do
+	for _, item in pairs(self._item_panels) do
         item:set_visible(p:inside(p:world_x(), item:world_y()) == true or p:inside(p:world_x(), item:world_bottom()) == true)
         if item:visible() then
             table.insert(self._visible_items, item)

@@ -36,12 +36,13 @@ function Menu:Init(params)
     self._reachable_items = self._reachable_items or {}
     self._visible_items = {}
     self:Reposition()
-    if self.auto_align then
-        self:AlignItems()
-    end
-    self:SetScrollPanelSize()
     self:SetEnabled(self.enabled)
     self:SetVisible(self.visible)
+    self:GrowHeight()
+end
+
+function Menu:GrowHeight(speed)
+    self:AlignItems()
 end
 
 function Menu:SetScrollSpeed(speed)
@@ -74,7 +75,6 @@ function Menu:WorkParams(params)
     if self.w == "half" then
         self.w = self.parent_panel:w() / 2
     end
-    self:SetSize(NotNil(self.w, self.parent_panel:w()), NotNil(self.h, self.parent_panel:h()))
 end
 
 function Menu:SetLayer(layer)
@@ -151,7 +151,7 @@ end
 function Menu:MousePressed(button, x, y)
     local menu = self.menu
     if self:Enabled() then
-        for _, item in ipairs(self._visible_items) do
+        for _, item in pairs(self._visible_items) do
             if item:MousePressed(button, x, y) then
                 return true
             end
@@ -196,7 +196,7 @@ function Menu:MouseMoved(x, y)
                 managers.mouse_pointer:set_pointer_image("arrow")
             end
         end
-        for _, item in ipairs(self._visible_items) do
+        for _, item in pairs(self._visible_items) do
             if item:MouseMoved(x, y) then
                 return true
             end
@@ -206,7 +206,7 @@ end
 
 function Menu:CheckItems()
     self._visible_items = {}
-    for _, item in ipairs(self._all_items) do
+    for _, item in pairs(self._all_items) do
         if item:TryRendering() then
             table.insert(self._visible_items, item)
         end
@@ -218,7 +218,7 @@ function Menu:MouseReleased(button, x, y)
     if not self.menu._highlighted then
         managers.mouse_pointer:set_pointer_image("arrow")
     end
-    for _, item in ipairs(self._all_items) do
+    for _, item in pairs(self._all_items) do
         if item:MouseReleased(button, x, y) then
             return true
         end
@@ -247,7 +247,7 @@ function Menu:AlignItemsGrid()
     local max_h = 0
     local max_x = 0
     local max_y = 0
-    for i, item in ipairs(self._my_items) do
+    for i, item in pairs(self._my_items) do
         if not item.ignore_align and item:Visible() then
             local offset = item:Offset()
             local panel = item:Panel()
@@ -283,7 +283,7 @@ function Menu:AlignItems(menus)
         self.parent:AlignItems()
     end
     if menus then
-        for _, item in ipairs(self._my_items) do
+        for _, item in pairs(self._my_items) do
             if item.menu_type then
                 item:AlignItems(true)
             end
@@ -297,7 +297,7 @@ function Menu:AlignItemsNormal()
     end
     local max_h = 0
     local prev_item
-    for i, item in ipairs(self._my_items) do
+    for i, item in pairs(self._my_items) do
         if not item.ignore_align and item:Visible() then
             local offset = item:Offset()
             local panel = item:Panel()

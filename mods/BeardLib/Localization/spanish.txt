@@ -20,7 +20,7 @@
     "heist_contact_custom" : "Mapa Personalizados",
     "heist_contact_custom_description" : "Los Mapas personalizados son atracos creados completamente por la Comunidad",
     "custom_map_cant_download" : "El Mapa del anfitrion no puede ser descargado, desconectando...",
-    "custom_map_failed" : "Algo salio mal cuando se intento descargar el mapa"
+    "custom_map_failed" : "Algo salio mal cuando se intento descargar el mapa",
     "beardlib_mods_manager" : "Administrador de Modulo BeardLib",
     "beardlib_updates_available" : "Administrador de Modulo BeardLib: Actualizaciones disponibles!",
     "beardlib_updates_available_desc" : "Visita el Administrador de descargas de BeardLib para descargarlo (Presiona el circulo azul)",
@@ -44,5 +44,7 @@
     "beardlib_mods_manager_important_title" : "$mod tiene una nueva version!",
     "beardlib_mods_manager_important_help" : "Desea ir al Administrador de descargas para actualizar?",
     "beardlib_search" : "Buscar",
-    "beardlib_important_notice" : "Mostrar aviso de actualizacion"
+    "beardlib_important_notice" : "Mostrar aviso de actualizacion",
+    "beardlib_match_case" : "Match case",
+    "beardlib_limit_results" : "Limit results"
 }

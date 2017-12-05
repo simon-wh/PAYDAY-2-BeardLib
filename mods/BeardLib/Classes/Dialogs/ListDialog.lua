@@ -53,7 +53,7 @@ function ListDialog:_Show(params)
     self._menu:TextBox({
         name = "Search",
         w = tw,
-        control_slice = 0.7,
+        control_slice = 0.8,
         text = "beardlib_search",
         localized = true,
         callback = callback(self, self, "Search"),  
@@ -66,6 +66,8 @@ function ListDialog:_Show(params)
         w = bw,
         offset = offset,
         text = ">|",
+        help = "beardlib_limit_results",
+        help_localized = true,
         value = self._limit,
         callback = function(menu, item)
             self._limit = item:Value()
@@ -78,6 +80,8 @@ function ListDialog:_Show(params)
         w = bw,
         offset = offset,
         text = "Aa",
+        help = "beardlib_match_case",
+        help_localized = true,
         value = self._case_sensitive,
         callback = function(menu, item)
             self._case_sensitive = item:Value()

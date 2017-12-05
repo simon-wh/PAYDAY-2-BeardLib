@@ -79,7 +79,7 @@ function MenuUI:ReloadInterface(params, shallow)
         color = self.help_color or Color.black       
     })
     if not shallow then
-        for _, menu in ipairs(self._menus) do
+        for _, menu in pairs(self._menus) do
             menu:ReloadInterface()
         end
     end
@@ -291,7 +291,7 @@ end
 
 function MenuUI:MouseReleased(o, button, x, y)
 	self._slider_hold = nil    
-    for _, menu in ipairs(self._menus) do
+    for _, menu in pairs(self._menus) do
         if menu:MouseReleased(button, x, y) then
             return
         end
@@ -303,7 +303,7 @@ end
 
 function MenuUI:MouseDoubleClick(o, button, x, y)
     if self.always_mouse_double_click then self.always_mouse_double_click(button, x, y) end
-	for _, menu in ipairs(self._menus) do
+	for _, menu in pairs(self._menus) do
 		if menu:MouseDoubleClick(button, x, y) then
             return
 		end
@@ -323,7 +323,7 @@ function MenuUI:MousePressed(o, button, x, y)
             self._openlist:hide()
         end
     else    
-    	for _, menu in ipairs(self._menus) do
+    	for _, menu in pairs(self._menus) do
             if menu:MouseFocused() then
         		if menu:MousePressed(button, x, y) then
                     return
@@ -360,7 +360,7 @@ function MenuUI:MouseMoved(o, x, y)
         if self._highlighted and not self._highlighted:MouseFocused() and not self._scroll_hold and not self._highlighted.parent.always_highlighting then
             self._highlighted:UnHighlight()
         else
-            for _, menu in ipairs(self._menus) do
+            for _, menu in pairs(self._menus) do
                 if menu:MouseMoved(x, y) then
                     return
                 end

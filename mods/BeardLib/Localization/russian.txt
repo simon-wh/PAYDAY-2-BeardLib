@@ -44,5 +44,7 @@
     "beardlib_mods_manager_important_title" : "Доступна последняя версия мода $mod!",
     "beardlib_mods_manager_important_help" : "Перейти в менеджер модов Beardlib для обновления?",
     "beardlib_search" : "Поиск",
-    "beardlib_important_notice" : "Показывать уведомление об обновлении"
+    "beardlib_important_notice" : "Показывать уведомление об обновлении",
+    "beardlib_match_case" : "Match case",
+    "beardlib_limit_results" : "Limit results"
 }

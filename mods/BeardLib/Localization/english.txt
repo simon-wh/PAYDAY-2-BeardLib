@@ -44,5 +44,7 @@
     "beardlib_mods_manager_important_title" : "$mod has a new version!",
     "beardlib_mods_manager_important_help" : "Go to BeardLib Mods Manager to update?",
     "beardlib_search" : "Search",
-    "beardlib_important_notice" : "Show update notice"
+    "beardlib_important_notice" : "Show update notice",
+    "beardlib_match_case" : "Match case",
+    "beardlib_limit_results" : "Limit results"
 }

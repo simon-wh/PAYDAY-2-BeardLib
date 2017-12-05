@@ -69,30 +69,23 @@ function NarrativeModule:AddNarrativeData(narr_self, tweak_data)
         tweak_data.hud_icons[icon] = {texture = self._config.icon, texture_rect = self._config.icon_rect or false, custom = true}
     end
 
-    local data = {
-        name_id = self._config.name_id or "heist_" .. self._config.id .. "_name",
-        briefing_id = self._config.brief_id or "heist_" .. self._config.id .. "_brief",
-        contact = self._config.contact or "custom",
-        jc = self._config.jc or 50,
-        chain = self._config.chain,
-        dlc = self._config.dlc,
-        briefing_event = self._config.briefing_event,
-        debrief_event = self._config.debrief_event,
-        crimenet_callouts = self._config.crimenet_callouts,
-        crimenet_videos = self._config.crimenet_videos,
-        payout = self._config.payout or {0.001,0.001,0.001,0.001,0.001},
-        contract_cost = self._config.contract_cost or {0.001,0.001,0.001,0.001,0.001},
-        experience_mul = self._config.experience_mul or {0.001,0.001,0.001,0.001,0.001},
-        contract_visuals = {
-            min_mission_xp = self._config.min_mission_xp or {0.001,0.001,0.001,0.001,0.001},
-            max_mission_xp = self._config.max_mission_xp or {0.001,0.001,0.001,0.001,0.001},
-            preview_image = self._config.preview_image or {icon = icon}
+    local data = clone(self._config)
+    table.merge(data, {
+        name_id = data.name_id or "heist_" .. data.id .. "_name",
+        briefing_id = data.brief_id or "heist_" .. data.id .. "_brief",
+        contact = data.contact or "custom",
+        jc = data.jc or 50,
+        payout = data.payout or {0.001,0.001,0.001,0.001,0.001},
+        contract_cost = data.contract_cost or {0.001,0.001,0.001,0.001,0.001},
+        experience_mul = data.experience_mul or {0.001,0.001,0.001,0.001,0.001},
+        contract_visuals = data.contract_visuals or {
+            min_mission_xp = data.min_mission_xp or {0.001,0.001,0.001,0.001,0.001},
+            max_mission_xp = data.max_mission_xp or {0.001,0.001,0.001,0.001,0.001},
+            preview_image = data.preview_image or {icon = icon}
         },
-        load_screen = self._config.load_screen,
         ignore_heat = true,
-        allowed_gamemodes = self._config.allowed_gamemodes,
         custom = true
-    }    
+    })
     for _, stage in pairs(data.chain) do
         if stage.level_id then
             narr_self.stages[stage.level_id] = stage
@@ -105,7 +98,9 @@ function NarrativeModule:AddNarrativeData(narr_self, tweak_data)
     if self._config.merge_data then
         table.merge(data, BeardLib.Utils:RemoveMetas(self._config.merge_data, true))
     end
+
     narr_self.jobs[tostring(self._config.id)] = data
+    
     if #data.chain > 0 then 
         table.insert(narr_self._jobs_index, tostring(self._config.id))
     end

@@ -177,7 +177,7 @@ function TextBoxBase:add_history_point(text)
     if self.history_point then
         local temp_history = clone(self.history)
         self.history = {}
-        for point, text in ipairs(temp_history) do
+        for point, text in pairs(temp_history) do
             if point <= self.history_point then
                 table.insert(self.history, text)
             end

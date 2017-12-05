@@ -4,6 +4,7 @@ Group.type_name = "Group"
 function Group:Init()
     Group.super.Init(self)
     self:InitBasicItem()
+    self:GrowHeight()
 end
 
 function Group:InitBasicItem()
@@ -46,7 +47,7 @@ function Group:ToggleGroup()
         self.closed = true
         self.panel:set_h(self.parent.items_size)
     end
-    for i, item in ipairs(self._my_items) do
+    for i, item in pairs(self._my_items) do
         item:SetVisible(not self.closed)
     end
     self.toggle:set_texture_rect(self.closed and 42 or 2, self.closed and 2 or 0, 16, 16)

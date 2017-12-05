@@ -43,6 +43,8 @@
     "beardlib_close" : "Chiudi",
     "beardlib_mods_manager_important_title" : "È disponibile una nuova versione di $mod!",
     "beardlib_mods_manager_important_help" : "Aprire il gestore delle mod di BeardLib ed aggiornarla?",
-    "beardlib_search" : "Cerca",
-    "beardlib_important_notice" : "Mostra notifica aggiornamento"
+    "beardlib_search" : "Cerca",
+    "beardlib_important_notice" : "Mostra notifica aggiornamento",
+    "beardlib_match_case" : "Match case",
+    "beardlib_limit_results" : "Limit results"
 }

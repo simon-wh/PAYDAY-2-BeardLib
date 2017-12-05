@@ -177,7 +177,7 @@ end
 
 function Item:MouseMoved(x, y)
 	if not self.menu_type then
-	    for _, item in ipairs(self._adopted_items) do
+	    for _, item in pairs(self._adopted_items) do
 	        if item:MouseMoved(x, y) then
 	            return true
 	        end
