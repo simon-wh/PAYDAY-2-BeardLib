@@ -45,6 +45,6 @@
     "beardlib_mods_manager_important_help" : "Aller au gestionnaire des mods BeardLib pour mettre à jour?",
     "beardlib_search" : "Rechercher",
     "beardlib_important_notice" : "Montrer les notifications de mise-à-jour",
-    "beardlib_match_case" : "Match case",
-    "beardlib_limit_results" : "Limit results"
+    "beardlib_match_case" : "Correspondance",
+    "beardlib_limit_results" : "Limiter les résulats"
 }
