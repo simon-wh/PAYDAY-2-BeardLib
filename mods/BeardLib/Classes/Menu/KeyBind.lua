@@ -18,8 +18,12 @@ function KeyBindItem:Init()
 end
 
 function KeyBindItem:SetValue(value, run_callback)
-    KeyBindItem.super.SetValue(self, value, run_callback)
-    self:SetKeybindKey()
+    if KeyBindItem.super.SetValue(self, value, run_callback) then
+        self:SetKeybindKey()
+        return true
+    else
+        return false
+    end
 end
 
 function KeyBindItem:SetKeybindKey()

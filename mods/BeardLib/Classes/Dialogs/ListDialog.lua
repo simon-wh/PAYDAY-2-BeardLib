@@ -41,40 +41,23 @@ function ListDialog:init(params, menu)
     self._menu:Panel():set_leftbottom(self._list_menu:Panel():left(), self._list_menu:Panel():top() - 1)
 end
 
-function ListDialog:_Show(params)
-    if not self:basic_show(params) then
-        return
-    end
-    self._filter = {}
-    self._case_sensitive = params.case_sensitive
-    self._limit = NotNil(params.limit, true)
-    self._list = params.list
-    local tw = self._menu.w * 0.8
-    self._menu:TextBox({
-        name = "Search",
-        w = tw,
-        control_slice = 0.8,
-        text = "beardlib_search",
-        localized = true,
-        callback = callback(self, self, "Search"),  
-        label = "temp"
-    })
-    local bw = (self._menu.w - tw) * 0.25
-    local offset = {bw / 3, 0}
-    self._menu:Toggle({
+function ListDialog:CreateShortcuts(params)
+    local offset = {4, 0}
+    local bw = self._menu:Toggle({
         name = "Limit",
         w = bw,
         offset = offset,
         text = ">|",
         help = "beardlib_limit_results",
         help_localized = true,
+        size_by_text = true,
         value = self._limit,
         callback = function(menu, item)
             self._limit = item:Value()
             self:MakeListItems()
         end,  
         label = "temp"
-    })
+    }):Width()
     self._menu:Toggle({
         name = "CaseSensitive",
         w = bw,
@@ -89,16 +72,38 @@ function ListDialog:_Show(params)
         end,  
         label = "temp"
     })
-    self._menu:ImageButton({
+    return offset, bw
+end
+
+function ListDialog:_Show(params)
+    if not self:basic_show(params) then
+        return
+    end
+    self._filter = {}
+    self._case_sensitive = params.case_sensitive
+    self._limit = NotNil(params.limit, true)
+    self._list = params.list
+    local offset, bw = self:CreateShortcuts(params)
+    local close = self._menu:ImageButton({
         name = "Close",
         w = bw,
+        offset = offset,
         h = 20,
         icon_w = 14,
         icon_h = 14,
-        position = "Right",
         texture = "guis/textures/menu_ui_icons",
         texture_rect = {84, 89, 36, 36},
         callback = callback(self, self, "hide"),  
+        label = "temp"
+    })
+    self._menu:TextBox({
+        name = "Search",
+        w = self._menu:ItemsWidth() - close:Right() - offset[1],
+        control_slice = 0.86,
+        index = 1,
+        text = "beardlib_search",
+        localized = true,
+        callback = callback(self, self, "Search"),  
         label = "temp"
     })
     if params.sort ~= false then
@@ -125,7 +130,7 @@ function ListDialog:SearchCheck(t)
 end
 
 function ListDialog:MakeListItems(params)
-    self._list_menu:ClearItems("temp2")  
+    self._list_menu:ClearItems("temp2")
     local case = self._case_sensitive
     local limit = self._limit
     local groups = {}

@@ -25,7 +25,7 @@ function ColorTextBox:SetValue(value, ...)
     if type_name(value) == "Color" then
         value = value:to_hex()
     end
-    ColorTextBox.super.SetValue(self, value, ...)
+    return ColorTextBox.super.SetValue(self, value, ...)
 end
 
 function ColorTextBox:_SetValue(...)

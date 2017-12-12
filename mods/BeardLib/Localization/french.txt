@@ -46,5 +46,7 @@
     "beardlib_search" : "Rechercher",
     "beardlib_important_notice" : "Montrer les notifications de mise-à-jour",
     "beardlib_match_case" : "Correspondance",
-    "beardlib_limit_results" : "Limiter les résulats"
+    "beardlib_limit_results" : "Limiter les résulats",
+    "beardlib_tick_all" : "Tick all present items",
+    "beardlib_untick_all" : "Untick all present items"
 }

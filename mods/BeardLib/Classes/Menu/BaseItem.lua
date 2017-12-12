@@ -327,6 +327,9 @@ function BaseItem:SetPositionByString(pos)
 end
 
 function BaseItem:SetValue(value, run_callback)
+	if not self:alive() then
+		return false
+	end
 	if run_callback then
 		run_callback = value ~= self.value
 	end
@@ -334,6 +337,7 @@ function BaseItem:SetValue(value, run_callback)
 	if run_callback then
 		self:RunCallback()
 	end
+	return true
 end
 
 function BaseItem:MouseCheck(press)

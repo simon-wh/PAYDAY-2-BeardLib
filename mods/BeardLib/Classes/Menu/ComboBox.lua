@@ -52,7 +52,10 @@ function ComboBox:SetItems(items)
     self._list:update_search()
 end
 
-function ComboBox:SetValue(value, run_callback, no_items_clbk)    
+function ComboBox:SetValue(value, run_callback, no_items_clbk)
+    if not self:alive() then
+		return false
+	end
     local v = self.items[value]
     if run_callback and type(v) == "table" and not no_items_clbk and v.callback then
         self:RunCallback(v.callback)
@@ -64,6 +67,7 @@ function ComboBox:SetValue(value, run_callback, no_items_clbk)
        self._textbox:Text():set_text(self.localized_items and v and managers.localization:text(tostring(v)) or type(v) ~= "nil" and tostring(v) or "")
     end    
     ComboBox.super.SetValue(self, value, run_callback)
+    return true
 end
 
 function ComboBox:SetSelectedItem(value, ...)    

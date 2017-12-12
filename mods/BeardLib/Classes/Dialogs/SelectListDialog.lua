@@ -3,7 +3,8 @@ SelectListDialog.type_name = "SelectListDialog"
 function SelectListDialog:init(params, menu)
     if self.type_name == SelectListDialog.type_name then
         params = params and clone(params) or {}
-    end    
+    end
+    self._visible_items = {}
     SelectListDialog.super.init(self, params, menu)
 end
 
@@ -13,6 +14,42 @@ function SelectListDialog:_Show(params)
     self._allow_multi_insert = params.allow_multi_insert or false
     self._selected_list = params.selected_list or {}
     SelectListDialog.super._Show(self, params)
+end
+
+function SelectListDialog:CreateShortcuts(...)
+    local offset, bw = SelectListDialog.super.CreateShortcuts(self, ...)
+    self._menu:Button({
+        name = "TickAll",
+        offset = offset,
+        text = "+*",
+        text_align = "center",
+        help = "beardlib_tick_all",
+        help_localized = true,
+        w = bw,
+        callback = callback(self, self, "TickAllPresent", true),
+        label = "temp"
+    })
+    self._menu:Button({
+        name = "UntickAll",
+        offset = offset,
+        text = "-*",
+        text_align = "center",
+        help = "beardlib_untick_all",
+        help_localized = true,
+        w = bw,
+        callback = callback(self, self, "TickAllPresent", false),
+        label = "temp"
+    })
+    return offset, bw
+end
+
+function SelectListDialog:TickAllPresent(set)
+    for _, item in pairs(self._visible_items) do
+        if (set and item.can_be_ticked ~= false) or (not set and item.can_be_unticked ~= false) then
+            item:SetValue(set, false)
+            item:RunCallback()
+        end
+    end
 end
 
 function SelectListDialog:ShowItem(t, selected)
@@ -28,14 +65,15 @@ function SelectListDialog:ShowItem(t, selected)
 end
 
 function SelectListDialog:MakeListItems(params)
+    self._visible_items = {}
     self._list_menu:ClearItems("list_items")
-    for _,v in pairs(self._selected_list) do
+    for _, v in pairs(self._selected_list) do
         local t = type(v) == "table" and v.name or v
         if self:ShowItem(t, true) then
             self:ToggleItem(t, true, v)
         end
     end
-    for _,v in pairs(self._list) do
+    for _, v in pairs(self._list) do
         local t = type(v) == "table" and v.name or v
         if self:ShowItem(t) then
             self:ToggleItem(t, false, v)
@@ -59,7 +97,7 @@ function SelectListDialog:ToggleClbk(value, menu, item)
             if self._single_select then
                 self._selected_list = {value}
             else
-                table.insert(self._selected_list, clone(value))
+                table.insert(self._selected_list, type(value) == "table" and clone(value) or value)
             end
         end
     else
@@ -72,13 +110,13 @@ function SelectListDialog:ToggleClbk(value, menu, item)
 end
 
 function SelectListDialog:ToggleItem(name, selected, value)
-    self._list_menu:Toggle({
+    table.insert(self._visible_items, self._list_menu:Toggle({
         name = name,
         text = name,
         value = selected,
         callback = callback(self, self, "ToggleClbk", value),
         label = "list_items"
-    })
+    }))
 end
 
 function SelectListDialog:run_callback(clbk)

@@ -71,7 +71,7 @@ function Menu:WorkParams(params)
     self.private.background_color = NotNil(self.private.background_color, self.background_visible and self.background_color or nil)    
     self.auto_align = NotNil(self.auto_align, true)
     self.auto_height = NotNil(self.auto_height, self.type_name == "Group" and true or false)
-    self.scrollbar = NotNil(self.scrollbar, self.auto_height ~= true)
+    self.scrollbar = NotNil(self.scrollbar, self.auto_height ~= true or self.min_height ~= nil or self.max_height ~= nil)
     if self.w == "half" then
         self.w = self.parent_panel:w() / 2
     end
@@ -480,6 +480,9 @@ function Menu:ShouldClose()
     return true
 end
 
+function Menu:MyItems() return self._my_items end
+function Menu:Items() return self._all_items end
+function Menu:AdoptedItems() return self._adopted_items end
 function Menu:ItemsWidth() return self.items_panel:w() end
 function Menu:ItemsHeight() return self.items_panel:h() end
 

@@ -39,8 +39,12 @@ function Toggle:SetEnabled(enabled)
 end
 
 function Toggle:SetValue(value, run_callback)
-	Toggle.super.SetValue(self, value, run_callback)
-	self:UpdateToggle(true)
+	if Toggle.super.SetValue(self, value, run_callback) then
+		self:UpdateToggle(true)
+		return true
+	else
+		return false
+	end
 end
 
 function Toggle:UpdateToggle(value_changed, highlight)

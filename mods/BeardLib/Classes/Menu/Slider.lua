@@ -94,10 +94,14 @@ function Slider:_SetValue(value, run_callback, reset_selection, no_format)
 end
 
 function Slider:SetValue(value, ...)
+    if not self:alive() then
+        return false
+    end
     if self.value ~= value then
         self._textbox:add_history_point(value)
     end
     self:_SetValue(value, ...)
+    return true
 end
 
 function Slider:SetValueByPercentage(percent)
