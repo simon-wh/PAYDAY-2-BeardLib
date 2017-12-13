@@ -22,20 +22,41 @@ function ElementCustomSound:client_on_executed(...)
 	self:on_executed(...)
 end
 
+function ElementCustomSound:_check_and_create_panels()
+	--Creates secondary & tertiary panels in case they don't exist yet (or have been destroyed)
+	if not managers.menu_component._secondary_panel then
+		managers.menu_component._secondary_panel = managers.menu_component._ws:panel():panel()
+	end
+	
+	if not managers.menu_component._third_panel then
+		managers.menu_component._third_panel = managers.menu_component._ws:panel():panel()
+	end
+end
+
 function ElementCustomSound:_check_volume_choice()
 	if self._values.volume_choice == "sfx" then
 		local volume = managers.user:get_setting("sfx_volume")
 		local percentage = (volume - tweak_data.menu.MIN_SFX_VOLUME) / (tweak_data.menu.MAX_SFX_VOLUME - tweak_data.menu.MIN_SFX_VOLUME)
+		
 		self._volume_based = percentage
 	else
 		self._volume_based = Global.music_manager.volume
 	end
+	
+	--Volume overriding
+	if self._values.volume_override and self._values.volume_override >= 0 then
+		self._volume_based = self._volume_based * self._values.volume_override
+	end
+	
 	return self._volume_based
 end
 
 function ElementCustomSound:stop_secondary()
-	if alive(self._secondary_player) then
-		self._secondary_player:parent():remove(self._secondary_player)
+	
+	--Removes the secondary panel from the menu component manager
+	if managers.menu_component._secondary_panel then
+		managers.menu_component._ws:panel():remove(managers.menu_component._secondary_panel)
+		managers.menu_component._secondary_panel = nil
 	end
 end
 
@@ -55,21 +76,26 @@ end
 
 function ElementCustomSound:play_secondary(src)
 	if MusicModule then
-   		managers.menu_component._secondary_panel = managers.menu_component._ws:panel():panel()
+		--Removes the secondary panel, terminating all video files contained in it automatically
+		if self._values.override_others then
+			self:stop_secondary()
+			self:_check_and_create_panels()
+		end
+	
 		self._secondary_player = managers.menu_component._secondary_panel:video({
 			name = "secondary_sound",
 	        video = src,
 	        visible = false,
 	        loop = false
 		})
+
 	 	self._secondary_player:set_volume_gain(self:_check_volume_choice())
 	end
 end
 
 function ElementCustomSound:play_third(src)
 	if MusicModule then
-   		managers.menu_component._third_panel = managers.menu_component._ws:panel():panel()
-		self._third_player = managers.menu_component._third_panel:video({
+   		self._third_player = managers.menu_component._third_panel:video({
 			name = "third_sound",
 	        video = src,
 	        visible = false,
@@ -119,6 +145,13 @@ function ElementCustomSound:on_executed(instigator)
 		return
 	end
 
+	if self._values.instigator_only and instigator ~= managers.player:player_unit() then
+		return
+	end
+	
+	--Check panels and create if required
+	self:_check_and_create_panels()
+	
 	if not self._values.use_as_secondary and not self._values.use_as_third then
 		-- Primary Channel
 		self:play(self._values.sound_path)
