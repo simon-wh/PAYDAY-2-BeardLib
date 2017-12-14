@@ -32,12 +32,14 @@ function ScrollablePanelModified:set_scroll_color(color)
 	color = color or Color.white
 	local function set_boxgui_img(pnl)
 		for _, child in pairs(pnl:children()) do
-			local typ = CoreClass.type_name(child)
+			local typ = type_name(child)
 			if typ == "Panel" then
 				set_boxgui_img(child)
 			elseif typ == "Bitmap" then
 				if child:texture_name() == Idstring("guis/textures/pd2/shared_lines") then
 					child:set_image("units/white_df")
+					child:set_x(0)
+					child:set_w(child:parent():w())
 				end
 				child:set_color(color)
 			end
@@ -144,6 +146,7 @@ function ScrollablePanelModified:canvas_scroll_width()
 		return self:scroll_panel():w() - self:padding() - 5
 	end
 end
+
 function ScrollablePanelModified:set_canvas_size(w, h)
 	w = w or self:canvas():w()
 	h = h or self:canvas():h()

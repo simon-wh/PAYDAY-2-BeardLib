@@ -68,8 +68,8 @@ function Group:MousePressed(button, x, y)
 end
 
 function Group:MouseMoved(x, y)
-    if BeardLib.Items.Item.MouseMoved(self, x, y) then
-        return true
+    if not Group.super.MouseMoved(self, x, y) then
+        return BeardLib.Items.Item.MouseMoved(self, x, y)
     end
-    return Group.super.MouseMoved(self, x, y)
+    return false
 end
