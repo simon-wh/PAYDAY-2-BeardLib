@@ -1,4 +1,10 @@
 if CoreSequenceManager then
+
+    Hooks:Register("BeardLibCreateScriptDataMods")
+    Hooks:PostHook(CoreSequenceManager.SequenceManager, "init", "BeardLibSequenceManagerPostInit", function() 
+        Hooks:Call("BeardLibCreateScriptDataMods")
+    end)	
+
 	local MaterialElement = CoreSequenceManager.MaterialElement
 	MaterialElement.FUNC_MAP.texture = "set_texture"
 	
