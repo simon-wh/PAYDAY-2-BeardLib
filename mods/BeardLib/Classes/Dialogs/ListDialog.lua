@@ -137,8 +137,8 @@ function ListDialog:MakeListItems(params)
     local i = 0
     for _, v in pairs(self._list) do
         local t = type(v) == "table" and v.name or v
-        i = i + 1
         if self:SearchCheck(t) then
+            i = i + 1
             if limit and i >= 250 then
                 break
             end
