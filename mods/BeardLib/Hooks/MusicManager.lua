@@ -90,6 +90,7 @@ function MusicManager:attempt_play(track, event, stop)
 		end
 		if sound.id == track or sound.id == event then
 			if self._current_custom_track ~= sound.id or sound.id == event then
+				start_source = type(sound.start_source) == "string" and DB:has(Idstring("movie"), sound.start_source) and sound.start_source
 				source = sound.source
 				self._current_custom_track = sound.id
 			else
