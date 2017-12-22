@@ -35,6 +35,10 @@ function OptionModule:post_init()
 
     self:InitOptions(self._config.options, self._storage)
 
+    if self._config.value_changed then
+        self._value_changed = self._mod:StringToCallback(self._config.value_changed)
+    end
+
     if self._config.auto_load == nil or self._config.auto_load then
         self:Load()
     end
@@ -171,6 +175,9 @@ function OptionModule:_SetValue(tbl, name, value, full_name)
         if tbl.value_changed then
             tbl.value_changed(full_name, value)
         end
+        if self._value_changed then
+            self._value_changed(full_name, value)
+        end
     else
         if tbl[name] == nil then
             BeardLib:log(string.format("[ERROR] Option of name %q does not exist in mod, %s", name, self._mod.Name))
@@ -180,6 +187,9 @@ function OptionModule:_SetValue(tbl, name, value, full_name)
 
         if tbl[name].value_changed then
             tbl[name].value_changed(full_name, value)
+        end
+        if self._value_changed then
+            self._value_changed(full_name, value)
         end
     end
 end
@@ -471,7 +481,33 @@ end
 
 function OptionModule:CreateColour(parent_node, option_tbl, option_path)
     local alpha = not not self:GetParameter(option_tbl, "alpha")
-    self:CreateMatrix(parent_node, option_tbl, option_path, { [1] = alpha and {id="a", title="A"} or nil, {id="r", title="R"}, {id="g", title="G"}, {id="b", title="B"} })
+    local id = self._mod.Name .. option_tbl.name
+
+    option_path = option_path == "" and option_tbl.name or option_path .. "/" .. option_tbl.name
+
+    local enabled = not self:GetParameter(option_tbl, "disabled")
+
+    if option_tbl.enabled_callback then
+        enabled = option_tbl:enabled_callback()
+    end
+
+    local merge_data = self:GetParameter(option_tbl, "merge_data") or {}
+    merge_data = BeardLib.Utils:RemoveAllNumberIndexes(merge_data)
+
+    MenuHelperPlus:AddColorButton(table.merge({
+        id = self:GetParameter(option_tbl, "name"),
+        title = self:GetParameter(option_tbl, "title_id") or id .. "TitleID",
+        node = parent_node,
+        desc = self:GetParameter(option_tbl, "desc_id") or id .. "DescID",
+        callback = "OptionModuleGeneric_ValueChanged",
+        enabled = enabled,
+        value = self:GetValue(option_path),
+        show_value = self:GetParameter(option_tbl, "show_value"),
+        merge_data = {
+            option_key = option_path,
+            module = self
+        }
+    }, merge_data))
 end
 
 function OptionModule:CreateVector(parent_node, option_tbl, option_path)

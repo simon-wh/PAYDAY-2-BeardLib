@@ -1,5 +1,6 @@
 SelectListDialog = SelectListDialog or class(ListDialog)
 SelectListDialog.type_name = "SelectListDialog"
+
 function SelectListDialog:init(params, menu)
     if self.type_name == SelectListDialog.type_name then
         params = params and clone(params) or {}
@@ -57,7 +58,7 @@ function SelectListDialog:ShowItem(t, selected)
         return false
     end
     if self:SearchCheck(t) then
-        if not self._limit or self:ItemsCount() <= 250 then
+        if not self._limit or #self._visible_items <= 250 then
             return true
         end
     end

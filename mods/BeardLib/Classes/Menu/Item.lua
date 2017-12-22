@@ -2,9 +2,6 @@ BeardLib.Items.Item = BeardLib.Items.Item or class(BeardLib.Items.BaseItem)
 local Item = BeardLib.Items.Item
 function Item:Init(params)
 	self:WorkParams(params)
-	if self.override_parent then
-		self.override_parent:AddItem(self)
-	end
 	self.panel = self.parent_panel:panel({
 		name = self.name,
 		visible = self.visible,

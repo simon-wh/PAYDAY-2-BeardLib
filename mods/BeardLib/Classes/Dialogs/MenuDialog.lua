@@ -95,6 +95,7 @@ function MenuDialog:show_dialog()
 end
 
 function MenuDialog:basic_show(params, force)
+    self._no_blur = params.no_blur or false
     BeardLib.managers.dialog:ShowDialog(self)
     self._tbl = {}
     self._params = params

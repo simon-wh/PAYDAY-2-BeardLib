@@ -170,7 +170,7 @@ function MenuUI:Enable()
         return
     end
     if self.animate_toggle then
-        play_anim(self._panel, {set = {alpha = 1}})       
+        play_anim(self._panel, {set = {alpha = 1}, time = 0.2})       
     else
         self._panel:set_alpha(1)
     end
@@ -191,7 +191,7 @@ function MenuUI:Disable()
         return
     end
     if self.animate_toggle then
-        play_anim(self._panel, {set = {alpha = 0}})
+        play_anim(self._panel, {set = {alpha = 0}, time = 0.2})
     else
         self._panel:set_alpha(0)
     end
@@ -399,7 +399,7 @@ function MenuUI:GetItem(name, shallow)
 end
 
 function MenuUI:GetItemByLabel(label, shallow)
-    for _, item in pairs(self._all_items) do
+    for _, item in pairs(self._menus) do
         if item.label == label then
             return item
         elseif item.menu_type and not shallow then

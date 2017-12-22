@@ -48,7 +48,9 @@ function Group:ToggleGroup()
         self.panel:set_h(self.parent.items_size)
     end
     for i, item in pairs(self._my_items) do
-        item:SetVisible(not self.closed)
+        if item:ParentPanel() == self:ItemsPanel() then
+            item:SetVisible(not self.closed)
+        end
     end
     self.toggle:set_texture_rect(self.closed and 42 or 2, self.closed and 2 or 0, 16, 16)
     self:AlignItems()

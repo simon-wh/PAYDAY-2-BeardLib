@@ -115,7 +115,7 @@ function ListDialog:_Show(params)
 end
 
 function ListDialog:ItemsCount()
-    return #self._list_menu._all_items
+    return #self._list_menu:Items()
 end
 
 function ListDialog:SearchCheck(t)
@@ -134,33 +134,37 @@ function ListDialog:MakeListItems(params)
     local case = self._case_sensitive
     local limit = self._limit
     local groups = {}
-    for _,v in pairs(self._list) do
+    local i = 0
+    for _, v in pairs(self._list) do
         local t = type(v) == "table" and v.name or v
+        i = i + 1
         if self:SearchCheck(t) then
-            if not limit or self:ItemsCount() <= 250 then
-                local menu = self._list_menu
-                if type(v) == "table" and v.create_group then 
-                    menu = groups[v.create_group] or self._list_menu:Group({
-                        auto_align = false,
-                        name = v.create_group,
-                        text = v.create_group,
-                        label = "temp2"
-                    }) 
-                    groups[v.create_group] = menu
-                end
-                menu:Button(table.merge(type(v) == "table" and v or {}, {
-                    name = t,
-                    text = t,
-                    callback = function(menu, item)
-                        if self._callback then
-                            self._callback(v)
-                        end
-                    end, 
-                    label = "temp2"
-                }))
+            if limit and i <= 250 then
+                break
             end
+            local menu = self._list_menu
+            if type(v) == "table" and v.create_group then 
+                menu = groups[v.create_group] or self._list_menu:Group({
+                    auto_align = false,
+                    name = v.create_group,
+                    text = v.create_group,
+                    label = "temp2"
+                }) 
+                groups[v.create_group] = menu
+            end
+            menu:Button(table.merge(type(v) == "table" and v or {}, {
+                name = t,
+                text = t,
+                callback = function(menu, item)
+                    if self._callback then
+                        self._callback(v)
+                    end
+                end, 
+                label = "temp2"
+            }))
         end
     end
+    
     self:show_dialog()
     self._list_menu:AlignItems(true)
 end

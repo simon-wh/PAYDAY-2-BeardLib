@@ -23,7 +23,7 @@ function Menu:Init(params)
         layer = 0
     })
     self._scroll = ScrollablePanelModified:new(self.panel, "ItemsPanel", {
-        layer = 4, 
+        layer = 4,
         padding = 0.0001, 
         scroll_width = self.scrollbar == false and 0 or self.scroll_width, 
         hide_shade = true, 
@@ -32,7 +32,6 @@ function Menu:Init(params)
     })
     self.items_panel = self._scroll:canvas()
     self._my_items = self._my_items or {}
-    self._all_items = self._all_items or {}
     self._reachable_items = self._reachable_items or {}
     self._visible_items = {}
     self:Reposition()
@@ -162,24 +161,27 @@ function Menu:MousePressed(button, x, y)
                 self:CheckItems()
                 return true
             end
-        elseif button == Idstring("mouse wheel down") and self.scrollbar and self._scroll:is_scrollable() then
-            if self._scroll:scroll(x, y, -1) then
-                if menu._highlighted and menu._highlighted.parent == self then
-                    menu._highlighted:MouseMoved(x,y)
-                end 
-                self:CheckItems()
-                return true
-            end
-        elseif button == Idstring("mouse wheel up") and self.scrollbar and self._scroll:is_scrollable() then
-            if self._scroll:scroll(x, y, 1) then
-                if menu._highlighted and menu._highlighted.parent == self then
-                    menu._highlighted:MouseMoved(x,y)
-                end 
-                self:CheckItems()
-                return true
+        elseif self.scrollbar and self._scroll:is_scrollable() then
+            if button == Idstring("mouse wheel down") then
+                if self._scroll:scroll(x, y, -1) then
+                    if menu._highlighted and menu._highlighted.parent == self then
+                        menu._highlighted:MouseMoved(x,y)
+                    end 
+                    self:CheckItems()
+                    return true
+                end
+            elseif button == Idstring("mouse wheel up") then
+                if self._scroll:scroll(x, y, 1) then
+                    if menu._highlighted and menu._highlighted.parent == self then
+                        menu._highlighted:MouseMoved(x,y)
+                    end 
+                    self:CheckItems()
+                    return true
+                end
             end
         end
     end
+    return false
 end
 
 function Menu:MouseMoved(x, y)
@@ -202,11 +204,12 @@ function Menu:MouseMoved(x, y)
             end
         end
     end
+    return false
 end
 
 function Menu:CheckItems()
     self._visible_items = {}
-    for _, item in pairs(self._all_items) do
+    for _, item in pairs(self._my_items) do
         if item:TryRendering() then
             table.insert(self._visible_items, item)
         end
@@ -218,14 +221,14 @@ function Menu:MouseReleased(button, x, y)
     if not self.menu._highlighted then
         managers.mouse_pointer:set_pointer_image("arrow")
     end
-    for _, item in pairs(self._all_items) do
+    for _, item in pairs(self._my_items) do
         if item:MouseReleased(button, x, y) then
             return true
         end
     end
 end
 
-function Menu:SetVisible(visible, animate)
+function Menu:SetVisible(visible, animate, no_align)
     local panel = self:Panel()
     if not alive(panel) then
         return
@@ -234,7 +237,10 @@ function Menu:SetVisible(visible, animate)
     BeardLib.Items.Item.super.SetVisible(self, visible, true)
     if animate and visible and not was_visible then
         panel:set_alpha(0)
-        play_anim(panel, {set = {alpha = 1}})
+        play_anim(panel, {set = {alpha = 1}, time = 0.2})
+    end
+    if not no_align and self.parent.auto_align then
+    	self.parent:AlignItems()
     end
     self.menu:CheckOpenedList()
 end
@@ -251,7 +257,7 @@ function Menu:AlignItemsGrid()
         if not item.ignore_align and item:Visible() then
             local offset = item:Offset()
             local panel = item:Panel()
-            if panel:w() + (max_x + offset[1]) > self:ItemsWidth() then
+            if panel:w() + (max_x + offset[1]) - self:ItemsWidth() > 0.001 then
                 max_y = max_h
                 max_x = 0
             end
@@ -334,7 +340,7 @@ function Menu:UpdateCanvas()
 end
 
 function Menu:GetMenu(name, shallow)
-    for _, menu in pairs(self._all_items) do
+    for _, menu in pairs(self._my_items) do
         if menu.menu_type then
             if menu.name == name then
                 return menu
@@ -350,7 +356,7 @@ function Menu:GetMenu(name, shallow)
 end
 
 function Menu:GetItem(name, shallow)
-    for _, item in pairs(self._all_items) do
+    for _, item in pairs(self._my_items) do
         if item.name == name then
             return item
         elseif item.menu_type and not shallow then
@@ -364,7 +370,7 @@ function Menu:GetItem(name, shallow)
 end
 
 function Menu:GetItemByLabel(label, shallow)
-    for _, item in pairs(self._all_items) do
+    for _, item in pairs(self._my_items) do
         if item.label == label then
             return item
         elseif item.menu_type and not shallow then
@@ -378,22 +384,16 @@ function Menu:GetItemByLabel(label, shallow)
 end
 
 function Menu:ClearItems(label)
-    local temp = clone(self._all_items)
-    self._all_items = {}
+    local temp = clone(self._my_items)
     self._my_items = {}
     self._reachable_items = {}
     for _, item in pairs(temp) do
-        if not label or type(label) == "table" and item.override_parent == label or item.label == label then
+        if not label or type(label) == "table" or item.label == label then
             self:RemoveItem(item)
-        else
-            if item:alive() and not item.override_parent or alive(item.override_parent) then
-                table.insert(self._all_items, item)
-                if item.override_parent == nil then
-                    table.insert(self._my_items, item)
-                end
-                if item.reachable then
-                    table.insert(self._reachable_items, item)
-                end
+        elseif item:alive() then
+            table.insert(self._my_items, item)
+            if item.reachable then
+                table.insert(self._reachable_items, item)
             end
         end
     end
@@ -405,7 +405,7 @@ function Menu:ClearItems(label)
 end
 
 function Menu:RecreateItems()
-    for _, item in pairs(self._all_items) do
+    for _, item in pairs(self._my_items) do
         self:RecreateItem(item)
     end
     if self.auto_align then
@@ -421,10 +421,13 @@ function Menu:RecreateItem(item, align_items)
     if alive(panel) then
         panel:parent():remove(panel)
     end
-    if item.override_parent then
-        table.delete(item.override_parent._adopted_items, item)
+    if item.override_panel then
+        table.delete(item.override_panel._adopted_items, item)
+        if item.override_panel.Panel then
+            item.parent_panel = item.override_panel:Panel()
+        end
     end
-    item.parent_panel = (item.override_parent and item.override_parent:Panel()) or self.items_panel
+    item.parent_panel = alive(item.parent_panel) and item.parent_panel or self.items_panel
     item:Init()
     item:PostInit()
     if item.menu_type then
@@ -444,20 +447,19 @@ function Menu:RemoveItem(item)
     end
     if item._adopted_items then
         for _, v in pairs(item._adopted_items) do
-            v.override_parent = nil
-            self:RemoveItem(v)
+            v.override_panel = nil
+            v:Destroy()
         end
     end
-
-    if item.override_parent then
-        table.delete(item.override_parent._adopted_items, item)
+    if item.override_panel then
+        table.delete(item.override_panel._adopted_items, item)
     end
+
     if item.list then
         item.list:parent():remove(item.list)
     end
     table.delete(self._reachable_items, item)
     table.delete(self._my_items, item)
-    table.delete(self._all_items, item)
     table.delete(self._adopted_items, item)
     local panel = item:Panel()
     if alive(panel) then
@@ -469,7 +471,7 @@ function Menu:RemoveItem(item)
 end
 
 function Menu:ShouldClose()
-    for _, item in pairs(self._all_items) do
+    for _, item in pairs(self._my_items) do
         if item.menu_type and not item:ShouldClose() then
             return false
         end
@@ -480,11 +482,10 @@ function Menu:ShouldClose()
     return true
 end
 
-function Menu:MyItems() return self._my_items end
-function Menu:Items() return self._all_items end
-function Menu:AdoptedItems() return self._adopted_items end
+function Menu:Items() return self._my_items end
 function Menu:ItemsWidth() return self.items_panel:w() end
 function Menu:ItemsHeight() return self.items_panel:h() end
+function Menu:ItemsPanel() return self.items_panel end
 
 function Menu:ImageButton(params)
     local w = params.w or not params.icon_h and params.items_size
@@ -545,14 +546,14 @@ function Menu:ConfigureItem(item, menu)
         log(tostring(debug.traceback()))
         return
     end
-    if item.override_parent == self then
-        item.override_parent = nil
-    end
-    local inherit = NotNil(item.inherit, item.override_parent, self)
+    local inherit = NotNil(item.inherit, self)
     item.inherit = inherit
     item.parent = self
     item.menu = self.menu
-    item.parent_panel = (item.override_parent and item.override_parent.panel) or self.items_panel
+    item.parent_panel = self.items_panel
+    if item.override_panel and item.override_panel.Panel then
+        item.parent_panel = item.override_panel:Panel()
+    end
     if type(item.index) == "string" then
         local split = string.split(item.index, "|")
         local wanted_item = self:GetItem(split[2] or split[1]) 
@@ -569,20 +570,12 @@ function Menu:ConfigureItem(item, menu)
 end
 
 function Menu:NewItem(item)
-    local index
-    if not item.override_parent and item.indx then
-        table.insert(self._all_items, item.indx, item)
+    if item.indx then
+        table.insert(self._my_items, item.indx, item)
     else
-        table.insert(self._all_items, item)
+        table.insert(self._my_items, item)
     end
-    if item.override_parent == nil then
-        if item.indx then
-            table.insert(self._my_items, item.indx, item)
-        else
-            table.insert(self._my_items, item)
-            index = #self._my_items
-        end
-    end
+    local index = #self._my_items
     if item.reachable then
         table.insert(self._reachable_items, item)
     end

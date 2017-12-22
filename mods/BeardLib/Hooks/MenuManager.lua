@@ -1,3 +1,4 @@
+dofile(BeardLib.config.hooks_dir .. "MenuItemColorButton.lua")
 local orig_MenuCallbackHandler_start_job = MenuCallbackHandler.start_job
 
 local sync_game_settings_id = "BeardLib_sync_game_settings"

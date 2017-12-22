@@ -77,7 +77,7 @@ function ScrollablePanelModified:update_canvas_size()
 	local max_w = show_scrollbar and self:canvas_scroll_width() or self:canvas_max_width()
 
 	self:canvas():grow(max_w - self:canvas():w(), max_h - self:canvas():h())
-
+	self:canvas():set_w(math.min(self:canvas():w(), self:scroll_panel():w()))
 	if self._on_canvas_updated then
 		self._on_canvas_updated(max_w)
 	end
@@ -141,9 +141,9 @@ end
 
 function ScrollablePanelModified:canvas_scroll_width()
 	if self._scroll_width then
-		return self:scroll_panel():w() - ((self._scroll_bar:w() * 2) - 2)
+		return math.max(0, self:scroll_panel():w() - ((self._scroll_bar:w() * 2) - 2))
 	else
-		return self:scroll_panel():w() - self:padding() - 5
+		return math.max(0, self:scroll_panel():w() - self:padding() - 5)
 	end
 end
 

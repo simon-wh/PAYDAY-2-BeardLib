@@ -41,7 +41,7 @@ function ColorDialog:_Show(params)
         callback = callback(self, self, "update_hex"),
         w = 120,
         items_size = 20,
-        override_parent = preview
+        override_panel = preview
     })
     if params.create_items then
         params.create_items(self._menu)

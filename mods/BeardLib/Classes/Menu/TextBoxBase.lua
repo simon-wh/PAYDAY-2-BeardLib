@@ -246,6 +246,7 @@ function TextBoxBase:update_caret()
     local lines = math.max(1, text:number_of_lines())
     local _,_,_,h = text:text_rect()
     h = math.max(h, text:font_size())
+    local old_h = self.panel:h()
     if not self.lines or (self.lines > 1 and self.lines <= lines) then
         self.panel:set_h(h)
         self.panel:parent():set_h(h)
@@ -253,7 +254,7 @@ function TextBoxBase:update_caret()
         self.panel:child("line"):set_bottom(h)
         self.owner:_SetText(self.owner.text)
     end
-    if self.parent then
+    if self.parent and old_h ~= self.panel:h() then
         self.parent:AlignItems()
     end
     local s, e = text:selection()

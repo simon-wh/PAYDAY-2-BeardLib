@@ -130,9 +130,7 @@ function MenuHelperPlus:AddButton(params)
         return
     end
 
-	local data = {
-		type = "CoreMenuItem.Item",
-	}
+	local data = {type = "CoreMenuItem.Item"}
 
 	local item_params = {
 		name = params.id,
@@ -294,7 +292,7 @@ function MenuHelperPlus:AddSlider(params)
 	end
 	
 	local item = node:create_item(data, item_params)
-	item:set_value( math.clamp(params.value, data.min, data.max) or data.min )
+	item:set_value(math.clamp(params.value, data.min, data.max) or data.min)
 	
 	if params.enabled ~= nil then
 		item:set_enabled( params.enabled )
@@ -316,9 +314,8 @@ function MenuHelperPlus:AddMultipleChoice(params)
         return
     end
 
-	local data = {
-		type = "MenuItemMultiChoice"
-	}
+	local data = {type = "MenuItemMultiChoice"}
+
 	for k, v in ipairs( params.items or {} ) do
 		if type(v) == "table" then
 			table.insert(data, table.merge(v, { _meta="option" }) )
@@ -364,10 +361,6 @@ function MenuHelperPlus:AddKeybinding(params)
         return
     end
 	
-	local data = {
-		type = "MenuItemCustomizeController",
-	}
-
 	local item_params = {
 		name = params.id,
 		text_id = params.title,
@@ -385,7 +378,39 @@ function MenuHelperPlus:AddKeybinding(params)
 		table.merge(item_params, params.merge_data)
 	end
 	
-	local item = node:create_item(data, item_params)
+	local item = node:create_item({type = "MenuItemCustomizeController"}, item_params)
+
+	if params.position then
+        node:insert_item(item, params.position)
+    else
+        node:add_item(item)
+    end
+    
+    return item
+end
+
+function MenuHelperPlus:AddColorButton(params)
+	local node = params.node or self:GetNode(params.menu, params.node_name)
+	if not node then
+        BeardLib:log("[ERROR] Unable to find node " .. params.node_name)
+        return
+    end
+	
+	local item = node:create_item({type = "MenuItemColorButton"}, table.merge({
+		name = params.id,
+		text_id = params.title,
+		help_id = params.desc,
+		callback = params.callback,
+		disabled_color = params.disabled_color or Color(0.25, 1, 1, 1),
+		localize = params.localized,
+	}, params.merge_data or {}))
+
+	item:set_value(params.value or Color.white)
+	item._priority = params.priority
+
+	if params.disabled then
+		item:set_enabled(not params.disabled)
+	end
 
 	if params.position then
         node:insert_item(item, params.position)

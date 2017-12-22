@@ -112,7 +112,7 @@ function BaseItem:WorkParams(params)
 	self:WorkParam("disabled_alpha", 0.5)
 	self:WorkParam("background_alpha")
 	self:WorkParam("text_align", "left")
-	self:WorkParam("text_vertical", "center")
+	self:WorkParam("text_vertical", "top")
 	self:WorkParam("size_by_text")
 	self:WorkParam("control_slice", 0.5)
 	self:WorkParam("font", tweak_data.menu.pd2_large_font or tweak_data.menu.default_font)
@@ -124,6 +124,7 @@ function BaseItem:WorkParams(params)
 	self:WorkParam("slider_color", self.accent_color)
 	self:WorkParam("border_color", self.accent_color)
 	self:WorkParam("line_color", self.accent_color)
+	self:WorkParam("ignore_align", self.override_panel)
 	self.name = NotNil(self.name, self.text, "")
 	self.text = NotNil(self.text, self.text ~= false and self.name)
 	self.offset = self.offset and self:ConvertOffset(self.offset) or self:ConvertOffset(self.inherit.offset)
@@ -210,11 +211,12 @@ function BaseItem:TryRendering()
 	local p = self.parent_panel
 	local visible = false
 	if alive(self.panel) then		
-	 	visible = p:inside(p:world_x(), self.panel:world_y()) == true or p:inside(p:world_x(), self.panel:world_bottom()) == true
+		local x = p:world_x()
+	 	visible = p:inside(x, self.panel:world_y()) == true or p:inside(x, self.panel:world_bottom()) == true
 		self.panel:set_visible(visible)
 		self.should_render = visible
 		if self.debug then
-			BeardLib:log("Item %s has been set to rendering=%s", tostring(self), tostring(visible))
+			BLT:log("Item %s has been set to rendering=%s", tostring(self), tostring(visible))
 		end
 	end
 	return visible
@@ -241,12 +243,15 @@ end
 
 --Return Funcs--
 function BaseItem:Panel() return self.panel end
+function BaseItem:Parent() return self.parent end
+function BaseItem:ParentPanel() return self.panel:parent() end
 	function BaseItem:X() return self:Panel():x() end
 	function BaseItem:Y() return self:Panel():y() end
 	function BaseItem:W() return self:Panel():w() end
 	function BaseItem:H() return self:Panel():h() end
 	function BaseItem:Right() return self:Panel():right() end
 	function BaseItem:Bottom() return self:Panel():bottom() end
+function BaseItem:AdoptedItems() return self._adopted_items end
 function BaseItem:Position() return self.position end
 function BaseItem:Name() return self.name end
 function BaseItem:Text() return type(self.text) == "string" and self.text or "" end
@@ -300,7 +305,7 @@ function BaseItem:Reposition()
         self:position(self)
     elseif t == "string" then
         self:SetPositionByString(self.position)
-    end
+	end
     return t ~= "nil"
 end
 
