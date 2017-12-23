@@ -210,7 +210,7 @@ end
 function Menu:CheckItems()
     self._visible_items = {}
     for _, item in pairs(self._my_items) do
-        if item:TryRendering() then
+        if item:TryRendering() and (not item.override_panel or item.override_panel == self) then
             table.insert(self._visible_items, item)
         end
     end

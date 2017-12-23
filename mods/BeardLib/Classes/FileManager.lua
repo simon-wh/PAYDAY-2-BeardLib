@@ -24,7 +24,6 @@ fm._files_to_unload = {}
 
 Hooks:Register(fm.const.h_preprocessSF)
 Hooks:Register(fm.const.h_postprocessSF)
-
 function fm:Process(ids_ext, ids_path, name_mt)
 	local data = {}
 	if DB:_has(ids_ext, ids_path) then
@@ -86,7 +85,7 @@ function fm:AddFile(ext, path, file)
     DB:create_entry(ext:id(), path:id(), file)
     local k_ext = ext:key()
     Global.fm.added_files[k_ext] = Global.fm.added_files[k_ext] or {}
-    Global.fm.added_files[k_ext][path:key()] = true
+    Global.fm.added_files[k_ext][path:key()] = file
 end
 
 function fm:RemoveFile(ext, path)
@@ -137,52 +136,62 @@ function fm:HasScriptMod(ext, path)
 	return self.modded_files[k_ext] and self.modded_files[k_ext][path:key()]
 end
 
-local _LoadAsset = function(ids_ext, ids_path)
-    if not managers.dyn_resource:has_resource(ids_ext, ids_path, managers.dyn_resource.DYN_RESOURCES_PACKAGE) then
-    	BeardLib:log("loaded file %s.%s", ids_path:key(), ids_ext:key())
+local _LoadAsset = function(ids_ext, ids_path, file_path)
+	if not managers.dyn_resource:has_resource(ids_ext, ids_path, managers.dyn_resource.DYN_RESOURCES_PACKAGE) then
+		if file_path then
+			BeardLib:log("loaded file %s", tostring(file_path))
+		else
+			BeardLib:log("loaded file %s.%s", ids_path:key(), ids_ext:key())
+		end
         managers.dyn_resource:load(ids_ext, ids_path, managers.dyn_resource.DYN_RESOURCES_PACKAGE)
     end
 end
 
-local _UnLoadAsset = function(ids_ext, ids_path)
+local _UnLoadAsset = function(ids_ext, ids_path, file_path)
     if managers.dyn_resource:has_resource(ids_ext, ids_path, managers.dyn_resource.DYN_RESOURCES_PACKAGE) then
-        BeardLib:log("unloaded file %s.%s", ids_path:key(), ids_ext:key())
+		if file_path then
+			BeardLib:log("unloaded file %s", tostring(file_path))
+		else
+			BeardLib:log("unloaded file %s.%s", ids_path:key(), ids_ext:key())
+		end
         managers.dyn_resource:unload(ids_ext, ids_path, managers.dyn_resource.DYN_RESOURCES_PACKAGE)
     end
 end
 
-function fm:LoadAsset(ids_ext, ids_path)
+function fm:LoadAsset(ids_ext, ids_path, file_path)
 	ids_ext = ids_ext:id()
 	ids_path = ids_path:id()
     if not managers.dyn_resource then
-        table.insert(self._files_to_load, {ids_ext, ids_path})
+        table.insert(self._files_to_load, {ids_ext, ids_path, file_path})
         return
     end
 
-    _LoadAsset(ids_ext, ids_path)
+    _LoadAsset(ids_ext, ids_path, file_path)
 end
 
-function fm:UnLoadAsset(ids_ext, ids_path)
+function fm:UnLoadAsset(ids_ext, ids_path, file_path)
 	ids_ext = ids_ext:id()
 	ids_path = ids_path:id()
     if not managers.dyn_resource then
-        table.insert(self._files_to_unload, {ids_ext, ids_path})
+        table.insert(self._files_to_unload, {ids_ext, ids_path, file_path})
         return
     end
 
-    _UnLoadAsset(ids_ext, ids_path)
+    _UnLoadAsset(ids_ext, ids_path, file_path)
 end
 
-function fm:update(t,dt)
-    if #self._files_to_load > 0 and managers.dyn_resource then
-        local ids_ext, ids_path = unpack(table.remove(self._files_to_load))
-        _LoadAsset(ids_ext, ids_path)
-    end
+function fm:update()
+	if not managers.dyn_resource then
+		return
+	end
 
-	if #self._files_to_unload > 0 and managers.dyn_resource then
-        local ids_ext, ids_path = unpack(table.remove(self._files_to_unload))
-        _UnLoadAsset(ids_ext, ids_path)
-    end
+	if #self._files_to_load > 0 then
+		_LoadAsset(unpack(table.remove(self._files_to_load)))
+	end
+
+	if #self._files_to_unload > 0 then
+		_UnLoadAsset(unpack(table.remove(self._files_to_unload)))
+	end
 end
 
 return fm

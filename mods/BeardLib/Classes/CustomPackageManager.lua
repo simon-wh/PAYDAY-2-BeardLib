@@ -1,10 +1,12 @@
-_G.CustomPackageManager = {}
 Global.cmp = Global.cmp or {}
 Global.cmp.custom_loaded_packages = Global.cmp.custom_loaded_packages or {}
-local cmp = CustomPackageManager
-cmp.custom_packages = {}
+CustomPackageManager = CustomPackageManager or {}
 
-function cmp:RegisterPackage(id, directory, config)
+local C = CustomPackageManager
+C.custom_packages = {}
+C.ext_convert = {dds = "texture", png = "texture", tga = "texture", jpg = "texture"}
+
+function C:RegisterPackage(id, directory, config)
     local func_name = "CustomPackageManager:RegisterPackage"
     if (not BeardLib.Utils:CheckParamsValidty({id, directory, config},
         {
@@ -28,7 +30,7 @@ function cmp:RegisterPackage(id, directory, config)
     return true
 end
 
-function cmp:LoadPackage(id)
+function C:LoadPackage(id)
     id = id:key()
     if self.custom_packages[id] then
         local pck = self.custom_packages[id]
@@ -38,7 +40,7 @@ function cmp:LoadPackage(id)
     end
 end
 
-function cmp:UnLoadPackage(id)
+function C:UnLoadPackage(id)
     id = id:key()
     if self.custom_packages[id] then
         local pck = self.custom_packages[id]
@@ -48,60 +50,64 @@ function cmp:UnLoadPackage(id)
     end
 end
 
-function cmp:PackageLoaded(id)
+function C:PackageLoaded(id)
     return Global.cmp.custom_loaded_packages[id:key()]
 end
 
-function cmp:HasPackage(id)
+function C:HasPackage(id)
     return not not self.custom_packages[id:key()]
 end
 
-function cmp:LoadPackageConfig(directory, config)
+function C:LoadPackageConfig(directory, config)
     if not SystemFS then
         BeardLib:log("[ERROR] SystemFS does not exist! Custom Packages cannot function without this! Do you have an outdated game version?")
         return
     end
+    if config.load_clbk and not config.load_clbk() then
+        return
+    end
+
     local loading = {}
     for i, child in ipairs(config) do
         if type(child) == "table" then
             local typ = child._meta
             local path = child.path
-            if typ == "unit_load" then
-                self:LoadPackageConfig(directory, child)
-            elseif typ and path then
-                path = BeardLib.Utils.Path:Normalize(path)
-                local ids_ext = Idstring(typ)
-                local ids_path = Idstring(path)
-                local file_path = BeardLib.Utils.Path:Combine(directory, path) ..".".. typ
-                if SystemFS:exists(file_path) then
-                    if (not DB:has(ids_ext, ids_path) or child.force) then
-                        --self:log("Added file %s %s", path, typ)
-                        FileManager:AddFile(ids_ext, ids_path, file_path)
-                        if child.reload then
-                            PackageManager:reload(ids_ext, ids_path)
+            local load_clbk = child.load_clbk
+            if not load_clbk or load_clbk(path, typ) then
+                if typ == "unit_load" or typ == "add" then
+                    self:LoadPackageConfig(directory, child)
+                elseif typ and path then
+                    path = BeardLib.Utils.Path:Normalize(path)
+                    local ids_ext = Idstring(self.ext_convert[typ] or typ)
+                    local ids_path = Idstring(path)
+                    local file_path = BeardLib.Utils.Path:Combine(directory, path) ..".".. typ
+                    if SystemFS:exists(file_path) then
+                        if (not DB:has(ids_ext, ids_path) or child.force) then
+                            FileManager:AddFile(ids_ext, ids_path, file_path)
+                            if child.reload then
+                                PackageManager:reload(ids_ext, ids_path)
+                            end
+                            if child.load then
+                                table.insert(loading, {ids_ext, ids_path, file_path})
+                            end
                         end
-                        if child.load then
-                            table.insert(loading, {ids_ext, ids_path})
-                            --FileManager:LoadAsset(ids_ext, ids_path)
-                        end
+                    else
+                        BeardLib:log("[ERROR] File does not exist! %s", tostring(file_path))
                     end
                 else
-                    BeardLib:log("[ERROR] File does not exist! %s", tostring(file_path))
-                end
-            else
-                BeardLib:log("[ERROR] Node in %s does not contain a definition for both type and path", tostring(directory))
+                    BeardLib:log("[ERROR] Node in %s does not contain a definition for both type and path", tostring(directory))
+                end                
             end
         end
     end
     --For some reason this needs to be here, instead of loading in the main loop or the game will go into a hissy fit 
     for _, file in pairs(loading) do
-        local ids_ext, ids_path = unpack(file)
-        FileManager:LoadAsset(ids_ext, ids_path)
+        FileManager:LoadAsset(unpack(file))
     end
 end
 
 
-function cmp:UnloadPackageConfig(config)
+function C:UnloadPackageConfig(config)
     BeardLib:log("Unloading added files")
     for i, child in ipairs(config) do
         if type(child) == "table" then
@@ -109,16 +115,15 @@ function cmp:UnloadPackageConfig(config)
             local path = child.path
             if typ and path then
                 path = BeardLib.Utils.Path:Normalize(path)
-                local ids_ext = Idstring(typ)
+                local ids_ext = Idstring(self.ext_convert(typ))
                 local ids_path = Idstring(path)
                 if DB:has(ids_ext, ids_path) then
                     if child.unload ~= false then
                         FileManager:UnLoadAsset(ids_ext, ids_path)
                     end
-                    --self:log("Unloaded %s %s", path, typ)
                     FileManager:RemoveFile(ids_ext, ids_path)
                 end
-            elseif typ == "unit_load" then
+            elseif typ == "unit_load" or typ == "add" then
                 self:UnloadPackageConfig(child)
             else
                 BeardLib:log("[ERROR] Some node does not contain a definition for both type and path")

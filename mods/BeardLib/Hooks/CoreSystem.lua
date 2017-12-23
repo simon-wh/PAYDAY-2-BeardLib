@@ -15,16 +15,27 @@ local ids_unit = Idstring("unit")
 local key_unit = ids_unit:key()
 
 overwrite_meta_function(World, "spawn_unit", function(self, unit_name, ...)
-	if (unit_name and Global.fm.added_files[key_unit] and Global.fm.added_files[key_unit][unit_name:key()]) or unit_name:key() == "0d8ea9bdcebaaf64" then
-		FileManager:LoadAsset(ids_unit, unit_name)
+	if unit_name then
+		local ukey = unit_name:key()
+		if ukey == "0d8ea9bdcebaaf64" then
+			FileManager:LoadAsset(ids_unit, unit_name)
+		elseif Global.fm.added_files[key_unit] then
+			local file = Global.fm.added_files[key_unit][ukey]
+			if file then
+				FileManager:LoadAsset(ids_unit, unit_name, file)
+			end
+		end
 	end
 	--STOP REPORTING THIS AS A BEARLID ISSUE PLEASE
 	return self:_spawn_unit(unit_name, ...)
 end)
 
 overwrite_meta_function(PackageManager, "unit_data", function(self, unit_name, ...)
-	if Global.fm.added_files[key_unit] and Global.fm.added_files[key_unit][tostring(unit_name:key())] then
-		FileManager:LoadAsset(ids_unit, unit_name)
+	if unit_name and Global.fm.added_files[key_unit] then
+		local file = Global.fm.added_files[key_unit][tostring(unit_name:key())]
+		if file then
+			FileManager:LoadAsset(ids_unit, unit_name, file)
+		end
 	end
 	return self:_unit_data(unit_name, ...)
 end)

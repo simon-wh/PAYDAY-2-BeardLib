@@ -43,7 +43,7 @@ function MenuItemColorButton:set_editing(set)
     self:_set_enabled(set)
 end
 
-function MenuItemInput:_set_enabled(enabled)
+function MenuItemColorButton:_set_enabled(enabled)
 	if not self:enabled() then
 		return
 	end
