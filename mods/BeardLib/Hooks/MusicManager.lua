@@ -170,8 +170,9 @@ function MusicManager:custom_update(t, dt, paused)
 		end
 	elseif self._switch_at_end then
 		if (self._xa_source and self._xa_source:is_closed()) or (gui_ply and gui_ply:current_frame() >= gui_ply:frames()) then
-			self:play(unpack(self._switch_at_end))
+			local switch = self._switch_at_end
 			self._switch_at_end = nil
+			self:play(unpack(switch))
 		end
 	end
 end
