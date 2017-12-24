@@ -115,7 +115,7 @@ function C:UnloadPackageConfig(config)
             local path = child.path
             if typ and path then
                 path = BeardLib.Utils.Path:Normalize(path)
-                local ids_ext = Idstring(self.ext_convert(typ))
+                local ids_ext = Idstring(self.ext_convert[typ] or typ)
                 local ids_path = Idstring(path)
                 if DB:has(ids_ext, ids_path) then
                     if child.unload ~= false then
