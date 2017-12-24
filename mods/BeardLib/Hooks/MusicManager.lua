@@ -138,7 +138,9 @@ function MusicManager:play(src, use_xaudio, custom_volume)
 			self._xa_source:set_type("music")
 			self._xa_source:set_relative(true)
 			self._xa_source:set_looping(not self._switch_at_end)
-			self._xa_source:set_volume(custom_volume)
+			if custom_volume then
+				self._xa_source:set_volume(custom_volume)
+			end
 		else
 			BeardLib:log("XAduio was not found, cannot play music.")
 		end
