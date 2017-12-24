@@ -23,6 +23,10 @@ function MusicManager:check_playlist(is_menu)
 end
 
 function MusicManager:stop_custom()
+	if self._xa_source then
+		self._xa_source:close()
+		self._xa_source = nil
+	end
 	if alive(self._player) then
 		self._player:parent():remove(self._player)
 	end
@@ -75,71 +79,105 @@ function MusicManager:track_listen_stop(...)
 	end
 end
 
+local movie_ids = Idstring("movie")
 function MusicManager:attempt_play(track, event, stop)
 	if stop then
 		self:stop_custom()
 	end
-	local source
-	local start_source
+	local next_music
+	local next_event
 	if track and track ~= self._current_custom_track then
 		self._current_custom_track = nil
 	end
-	for _, sound in pairs(BeardLib.MusicMods) do
-		if source then
+	for id, music in pairs(BeardLib.MusicMods) do
+		if next_music then
 			break
 		end
-		if sound.id == track or sound.id == event then
-			if self._current_custom_track ~= sound.id or sound.id == event then
-				start_source = type(sound.start_source) == "string" and DB:has(Idstring("movie"), sound.start_source) and sound.start_source
-				source = sound.source
-				self._current_custom_track = sound.id
-			else
-				BeardLib:log("[Music] Attempting to play a track that is already playing?")
+		if event == id or track == id or self._current_custom_track == id then
+			if music.source and (self._current_custom_track ~= id or id == event) then
+				next_music = music
+				self._current_custom_track = id
 			end
-		end
-		if event and self._current_custom_track == sound.id then
-			for k,v in pairs(sound) do
-				local short_event = string.split(event, "_")[3]
-				if type(v) == "table" and v._meta == "event" and v.name == short_event then
-					start_source = type(v.start_source) == "string" and DB:has(Idstring("movie"), v.start_source) and v.start_source
-					source = v.source
+			if music.events and event then
+				local event_tbl = music.events[string.split(event, "_")[3]]
+				if event_tbl then
+					next_music = music
+					next_event = event_tbl
+					self._current_custom_track = id
 				end
 			end
 		end
 	end
-	if source then
-		if DB:has(Idstring("movie"), source) and managers.menu_component._main_panel then
-			self._switch_at_end = start_source and source
-			self:play(start_source or source)
+	if next_music then
+		local next = next_event or next_music
+		local source = next.start_source or next.source
+		if next_music.xaudio then
+			if not source then
+				BeardLib:log("[ERROR] No buffer found to play for music '%s'", tostring(self._current_custom_track))
+			end
 		else
-			BeardLib:log("[ERROR] Trying to play from unloaded source '%s'", tostring(source))
+			if not source or not DB:has(movie_ids, source:id()) then
+				BeardLib:log("[ERROR] Source file '%s' is not loaded, music id '%s'", tostring(source), tostring(self._current_custom_track))
+				return true
+			end
 		end
-	else
-		BeardLib:log("Could not find any source for track %s and event %s current custom track is %s", tostring(track), tostring(event), tostring(self._current_custom_track))
+		self._switch_at_end = next.start_source and next.source
+		self:play(source, next_music.xaudio, next.volume or next_music.volume)
+		return true
 	end
-	return source ~= nil
+	return next_music ~= nil
 end
 
-function MusicManager:play(src)
+function MusicManager:play(src, use_xaudio, custom_volume)
 	self:stop_custom()
 	Global.music_manager.source:post_event("stop_all_music")
-    self._player = managers.menu_component._main_panel:video({
-        name = "music",
-        video = src,
-        visible = false,
-        loop = not self._switch_at_end,
-    })
- 	self._player:set_volume_gain(Global.music_manager.volume)
+	if use_xaudio then
+		if XAudio then
+			self._xa_source = XAudio.Source:new(src)
+			self._xa_source:set_type("music")
+			self._xa_source:set_relative(true)
+			self._xa_source:set_looping(not self._switch_at_end)
+			self._xa_source:set_volume(custom_update)
+		else
+			BeardLib:log("XAduio was not found, cannot play music.")
+		end
+	elseif managers.menu_component._main_panel then
+		self._player = managers.menu_component._main_panel:video({
+			name = "music",
+			video = src,
+			visible = false,
+			loop = not self._switch_at_end,
+		})
+		self._player:set_volume_gain(Global.music_manager.volume)
+	end
+end
+
+function MusicManager:custom_update(t, dt, paused)
+	local gui_ply = alive(self._player) and self._player or nil
+	if gui_ply then
+		gui_ply:set_volume_gain(Global.music_manager.volume)
+	end
+	if paused then
+		--xaudio already pauses itself.
+		if gui_ply then
+			gui_ply:set_volume_gain(0)
+			gui_ply:goto_frame(gui_ply:current_frame()) --Force because the pause function is kinda broken :/
+		end
+	elseif self._switch_at_end then
+		if (self._xa_source and self._xa_source:get_state() == XAudio.Source.STOPPED) or (gui_ply and gui_ply:current_frame() >= gui_ply:frames()) then
+			self:play(self._switch_at_end)
+		end
+	end
 end
 
 --Hooks
 Hooks:PostHook(MusicManager, "init", "BeardLibMusicManagerInit", function(self)
-	for _, music in pairs(BeardLib.MusicMods) do
+	for id, music in pairs(BeardLib.MusicMods) do
 		if music.heist then
-			table.insert(tweak_data.music.track_list, {track = music.id})
+			table.insert(tweak_data.music.track_list, {track = id})
 		end
 		if music.menu then
-			table.insert(tweak_data.music.track_menu_list, {track = music.id})
+			table.insert(tweak_data.music.track_menu_list, {track = id})
 		end
 	end
 end)
@@ -163,25 +201,26 @@ Hooks:PostHook(MusicManager, "track_listen_start", "BeardLibMusicManagerTrackLis
 end)
 
 Hooks:PostHook(MusicManager, "set_volume", "BeardLibMusicManagerSetVolume", function(self, volume)
+	--xaudio sets its own volume
 	if alive(self._player) then
 		self._player:set_volume_gain(volume)
 	end	
 end)
 
-Hooks:Add("GameSetupUpdate", "BeardLibMusicUpdate", function()
-	local music = managers.music
-	if music and alive(music._player) then
-	 	music._player:set_volume_gain(Global.music_manager.volume)
-        if music._switch_at_end and (music._player:current_frame() >= music._player:frames()) then
-            music:play(music._switch_at_end)
-        end
+Hooks:Add("MenuUpdate", "BeardLibMusicMenuUpdate", function(t, dt)
+	if managers.music then
+		managers.music:custom_update(t, dt)
 	end
 end)
 
-Hooks:Add("GameSetupPauseUpdate", "BeardLibMusicPausedUpdate", function()
-	local music = managers.music
-	if music and alive(music._player) then
-	 	music._player:set_volume_gain(0)
-		music._player:goto_frame(music._player:current_frame()) --Force because the pause function is kinda broken :/
+Hooks:Add("GameSetupUpdate", "BeardLibMusicUpdate", function(t, dt)
+	if managers.music then
+		managers.music:custom_update(t, dt)
+	end
+end)
+
+Hooks:Add("GameSetupPauseUpdate", "BeardLibMusicPausedUpdate", function(t, dt)
+	if managers.music then
+		managers.music:custom_update(t, dt, true)
 	end
 end)

@@ -1108,3 +1108,10 @@ function play_value(o, value_name, value, params)
         end)
     end
 end
+
+--Safe call
+function BeardLib.Utils:SetupXAudio()
+    if blt and blt.xaudio then
+        blt.xaudio.setup()
+    end
+end

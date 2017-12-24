@@ -10,42 +10,50 @@ end
 
 function MusicModule:RegisterHook()
 	self._config.id = self._config.id or "Err"
-	if not self._config.source then
-		self:log("[ERROR] No source was specified for the music %s", self._config.id)
-		return
-	end	
-	if BeardLib.MusicMods[self._config.id] then
-		self:log("[ERROR] Music with the id '%s' already exists!", self._config.id)
-		return
-	end
+	
 	local dir = self._config.directory
-	self._config.directory = (dir and dir .. "/") or ""
-	self._config.source = self._config.directory .. self._config.source
-	local sources = {}
+	dir = (dir and dir .. "/") or ""
+	
+	if self._config.source then
+		self._config.source = dir .. self._config.source
+	end
+	if self._config.start_source then
+		self._config.start_source = dir .. self._config.start_source
+	end
 
-	for k,v in pairs(self._config) do
-		if type(k) == "number" and type(v) == "table" and v._meta == "event" then
+	local music = {menu = self._config.menu, heist = self._config.heist, source = self._config.source, start_source = self._config.start_source, events = {}}
+
+	for k,v in ipairs(self._config) do
+		if type(v) == "table" and v._meta == "event" then
 			if v.start_source then
-				v.start_source = self._config.directory .. v.start_source
-				sources[v.start_source] = true
+				v.start_source = dir .. v.start_source
 			end
 			if v.source then
-				v.source = self._config.directory .. v.source
-				sources[v.source] = true
+				v.source = dir .. v.source
 			else
 				self:log("[ERROR] Music with the id '%s' has an event that has no source!", self._config.id)
 				return
 			end
+			music.events[v.name] = {source = v.source, start_source = v.start_source}
 		end
 	end
+
 	if not self._mod._config.AddFiles then
 		local add = {directory = self._config.assets_directory or "Assets"}
-		for source in pairs(sources) do
-			table.insert(add, {_meta = "movie", path = source})
+		table.insert(add, {_meta = "movie", path = music.source})
+		if music.start_source then
+			table.insert(add, {_meta = "movie", path = music.start_source})
+		end
+		for _, event in pairs(music.events) do
+			table.insert(add, {_meta = "movie", path = event.source})
+			if event.start_source then
+				table.insert(add, {_meta = "movie", path = event.start_source})
+			end
 		end
 		self._mod._config.AddFiles = AddFilesModule:new(self._mod, add)
 	end
-	BeardLib.MusicMods[self._config.id] = self._config
+
+	BeardLib.MusicMods[self._config.id] = music
 end
 
 BeardLib:RegisterModule(MusicModule.type_id, MusicModule)
