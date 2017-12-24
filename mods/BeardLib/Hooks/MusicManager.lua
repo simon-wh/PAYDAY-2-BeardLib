@@ -23,9 +23,10 @@ function MusicManager:check_playlist(is_menu)
 end
 
 function MusicManager:stop_custom()
-	if self._xa_source then
-		self._xa_source:close()
-		self._xa_source = nil
+	local source = self._xa_source
+	self._xa_source = nil
+	if source then
+		source:close()
 	end
 	if alive(self._player) then
 		self._player:parent():remove(self._player)
@@ -137,9 +138,7 @@ function MusicManager:play(src, use_xaudio, custom_volume)
 			self._xa_source:set_type("music")
 			self._xa_source:set_relative(true)
 			self._xa_source:set_looping(not self._switch_at_end)
-			if custom_volume then
-				self._xa_source:set_volume(custom_volume)
-			end
+			self._xa_source:set_volume(custom_volume)
 		else
 			BeardLib:log("XAduio was not found, cannot play music.")
 		end
@@ -168,6 +167,7 @@ function MusicManager:custom_update(t, dt, paused)
 	elseif self._switch_at_end then
 		if (self._xa_source and self._xa_source:get_state() == XAudio.Source.STOPPED) or (gui_ply and gui_ply:current_frame() >= gui_ply:frames()) then
 			self:play(self._switch_at_end)
+			self._switch_at_end = nil
 		end
 	end
 end
