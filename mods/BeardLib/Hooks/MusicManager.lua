@@ -167,7 +167,7 @@ function MusicManager:custom_update(t, dt, paused)
 			gui_ply:goto_frame(gui_ply:current_frame()) --Force because the pause function is kinda broken :/
 		end
 	elseif self._switch_at_end then
-		if (self._xa_source and self._xa_source:get_state() == XAudio.Source.STOPPED) or (gui_ply and gui_ply:current_frame() >= gui_ply:frames()) then
+		if (self._xa_source and self._xa_source:is_closed()) or (gui_ply and gui_ply:current_frame() >= gui_ply:frames()) then
 			self:play(self._switch_at_end)
 			self._switch_at_end = nil
 		end
