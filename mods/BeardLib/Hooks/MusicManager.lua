@@ -122,8 +122,10 @@ function MusicManager:attempt_play(track, event, stop)
 				return true
 			end
 		end
-		self._switch_at_end = next.start_source and next.source
-		self:play(source, next_music.xaudio, next.volume or next_music.volume)
+		local switch_at_end = next.start_source and next.source or nil
+		local volume = next.volume or next_music.volume
+		self._switch_at_end = switch_at_end and {switch_at_end, next_music.xaudio, volume} or nil
+		self:play(source, next_music.xaudio, volume)
 		return true
 	end
 	return next_music ~= nil
@@ -168,7 +170,7 @@ function MusicManager:custom_update(t, dt, paused)
 		end
 	elseif self._switch_at_end then
 		if (self._xa_source and self._xa_source:is_closed()) or (gui_ply and gui_ply:current_frame() >= gui_ply:frames()) then
-			self:play(self._switch_at_end)
+			self:play(unpack(self._switch_at_end))
 			self._switch_at_end = nil
 		end
 	end
