@@ -332,7 +332,7 @@ function BeardLib.Utils:CheckParamValidty(func_name, vari, var, desired_type, al
 end
 
 function BeardLib.Utils:DownloadMap(level_name, id, done_callback)
-    local lookup_tbl = {id = tostring(id), steamid = Steam:userid()}
+    local lookup_tbl = {id = tostring(id)}
     local function done_map_download()
         BeardLib.managers.MapFramework:Load()
         BeardLib.managers.MapFramework:RegisterHooks()
