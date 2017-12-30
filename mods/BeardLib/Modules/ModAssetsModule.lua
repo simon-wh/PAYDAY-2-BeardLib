@@ -3,9 +3,9 @@ ModAssetsModule.type_name = "AssetUpdates"
 ModAssetsModule._default_version_file = "version.txt"
 ModAssetsModule._providers = {
     modworkshop = {
-        check_url = "https://api.modwork.shop/api.php?command=CompareVersion&did=$id$&vid=$version$&steamid=$steamid$&token=Je3KeUETqqym6V8b5T7nFdudz74yWXgU",
-        get_files_url = "https://api.modwork.shop/api.php?command=AssocFiles&did=$id$&steamid=$steamid$&token=Je3KeUETqqym6V8b5T7nFdudz74yWXgU",
-        download_url = "https://api.modwork.shop/api.php?command=DownloadFile&fid=$fid$&steamid=$steamid$&token=Je3KeUETqqym6V8b5T7nFdudz74yWXgU",
+        check_url = "https://api.modwork.shop/api.php?command=CompareVersion&did=$id$&vid=$version$&steamid=76561197971723118&token=Je3KeUETqqym6V8b5T7nFdudz74yWXgU",
+        get_files_url = "https://api.modwork.shop/api.php?command=AssocFiles&did=$id$&steamid=76561197971723118&token=Je3KeUETqqym6V8b5T7nFdudz74yWXgU",
+        download_url = "https://api.modwork.shop/api.php?command=DownloadFile&fid=$fid$&steamid=76561197971723118&token=Je3KeUETqqym6V8b5T7nFdudz74yWXgU",
         page_url = "https://modwork.shop/$id$",
         check_func = function(self)
             local id = tonumber(self.id)
@@ -40,7 +40,7 @@ ModAssetsModule._providers = {
             dohttpreq(get_files_url, function(data, id)
                 local fid = string.split(data, '"')[1]
                 if fid then
-                    self:_DownloadAssets({fid = fid, steamid = self.steamid})
+                    self:_DownloadAssets({fid = fid, steamid = 76561197971723118})
                     Global.beardlib_checked_updates[self.id] = nil --check again later for hotfixes.
                 end    
             end)
@@ -55,7 +55,7 @@ function ModAssetsModule:init(core_mod, config)
         return false
     end
 
-    self.steamid = Steam:userid()
+    self.steamid = 76561197971723118
     self.id = self._config.id
 
     if self._config.provider then
