@@ -42,14 +42,20 @@ function NetworkMatchMakingSTEAM:_lobby_to_numbers(lobby, ...)
 		end
 	end
 	local level_name = lobby:key_value("custom_level_name")
-	local level_update_key = lobby:key_value("level_update_key")
+	local uid = lobby:key_value("level_update_key")
+	local provider = lobby:key_value("level_update_provider")
+	local url = lobby:key_value("level_update_download_url")
 	if is_key_valid(level_name) then
 		log("Received level real name: " .. tostring(level_name))
-		if is_key_valid(level_update_key) then
-			log("Received custom map did: " .. tostring(level_update_key))
+		if is_key_valid(uid) or is_key_valid(provider) or is_key_valid(url) then
+			log("Received custom map data, id: " .. tostring(uid))
+			log("provider: " .. tostring(provider))
+			log("download url: " .. tostring(url))
 			data["level_id"] = lobby:key_value("level_id")
 			data["job_key"] = lobby:key_value("job_key")
-			data["level_update_key"] = level_update_key
+			data["level_update_key"] = uid
+			data["level_update_provider"] = provider
+			data["level_update_download_url"] = url
 			data["custom_level_name"] = level_name
 			data[1] = 1001
 		else
@@ -66,13 +72,15 @@ Hooks:PostHook(NetworkMatchMakingSTEAM, "_call_callback", "BeardLibSearchLobbyFi
 			local numbers = attribute_list[i].numbers
 			local state_string_id = tweak_data:index_to_server_state(numbers[4])
 			local state_name = state_string_id and managers.localization:text("menu_lobby_server_state_" .. state_string_id) or "UNKNOWN"
-			if numbers.level_update_key then
+			if numbers.level_update_key or numbers.provider or numbers.download_url then
 				local comp = managers.menu_component
 				local cmgui = comp and comp._crimenet_gui
 				if cmgui and cmgui._jobs and cmgui._jobs[room.room_id] then
 					local job = cmgui._jobs[room.room_id]
-					job.update_key = numbers.level_update_key
+					local update_data = {id = numbers.level_update_key, provider = numbers.level_update_provider, download_url = numbers.level_update_download_url}
+					job.update_data = table.size(update_data) > 0 and update_data or nil
 					job.level_name = tostring(numbers.custom_level_name)
+					job.job_key = numbers.job_key
 					job.state_name = state_name
 					cmgui:change_to_custom_job_gui(job)
 				end
@@ -93,13 +101,16 @@ Hooks:Add(seta_hook, "BeardLibCorrectCustomHeist", function(self, new_data, sett
 	local level_id = (_level_id and tweak_data.levels[_level_id] and tweak_data.levels[_level_id].custom) and _level_id or nil
 	local job_key = (_job_key and tweak_data.narrative.jobs[_job_key] and tweak_data.narrative.jobs[_job_key].custom) and _job_key or nil
 	local mod = BeardLib.managers.MapFramework:GetMapByJobId(_job_key)
-	if mod and (level_id or job_key) then
+	if mod and (level_id or job_key) and mod.update_module_data then
+		local update = mod.update_module_data
 		--Localization might be an issue..
 		table.merge(new_data, {
 			custom_level_name = managers.localization:to_upper_text(tweak_data.levels[level_id].name_id),
 			level_id = level_id, 
 			job_key = job_key,
-			level_update_key = mod and mod.update_key and mod.update_key >= 1 and mod.update_key 
+			level_update_key = update.id,
+			level_update_provider = update.provider,
+			level_update_download_url = update.download_url,
 		})
 	end
 end)

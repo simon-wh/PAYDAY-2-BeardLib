@@ -74,11 +74,12 @@ end)
 Hooks:Add("NetworkReceivedData", sync_game_settings_id, function(sender, id, data)
     if id == sync_game_settings_id then
         local split_data = string.split(data, "|")
-        local level_name = split_data[1]
-        local update_key = split_data[5]
+        local level_name = split_data[4]
+        local job_id = split_data[1]
+        local update_data = BeardLib.Utils:GetUpdateData(split_data)
         local session = managers.network:session()
         local function continue_sync()
-            local job_index = tweak_data.narrative:get_index_from_job_id(level_name)
+            local job_index = tweak_data.narrative:get_index_from_job_id(job_id)
             local level_index = tweak_data.levels:get_index_from_level_id(split_data[2])
 
             local peer = session:peer(sender)
@@ -87,25 +88,32 @@ Hooks:Add("NetworkReceivedData", sync_game_settings_id, function(sender, id, dat
                 managers.network._handlers.connection:sync_game_settings(job_index, level_index, tweak_data:difficulty_to_index(split_data[3]), rpc)
             end
         end
-        if tweak_data.narrative.jobs[level_name] == nil then
-            if update_key then
+        local function disconnect()
+            if managers.network:session() then
+                managers.network:queue_stop_network()
+                managers.platform:set_presence("Idle")
+                managers.network.matchmake:leave_game()
+                managers.network.voice_chat:destroy_voice(true)
+                managers.menu:exit_online_menues()
+            end
+        end
+        if tweak_data.narrative.jobs[job_id] == nil then
+            if update_data then
                 session._ignore_load = true
-                BeardLib.Utils:DownloadMap(level_name, update_key, function()
-                    continue_sync()
-                    session._ignore_load = nil
-                    if session._ignored_load then
-                        session:ok_to_load_level(unpack(session._ignored_load))
-                    end                
+                BeardLib.Utils:DownloadMap(level_name, job_id, update_data, function(success)
+                    if success then
+                        continue_sync()
+                        session._ignore_load = nil
+                        if session._ignored_load then
+                            session:ok_to_load_level(unpack(session._ignored_load))
+                        end
+                    else
+                        disconnect()
+                    end               
                 end)
             else
-                if managers.network:session() then
-                    managers.network:queue_stop_network()
-                    managers.platform:set_presence("Idle")
-                    managers.network.matchmake:leave_game()
-                    managers.network.voice_chat:destroy_voice(true)
-                    managers.menu:exit_online_menues()
-                end
-                QuickMenuPlus:new(managers.localization:text("mod_assets_error"), managers.localization:text("custom_map_cant_download"))
+                disconnect()
+                BeardLibEditor.managers.Dialog:Show({title = managers.localization:text("mod_assets_error"), message = managers.localization:text("custom_map_cant_download"), force = true})
                 return
             end
         end

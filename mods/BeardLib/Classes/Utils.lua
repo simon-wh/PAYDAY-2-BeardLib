@@ -4,6 +4,10 @@ function table.pack(...)
 end
 
 function table.merge(og_table, new_table)
+    if not new_table then
+        return og_table
+    end
+
     for i, data in pairs(new_table) do
         i = type(data) == "table" and data.index or i
         if type(data) == "table" and type(og_table[i]) == "table" then
@@ -331,39 +335,31 @@ function BeardLib.Utils:CheckParamValidty(func_name, vari, var, desired_type, al
     return true
 end
 
-function BeardLib.Utils:DownloadMap(level_name, id, done_callback)
-    local lookup_tbl = {id = tostring(id), steamid = Steam:userid()}
-    local function done_map_download()
-        BeardLib.managers.MapFramework:Load()
-        BeardLib.managers.MapFramework:RegisterHooks()
-        managers.job:_check_add_heat_to_jobs()
-        managers.crimenet:find_online_games(Global.game_settings.search_friends_only)
-        if done_callback then
-            done_callback(true)
-        end
+function BeardLib.Utils:DownloadMap(level_name, job_id, udata, done_callback)
+    if not udata then
+        return
     end
-    QuickMenuPlus:new(managers.localization:text("custom_map_alert"), managers.localization:text("custom_map_needs_download"), {{text = "Yes", callback = function()
-        local provider = ModAssetsModule._providers.modworkshop --temporarily will support only mws
-        dohttpreq(ModCore:GetRealFilePath(provider.get_files_url, lookup_tbl), function(data, id)
-            local fid = string.split(data, '"')[1]
-            if fid then
-                lookup_tbl.fid = fid
-                local download_url = ModCore:GetRealFilePath(provider.download_url, lookup_tbl)
-                BeardLib:log("Downloading map from url: %s", download_url)
-                local dialog = BeardLib.managers.dialog.download
-                dialog:Show({title = managers.localization:text("beardlib_downloading")..level_name or "No Map Name", force = true})				
-                dohttpreq(download_url, callback(ModAssetsModule, ModAssetsModule, "StoreDownloadedAssets", {
-                    install_directory = "Maps", 
-                    done_callback = done_map_download,
-                    install = callback(dialog, dialog, "SetInstalling"),
-                    failed = callback(dialog, dialog, "SetFailed"),
-                    finish = callback(dialog, dialog, "SetFinished"),
-                }), callback(dialog, dialog, "SetProgress"))
-            else
-                QuickMenuPlus:new(managers.localization:text("mod_assets_error"), managers.localization:text("custom_map_failed_download"))
-                BeardLib:log("Failed to parse the data received from Modworkshop(Invalid map?)")
+    local msg = managers.localization:text("custom_map_needs_download", {url = udata.download_url or ""})
+    QuickMenuPlus:new(managers.localization:text("custom_map_alert"), msg, {{text = "Yes", callback = function()
+        local provider = ModAssetsModule._providers[udata.provider or (not udata.download_url and "modworkshop") or nil]
+        local dialog = BeardLib.managers.dialog.download
+        local map = DownloadCustomMap:new()
+        map.provider = provider or {download_url = udata.download_url}
+        map.id = udata.id
+        map.steamid = Steam:userid()
+        map.level_name = level_name
+        map.failed_map_downloaed = SimpleClbk(done_callback, false)
+        map.done_map_download = function()
+            BeardLib.managers.MapFramework:Load()
+            BeardLib.managers.MapFramework:RegisterHooks()
+            managers.job:_check_add_heat_to_jobs()
+            managers.crimenet:find_online_games(Global.game_settings.search_friends_only)
+            if done_callback then
+                done_callback(tweak_data.narrative.jobs[job_id] ~= nil)
             end
-        end)
+        end
+
+        map:DownloadAssets()
     end},{text = "No", is_cancel_button = true, callback = function()
         if done_callback then
             done_callback(false)
@@ -371,20 +367,26 @@ function BeardLib.Utils:DownloadMap(level_name, id, done_callback)
     end}}, {force = true})
 end
 
+function BeardLib.Utils:GetUpdateData(data)
+    local function parse_network_str(s)
+        return s ~= "null" and s or nil
+    end
+    local res =  {id = parse_network_str(data[5]), provider = parse_network_str(data[6]), download_url = parse_network_str(data[7])}
+    return table.size(res) > 0 and res or false
+end
+
 function BeardLib.Utils:GetJobString()
     local level_id = Global.game_settings.level_id
     local job_id = managers.job:current_job_id()
     local level = tweak_data.levels[level_id]
+    local level_name = managers.localization:to_upper_text(level and level.name_id or "")
     local mod = BeardLib.managers.MapFramework:GetMapByJobId(job_id)
-    local update_key = mod and mod.update_key    
-    local str = string.format("%s|%s|%s|%s|%s", job_id, level_id, Global.game_settings.difficulty, managers.localization:to_upper_text(level and level.name_id or ""), update_key or "")
-    return str
+    local update = mod and mod.update_module_data or {}
+    local cat = table.concat({job_id, level_id, Global.game_settings.difficulty, level_name, update.id or "null", update.provider or "null", update.download_url or "null"}, "|")
+    return cat
 end
 
-BeardLib.Utils.WeapConv = {
-    [1] = "wpn_fps_pis_g17",
-    [2] = "wpn_fps_ass_amcar"
-}
+BeardLib.Utils.WeapConv = {"wpn_fps_pis_g17", "wpn_fps_ass_amcar"}
 
 function BeardLib.Utils:GetBasedOnFactoryId(id, wep)
     wep = wep or tweak_data.weapon[managers.weapon_factory:get_weapon_id_by_factory_id(id)]

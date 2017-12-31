@@ -1,56 +1,18 @@
 ModAssetsModule = ModAssetsModule or class(ModuleBase)
 ModAssetsModule.type_name = "AssetUpdates"
 ModAssetsModule._default_version_file = "version.txt"
-ModAssetsModule._providers = {
-    modworkshop = {
-        check_url = "https://api.modwork.shop/api.php?command=CompareVersion&did=$id$&vid=$version$&steamid=$steamid$&token=Je3KeUETqqym6V8b5T7nFdudz74yWXgU",
-        get_files_url = "https://api.modwork.shop/api.php?command=AssocFiles&did=$id$&steamid=$steamid$&token=Je3KeUETqqym6V8b5T7nFdudz74yWXgU",
-        download_url = "https://api.modwork.shop/api.php?command=DownloadFile&fid=$fid$&steamid=$steamid$&token=Je3KeUETqqym6V8b5T7nFdudz74yWXgU",
-        page_url = "https://modwork.shop/$id$",
-        check_func = function(self)
-            local id = tonumber(self.id)
-            if not id or id <= 0 then
-                return
-            end
-            --optimization, mostly you don't really need to check updates again when going back to menu
-            local upd = Global.beardlib_checked_updates[self.id]
-            if upd then
-                if type(upd) == "string" and upd ~= tostring(self.version) then
-                    self._new_version = upd
-                    self:PrepareForUpdate()
-                end
-                return
-            end
-            local check_url = self._mod:GetRealFilePath(self.provider.check_url, self)
-            dohttpreq(check_url, function(data, id)
-                if data then
-                    data = string.sub(data, 0, #data - 1)
-                    if data ~= "false" and data ~= "true" and string.len(data) > 0 then
-                        self._new_version = data
-                        Global.beardlib_checked_updates[self.id] = data
-                        self:PrepareForUpdate()
-                    else
-                        Global.beardlib_checked_updates[self.id] = true
-                    end
-                end
-            end)
-        end,
-        download_file_func = function(self)
-            local get_files_url = self._mod:GetRealFilePath(self.provider.get_files_url, self)
-            dohttpreq(get_files_url, function(data, id)
-                local fid = string.split(data, '"')[1]
-                if fid then
-                    self:_DownloadAssets({fid = fid, steamid = self.steamid})
-                    Global.beardlib_checked_updates[self.id] = nil --check again later for hotfixes.
-                end    
-            end)
-        end
-    }
-}
-ModAssetsModule._providers.lastbullet = clone(ModAssetsModule._providers.modworkshop)
+ModAssetsModule._providers = {}
+--Load the providers
+local providers_dir = BeardLib.config.classes_dir.."/Providers/"
+local providers = FileIO:GetFiles(providers_dir)
+if providers then
+    for _, provider in pairs(providers) do
+        dofile(providers_dir..provider)
+    end
+end
 
+dofile(BeardLib.config.classes_dir)
 function ModAssetsModule:init(core_mod, config)
-    self.required_params = table.add(clone(self.required_params), {"id"})
     if not ModAssetsModule.super.init(self, core_mod, config) then
         return false
     end
@@ -76,13 +38,17 @@ function ModAssetsModule:init(core_mod, config)
     end
 
     self.folder_names = self._config.use_local_dir and {table.remove(string.split(self._mod.ModPath, "/"))} or (type(self._config.folder_name) == "string" and {self._config.folder_name} or BeardLib.Utils:RemoveNonNumberIndexes(self._config.folder_name))
-    self.install_directory = (self._config.install_directory and self._mod:GetRealFilePath(self._config.install_directory, self)) or (self._config.use_local_path ~= false and BeardLib.Utils.Path:GetDirectory(self._mod.ModPath)) or BeardLib.config.mod_override_dir
-    self.version_file = self._config.version_file and self._mod:GetRealFilePath(self._config.version_file, self) or BeardLib.Utils.Path:Combine(self.install_directory, self.folder_names[1], self._default_version_file)
+    self.install_directory = (self._config.install_directory and ModCore:GetRealFilePath(self._config.install_directory, self)) or (self._config.use_local_path ~= false and BeardLib.Utils.Path:GetDirectory(self._mod.ModPath)) or BeardLib.config.mod_override_dir
+    self.version_file = self._config.version_file and ModCore:GetRealFilePath(self._config.version_file, self) or BeardLib.Utils.Path:Combine(self.install_directory, self.folder_names[1], self._default_version_file)
     self.version = 0
     
     self._update_manager_id = self._mod.Name .. self._name
-    self._mod.update_key = (self._config.is_standalone ~= false) and self.id
-    self._mod.update_assets_module = self
+    self._mod.update_module_data = {
+        id = (self._config.is_standalone ~= false) and self.id,
+        module = self,
+        provider = not self._config.custom_provider and self._config.provider,
+        download_url = self._config.custom_provider and self._config.custom_provider.download_url
+    }
     self:RetrieveCurrentVersion()
 
     if not self._config.manual_check then
@@ -112,8 +78,6 @@ function ModAssetsModule:RetrieveCurrentVersion()
         end
     elseif self._config.version then
         self.version = self._config.version
-    else
-        self:log("[ERROR] Unable to get version for '%s's assets. File: %s", self._mod.Name, self.version_file)
     end
     if tonumber(self.version) then -- has to be here, xml seems to fuckup numbers.
         self.version = BeardLib.Utils.Math:Round(tonumber(self.version), 4)
@@ -133,6 +97,9 @@ function ModAssetsModule:CheckVersion(force)
 end
 
 function ModAssetsModule:PrepareForUpdate()
+    if not self._mod then
+        return
+    end
     BeardLib.managers.mods_menu:SetModNeedsUpdate(self._mod, self._new_version)
     if self._config.important and BeardLib.Options:GetValue("ImportantNotice") then
         local loc = managers.localization
@@ -143,7 +110,10 @@ function ModAssetsModule:PrepareForUpdate()
 end
 
 function ModAssetsModule:_CheckVersion(force)
-    local version_url = self._mod:GetRealFilePath(self.provider.version_api_url, self)
+    if not self.provider.version_api_url then
+        return 
+    end
+    local version_url = ModCore:GetRealFilePath(self.provider.version_api_url, self)
     local loc = managers.localization
     dohttpreq(version_url, function(data, id)
         self:log("Received version '%s' from the server(local is %s)", tostring(data), tostring(self.version))
@@ -180,12 +150,18 @@ function ModAssetsModule:DownloadAssets()
     if self.provider.download_file_func then
         self.provider.download_file_func(self)
     else
-        self:_DownloadAssets()
+        return self:_DownloadAssets()
+    end
+end
+
+function ModAssetsModule:DownloadFailed()
+    if self.provider.download_failed_func then
+        self.provider.download_failed_func(self)        
     end
 end
 
 function ModAssetsModule:ViewMod()
-    local url = self._mod:GetRealFilePath(self.provider.page_url, self)
+    local url = ModCore:GetRealFilePath(self.provider.page_url, self)
     if Steam:overlay_enabled() then
 		Steam:overlay_activate("url", url)
 	else
@@ -194,21 +170,20 @@ function ModAssetsModule:ViewMod()
 end
 
 function ModAssetsModule:_DownloadAssets(data)
-    local download_url = self._mod:GetRealFilePath(self.provider.download_url, data or self)
+    local download_url = ModCore:GetRealFilePath(self.provider.download_url, data or self)
     self:log("Downloading assets from url: %s", download_url)
-    local mods_menu = BeardLib.managers.mods_menu
-    dohttpreq(download_url, callback(self, self, "StoreDownloadedAssets", false), callback(mods_menu, mods_menu, "SetModProgress", self._mod))                
+    dohttpreq(download_url, ClassClbk(self, "StoreDownloadedAssets", false), self._mod and ClassClbk(BeardLib.managers.mods_menu, "SetModProgress", self._mod) or nil)
 end
 
 function ModAssetsModule:StoreDownloadedAssets(config, data, id)
     config = config or self._config
     local mods_menu = BeardLib.managers.mods_menu
     local coroutine = mods_menu._menu._ws:panel():panel({})
-    coroutine:animate(function() --Same reason as BLT uses it, to update the UI properly.
+    coroutine:animate(function()
         wait(0.001)
         if config.install then
             config.install()
-        else
+        elseif self._mod then
             mods_menu:SetModInstallingUpdate(self._mod)
         end
         wait(1)
@@ -219,7 +194,7 @@ function ModAssetsModule:StoreDownloadedAssets(config, data, id)
             BeardLib:log("[ERROR] Assets download failed, received data was invalid")
             if config.failed then
                 config.failed()
-            else
+            elseif self._mod then
                 mods_menu:SetModFailedUpdate(self._mod)
             end
             return
@@ -254,7 +229,7 @@ function ModAssetsModule:StoreDownloadedAssets(config, data, id)
         self.version = self._new_version        
         if config.finish then
             config.finish()
-        else
+        elseif self._mod then
             mods_menu:SetModNormal(self._mod)
         end
         if alive(coroutine) then
@@ -309,6 +284,35 @@ function ModAssetsModule:InitializeNode(node)
         enabled = not not managers.menu._is_start_menu,
         merge_data = {mod_key = self._mod.GlobalKey}
     })
+end
+
+DownloadCustomMap = DownloadCustomMap or class(ModAssetsModule)
+function DownloadCustomMap:init()
+end
+
+function DownloadCustomMap:DownloadFailed()
+    BeardLibEditor.managers.Dialog:Show({title = managers.localization:text("mod_assets_error"), message = managers.localization:text("custom_map_failed_download"), force = true})
+    if self.failed_map_downloaed then
+        self.failed_map_downloaed()
+    end
+end
+
+function DownloadCustomMap:_DownloadAssets(data)
+    local download_url = ModCore:GetRealFilePath(self.provider.download_url, data or self)
+    local dialog = BeardLib.managers.dialog.download
+    dialog:Show({title = managers.localization:text("beardlib_downloading")..self.level_name or "No Map Name", force = true})				
+    dohttpreq(download_url, ClassClbk(self, "StoreDownloadedAssets", {
+        install_directory = BeardLib.config.maps_dir, 
+        done_callback = self.done_map_download,
+        install = ClassClbk(dialog, "SetInstalling"),
+        failed = function()
+            if self.failed_map_downloaed then
+                self.failed_map_downloaed()
+            end
+            dialog:SetFailed()
+        end,
+        finish = ClassClbk(dialog, "SetFinished"),
+    }), ClassClbk(dialog, "SetProgress"))
 end
 
 BeardLib:RegisterModule(ModAssetsModule.type_name, ModAssetsModule)

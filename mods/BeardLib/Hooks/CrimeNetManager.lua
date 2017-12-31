@@ -1,9 +1,9 @@
 local orig = CrimeNetGui.check_job_pressed
 function CrimeNetGui:check_job_pressed(x,y, ...)
     for id, job in pairs(self._jobs) do
-        if job.mouse_over == 1 and job.update_key then
+        if job.mouse_over == 1 and job.update_data then
             self:disable_crimenet()
-            BeardLib.Utils:DownloadMap(job.level_name, job.update_key, function(success)
+            BeardLib.Utils:DownloadMap(job.level_name, job.job_key, job.update_data, function(success)
                 self:enable_crimenet()
                 self._grabbed_map = false
             end)

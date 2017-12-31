@@ -115,6 +115,7 @@ function BeardLibModsMenu:CreateItems(menu)
             item:SetPositionByString("CenterBottom")
             item:Panel():move(5, -5)
         end,
+        auto_align = false,
         align_method = "grid",
     })
     self:AddMod(BeardLib, "blt")
@@ -127,6 +128,7 @@ function BeardLibModsMenu:CreateItems(menu)
     for _, mod in pairs(BeardLib.managers.MapFramework._loaded_mods) do
         self:AddMod(mod, "custom_heist")
     end
+    self._list:AlignItems(true)
 end
 
 function BeardLibModsMenu:AddMod(mod, type)
@@ -151,6 +153,7 @@ function BeardLibModsMenu:AddMod(mod, type)
         w = s - 1,
         h = s - 1,
         scrollbar = false,
+        auto_align = false,
         accent_color = concol,
         highlight_color = concol, 
         background_color = color:with_alpha(0.8)
@@ -209,7 +212,7 @@ function BeardLibModsMenu:AddMod(mod, type)
     mod_item:Button({
         name = "View",
         callback = callback(self, self, "ViewMod", mod),
-        enabled = mod.update_assets_module ~= nil,
+        enabled = mod.update_module_data ~= nil,
         items_size = 16,
         localized = true,
         text = "beardlib_visit_page"
@@ -235,7 +238,7 @@ function BeardLibModsMenu:UpdateTitle(mod)
     local mod_item = self._list:GetItemByLabel(mod)
     if mod_item then
         local title = mod_item:GetItem("Title")
-        title:SetText((mod.Name or "Missing name?") ..(mod.update_assets_module and "("..mod.update_assets_module.version..")" or ""))
+        title:SetText((mod.Name or "Missing name?") ..(mod.update_module_data and "("..mod.update_module_data.module.version..")" or ""))
     end
 end
 
@@ -293,12 +296,12 @@ function BeardLibModsMenu:SetShowImportantUpdatesNotice(menu, item)
 end
 
 function BeardLibModsMenu:ViewMod(mod)
-    mod.update_assets_module:ViewMod()
+    mod.update_module_data.module:ViewMod()
 end
 
 function BeardLibModsMenu:BeginModDownload(mod)
     self:SetModStatus(self._list:GetItemByLabel(mod), "beardlib_waiting")
-    mod.update_assets_module:DownloadAssets()
+    mod.update_module_data.module:DownloadAssets()
 end
 
 local megabytes = (1024 ^ 2)

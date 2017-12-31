@@ -13,7 +13,7 @@
     "custom_map_title" : "Colpo personalizzato: $map",
     "custom_map_download_available" : "Download disponibile",
     "custom_map_alert" : "Avviso colpo personalizzato",
-    "custom_map_needs_download" : "Per unirti alla partita devi prima scaricare il colpo, si desidera procedere?",
+    "custom_map_needs_download" : "Per unirti alla partita devi prima scaricare il colpo, si desidera procedere?\n$url",
     "custom_map_host_old_version" : "Impossibile iniziare il download del colpo perché l'host sta utilizzando una versione datata di BeardLib!",
     "custom_map_failed_download" : "Download del colpo personalizzato fallito",
     "custom_map_missing_updater" : "Impossibile iniziare il downlaod del colpo personalizzato poiché la mappa non ha un ID per l'aggiornamento!",

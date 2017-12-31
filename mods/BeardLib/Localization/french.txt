@@ -13,7 +13,7 @@
     "custom_map_title" : "Braquage Custom: $map",
     "custom_map_download_available" : "Téléchargement disponible",
     "custom_map_alert" : "Alerte Braquage Custom",
-    "custom_map_needs_download" : "Vous avez besoin de télécharger le braquage avant de rejoindre, commencer le téléchargement?",
+    "custom_map_needs_download" : "Vous avez besoin de télécharger le braquage avant de rejoindre, commencer le téléchargement?\n$url",
     "custom_map_host_old_version" : "Impossible de commencer le téléchargement car l'hôte utilise une ancienne version de BeardLib!",
     "custom_map_failed_download" : "Echec du téléchargement du braquage custom",
     "custom_map_missing_updater" : "Impossible de commencer le téléchargement car le braquage ne supporte pas les mises-à-jour!",

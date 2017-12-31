@@ -13,7 +13,7 @@
     "custom_map_title" : "커스텀 하이스트: $map",
     "custom_map_download_available" : "다운로드 가능",
     "custom_map_alert" : "커스텀 하이스트 경고",
-    "custom_map_needs_download" : "참여하기 전에 하이스트를 설치해야 합니다, 다운로드 하시겠습니까?",
+    "custom_map_needs_download" : "참여하기 전에 하이스트를 설치해야 합니다, 다운로드 하시겠습니까?\n$url",
     "custom_map_host_old_version" : "커스텀 하이스트 다운로드가 불가능합니다, 왜냐하면 호스트가 구버전의 비어드립을 사용하고 있습니다!",
     "custom_map_failed_download" : "커스텀 하이스트 다운로드 실패",
     "custom_map_missing_updater" : "커스텀 하이스트를 다운로드 할 수 없습니다, 왜나하면 맵이 업데이트가 되지 않았습니다!",
