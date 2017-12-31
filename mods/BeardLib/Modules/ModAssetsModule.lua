@@ -11,7 +11,6 @@ if providers then
     end
 end
 
-dofile(BeardLib.config.classes_dir)
 function ModAssetsModule:init(core_mod, config)
     if not ModAssetsModule.super.init(self, core_mod, config) then
         return false
@@ -43,11 +42,12 @@ function ModAssetsModule:init(core_mod, config)
     self.version = 0
     
     self._update_manager_id = self._mod.Name .. self._name
+    local download_url = self._config.downlad_url or (self._config.custom_provider and self._config.custom_provider.download_url) or nil
     self._mod.update_module_data = {
         id = (self._config.is_standalone ~= false) and self.id,
         module = self,
-        provider = not self._config.custom_provider and self._config.provider,
-        download_url = self._config.custom_provider and self._config.custom_provider.download_url
+        provider = not download_url and self._config.provider,
+        download_url = download_url
     }
     self:RetrieveCurrentVersion()
 
