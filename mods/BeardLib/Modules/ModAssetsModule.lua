@@ -117,9 +117,9 @@ function ModAssetsModule:_CheckVersion(force)
     local loc = managers.localization
     dohttpreq(version_url, function(data, id)
         self:log("Received version '%s' from the server(local is %s)", tostring(data), tostring(self.version))
-        if data then
+        if data and (not self.provider.version_is_number or tonumber(data)) then
             self._new_version = data
-            if self._new_version and self._new_version ~= self.version then
+            if self._new_version and tostring(self._new_version) ~= tostring(self.version) then
                 self:PrepareForUpdate()
             elseif force then
                 self:ShowNoChangePrompt()

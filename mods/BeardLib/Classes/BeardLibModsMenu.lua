@@ -361,6 +361,7 @@ function BeardLibModsMenu:SetModNeedsUpdate(mod, new_version)
         self:SetModStatus(mod_item, loc:text("beardlib_waiting_update")..(new_version and "("..new_version..")" or ""), true)
         mod_item:GetItem("Download"):SetEnabled(true)
         mod_item:SetIndex(mod.Name == "BeardLib" and 1 or 2)
+        self._list:AlignItems(true)
     else
         mod.NeedsUpdate = true
     end
