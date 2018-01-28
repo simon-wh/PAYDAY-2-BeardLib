@@ -25,7 +25,7 @@ if F == "weaponfactorymanager" then
     Hooks:PreHook(WeaponFactoryManager, "_read_factory_data", "BeardLibFixMissingParts", function(self)
         local tweak = tweak_data.weapon.factory
         for factory_id, data in pairs(tweak) do
-            if factory_id ~= "parts" then
+            if factory_id ~= "parts" and type(data.uses_parts) == "table" then
                 for i, part_id in pairs(data.uses_parts) do
                     if not tweak.parts[part_id] then
                         BeardLib:log("[Fixes][Warning] Weapon with the factory ID %s has the part %s defined but the part does not exist", tostring(factory_id), tostring(part_id))                        
