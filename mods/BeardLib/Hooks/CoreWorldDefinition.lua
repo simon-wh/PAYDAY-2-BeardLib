@@ -44,13 +44,13 @@ function WorldDefinition:unload_packages(...)
             Global.level_data._add:Unload()
             Global.level_data._add = nil
         end
-
+--[[
         if self._custom_loaded_packages then
             for _, pck in pairs(self._custom_loaded_packages) do
                 self:_unload_package(pck)
             end
         end
-
+]]
         if not self._has_package then
             return
         end
