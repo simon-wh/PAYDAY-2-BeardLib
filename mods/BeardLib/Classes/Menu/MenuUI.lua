@@ -61,7 +61,7 @@ end
 function MenuUI:ReloadInterface(params, shallow)
     table.merge(self, params or {})
     self._panel:child("bg"):configure({
-        visible = not not self.background_blur or self.background_color ~= nil,
+        visible = not not self.background_blur or not not self.background_color,
         render_template = self.background_blur and "VertexColorTexturedBlur3D" or "VertexColorTextured",
         texture = self.background_blur and "guis/textures/test_blur_df",
         w = self.background_blur and self._panel:w(),

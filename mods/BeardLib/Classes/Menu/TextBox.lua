@@ -3,9 +3,9 @@ local TextBox = BeardLib.Items.TextBox
 TextBox.type_name = "TextBox"
 function TextBox:Init()
 	self.size_by_text = false
-	TextBox.super.Init(self)	
-    self.floats = self.floats or 2
-    if self.filter == "number" then
+	TextBox.super.Init(self)
+	self:WorkParam("floats", 3)
+	if self.filter == "number" then
     	self.value = tonumber(self.value) or 0
     end
 	self._textbox = BeardLib.Items.TextBoxBase:new(self, {
@@ -24,16 +24,16 @@ function TextBox:_SetValue(value, run_callback, reset_selection)
 	local text = self._textbox.panel:child("text")
 
 	if self.filter == "number" then
-		value = tonumber(value) or 0
+		value = tonumber(value) or 0		
 		if self.max then
 			value = math.min(self.max, value)
 		end
 		if self.min then
 			value = math.max(self.min, value)
 		end
-	    local format = string.format("%." .. self.floats .. "f", value)
-	    value = tonumber(format)    
-	    text:set_text(format)
+	    local final_number = self.floats and string.format("%." .. self.floats .. "f", value) or tostring(value)
+	    value = tonumber(final_number)    
+	    text:set_text(final_number)
 	else
 		text:set_text(value)
 	end

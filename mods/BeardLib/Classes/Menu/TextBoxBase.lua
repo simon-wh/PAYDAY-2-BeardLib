@@ -30,9 +30,13 @@ function TextBoxBase:init(parent, params)
         color = self.line_color or color,
     })
     line:set_bottom(self.panel:h())
+    local value = params.value or ""
+    if parent.fitler == "number" and parents.floats then
+        value = string.format("%." .. parent.floats .. "f", tonumber(value))
+    end
     self.text = self.panel:text({
         name = "text",
-        text = params.value and (parent.filter == "number" and string.format("%." .. parent.floats .. "f", tonumber(params.value)) or tostring(params.value)) or "",
+        text = tostring(value),
         align = params.align,
         wrap = not params.lines or params.lines > 1,
         word_wrap = not params.lines or params.lines > 1,
@@ -97,7 +101,12 @@ function TextBoxBase:CheckText(text, no_clbk)
 end
  
 function TextBoxBase:tonumber(text)
-    return tonumber(string.format("%." .. self.owner.floats .. "f", (text or 0)))
+    text = text or 0
+    if self.owner.floats then
+        return tonumber(string.format("%." .. self.owner.floats .. "f", text))
+    else
+        return tonumber(text)
+    end
 end
 
 function TextBoxBase:key_hold(text, k)
@@ -191,7 +200,12 @@ function TextBoxBase:fixed_text(text)
 	if self.owner.filter == "number" then
 		local num = tonumber(text) 
         if num then
-		    return string.format("%." .. self.owner.floats .."f", math.clamp(num, self.owner.min or num, self.owner.max or num))
+            local clamp = math.clamp(num, self.owner.min or num, self.owner.max or num)
+            if self.owner.floats then
+                return string.format("%." .. self.owner.floats .."f", clamp)
+            else
+                return clamp
+            end
         end
 	else
 		return text

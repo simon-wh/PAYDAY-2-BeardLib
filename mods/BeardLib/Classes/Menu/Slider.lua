@@ -7,7 +7,7 @@ function Slider:Init()
 	Slider.super.Init(self)
     self.step = self.step or 1
     self.value = tonumber(self.value) or 0
-    self.floats = self.floats or 2
+    self:WorkParam("floats", 3)
     self.filter = "number"
     self.min = self.min or 0
     self.max = self.max or self.min
@@ -78,13 +78,13 @@ function Slider:_SetValue(value, run_callback, reset_selection, no_format)
     if self.max or self.min then
         value = math.clamp(value, self.min, self.max)    
     end      
-    value = tonumber(not no_format and format or value)     
-    local format = string.format("%." .. self.floats .. "f", value)
+    value = tonumber(not no_format and format or value)
+    local final_number = self.floats and string.format("%." .. self.floats .. "f", value) or tostring(value)
     local text = self._textbox.panel:child("text")
     self.sfg:set_w(self.sbg:w() * ((value - self.min) / (self.max - self.min)))
     self._slider:child("circle"):set_center(self.sfg:right(), self.sfg:center_y())
     if not no_format then
-        text:set_text(format)
+        text:set_text(final_number)
     end
      if reset_selection then
         text:set_selection(text:text():len())

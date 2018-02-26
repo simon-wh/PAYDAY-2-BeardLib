@@ -39,6 +39,7 @@ function InputDialog:_Show(params)
         reachable = true,
         line_color = Color.transparent,
         control_slice = 1,
+        floats = params.floats or false,
         filter = params.filter,
         value = params.text
     }, params.merge_text or {}))
