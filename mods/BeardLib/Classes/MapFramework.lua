@@ -1,10 +1,7 @@
 MapFramework = MapFramework or class(FrameworkBase)
-
-function MapFramework:init()
-    self._directory = BeardLib.config.maps_dir
-    self._ignore_folders = {"backups", "prefabs"}
-    MapFramework.super.init(self)
-end
+MapFramework._loaded_instances = {}
+MapFramework._ignore_folders = {"backups", "prefabs"}
+MapFramework._directory = BeardLib.config.maps_dir
 
 function MapFramework:RegisterHooks()
     self:AddCustomContact()

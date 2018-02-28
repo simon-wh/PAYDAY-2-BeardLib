@@ -1,6 +1,6 @@
-if Application:short_game_name() == "RAID WW2" then --Don't run in raid.
-    return
-end
+local BeardLib = BeardLib
+local Framework = BeardLib.managers.MapFramework
+local Hooks = Hooks
 
 core:module("CoreWorldDefinition")
 WorldDefinition = WorldDefinition or CoreWorldDefinition.WorldDefinition
@@ -43,6 +43,12 @@ function WorldDefinition:unload_packages(...)
         if Global.level_data._add then
             Global.level_data._add:Unload()
             Global.level_data._add = nil
+        end
+
+        if self._custom_instances then
+            for _, instance in pairs(self._custom_instances) do
+                instance:Unload()
+            end
         end
 --[[
         if self._custom_loaded_packages then
@@ -119,3 +125,27 @@ function WorldDefinition:_create_environment(data, offset, ...)
 		end
 	end
 end
+
+function WorldDefinition:try_loading_custom_instance(instance)
+    local module = Framework._loaded_instances[instance]
+    if module then
+        self._custom_instances = self._custom_instances or {}
+        if not self._custom_instances[instance] then
+            self._custom_instances[instance] = module:Load()
+        end
+    end   
+end
+
+function WorldDefinition:load_custom_instances()
+    for name, data in pairs(self._continent_definitions) do
+        if data.instances then
+            for _, instance in pairs(data.instances) do
+                self:try_loading_custom_instance(instance.folder)
+            end
+        end
+    end
+end
+
+Hooks:PreHook(WorldDefinition, "_insert_instances", "BeardLibInsertCustomInstances", function(self)
+    self:load_custom_instances()
+end)

@@ -108,6 +108,7 @@ function SelectListDialog:ToggleClbk(value, menu, item)
             table.delete(self._selected_list, value)
         end
     end
+    self:MakeListItems()
 end
 
 function SelectListDialog:ToggleItem(name, selected, value)
