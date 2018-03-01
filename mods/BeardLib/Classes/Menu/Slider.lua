@@ -73,7 +73,7 @@ function Slider:SetStep(step)
     self.step = step
 end
 
-function Slider:_SetValue(value, run_callback, reset_selection, no_format)  
+function Slider:TextBoxSetValue(value, run_callback, reset_selection, no_format)  
     value = tonumber(value) or 0 
     if self.max or self.min then
         value = math.clamp(value, self.min, self.max)    
@@ -100,7 +100,7 @@ function Slider:SetValue(value, ...)
     if self.value ~= value then
         self._textbox:add_history_point(value)
     end
-    self:_SetValue(value, ...)
+    self:TextBoxSetValue(value, ...)
     return true
 end
 

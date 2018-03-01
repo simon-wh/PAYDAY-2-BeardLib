@@ -25,8 +25,7 @@ function ComboBox:Init()
         align = self.textbox_align,
         line_color = self.line_color or self.highlight_color,
         w = self.panel:w() * (self.text == nil and 1 or self.control_slice),
-        update_text = callback(self._list, self._list, "update_search", true),
-        value = self.localized_items and text and managers.localization:text(tostring(text)) or type(text) ~= "nil" and tostring(text) or "",
+        value = self:GetValueText(),
     })
     self._textbox:PostInit()
     combo_bg:set_right(self.panel:w())
@@ -41,6 +40,14 @@ function ComboBox:Init()
     })
     self.icon:set_right(combo_bg:right() - 2)
     self.icon:set_center_y(self._textbox.panel:center_y() - 2)
+    self:UpdateValueText()
+end
+
+function ComboBox:TextBoxSetValue(value, run_clbk, ...)
+    if self.free_typing then
+        self:SetValue(self._textbox:Value(), run_clbk, true)
+    end
+    self._list:update_search(true)
 end
 
 function ComboBox:ContextMenuCallback(item)
@@ -55,27 +62,42 @@ end
 function ComboBox:SetValue(value, run_callback, no_items_clbk)
     if not self:alive() then
 		return false
-	end
-    local v = self.items[value]
-    if run_callback and type(v) == "table" and not no_items_clbk and v.callback then
-        self:RunCallback(v.callback)
     end
-    if type(v) == "table" then
-        v = v.text
+    if type(value) == "number" then
+        local v = self.items[value]
+        if run_callback and type(v) == "table" and not no_items_clbk and v.callback then
+            self:RunCallback(v.callback)
+        end
     end
-    if alive(self.panel) then
-       self._textbox:Text():set_text(self.localized_items and v and managers.localization:text(tostring(v)) or type(v) ~= "nil" and tostring(v) or "")
-    end    
     ComboBox.super.SetValue(self, value, run_callback)
+    self:UpdateValueText()
     return true
 end
 
-function ComboBox:SetSelectedItem(value, ...)    
+function ComboBox:GetValueText()
+    local text
+    if type(self.value) == "number" then
+        text = self.items[self.value]
+        text = type(text) == "table" and text.text or text
+        text = self.localized_items and text and managers.localization:text(text) or type(text) ~= "nil" and tostring(text) or ""
+    elseif self.free_typing then
+        text = self.value
+    end
+    return text
+end
+    
+function ComboBox:UpdateValueText()
+    if alive(self.panel) then
+       self._textbox:Text():set_text(self:GetValueText())
+    end
+end
+
+function ComboBox:SetSelectedItem(value, ...)
     self:SetValue(table.get_key(self.items, value), ...)
 end
 
 function ComboBox:SelectedItem()
-    return self.items[self.value]
+    return tonumber(self.value) and self.items[self.value] or self.value
 end
 
 function ComboBox:DoHighlight(highlight)

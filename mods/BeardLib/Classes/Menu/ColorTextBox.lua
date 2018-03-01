@@ -28,8 +28,8 @@ function ColorTextBox:SetValue(value, ...)
     return ColorTextBox.super.SetValue(self, value, ...)
 end
 
-function ColorTextBox:_SetValue(...)
-    ColorTextBox.super._SetValue(self, ...)
+function ColorTextBox:TextBoxSetValue(...)
+    ColorTextBox.super.TextBoxSetValue(self, ...)
     self:UpdateColor()
 end
 

@@ -20,7 +20,7 @@ function TextBox:Init()
     self._textbox:PostInit()
 end
 
-function TextBox:_SetValue(value, run_callback, reset_selection)
+function TextBox:TextBoxSetValue(value, run_callback, reset_selection)
 	local text = self._textbox.panel:child("text")
 
 	if self.filter == "number" then
@@ -51,7 +51,7 @@ function TextBox:SetValue(value, ...)
 	if self.value ~= value then
 		self._textbox:add_history_point(value)
 	end
-	self:_SetValue(value, ...)
+	self:TextBoxSetValue(value, ...)
 	return true
 end
 

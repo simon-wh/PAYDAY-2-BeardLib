@@ -58,7 +58,7 @@ function TextBoxBase:init(parent, params)
 	self.btn = params.btn or "0"
     self.history = {params.value and self.text:text()}
  	self.text:enter_text(callback(self, TextBoxBase, "enter_text"))
- 	self.update_text = params.update_text or function(self, ...) self.owner:_SetValue(...) end
+ 	self.update_text = params.update_text or ClassClbk(self.owner, "TextBoxSetValue")
 end
 
 function TextBoxBase:PostInit()
@@ -91,12 +91,12 @@ end
 function TextBoxBase:CheckText(text, no_clbk)
     if self.filter == "number" then
         if tonumber(text:text()) ~= nil then
-            self:update_text(self:tonumber(text:text()), not no_clbk, true)
+            self.update_text(self:tonumber(text:text()), not no_clbk, true)
         else
-            self:update_text(self:tonumber(self:one_point_back()), not no_clbk, true)
+            self.update_text(self:tonumber(self:one_point_back()), not no_clbk, true)
         end
     else
-        self:update_text(text:text(), not no_clbk, true)
+        self.update_text(text:text(), not no_clbk, true)
     end
 end
  
@@ -125,7 +125,7 @@ function TextBoxBase:key_hold(text, k)
                 end
                 text:replace_text(tostring(Application:get_clipboard()))
                 self:add_history_point(text:text())
-                self:update_text(text:text(), true, true, true)
+                self.update_text(text:text(), true, true, true)
             elseif shift() then
                 if KB:Down(Idstring("left")) then text:set_selection(s - 1, e)
                 elseif KB:Down(Idstring("right")) then text:set_selection(s, e + 1) end
@@ -137,7 +137,7 @@ function TextBoxBase:key_hold(text, k)
                     local new_point = point and point + (z and -1 or 1)
                     if new_point > 0 then
                         self.history_point = new_point < #self.history and new_point or nil
-                        self:update_text(self.history[new_point], true, true, true)
+                        self.update_text(self.history[new_point], true, true, true)
                     end
                 end
             end
@@ -149,8 +149,8 @@ function TextBoxBase:key_hold(text, k)
                     end
                     text:replace_text("")
                     self:add_history_point(text:text())
-                    if (self.owner.filter ~= "number") or (text:text() ~= "" and self:fixed_text(text:text()) == text:text()) then
-                        self:update_text(text:text(), true, false, true)
+                    if (text:text() ~= "" and self:fixed_text(text:text()) == text:text()) then
+                        self.update_text(text:text(), true, false, true)
                     end
                 end
             elseif k == Idstring("left") then
@@ -227,7 +227,7 @@ function TextBoxBase:enter_text(text, s)
         self:add_history_point(number and (tonumber(text:text()) or self:one_point_back()) or text:text())
         self:update_caret()
         if self:fixed_text(text:text()) == text:text() then
-            self:update_text(text:text(), true, false, true)
+            self.update_text(text:text(), true, false, true)
         end
     end
 end
@@ -318,7 +318,7 @@ function TextBoxBase:MousePressed(button, x, y)
         self:update_caret()
         return true
     elseif cantype == true and self.cantype == false then
-        self:update_text(text:text(), false, true, true)
+        self.update_text(text:text(), false, true, true)
         return true
     end
 end
