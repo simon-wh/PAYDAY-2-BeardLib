@@ -298,12 +298,16 @@ function MenuHelperPlus:AddSlider(params)
 		item:set_enabled( params.enabled )
 	end
 
+	if params.decimal_count then
+		item:set_decimal_count(params.decimal_count)
+	end
+	
 	if params.position then
         node:insert_item(item, params.position)
     else
         node:add_item(item)
-    end
-    
+	end
+	
     return item
 end
 

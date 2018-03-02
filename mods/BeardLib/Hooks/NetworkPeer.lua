@@ -79,13 +79,13 @@ Hooks:Add("NetworkReceivedData", sync_game_settings_id, function(sender, id, dat
         local update_data = BeardLib.Utils:GetUpdateData(split_data)
         local session = managers.network:session()
         local function continue_sync()
-            local job_index = tweak_data.narrative:get_index_from_job_id(job_id)
-            local level_index = tweak_data.levels:get_index_from_level_id(split_data[2])
-
             local peer = session:peer(sender)
             local rpc = peer and peer:rpc()
             if rpc then
-                managers.network._handlers.connection:sync_game_settings(job_index, level_index, tweak_data:difficulty_to_index(split_data[3]), rpc)
+                local job_index = tweak_data.narrative:get_index_from_job_id(job_id)
+                local level_index = tweak_data.levels:get_index_from_level_id(split_data[2])
+                local difficulty_index = tweak_data:difficulty_to_index(split_data[3])
+                managers.network._handlers.connection:sync_game_settings(job_index, level_index, difficulty_index, Global.game_settings.one_down, rpc)
             end
         end
         local function disconnect()

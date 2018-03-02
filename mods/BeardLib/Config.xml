@@ -70,6 +70,7 @@
 	    <hook source="lib/units/beings/player/playerinventory" file="NetworkHooks.lua"/>
 		
 	 	<hook source="lib/network/base/handlers/connectionnetworkhandler" file="Fixes.lua"/>
+		<hook source="core/lib/managers/menu/items/coremenuitemslider" file="Fixes.lua"/>
 		<hook source="core/lib/managers/coresoundenvironmentmanager" file="Fixes.lua"/>
 		<hook source="lib/managers/mission/elementvehiclespawner" file="Fixes.lua"/>
 		<hook source="lib/managers/mission/elementinteraction" file="Fixes.lua"/>

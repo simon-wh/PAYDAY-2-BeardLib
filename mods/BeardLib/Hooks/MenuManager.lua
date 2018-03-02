@@ -91,6 +91,7 @@ Hooks:Add("NetworkReceivedData", sync_game_settings_id, function(sender, id, dat
         managers.network._handlers.connection:sync_game_settings(tweak_data.narrative:get_index_from_job_id(split_data[1]),
         tweak_data.levels:get_index_from_level_id(split_data[2]),
         tweak_data:difficulty_to_index(split_data[3]),
+        Global.game_settings.one_down,
         managers.network:session():peer(sender):rpc())
     end
 end)

@@ -347,6 +347,7 @@ function OptionModule:CreateSlider(parent_node, option_tbl, option_path)
         min = self:GetParameter(option_tbl, "min"),
         max = self:GetParameter(option_tbl, "max"),
         step = self:GetParameter(option_tbl, "step"),
+        decimal_count = self:GetParameter(option_tbl, "decimal_count"),
         enabled = enabled,
         value = self:GetValue(option_path),
         show_value = self:GetParameter(option_tbl, "show_value"),

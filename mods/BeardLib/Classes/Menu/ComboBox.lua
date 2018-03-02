@@ -93,7 +93,7 @@ function ComboBox:UpdateValueText()
 end
 
 function ComboBox:SetSelectedItem(value, ...)
-    self:SetValue(table.get_key(self.items, value), ...)
+    self:SetValue(table.get_key(self.items, value) or value, ...)
 end
 
 function ComboBox:SelectedItem()
