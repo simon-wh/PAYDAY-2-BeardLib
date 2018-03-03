@@ -12,14 +12,21 @@ if F == "weaponfactorymanager" then
         end
         return orig_unpack(self, factory_id, ...)
     end
+
     local orig_has = WeaponFactoryManager.has_perk
     function WeaponFactoryManager:has_perk(perk_name, factory_id, blueprint, ...)
+        local factory = tweak_data.weapon.factory
+
         for _, part_id in pairs(blueprint) do
-            if not tweak_data.weapon.factory.parts[part_id] then
+            if not factory.parts[part_id] then
                 BeardLib:log("[Fixes][Warning] Weapon mod with the ID '%s' was found in the save but was missing, the weapon mod will be deleted from the save", tostring(part_id))
                 return false
+            elseif type(factory.parts[part_id].perks) == "string" then
+                BeardLib:log("[Fixes][Warning] Perks value is a string when it's supposed to be a table, weapon mod id %s, perk value %s", tostring(part_id), tostring(factory.parts[part_id].perks))
+                factory.parts[part_id].perks = {factory.parts[part_id].perks}
             end
         end
+
         return orig_has(self, perk_name, factory_id, blueprint, ...)
     end
     --https://github.com/simon-wh/PAYDAY-2-BeardLib/issues/112
