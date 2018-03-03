@@ -138,21 +138,25 @@ end
 
 local _LoadAsset = function(ids_ext, ids_path, file_path)
 	if not managers.dyn_resource:has_resource(ids_ext, ids_path, managers.dyn_resource.DYN_RESOURCES_PACKAGE) then
-		if file_path then
-			BeardLib:log("loaded file %s", tostring(file_path))
-		else
-			BeardLib:log("loaded file %s.%s", ids_path:key(), ids_ext:key())
+		if BeardLib.FullLog then
+			if file_path then
+				BeardLib:log("loaded file %s", tostring(file_path))
+			else
+				BeardLib:log("loaded file %s.%s", ids_path:key(), ids_ext:key())
+			end
 		end
         managers.dyn_resource:load(ids_ext, ids_path, managers.dyn_resource.DYN_RESOURCES_PACKAGE)
     end
 end
 
 local _UnLoadAsset = function(ids_ext, ids_path, file_path)
-    if managers.dyn_resource:has_resource(ids_ext, ids_path, managers.dyn_resource.DYN_RESOURCES_PACKAGE) then
-		if file_path then
-			BeardLib:log("unloaded file %s", tostring(file_path))
-		else
-			BeardLib:log("unloaded file %s.%s", ids_path:key(), ids_ext:key())
+	if managers.dyn_resource:has_resource(ids_ext, ids_path, managers.dyn_resource.DYN_RESOURCES_PACKAGE) then
+		if BeardLib.FullLog then
+			if file_path then
+				BeardLib:log("unloaded file %s", tostring(file_path))
+			else
+				BeardLib:log("unloaded file %s.%s", ids_path:key(), ids_ext:key())
+			end
 		end
         managers.dyn_resource:unload(ids_ext, ids_path, managers.dyn_resource.DYN_RESOURCES_PACKAGE)
     end
