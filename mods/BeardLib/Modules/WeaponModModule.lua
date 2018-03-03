@@ -14,11 +14,12 @@ function WeaponModModule:RegisterHook()
     self._config.global_value = self._config.global_value or self.defaults.global_value
     self._config.drop = self._config.drop ~= nil and self._config.drop or true
     Hooks:Add("BeardLibCreateCustomWeaponMods", self._config.id .. "AddWeaponModTweakData", function(w_self)
+        local config = self._config
         if w_self.parts[self._config.id] then
             BeardLib:log("[ERROR] Weapon mod with id '%s' already exists!", self._config.id)
             return
         end
-        local data = table.merge(deep_clone(self._config.based_on and (w_self.parts[self._config.based_on] ~= nil and w_self.parts[self._config.based_on]) or {}), {
+        local data = table.merge(deep_clone(self._config.based_on and (w_self.parts[self._config.based_on] ~= nil and w_self.parts[self._config.based_on]) or {}), table.merge({
             name_id = self._config.name_id or "bm_wp_" .. self._config.id,
             unit = self._config.unit,
             third_unit = self._config.third_unit,
@@ -31,7 +32,7 @@ function WeaponModModule:RegisterHook()
             animations = self._config.animations,
             is_a_unlockable = self._config.is_a_unlockable,
             custom = true
-        })
+        }, config))
         if self._config.merge_data then
             table.merge(data, self._config.merge_data)
         end
