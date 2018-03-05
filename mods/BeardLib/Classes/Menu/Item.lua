@@ -5,6 +5,7 @@ function Item:Init(params)
 	self.panel = self.parent_panel:panel({
 		name = self.name,
 		visible = self.visible,
+		alpha = self.enabled and self.enabled_alpha or self.disabled_alpha,
 		w = self.w,
 		h = self.h or self.items_size,
 	})
@@ -132,14 +133,32 @@ end
 
 function Item:DoHighlight(highlight)
 	local foreground = self:GetForeground(highlight)
-	if self.bg then play_anim(self.bg, {set = {alpha = highlight and self.highlight_bg and self.highlight_bg:visible() and 0 or 1}}) end
-	if self.highlight_bg then play_anim(self.highlight_bg, {set = {alpha = highlight and 1 or 0}}) end
-	if self.title then play_color(self.title, foreground) end
-	if self.border_highlight_color then
-		for _, v in pairs({"left", "top", "right", "bottom"}) do
-			local side = self.panel:child(v)
-			if alive(side) and side:visible() then
-				play_color(side, highlight and self.border_highlight_color or self.border_color or foreground)
+end
+
+function Item:DoHighlight(highlight)
+	local foreground = self:GetForeground(highlight)
+	if self.animate_colors then
+		if self.bg then play_anim(self.bg, {set = {alpha = highlight and self.highlight_bg and self.highlight_bg:visible() and 0 or 1}}) end
+		if self.highlight_bg then play_anim(self.highlight_bg, {set = {alpha = highlight and 1 or 0}}) end
+		if self.title then play_color(self.title, foreground) end
+		if self.border_highlight_color then
+			for _, v in pairs({"left", "top", "right", "bottom"}) do
+				local side = self.panel:child(v)
+				if alive(side) and side:visible() then
+					play_color(side, highlight and self.border_highlight_color or self.border_color or foreground)
+				end
+			end
+		end
+	else
+		if self.bg then self.bg:set_alpha(highlight and self.highlight_bg and self.highlight_bg:visible() and 0 or 1) end
+		if self.highlight_bg then self.highlight_bg:set_alpha(highlight and 1 or 0) end
+		if self.title then self.title:set_color(foreground) end
+		if self.border_highlight_color then
+			for _, v in pairs({"left", "top", "right", "bottom"}) do
+				local side = self.panel:child(v)
+				if alive(side) and side:visible() then
+					side:set_color(highlight and self.border_highlight_color or self.border_color or foreground)
+				end
 			end
 		end
 	end

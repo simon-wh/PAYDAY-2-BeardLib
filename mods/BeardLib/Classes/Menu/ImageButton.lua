@@ -27,7 +27,11 @@ end
 function ImageButton:DoHighlight(highlight)
     ImageButton.super.DoHighlight(self, highlight)
     if self.highlight_image and self.img then
-        play_color(self.img, self:GetForeground(highlight))
+        if self.animate_colors then
+            play_color(self.img, self:GetForeground(highlight))
+        else
+            self.img:set_color(self:GetForeground(highlight))            
+        end
     end
 end
 

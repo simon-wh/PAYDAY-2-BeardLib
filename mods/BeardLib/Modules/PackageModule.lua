@@ -9,7 +9,7 @@ function PackageModule:init(core_mod, config)
         return false
     end
     self._id = self._config.id:id()
-    local directory = BeardLib.Utils.Path:Combine(self._mod.ModPath, self._config.directory)
+    local directory = self._config.full_directory or BeardLib.Utils.Path:Combine(self._mod.ModPath, self._config.directory)
     if not CustomPackageManager:RegisterPackage(self._config.id, directory, self._config) then
         --self:log("[ERROR] Package with key '%s' already exists!", self._config.name)
         return false

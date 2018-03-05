@@ -104,7 +104,11 @@ function ComboBox:DoHighlight(highlight)
     ComboBox.super.DoHighlight(self, highlight)
     self._textbox:DoHighlight(highlight)
     if self.icon then
-        play_color(self.icon, self:GetForeground(highlight))
+        if self.animate_colors then
+            play_color(self.icon, self:GetForeground(highlight))
+        else
+            self.icon:set_color(self:GetForeground(highlight))
+        end
     end
 end
 

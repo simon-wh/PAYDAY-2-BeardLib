@@ -127,9 +127,15 @@ function Slider:DoHighlight(highlight)
     self._textbox:DoHighlight(highlight)
     local fgcolor = self:GetForeground(highlight)
     if self.sfg then
-        play_color(self.sfg, fgcolor)
-        play_color(self.sbg, fgcolor:with_alpha(0.25))
-        play_color(self.circle, fgcolor)
+        if self.animate_colors then
+            play_color(self.sfg, fgcolor)
+            play_color(self.sbg, fgcolor:with_alpha(0.25))
+            play_color(self.circle, fgcolor)
+        else
+            self.sfg:set_color(fgcolor)
+            self.sfg:set_color(fgcolor:with_alpha(0.25))
+            self.circle:set_color(fgcolor)
+        end
     end
 end
 

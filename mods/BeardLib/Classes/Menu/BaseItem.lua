@@ -49,7 +49,7 @@ function BaseItem:InitBasicItem()
 end
 
 function BaseItem:InitBGs()
-	self.bg = self.bg or self.panel:rect({
+	self.bg = self.panel:rect({
 		name = "background",
 		color = self.background_color,
 		visible = self.background_color ~= false,
@@ -216,7 +216,7 @@ function BaseItem:TryRendering()
 		self.panel:set_visible(visible)
 		self.should_render = visible
 		if self.debug then
-			BLT:log("Item %s has been set to rendering=%s", tostring(self), tostring(visible))
+			BeardLib:log("Item %s has been set to rendering=%s", tostring(self), tostring(visible))
 		end
 	end
 	return visible

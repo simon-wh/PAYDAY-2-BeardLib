@@ -74,9 +74,16 @@ function TextBoxBase:DoHighlight(highlight)
     local color = self:GetForeground(highlight)
     local caret = self.panel:child("caret")
     if caret then
-        play_color(caret, color:with_alpha(1))
-        play_color(self.panel:child("line"), self.line_color or color)
-        play_anim(self.panel:child("text"), {set = {color = color, selection_color = color:with_alpha(0.5)}})
+        if self.owner.animate_colors then
+            play_color(caret, color:with_alpha(1))
+            play_color(self.panel:child("line"), self.line_color or color)
+            play_anim(self.panel:child("text"), {set = {color = color, selection_color = color:with_alpha(0.5)}})
+        else
+            caret:set_color(color:with_alpha(1))
+            self.panel:child("line"):set_color(self.line_color or color)
+            self.panel:child("text"):set_color(color)
+            self.panel:child("text"):set_selection_color(color:with_alpha(0.5))    
+        end
     end
 end
 
@@ -287,8 +294,12 @@ function TextBoxBase:update_caret()
     self.caret_visible = self.cantype
 end
 
+function TextBoxBase:alive()
+    return alive(self.panel) and alive(self.panel:child("text"))
+end
+
 function TextBoxBase:MousePressed(button, x, y)
-    if not alive(self.panel) or not alive(self.panel:child("text")) then
+    if not self:alive() then
         return
     end
     local text = self.panel:child("text")
@@ -296,6 +307,9 @@ function TextBoxBase:MousePressed(button, x, y)
     self.cantype = text:inside(x,y) and button == Idstring(self.btn)
     if self.cantype then
         BeardLib:AddUpdater("CheckMouseOut"..tostring(self), function()
+            if not self:alive() then
+                BeardLib:RemoveUpdater("CheckMouseOut"..tostring(self))
+            end
             local x,y = managers.mouse_pointer:world_position()
             local cantype = self.cantype
             if x ~= self._old_x or y ~= self._old_y then

@@ -19,13 +19,13 @@ function C:RegisterPackage(id, directory, config)
         })) then
         return false
     end
-    id = id:key()
-    if self.custom_packages[id] then
+    local id_key = id:key()
+    if self.custom_packages[id_key] then
         BeardLib:log("[ERROR] Package with ID '%s' already exists! Returning...", id)
         return false
     end
 
-    self.custom_packages[id] = {dir = directory, config = config}
+    self.custom_packages[id_key] = {dir = directory, config = config, id = id}
 
     return true
 end
@@ -108,7 +108,6 @@ end
 
 
 function C:UnloadPackageConfig(config)
-    BeardLib:log("Unloading added files")
     for i, child in ipairs(config) do
         if type(child) == "table" then
             local typ = child._meta
