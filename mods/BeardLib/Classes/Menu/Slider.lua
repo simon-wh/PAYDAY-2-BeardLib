@@ -133,7 +133,7 @@ function Slider:DoHighlight(highlight)
             play_color(self.circle, fgcolor)
         else
             self.sfg:set_color(fgcolor)
-            self.sfg:set_color(fgcolor:with_alpha(0.25))
+            self.sbg:set_color(fgcolor:with_alpha(0.25))
             self.circle:set_color(fgcolor)
         end
     end
