@@ -149,3 +149,19 @@ end
 Hooks:PreHook(WorldDefinition, "_insert_instances", "BeardLibInsertCustomInstances", function(self)
     self:load_custom_instances()
 end)
+
+local add_trigger_sequence = WorldDefinition.add_trigger_sequence
+function WorldDefinition:add_trigger_sequence(unit, triggers, ...)
+	if not triggers then
+		return
+    end
+    
+    local fixed_triggers = {}
+    for _, trigger in pairs(triggers) do
+        if trigger.notify_unit_id then
+            table.insert(fixed_triggers, trigger)
+        end
+    end
+    
+    return add_trigger_sequence(self, unit, fixed_triggers, ...)
+end

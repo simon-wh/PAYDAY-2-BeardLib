@@ -80,10 +80,6 @@ function Menu:SetLayer(layer)
     Menu.super.SetLayer(self, layer)
 end
 
-function Menu:AdditionalHeight()
-    return self:title_alive() and self.title:h() or 0
-end
-
 function Menu:SetSize(w, h, no_recreate)
     self.orig_h = h
     self:_SetSize(w, h, no_recreate)
@@ -94,7 +90,7 @@ function Menu:_SetSize(w, h, no_recreate)
         return
     end
     w = w or self.w
-    h = self.closed and self:AdditionalHeight() or (h or self.orig_h or self.h)
+    h = self.closed and self:TextHeight() or (h or self.orig_h or self.h)
     h = math.clamp(h, self.min_height or 0, self.max_height or h)
     self.panel:set_size(w, h)
     self:SetScrollPanelSize()
@@ -111,7 +107,7 @@ function Menu:SetScrollPanelSize()
     if not self:alive() or not self._scroll:alive() then
         return
     end
-    self._scroll:set_size(self.panel:w(), self.panel:h() - self:AdditionalHeight())
+    self._scroll:set_size(self.panel:w(), self.panel:h() - self:TextHeight())
     self._scroll:panel():set_bottom(self:Height())
 end
 
@@ -272,7 +268,7 @@ function Menu:AlignItemsGrid()
             end
         end
     end    
-    max_h = max_h + self:AdditionalHeight() + (self.last_y_offset or (prev_item and prev_item:Offset()[2] or 0))
+    max_h = max_h + self:TextHeight() + (self.last_y_offset or (prev_item and prev_item:Offset()[2] or 0))
     if self.auto_height and self.h ~= max_h then
         self:_SetSize(nil, max_h, true)
     end
@@ -321,7 +317,7 @@ function Menu:AlignItemsNormal()
             end
         end
     end
-    max_h = max_h + self:AdditionalHeight() + (self.last_y_offset or (prev_item and prev_item:Offset()[2] or 0))
+    max_h = max_h + self:TextHeight() + (self.last_y_offset or (prev_item and prev_item:Offset()[2] or 0))
     if self.auto_height and self.h ~= max_h then
         self:_SetSize(nil, max_h, true)
     end
@@ -487,6 +483,10 @@ function Menu:ItemsWidth() return self.items_panel:w() end
 function Menu:ItemsHeight() return self.items_panel:h() end
 function Menu:ItemsPanel() return self.items_panel end
 
+function Menu:Create(type, ...)
+    return self[type](self, ...)
+end
+
 function Menu:ImageButton(params)
     local w = params.w or not params.icon_h and params.items_size
     local h = params.h or params.icon_h or params.items_size
@@ -512,6 +512,10 @@ function Menu:NumberBox(params)
     _params.type_name = "NumberBox"
     _params.filter = "number"
     return self:NewItem(BeardLib.Items.TextBox:new(_params))
+end
+
+function Menu:Text(text, params)
+    return self:Divider({text = text}, params)
 end
 
 function Menu:Divider(params)

@@ -54,6 +54,15 @@ elseif F == "blackmarketmanager" then
             return 0
         end
     end
+
+    local orig_string_mask = BlackMarketManager._outfit_string_mask
+    function BlackMarketManager:_outfit_string_mask(...)
+        if not managers.blackmarket:equipped_mask() then
+            BeardLib:log("[Fixes][Warning] Mask is null, returning default.")		
+            return "character_locked"
+        end
+        return orig_string_mask(self, ...)
+    end
 elseif F == "crewmanagementgui" then
     local orig = CrewManagementGui.populate_primaries
     --Blocks out custom weapons that are don't have support for AI.

@@ -45,7 +45,11 @@ function TextBoxBase:init(parent, params)
 		font = parent.font or "fonts/font_medium_mf",
 		font_size = self.items_size
     })
-    self.text:set_selection(self.text:text():len())
+    if self.owner.text_offset then
+        self.text:set_y(self.owner.text_offset[2])
+    end
+    local len = self.text:text():len()
+    self.text:set_selection(len, len)
     local caret = self.panel:rect({
         name = "caret",
         w = 2,
@@ -54,11 +58,17 @@ function TextBoxBase:init(parent, params)
         h = self.text:font_size() - (line:h() * 2),
         layer = 3,
     })
+    
+    self.focus_mode = params.focus_mode
+    if self.focus_mode and not self.owner.menu:Typing() and params.auto_focus then
+        self:set_active(true)
+    end
+
 	self.lines = params.lines
 	self.btn = params.btn or "0"
     self.history = {params.value and self.text:text()}
  	self.text:enter_text(callback(self, TextBoxBase, "enter_text"))
- 	self.update_text = params.update_text or ClassClbk(self.owner, "TextBoxSetValue")
+    self.update_text = params.update_text or ClassClbk(self.owner, "TextBoxSetValue")
 end
 
 function TextBoxBase:PostInit()
@@ -118,7 +128,7 @@ end
 
 function TextBoxBase:key_hold(text, k)
     local first
-    while self.cantype and self.menu._key_pressed == k and (self.menu._highlighted == self.owner or self.menu._openlist == self.owner) do
+    while self.cantype and self.menu._key_pressed == k and self.menu.active_textbox == self do
         local s, e = text:selection()
         local n = utf8.len(text:text())
         if ctrl() then
@@ -156,7 +166,7 @@ function TextBoxBase:key_hold(text, k)
                     end
                     text:replace_text("")
                     self:add_history_point(text:text())
-                    if (text:text() ~= "" and self:fixed_text(text:text()) == text:text()) then
+                    if self:fixed_text(text:text()) == text:text() then
                         self.update_text(text:text(), true, false, true)
                     end
                 end
@@ -229,7 +239,7 @@ function TextBoxBase:enter_text(text, s)
             return
         end
     end
-    if (self.menu._highlighted == self.owner or self.menu._openlist == self.owner) and self.cantype and not ctrl() then
+    if self.menu.active_textbox == self and self.cantype and not ctrl() then
         text:replace_text(s)       
         self:add_history_point(number and (tonumber(text:text()) or self:one_point_back()) or text:text())
         self:update_caret()
@@ -239,18 +249,38 @@ function TextBoxBase:enter_text(text, s)
     end
 end
 
+function TextBoxBase:set_active(active)
+    local cantype = self.cantype
+    self.cantype = active
+
+    local text = self:alive() and self.panel:child("text") or nil
+
+    if self.cantype then
+        self.menu.active_textbox = self
+    else
+        if self.menu.active_textbox == self then
+            self.menu.active_textbox = nil
+        end
+        if text and cantype then
+            self:CheckText(text)
+        end
+    end
+    self:update_caret()
+end
+
 function TextBoxBase:KeyPressed(o, k)
     if not alive(self.panel) then
         return
     end
+    
 	local text = self.panel:child("text")
 
- 	if k == Idstring("enter") or k == Idstring("esc") then
- 		self.cantype = false
+    if k == Idstring("enter") or k == Idstring("esc") then
+        self:set_active(false)
         text:stop()
  		self:CheckText(text)
  	end
-     if self.cantype then
+    if self.cantype then
         text:stop()
         text:animate(callback(self, self, "key_hold"), k)
         return true
@@ -260,20 +290,25 @@ end
 
 function TextBoxBase:update_caret()
     if not self.owner:alive() or not alive(self.panel) then
-        self.cantype = false
         return
     end
     local text = self.panel:child("text")
     local lines = math.max(1, text:number_of_lines())
     local _,_,_,h = text:text_rect()
     h = math.max(h, text:font_size())
+    if self.owner.text_offset then
+        h = h + self.owner.text_offset[2]
+    end
     local old_h = self.panel:h()
     if not self.lines or (self.lines > 1 and self.lines <= lines) then
         self.panel:set_h(h)
         self.panel:parent():set_h(h)
         text:set_h(h)
-        self.panel:child("line"):set_bottom(h)
         self.owner:_SetText(self.owner.text)
+        if not self.owner.SetScrollPanelSize then
+            self.panel:set_h(self.panel:parent():h())
+        end
+        self.panel:child("line"):set_bottom(self.panel:h())
     end
     if self.parent and old_h ~= self.panel:h() then
         self.parent:AlignItems()
@@ -291,54 +326,50 @@ function TextBoxBase:update_caret()
     caret:set_world_position(x, y + 1)
     caret:set_visible(self.cantype)
     caret:set_color(text:color():with_alpha(1))
-    self.caret_visible = self.cantype
 end
 
 function TextBoxBase:alive()
     return alive(self.panel) and alive(self.panel:child("text"))
 end
 
+local scroll_up = Idstring("mouse wheel up")
+local scroll_down = Idstring("mouse wheel down")
+
 function TextBoxBase:MousePressed(button, x, y)
     if not self:alive() then
-        return
+        return false
     end
+    
     local text = self.panel:child("text")
-    local cantype = self.cantype
-    self.cantype = text:inside(x,y) and button == Idstring(self.btn)
-    if self.cantype then
-        BeardLib:AddUpdater("CheckMouseOut"..tostring(self), function()
-            if not self:alive() then
-                BeardLib:RemoveUpdater("CheckMouseOut"..tostring(self))
-            end
-            local x,y = managers.mouse_pointer:world_position()
-            local cantype = self.cantype
-            if x ~= self._old_x or y ~= self._old_y then
-                self.cantype = self.panel:inside(x,y) and self.cantype or false
-            end
-            if cantype and not self.cantype then
-                self:CheckText(text)
-            end
-            self:update_caret()
-            if not self.cantype then
-                BeardLib:RemoveUpdater("CheckMouseOut"..tostring(self))
-            end
-            self._old_x = x
-            self._old_y = y
-        end, true)
+    local active = text:inside(x,y) and button == Idstring(self.btn)
+
+    self:set_active(active)
+
+    if active then
         local i = text:point_to_index(x, y)
         self._start_select = i
         self._select_neg = nil
         text:set_selection(i, i)
         self:update_caret()
-        return true
-    elseif cantype == true and self.cantype == false then
-        self.update_text(text:text(), false, true, true)
-        return true
     end
+
+    return self.cantype
 end
 
 function TextBoxBase:MouseMoved(x, y)
+    if not self:alive() then
+        return false
+    end
+
     local text = self.panel:child("text")
+    if self.cantype then
+        local x,y = managers.mouse_pointer:world_position()
+        if x ~= self._old_x or y ~= self._old_y then
+            local active = self.menu.active_textbox
+            self:set_active((self.focus_mode and (not active or active == self)) or self.panel:inside(x,y))
+        end
+        self:update_caret()
+    end
     if self._start_select then
         local i = text:point_to_index(x, y)
         local s, e = text:selection()
@@ -351,7 +382,11 @@ function TextBoxBase:MouseMoved(x, y)
         else
             text:set_selection(self._start_select, i + 1)
         end
+        self:update_caret()
     end
+    self._old_x = x
+    self._old_y = y
+    return self.cantype
 end
 
 function TextBoxBase:MouseReleased(button, x, y)

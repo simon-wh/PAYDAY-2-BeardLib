@@ -154,10 +154,15 @@ function MenuDialog:hide(yes, menu, item)
     self._no_callback = nil
     self._params = nil
     if type(clbk) == "function" then
-        self:run_callback(clbk)
+        self:run_callback(clbk, yes)
     end
     self._tbl = {}
     return true
+end
+
+function MenuDialog:on_escape()
+    self:hide()
+    managers.menu:post_event("prompt_exit")
 end
 
 function QuickDialog(opt, items)

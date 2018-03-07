@@ -26,12 +26,8 @@ function BaseItem:PostInit()
 end
 
 function BaseItem:InitBasicItem()
-	local offset = math.max(self.border_left and self.border_width or 0, self.text_offset)
 	self.title = self.panel:text({
 		name = "title",
-		x = offset,
-		w = self.panel:w() - offset,
-		h = 0,
 		align = self.text_align,
 		vertical = self.text_vertical,
 		wrap = not self.size_by_text,
@@ -54,9 +50,9 @@ function BaseItem:InitBGs()
 		color = self.background_color,
 		visible = self.background_color ~= false,
 		alpha = self.highlight and 0 or 1,
-		h = self.items_size,
-		halign = "grow",
-		valign = "grow",
+		h = self.type_name == "Group" and self.items_size,
+		halign = self.type_name ~= "Group" and "grow",
+		valign = self.type_name ~= "Group" and "grow",
 		layer = 0
 	})
 	self.highlight_bg = self.panel:rect({
@@ -116,7 +112,6 @@ function BaseItem:WorkParams(params)
 	self:WorkParam("size_by_text")
 	self:WorkParam("control_slice", 0.5)
 	self:WorkParam("font", tweak_data.menu.pd2_large_font or tweak_data.menu.default_font)
-	self:WorkParam("text_offset", 4)
 	self:WorkParam("border_size", 2)
 	self:WorkParam("last_y_offset")
 	self:WorkParam("accent_color")
@@ -127,7 +122,14 @@ function BaseItem:WorkParams(params)
 	self:WorkParam("ignore_align", self.override_panel)
 	self.name = NotNil(self.name, self.text, "")
 	self.text = NotNil(self.text, self.text ~= false and self.name)
+	
+	self.text_offset = self.text_offset and self:ConvertOffset(self.text_offset, true) or self:ConvertOffset(self.inherit.text_offset, true) or {4, 2}
 	self.offset = self.offset and self:ConvertOffset(self.offset) or self:ConvertOffset(self.inherit.offset)
+	self.text_offset[1] = self.text_offset_x or self.text_offset[1]
+	self.text_offset[2] = self.text_offset_y or self.text_offset[2]
+	self.offset[1] = self.offset_x or self.offset[1]
+	self.offset[2] = self.offset_y or self.offset[2]
+
 	if not self.initialized and self.parent ~= self.menu then
 		if (not self.w or self.parent.align_method ~= "grid")  then
 			self.w = (self.w or self.parent_panel:w()) - ((self.size_by_text or self.type_name == "ImageButton") and 0 or self.offset[1] * 2)
@@ -175,7 +177,7 @@ function BaseItem:MakeBorder()
 	local right = self.panel:bitmap(opt)
 
 	local vis = self.border_visible
-	local w,h = self.border_size, self.border_lock_height and self.items_size or self.panel:h()
+	local w,h = self.border_size, self.border_lock_height and self:TextHeight() or self.panel:h()
     bottom:set_size(self.border_width or self.panel:w(), w)
     right:set_size(w, self.border_height or h)
     top:set_size(self.border_width or self.panel:w(), w)
@@ -258,7 +260,13 @@ function BaseItem:Text() return type(self.text) == "string" and self.text or "" 
 function BaseItem:Height() return self:Panel():h() end
 function BaseItem:OuterHeight() return self:Height() + self:Offset()[2] end
 function BaseItem:Width() return self:Panel():w() end
+function BaseItem:OuterWidth() return self:Width() + self:Offset()[1]  end
 function BaseItem:Offset() return self.offset end
+function BaseItem:OffsetX() return self.offset[1] end
+function BaseItem:OffsetY() return self.offset[2] end
+function BaseItem:TextOffset() return self.text_offset end
+function BaseItem:TextOffsetX() return self.text_offset[1] end
+function BaseItem:TextOffsetY() return self.text_offset[2] end
 function BaseItem:alive() return alive(self.panel) end
 function BaseItem:title_alive() return type_name(self.title) == "Text" and alive(self.title) end
 function BaseItem:Value() return self.value end
@@ -266,12 +274,15 @@ function BaseItem:Enabled() return self.enabled end
 function BaseItem:Index() return self.parent:GetIndex(self.name) end
 function BaseItem:MouseInside(x, y) return self.panel:inside(x,y) end
 function BaseItem:Visible() return self:alive() and self.visible and self.should_render end
+function BaseItem:TextHeight() return self:title_alive() and self.title:bottom() + self:TextOffsetY() or 0 end
 function BaseItem:MouseFocused(x, y)
     if not x and not y then
         x,y = managers.mouse_pointer._mouse:world_position()
     end
     return self:alive() and self.panel:inside(x,y) and self:Visible()
 end
+
+
 
 --Add/Set Funcs--
 function BaseItem:AddItem(item) table.insert(self._adopted_items, item) end
@@ -281,14 +292,14 @@ function BaseItem:SetParam(k,v) self[k] = v end
 function BaseItem:SetEnabled(enabled) self.enabled = enabled == true end
 function BaseItem:WorkParam(param, ...) self[param] = NotNil(self[param], self.private[param], not self.inherit.private[param] and self.inherit[param], ...) end
 
-function BaseItem:ConvertOffset(offset)
+function BaseItem:ConvertOffset(offset, no_default)
     if offset then
         if type(offset) == "number" then
             return {offset, offset}
         else
             return offset
         end
-    else
+    elseif not no_default then
         return {6,2}
     end
 end

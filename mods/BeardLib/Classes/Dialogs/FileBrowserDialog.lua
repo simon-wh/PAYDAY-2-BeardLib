@@ -43,7 +43,7 @@ function FileBrowserDialog:init(params, menu)
     }))
     FileBrowserDialog.super.init(self, table.merge(params, {
         w = 900,
-        h = self._files_menu.items_size + 4,
+        h = self._files_menu.items_size + 8,
         auto_height = false,
         position = function(item)
             item:Panel():set_leftbottom(self._folders_menu:Panel():left(), self._folders_menu:Panel():top() - 1)
@@ -73,7 +73,7 @@ function FileBrowserDialog:init(params, menu)
     })    
     self._menu:TextBox({
         name = "CurrentPath",
-        text = false,
+        text = " ",
         w = 540,
         control_slice = 1,
         forbidden_chars = {':','*','?','"','<','>','|'},

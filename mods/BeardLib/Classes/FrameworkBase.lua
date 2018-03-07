@@ -1,6 +1,7 @@
 FrameworkBase = FrameworkBase or class()
 FrameworkBase._directory = ""
 FrameworkBase._ignore_folders = {}
+FrameworkBase._ignored_configs = {}
 FrameworkBase.auto_init_modules = true
 FrameworkBase.main_file_name = "main.xml"
 FrameworkBase._mod_core = ModCore
@@ -44,8 +45,9 @@ function FrameworkBase:Load()
                     if not self._loaded_mods[dir] then
                         self:LoadMod(dir, p, main_file)
                     end
-                elseif not self._ignore_detection_errors then
-                    BeardLib:log("[ERROR] Could not read %s", main_file)
+                elseif not self._ignore_detection_errors and not self._ignored_configs[main_file] then
+                    BeardLib:log("[Warning] Could not read %s", main_file)
+                    self._ignored_configs[main_file] = true
                 end
             end
         end

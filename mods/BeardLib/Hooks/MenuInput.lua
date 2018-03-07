@@ -12,24 +12,22 @@ function MenuInput:back(...)
 end
 
 local mm = MenuInput.mouse_moved
-function MenuInput:mouse_moved(...)
+function MenuInput:MenuUINotActive(...)
     local mc = managers.mouse_pointer._mouse_callbacks
     local last = mc[#mc]
-    if not last or type_name(last.parent) ~= "MenuUI" or last.parent.allow_full_input then
-        if not self:BeardLibMouseMoved(...) then
-            return mm(self, ...)
-        end
+    return not last or type_name(last.parent) ~= "MenuUI" or last.parent.allow_full_input
+end
+
+function MenuInput:mouse_moved(...)
+    if self:MenuUINotActive() then
+        return mm(self, ...)
     end
 end
 
 local mp = MenuInput.mouse_pressed
 function MenuInput:mouse_pressed(...)
-    local mc = managers.mouse_pointer._mouse_callbacks
-    local last = mc[#mc]
-    if not last or type_name(last.parent) ~= "MenuUI" or last.parent.allow_full_input then
-        if not self:BeardLibMousePressed(...) then
-            return mp(self, ...)
-        end
+    if self:MenuUINotActive() then
+        return mp(self, ...)
     end
 end
 
@@ -118,4 +116,18 @@ function MenuInput:input_color_item(item, controller, mouse_click)
         self._logic:trigger_item(true, item)
         self:select_node()
 	end
+end
+
+local up = MenuInput.update
+function MenuInput:update(...)
+    self:any_keyboard_used()
+    if self._accept_input then
+        if self._controller then
+            if self:MenuUINotActive() then
+                up(self, ...)
+            end
+        end
+    else
+        up(self, ...)
+    end
 end

@@ -33,7 +33,7 @@ function KeyBindItem:SetKeybindKey()
     self.keybind_key:set_text(string.upper(self.value or "None"))
     local _,_,w,h = self.keybind_key:text_rect()
     self.keybind_key:set_size(w,h)
-    self.keybind_key:set_right(self.panel:w() - self.text_offset)
+    self.keybind_key:set_right(self.panel:w() - self.text_offset[1])
 end
 
 function KeyBindItem:SetCanEdit(CanEdit)

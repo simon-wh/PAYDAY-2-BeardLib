@@ -108,18 +108,8 @@ function Slider:SetValueByPercentage(percent)
     self:SetValue(self.min + (self.max - self.min) * percent, true, true)
 end
 
-function Slider:MouseMoved(x, y)
-    Slider.super.MouseMoved(self, x, y)
-    self._textbox:MouseMoved(x, y)
-end
-
 function Slider:MouseReleased(button, x, y)
     self._textbox:MouseReleased(button, x, y)
-end
-
-function Slider:KeyPressed(o, k)
-    Slider.super.KeyPressed(self, o, k)
-    self._textbox:KeyPressed(o, k)
 end
 
 function Slider:DoHighlight(highlight)

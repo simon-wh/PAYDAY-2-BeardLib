@@ -1117,3 +1117,19 @@ function BeardLib.Utils:SetupXAudio()
         blt.xaudio.setup()
     end
 end
+
+function prnt(...)
+    local s = ""
+    for _, v in pairs({...}) do
+        s = s .. "  " .. tostring(v)
+    end
+    log(s)
+end
+
+function prntf(s, ...)
+    local strs = {}
+    for _, v in pairs({...}) do
+        table.insert(strs, tostring(v))
+    end
+    log(string.format(s, unpack(strs)))
+end

@@ -98,22 +98,29 @@ function Item:_SetText(text)
     if self:alive() and self:title_alive() then
         self.text = text
         self.title:set_text(self.localized and text and managers.localization:text(text) or text)
-        local lines = math.max(1, self.title:number_of_lines()) 
-        local offset = math.max(self.border_left and self.border_width or 0, self.text_offset)
-        self.title:set_shape(offset, 0, self.panel:w() - (offset * 2), self.panel:h())
+        local offset_x = math.max(self.border_left and self.border_width or 0, self.text_offset[1])
+		local offset_y = math.max(self.border_top and self.border_size or 0, self.text_offset[2])
+		local offset_w = offset_x * 2
+		local offset_h = offset_y * 2
+
+		local lines = math.max(1, self.title:number_of_lines())
+		
+		self.title:set_shape(offset_x, offset_y, self.panel:w() - offset_w, math.max(self.title:line_height(), self.panel:h() - offset_h))
         local _,_,w,h = self.title:text_rect()
-        self.title:set_h(h)
+        self.title:set_h(math.clamp(h, self.min_height and self.min_height - offset_h or h, self.max_height and self.max_height - offset_h or h))
         if self.size_by_text then
-        	local w = w + (offset * 2) + (self.type_name == "Toggle" and self.items_size or 0)
-            self.panel:set_size(math.clamp(w, self.min_width or 0, self.max_width or w), math.clamp(h, self.min_height or 0, self.max_height or h))
+			local new_w = w + offset_w + (self.type_name == "Toggle" and self.items_size or 0)
+			local new_h = self.title:bottom() + offset_y
+            self.panel:set_size(math.clamp(new_w, self.min_width or 0, self.max_width or new_w), math.clamp(new_h, self.min_height or 0, self.max_height or new_h))
             self.w, self.h = self.panel:size()
-            self.title:set_shape(offset, 0, self.w - (offset * 2), self.h)
-        end
+            self.title:set_w(math.clamp(w, self.min_width and self.min_width - offset_w or w, self.max_width and self.max_width - offset_w or w))
+		end
 		if self.SetScrollPanelSize then
             self:SetScrollPanelSize()
-        elseif not self.size_by_text then
-            self.panel:set_h(math.max(self.items_size * lines, self.items_size, self._textbox and alive(self._textbox.panel) and self._textbox.panel:h() or 0))
-        end
+		elseif not self.size_by_text and not self.h then
+			local new_h = math.max(self.title:bottom() + offset_y, self.items_size, self._textbox and alive(self._textbox.panel) and self._textbox.panel:h() or 0)
+            self.panel:set_h(math.clamp(new_h, self.min_height or 0, self.max_height or new_h))
+		end
         return true
     end
     return false
@@ -209,7 +216,7 @@ function Item:MouseMoved(x, y)
         if self:MouseInside(x,y) then
             self:Highlight()
             return true
-        elseif not self.parent.always_highlight then
+        elseif not self.parent.always_highlighting then
             self:UnHighlight()
             return false
         end

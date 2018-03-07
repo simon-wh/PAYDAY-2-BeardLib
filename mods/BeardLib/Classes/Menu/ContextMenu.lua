@@ -78,9 +78,9 @@ function ContextMenu:CreateItems()
         panel:text({
             name = "text",
             text = self.owner.localized_items and managers.localization:text(tostring(text)) or tostring(text),
-            w = panel:w() - (self.owner.text_offset * 2),
+            w = panel:w() - (self.owner.text_offset[1] * 2),
             h = panel:h(),
-            x = self.owner.text_offset,
+            x = self.owner.text_offset[1],
             vertical = "center",
             layer = 1,
             color = color,

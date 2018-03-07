@@ -12,8 +12,8 @@ function Group:InitBasicItem()
     if not self.divider_type then
 	    self.toggle = self.panel:bitmap({
 	        name = "toggle",
-	        w = self.parent.items_size - 4,
-	        h = self.parent.items_size - 4,
+	        w = self.title:h() - 4,
+	        h = self.title:h() - 4,
 	        texture = "guis/textures/menu_ui_icons",
 	        color = self:GetForeground(highlight),
 	        y = 2,
@@ -27,8 +27,15 @@ end
 function Group:RePositionToggle()
     if self:title_alive() then
         local _,_,w,_ = self.title:text_rect()
-        if self.toggle and alive(self.toggle) then
-            self.toggle:set_left(w + 4)
+        if alive(self.toggle) then
+            local s = self.title:h() - 4
+            self.toggle:set_size(s, s)
+            self.toggle:set_x(w + 4)
+            self.toggle:set_center_y(self.title:center_y())
+        end
+        if alive(self.bg) and alive(self.highlight_bg) then
+            self.bg:set_h(self:TextHeight())
+            self.highlight_bg:set_h(self:TextHeight())
         end
     end
 end
@@ -45,7 +52,7 @@ function Group:ToggleGroup()
         self.closed = false
     else
         self.closed = true
-        self.panel:set_h(self.parent.items_size)
+        self.panel:set_h(self:TextHeight())
     end
     for i, item in pairs(self._my_items) do
         if item:ParentPanel() == self:ItemsPanel() then

@@ -36,6 +36,8 @@ function InputDialog:_Show(params)
         text = "",
         offset = 0,
         highlight_color = false,
+        focus_mode = true,
+        auto_focus = true,
         reachable = true,
         line_color = Color.transparent,
         control_slice = 1,

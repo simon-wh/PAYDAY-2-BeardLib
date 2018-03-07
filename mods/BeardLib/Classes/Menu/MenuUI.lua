@@ -235,9 +235,6 @@ function MenuUI:Update()
     if self._showing_help and (not alive(self._showing_help) or not self._showing_help:MouseInside(x, y)) then
         self:HideHelp()
     end
-    if self._highlighted and not self:IsMouseActive() then
-        self._highlighted:UnHighlight()
-    end
 end
 
 function MenuUI:KeyReleased(o, k)
@@ -261,6 +258,9 @@ end
 function MenuUI:KeyPressed(o, k)
     if self.always_key_press then self.always_key_press(o, k) end
     self._key_pressed = k
+    if self.active_textbox then
+        self.active_textbox:KeyPressed(o, k)
+    end
     if self._openlist then
         self._openlist:KeyPressed(o, k)
     end
@@ -290,7 +290,7 @@ function MenuUI:SetParam(param, value)
 end
 
 function MenuUI:MouseReleased(o, button, x, y)
-	self._slider_hold = nil    
+	self._slider_hold = nil
     for _, menu in pairs(self._menus) do
         if menu:MouseReleased(button, x, y) then
             return
@@ -311,8 +311,18 @@ function MenuUI:MouseDoubleClick(o, button, x, y)
     if self.mouse_double_click then self.mouse_double_click(button, x, y) end
 end
 
+local scroll_up = Idstring("mouse wheel up")
+local scroll_down = Idstring("mouse wheel down")
+
 function MenuUI:MousePressed(o, button, x, y)
     self:HideHelp()
+    if self.active_textbox and button ~= scroll_down and button ~= scroll_up then
+        if self.active_textbox:MousePressed(button, x, y) then
+            return
+        elseif  self.active_textbox then
+            self.active_textbox:set_active(false)
+        end
+    end
     if self.always_mouse_press then self.always_mouse_press(button, x, y) end
     if self._openlist then
         if self._openlist.parent:Enabled() then
@@ -348,6 +358,13 @@ end
 
 function MenuUI:MouseMoved(o, x, y)
     if self.always_mouse_move then self.always_mouse_move(x, y) end
+
+    if self.active_textbox and not self.active_textbox:MouseMoved(x, y) then
+        if self.active_textbox then
+            self.active_textbox:set_active(false)
+        end
+    end
+
     if self._openlist then
         if self._openlist.parent:Enabled() then
             if self._openlist:MouseMoved(x, y) then
@@ -413,6 +430,9 @@ function MenuUI:GetItemByLabel(label, shallow)
 end
 
 function MenuUI:Focused()
+    if self:Typing() then
+        return true
+    end
 	for _, menu in pairs(self._menus) do
 		if menu:Visible() then
             return self._highlighted
@@ -422,7 +442,7 @@ function MenuUI:Focused()
 end
 
 function MenuUI:Typing()
-    return self._highlighted and self._highlighted._textbox and self._highlighted._textbox.cantype
+    return alive(self.active_textbox) and self.active_textbox.cantype
 end
 
 --Deprecated Functions--

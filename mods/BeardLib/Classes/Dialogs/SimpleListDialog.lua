@@ -7,7 +7,7 @@ function SimpleListDialog:init(params, menu)
 
     params.w = 400
     params.h = 500
-    params.main_h = 40
+    params.items_size = 24
     
     SimpleListDialog.super.init(self, params, menu)
 end
@@ -29,7 +29,8 @@ function SimpleListDialog:_Show(params)
     self._case_sensitive = NotNil(params.case_sensitive, false)
     self._limit = NotNil(params.limit, true)
     self._list = params.list
-    local bs = self._menu.h + 4
+    local s = self._menu.items_size
+    local bs = s + self._menu:OffsetX()
     local tw = self._menu.w - (bs * 2)
     
     self._menu:TextBox({
@@ -43,10 +44,9 @@ function SimpleListDialog:_Show(params)
 
     local close = self._menu:ImageButton({
         name = "Close",
-        w = bs,
-        h = self._menu.h,
-        icon_w = 14,
-        icon_h = 14,
+        w = s,
+        h = s,
+        img_offset = 4,
         position = "CenterRight",
         texture = "guis/textures/menu_ui_icons",
         texture_rect = {84, 89, 36, 36},
@@ -56,10 +56,9 @@ function SimpleListDialog:_Show(params)
 
     self._menu:ImageButton({
         name = "Apply",
-        w = bs,
-        h = self._menu.h,
-        icon_w = 14,
-        icon_h = 14,
+        w = s,
+        h = s,
+        img_offset = 4,
         position = function(item)
             item:Panel():set_righttop(close:Panel():position())
         end,

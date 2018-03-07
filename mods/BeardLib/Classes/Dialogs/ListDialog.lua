@@ -17,11 +17,16 @@ function ListDialog:init(params, menu)
         w = 900,
         items_size = 20,
         offset = 0,
-        auto_height = false,
         align_method = "grid",
+        position = function(item)
+            if alive(self._list_menu) then
+                item:Panel():set_leftbottom(self._list_menu:Panel():left(), self._list_menu:Panel():top() - 1)
+            end
+        end,
         auto_align = true
     }, params), menu)
 
+    params.position = nil
     params.h = h
 
     self._list_menu = menu:Menu(table.merge({
@@ -38,7 +43,6 @@ function ListDialog:init(params, menu)
     }, params))
     
     self._menus = {self._list_menu}
-    self._menu:Panel():set_leftbottom(self._list_menu:Panel():left(), self._list_menu:Panel():top() - 1)
 end
 
 function ListDialog:CreateShortcuts(params)
@@ -100,6 +104,8 @@ function ListDialog:_Show(params)
         name = "Search",
         w = self._menu:ItemsWidth() - close:Right() - offset[1],
         control_slice = 0.86,
+        focus_mode = true,
+        auto_focus = true,
         index = 1,
         text = "beardlib_search",
         localized = true,
@@ -179,6 +185,13 @@ function ListDialog:Search(menu, item)
         table.insert(self._filter, s)
     end
     self:MakeListItems()
+end
+
+function ListDialog:on_escape()
+    if self._no_callback then
+        self._no_callback()
+    end
+    ListDialog.super.on_escape(self)
 end
 
 function ListDialog:run_callback(clbk)

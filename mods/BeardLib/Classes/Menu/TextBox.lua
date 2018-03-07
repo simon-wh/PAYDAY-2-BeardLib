@@ -11,11 +11,14 @@ function TextBox:Init()
 	self._textbox = BeardLib.Items.TextBoxBase:new(self, {
         panel = self.panel,
         lines = self.lines,
-        align = self.textbox_align,
+		align = self.textbox_align,
+		focus_mode = self.focus_mode,
+		auto_focus = self.auto_focus,
         line_color = self.line_color or self.highlight_color,
         w = self.panel:w() * (self.text == nil and 1 or self.control_slice),
         value = self.value,
-    })
+	})
+	self.auto_focus = nil
     self.value = self.value or ""
     self._textbox:PostInit()
 end
@@ -38,7 +41,8 @@ function TextBox:TextBoxSetValue(value, run_callback, reset_selection)
 		text:set_text(value)
 	end
 	if reset_selection then
-		text:set_selection(text:text():len())
+		local len = text:text():len()
+		text:set_selection(len, len)
 	end
 	self._textbox:update_caret()	
 	TextBox.super.SetValue(self, value, run_callback)
@@ -73,18 +77,6 @@ end
 
 function TextBox:MouseReleased(button, x, y)
 	self._textbox:MouseReleased(button, x, y)
-end
-
-function TextBox:KeyPressed(o, k)
-	TextBox.super.KeyPressed(self, o, k)
-	self._textbox:KeyPressed(o, k)
-end
-
-function TextBox:MouseMoved(x, y)
-    if not TextBox.super.MouseMoved(self, x, y) then
-    	return 
-    end
-    self._textbox:MouseMoved(x, y)
 end
 
 function TextBox:DoHighlight(highlight)

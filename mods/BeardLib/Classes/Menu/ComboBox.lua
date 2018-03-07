@@ -39,7 +39,7 @@ function ComboBox:Init()
         layer = 2,
     })
     self.icon:set_right(combo_bg:right() - 2)
-    self.icon:set_center_y(self._textbox.panel:center_y() - 2)
+    self.icon:set_center_y(self._textbox.panel:center_y() - 1)
     self:UpdateValueText()
 end
 
