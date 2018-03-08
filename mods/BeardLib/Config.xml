@@ -68,6 +68,7 @@
 	<hooks>
 		<hook source="lib/units/beings/player/huskplayermovement" file="NetworkHooks.lua"/>
 	    <hook source="lib/units/beings/player/playerinventory" file="NetworkHooks.lua"/>
+	    <hook source="lib/units/weapons/newraycastweaponbase" file="NetworkHooks.lua"/>
 		
 	 	<hook source="lib/network/base/handlers/connectionnetworkhandler" file="Fixes.lua"/>
 		<hook source="core/lib/managers/menu/items/coremenuitemslider" file="Fixes.lua"/>

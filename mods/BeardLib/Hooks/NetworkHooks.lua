@@ -40,4 +40,10 @@ elseif F == "playerinventory" then
             end
         end
     end)
+elseif F == "newraycastweaponbase" then
+    --Gotta replace it all sadly.
+    function NewRaycastWeaponBase:blueprint_to_string()
+        local new_blueprint = BeardLib.Utils:GetCleanedBlueprint(self._blueprint, self._factory_id)
+        return managers.weapon_factory:blueprint_to_string(self._factory_id, new_blueprint)
+    end
 end

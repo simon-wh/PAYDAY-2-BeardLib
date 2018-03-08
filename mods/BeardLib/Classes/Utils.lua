@@ -419,11 +419,46 @@ function BeardLib.Utils:OutfitStringFromList(outfit, is_henchman)
     is_henchman = is_henchman and bm.henchman_loadout_string_from_loadout
     local str = is_henchman and bm:henchman_loadout_string_from_loadout(outfit) or bm:outfit_string_from_list(outfit)
      --Remove when overkill decides to add armor_skin to BlackMarketManager:outfit_string_from_list
+     --Still missing :)))
     return is_henchman and str or str:gsub(outfit.armor.."%-"..outfit.armor_current.."%-"..outfit.armor_current_state, outfit.armor.."-"..outfit.armor_current.."-"..outfit.armor_current_state.."-"..outfit.armor_skin)
+end
+
+function BeardLib.Utils:GetCleanedBlueprint(blueprint, factory_id)
+    local new_blueprint = {}
+    local factory = tweak_data.weapon.factory
+
+    for _, part_id in pairs(blueprint) do
+        local part = factory.parts[part_id]
+        if part then
+            if part.custom then
+                local fac = factory[factory_id]
+                --TODO: deal with mods that force add those parts if it becomes an issue
+                if fac and part.based_on then
+                    if table.contains(fac.uses_parts, part.based_on) then
+                        table.insert(new_blueprint, part.based_on)
+                    else --fuck lol, search for a default weapon part to replace it.
+                        local fac_part = factory.parts[part.based_on]
+                        for _, def_part in pairs(fac.default_blueprint) do
+                            local fac_def_part = factory.parts[def_part]
+                            if fac_def_part.type == fac_part.type then
+                                table.insert(new_blueprint, def_part)
+                                break
+                            end
+                        end
+                    end
+                end
+            else
+                table.insert(new_blueprint, part_id)
+            end
+        end    
+    end
+    
+    return new_blueprint
 end
 
 function BeardLib.Utils:CleanOutfitString(str, is_henchman)
     local bm = managers.blackmarket
+    local factory = tweak_data.weapon.factory
     if is_henchman and not bm.unpack_henchman_loadout_string then --thx ovk for the headaches henchman beta caused me <3
         is_henchman = false
     end
@@ -462,16 +497,16 @@ function BeardLib.Utils:CleanOutfitString(str, is_henchman)
                 list.primary = based_on
             else
                 list.primary.factory_id = based_on
-                list.primary.blueprint = tweak_data.weapon.factory[list.primary.factory_id].default_blueprint
+                list.primary.blueprint = factory[list.primary.factory_id].default_blueprint
             end
     	end
     end
 
 	if not is_henchman and list.secondary then
         local secondary = list.secondary.factory_id
-        if tweak_data.weapon.factory[secondary].custom then
+        if factory[secondary].custom then
     		list.secondary.factory_id = self:GetBasedOnFactoryId(secondary) or self.WeapConv[1]
-            list.secondary.blueprint = tweak_data.weapon.factory[list.secondary.factory_id].default_blueprint
+            list.secondary.blueprint = factory[list.secondary.factory_id].default_blueprint
     	end
 
         local melee = tweak_data.blackmarket.melee_weapons[list.melee_weapon]
@@ -484,17 +519,8 @@ function BeardLib.Utils:CleanOutfitString(str, is_henchman)
             list.melee_weapon = based_on or "weapon"
         end
 
-    	for _, weap in pairs({list.primary, list.secondary}) do
-            for i, part_id in pairs(weap.blueprint) do
-                local part = tweak_data.weapon.factory.parts[part_id]
-                if part and part.custom then
-                    if part.based_on then
-                        weap.blueprint[i] = part.based_on
-                    else
-                        table.remove(weap.blueprint, i)
-                    end
-    			end
-    		end
+        for _, weap in pairs({list.primary, list.secondary}) do
+            weap.blueprint = self:GetCleanedBlueprint(weap.blueprint, weap.factory_id)
     	end
     end
 	return self:OutfitStringFromList(list, is_henchman)

@@ -98,7 +98,11 @@ function MenuDialogManager:CloseLastDialog()
         return false
     end
     if dialog:should_close() then
-        dialog:on_escape()
+        if dialog.on_escape then
+            dialog:on_escape()
+        elseif dialog:hide() then
+            managers.menu:post_event("prompt_exit")
+        end
     end
     return true
 end

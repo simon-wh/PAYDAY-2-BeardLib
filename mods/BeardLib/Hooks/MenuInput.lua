@@ -19,14 +19,14 @@ function MenuInput:MenuUINotActive(...)
 end
 
 function MenuInput:mouse_moved(...)
-    if self:MenuUINotActive() then
+    if self:MenuUINotActive() and not self:BeardLibMouseMoved(...) then
         return mm(self, ...)
     end
 end
 
 local mp = MenuInput.mouse_pressed
 function MenuInput:mouse_pressed(...)
-    if self:MenuUINotActive() then
+    if self:MenuUINotActive() and not self:BeardLibMousePressed(...) then
         return mp(self, ...)
     end
 end
@@ -100,7 +100,6 @@ function MenuInput:ValueEnteredCallback(value)
         if self._current_item.set_value then
             self._current_item:set_value(value)
         end
-        managers.viewport:resolution_changed()
         self._current_item:trigger()
         self._current_item = nil
     end
