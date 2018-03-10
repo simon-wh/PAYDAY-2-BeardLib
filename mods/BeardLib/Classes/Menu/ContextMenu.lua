@@ -109,7 +109,9 @@ function ContextMenu:hide()
     if self:alive() then
         self.panel:hide()
     end
-    self.menu._openlist = nil
+    if self.menu._openlist == self then
+        self.menu._openlist = nil
+    end
 end
 
 function ContextMenu:reposition()
@@ -264,4 +266,11 @@ function ContextMenu:MouseReleased(button, x, y)
     end
     self._scroll:mouse_released(button, x, y)
     self:CheckItems()
+end
+
+function ContextMenu:Destroy()
+    if alive(self.panel) then
+        self.panel:parent():remove(self.panel)
+        self.panel = nil
+    end
 end

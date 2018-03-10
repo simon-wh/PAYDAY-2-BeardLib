@@ -451,9 +451,10 @@ function Menu:RemoveItem(item)
         table.delete(item.override_panel._adopted_items, item)
     end
 
-    if item.list then
-        item.list:parent():remove(item.list)
+    if item._list then
+        item._list:Destroy()
     end
+    
     table.delete(self._reachable_items, item)
     table.delete(self._my_items, item)
     table.delete(self._adopted_items, item)
