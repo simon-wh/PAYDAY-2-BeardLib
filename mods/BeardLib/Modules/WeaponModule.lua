@@ -125,11 +125,6 @@ function WeaponModule:RegisterHook()
         local data = table.merge({
             custom = true
         }, config)
-        data.override = nil
-
-        if config.override then
-            data = table.merge(data, config.override)
-        end
 
         w_self[config.id] = data
         w_self[config.id .. "_npc"] = table.merge(clone(data), {unit = config.unit .. "_npc"})
