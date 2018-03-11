@@ -34,12 +34,15 @@ if F == "weaponfactorymanager" then
         local tweak = tweak_data.weapon.factory
         for factory_id, data in pairs(tweak) do
             if factory_id ~= "parts" and type(data.uses_parts) == "table" then
-                for i, part_id in pairs(data.uses_parts) do
-                    if not tweak.parts[part_id] then
+                local new_uses_parts = {}
+                for _, part_id in pairs(data.uses_parts) do
+                    if tweak.parts[part_id] then
+                        table.insert(new_uses_parts, part_id)
+                    else
                         BeardLib:log("[Fixes][Warning] Weapon with the factory ID %s has the part %s defined but the part does not exist", tostring(factory_id), tostring(part_id))                        
-                        table.remove(data.uses_parts, i)
                     end
                 end
+                data.uses_parts = new_uses_parts
             end
         end
     end)
