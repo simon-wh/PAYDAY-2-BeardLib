@@ -4,48 +4,32 @@ WeaponModule.type_name = "Weapon"
 function WeaponModule:init(core_mod, config)
     self.required_params = {}
     self.clean_table = table.add(clone(self.clean_table), {
-        {
-            param = "weapon.kick",
-            action = "remove_metas"
-        },
-        {
-            param = "weapon.crosshair",
-            action = "remove_metas"
-        },
-        {
-            param = "weapon.stats",
-            action = "remove_metas"
-        },
-        {
-            param = "factory.default_blueprint",
-            action = "remove_metas"
-        },
-        {
-            param = "factory.uses_parts",
-            action = "remove_metas"
-        },
-        {
-            param = "factory.optional_types",
-            action = "remove_metas"
-        },
-        {
-            param = "factory.animations",
-            action = "remove_metas"
-        },
-        {
-            param = "factory.override",
-            action = {"remove_metas", "no_number_indexes"}
-        },
-        {
-            param = "factory.adds",
-            action = {"remove_metas", "no_number_indexes"}
-        }
+        {param = "weapon.kick", action = "remove_metas"},
+        {param = "weapon.crosshair", action = "remove_metas"},
+        {param = "weapon.stats", action = "remove_metas"},
+        {param = "factory.default_blueprint", action = "remove_metas"},
+        {param = "factory.uses_parts",  action = "remove_metas"},
+        {param = "factory.optional_types", action = "remove_metas"},
+        {param = "factory.animations", action = "remove_metas"},
+        {param = "factory.override", action = {"remove_metas", "no_number_indexes"}},
+        {param = "factory.adds", action = {"remove_metas", "no_number_indexes"}}
     })
     if not WeaponModule.super.init(self, core_mod, config) then
         return false
     end
 
     return true
+end
+
+local default_weap = "glock_17"
+function WeaponModule:GetBasedOn(w_self, based_on)
+    w_self = w_self or tweak_data.weapon
+    based_on = based_on or self._config.weapon.based_on
+    if based_on and w_self[based_on] then
+        return based_on
+    else
+        return default_weap
+    end
 end
 
 function WeaponModule:RegisterHook()
@@ -92,7 +76,7 @@ function WeaponModule:RegisterHook()
             minigun = aim_assist_minigun_default,
         }
 
-        local data = table.merge(deep_clone(config.based_on and (w_self[config.based_on] ~= nil and w_self[config.based_on]) or w_self.glock_17), table.merge({
+        local data = table.merge(deep_clone(w_self[self:GetBasedOn(w_self)]), table.merge({
             name_id = "bm_w_" .. config.id,
             desc_id = "bm_w_" .. config.id .. "_desc",
             description_id = "des_" .. config.id,
@@ -115,6 +99,38 @@ function WeaponModule:RegisterHook()
         w_self[config.id] = data
     end)
 
+    Hooks:PostHook(TweakDataVR , "init", self._config.weapon.id .. "AddVRWeaponTweakData", function(vrself)
+        local config = self._config.vr or {}
+        
+        local id = self._config.weapon.id
+        if config.locked then
+            vrself.locked.weapons[id] = true
+            return
+        end
+
+        local timelines = vrself.reload_timelines
+        local based_on = self:GetBasedOn(timelines, config.based_on) --If not present, use normal based on of weapon tweakdata.
+        timelines[id] = table.merge(deep_clone(timelines[based_on]), config.reload_timelines)
+        
+        local tweak_offsets = vrself.weapon_offsets
+        local tweak_weapon_assist = vrself.weapon_assist
+        local tweak_weapon_hidden = vrself.weapon_hidden
+        local tweak_custom_wall_check = vrself.custom_wall_check
+        local tweak_magazine_offsets = vrself.magazine_offsets
+
+        local offsets = tweak_offsets[based_on]
+        local weapon_assist = tweak_weapon_assist[based_on]
+        local weapon_hidden = tweak_weapon_hidden[based_on]
+        local custom_wall_check = custom_wall_check[based_on]
+        local magazine_offsets = magazine_offsets[based_on]
+
+        offsets[id] = offsets and table.merge(offsets, config.offsets) or config.offsets
+        weapon_assist[id] = weapon_assist and table.merge(weapon_assist, config.weapon_assist) or config.weapon_assist or nil
+        weapon_hidden[id] = weapon_hidden and table.merge(weapon_hidden, config.weapon_hidden) or config.weapon_hidden or nil
+        custom_wall_check[id] = custom_wall_check and table.merge(custom_wall_check, config.custom_wall_check) or config.custom_wall_check or nil
+        magazine_offsets[id] = magazine_offsets and table.merge(magazine_offsets, config.magazine_offsets) or config.magazine_offsets or nil
+    end)
+    
     Hooks:Add("BeardLibCreateCustomWeapons", self._config.factory.id .. "AddWeaponFactoryTweakData", function(w_self)
         local config = self._config.factory
         if w_self[config.id] then
@@ -145,7 +161,8 @@ function WeaponModule:RegisterHook()
 
     Hooks:PostHook(PlayerTweakData, "_init_new_stances", self._config.weapon.id .. "AddWeaponStancesData", function(p_self)
         local stance_data = self._config.stance or {}
-        p_self.stances[self._config.weapon.id] = table.merge(deep_clone(stance_data.based_on and (p_self.stances[stance_data.based_on] ~= nil and p_self.stances[stance_data.based_on]) or self._config.weapon.based_on and (p_self.stances[self._config.weapon.based_on] ~= nil and p_self.stances[self._config.weapon.based_on]) or p_self.stances.glock_17), stance_data)
+        local stances = p_self.stances
+        stances[self._config.weapon.id] = table.merge(deep_clone(stances[self:GetBasedOn(stances, stance_data.based_on)]), stance_data)
     end)
 end
 
