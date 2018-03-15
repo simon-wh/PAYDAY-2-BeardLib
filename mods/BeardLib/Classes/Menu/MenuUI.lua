@@ -56,6 +56,12 @@ function MenuUI:init(params)
 
     BeardLib:AddUpdater("MenuUIUpdate"..tostring(self), callback(self, self, "Update"), true)
     if self.create_items then self:create_items() end
+
+    --Deprecated values
+    self.pre_key_press = self.always_key_press
+    self.pre_key_release = self.always_key_released
+    self.pre_mouse_press = self.always_mouse_press
+    self.pre_mouse_move = self.always_mouse_move
 end
 
 function MenuUI:ReloadInterface(params, shallow)
@@ -165,6 +171,14 @@ function MenuUI:IsMouseActive()
     return mc[#mc] and mc[#mc].parent == self
 end
 
+function MenuUI:SetEnabled(enabled)
+    if enabled then
+        self:Enable()
+    else
+        self:Disable()
+    end
+end
+
 function MenuUI:Enable()
     if self:Enabled() then
         return
@@ -198,7 +212,7 @@ function MenuUI:Disable()
 	self._enabled = false
 	if self._highlighted then self._highlighted:UnHighlight() end
 	if self._openlist then self._openlist:hide() end
-	managers.mouse_pointer:remove_mouse(self._mouse_id)
+    call_on_next_update(ClassClbk(managers.mouse_pointer, "remove_mouse", self._mouse_id)) --Makes sure older menus don't get reactivated too soon
 end
 
 function MenuUI:RunToggleClbk()
@@ -238,7 +252,11 @@ function MenuUI:Update()
 end
 
 function MenuUI:KeyReleased(o, k)
-    if self.always_key_released then self.always_key_released(o, k) end
+    if self.pre_key_released then 
+        if self.pre_key_released(o, k) == false then
+            return
+        end
+    end
     self._scroll_hold = nil
     self._key_pressed = nil   
     if not self:Enabled() then
@@ -256,7 +274,11 @@ function MenuUI:MouseInside()
 end
 
 function MenuUI:KeyPressed(o, k)
-    if self.always_key_press then self.always_key_press(o, k) end
+    if self.pre_key_press then 
+        if self.pre_key_press(o, k) == false then
+            return
+        end
+    end
     self._key_pressed = k
     if self.active_textbox then
         self.active_textbox:KeyPressed(o, k)
@@ -290,6 +312,12 @@ function MenuUI:SetParam(param, value)
 end
 
 function MenuUI:MouseReleased(o, button, x, y)
+    if self.pre_mouse_release then 
+        if self.pre_mouse_release(button, x, y) == false then
+            return
+        end
+    end
+
 	self._slider_hold = nil
     for _, menu in pairs(self._menus) do
         if menu:MouseReleased(button, x, y) then
@@ -297,12 +325,16 @@ function MenuUI:MouseReleased(o, button, x, y)
         end
     end
     if self.mouse_release then
-        self.mouse_release(o, k)
+        self.mouse_release(button, x, y)
     end
 end
 
 function MenuUI:MouseDoubleClick(o, button, x, y)
-    if self.always_mouse_double_click then self.always_mouse_double_click(button, x, y) end
+    if self.pre_mouse_double_click then 
+        if self.pre_mouse_double_click(button, x, y) == false then
+            return
+        end
+    end
 	for _, menu in pairs(self._menus) do
 		if menu:MouseDoubleClick(button, x, y) then
             return
@@ -315,6 +347,12 @@ local scroll_up = Idstring("mouse wheel up")
 local scroll_down = Idstring("mouse wheel down")
 
 function MenuUI:MousePressed(o, button, x, y)
+    if self.pre_mouse_press then 
+        if self.pre_mouse_press(button, x, y) == false then
+            return
+        end
+    end
+
     self:HideHelp()
     if self.active_textbox and button ~= scroll_down and button ~= scroll_up then
         if self.active_textbox:MousePressed(button, x, y) then
@@ -323,7 +361,6 @@ function MenuUI:MousePressed(o, button, x, y)
             self.active_textbox:set_active(false)
         end
     end
-    if self.always_mouse_press then self.always_mouse_press(button, x, y) end
     if self._openlist then
         if self._openlist.parent:Enabled() then
             if self._openlist:MousePressed(button, x, y) then
@@ -357,7 +394,11 @@ function MenuUI:ShouldClose()
 end
 
 function MenuUI:MouseMoved(o, x, y)
-    if self.always_mouse_move then self.always_mouse_move(x, y) end
+    if self.pre_mouse_move then 
+        if self.pre_mouse_move(x, y) == false then
+            return
+        end
+    end
 
     if self.active_textbox and not self.active_textbox:MouseMoved(x, y) then
         if self.active_textbox then
@@ -445,16 +486,6 @@ function MenuUI:Typing()
     return alive(self.active_textbox) and self.active_textbox.cantype
 end
 
---Deprecated Functions--
-function MenuUI:SwitchMenu(menu)
-    if self._current_menu then
-        self._current_menu:SetVisible(false)
-    end
-    menu:SetVisible(true)
-    self._current_menu = menu
-end
-
-function MenuUI:NewMenu(params) return self:Menu(params) end
 function MenuUI:enable() return self:Enable() end
 function MenuUI:disable() return self:Disable() end
 function MenuUI:toggle() return self:Toggle() end

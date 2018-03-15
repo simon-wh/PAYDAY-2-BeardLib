@@ -13,6 +13,14 @@ function WorldDefinition:init(...)
     end
 end
 
+function WorldDefinition:do_package_load(pkg)
+    if PackageManager:package_exists(pkg) and not PackageManager:loaded(pkg) then
+        PackageManager:load(pkg)
+        BeardLib:DevLog("Loaded package: "..pkg)
+        table.insert(self._custom_loaded_packages, pkg)
+    end    
+end
+
 local WorldDefinition_load_world_package = WorldDefinition._load_world_package
 function WorldDefinition:_load_world_package(...)
     if Global.level_data then
@@ -21,12 +29,9 @@ function WorldDefinition:_load_world_package(...)
             self._has_package = not not level_tweak.package
             if level_tweak.custom_packages then
                 self._custom_loaded_packages = {}
-                for _, package in pairs(level_tweak.custom_packages) do
-                    if PackageManager:package_exists(package) and not PackageManager:loaded(package) then
-                        PackageManager:load(package)
-                        log("Loaded package: "..package)
-                        table.insert(self._custom_loaded_packages, package)
-                    end
+                for _, package in ipairs(level_tweak.custom_packages) do
+                    self:do_package_load(package.."_init")
+                    self:do_package_load(package)
                 end
             end
             if not self._has_package then

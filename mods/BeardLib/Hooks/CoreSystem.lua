@@ -64,9 +64,9 @@ overwrite_meta_function(PackageManager, "load", function(self, pck, ...)
 	if not pck then
 		return true
 	end
-	if BeardLib.FullLog then
-		log("Load package: " .. tostring(pck))
-	end
+
+	BeardLib:DevLog("Load package: " .. tostring(pck))
+
 	if CustomPackageManager:LoadPackage(pck) then
 		return
 	end

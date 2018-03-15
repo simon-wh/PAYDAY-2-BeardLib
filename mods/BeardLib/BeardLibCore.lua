@@ -12,7 +12,6 @@ if not _G.BeardLib then
     self.modules = {}
 	self.Items = {}
 	self.Mods = {}
-
 	self._paused_updaters = {}
 	self._updaters = {}
 
@@ -56,6 +55,8 @@ if not _G.BeardLib then
 		end
 		--Load mod_overrides adds
 		self:RegisterTweak()
+		
+		self.DevMode = FileIO:Exists("mods/developer.txt") --Use same method as BLT.
 	end
 
 	function self:AddUpdater(id, clbk, paused)
@@ -125,6 +126,12 @@ if not _G.BeardLib then
 				upgrades = {}
 			}
 		}, "dlc", "mod")
+	end
+
+	function self:DevLog(str, ...)
+		if self.DevMode then
+			self:log(str, ...)
+		end
 	end
 
 	function self:log(str, ...)

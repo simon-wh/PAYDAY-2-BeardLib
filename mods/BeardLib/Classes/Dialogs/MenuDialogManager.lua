@@ -5,7 +5,7 @@ function MenuDialogManager:Init()
         name = "BeardLibDialogs",
         layer = 5000,
         background_blur = true,
-        always_key_press = callback(self, self, "KeyPressed"),
+        pre_key_press = callback(self, self, "KeyPressed"),
     })
     self._dialogs = {}
     self._opened_dialogs = {}
@@ -120,10 +120,12 @@ function MenuDialogManager:Show()
     end 
 end
 
+local enter_ids = Idstring("enter")
 function MenuDialogManager:KeyPressed(o, k)
     local dialog = self._opened_dialogs[1]
-    if self._menu:Enabled() and dialog and dialog._is_input and k == Idstring("enter") then
+    if self._menu:Enabled() and dialog and dialog._is_input and k == enter_ids then
         dialog:hide(true)
+        return false
     end
 end
 

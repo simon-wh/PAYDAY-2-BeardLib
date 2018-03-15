@@ -41,6 +41,7 @@ function Item:SetEnabled(enabled)
 	end
 end
 
+local enter_ids = Idstring("enter")
 function Item:KeyPressed(o, k)
 	if self._adopted_items then
 		for _, item in pairs(self._adopted_items) do
@@ -49,7 +50,7 @@ function Item:KeyPressed(o, k)
 			end
 		end
 	end
-	if k == Idstring("enter") and self.type_name == "Button" and self.menu._highlighted == self then
+	if k == enter_ids and self.type_name == "Button" and self.menu._highlighted == self then
 		self:RunCallback()
 	end
 end

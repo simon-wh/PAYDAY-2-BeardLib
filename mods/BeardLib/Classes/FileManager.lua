@@ -76,16 +76,23 @@ function fm:Process(ids_ext, ids_path, name_mt)
 	return data
 end
 
+local texture_key = "8c5b5ab050e16853" 
 function fm:AddFile(ext, path, file)
 	if not DB.create_entry then
 		BeardLib:log("[ERROR] Cannot add files!")
 		return
 	end
-	--Add check for supported file types (or unsupported) to give warning
-    DB:create_entry(ext:id(), path:id(), file)
-    local k_ext = ext:key()
+
+	ext = ext:id()
+	path = path:id()
+	local k_ext = ext:key()
+	local loaded
+    DB:create_entry(ext, path, file)
     Global.fm.added_files[k_ext] = Global.fm.added_files[k_ext] or {}
-    Global.fm.added_files[k_ext][path:key()] = file
+	Global.fm.added_files[k_ext][path:key()] = file
+	if k_ext == texture_key then
+		Application:reload_textures({path})
+	end
 end
 
 function fm:RemoveFile(ext, path)
@@ -94,9 +101,11 @@ function fm:RemoveFile(ext, path)
 	local k_ext = ext:key()
 	local k_path = path:key()
 	if Global.fm.added_files[k_ext] and Global.fm.added_files[k_ext][k_path] then
-		self:UnLoadAsset(ext, path)
 		DB:remove_entry(ext, path)
 		Global.fm.added_files[k_ext][k_path] = nil
+		if k_ext == texture_key then
+			Application:reload_textures({path})
+		end
 	end
 end
 
@@ -138,12 +147,10 @@ end
 
 local _LoadAsset = function(ids_ext, ids_path, file_path)
 	if not managers.dyn_resource:has_resource(ids_ext, ids_path, managers.dyn_resource.DYN_RESOURCES_PACKAGE) then
-		if BeardLib.FullLog then
-			if file_path then
-				BeardLib:log("loaded file %s", tostring(file_path))
-			else
-				BeardLib:log("loaded file %s.%s", ids_path:key(), ids_ext:key())
-			end
+		if file_path then
+			BeardLib:DevLog("loaded file %s", tostring(file_path))
+		else
+			BeardLib:DevLog("loaded file %s.%s", ids_path:key(), ids_ext:key())
 		end
         managers.dyn_resource:load(ids_ext, ids_path, managers.dyn_resource.DYN_RESOURCES_PACKAGE)
     end
@@ -151,12 +158,10 @@ end
 
 local _UnLoadAsset = function(ids_ext, ids_path, file_path)
 	if managers.dyn_resource:has_resource(ids_ext, ids_path, managers.dyn_resource.DYN_RESOURCES_PACKAGE) then
-		if BeardLib.FullLog then
-			if file_path then
-				BeardLib:log("unloaded file %s", tostring(file_path))
-			else
-				BeardLib:log("unloaded file %s.%s", ids_path:key(), ids_ext:key())
-			end
+		if file_path then
+			BeardLib:DevLog("unloaded file %s", tostring(file_path))
+		else
+			BeardLib:DevLog("unloaded file %s.%s", ids_path:key(), ids_ext:key())
 		end
         managers.dyn_resource:unload(ids_ext, ids_path, managers.dyn_resource.DYN_RESOURCES_PACKAGE)
     end

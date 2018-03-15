@@ -160,8 +160,8 @@ function MenuDialog:hide(yes, menu, item)
     return true
 end
 
-function MenuDialog:on_escape()
-    self:hide()
+function MenuDialog:on_escape(yes)
+    self:hide(yes)
     managers.menu:post_event("prompt_exit")
 end
 
