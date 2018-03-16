@@ -101,7 +101,7 @@ function WeaponModule:RegisterHook()
 
     Hooks:PostHook(TweakDataVR , "init", self._config.weapon.id .. "AddVRWeaponTweakData", function(vrself)
         local config = self._config.vr or {}
-        
+
         local id = self._config.weapon.id
         if config.locked then
             vrself.locked.weapons[id] = true
@@ -111,7 +111,7 @@ function WeaponModule:RegisterHook()
         local timelines = vrself.reload_timelines
         local based_on = self:GetBasedOn(timelines, config.based_on) --If not present, use normal based on of weapon tweakdata.
         timelines[id] = table.merge(deep_clone(timelines[based_on]), config.reload_timelines)
-        
+
         local tweak_offsets = vrself.weapon_offsets
         local tweak_weapon_assist = vrself.weapon_assist
         local tweak_weapon_hidden = vrself.weapon_hidden
@@ -121,14 +121,14 @@ function WeaponModule:RegisterHook()
         local offsets = tweak_offsets[based_on]
         local weapon_assist = tweak_weapon_assist[based_on]
         local weapon_hidden = tweak_weapon_hidden[based_on]
-        local custom_wall_check = custom_wall_check[based_on]
-        local magazine_offsets = magazine_offsets[based_on]
+        local custom_wall_check = tweak_custom_wall_check[based_on]
+        local magazine_offsets = tweak_magazine_offsets[based_on]
 
-        offsets[id] = offsets and table.merge(offsets, config.offsets) or config.offsets
-        weapon_assist[id] = weapon_assist and table.merge(weapon_assist, config.weapon_assist) or config.weapon_assist or nil
-        weapon_hidden[id] = weapon_hidden and table.merge(weapon_hidden, config.weapon_hidden) or config.weapon_hidden or nil
-        custom_wall_check[id] = custom_wall_check and table.merge(custom_wall_check, config.custom_wall_check) or config.custom_wall_check or nil
-        magazine_offsets[id] = magazine_offsets and table.merge(magazine_offsets, config.magazine_offsets) or config.magazine_offsets or nil
+        tweak_offsets[id] = offsets and table.merge(offsets, config.offsets) or config.offsets
+        tweak_weapon_assist[id] = weapon_assist and table.merge(weapon_assist, config.weapon_assist) or config.weapon_assist or nil
+        tweak_weapon_hidden[id] = weapon_hidden and table.merge(weapon_hidden, config.weapon_hidden) or config.weapon_hidden or nil
+        tweak_custom_wall_check[id] = custom_wall_check and table.merge(custom_wall_check, config.custom_wall_check) or config.custom_wall_check or nil
+        tweak_magazine_offsets[id] = magazine_offsets and table.merge(magazine_offsets, config.magazine_offsets) or config.magazine_offsets or nil
     end)
     
     Hooks:Add("BeardLibCreateCustomWeapons", self._config.factory.id .. "AddWeaponFactoryTweakData", function(w_self)
