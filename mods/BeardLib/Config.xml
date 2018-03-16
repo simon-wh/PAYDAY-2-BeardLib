@@ -88,7 +88,7 @@
 		<hook source="core/lib/managers/coresequencemanager" file="CoreSequenceManager.lua"/>
 		<hook source="lib/managers/menu/scrollablepanel" file="ScrollablePanel.lua"/>
         <hook source="lib/managers/systemmenumanager" file="SystemMenuManager.lua"/>
-        <hook source="lib/tweak_data/crimespreetweakdata" file="PreTweakData.lua"/>
+        <hook source="lib/tweak_data/TweakDataPD2" file="PreTweakData.lua"/>
         <hook source="lib/managers/crimenetmanager" file="CrimeNetManager.lua"/>
         <hook source="lib/network/base/networkpeer" file="NetworkPeer.lua"/>
         <hook source="lib/managers/musicmanager" file="MusicManager.lua"/>
