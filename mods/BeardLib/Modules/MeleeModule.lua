@@ -10,6 +10,17 @@ function MeleeModule:init(core_mod, config)
     return true
 end
 
+local default_melee = "kabar"
+function MeleeModule:GetBasedOn(w_self, based_on)
+    w_self = w_self or tweak_data.blackmarket.melee_weapons
+    based_on = based_on or self._config.based_on
+    if based_on and w_self[based_on] then
+        return based_on
+    else
+        return default_melee
+    end
+end
+
 function MeleeModule:RegisterHook()
     local dlc
     self._config.unlock_level = self._config.unlock_level or 1
@@ -19,7 +30,7 @@ function MeleeModule:RegisterHook()
             return
         end
 
-        local data = table.merge(deep_clone(self._config.based_on and (bm_self.melee_weapons[self._config.based_on] ~= nil and bm_self.melee_weapons[self._config.based_on]) or bm_self.melee_weapons.kabar), table.merge({
+        local data = table.merge(deep_clone(bm_self.melee_weapons[self:GetBasedOn()]), table.merge({
             name_id = "bm_melee_" .. self._config.id,
             dlc = self.defaults.dlc,
             custom = true,
@@ -31,6 +42,21 @@ function MeleeModule:RegisterHook()
         if dlc then
             TweakDataHelper:ModifyTweak({self._config.id}, "dlc", dlc, "content", "upgrades")
         end
+    end)
+
+    Hooks:PostHook(TweakDataVR , "init", self._config.id .. "AddVRMeleeTweakData", function(vrself)
+        local config = self._config.vr or {}
+
+        local id = self._config.id
+        if config.locked then
+            vrself.locked.melee_weapons[id] = true
+            return
+        end
+
+        local tweak_offsets = vrself.melee_offsets
+        local offsets = tweak_offsets[self:GetBasedOn(tweak_offsets, config.based_on)]
+
+        tweak_offsets[id] = offsets and table.merge(offsets, config.offsets) or config.offsets or nil
     end)
 
     Hooks:PostHook(UpgradesTweakData, "init", self._config.id .. "AddMeleeUpgradesData", function(u_self)

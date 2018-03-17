@@ -113,22 +113,25 @@ function WeaponModule:RegisterHook()
         timelines[id] = table.merge(deep_clone(timelines[based_on]), config.reload_timelines)
 
         local tweak_offsets = vrself.weapon_offsets
-        local tweak_weapon_assist = vrself.weapon_assist
+        local tweak_weapon_assist = vrself.weapon_assist.weapons
         local tweak_weapon_hidden = vrself.weapon_hidden
         local tweak_custom_wall_check = vrself.custom_wall_check
         local tweak_magazine_offsets = vrself.magazine_offsets
+        local tweak_sound_overrides = vrself.weapon_sound_overrides
 
         local offsets = tweak_offsets[based_on]
         local weapon_assist = tweak_weapon_assist[based_on]
         local weapon_hidden = tweak_weapon_hidden[based_on]
         local custom_wall_check = tweak_custom_wall_check[based_on]
         local magazine_offsets = tweak_magazine_offsets[based_on]
+        local sound_overrides = tweak_sound_overrides[based_on]
 
-        tweak_offsets[id] = offsets and table.merge(offsets, config.offsets) or config.offsets
+        tweak_offsets[id] = offsets and table.merge(offsets, config.offsets) or config.offsets or nil
         tweak_weapon_assist[id] = weapon_assist and table.merge(weapon_assist, config.weapon_assist) or config.weapon_assist or nil
         tweak_weapon_hidden[id] = weapon_hidden and table.merge(weapon_hidden, config.weapon_hidden) or config.weapon_hidden or nil
         tweak_custom_wall_check[id] = custom_wall_check and table.merge(custom_wall_check, config.custom_wall_check) or config.custom_wall_check or nil
         tweak_magazine_offsets[id] = magazine_offsets and table.merge(magazine_offsets, config.magazine_offsets) or config.magazine_offsets or nil
+        tweak_sound_overrides[id] = sound_overrides and table.merge(sound_overrides, config.sound_overrides) or config.sound_overrides or nil
     end)
     
     Hooks:Add("BeardLibCreateCustomWeapons", self._config.factory.id .. "AddWeaponFactoryTweakData", function(w_self)
