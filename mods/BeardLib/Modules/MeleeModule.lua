@@ -30,7 +30,7 @@ function MeleeModule:RegisterHook()
             return
         end
 
-        local data = table.merge(deep_clone(bm_self.melee_weapons[self:GetBasedOn(self)]), table.merge({
+        local data = table.merge(deep_clone(bm_self.melee_weapons[self:GetBasedOn(bm_self)]), table.merge({
             name_id = "bm_melee_" .. self._config.id,
             dlc = self.defaults.dlc,
             custom = true,
