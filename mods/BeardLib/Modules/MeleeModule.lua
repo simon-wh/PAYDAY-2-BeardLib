@@ -11,10 +11,10 @@ function MeleeModule:init(core_mod, config)
 end
 
 local default_melee = "kabar"
-function MeleeModule:GetBasedOn(bm_self, based_on)
-    bm_self = bm_self or tweak_data.blackmarket.melee_weapons
+function MeleeModule:GetBasedOn(melees, based_on)
+    melees = melees or tweak_data.blackmarket.melee_weapons
     based_on = based_on or self._config.based_on
-    if based_on and bm_self[based_on] then
+    if based_on and melees[based_on] then
         return based_on
     else
         return default_melee
@@ -29,8 +29,7 @@ function MeleeModule:RegisterHook()
             BeardLib:log("[ERROR] Melee weapon with id '%s' already exists!", self._config.id)
             return
         end
-
-        local data = table.merge(deep_clone(bm_self.melee_weapons[self:GetBasedOn(bm_self)]), table.merge({
+        local data = table.merge(deep_clone(bm_self.melee_weapons[self:GetBasedOn(bm_self.melee_weapons)]), table.merge({
             name_id = "bm_melee_" .. self._config.id,
             dlc = self.defaults.dlc,
             custom = true,
