@@ -3,7 +3,7 @@ local Toggle = BeardLib.Items.Toggle
 Toggle.type_name = "Toggle"
 function Toggle:Init()    
 	Toggle.super.Init(self)
-	local s = self.items_size - 4
+	local s = self.size - 4
 	local fgcolor = self:GetForeground()
     self.toggle = self.panel:bitmap({
 		name = "toggle",
@@ -51,7 +51,7 @@ function Toggle:UpdateToggle(value_changed, highlight)
 	local value = self.value
 	if alive(self.panel) then
 		local fgcolor = self:GetForeground(highlight)
-		local s = value and self.items_size - 4 or 0
+		local s = value and self.size - 4 or 0
 		play_color(self.toggle, fgcolor)
 		play_anim(self.toggle_value, {
 			after = function()

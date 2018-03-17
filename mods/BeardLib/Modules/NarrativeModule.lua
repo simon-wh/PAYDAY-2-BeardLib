@@ -111,7 +111,7 @@ function NarrativeModule:RegisterHook()
     if tweak_data and tweak_data.narrative then
         self:AddNarrativeData(tweak_data.narrative, tweak_data)
     else
-        Hooks:PostHook(NarrativeTweakData, "init", self._config.id .. "AddNarrativeData", callback(self, self, "AddNarrativeData"))
+        Hooks:PostHook(NarrativeTweakData, "init", self._config.id .. "AddNarrativeData", ClassClbk(self, "AddNarrativeData"))
     end
 end
 

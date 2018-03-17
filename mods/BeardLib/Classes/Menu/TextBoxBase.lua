@@ -5,7 +5,7 @@ function TextBoxBase:init(parent, params)
     self.owner = parent
     self.parent = parent.parent
     self.menu = parent.menu
-    self.items_size = params.items_size or parent.items_size
+    self.size = params.size or parent.size
     self._forbidden = {'%', '(', ")", "[", "]"}
     if self.owner.forbidden_chars then
         table.merge(self._forbidden, self.owner.forbidden_chars)
@@ -13,7 +13,7 @@ function TextBoxBase:init(parent, params)
 	self.panel = params.panel:panel({
 		name = "text_panel",
 		w = params.w,
-		h = params.h or params.items_size,
+		h = params.h or params.size,
         layer = params.layer or 5
 	})
 	self.panel:set_right(params.panel:w())
@@ -43,7 +43,7 @@ function TextBoxBase:init(parent, params)
         color = color,
         selection_color = color:with_alpha(0.5), --I fucking wish there was something better..
 		font = parent.font or "fonts/font_medium_mf",
-		font_size = self.items_size
+		font_size = self.size
     })
     if self.owner.text_offset then
         self.text:set_y(self.owner.text_offset[2])
@@ -67,7 +67,7 @@ function TextBoxBase:init(parent, params)
 	self.lines = params.lines
 	self.btn = params.btn or "0"
     self.history = {params.value and self.text:text()}
- 	self.text:enter_text(callback(self, TextBoxBase, "enter_text"))
+ 	self.text:enter_text(ClassClbk(self, "enter_text"))
     self.update_text = params.update_text or ClassClbk(self.owner, "TextBoxSetValue")
 end
 
@@ -282,7 +282,7 @@ function TextBoxBase:KeyPressed(o, k)
  	end
     if self.cantype then
         text:stop()
-        text:animate(callback(self, self, "key_hold"), k)
+        text:animate(ClassClbk(self, "key_hold"), k)
         return true
     end
 	self:update_caret()

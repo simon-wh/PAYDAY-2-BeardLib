@@ -35,6 +35,7 @@
 		<class file="FrameworkBase.lua"/>
 		<class file="MapFramework.lua" manager="MapFramework"/>
 		<class file="AddFramework.lua" manager="AddFramework"/>
+		<class file="Menu/MenuUIManager.lua" manager="menu_ui"/>
 		<class file="Menu/MenuUI.lua"/>
 		<class file="Menu/TextBoxBase.lua"/>
 		<class file="Menu/ContextMenu.lua"/>

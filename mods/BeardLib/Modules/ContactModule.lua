@@ -38,7 +38,7 @@ function ContactModule:RegisterHook()
     if tweak_data and tweak_data.narrative then
         self:AddContactData(tweak_data.narrative)
     else
-        Hooks:PostHook(NarrativeTweakData, "init", self._config.id .. "AddContactData", callback(self, self, "AddContactData"))
+        Hooks:PostHook(NarrativeTweakData, "init", self._config.id .. "AddContactData", ClassClbk(self, "AddContactData"))
     end
 end
 

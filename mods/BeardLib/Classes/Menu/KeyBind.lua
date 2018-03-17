@@ -6,13 +6,13 @@ function KeyBindItem:Init()
     KeyBindItem.super.Init(self)
     self.keybind_key = self.panel:text({
         name = "keybind_key",
-        h = self.items_size,
+        h = self.size,
         align = "center",
         vertical = self.text_vertical,
         layer = 1,
         color = self:GetForeground(highlight),
         font = self.font,
-        font_size = self.items_size - 2
+        font_size = self.size - 2
     })
     self:SetKeybindKey()
 end

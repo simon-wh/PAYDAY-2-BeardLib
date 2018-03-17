@@ -15,7 +15,7 @@ function ComboBox:Init()
         name = "combo_bg",
         w = control_size,
         alpha = 0,
-        h = self.items_size,
+        h = self.size,
         layer = 1,
         color = self:GetForeground(),
     })
@@ -31,8 +31,8 @@ function ComboBox:Init()
     combo_bg:set_right(self.panel:w())
     self.icon = self.panel:bitmap({
         name = "icon_arrow",
-        w = self.items_size - 6,
-        h = self.items_size - 6,
+        w = self.size - 6,
+        h = self.size - 6,
         texture = "guis/textures/menu_ui_icons",
         texture_rect = {4,0,16,16},
         color = self:GetForeground(highlight),
@@ -65,8 +65,8 @@ function ComboBox:SetValue(value, run_callback, no_items_clbk)
     end
     if type(value) == "number" then
         local v = self.items[value]
-        if run_callback and type(v) == "table" and not no_items_clbk and v.callback then
-            self:RunCallback(v.callback)
+        if run_callback and type(v) == "table" and not no_items_clbk and v.on_callback then
+            self:RunCallback(v.on_callback)
         end
     end
     ComboBox.super.SetValue(self, value, run_callback)

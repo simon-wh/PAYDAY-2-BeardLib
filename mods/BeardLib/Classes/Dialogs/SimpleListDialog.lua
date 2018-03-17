@@ -38,7 +38,7 @@ function SimpleListDialog:_Show(params)
         w = tw,
         control_slice = 0.98,
         text = false,
-        callback = callback(self, self, "Search"),  
+        on_callback = ClassClbk(self, "Search"),  
         label = "temp"
     })
 
@@ -50,7 +50,7 @@ function SimpleListDialog:_Show(params)
         position = "CenterRight",
         texture = "guis/textures/menu_ui_icons",
         texture_rect = {84, 89, 36, 36},
-        callback = callback(self, self, "hide", false),  
+        on_callback = ClassClbk(self, "hide", false),  
         label = "temp"
     })
 
@@ -64,7 +64,7 @@ function SimpleListDialog:_Show(params)
         end,
         texture = "guis/textures/menu_ui_icons",
         texture_rect = {82, 50, 36, 36},
-        callback = callback(self, self, "hide", true),  
+        on_callback = ClassClbk(self, "hide", true),  
         label = "temp"
     })
     if params.sort ~= false then

@@ -57,7 +57,7 @@ function FileBrowserDialog:init(params, menu)
         w = 30,
         text = "<",
         text_align = "center",
-        callback = callback(self, self, "FolderBack"),  
+        on_callback = ClassClbk(self, "FolderBack"),  
         label = "temp"
     })    
     enabled = self._old_dir and self._old_dir ~= self._current_dir or false
@@ -66,7 +66,7 @@ function FileBrowserDialog:init(params, menu)
         w = 30,
         text = ">",
         text_align = "center",
-        callback = function()
+        on_callback = function()
             self:Browse(self._old_dir)
         end,  
         label = "temp"
@@ -77,12 +77,12 @@ function FileBrowserDialog:init(params, menu)
         w = 540,
         control_slice = 1,
         forbidden_chars = {':','*','?','"','<','>','|'},
-        callback = callback(self, self, "OpenPathSetDialog"),
+        on_callback = ClassClbk(self, "OpenPathSetDialog"),
     })
     self._menu:TextBox({
         name = "Search",
         w = 200,
-        callback = callback(self, self, "Search"),  
+        on_callback = ClassClbk(self, "Search"),  
         label = "temp"
     })
     self._menu:Button({
@@ -90,7 +90,7 @@ function FileBrowserDialog:init(params, menu)
         w = 100,
         text = "Close",
         text_align = "center",
-        callback = callback(self, self, "hide"),  
+        on_callback = ClassClbk(self, "hide"),  
         label = "temp"
     })
     self._search = ""
@@ -157,7 +157,7 @@ function FileBrowserDialog:MakeFilesAndFolders(files, folders)
                 name = tbl and v.name or v,
                 text = tbl and v.name or v,
                 path = tbl and v.path or BeardLib.Utils.Path:Combine(self._current_dir, v),
-                callback = callback(self, self, "FileClick"), 
+                on_callback = ClassClbk(self, "FileClick"), 
                 label = "temp2",
             })
         end       
@@ -166,28 +166,28 @@ function FileBrowserDialog:MakeFilesAndFolders(files, folders)
          self._folders_menu:Button({
             name = v,
             text = v,
-            callback = callback(self, self, "FolderClick"), 
+            on_callback = ClassClbk(self, "FolderClick"), 
             label = "temp2"
         })        
     end
 end
 
-function FileBrowserDialog:Search(menu, item)
+function FileBrowserDialog:Search(item)
     self._search = item:Value()
     self:Browse(self._current_dir)
 end
 
-function FileBrowserDialog:OpenPathSetDialog(menu, item)
+function FileBrowserDialog:OpenPathSetDialog(item)
     self:Browse(item:Value())
 end
 
-function FileBrowserDialog:FileClick(menu, item)
+function FileBrowserDialog:FileClick(item)
     if self._file_click then
         self._file_click(item.path)
     end
 end 
 
-function FileBrowserDialog:FolderClick(menu, item)
+function FileBrowserDialog:FolderClick(item)
     self._old_dir = nil
     self:Browse(self._current_dir .. "/" .. item.text)
     if item.press_clbk then

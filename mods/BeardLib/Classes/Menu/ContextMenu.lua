@@ -28,8 +28,8 @@ function ContextMenu:init(owner, layer)
             panel = self.panel,
             align = "center",
             lines = 1,
-            items_size = owner.items_size,
-            update_text = callback(self, self, "update_search"),
+            size = owner.size,
+            update_text = ClassClbk(self, "update_search"),
         })
     end
     self._scroll = ScrollablePanelModified:new(self.panel, "ItemsPanel", {
@@ -69,7 +69,7 @@ function ContextMenu:CreateItems()
         if type(text) == "table" then
             text = text.text
         end
-        local font_size = (self.owner.font_size or self.owner.items_size) - 2
+        local font_size = (self.owner.font_size or self.owner.size) - 2
         local panel = self.items_panel:panel({
             name = "Item-"..tostring(text),
             h = font_size,
@@ -91,7 +91,7 @@ function ContextMenu:CreateItems()
             name = "bg",
             color = self.owner.background_color,
             alpha = 0,
-            h = self.type_name == "Group" and self.items_size,
+            h = self.type_name == "Group" and self.size,
             halign = self.type_name ~= "Group" and "grow",
             valign = self.type_name ~= "Group" and "grow",
             layer = 0
@@ -115,10 +115,10 @@ function ContextMenu:hide()
 end
 
 function ContextMenu:reposition()
-    local size = (self.owner.font_size or self.owner.items_size) - 2
+    local size = (self.owner.font_size or self.owner.size) - 2
     local bottom_h = (self.menu._panel:world_bottom() - self.owner.panel:world_bottom()) 
     local top_h = (self.owner.panel:world_y() - self.menu._panel:world_y()) 
-    local items_h = (#self._my_items * size) + (self.owner.searchbox and self.owner.items_size or 0)
+    local items_h = (#self._my_items * size) + (self.owner.searchbox and self.owner.size or 0)
     local normal_pos = items_h <= bottom_h or bottom_h >= top_h
     if (normal_pos and items_h > bottom_h) or (not normal_pos and items_h > top_h) then
         self.panel:set_h(math.min(bottom_h, top_h))
@@ -131,8 +131,8 @@ function ContextMenu:reposition()
     else
         self.panel:set_world_bottom(self.owner.panel:world_y())
     end
-    self._scroll:panel():set_y(self.owner.searchbox and self.owner.items_size or 0) 
-    self._scroll:set_size(self.panel:w(), self.panel:h() - (self.owner.searchbox and self.owner.items_size or 0))
+    self._scroll:panel():set_y(self.owner.searchbox and self.owner.size or 0) 
+    self._scroll:set_size(self.panel:w(), self.panel:h() - (self.owner.searchbox and self.owner.size or 0))
 
     self._scroll:panel():child("scroll_up_indicator_arrow"):set_top(6 - self._scroll:y_padding())
     self._scroll:panel():child("scroll_down_indicator_arrow"):set_bottom(self._scroll:panel():h() - 6 - self._scroll:y_padding())
@@ -180,7 +180,7 @@ function ContextMenu:MousePressed(button, x, y)
                     if self.owner.ContextMenuCallback then
                         self.owner:ContextMenuCallback(item)
                     else
-                        if item.callback then self.owner:RunCallback(item.callback, item) end            
+                        if item.on_callback then self.owner:RunCallback(item.on_callback, item) end            
                     end        
                     self:hide()
                     return true

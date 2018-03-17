@@ -16,8 +16,8 @@ function MenuUI:init(params)
         name = self.name or self.type_name, 
         alpha = 0, layer = self.layer
     })
-    self._panel:key_press(callback(self, self, "KeyPressed"))
-    self._panel:key_release(callback(self, self, "KeyReleased"))
+    self._panel:key_press(ClassClbk(self, "KeyPressed"))
+    self._panel:key_release(ClassClbk(self, "KeyReleased"))
 
     self._panel:bitmap({
         name = "bg",
@@ -54,14 +54,15 @@ function MenuUI:init(params)
     self.private = {}
 	if self.visible == true and managers.mouse_pointer then self:enable() end
 
-    BeardLib:AddUpdater("MenuUIUpdate"..tostring(self), callback(self, self, "Update"), true)
+    BeardLib:AddUpdater("MenuUIUpdate"..tostring(self), ClassClbk(self, "Update"), true)
     if self.create_items then self:create_items() end
-
+    BeardLib.managers.menu_ui:add_menu(self)
+    
     --Deprecated values
-    self.pre_key_press = self.always_key_press
-    self.pre_key_release = self.always_key_released
-    self.pre_mouse_press = self.always_mouse_press
-    self.pre_mouse_move = self.always_mouse_move
+    self.pre_key_press = self.pre_key_press or self.always_key_press
+    self.pre_key_release = self.pre_key_release or self.always_key_released
+    self.pre_mouse_press = self.pre_mouse_press or self.always_mouse_press
+    self.pre_mouse_move = self.pre_mouse_move or self.always_mouse_move
 end
 
 function MenuUI:ReloadInterface(params, shallow)
@@ -167,8 +168,11 @@ end
 function MenuUI:Enabled() return self._enabled end
 
 function MenuUI:IsMouseActive()
+    if BeardLib.managers.menu_ui:input_disabled() then
+        return false
+    end
     local mc = managers.mouse_pointer._mouse_callbacks
-    return mc[#mc] and mc[#mc].parent == self
+    return mc[#mc] and mc[#mc].menu_ui_object == self
 end
 
 function MenuUI:SetEnabled(enabled)
@@ -191,12 +195,12 @@ function MenuUI:Enable()
 	self._enabled = true
     self._mouse_id = self._mouse_id or managers.mouse_pointer:get_id()
 	managers.mouse_pointer:use_mouse({
-		mouse_move = callback(self, self, "MouseMoved"),
-		mouse_press = callback(self, self, "MousePressed"),
-		mouse_double_click = callback(self, self, "MouseDoubleClick"),
-		mouse_release = callback(self, self, "MouseReleased"),
+		mouse_move = ClassClbk(self, "MouseMoved"),
+		mouse_press = ClassClbk(self, "MousePressed"),
+		mouse_double_click = ClassClbk(self, "MouseDoubleClick"),
+		mouse_release = ClassClbk(self, "MouseReleased"),
 		id = self._mouse_id,
-        parent = self
+        menu_ui_object = self
 	})
 end
 
@@ -211,8 +215,9 @@ function MenuUI:Disable()
     end
 	self._enabled = false
 	if self._highlighted then self._highlighted:UnHighlight() end
-	if self._openlist then self._openlist:hide() end
-    call_on_next_update(ClassClbk(managers.mouse_pointer, "remove_mouse", self._mouse_id)) --Makes sure older menus don't get reactivated too soon
+    if self._openlist then self._openlist:hide() end
+    managers.mouse_pointer:remove_mouse(self._mouse_id)
+    BeardLib.managers.menu_ui:close_menu_event()
 end
 
 function MenuUI:RunToggleClbk()
@@ -274,7 +279,7 @@ function MenuUI:MouseInside()
 end
 
 function MenuUI:KeyPressed(o, k)
-    if self.pre_key_press then 
+    if self.pre_key_press then
         if self.pre_key_press(o, k) == false then
             return
         end

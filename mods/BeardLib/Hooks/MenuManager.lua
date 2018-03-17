@@ -13,16 +13,17 @@ local sync_game_settings = function(peer_id)
         end
     end
 end
-
+local menu_ui = BeardLib.managers.menu_ui
 local o_toggle_menu_state = MenuManager.toggle_menu_state
 function MenuManager:toggle_menu_state(...)
     if BeardLib.managers.dialog:DialogOpened() then
         BeardLib.managers.dialog:CloseLastDialog()
-        BeardLib.IgnoreBackOnce = true
         return
-    else
-        return o_toggle_menu_state(self, ...) 
     end
+    if not menu_ui:input_allowed() then
+        return
+    end
+    return o_toggle_menu_state(self, ...) 
 end
 
 local o_refresh = MenuManager.refresh_level_select

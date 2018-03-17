@@ -52,7 +52,7 @@ function ElementMoveUnit:register_move_unit(unit)
 		end_pos = mvector3.copy(start_pos)
 		mvector3.add(end_pos, self._values.displacement)
 	end
-	managers.game_play_central:add_move_unit(unit, start_pos, end_pos, self._values.speed, callback(self, self, "done_callback", unit))
+	managers.game_play_central:add_move_unit(unit, start_pos, end_pos, self._values.speed, ClassClbk(self, "done_callback", unit))
 end
 
 function ElementMoveUnit:done_callback(instigator)

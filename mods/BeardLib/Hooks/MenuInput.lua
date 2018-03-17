@@ -1,32 +1,30 @@
 Hooks:PostHook(MenuInput, "init", "BeardLibMenuInputInit", function(self)
-	self._item_input_action_map[MenuItemColorButton.TYPE] = callback(self, self, "input_color_item")
+	self._item_input_action_map[MenuItemColorButton.TYPE] = ClassClbk(self, "input_color_item")
 end)
 
 local back = MenuInput.back
+local menu_ui = BeardLib.managers.menu_ui
 function MenuInput:back(...)
     if BeardLib.IgnoreBackOnce then
         BeardLib.IgnoreBackOnce = nil
+        return false
+    end
+    if not menu_ui:input_allowed() then
         return false
     end
     return back(self, ...)
 end
 
 local mm = MenuInput.mouse_moved
-function MenuInput:MenuUINotActive(...)
-    local mc = managers.mouse_pointer._mouse_callbacks
-    local last = mc[#mc]
-    return not last or type_name(last.parent) ~= "MenuUI" or last.parent.allow_full_input
-end
-
 function MenuInput:mouse_moved(...)
-    if self:MenuUINotActive() and not self:BeardLibMouseMoved(...) then
+    if menu_ui:input_allowed() and not self:BeardLibMouseMoved(...) then
         return mm(self, ...)
     end
 end
 
 local mp = MenuInput.mouse_pressed
 function MenuInput:mouse_pressed(...)
-    if self:MenuUINotActive() and not self:BeardLibMousePressed(...) then
+    if menu_ui:input_allowed() and not self:BeardLibMousePressed(...) then
         return mp(self, ...)
     end
 end
@@ -64,7 +62,7 @@ function MenuInput:BeardLibMousePressed(o, button, x, y)
                     floats = item._decimal_count ~= 2 and item._decimal_count or nil,
                     force = true,
                     no_blur = true,
-                    callback = callback(self, self, "ValueEnteredCallback")
+                    callback = ClassClbk(self, "ValueEnteredCallback")
                 })
                 return true
             elseif item.TYPE == color_button then
@@ -81,7 +79,7 @@ function MenuInput:BeardLibMousePressed(o, button, x, y)
                 color = item:value(),
                 force = true,
                 no_blur = true,
-                callback = callback(self, self, "ValueEnteredCallback")
+                callback = ClassClbk(self, "ValueEnteredCallback")
             })
             return true
         end
@@ -119,14 +117,8 @@ end
 
 local up = MenuInput.update
 function MenuInput:update(...)
-    self:any_keyboard_used()
-    if self._accept_input then
-        if self._controller then
-            if self:MenuUINotActive() then
-                up(self, ...)
-            end
-        end
-    else
-        up(self, ...)
+    if not menu_ui:input_allowed() then
+        return
     end
+    up(self, ...)
 end

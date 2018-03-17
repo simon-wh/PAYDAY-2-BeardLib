@@ -38,7 +38,7 @@ function ColorDialog:_Show(params)
         position = "CenterLeft",
         background_color = false,
         highlight_color = false,
-        callback = callback(self, self, "update_hex"),
+        on_callback = ClassClbk(self, "update_hex"),
         w = 120,
         items_size = 20,
         override_panel = preview
@@ -52,7 +52,7 @@ function ColorDialog:_Show(params)
             text = ctrl,
             min = 0,
             max = 255,
-            callback = callback(self, self, "update_color"),
+            on_callback = ClassClbk(self, "update_color"),
             value = params.color[ctrl:lower()] * 255
         })   
     end
@@ -61,19 +61,19 @@ function ColorDialog:_Show(params)
         text = "Alpha",
         min = 0,
         max = 100,
-        callback = callback(self, self, "update_color"),
+        on_callback = ClassClbk(self, "update_color"),
         value = params.color.alpha * 100
     })
     self._menu:Button({
         name = "Apply",
         text = "Apply",
-        callback = callback(self, self, "hide", true),  
+        on_callback = ClassClbk(self, "hide", true),  
         label = "temp"
     })
     self._menu:Button({
         name = "Close",
         text = "Cancel",
-        callback = callback(self, self, "hide"),  
+        on_callback = ClassClbk(self, "hide"),  
         label = "temp"
     })
     self:update_color(self._menu)
@@ -99,7 +99,7 @@ function ColorDialog:set_color(color, not_hex)
    self:update_color(not_hex)
 end
 
-function ColorDialog:update_hex(menu, item)
+function ColorDialog:update_hex(item)
     self:set_color(Color:from_hex(item:Value()), true)
 end
 
@@ -113,7 +113,7 @@ function ColorDialog:update_color(not_hex)
     self:update_hex_color()
 end
 
-function ColorDialog:run_callback(clbk)
+function ColorDialog:run_on_callback(clbk)
     if clbk then
         clbk(self._color, self._menu)
     end

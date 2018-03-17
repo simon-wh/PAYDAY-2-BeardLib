@@ -90,14 +90,14 @@ function LevelModule:RegisterHook()
     if tweak_data and tweak_data.levels then    
         self:AddLevelDataToTweak(tweak_data.levels)
     else
-        Hooks:PostHook(LevelsTweakData, "init", self._config.id .. "AddLevelData", callback(self, self, "AddLevelDataToTweak"))
+        Hooks:PostHook(LevelsTweakData, "init", self._config.id .. "AddLevelData", ClassClbk(self, "AddLevelDataToTweak"))
     end
 
     if self._config.assets then
         if tweak_data and tweak_data.assets then
             self:AddAssetsDataToTweak(tweak_data.assets)
         else
-            Hooks:PostHook(AssetsTweakData, "init", self._config.id .. "AddAssetsData", callback(self, self, "AddAssetsDataToTweak"))
+            Hooks:PostHook(AssetsTweakData, "init", self._config.id .. "AddAssetsData", ClassClbk(self, "AddAssetsDataToTweak"))
         end
     end
 end

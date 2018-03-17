@@ -11,9 +11,14 @@ if GameSetup then
     end)
 end
 
-Hooks:Add("GameSetupPauseUpdate", "BeardLibGameSetupPausedUpdate", callback(BeardLib, BeardLib, "PausedUpdate"))
-Hooks:Add("GameSetupUpdate", "BeardLibGameSetupUpdate", callback(BeardLib, BeardLib, "Update"))
-Hooks:Add("MenuUpdate", "BeardLibMenuUpdate", callback(BeardLib, BeardLib, "Update"))
+if not BeardLib.Setup then
+    BeardLib:Init()
+    BeardLib.Setup = true
+end
+
+Hooks:Add("GameSetupPauseUpdate", "BeardLibGameSetupPausedUpdate", ClassClbk(BeardLib, "PausedUpdate"))
+Hooks:Add("GameSetupUpdate", "BeardLibGameSetupUpdate", ClassClbk(BeardLib, "Update"))
+Hooks:Add("MenuUpdate", "BeardLibMenuUpdate", ClassClbk(BeardLib, "Update"))
 
 Hooks:Add("MenuManagerInitialize", "BeardLibCreateMenuHooks", function(menu_manager)
     managers.menu = managers.menu or menu_manager
@@ -22,8 +27,3 @@ Hooks:Add("MenuManagerInitialize", "BeardLibCreateMenuHooks", function(menu_mana
     Hooks:Call("BeardLibMenuHelperPlusInitMenus", menu_manager)
     Hooks:Call("BeardLibCreateCustomNodesAndButtons", menu_manager)
 end)
-
-if not BeardLib.Setup then
-    BeardLib:Init()
-    BeardLib.Setup = true
-end

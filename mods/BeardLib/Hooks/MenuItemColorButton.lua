@@ -199,7 +199,7 @@ function MenuItemColorButton:key_press(row_item, o, k)
 	self._key_pressed = k
 
 	text:stop()
-	text:animate(callback(self, self, "update_key_down", row_item), k)
+	text:animate(ClassClbk(self, "update_key_down", row_item), k)
 
 	if k == Idstring("insert") then
 		local clipboard = Application:get_clipboard() or ""

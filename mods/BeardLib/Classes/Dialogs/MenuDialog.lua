@@ -72,7 +72,7 @@ function MenuDialog:CreateCustomStuff(params)
             text = params.yes or (params.no and "Yes") or "Close",
             reachable = true,
             highlight = true,
-            callback = callback(self, self, "hide", true)
+            on_callback = ClassClbk(self, "hide", true)
         })
     end
     if params.no then
@@ -80,7 +80,7 @@ function MenuDialog:CreateCustomStuff(params)
             name = "No",
             text = params.no,
             reachable = true,
-            callback = callback(self, self, "hide")
+            on_callback = ClassClbk(self, "hide")
         })
     end
 end
@@ -127,15 +127,15 @@ function MenuDialog:run_callback(clbk)
     end
 end
 
-function MenuDialog:Hide(yes, menu, item)
-    return self:hide(yes, menu, item)
+function MenuDialog:Hide(yes, item)
+    return self:hide(yes, item)
 end
 
 function MenuDialog:should_close()
     return self._menu:ShouldClose()
 end
 
-function MenuDialog:hide(yes, menu, item)
+function MenuDialog:hide(yes, item)
     BeardLib.managers.dialog:CloseDialog(self)
     local clbk = yes == true and self._callback or yes ~= false and self._no_callback
     if not self._no_clearing_menu then
@@ -175,7 +175,7 @@ function QuickDialog(opt, items)
             if item[3] == true then
                 dialog._no_callback = item[2]
             end
-            menu:Button({highlight = true, reachable = true, name =  type_name(item) == "table" and item[1] or item, callback = function() 
+            menu:Button({highlight = true, reachable = true, name =  type_name(item) == "table" and item[1] or item, on_callback = function() 
                 if type(item[2]) == "function" then
                     item[2]()
                 end

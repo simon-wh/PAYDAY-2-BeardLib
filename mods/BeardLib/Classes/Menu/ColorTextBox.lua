@@ -5,7 +5,7 @@ ColorTextBox.type_name = "ColoredTextBox"
 function ColorTextBox:Init(...)
     ColorTextBox.super.Init(self, ...)
     local panel = self:Panel()
-    panel:rect({name = "color_preview", w = self.items_size, h = self.items_size})
+    panel:rect({name = "color_preview", w = self.size, h = self.size})
     self:UpdateColor()
 end
 

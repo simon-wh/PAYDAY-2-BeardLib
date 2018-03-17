@@ -36,7 +36,7 @@ function BaseItem:InitBasicItem()
 		layer = 3,
 		color = self:GetForeground(),
 		font = self.font,
-		font_size = self.font_size or self.items_size,
+		font_size = self.font_size or self.size,
 		kern = self.kerning
 	})
 	self:InitBGs()
@@ -50,7 +50,7 @@ function BaseItem:InitBGs()
 		color = self.background_color,
 		visible = self.background_color ~= false,
 		alpha = self.highlight and 0 or 1,
-		h = self.type_name == "Group" and self.items_size,
+		h = self.type_name == "Group" and self.size,
 		halign = self.type_name ~= "Group" and "grow",
 		valign = self.type_name ~= "Group" and "grow",
 		layer = 0
@@ -60,7 +60,7 @@ function BaseItem:InitBGs()
 		color = self.highlight_color,
 		visible = self.highlight_color ~= false,
 		alpha = self.highlight and 1 or 0,
-		h = self.type_name == "Group" and self.items_size,
+		h = self.type_name == "Group" and self.size,
 		halign = self.type_name ~= "Group" and "grow",
 		valign = self.type_name ~= "Group" and "grow",
 		layer = 1
@@ -103,7 +103,11 @@ function BaseItem:WorkParams(params)
 	if self.auto_foreground and self.foreground_highlight ~= false then
 		self.foreground_highlight = bgh:contrast()
 	end
+
+	--Bad/Old names
 	self:WorkParam("items_size", 16)
+
+	self:WorkParam("size", self.items_size)
 	self:WorkParam("enabled_alpha", 1)
 	self:WorkParam("disabled_alpha", 0.5)
 	self:WorkParam("background_alpha")
@@ -120,6 +124,8 @@ function BaseItem:WorkParams(params)
 	self:WorkParam("border_color", self.accent_color)
 	self:WorkParam("line_color", self.accent_color)
 	self:WorkParam("ignore_align", self.override_panel)
+	self:WorkParam("localized")
+	self:WorkParam("animate_colors")
 	self.name = NotNil(self.name, self.text, "")
 	self.text = NotNil(self.text, self.text ~= false and self.name)
 	
@@ -286,7 +292,7 @@ end
 
 --Add/Set Funcs--
 function BaseItem:AddItem(item) table.insert(self._adopted_items, item) end
-function BaseItem:SetCallback(callback) self.callback = callback end
+function BaseItem:SetCallback(callback) self.on_callback = callback end
 function BaseItem:SetLabel(label) self.label = label end
 function BaseItem:SetParam(k,v) self[k] = v end
 function BaseItem:SetEnabled(enabled) self.enabled = enabled == true end
@@ -377,9 +383,11 @@ function BaseItem:SetLayer(layer)
 end
 
 function BaseItem:RunCallback(clbk, ...)
-	clbk = clbk or self.callback
+	clbk = clbk or self.on_callback
 	if clbk then
-		clbk(self.parent, self, ...)
+		clbk(self, ...)
+	elseif self.callback then --Old.
+		self.callback(self.parent, self, ...)
 	end
 end
 

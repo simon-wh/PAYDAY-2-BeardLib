@@ -14,6 +14,7 @@ if not _G.BeardLib then
 	self.Mods = {}
 	self._paused_updaters = {}
 	self._updaters = {}
+	self._call_next_update = {}
 
 	self.config = FileIO:ReadConfig(ModPath.."Config.xml", self)
 	self._config = self.config
@@ -69,6 +70,10 @@ if not _G.BeardLib then
 	function self:RemoveUpdater(id)
 		self._updaters[id] = nil
 		self._paused_updaters[id] = nil
+	end
+
+	function self:CallOnNextUpdate(func, only_unpaused, only_paused)
+		table.insert(self._call_next_update, {func = func, only_unpaused = only_unpaused, only_paused = only_paused})
 	end
 
 	function self:LoadClasses()
@@ -157,17 +162,29 @@ if not _G.BeardLib then
 		for id, clbk in pairs(self._updaters) do
 			clbk(t, dt)
 		end
+		for _, call in pairs(self._call_next_update) do
+			if not call.only_paused then
+				call.func(t, dt)
+			end
+		end
+		self._call_next_update = {}
 	end
 
 	function self:PausedUpdate(t, dt)
 		for _, manager in pairs(self.managers) do
-			if manager.paused_update then
-				manager:paused_update(t, dt)
+			if manager.update then
+				manager:update(t, dt)
 			end
 		end
 		for id, clbk in pairs(self._paused_updaters) do
 			clbk(t, dt)
 		end
+		for _, call in pairs(self._call_next_update) do
+			if not call.only_unpaused then
+				call.func(t, dt)
+			end
+		end
+		self._call_next_update = {}
 	end
 end
 

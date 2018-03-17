@@ -875,16 +875,29 @@ function NotNil(...)
     end
 end
 
-function SimpleClbk(func, ...)
-    local args = {...}
-    return function(...) return func(unpack(table.list_add(args, {...}))) end
+local list_add = table.list_add
+function SimpleClbk(f, a, b, c, ...)
+    if not f then
+        return function() end
+    end
+    if a then
+        if c then
+            local args = {...}
+            return function(...) return f(a, b, c, unpack(args), ...) end
+        elseif b then
+            return function(...) return f(a, b, ...) end
+        else
+            return function(...) return f(a, ...) end
+        end
+    else
+        return function(...) return f(...) end
+    end
 end
 
-function SafeClbk(func, ...)
-    local params = {...}
+function SafeClbk(...)
+    local f = SimpleClbk(...)
     return function(...)
-        local p = {...}
-        local success, ret = pcall(function() ret = func(unpack(params), unpack(p)) end)
+        local success, ret = pcall(f)
         if not success then
             BeardLib:log("[Safe Callback Error] %s", tostring(ret and ret.code or ""))
             return nil
@@ -893,13 +906,36 @@ function SafeClbk(func, ...)
     end
 end
 
-function ClassClbk(clss, func, ...)
+function SafeClassClbk(...)
+    local f = ClassClbk(...)
+    return function(...)
+        local success, ret = pcall(f)
+        if not success then
+            BeardLib:log("[Safe Callback Error] %s", tostring(ret and ret.code or ""))
+            return nil
+        end
+        return ret
+    end
+end
+
+function ClassClbk(clss, func, a, b, c, ...)
     local f = clss[func]
     if not f then
         BeardLib:log("[Callback Error] Function named %s was not found in the given class", tostring(func))
         return function() end
     end
-    return SimpleClbk(f, clss, ...)
+    if a then
+        if c then
+            local args = {...}
+            return function(...) return f(clss, a, b, unpack(args), ...) end
+        elseif b then
+            return function(...) return f(clss, a, b, ...) end
+        else
+            return function(...) return f(clss, a, ...) end
+        end
+    else
+        return function(...) return f(clss, ...) end
+    end
 end
 
 --If only Color supported alpha for hex :P
