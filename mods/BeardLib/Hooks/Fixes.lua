@@ -161,4 +161,43 @@ elseif F == "coremenuitemslider" then
             row_item.gui_slider_text:set_text(self:show_value() and self:value_string() or string.format("%.0f", self:percentage()) .. "%")
         end
     end)
+elseif F == "newraycastweaponbase" then
+    if RaycastWeaponBase._soundfix_should_play_normal then
+        return --Don't run if fix installed.
+    end
+    
+    function RaycastWeaponBase:use_soundfix()
+        local sounds = tweak_data.weapon[self:get_name_id()].sounds
+        return sounds and sounds.use_fix == true
+    end
+    
+    --Based of https://modworkshop.net/mydownloads.php?action=view_down&did=20403
+    
+    local fire_sound = RaycastWeaponBase._fire_sound
+    function RaycastWeaponBase:_fire_sound(...)
+        if not self:use_soundfix() then
+            return fire_sound(self, ...)
+        end
+    end
+    
+    local fire = RaycastWeaponBase.fire
+    function RaycastWeaponBase:fire(...)
+        local result = fire(self, ...)
+        if self:use_soundfix() and result then
+            self:play_tweak_data_sound("fire_single", "fire")
+        end
+        return result
+    end
+    
+    Hooks:PreHook(RaycastWeaponBase, "update_next_shooting_time", "BeardLibUpdateNextShootingTime", function(self)
+        if self:use_soundfix() then
+            self:_fire_sound()
+        end
+    end)
+    
+    Hooks:PreHook(RaycastWeaponBase, "trigger_held", "BeardLibTriggerHeld", function(self)
+        if not self:start_shooting_allowed() and self:use_soundfix() then
+            self:play_tweak_data_sound("stop_fire")
+        end
+    end)
 end

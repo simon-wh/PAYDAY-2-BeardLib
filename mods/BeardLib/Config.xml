@@ -29,6 +29,7 @@
 		<class file="Utils.lua"/>
 		<class file="ModCore.lua"/>
 		<class file="CustomPackageManager.lua"/>
+		<class file="CustomSoundManager.lua" manager="sound"/>
 		<class file="TweakDataHelper.lua"/>
 		<class file="ModManager.lua"/>
 		<class file="FileManager.lua" manager="File"/>
@@ -76,6 +77,7 @@
 		<hook source="core/lib/managers/coresoundenvironmentmanager" file="Fixes.lua"/>
 		<hook source="lib/managers/mission/elementvehiclespawner" file="Fixes.lua"/>
 		<hook source="lib/managers/mission/elementinteraction" file="Fixes.lua"/>
+	    <hook source="lib/units/weapons/newraycastweaponbase" file="Fixes.lua"/>
 		<hook source="lib/managers/menu/crewmanagementgui" file="Fixes.lua"/>
 		<hook source="lib/managers/weaponfactorymanager" file="Fixes.lua"/>
         <hook source="lib/managers/blackmarketmanager" file="Fixes.lua"/>

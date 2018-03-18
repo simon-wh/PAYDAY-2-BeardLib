@@ -52,6 +52,8 @@ if not _G.BeardLib then
 		for k, manager in pairs(self.managers) do
 			if manager.new then
 				self.managers[k] = manager:new()
+			else
+				self.managers[k] = manager
 			end
 		end
 		--Load mod_overrides adds
