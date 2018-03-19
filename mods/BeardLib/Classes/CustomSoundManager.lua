@@ -1,9 +1,14 @@
 CustomSoundManager = CustomSoundManager or {}
-CustomSoundManager.buffers = {}
+CustomSoundManager.buffers = {global = {}}
 CustomSoundManager.stop_ids = {}
 CustomSoundManager.sources = {}
+CustomSoundManager.engine_sources = {}
+
+local log_incoming = true
 function CustomSoundManager:CheckSoundID(sound_id, engine_source)
-    BeardLib:DevLog("Incoming sound check %s", tostring(sound_id))
+    if log_incoming then
+        BeardLib:DevLog("Incoming sound check %s", tostring(sound_id))
+    end
 
     local stop_id = self.stop_ids[sound_id]
     if stop_id then
@@ -28,7 +33,15 @@ function CustomSoundManager:CheckSoundID(sound_id, engine_source)
         return true
     end
 
-    local buffer = self.buffers[sound_id]
+    local prefix = engine_source:get_prefix()
+    local buffer
+    if prefix then
+        local prefix_tbl = self.buffers[prefix]
+        buffer = prefix_tbl and prefix_tbl[sound_id] or nil
+    else
+        buffer = self.buffers.global[sound_id]
+    end
+
     if buffer then
         local source = self:AddSource(engine_source, buffer).source
         source:set_buffer(buffer)
@@ -47,13 +60,23 @@ function CustomSoundManager:Buffers()
     return self.buffers
 end
 
-function CustomSoundManager:AddBuffer(path, sound_id, stop_id, loop)
+function CustomSoundManager:AddBuffer(path, data)
     local buffer = XAudio.Buffer:new(path)
-    buffer.loop = loop
+    local sound_id, stop_id = data.id, data.stop_id
+    local prefix = data.prefix
+    
+    buffer.loop = data.loop
     if stop_id then
         self.stop_ids[stop_id] = sound_id
     end
-    self.buffers[sound_id] = buffer
+    if prefix then
+        if not self.buffers[prefix] then
+            self.buffers[prefix] = {}
+        end
+        self.buffers[prefix][sound_id] = buffer
+    else
+        self.buffers.global[sound_id] = buffer
+    end
     return buffer
 end
 
