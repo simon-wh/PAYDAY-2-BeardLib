@@ -5,12 +5,33 @@ Hooks:PostHook(Setup, "init_managers", "BeardLibAddMissingDLCPackages", function
     Hooks:Call("SetupInitManagers")
 end)
 
+Hooks:PostHook(Setup, "unload_packages", "BeardLibUnloadPackages", function(ply)
+    CustomSoundManager:Close()
+end)
+
 if XAudio and SoundSource then
     local SoundSource = SoundSource
     if type(SoundSource) == "userdata" then
         SoundSource = getmetatable(SoundSource)
     end
     local sources = CustomSoundManager.engine_sources
+
+    local Unit = Unit
+    if type(Unit) == "userdata" then
+        Unit = getmetatable(Unit)
+    end
+
+    --I love overkill, they make get functions, but they crash at some instances :)
+    --This is the best way I could find to get these sound sources so :shrug:
+    local orig = Unit.sound_source
+    function Unit:sound_source(...)
+        local ss = orig(self, ...)
+        if ss then
+            ss:set_link_object(self)
+        end
+        return ss
+    end
+    
     function SoundSource:get_data()
         --:(
         local key = self:key()
@@ -43,17 +64,21 @@ if XAudio and SoundSource then
         return self:get_data().switch
     end
 
-    function SoundSource:get_prefix()
+    function SoundSource:get_prefixes()
         local switch = self:get_data().switch
-        return switch and switch.state or nil
+        return switch and table.map_values(switch) or nil
+    end
+
+    function SoundSource:set_link_object(object)
+        self:get_data().linking = object
     end
 
     Hooks:PostHook(SoundSource, "link", "BeardLibLink", function(self, object)
-        self:get_data().linking = object
+        self:set_link_object(object)
     end)
 
     Hooks:PostHook(SoundSource, "link_position", "BeardLibLinkPosition", function(self, object)
-        self:get_data().linking = object
+        self:set_link_object(object)
     end)
 
     Hooks:PostHook(SoundSource, "set_position", "BeardLibSetPosition", function(self, position)
@@ -61,7 +86,9 @@ if XAudio and SoundSource then
     end)
 
     Hooks:PostHook(SoundSource, "set_switch", "BeardLibSetSwitch", function(self, group, state)
-        self:get_data().switch = {group = group, state = state}
+        local data = self:get_data()
+        data.switch = data.switch or {}
+        data.switch[group] = state
         --Group: Not sure what it is exactly, guessing like a folder, gonna ignore for now.
         --State: Where the voice prefix actually goes to.
     end)

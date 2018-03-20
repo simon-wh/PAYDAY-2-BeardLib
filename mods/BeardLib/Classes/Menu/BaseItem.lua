@@ -105,8 +105,9 @@ function BaseItem:WorkParams(params)
 	end
 
 	--Bad/Old names
-	self:WorkParam("items_size", 16)
-
+	self:WorkParam("items_size", 18)
+	--
+	
 	self:WorkParam("size", self.items_size)
 	self:WorkParam("enabled_alpha", 1)
 	self:WorkParam("disabled_alpha", 0.5)

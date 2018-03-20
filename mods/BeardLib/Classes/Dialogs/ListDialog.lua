@@ -15,7 +15,7 @@ function ListDialog:init(params, menu)
     ListDialog.super.init(self, table.merge({
         h = params.main_h or 20,
         w = 900,
-        items_size = 20,
+        size = 20,
         offset = 0,
         align_method = "grid",
         position = function(item)
@@ -33,7 +33,7 @@ function ListDialog:init(params, menu)
         name = "List",        
         w = 900,
         h = params.h and params.h - self._menu.h or 600,
-        items_size = 18,
+        size = 18,
         auto_foreground = true,
         auto_align = false,
         background_color = self._menu.background_color,
