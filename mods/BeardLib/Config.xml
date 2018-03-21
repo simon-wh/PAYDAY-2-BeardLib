@@ -26,11 +26,11 @@
 		</Options>
 	</load_modules>
 	<classes>
-		<class file="Utils.lua"/>
+		<class file="Utils/Utils.lua"/>
 		<class file="ModCore.lua"/>
 		<class file="CustomPackageManager.lua"/>
 		<class file="CustomSoundManager.lua" manager="sound"/>
-		<class file="TweakDataHelper.lua"/>
+		<class file="Utils/TweakDataHelper.lua"/>
 		<class file="ModManager.lua"/>
 		<class file="FileManager.lua" manager="File"/>
 		<class file="FrameworkBase.lua"/>
@@ -60,8 +60,8 @@
 		<class file="Dialogs/SimpleListDialog.lua"/>
 		<class file="Dialogs/DownloadDialog.lua"/>
 		<class file="Dialogs/SimpleSelectListDialog.lua"/>
-		<class file="MenuHelperPlus.lua"/>
-		<class file="JsonUtils.lua"/>
+		<class file="Utils/MenuHelperPlus.lua"/>
+		<class file="Utils/JsonUtils.lua"/>
 		<class file="ModAssetUpdateManager.lua" manager="asset_update"/>
 		<class file="ModuleBase.lua"/>
 		<class file="Dialogs/MenuDialogManager.lua" manager="dialog"/>

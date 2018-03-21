@@ -1,5 +1,5 @@
 if not _G.BeardLib then
-	dofile(ModPath.."Classes/FileIO.lua")
+	dofile(ModPath.."Classes/Utils/FileIO.lua")
 	
     _G.BeardLib = {}
 	local self = BeardLib		
