@@ -116,8 +116,8 @@ function FileBrowserDialog:Browse(where, params)
     if self._browse_func then  
         f, d = self._browse_func(self)
     else
-        f = FileIO:getFiles(where)
-        d = FileIO:getFolders(where)
+        f = FileIO:GetFiles(where)
+        d = FileIO:GetFolders(where)
     end
     if self._search:len() > 0 then
         local temp_f = clone(f)
