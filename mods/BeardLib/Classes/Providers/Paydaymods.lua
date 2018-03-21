@@ -4,10 +4,10 @@ pdm.check_url = "http://api.paydaymods.com/updates/retrieve/?mod[0]=$id$"
 pdm.download_url = "http://download.paydaymods.com/download/latest/$id$"
 function pdm:get_hash()
     if self._config.hash_file then
-        return SystemFS:exists(self._config.hash_file) and file.FileHash(self._config.hash_file) or nil
+        return FileIO:Exists(self._config.hash_file) and file.FileHash(self._config.hash_file) or nil
     else
         local directory = Application:nice_path(self:GetMainInstallDir(), true)
-        return SystemFS:exists(directory) and file.DirectoryHash(directory) or nil
+        return FileIO:Exists(directory) and file.DirectoryHash(directory) or nil
     end
 end
 

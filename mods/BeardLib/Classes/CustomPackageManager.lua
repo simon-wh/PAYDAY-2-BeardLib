@@ -59,7 +59,7 @@ function C:HasPackage(id)
 end
 
 function C:LoadPackageConfig(directory, config)
-    if not SystemFS then
+    if not (SystemFS and SystemFS.exists) then
         BeardLib:log("[ERROR] SystemFS does not exist! Custom Packages cannot function without this! Do you have an outdated game version?")
         return
     end
