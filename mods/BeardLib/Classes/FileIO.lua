@@ -1,6 +1,6 @@
 FileIO = FileIO or {}
 function FileIO:Open(path, flags)
-	if SystemFS then
+	if SystemFS and SystemFS.open then
 		return SystemFS:open(path, flags)
 	else
 		return io.open(path, flags)
@@ -96,7 +96,7 @@ function FileIO:Exists(path)
 	if not path then
 		return false
 	end
-	if SystemFS then
+	if SystemFS and SystemFS.exists then
 		return SystemFS:exists(path)
 	else
 		if self:Open(path, "r") or file.GetFiles(path) then
@@ -112,7 +112,7 @@ function FileIO:CopyFileTo(path, to_path)
 	if not self:Exists(dir) then
 		self:MakeDir(dir)
 	end
-	if SystemFS then
+	if SystemFS and SystemFS.copy_file then
 		SystemFS:copy_file(path, dir)
 	else
 		os.execute(string.format("copy \"%s\" \"%s\" /e /i /h /y /c", path, to_path))
@@ -171,7 +171,7 @@ function FileIO:MoveTo(path, to_path)
 end
 
 function FileIO:Delete(path)
-	if SystemFS then
+	if SystemFS and SystemFS.delete_file then
 		SystemFS:delete_file(path)
 	else
 		os.execute("rm -r " .. path)
@@ -190,7 +190,7 @@ function FileIO:DeleteEmptyFolders(path, delete_current)
 end
 
 function FileIO:MakeDir(path) 
-    if SystemFS then
+    if SystemFS and SystemFS.make_dir then
     	local p
     	for _, s in pairs(string.split(path, "/")) do
     		p = p and p .. "/" .. s  or s
@@ -204,7 +204,7 @@ function FileIO:MakeDir(path)
 end
 --Changed to SystemFS because blt's one sometimes fucks up the strings.
 function FileIO:GetFiles(path)
-	if SystemFS then
+	if SystemFS and SystemFS.list then
 		return SystemFS:list(path)
 	else
 		return file.GetFiles(path)
@@ -212,7 +212,7 @@ function FileIO:GetFiles(path)
 end
 
 function FileIO:GetFolders(path)
-	if SystemFS then
+	if SystemFS and SystemFS.list then
 		return SystemFS:list(path, true)
 	elseif self:Exists(path) then
 		return file.GetDirectories(path)
