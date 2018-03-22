@@ -7,14 +7,18 @@ C.sources = {}
 C.engine_sources = {}
 local log_incoming = true
 function C:CheckSoundID(sound_id, engine_source)
+    if self._closed then
+        return false
+    end
+    
+    local prefixes = engine_source:get_prefixes()
     if log_incoming then
-        local prefixes = engine_source:get_prefixes()
         BeardLib:DevLog("Incoming sound check: ID %s Prefixes %s", tostring(sound_id), tostring(prefixes and table.concat(prefixes, ", ") or "none"))
     end
 
     local stop_id = self.stop_ids[sound_id]
     if stop_id then
-        local buffer = self.buffers[stop_id]
+        local buffer = self:GetLoadedBuffer(stop_id, prefixes, true)
         if buffer then
             local new_sources = {}
             for _, tbl in pairs(self.sources) do
@@ -35,7 +39,7 @@ function C:CheckSoundID(sound_id, engine_source)
         return true
     end
 
-    local buffer = self:GetLoadedBuffer(sound_id, engine_source:get_prefixes())
+    local buffer = self:GetLoadedBuffer(sound_id, prefixes)
 
     if buffer then
         local source = self:AddSource(engine_source, buffer).source
@@ -70,11 +74,15 @@ function C:GetDelayedBuffer(sound_id, prefixes)
     return nil
 end
 
-function C:GetLoadedBuffer(sound_id, prefixes)
+function C:GetLoadedBuffer(sound_id, prefixes, no_load)
     local delayed_buffer, prefix_tbl = self:GetDelayedBuffer(sound_id, prefixes)
     if delayed_buffer then
-        prefix_tbl[sound_id] = nil
-        return self:AddBuffer(delayed_buffer, true)
+        if not no_load then
+            prefix_tbl[sound_id] = nil
+            return self:AddBuffer(delayed_buffer, true)
+        else
+            return nil
+        end
     end
 
     if prefixes then
@@ -199,13 +207,16 @@ function C:Close()
                 end
             end
         end
-        self.buffers = {}
+        self.buffers = {global = {}}
         self.sources = {}
         self._closed = true
     end
 end
 
 function C:update(t, dt)
+    if self._closed then
+        return
+    end
     for i, tbl in pairs(self.sources) do
         local source = tbl.source
         local engine_source = tbl.engine_source
