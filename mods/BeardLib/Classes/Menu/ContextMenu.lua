@@ -195,9 +195,6 @@ function ContextMenu:MousePressed(button, x, y)
 end
 
 function ContextMenu:KeyPressed(o, k)
-    if self:textbox() then
-        self:textbox():KeyPressed(o, k)
-    end
     if not self:alive() then
         return
     end

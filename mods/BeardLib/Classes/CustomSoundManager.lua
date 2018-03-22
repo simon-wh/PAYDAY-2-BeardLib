@@ -162,9 +162,11 @@ function C:AddSource(engine_source, buffer)
        
     local source = XAudio.Source:new(buffer)
     local source_tbl = {engine_source = engine_source, source = source}
-    if engine_source:is_relative() then
+    if engine_source:is_relative() or buffer.data.relative then
         source:set_relative(true)
-        source:set_auto_pause(false)
+        if not buffer.data.auto_pause then
+            source:set_auto_pause(false)
+        end
     else
         source:set_position(engine_source:get_position())
     end

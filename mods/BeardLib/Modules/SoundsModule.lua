@@ -10,7 +10,9 @@ function SoundsModule:ReadSounds(data, prev_dir)
 	local prefix = data.prefix
 	local load_on_play = data.load_on_play or false
 	local unload = data.unload
-	
+	local auto_pause = data.auto_pause
+	local relative = data.relative
+			
     for k, v in pairs(data) do
 		if type(v) == "table" then
 			if (v._meta == "event" or v._meta == "Event") and v.id then
@@ -19,7 +21,8 @@ function SoundsModule:ReadSounds(data, prev_dir)
 				v.prefix = v.prefix or prefix
 				v.load_on_play = v.load_on_play or load_on_play
 				v.unload = v.unload or unload
-				CustomSoundManager:AddBuffer(v)
+				v.auto_pause = v.auto_pause or auto_pause
+				v.relative = v.relative or relative
 			elseif (v._meta == "sounds" or v._meta == "Sounds") then
 				self:ReadSounds(v, dir)
 			end
