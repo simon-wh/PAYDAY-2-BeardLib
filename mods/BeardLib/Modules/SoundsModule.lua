@@ -12,18 +12,21 @@ function SoundsModule:ReadSounds(data, prev_dir)
 	local unload = data.unload
 	local auto_pause = data.auto_pause
 	local relative = data.relative
-			
+	local dont_store_float = data.dont_store_float
+
     for k, v in pairs(data) do
 		if type(v) == "table" then
 			if (v._meta == "sound" or v._meta == "Sound") and v.id then
-				v.full_path = v.full_path or Path:Combine(dir, v.path)
-				v.stop_id = v.stop_id or v.id.."_stop"
-				v.prefix = v.prefix or prefix
-				v.load_on_play = v.load_on_play or load_on_play
-				v.unload = v.unload or unload
-				v.auto_pause = v.auto_pause or auto_pause
-				v.relative = v.relative or relative
-				CustomSoundManager:AddBuffer(v)
+				CustomSoundManager:AddBuffer(table.merge({
+					full_path = Path:Combine(dir, v.path),
+					dont_store_float = dont_store_float,
+					load_on_play = load_on_play,
+					auto_pause = auto_pause,
+					stop_id = v.id.."_stop",
+					relative = relative,
+					prefix = prefix,
+					unload = unload,
+				}, v))
 			elseif (v._meta == "sounds" or v._meta == "Sounds") then
 				self:ReadSounds(v, dir)
 			end

@@ -7,6 +7,7 @@ C.delayed_buffers = {global = {}}
 C.stop_ids = {}
 C.sources = {}
 C.engine_sources = {}
+C.float_ids = {}
 C.Closed = XAudio == nil
 
 function C:CheckSoundID(sound_id, engine_source)
@@ -14,6 +15,13 @@ function C:CheckSoundID(sound_id, engine_source)
         return false
     end
     
+    if tonumber(sound_id) then
+        local convert = self.float_ids[sound_id]
+        if convert then
+            sound_id = convert
+        end
+    end
+
     local prefixes = engine_source:get_prefixes()
     if log_incoming then
         BeardLib:DevLog("Incoming sound check: ID %s Prefixes %s", tostring(sound_id), tostring(prefixes and table.concat(prefixes, ", ") or "none"))
@@ -107,6 +115,12 @@ function C:AddBuffer(data, force)
     end
 
     local sound_id, stop_id = data.id, data.stop_id
+    if not data.dont_store_float then
+        self.float_ids[SoundDevice:string_to_id(sound_id)] = sound_id
+        if stop_id then
+            self.float_ids[SoundDevice:string_to_id(stop_id)] = stop_id
+        end
+    end
     local prefix = data.prefix
     if not force and data.load_on_play then
         if prefix then
