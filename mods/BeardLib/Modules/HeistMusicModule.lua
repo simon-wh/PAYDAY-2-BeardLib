@@ -20,6 +20,11 @@ function HeistMusic:MakeBuffer(source)
 end
 
 function HeistMusic:RegisterHook()
+	if not XAudio then
+		self:log("[ERROR] Heist music module requires the XAudio API!")
+		return
+	end
+
 	self._config.id = self._config.id or "Err"
 	if BeardLib.MusicMods[self._config.id] then
 		self:log("[ERROR] Music with the id '%s' already exists!", self._config.id)

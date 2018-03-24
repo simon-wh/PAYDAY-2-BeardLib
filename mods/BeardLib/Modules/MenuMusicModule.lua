@@ -20,6 +20,11 @@ function MenuMusicModule:MakeBuffer(source)
 end
 
 function MenuMusicModule:RegisterHook()
+	if not XAudio then
+		self:log("[ERROR] Menu music module requires the XAudio API!")
+		return
+	end
+
 	self._config.id = self._config.id or "Err"
 	if BeardLib.MusicMods[self._config.id] and not self._config.force then
 		self:log("[ERROR] Music with the id '%s' already exists!", self._config.id)

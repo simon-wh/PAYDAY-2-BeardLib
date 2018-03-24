@@ -6,6 +6,11 @@ function SoundsModule:RegisterHook()
 end
 
 function SoundsModule:ReadSounds(data, prev_dir)
+	if not XAudio then
+		self:log("[ERROR] Sounds module requires the XAudio API!")
+		return
+	end
+
 	local dir = self:GetPath(data.directory, prev_dir)
 	local prefix = data.prefix
 	local load_on_play = data.load_on_play or false

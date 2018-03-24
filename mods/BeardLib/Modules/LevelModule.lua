@@ -35,6 +35,10 @@ function LevelModule:Load()
         end
     end
 
+    if self._config.sounds then --Sounds unload automatically.
+        SoundsModule:new(self._mod, self._config.sounds)
+    end
+
     if self._config.add then
         self._loaded_addfiles = AddFilesModule:new(self._mod, self._config.add)
         Global.level_data._add = Global.level_data._add or self._loaded_addfiles
