@@ -27,7 +27,7 @@ Hooks:Add(peer_send_hook, "BeardLibCustomHeistFix", function(self, func_name, pa
             orig_NetworkPeer_send(self, "send_chat_message", LuaNetworking.HiddenChannel, parse_as_lnetwork_string(sync_stage_settings_id, string.format("%s|%s|%s|%s", Global.game_settings.level_id, tostring(managers.job._global.current_job.current_stage), tostring(managers.job._global.alternative_stage or 0), tostring(managers.job._global.interupt_stage))))      
 		elseif string.ends(func_name,"join_request_reply") then
             if params[1] == 1 then
-                params[14] = BeardLib.Utils:GetJobString()
+                params[15] = BeardLib.Utils:GetJobString()
             end
         end
     end

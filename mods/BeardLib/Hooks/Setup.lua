@@ -73,6 +73,10 @@ if XAudio and SoundSource then
         self:get_data().linking = object
     end
 
+    Hooks:PostHook(SoundSource, "stop", "BeardLibStopSounds", function(self)
+        CustomSoundManager:Stop(self)
+    end)
+
     Hooks:PostHook(SoundSource, "link", "BeardLibLink", function(self, object)
         self:set_link_object(object)
     end)

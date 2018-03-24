@@ -15,7 +15,7 @@ function SoundsModule:ReadSounds(data, prev_dir)
 			
     for k, v in pairs(data) do
 		if type(v) == "table" then
-			if (v._meta == "event" or v._meta == "Event") and v.id then
+			if (v._meta == "sound" or v._meta == "Sound") and v.id then
 				v.full_path = v.full_path or Path:Combine(dir, v.path)
 				v.stop_id = v.stop_id or v.id.."_stop"
 				v.prefix = v.prefix or prefix
@@ -23,6 +23,7 @@ function SoundsModule:ReadSounds(data, prev_dir)
 				v.unload = v.unload or unload
 				v.auto_pause = v.auto_pause or auto_pause
 				v.relative = v.relative or relative
+				CustomSoundManager:AddBuffer(v)
 			elseif (v._meta == "sounds" or v._meta == "Sounds") then
 				self:ReadSounds(v, dir)
 			end

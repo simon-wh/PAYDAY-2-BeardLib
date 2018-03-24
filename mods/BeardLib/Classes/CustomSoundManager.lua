@@ -1,13 +1,16 @@
 CustomSoundManager = CustomSoundManager or {}
 local C = CustomSoundManager
+local log_incoming = true
+
 C.buffers = {global = {}}
 C.delayed_buffers = {global = {}}
 C.stop_ids = {}
 C.sources = {}
 C.engine_sources = {}
-local log_incoming = true
+C.Closed = XAudio == nil
+
 function C:CheckSoundID(sound_id, engine_source)
-    if self._closed then
+    if self.Closed then
         return false
     end
     
@@ -42,8 +45,7 @@ function C:CheckSoundID(sound_id, engine_source)
     local buffer = self:GetLoadedBuffer(sound_id, prefixes)
 
     if buffer then
-        local source = self:AddSource(engine_source, buffer).source
-        source:set_looping(buffer.data.loop)
+        self:AddSource(engine_source, buffer)
         return true
     else
         return false
@@ -100,7 +102,7 @@ function C:GetLoadedBuffer(sound_id, prefixes, no_load)
 end
 
 function C:AddBuffer(data, force)
-    if self._closed then
+    if self.Closed then
         return
     end
 
@@ -156,7 +158,7 @@ function C:AddBuffer(data, force)
 end
 
 function C:AddSource(engine_source, buffer) 
-    if self._closed then
+    if self.Closed then
         return
     end
        
@@ -170,12 +172,13 @@ function C:AddSource(engine_source, buffer)
     else
         source:set_position(engine_source:get_position())
     end
+    source:set_looping(buffer.data.loop)
     table.insert(self.sources, source_tbl)
     return source_tbl
 end
 
 function C:IsClosed()
-    return self._closed
+    return self.Closed
 end
 
 function C:CloseBuffer(sound_id, prefix, soft)
@@ -200,6 +203,21 @@ function C:CloseBuffer(sound_id, prefix, soft)
     end
 end
 
+function C:Stop(engine_source)
+    local new_sources = {}
+    for _, tbl in pairs(self.sources) do
+        local source = tbl.source
+        if source and not source:is_closed() then
+            if tbl.engine_source == engine_source then
+                source:close()
+            else
+                table.insert(new_sources, tbl)
+            end
+        end
+    end
+    self.sources = new_sources
+end
+
 function C:Close()
     if not self:IsClosed() then
         for _, prefix_tbl in pairs(self.buffers) do
@@ -211,12 +229,12 @@ function C:Close()
         end
         self.buffers = {global = {}}
         self.sources = {}
-        self._closed = true
+        self.Closed = true
     end
 end
 
 function C:update(t, dt)
-    if self._closed then
+    if self.Closed then
         return
     end
     for i, tbl in pairs(self.sources) do

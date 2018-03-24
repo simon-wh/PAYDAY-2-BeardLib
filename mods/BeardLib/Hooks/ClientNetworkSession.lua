@@ -1,6 +1,8 @@
-Hooks:PreHook(ClientNetworkSession, "on_join_request_reply", "BeardLib_on_join_request_reply_fix_levels", function(self, reply, my_peer_id, my_character, level_index, difficulty_index, state_index, server_character, user_id, mission, job_id_index, job_stage, alternative_job_stage, interupt_job_stage_level_index, xuid, auth_ticket, sender)
-    if reply == 1 then
+--Why so many parameters aaa
+Hooks:PreHook(ClientNetworkSession, "on_join_request_reply", "BeardLib_on_join_request_reply_fix_levels", function(self, r, pid, char, lix, dix, od, si, sc, uid, ms, jix, js, alt_js, int_js, xuid, at, s)
+    if r == 1 then
         local cb = self._cb_find_game
+        
         self._cb_find_game = function(state, ...)
             local function orig_cb(state, ...)
                 if cb then
@@ -17,13 +19,13 @@ Hooks:PreHook(ClientNetworkSession, "on_join_request_reply", "BeardLib_on_join_r
                         orig_cb("CANCELLED")
                         return
                     end
-                    if job_id_index ~= 0 then
-                        managers.job:activate_job(split_data[1], job_stage)
-                        if alternative_job_stage ~= 0 then
-                            managers.job:synced_alternative_stage(alternative_job_stage)
+                    if jix ~= 0 then
+                        managers.job:activate_job(split_data[1], js)
+                        if alt_js ~= 0 then
+                            managers.job:synced_alternative_stage(alt_js)
                         end
-                        if interupt_job_stage_level_index ~= 0 then
-                            local interupt_level = tweak_data.levels:get_level_name_from_index(interupt_job_stage_level_index)
+                        if int_js ~= 0 then
+                            local interupt_level = tweak_data.levels:get_level_name_from_index(int_js)
                             managers.job:synced_interupt_stage(interupt_level)
                         end
                         Global.game_settings.world_setting = managers.job:current_world_setting()
