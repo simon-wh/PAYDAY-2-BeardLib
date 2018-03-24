@@ -880,11 +880,11 @@ function SimpleClbk(f, a, b, c, ...)
     if not f then
         return function() end
     end
-    if a then
-        if c then
+    if a ~= nil then
+        if c ~= nil then
             local args = {...}
-            return function(...) return f(a, b, c, unpack(args), ...) end
-        elseif b then
+            return function(...) return f(a, b, c, unpack(list_add(args, ...))) end
+        elseif b ~= nil then
             return function(...) return f(a, b, ...) end
         else
             return function(...) return f(a, ...) end
@@ -924,11 +924,11 @@ function ClassClbk(clss, func, a, b, c, ...)
         BeardLib:log("[Callback Error] Function named %s was not found in the given class", tostring(func))
         return function() end
     end
-    if a then
-        if c then
+    if a ~= nil then
+        if c ~= nil then
             local args = {...}
-            return function(...) return f(clss, a, b, unpack(args), ...) end
-        elseif b then
+            return function(...) return f(clss, a, b, c, unpack(list_add(args, ...))) end
+        elseif b ~= nil then
             return function(...) return f(clss, a, b, ...) end
         else
             return function(...) return f(clss, a, ...) end
