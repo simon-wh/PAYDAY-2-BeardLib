@@ -300,13 +300,15 @@ function BaseItem:SetEnabled(enabled) self.enabled = enabled == true end
 function BaseItem:WorkParam(param, ...) self[param] = NotNil(self[param], self.private[param], not self.inherit.private[param] and self.inherit[param], ...) end
 
 function BaseItem:ConvertOffset(offset, no_default)
-    if offset then
-        if type(offset) == "number" then
+	if offset then
+		local t = type(offset)
+        if t == "number" then
             return {offset, offset}
-        else
-            return offset
-        end
-    elseif not no_default then
+		elseif t == "table" then
+            return clone(offset)
+		end
+	end
+    if not no_default then
         return {6,2}
     end
 end
