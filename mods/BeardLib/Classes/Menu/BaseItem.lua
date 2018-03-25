@@ -58,7 +58,7 @@ function BaseItem:InitBGs()
 	self.highlight_bg = self.panel:rect({
 		name = "highlight",
 		color = self.highlight_color,
-		visible = self.highlight_color ~= false,
+		visible = self.highlight_color ~= false, 
 		alpha = self.highlight and 1 or 0,
 		h = self.type_name == "Group" and self.size,
 		halign = self.type_name ~= "Group" and "grow",
@@ -126,20 +126,39 @@ function BaseItem:WorkParams(params)
 	self:WorkParam("line_color", self.accent_color)
 	self:WorkParam("ignore_align", self.override_panel)
 	self:WorkParam("localized")
-	self:WorkParam("help_localized")
+	self:WorkParam("help_localized", self.localized)
+	self:WorkParam("localized_items", self.localized)
 	self:WorkParam("animate_colors")
+
+	--Specific items
+	self:WorkParam("wheel_control")
+	self:WorkParam("floats")
+	self:WorkParam("focus_mode")
+	self:WorkParam("supports_keyboard")
+	self:WorkParam("supports_mouse")
+	
 	self.name = NotNil(self.name, self.text, "")
 	self.text = NotNil(self.text, self.text ~= false and self.name)
-	
-	self.text_offset = self.text_offset and self:ConvertOffset(self.text_offset, true) or self:ConvertOffset(self.inherit.text_offset, true) or {4, 2}
-	self.offset = self.offset and self:ConvertOffset(self.offset) or self:ConvertOffset(self.inherit.offset)
+	self.fit_width = NotNil(self.fit_width, self.parent.align_method ~= "grid")
+
+	if not self.offset then
+		self:WorkParam("offset")
+	end
+
+	if not self.text_offset then
+		self:WorkParam("text_offset")
+	end
+
+	self.offset = self:ConvertOffset(self.offset)
+	self.text_offset = self:ConvertOffset(self.text_offset, true) or {4,2}
+
 	self.text_offset[1] = self.text_offset_x or self.text_offset[1]
 	self.text_offset[2] = self.text_offset_y or self.text_offset[2]
 	self.offset[1] = self.offset_x or self.offset[1]
 	self.offset[2] = self.offset_y or self.offset[2]
 
 	if not self.initialized and self.parent ~= self.menu then
-		if (not self.w or self.parent.align_method ~= "grid")  then
+		if (not self.w or self.fit_width) then
 			self.w = (self.w or self.parent_panel:w()) - ((self.size_by_text or self.type_name == "ImageButton") and 0 or self.offset[1] * 2)
 		end
 		self.w = math.clamp(self.w, self.min_width or 0, self.max_width or self.w)
@@ -290,15 +309,30 @@ function BaseItem:MouseFocused(x, y)
     return self:alive() and self.panel:inside(x,y) and self:Visible()
 end
 
-
-
 --Add/Set Funcs--
 function BaseItem:AddItem(item) table.insert(self._adopted_items, item) end
 function BaseItem:SetCallback(callback) self.on_callback = callback end
 function BaseItem:SetLabel(label) self.label = label end
 function BaseItem:SetParam(k,v) self[k] = v end
 function BaseItem:SetEnabled(enabled) self.enabled = enabled == true end
-function BaseItem:WorkParam(param, ...) self[param] = NotNil(self[param], self.private[param], not self.inherit.private[param] and self.inherit[param], ...) end
+function BaseItem:WorkParam(param, ...)
+	if self[param] == nil then
+		local v
+		if self.private[param] ~= nil then
+			v = self.private[param]
+		elseif self.inherit.inherit_values and self.inherit.inherit_values[param] ~= nil then
+			v = self.inherit.inherit_values[param]
+		elseif self.inherit.private[param] == nil and self.inherit[param] ~= nil then
+			v = self.inherit[param]
+		else
+			v = NotNil(...)
+		end
+		if type(v) == "table" then
+			v = clone(v)
+		end
+		self[param] = v
+	end
+end
 
 function BaseItem:ConvertOffset(offset, no_default)
 	if offset then
@@ -306,7 +340,7 @@ function BaseItem:ConvertOffset(offset, no_default)
         if t == "number" then
             return {offset, offset}
 		elseif t == "table" then
-            return clone(offset)
+            return {offset[1], offset[2]}
 		end
 	end
     if not no_default then

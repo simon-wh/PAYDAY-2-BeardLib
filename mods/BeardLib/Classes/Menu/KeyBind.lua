@@ -3,6 +3,7 @@ local KeyBindItem = BeardLib.Items.KeyBindItem
 KeyBindItem.type_name = "KeyBind"
 function KeyBindItem:Init()
     self.size_by_text = false
+    self:WorkParam("supports_keyboard", true)
     KeyBindItem.super.Init(self)
     self.keybind_key = self.panel:text({
         name = "keybind_key",
@@ -61,7 +62,7 @@ function KeyBindItem:SetCanEdit(CanEdit)
                 end
                 return key, additional_key
             end
-            local key, additional_key = get(Input:keyboard())
+            local key, additional_key = self.supports_keyboard and get(Input:keyboard())
             local is_mouse
             if not key and self.supports_mouse and not self._ignore_mouse then
                 key = get(Input:mouse())

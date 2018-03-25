@@ -11,7 +11,6 @@ function TextBox:Init()
 	self._textbox = BeardLib.Items.TextBoxBase:new(self, {
         panel = self.panel,
         lines = self.lines,
-		align = self.textbox_align,
 		focus_mode = self.focus_mode,
 		auto_focus = self.auto_focus,
         line_color = self.line_color or self.highlight_color,

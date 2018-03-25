@@ -22,7 +22,6 @@ function ComboBox:Init()
 	self._textbox = BeardLib.Items.TextBoxBase:new(self, {
         panel = self.panel,
         lines = 1,
-        align = self.textbox_align,
         line_color = self.line_color or self.highlight_color,
         w = self.panel:w() * (self.text == nil and 1 or self.control_slice),
         value = self:GetValueText(),
@@ -63,12 +62,12 @@ function ComboBox:SetValue(value, run_callback, no_items_clbk)
     if not self:alive() then
 		return false
     end
-    if type(value) == "number" then
-        local v = self.items[value]
-        if run_callback and type(v) == "table" and not no_items_clbk and v.on_callback then
-            self:RunCallback(v.on_callback)
-        end
+    
+    local v = self.items[value]
+    if run_callback and not no_items_clbk and v and type(v) == "table" and v.on_callback then
+        self:RunCallback(v.on_callback)
     end
+
     ComboBox.super.SetValue(self, value, run_callback)
     self:UpdateValueText()
     return true
@@ -93,11 +92,11 @@ function ComboBox:UpdateValueText()
 end
 
 function ComboBox:SetSelectedItem(value, ...)
-    self:SetValue(table.get_key(self.items, value) or value, ...)
+    self:SetValue(table.get_key(self.items, value) or (self.free_typing and value or nil), ...)
 end
 
 function ComboBox:SelectedItem()
-    return tonumber(self.value) and self.items[self.value] or self.value
+    return self.items[self.value] or (self.free_typing and self.value or nil)
 end
 
 function ComboBox:DoHighlight(highlight)

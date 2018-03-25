@@ -7,6 +7,11 @@ function Slider:Init()
 	Slider.super.Init(self)
     self.step = self.step or 1
     self.value = tonumber(self.value) or 0
+    self.min = self.min or self.value
+    self.max = self.max or self.value
+    if self.max or self.min then
+        self.value = math.clamp(self.value, self.min, self.max)    
+    end
     self:WorkParam("floats", 3)
     self.filter = "number"
     self.min = self.min or 0
@@ -77,7 +82,7 @@ function Slider:TextBoxSetValue(value, run_callback, reset_selection, no_format)
     value = tonumber(value) or 0 
     if self.max or self.min then
         value = math.clamp(value, self.min, self.max)    
-    end      
+    end
     value = tonumber(not no_format and format or value)
     local final_number = self.floats and string.format("%." .. self.floats .. "f", value) or tostring(value)
     local text = self._textbox.panel:child("text")
@@ -86,7 +91,7 @@ function Slider:TextBoxSetValue(value, run_callback, reset_selection, no_format)
     if not no_format then
         text:set_text(final_number)
     end
-     if reset_selection then
+    if reset_selection then
         text:set_selection(text:text():len())
     end
     self._before_text = self.value
@@ -104,8 +109,8 @@ function Slider:SetValue(value, ...)
     return true
 end
 
-function Slider:SetValueByPercentage(percent)
-    self:SetValue(self.min + (self.max - self.min) * percent, true, true)
+function Slider:SetValueByPercentage(percent, run_callback)
+    self:SetValue(self.min + (self.max - self.min) * percent, run_callback, true)
 end
 
 function Slider:MouseReleased(button, x, y)
@@ -129,6 +134,9 @@ function Slider:DoHighlight(highlight)
     end
 end
 
+local mouse_0 = Idstring("0")
+local wheel_up = Idstring("mouse wheel up")
+local wheel_down = Idstring("mouse wheel down")
 function Slider:MousePressed(button, x, y)
 	Slider.super.MousePressed(self, button, x, y)
     self._textbox:MousePressed(button, x, y)
@@ -137,12 +145,12 @@ function Slider:MousePressed(button, x, y)
     end
     local inside = self._slider:inside(x,y)
     if inside then
-        local wheelup = (button == Idstring("mouse wheel up") and 0) or (button == Idstring("mouse wheel down") and 1) or -1
+        local wheelup = (button == wheel_up and 0) or (button == wheel_down and 1) or -1
         if self.wheel_control and wheelup ~= -1 then
             self:SetValue(self.value + ((wheelup == 1) and -self.step or self.step), true, true)
             return true
         end
-    	if button == Idstring("0") then
+    	if button == mouse_0 then
             self.menu._slider_hold = self
             if self.max or self.min then
                 local slider_bg = self._slider:child("bg")
@@ -155,10 +163,11 @@ function Slider:MousePressed(button, x, y)
     end
 end
 
+local abs = math.abs
 function Slider:SetValueByMouseXPos(x)
     if not alive(self.panel) then
         return
     end
     local slider_bg = self._slider:child("bg")
-    self:SetValueByPercentage((x - slider_bg:world_left()) / (slider_bg:world_right() - slider_bg:world_left()))
+    self:SetValueByPercentage((x - slider_bg:world_left()) / (slider_bg:world_right() - slider_bg:world_left()), true)
 end

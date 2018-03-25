@@ -63,6 +63,10 @@ function MenuUI:init(params)
     self.pre_key_release = self.pre_key_release or self.always_key_released
     self.pre_mouse_press = self.pre_mouse_press or self.always_mouse_press
     self.pre_mouse_move = self.pre_mouse_move or self.always_mouse_move
+    
+    if self.use_default_close_key then
+        self.close_key = "esc"
+    end
 end
 
 function MenuUI:ReloadInterface(params, shallow)
@@ -300,6 +304,9 @@ function MenuUI:KeyPressed(o, k)
     if self:IsMouseActive() and self._highlighted and self._highlighted.parent:Enabled() and self._highlighted:KeyPressed(o, k) then
         return 
     end 
+    if self.close_key and k == Idstring(self.close_key) then
+        self:Disable()
+    end
     for _, menu in pairs(self._menus) do
         if menu:KeyPressed(o, k) then
             return

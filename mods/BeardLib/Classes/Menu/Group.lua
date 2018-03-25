@@ -1,8 +1,8 @@
 BeardLib.Items.Group = BeardLib.Items.Group or class(BeardLib.Items.Menu)
 local Group = BeardLib.Items.Group
 Group.type_name = "Group"
-function Group:Init()
-    Group.super.Init(self)
+function Group:Init(...)
+    Group.super.Init(self, ...)
     self:InitBasicItem()
     self:GrowHeight()
 end

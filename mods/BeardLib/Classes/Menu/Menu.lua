@@ -11,7 +11,7 @@ function Menu:Init(params)
         visible = self.visible == true,
         layer = self.layer or 1,
     })
-    self.bg = self.panel:rect({
+    self.bg = self.panel:bitmap({
         name = "background",
         halign = "grow",
         valign = "grow",
