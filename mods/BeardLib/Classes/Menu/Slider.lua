@@ -36,7 +36,7 @@ function Slider:Init()
         name = "slider",
         layer = 4,
     })
-    local ch = self._slider:h() - 2
+    local ch = self.size - 4
     self.circle = self._slider:bitmap({
         name = "circle",
         w = ch,
@@ -47,6 +47,7 @@ function Slider:Init()
         layer = 3,
         color = fgcolor,
     })
+    self.circle:set_center_y(self._slider:h() / 2)
 
     self.sfg = self._slider:rect({
         name = "fg",
