@@ -78,7 +78,7 @@ function ComboBox:GetValueText()
     if type(self.value) == "number" then
         text = self.items[self.value]
         text = type(text) == "table" and text.text or text
-        text = self.localized_items and text and managers.localization:text(text) or type(text) ~= "nil" and tostring(text) or ""
+        text = self.items_localized and text and managers.localization:text(text) or type(text) ~= "nil" and tostring(text) or ""
     elseif self.free_typing then
         text = self.value
     end

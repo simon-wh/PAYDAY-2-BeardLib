@@ -77,7 +77,7 @@ function ContextMenu:CreateItems()
         })
         panel:text({
             name = "text",
-            text = self.owner.localized_items and managers.localization:text(tostring(text)) or tostring(text),
+            text = self.owner.items_localized and managers.localization:text(tostring(text)) or tostring(text),
             w = panel:w() - (self.owner.text_offset[1] * 2),
             h = panel:h(),
             x = self.owner.text_offset[1],

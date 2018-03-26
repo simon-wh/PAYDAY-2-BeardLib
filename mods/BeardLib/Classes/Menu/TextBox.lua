@@ -64,7 +64,7 @@ end
 
 function TextBox:MousePressed(button, x, y)
 	if not self:MouseCheck(true) then
-		return
+		return false, true
 	end
 	if button == Idstring("1") and self.type_name == "NumberBox" and not self.no_slide and self._textbox.panel:inside(x,y) then
 		self.menu._slider_hold = self

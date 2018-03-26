@@ -65,7 +65,7 @@ function MenuUI:init(params)
     self.pre_mouse_move = self.pre_mouse_move or self.always_mouse_move
     
     if self.use_default_close_key then
-        self.close_key = "esc"
+        self.close_key = Idstring("esc")
     end
 end
 
@@ -295,7 +295,7 @@ function MenuUI:KeyPressed(o, k)
     if self._openlist then
         self._openlist:KeyPressed(o, k)
     end
-    if self.toggle_key and k == Idstring(self.toggle_key) then
+    if self.toggle_key and k == self.toggle_key:id() then
         self:toggle()
     end
     if not self:Enabled() then
@@ -304,7 +304,7 @@ function MenuUI:KeyPressed(o, k)
     if self:IsMouseActive() and self._highlighted and self._highlighted.parent:Enabled() and self._highlighted:KeyPressed(o, k) then
         return 
     end 
-    if self.close_key and k == Idstring(self.close_key) then
+    if self.close_key and k == self.close_key:id() then
         self:Disable()
     end
     for _, menu in pairs(self._menus) do

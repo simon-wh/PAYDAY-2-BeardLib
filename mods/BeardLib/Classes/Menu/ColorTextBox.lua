@@ -18,7 +18,21 @@ function ColorTextBox:UpdateColor()
 end
 
 function ColorTextBox:Value()
-    return Color:from_hex(self.value)
+    local value = self.value
+    if type_name(value) == "Color" then
+        return value
+    else
+        return Color:from_hex(value)
+    end
+end
+
+function ColorTextBox:HexValue()
+    local value = self.value
+    if type_name(value) == "Color" then
+        return value:to_hex()
+    else
+        return value
+    end
 end
 
 function ColorTextBox:SetValue(value, ...)
@@ -33,13 +47,19 @@ function ColorTextBox:TextBoxSetValue(...)
     self:UpdateColor()
 end
 
+local mouse_0 = Idstring("0")
 function ColorTextBox:MousePressed(button, x, y)
-    local result = ColorTextBox.super.MousePressed(self, button, x, y)
-    if not result and self.show_color_dialog and self.enabled then
-        if button == Idstring("0") and self:Panel():inside(x,y) then
+    local result, bad = ColorTextBox.super.MousePressed(self, button, x, y)
+    if result then
+        return result
+    elseif not bad and button == mouse_0 and self:Panel():inside(x,y) then
+        if self.show_color_dialog then -- Old.
             self:RunCallback(self.show_color_dialog)
             return true
-        end
+        elseif self.color_dialog then
+            BeardLibEditor.ColorDialog:Show({color = self:Value(), callback = ClassClbk(self, "RunCallback")})
+            return true
+        end   
     end
     return result
 end

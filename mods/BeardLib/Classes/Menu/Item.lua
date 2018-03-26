@@ -55,6 +55,7 @@ function Item:KeyPressed(o, k)
 	end
 end
 
+local mouse_1 = Idstring("1")
 function Item:MousePressed(button, x, y)
 	if not self.menu_type then
 	    for _, item in pairs(self._adopted_items) do
@@ -66,17 +67,19 @@ function Item:MousePressed(button, x, y)
     if not self:MouseCheck(true) then
         return
     end
-    if self:alive() and self:MouseInside(x,y) then
+	if self:alive() and self:MouseInside(x,y) then
         if button == Idstring("0") then
             self:RunCallback()
-            return true
-        elseif button == Idstring("1") then
-            if self._list then
-				self._list:show()
-			elseif self.on_right_click then
-				self:RunCallback(self.on_right_click)
-            end
-        end
+			return true
+		end
+		local right_click = button == mouse_1
+		if self._list and ((not self.open_list_key and right_click) or (self.open_list_key and button == self.open_list_key:id())) then
+			self._list:show()
+			return true
+		end
+		if self.on_right_click and (not self._list or self.open_list_key ~= mouse_1) then
+			self:RunCallback(self.on_right_click)
+		end
     end
 end
 

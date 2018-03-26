@@ -127,7 +127,7 @@ function BaseItem:WorkParams(params)
 	self:WorkParam("ignore_align", self.override_panel)
 	self:WorkParam("localized")
 	self:WorkParam("help_localized", self.localized)
-	self:WorkParam("localized_items", self.localized)
+	self:WorkParam("items_localized", self.localized)
 	self:WorkParam("animate_colors")
 
 	--Specific items
@@ -136,7 +136,8 @@ function BaseItem:WorkParams(params)
 	self:WorkParam("focus_mode")
 	self:WorkParam("supports_keyboard")
 	self:WorkParam("supports_mouse")
-	
+	self:WorkParam("color_dialog")
+
 	self.name = NotNil(self.name, self.text, "")
 	self.text = NotNil(self.text, self.text ~= false and self.name)
 	self.fit_width = NotNil(self.fit_width, self.parent.align_method ~= "grid")
@@ -282,7 +283,16 @@ function BaseItem:ParentPanel() return self.panel:parent() end
 	function BaseItem:Bottom() return self:Panel():bottom() end
 function BaseItem:AdoptedItems() return self._adopted_items end
 function BaseItem:Position() return self.position end
+function BaseItem:Location() return self:Panel():position() end
+function BaseItem:LeftTop() return self:Panel():lefttop() end
+function BaseItem:RightTop() return self:Panel():righttop() end
+function BaseItem:LeftBottom() return self:Panel():leftbottom() end
+function BaseItem:RightBottom() return self:Panel():rightbottom() end
+function BaseItem:CenterX() return self:Panel():center_x() end
+function BaseItem:CenterY() return self:Panel():center_y() end
+function BaseItem:Center() return self:Panel():center() end
 function BaseItem:Name() return self.name end
+function BaseItem:Label() return self.label end
 function BaseItem:Text() return type(self.text) == "string" and self.text or "" end
 function BaseItem:Height() return self:Panel():h() end
 function BaseItem:OuterHeight() return self:Height() + self:Offset()[2] end
@@ -300,6 +310,7 @@ function BaseItem:Value() return self.value end
 function BaseItem:Enabled() return self.enabled end
 function BaseItem:Index() return self.parent:GetIndex(self.name) end
 function BaseItem:MouseInside(x, y) return self.panel:inside(x,y) end
+function BaseItem:Inside(x, y) return self.panel:inside(x,y) end
 function BaseItem:Visible() return self:alive() and self.visible and self.should_render end
 function BaseItem:TextHeight() return self:title_alive() and self.title:bottom() + self:TextOffsetY() or 0 end
 function BaseItem:MouseFocused(x, y)
@@ -407,10 +418,10 @@ function BaseItem:MouseCheck(press)
 	return not self.divider_type, true
 end
 
-function BaseItem:SetIndex(index)
+function BaseItem:SetIndex(index, no_align)
 	table.delete(self.parent._my_items, self)
 	table.insert(self.parent._my_items, index, self)
-    if self.auto_align then
+    if not no_align and self.parent.auto_align then
         self:AlignItems(true)
     end
 end
@@ -430,13 +441,13 @@ function BaseItem:RunCallback(clbk, ...)
 end
 
 function BaseItem:Destroy()
+	if not self:alive() then
+		return
+	end
 	self.parent:RemoveItem(self)
 end
 
 function BaseItem:Configure(params)
-	table.merge(self, params)
+	table.careful_merge(self, params)
 	self.parent:RecreateItem(self, true)
-    if self.auto_align then
-        self:AlignItems(true)
-    end
 end
