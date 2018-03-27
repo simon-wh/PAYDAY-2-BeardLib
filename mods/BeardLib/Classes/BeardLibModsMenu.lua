@@ -1,40 +1,23 @@
 BeardLibModsMenu = BeardLibModsMenu or class() 
 function BeardLibModsMenu:init()
-    local accent_color = Color(0, 0.25, 1)
+    local accent_color = BeardLib.Options:GetValue("MenuColor")
 	self._menu = MenuUI:new({
         name = "BeardLibEditorMods",
         layer = 1000,
         offset = 6,
         localized = true,
-        show_help_time = 0.1,
         animate_toggle = true,
-        auto_foreground = true,
         accent_color = accent_color,
-		create_items = ClassClbk(self, "CreateItems"),
+        foreground = accent_color:contrast(),
+        animate_colors = true,
+        create_items = ClassClbk(self, "CreateItems"),
+        use_default_close_key = true
     })
     self._waiting_for_update = {}
 end
 
 function BeardLibModsMenu:SetEnabled(enabled)
-    local opened = BeardLib.managers.dialog:DialogOpened(self)
-    if enabled then
-        if not opened then
-            BeardLib.managers.dialog:ShowDialog(self)
-            self._menu:Enable()
-        end
-    elseif opened then
-        BeardLib.managers.dialog:CloseDialog(self)
-        self._menu:Disable()
-    end
-end
-
-function BeardLibModsMenu:should_close()
-    return self._menu:ShouldClose()
-end
-
-function BeardLibModsMenu:hide()
-    self:SetEnabled(false)
-    return true
+    self._menu:SetEnabled(enabled)
 end
 
 function BeardLibModsMenu:CreateItems(menu)
@@ -42,76 +25,64 @@ function BeardLibModsMenu:CreateItems(menu)
     
     self._holder = menu:Menu({
         name = "Main",
-        private = {background_color = Color(0.8, 0.2, 0.2, 0.2)},
-        size = 16,
+        scrollbar = false,
+        background_color = Color(0.8, 0.2, 0.2, 0.2),
+        highlight_color = menu.foreground:with_alpha(0.1),
+        size = 20,
     })
     self._menu._panel:rect({
         name = "title_bg",
         layer = 2,
-        color = Color(0.8, 0, 0.25, 1),
+        color = self._menu.accent_color,
         h = 34,
     })
     local text = self._holder:Divider({
         name = "title",
         text = "beardlib_mods_manager",
-        size = 20,
         position = {4, 6},
         count_as_aligned = true
     })
-    local close = self._holder:Button({
+    self._holder:Button({
         name = "Close",
         text = "beardlib_close",
         size_by_text = true,
-        size = 20,
-        position = function(item)
-            item:SetPositionByString("RightTop")
-            item:Panel():move(-4, 6)
-        end,
-        on_callback = ClassClbk(self, "hide")
+        position = "RightTopOffset-xy",
+        on_callback = ClassClbk(self, "SetEnabled", false)
     })
-    local upall = self._holder:Button({
+    self._holder:Button({
         name = "UpdateAllMods",
         text = "beardlib_update_all",
         size_by_text = true,
-        size = 20,
-        position = function(item)
-            item:Panel():set_righttop(close:Panel():left() - 4, close:Panel():y())
-        end,
-        on_callback = ClassClbk(self, "UpdateAllMods", true),
-        on_right_click = ClassClbk(self, "UpdateAllMods")
+        position = SimpleClbk(self._holder.AlignRight),
+        on_callback = ClassClbk(self, "UpdateAllMods"),
     })
-    self._holder:Toggle({
-        name = "ImportantNotice",
-        text = "beardlib_important_notice",
-        value = BeardLib.Options:GetValue("ImportantNotice"),
+    self._holder:Button({
+        name = "Settings",
+        text = "beardlib_settings",
         size_by_text = true,
-        size = 20,
-        position = function(item)
-            item:Panel():set_righttop(upall:Panel():left() - 4, upall:Panel():y())
-        end,
-        on_callback = ClassClbk(self, "SetShowImportantUpdatesNotice")
+        position = SimpleClbk(self._holder.AlignRight),
+        on_callback = ClassClbk(self, "OpenSettings"),
     })
     self._holder:TextBox({
         name = "search",
         text = false,
         w = 300,
+        focus_mode = true,
         line_color = self._holder.foreground,
         control_slice = 1,
-        size = 20,
-        position = function(item)
+        position = function(item, last_item)
             item:SetPositionByString("Center")
-            item:Panel():set_y(upall:Panel():y())
+            item:Panel():set_y(item:OffsetY())
         end,
         on_callback = ClassClbk(self, "SearchMods")
     })
     self._list = self._holder:Menu({
         name = "ModList",
-        h = self._holder:ItemsHeight() - text:OuterHeight() - (self._holder.offset[2] * 2) - 10,
-        private = {offset = 0},
-        position = function(item)
-            item:SetPositionByString("CenterBottom")
-            item:Panel():move(5, -5)
-        end,
+        h = self._holder:ItemsHeight() - text:OuterHeight() - (self._holder.offset[2] * 2),
+        fit_width = false,
+        offset = 4,
+        size = 16,
+        position = "CenterxBottomOffset-y",
         auto_align = false,
         align_method = "grid",
     })
@@ -128,13 +99,16 @@ function BeardLibModsMenu:CreateItems(menu)
     self._list:AlignItems(true)
 end
 
+local texutre_ids = Idstring("texture")
 function BeardLibModsMenu:AddMod(mod, type)
-    local loc = managers.localization
     local disabled_mods = BeardLib.Options:GetValue("DisabledMods")
+    local show_images = BeardLib.Options:GetValue("ShowImages")
+    local loc = managers.localization
     local name = mod.Name or "Missing name?"
     local blt_mod = type == "blt"
     local color = blt_mod and Color(0.6, 0, 1) or type == "custom" and Color(0, 0.25, 1) or Color(0.1, 0.6, 0.1)
-    local s = (self._list:ItemsWidth() / 5) - self._list:Offset()[1]
+    local s = (self._list:ItemsWidth() / 5) - self._list.offset[1] - 1
+
     if mod._config.color then
         local orig_color = color
         color = BeardLib.Utils:normalize_string_value(mod._config.color)
@@ -147,46 +121,39 @@ function BeardLibModsMenu:AddMod(mod, type)
     local mod_item = self._list:Menu({
         name = name,
         label = mod,
-        w = s - 1,
-        h = s - 1,
+        w = s,
+        h = show_images and s or s / 1.5,
         scrollbar = false,
         auto_align = false,
+        auto_foreground = true,
         accent_color = concol,
-        highlight_color = concol, 
+        highlight_color = concol,
         background_color = color:with_alpha(0.8)
     })
     self._list:SetScrollSpeed(mod_item:Height())
-    local o = {}
     local text = function(t, opt)
-        opt = opt or o
-        return mod_item:Divider(table.merge({
-            text_vertical = "top",
-            text = t,
-            localized = false
-        }, opt))
+        return mod_item:Divider(table.merge({text_vertical = "top", text = t, localized = false}, opt))
     end
-    local img = mod._config.image
-    img = img and DB:has(Idstring("texture"), Idstring(mod._config.image)) and img or nil
-    mod_item:Image({
-        name = "Image",
-        w = 100,
-        h = 100,
-        icon_w = 100,
-        icon_h = 100,
-        offset = 0,
-        foreground = Color.white,
-        auto_foreground = mod._config.auto_image_color or not mod._config.image,
-        count_as_aligned = true,
-        texture = img or "guis/textures/pd2/none_icon",
-        position = "CenterTop"
-    })
-    local t = text(tostring(name), {name = "Title", size = 20, offset = {4, 0}})
+    if show_images then
+        local img = mod._config.image
+        img = img and DB:has(texutre_ids, img:id()) and img or nil
+        local image = mod_item:Image({
+            name = "Image",
+            w = 100,
+            h = 100,
+            foreground = (not mod._config.auto_image_color or not mod._config.image) and Color.white or nil,
+            count_as_aligned = true,
+            texture = img or "guis/textures/pd2/none_icon",
+            position = "CenterTop"
+        })
+    end
+    local t = text(tostring(name), {name = "Title", size = 20})
     if t:Height() == t.size then
         text("")
     end
     text("Type: "..loc:text("beardlib_mod_type_" .. type))
     text("", {name = "Status"})
-    mod_item:Toggle({
+    local p = mod_item:Toggle({
         name = "Enabled",
         text = false,
         enabled = not blt_mod,
@@ -194,31 +161,29 @@ function BeardLibModsMenu:AddMod(mod, type)
         h = 24,
         size = 24,
         highlight_color = Color.transparent,
-        offset = 0,
+        fit_width = false,
         value = disabled_mods[mod.ModPath] ~= true,
         on_callback = ClassClbk(self, "SetModEnabled", mod),
-        position = function(item)
-            item:SetPositionByString("TopRight")
-            item:Panel():move(-4, 1)
-        end
+        position = "TopRightOffset-xy"
     })
     mod_item:Panel():rect({
         name = "DownloadProgress",
         color = color:contrast():with_alpha(0.25),
         w = 0,
     })
-    mod_item:Button({
-        name = "View",
-        on_callback = ClassClbk(self, "ViewMod", mod),
-        enabled = mod.update_module_data ~= nil,
-        size = 16,
-        text = "beardlib_visit_page"
-    })
+    if mod.update_module_data ~= nil then
+        mod_item:Button({
+            name = "View",
+            on_callback = ClassClbk(self, "ViewMod", mod),
+            text = "beardlib_visit_page"
+        })
+    end
     mod_item:Button({
         name = "Download",
         on_callback = ClassClbk(self, "BeginModDownload", mod),
         enabled = false,
-        size = 16,
+        fit_width = false,
+        position = "BottomOffset-y",
         text = "beardlib_updates_download_now"
     })
     
@@ -261,7 +226,7 @@ function BeardLibModsMenu:SearchMods(item)
     self._list:AlignItems()
 end
 
-function BeardLibModsMenu:UpdateAllMods(no_dialog)
+function BeardLibModsMenu:UpdateAllMods()
     local tbl = {}
     for _, mod_item in pairs(self._list._my_items) do
         local download = mod_item:GetItem("Download")
@@ -269,12 +234,49 @@ function BeardLibModsMenu:UpdateAllMods(no_dialog)
             table.insert(tbl, {name = mod_item.name, value = mod_item})
         end
     end
+    BeardLib.managers.dialog:SimpleSelectList():Show({force = true, list = tbl, selected_list = tbl, callback = ClassClbk(self, "UpdatesModsByList")})
+end
 
-    if no_dialog == true then
-        self:UpdatesModsByList(tbl)
-    else        
-        BeardLib.managers.dialog:SimpleSelectList():Show({force = true, list = tbl, selected_list = tbl, callback = ClassClbk(self, "UpdatesModsByList")})
-    end
+function BeardLibModsMenu:OpenSettings()
+    BeardLib.managers.dialog:Simple():Show({
+        title = managers.localization:text("beardlib_b_settings"),
+        create_items = function(menu)
+            local holder = menu:Menu({name = "settings_holder", auto_height = true, localized = true})
+            holder:ColorTextBox({
+                name = "MenuColor",
+                text = "beardlib_menu_color",
+                value = BeardLib.Options:GetValue("MenuColor"),
+                on_callback = ClassClbk(self, "SetOption")
+            })
+            holder:Toggle({
+                name = "ShowImages",
+                text = "beardlib_show_images",
+                value = BeardLib.Options:GetValue("ShowImages"),
+                on_callback = ClassClbk(self, "SetOption")
+            })
+            holder:Toggle({
+                name = "ImportantNotice",
+                text = "beardlib_important_notice",
+                help = "beardlib_important_notice_help",
+                value = BeardLib.Options:GetValue("ImportantNotice"),
+                on_callback = ClassClbk(self, "SetOption")
+            })
+            if FileIO:Exists("mods/developer.txt") then
+                holder:Toggle({
+                    name = "DevMode",
+                    text = "beardlib_dev_mode",
+                    help = "beardlib_dev_mode_help",
+                    value = BeardLib.Options:GetValue("DevMode"),
+                    on_callback = ClassClbk(self, "SetOption")
+                })    
+            end
+            holder:Button({
+                name = "ResetSettings",
+                text = "beardlib_reset_settings",
+                on_callback = ClassClbk(self, "ResetOptions")
+            })
+        end
+    })
 end
 
 function BeardLibModsMenu:UpdatesModsByList(list)
@@ -287,8 +289,17 @@ function BeardLibModsMenu:UpdatesModsByList(list)
     end
 end
 
-function BeardLibModsMenu:SetShowImportantUpdatesNotice(item)
-    BeardLib.Options:SetValue("ImportantNotice", item:Value())    
+function BeardLibModsMenu:SetOption(item)
+    BeardLib.Options:SetValue(item:Name(), item:Value())    
+end
+
+function BeardLibModsMenu:ResetOptions(item)
+    for _, I in pairs(item.parent:Items()) do
+        local option = BeardLib.Options:GetOption(I:Name())
+        if option then
+            I:SetValue(option.default_value, true)
+        end
+    end
 end
 
 function BeardLibModsMenu:ViewMod(mod)

@@ -48,5 +48,13 @@
     "beardlib_match_case" : "Match case",
     "beardlib_limit_results" : "Limit results",
     "beardlib_tick_all" : "Tick all present items",
-    "beardlib_untick_all" : "Untick all present items"
+    "beardlib_untick_all" : "Untick all present items",
+    "beardlib_settings" : "Settings",
+    "beardlib_b_settings" : "BeardLib Settings",
+    "beardlib_menu_color" : "Menu color",
+    "beardlib_show_images" : "Show mod images",
+    "beardlib_reset_settings" : "Reset settings",
+    "beardlib_dev_mode" : "Developer mode",
+    "beardlib_dev_mode_help" : "BeardLib's developer mode currently only logs some information such as sound ids",
+    "beardlib_important_notice_help" : "Should BeardLib notify you when there's an update for an important mod?"
 }

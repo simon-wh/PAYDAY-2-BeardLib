@@ -298,21 +298,20 @@ function MenuUI:KeyPressed(o, k)
     if self.toggle_key and k == self.toggle_key:id() then
         self:toggle()
     end
-    if not self:Enabled() then
-        return
-    end
-    if self:IsMouseActive() and self._highlighted and self._highlighted.parent:Enabled() and self._highlighted:KeyPressed(o, k) then
-        return 
-    end 
-    if self.close_key and k == self.close_key:id() then
-        self:Disable()
-    end
-    for _, menu in pairs(self._menus) do
-        if menu:KeyPressed(o, k) then
-            return
+    if self:Enabled() and self:IsMouseActive() then
+        if self._highlighted and self._highlighted.parent:Enabled() and self._highlighted:KeyPressed(o, k) then
+            return 
         end
+        if self.close_key and k == self.close_key:id() then
+            self:Disable()
+        end
+        for _, menu in pairs(self._menus) do
+            if menu:KeyPressed(o, k) then
+                return
+            end
+        end
+        if self.key_press then self.key_press(o, k) end
     end
-    if self.key_press then self.key_press(o, k) end
 end
 
 function MenuUI:Param(param)
@@ -492,6 +491,10 @@ function MenuUI:Focused()
         end
 	end
     return false
+end
+
+function MenuUI:GetBackground()
+    return self.background_color
 end
 
 function MenuUI:Typing()

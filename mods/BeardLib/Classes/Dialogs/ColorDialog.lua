@@ -10,7 +10,7 @@ function ColorDialog:init(params, menu)
         w = ColorDialog._default_width,
         offset = 8,
         auto_height = true,
-        items_size = 20,
+        size = 20,
         auto_align = true
     }), menu)
 end
@@ -24,7 +24,7 @@ function ColorDialog:_Show(params)
     local preview = self._menu:Divider({
         name = "ColorPreview",
         text = "",
-        items_size = 32,
+        size = 32,
         offset = 0,
         background_color = params.color,
     })
@@ -40,7 +40,7 @@ function ColorDialog:_Show(params)
         highlight_color = false,
         on_callback = ClassClbk(self, "update_hex"),
         w = 120,
-        items_size = 20,
+        size = 20,
         override_panel = preview
     })
     if params.create_items then
@@ -113,7 +113,7 @@ function ColorDialog:update_color(not_hex)
     self:update_hex_color()
 end
 
-function ColorDialog:run_on_callback(clbk)
+function ColorDialog:run_callback(clbk)
     if clbk then
         clbk(self._color, self._menu)
     end

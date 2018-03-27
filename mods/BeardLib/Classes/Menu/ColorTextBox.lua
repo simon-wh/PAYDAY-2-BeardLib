@@ -3,6 +3,8 @@ local ColorTextBox = BeardLib.Items.ColorTextBox
 ColorTextBox.type_name = "ColoredTextBox"
 
 function ColorTextBox:Init(...)
+    self.lines = 1
+    self.value = self:HexValue() or "000000"
     ColorTextBox.super.Init(self, ...)
     local panel = self:Panel()
     panel:rect({name = "color_preview", w = self.size, h = self.size})
@@ -13,6 +15,8 @@ function ColorTextBox:UpdateColor()
     local preview = self:Panel():child("color_preview")
     if preview then
         preview:set_color(self:Value())
+        local s = self._textbox.panel:h()
+        preview:set_size(s,s)
         preview:set_right(self._textbox.panel:right())
     end
 end
@@ -20,6 +24,7 @@ end
 function ColorTextBox:Value()
     local value = self.value
     if type_name(value) == "Color" then
+        self.value = value:to_hex()
         return value
     else
         return Color:from_hex(value)
@@ -56,10 +61,12 @@ function ColorTextBox:MousePressed(button, x, y)
         if self.show_color_dialog then -- Old.
             self:RunCallback(self.show_color_dialog)
             return true
-        elseif self.color_dialog then
-            BeardLibEditor.ColorDialog:Show({color = self:Value(), callback = ClassClbk(self, "RunCallback")})
+        elseif not self.no_color_dialog then
+            BeardLib.managers.dialog:Color():Show({color = self:Value(), force = true, callback = function(color)
+                self:SetValue(color, true)
+            end})
             return true
-        end   
+        end
     end
     return result
 end

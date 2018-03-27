@@ -2,6 +2,7 @@ FileBrowserDialog = FileBrowserDialog or class(MenuDialog)
 FileBrowserDialog._no_clearing_menu = true
 FileBrowserDialog._no_reshaping_menu = true
 FileBrowserDialog.type_name = "FileBrowserDialog"
+--TODO: Clean this
 function FileBrowserDialog:_Show(params, force)
     if not self:basic_show(params) then
         return
@@ -41,22 +42,25 @@ function FileBrowserDialog:init(params, menu)
         end,
         w = 600
     }))
+    local s = self._files_menu.size + 8
     FileBrowserDialog.super.init(self, table.merge(params, {
         w = 900,
-        h = self._files_menu.items_size + 8,
+        h = s,
         auto_height = false,
         position = function(item)
             item:Panel():set_leftbottom(self._folders_menu:Panel():left(), self._folders_menu:Panel():top() - 1)
         end,
+        text_align = "center",
+        text_vertical = "center",
         align_method = "grid",
         offset = 0
-    }), menu) 
+    }), menu)
     self._menus = {self._files_menu, self._folders_menu}
     self._menu:Button({
         name = "Backward",
         w = 30,
+        h = s,
         text = "<",
-        text_align = "center",
         on_callback = ClassClbk(self, "FolderBack"),  
         label = "temp"
     })    
@@ -64,8 +68,8 @@ function FileBrowserDialog:init(params, menu)
     self._menu:Button({
         name = "Forward",
         w = 30,
+        h = s,
         text = ">",
-        text_align = "center",
         on_callback = function()
             self:Browse(self._old_dir)
         end,  
@@ -73,23 +77,32 @@ function FileBrowserDialog:init(params, menu)
     })    
     self._menu:TextBox({
         name = "CurrentPath",
-        text = " ",
+        text = false,
         w = 540,
+        h = s,
+        lines = 1,
         control_slice = 1,
         forbidden_chars = {':','*','?','"','<','>','|'},
         on_callback = ClassClbk(self, "OpenPathSetDialog"),
     })
     self._menu:TextBox({
         name = "Search",
-        w = 200,
+        w = 260,
+        h = s,
+        lines = 1,
+        control_slice = 0.75,
+        text_align = "left",
         on_callback = ClassClbk(self, "Search"),  
         label = "temp"
     })
-    self._menu:Button({
+    self._menu:ImageButton({
         name = "Close",
-        w = 100,
-        text = "Close",
-        text_align = "center",
+        w = 40,
+        h = s,
+        icon_w = 14,
+        icon_h = 14,
+        texture = "guis/textures/menu_ui_icons",
+        texture_rect = {84, 89, 36, 36},
         on_callback = ClassClbk(self, "hide"),  
         label = "temp"
     })

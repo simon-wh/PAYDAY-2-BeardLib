@@ -223,6 +223,26 @@ function Item:MouseMoved(x, y)
     end
 end
 
+function Item:AlignRight(last_item)
+	if last_item then
+		local p = last_item:Panel()
+		self:Panel():set_righttop(p:x() - self:OffsetX(), p:y())
+	else
+		self:SetPositionByString("RightTop")
+		self:Panel():move(-self:OffsetX(), self:OffsetY())
+	end
+end
+
+function Item:AlignLeft(last_item)
+	if last_item then
+		local p = last_item:Panel()
+		self:Panel():set_position(p:x() + self:OffsetX(), p:y())
+	else
+		self:SetPositionByString("LeftTop")
+		self:Panel():move(self:OffsetX(), self:OffsetY())
+	end
+end
+
 function Item:MouseReleased(button, x, y)
 	if self._list then
 		self._list:MouseReleased(button, x, y)

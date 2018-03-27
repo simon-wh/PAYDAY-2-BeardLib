@@ -18,7 +18,10 @@
 		</AddFiles>
 		<Options build_menu="false" auto_load="true">
 			<options>
+				<option name="ShowImages" type="boolean" default_value="true"/>
+				<option name="MenuColor" type="color" default_value="Color(0, 0.25, 1)"/>
 				<option name="ImportantNotice" type="boolean" default_value="true"/>
+				<option name="DevMode" type="boolean" default_value="false"/>
 				<option name="DisabledMods" type="table">
 					<default_value/>
 				</option>

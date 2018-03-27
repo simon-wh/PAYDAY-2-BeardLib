@@ -24,10 +24,11 @@ function Menu:Init(params)
     })
     self._scroll = ScrollablePanelModified:new(self.panel, "ItemsPanel", {
         layer = 4,
-        padding = 0.0001, 
+        padding = 0, 
         scroll_width = self.scrollbar == false and 0 or self.scroll_width, 
         hide_shade = true, 
         color = self.scroll_color or self.highlight_color,
+        hide_scroll_background = self.hide_scroll_background,
         scroll_speed = self.scroll_speed
     })
     self.items_panel = self._scroll:canvas()
@@ -280,6 +281,7 @@ function Menu:AlignItemsNormal()
     end
     local max_h = 0
     local prev_item
+    local last_positioned_item
     for _, item in pairs(self._my_items) do
         if not item.ignore_align and item:Visible() then
             local offset = item:Offset()
@@ -289,7 +291,10 @@ function Menu:AlignItemsNormal()
             if alive(prev_item) then
                 panel:set_world_y(prev_item:Panel():world_bottom() + offset[2])
             end
-            local repos = item:Reposition()
+            local repos = item:Reposition(last_positioned_item, prev_item)
+            if repos then
+                last_positioned_item = item
+            end
             if not repos or item.count_as_aligned then
                 prev_item = item
             end
@@ -307,6 +312,7 @@ function Menu:AlignItemsReversed()
     end
     local max_h = 0
     local prev_item
+    local last_positioned_item
     for i=#self._my_items, 1, -1 do
         local item = self._my_items[i]
         if not item.ignore_align and item:Visible() then
@@ -317,7 +323,10 @@ function Menu:AlignItemsReversed()
             if alive(prev_item) then
                 panel:set_world_y(prev_item:Panel():world_bottom() + offset[2])
             end
-            local repos = item:Reposition()
+            local repos = item:Reposition(last_positioned_item, prev_item)
+            if repos then
+                last_positioned_item = item
+            end
             if not repos or item.count_as_aligned then
                 prev_item = item
             end
@@ -334,6 +343,7 @@ function Menu:AlignItemsGrid()
         return
     end
     local prev_item
+    local last_positioned_item
     local max_h = 0
     local max_x = 0
     local max_y = 0
@@ -346,7 +356,10 @@ function Menu:AlignItemsGrid()
                 max_x = 0
             end
             panel:set_position(max_x + offset[1], max_y + offset[2])
-            local repos = item:Reposition()
+            local repos = item:Reposition(last_positioned_item, prev_item)
+            if repos then
+                last_positioned_item = item
+            end
             if not repos or item.count_as_aligned then
                 prev_item = item
                 max_x = math.max(max_x, panel:right())
@@ -364,6 +377,7 @@ function Menu:AlignItemsReversedGrid()
         return
     end
     local prev_item
+    local last_positioned_item
     local max_h = 0
     local max_x = 0
     local max_y = 0
@@ -377,7 +391,10 @@ function Menu:AlignItemsReversedGrid()
                 max_x = 0
             end
             panel:set_position(max_x + offset[1], max_y + offset[2])
-            local repos = item:Reposition()
+            local repos = item:Reposition(last_positioned_item, prev_item)
+            if repos then
+                last_positioned_item = item
+            end
             if not repos or item.count_as_aligned then
                 prev_item = item
                 max_x = math.max(max_x, panel:right())

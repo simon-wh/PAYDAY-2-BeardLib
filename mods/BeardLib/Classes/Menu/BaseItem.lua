@@ -77,11 +77,9 @@ function BaseItem:BestAlpha(...)
 	return big
 end
 
+--Hopefully this reaches the base MenuUI and not cause a stack overflow xd
 function BaseItem:GetBackground()
-	if not self.background_color and self.menu ~= self.parent then
-		return self.parent:GetBackground()
-	end
-	return self.background_color or Color.black
+	return self:BestAlpha(self.background_color, self.parent:GetBackground()) or Color.black
 end
 
 function BaseItem:WorkParams(params)
@@ -92,9 +90,14 @@ function BaseItem:WorkParams(params)
 	self:WorkParam("context_background_color", self.background_color, Color.black)	
 	self:WorkParam("background_color", Color.transparent)
 
-	local bg = self:GetBackground()
-	local bgh = self:BestAlpha(self.highlight_color, bg)
+	local bg, bgh
 	self:WorkParam("auto_foreground")
+
+	if self.auto_foreground then
+		bg = self:GetBackground()
+		bgh = self:BestAlpha(self.highlight_color, bg)
+	end
+
 	self:WorkParam("foreground", foreground)
 	if self.auto_foreground and self.foreground ~= false then
 		self.foreground = bg:contrast()
@@ -157,6 +160,15 @@ function BaseItem:WorkParams(params)
 	self.text_offset[2] = self.text_offset_y or self.text_offset[2]
 	self.offset[1] = self.offset_x or self.offset[1]
 	self.offset[2] = self.offset_y or self.offset[2]
+
+	if self.inherit_values then
+		if self.inherit_values.offset then
+			self.inherit_values.offset = self:ConvertOffset(self.inherit_values.offset)
+		end
+		if self.inherit_values.text_offset then
+			self.inherit_values.text_offset = self:ConvertOffset(self.inherit_values.text_offset)
+		end	
+	end
 
 	if not self.initialized and self.parent ~= self.menu then
 		if (not self.w or self.fit_width) then
@@ -328,7 +340,6 @@ function BaseItem:SetParam(k,v) self[k] = v end
 function BaseItem:SetEnabled(enabled) self.enabled = enabled == true end
 function BaseItem:WorkParam(param, ...)
 	if self[param] == nil then
-		local v
 		if self.private[param] ~= nil then
 			v = self.private[param]
 		elseif self.inherit.inherit_values and self.inherit.inherit_values[param] ~= nil then
@@ -360,7 +371,7 @@ function BaseItem:ConvertOffset(offset, no_default)
 end
 
 --Position Func--
-function BaseItem:Reposition()
+function BaseItem:Reposition(last_positioned_item, prev_item)
 	if not self:alive() then
 		return false
 	end
@@ -368,7 +379,7 @@ function BaseItem:Reposition()
     if t == "table" then
         self.panel:set_position(unpack(self.position))
     elseif t == "function" then
-        self:position(self)
+        self:position(last_positioned_item, prev_item)
     elseif t == "string" then
         self:SetPositionByString(self.position)
 	end
@@ -384,17 +395,36 @@ function BaseItem:SetPosition(x,y)
     self:Reposition()
 end
 
+local pos_funcs = {
+    ["Left"] = function(panel) panel:set_x(0) end,
+    ["Top"] = function(panel) panel:set_y(0) end,
+    ["Right"] = function(panel, parent) panel:set_right(parent:w()) end,
+    ["Bottom"] = function(panel, parent) panel:set_bottom(parent:h()) end,
+    ["Centerx"] = function(panel, parent) panel:set_center_x(parent:w() / 2) end,
+    ["Centery"] = function(panel, parent) panel:set_center_y(parent:y() / 2) end,
+    ["Center"] = function(panel, parent) panel:set_world_center(parent:world_center()) end,
+    ["Offsetx"] = function(panel, parent, offset) panel:move(offset[1]) end,
+    ["Offset-x"] = function(panel, parent, offset) panel:move(-offset[1]) end,
+    ["Offsety"] = function(panel, parent, offset) panel:move(0, offset[2]) end,
+    ["Offset-y"] = function(panel, parent, offset) panel:move(0, -offset[2]) end,
+    ["Offset"] = function(panel, parent, offset) panel:move(offset[1], offset[2]) end,
+    ["Offset-"] = function(panel, parent, offset) panel:move(-offset[1], -offset[2]) end,
+    ["Offsetx-y"] = function(panel, parent, offset) panel:move(offset[1], -offset[2]) end,
+    ["Offset-xy"] = function(panel, parent, offset) panel:move(-offset[1], offset[2]) end,
+}
 function BaseItem:SetPositionByString(pos)
 	if not pos then
 		BeardLib:log("[ERROR] Position for item %s in parent %s is nil!", tostring(self.name), tostring(self.parent.name))
 		return
 	end
-    local pos_panel = self.parent_panel
-    for _, p in pairs({"center", "bottom", "top", "right", "left", "center_x", "center_y"}) do
-		if (p ~= "center" or not pos:lower():match("center_")) and pos:lower():match(p) then
-            self.panel["set_world_"..p](self.panel, pos_panel["world_"..p](pos_panel))
-        end
-    end
+	local panel = self.panel
+	local parent_panel = self.parent_panel
+	local offset = self.offset
+	for p in pos:gmatch("%u%U+") do
+		if pos_funcs[p] then
+			pos_funcs[p](panel, parent_panel, offset)
+		end
+	end
 end
 
 function BaseItem:SetValue(value, run_callback)
@@ -429,6 +459,16 @@ end
 function BaseItem:SetLayer(layer)
     self:Panel():set_layer(layer)
     self.layer = layer
+end
+
+function BaseItem:SetEnabledAlpha(alpha)
+	self.enabled_alpha = alpha
+	self:SetEnabled(self.enabled)
+end
+
+function BaseItem:SetDisabledAlpha(alpha)
+	self.disabled_alpha = alpha
+	self:SetEnabled(self.enabled)
 end
 
 function BaseItem:RunCallback(clbk, ...)

@@ -1,7 +1,5 @@
 CustomSoundManager = CustomSoundManager or {}
 local C = CustomSoundManager
-local log_incoming = true
-
 C.buffers = {global = {}}
 C.delayed_buffers = {global = {}}
 C.stop_ids = {}
@@ -23,8 +21,8 @@ function C:CheckSoundID(sound_id, engine_source)
     end
 
     local prefixes = engine_source:get_prefixes()
-    if log_incoming then
-        BeardLib:DevLog("Incoming sound check: ID %s Prefixes %s", tostring(sound_id), tostring(prefixes and table.concat(prefixes, ", ") or "none"))
+    if BeardLib.DevMode then
+        BeardLib:log("Incoming sound check: ID %s Prefixes %s", tostring(sound_id), tostring(prefixes and table.concat(prefixes, ", ") or "none"))
     end
 
     local stop_id = self.stop_ids[sound_id]

@@ -940,6 +940,9 @@ end
 
 --If only Color supported alpha for hex :P
 function Color:from_hex(hex)
+    if type_name(hex) == "Color" then
+        return hex
+    end
     if not hex or type(hex) ~= "string" then
         log(debug.traceback())
         return Color()

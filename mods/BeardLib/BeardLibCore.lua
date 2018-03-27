@@ -59,7 +59,7 @@ if not _G.BeardLib then
 		--Load mod_overrides adds
 		self:RegisterTweak()
 		
-		self.DevMode = FileIO:Exists("mods/developer.txt") --Use same method as BLT.
+		self.DevMode = self.Options:GetValue("DevMode")
 	end
 
 	function self:AddUpdater(id, clbk, paused)

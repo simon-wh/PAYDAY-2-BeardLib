@@ -92,7 +92,7 @@ function ListDialog:_Show(params)
         name = "Close",
         w = bw,
         offset = offset,
-        h = 20,
+        h = self._menu:H(),
         icon_w = 14,
         icon_h = 14,
         texture = "guis/textures/menu_ui_icons",
@@ -102,7 +102,7 @@ function ListDialog:_Show(params)
     })
     self._menu:TextBox({
         name = "Search",
-        w = self._menu:ItemsWidth() - close:Right() - offset[1],
+        w = self._menu:ItemsWidth() - close:Right(),
         control_slice = 0.86,
         focus_mode = true,
         auto_focus = true,

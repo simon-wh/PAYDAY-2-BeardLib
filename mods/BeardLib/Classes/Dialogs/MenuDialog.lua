@@ -18,9 +18,9 @@ function MenuDialog:init(params, menu)
         always_highlighting = true,
         reach_ignore_focus = true,
         scrollbar = false,
-        items_size = 20,
+        size = 20,
         offset = 8,
-        accent_color = Color("4385ef"),
+        accent_color = BeardLib.Options:GetValue("MenuColor"),
         background_color = Color(0.6, 0.2, 0.2, 0.2),
     }, params))
     BeardLib.managers.dialog:AddDialog(self)
@@ -52,15 +52,17 @@ function MenuDialog:CreateCustomStuff(params)
         self._menu:Divider(table.merge({
             name = "Title",
             text = params.title,
-            border_left = true,
-            items_size = self._menu.items_size + 4,
+            background_color = self._menu.accent_color,
+            offset = 0,
+            text_offset = 6,
+            size = self._menu.size + 4,
         }, params.title_merge or {}))
     end
     if params.message then
         self._menu:Divider({
             name = "Message",
             text = params.message,
-            items_size = self._menu.items_size + 2,
+            size = self._menu.size + 2,
         })
     end
     if params.create_items then
@@ -106,6 +108,9 @@ function MenuDialog:basic_show(params, force)
         self._menu:ClearItems()
     end
     self._menu:SetLayer(BeardLib.managers.dialog:GetMyIndex(self) * 50)
+    if self.type_name == MenuDialog.type_name then
+        self._menu.auto_height = NotNil(params.auto_height, true)
+    end
     if not self._no_reshaping_menu then
         self._menu:SetSize(params.w or self._default_width, params.h)
         self._menu:SetPosition(params.position or "Center")
