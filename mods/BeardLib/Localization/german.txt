@@ -1,9 +1,9 @@
 {
     "ModAssetsManagementTextID" : "Assets Update Manager",
     "ModAssetsManagementDescID" : "",
-    "ModAssetsToggleAutoUpdatesTextID" : "Assets Update Check Ein-/Aus schalten",
+    "ModAssetsToggleAutoUpdatesTextID" : "Assets Update Check Ein-/Ausschalten",
     "ModAssetsToggleAutoUpdatesDescID" : "",
-    "ModAssetsCheckUpdatesTextID" : "Nach Assets updates suchen!",
+    "ModAssetsCheckUpdatesTextID" : "Nach Assets Updates suchen!",
     "ModAssetsCheckUpdatesDescID" : "",
     "mod_assets_error" : "FEHLER!",
     "mod_assets_error_desc" : "Ein Fehler ist aufgetreten beim Versuch die Server Version zu erhalten.",
@@ -14,9 +14,9 @@
     "custom_map_download_available" : "Download verfügbar",
     "custom_map_alert" : "Custom Heist Warnung",
     "custom_map_needs_download" : "Du musst den Heist downloaden um fortzufahren, Download starten?\n$url",
-    "custom_map_host_old_version" : "Download kann nicht gestarte werden, da der Host eine veraltete Version von BeardLib nutzt!",
+    "custom_map_host_old_version" : "Download kann nicht gestartet werden, da der Host eine veraltete Version von BeardLib nutzt!",
     "custom_map_failed_download" : "Download des Heists fehlgeschlagen",
-    "custom_map_missing_updater" : "Der Download des Heists kannnicht gestartet werden, da die Map keinen Updater hat!",
+    "custom_map_missing_updater" : "Der Download des Heists kann nicht gestartet werden, da die Map keinen Updater hat!",
     "heist_contact_custom" : "Custom Heists",
     "heist_contact_custom_description" : "Custom Heists sind komplett neue, von der Community erstellte Heists.",
     "custom_map_cant_download" : "Der Heist, den der Host festgelegt hat, kann nicht heruntergeladen werden.",
@@ -25,8 +25,8 @@
     "beardlib_updates_available" : "BeardLib Mods Manager: Updates verfügbar!",
     "beardlib_updates_available_desc" : "Öffne den BeardLib Mods Manager zum updaten(Klick den blauen Kreis)",
     "beardlib_updates_download_now" : "Jetzt runterladen",
-    "beardlib_visit_page" : "Seite öffnen",
-    "beardlib_update_all" : "Alle updaten",
+    "beardlib_visit_page" : "Modseite öffnen",
+    "beardlib_update_all" : "Alle aktualisieren",
     "beardlib_updated" : "Aktualisiert!",
     "beardlib_waiting" : "Warte auf Antwort..",
     "beardlib_waiting_update" : "Warte auf Update..",
@@ -55,6 +55,6 @@
     "beardlib_show_images" : "Zeige Mod-Bilder",
     "beardlib_reset_settings" : "Einstellungen zurücksetzen",
     "beardlib_dev_mode" : "Entwickler Modus",
-    "beardlib_dev_mode_help" : "BeardLib's Entwickler Modus zeigt momentan nur einige informationen wie z.B. Sound IDs an.",
-    "beardlib_important_notice_help" : "Soll BeardLib dich benachrichtigen wenn ein Update für eine wichtige Mod verfpgbar ist?"
+    "beardlib_dev_mode_help" : "BeardLib's Entwickler Modus zeigt zur Zeit nur einige informationen wie z.B. Sound IDs an.",
+    "beardlib_important_notice_help" : "Soll BeardLib dich benachrichtigen wenn ein Update für eine wichtige Mod verfügbar ist?"
 }
