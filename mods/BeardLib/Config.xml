@@ -46,6 +46,7 @@
 		<class file="Menu/BaseItem.lua"/>
 		<class file="Menu/Item.lua"/>
 		<class file="Menu/Menu.lua"/>
+		<class file="Menu/MenuAlignMethods.lua"/>
 		<class file="Menu/KeyBind.lua"/>
 		<class file="Menu/Group.lua"/>
 		<class file="Menu/ImageButton.lua"/>

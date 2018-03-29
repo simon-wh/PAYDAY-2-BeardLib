@@ -320,7 +320,7 @@ function BaseItem:alive() return alive(self.panel) end
 function BaseItem:title_alive() return type_name(self.title) == "Text" and alive(self.title) end
 function BaseItem:Value() return self.value end
 function BaseItem:Enabled() return self.enabled end
-function BaseItem:Index() return self.parent:GetIndex(self.name) end
+function BaseItem:Index() return self.parent:GetIndex(self) end
 function BaseItem:MouseInside(x, y) return self.panel:inside(x,y) end
 function BaseItem:Inside(x, y) return self.panel:inside(x,y) end
 function BaseItem:Visible() return self:alive() and self.visible and self.should_render end
