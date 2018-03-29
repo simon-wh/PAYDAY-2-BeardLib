@@ -76,6 +76,8 @@ function LevelModule:AddAssetsDataToTweak(a_self)
     for _, value in ipairs(self._config.assets) do
         if value._meta == "asset" then
             if a_self[value.name] ~= nil then
+                a_self[value.name].exclude_stages = a_self[value.name].exclude_stages or {}
+                a_self[value.name].stages = a_self[value.name].stages or {}
                 table.insert(value.exclude and a_self[value.name].exclude_stages or a_self[value.name].stages, self._config.id)
             else
                 self:log("[ERROR] Asset %s does not exist! (Map: %s)", value.name, name)
