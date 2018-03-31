@@ -14,14 +14,24 @@ function ScriptReplacementsModule:init(core_mod, config)
 end
 
 function ScriptReplacementsModule:post_init()
-    for _, tbl in ipairs(self._config) do
-        if tbl._meta == "mod" then
-            local options = tbl.options
-            if options and options.use_clbk then
-                options.use_clbk = self._mod:StringToCallback(options.use_clbk)
+    for _, v in ipairs(self._config) do
+        if v._meta == "mod" then
+            local options = v.options or v
+            local clbk = options.use_clbk or options.clbk
+            local use_clbk
+            if clbk then
+                use_clbk = self._mod:StringToCallback(options.use_clbk)
+            end            
+            local target = options.target_file or options.target_path
+            local ext = options.target_type or options.target_ext
+            local opt = {mode = options.merge_mode, use_clbk = use_clbk}
+            if v.file then
+                local file = BeardLib.Utils.Path:Combine(self.ScriptDirectory, v.file or v.replacement)
+                local file_type = options.type or options.replacement_type
+                FileManager:ScriptReplaceFile(ext, target, file, table.merge(opt, {type = file_type}))
+            elseif v.tbl then
+                FileManager:ScriptReplace(ext, target, v.tbl, opt)
             end
-
-            BeardLib:ReplaceScriptData(BeardLib.Utils.Path:Combine(self.ScriptDirectory, tbl.file or tbl.replacement), tbl.type or tbl.replacement_type, tbl.target_file or tbl.target_path, tbl.target_type or tbl.target_ext, options)
         end
     end
 end

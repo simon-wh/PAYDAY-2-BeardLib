@@ -155,17 +155,41 @@ end
 
 local special_params = {
     "search",
+    "mode",
 	"index"
 }
 
 function table.script_merge(base_tbl, new_tbl)
     for i, sub in pairs(new_tbl) do
         if type(sub) == "table" then
-            if tonumber(i) ~= nil then
+            if tonumber(i) then
                 if sub.search then
+                    local mode = sub.mode
                     local index, found_tbl = table.search(base_tbl, sub.search)
                     if found_tbl then
-                        table.script_merge(found_tbl, sub)
+                        if not mode then
+                            table.script_merge(found_tbl, sub)
+                        elseif mode == "merge" then
+                            for i, tbl in pairs(sub) do
+                                if type(tbl) == "table" and tonumber(i) then
+                                    table.merge(found_tbl, tbl)
+                                    break
+                                end
+                            end
+                        elseif mode == "replace" then
+                            for i, tbl in pairs(sub) do
+                                if type(tbl) == "table" and tonumber(i) then
+                                    base_tbl[index] = tbl
+                                    break
+                                end
+                            end
+                        elseif mode == "remove" then
+                            if type(index) == "number" then
+                                table.remove(base_tbl, index)
+                            else
+                                base_tbl[index] = nil
+                            end
+                        end
                     end
                 else
                     table.custom_insert(base_tbl, sub, sub.index)
@@ -176,10 +200,6 @@ function table.script_merge(base_tbl, new_tbl)
 						sub[param] = nil
 					end
                 end
-            --[[else
-                if not base_tbl[i] then
-                    base_tbl[i] = sub
-                end]]--
             end
         elseif not table.contains(special_params, i) then
             base_tbl[i] = sub

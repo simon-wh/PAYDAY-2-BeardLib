@@ -48,7 +48,7 @@ function fm:Process(ids_ext, ids_path, name_mt)
 					if to_replace and #mods > 1 then
 						BeardLib:log("[WARNING] Script Mod with ID:'%s', Path:'%s.%s' may potentially overwrite changes from other mods! Continuing...", tostring(data.id), k_path, k_ext)
 					end
-					local new_data = FileIO:ReadScriptDataFrom(mdata.file, mdata.type)
+					local new_data = mdata.tbl or FileIO:ReadScriptDataFrom(mdata.file, mdata.type)
 					if new_data then
                         if ids_ext == Idstring("nav_data") then
                             BeardLib.Utils:RemoveMetas(new_data)
@@ -114,11 +114,8 @@ function fm:ScriptAddFile(path, ext, file, options)
 end
 
 function fm:ScriptReplaceFile(ext, path, file, options)
-    local ids_ext = ext:id()
-	local ids_path = path:id()
-
     if options ~= nil and type(options) ~= "table" then
-        BeardLib:log("[ERROR] %s:ReplaceScriptData parameter 5, expected table, got %s", self.Name, tostring(type(extra_data)))
+        BeardLib:log("[ERROR] %s:ReplaceScriptData options parameter expected as a table, got %s", self.Name, tostring(type(options)))
         return
     end
     if not FileIO:Exists(file) then
@@ -127,12 +124,26 @@ function fm:ScriptReplaceFile(ext, path, file, options)
     end
 
     options = options or {}
-	local k_ext = ids_ext:key()
-	local k_path = ids_path:key()
+	local k_ext = ext:key()
+	local k_path = path:key()
 	fm.modded_files[k_ext] = fm.modded_files[k_ext] or {}
 	fm.modded_files[k_ext][k_path] = fm.modded_files[k_ext][k_path] or {}
 	--Potentially move to [id] = options
 	table.insert(fm.modded_files[k_ext][k_path], table.merge(options, {file = file}))
+end
+
+function fm:ScriptReplace(ext, path, tbl, options)
+	if options ~= nil and type(options) ~= "table" then
+        BeardLib:log("[ERROR] %s:ScriptReplace options parameter expected as a table, got %s", self.Name, tostring(type(options)))
+        return
+    end
+
+    options = options or {}
+	local k_ext = ext:key()
+	local k_path = path:key()
+	fm.modded_files[k_ext] = fm.modded_files[k_ext] or {}
+	fm.modded_files[k_ext][k_path] = fm.modded_files[k_ext][k_path] or {}
+	table.insert(fm.modded_files[k_ext][k_path], table.merge(options, {tbl = tbl}))
 end
 
 function fm:Has(ext, path)
