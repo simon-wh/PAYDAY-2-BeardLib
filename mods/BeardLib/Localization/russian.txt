@@ -47,8 +47,8 @@
     "beardlib_important_notice" : "Показывать уведомление об обновлении",
     "beardlib_match_case" : "Учитывать регистр",
     "beardlib_limit_results" : "Ограничить результаты",
-    "beardlib_tick_all" : "Отметить все предметы",
-    "beardlib_untick_all" : "Снять отметку со всех предметов",
+    "beardlib_tick_all" : "Отметить всё",
+    "beardlib_untick_all" : "Снять отметку со всего",
     "beardlib_settings" : "Настройки",
     "beardlib_b_settings" : "Настройки BeardLib",
     "beardlib_menu_color" : "Цвет меню",
@@ -56,6 +56,6 @@
     "beardlib_reset_settings" : "Сбросить настройки",
     "beardlib_dev_mode" : "Режим разработчика",
     "beardlib_dev_mode_help" : "В режиме разработчика BeardLib в настоящее время регистрируется только некоторая информация, такая как звуковые идентификаторы",
-    "beardlib_important_notice_help" : "Должен ли BeardLib уведомлять вас, когда есть обновление для важного мод?",
-    "beardlib_write_failed" : "Failed writing to path :/"
+    "beardlib_important_notice_help" : "Должен ли BeardLib уведомлять вас, когда есть обновление для важного мода?",
+    "beardlib_write_failed" : "Не удалось записать путь :/"
 }
