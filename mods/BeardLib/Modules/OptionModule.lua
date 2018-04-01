@@ -28,6 +28,7 @@ function OptionModule:init(core_mod, config)
     return true
 end
 
+--TODO: figure out if post init is really required, consider making it automatic.
 function OptionModule:post_init()
     if self._post_init_complete then
         return false

@@ -81,7 +81,7 @@ if not _G.BeardLib then
 	function self:LoadClasses()
 		for _, clss in ipairs(self.config.classes) do
 			local p = self.config.classes_dir .. clss.file
-			log("[BeardLib] Loading class", tostring(p))
+			self:DevLog("Loading class", tostring(p))
 			local obj = loadstring( "--"..p.. "\n" .. io.open(p):read("*all"))()
 			if clss.manager and obj then
 				self.managers[clss.manager] = obj
@@ -95,7 +95,7 @@ if not _G.BeardLib then
         end
 
 		if not self.modules[key] then
-			self:log("Registered module with key %s", key)
+			self:DevLog("Registered module with key %s", key)
 			self.modules[key] = module
 		else
 			self:log("[ERROR] Module with key %s already exists", key)

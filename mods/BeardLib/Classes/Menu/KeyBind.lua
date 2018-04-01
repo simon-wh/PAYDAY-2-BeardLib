@@ -13,7 +13,7 @@ function KeyBindItem:Init()
         layer = 1,
         color = self:GetForeground(highlight),
         font = self.font,
-        font_size = self.size - 2
+        font_size = self.size
     })
     self:SetKeybindKey()
 end
@@ -34,7 +34,7 @@ function KeyBindItem:SetKeybindKey()
     self.keybind_key:set_text(string.upper(self.value or "None"))
     local _,_,w,h = self.keybind_key:text_rect()
     self.keybind_key:set_size(w,h)
-    self.keybind_key:set_right(self.panel:w() - self.text_offset[1])
+    self.keybind_key:set_righttop(self.panel:w() - self.text_offset[1], self.text_offset[2])
 end
 
 function KeyBindItem:SetCanEdit(CanEdit)

@@ -1,6 +1,6 @@
-_G.FileManager = {}
-
+FileManager = FileManager or {}
 local fm = FileManager
+
 fm.const = {
 	h_preprocessSF = "BeardLibPreProcessScriptData",
 	h_postprocessSF = "BeardLibProcessScriptData"
@@ -12,11 +12,9 @@ fm.process_modes = {
 	add = function(a1, a2) return table.add(a1, a2) end,
 	replace = ""
 }
-Global.fm = Global.fm or {}
 
---[ids_ext] = {ids_added_file, ...}
+Global.fm = Global.fm or {}
 Global.fm.added_files = Global.fm.added_files or {}
--- [ids_ext] = { ids_modded_file = { id = {file, mode, ...}} }
 fm.modded_files = {}
 
 fm._files_to_load = {}
@@ -24,6 +22,7 @@ fm._files_to_unload = {}
 
 Hooks:Register(fm.const.h_preprocessSF)
 Hooks:Register(fm.const.h_postprocessSF)
+
 function fm:Process(ids_ext, ids_path, name_mt)
 	local data = {}
 	if DB:_has(ids_ext, ids_path) then
@@ -37,6 +36,8 @@ function fm:Process(ids_ext, ids_path, name_mt)
 	Hooks:Call(self.const.h_preprocessSF, ids_ext, ids_path, data)
 	local k_ext = ids_ext:key()
 	local k_path = ids_path:key()
+	
+	
 	local mods = self.modded_files[k_ext] and self.modded_files[k_ext][k_path]
 	if mods then
 		for id, mdata in pairs(mods) do
@@ -46,7 +47,12 @@ function fm:Process(ids_ext, ids_path, name_mt)
 				else
 					local to_replace = (not mdata.mode or mdata.mode == "replace")
 					if to_replace and #mods > 1 then
-						BeardLib:log("[WARNING] Script Mod with ID:'%s', Path:'%s.%s' may potentially overwrite changes from other mods! Continuing...", tostring(data.id), k_path, k_ext)
+						local id = data.id or "unknown"
+						if mdata.file then
+							BeardLib:log("[WARNING] Script Mod with ID: '%s', Path:'%s' may potentially overwrite changes from other mods! Continuing...", id, mdata.file)
+						else
+							BeardLib:log("[WARNING] Script Mod with ID: '%s', Path:'%s.%s' may potentially overwrite changes from other mods! Continuing...", id, k_path, k_ext)							
+						end
 					end
 					local new_data = mdata.tbl or FileIO:ReadScriptDataFrom(mdata.file, mdata.type)
 					if new_data then
@@ -119,7 +125,7 @@ function fm:ScriptReplaceFile(ext, path, file, options)
         return
     end
     if not FileIO:Exists(file) then
-        BeardLib:log("[ERROR] Lua state is unable to read file '%s'!", file)
+        BeardLib:log("[ERROR] Failed reading scriptdata at path '%s'!", file)
         return
     end
 
@@ -156,62 +162,69 @@ function fm:HasScriptMod(ext, path)
 	return self.modded_files[k_ext] and self.modded_files[k_ext][path:key()]
 end
 
-local _LoadAsset = function(ids_ext, ids_path, file_path)
-	if not managers.dyn_resource:has_resource(ids_ext, ids_path, managers.dyn_resource.DYN_RESOURCES_PACKAGE) then
-		if file_path then
-			BeardLib:DevLog("loaded file %s", tostring(file_path))
+local _LoadAsset = function(load)
+	local path = load.path
+	local ext = load.ext
+	if not managers.dyn_resource:has_resource(ext, path, managers.dyn_resource.DYN_RESOURCES_PACKAGE) then
+		local k_ext = ext:key()
+		local k_path = path:key()
+		if load.file_path then
+			BeardLib:DevLog("loaded file %s", tostring(load.file_path))
 		else
-			BeardLib:DevLog("loaded file %s.%s", ids_path:key(), ids_ext:key())
+			BeardLib:DevLog("loaded file %s.%s", k_path, k_ext)
 		end
-        managers.dyn_resource:load(ids_ext, ids_path, managers.dyn_resource.DYN_RESOURCES_PACKAGE)
+		managers.dyn_resource:load(ext, path, managers.dyn_resource.DYN_RESOURCES_PACKAGE)
     end
 end
 
-local _UnLoadAsset = function(ids_ext, ids_path, file_path)
-	if managers.dyn_resource:has_resource(ids_ext, ids_path, managers.dyn_resource.DYN_RESOURCES_PACKAGE) then
-		if file_path then
-			BeardLib:DevLog("unloaded file %s", tostring(file_path))
+local _UnLoadAsset = function(unload)
+	local path = unload.path
+	local ext = unload.ext
+	if managers.dyn_resource:has_resource(ext, path, managers.dyn_resource.DYN_RESOURCES_PACKAGE) then
+		local k_ext = ext:key()
+		local k_path = path:key()
+		if unload.file_path then
+			BeardLib:DevLog("unloaded file %s", tostring(unload.file_path))
 		else
-			BeardLib:DevLog("unloaded file %s.%s", ids_path:key(), ids_ext:key())
+			BeardLib:DevLog("unloaded file %s.%s", k_path, k_ext)
 		end
-        managers.dyn_resource:unload(ids_ext, ids_path, managers.dyn_resource.DYN_RESOURCES_PACKAGE)
+        managers.dyn_resource:unload(ext, path, managers.dyn_resource.DYN_RESOURCES_PACKAGE)
     end
 end
 
 function fm:LoadAsset(ids_ext, ids_path, file_path)
-	ids_ext = ids_ext:id()
-	ids_path = ids_path:id()
-    if not managers.dyn_resource then
-        table.insert(self._files_to_load, {ids_ext, ids_path, file_path})
-        return
+	local load = {ext = ids_ext:id(), path = ids_path:id(), file_path = file_path}
+	if managers.dyn_resource then
+		_LoadAsset(load)
+	else
+        table.insert(self._files_to_load, load)
     end
-
-    _LoadAsset(ids_ext, ids_path, file_path)
 end
 
 function fm:UnLoadAsset(ids_ext, ids_path, file_path)
-	ids_ext = ids_ext:id()
-	ids_path = ids_path:id()
-    if not managers.dyn_resource then
-        table.insert(self._files_to_unload, {ids_ext, ids_path, file_path})
-        return
+	local unload = {ext = ids_ext:id(), path = ids_path:id(), file_path = file_path}
+	if managers.dyn_resource then
+		_UnLoadAsset(unload)
+	else
+        table.insert(self._files_to_unload, unload)
     end
-
-    _UnLoadAsset(ids_ext, ids_path, file_path)
 end
 
-function fm:update()
+function fm:update(t, dt)
 	if not managers.dyn_resource then
 		return
 	end
 
-	if #self._files_to_load > 0 then
-		_LoadAsset(unpack(table.remove(self._files_to_load)))
+	for _, load in pairs(self._files_to_load) do
+		_LoadAsset(load)
 	end
 
-	if #self._files_to_unload > 0 then
-		_UnLoadAsset(unpack(table.remove(self._files_to_unload)))
+	for _, unload in pairs(self._files_to_unload) do
+		_LoadAsset(unload)
 	end
+
+	self._files_to_load = {}
+	self._files_to_unload = {}
 end
 
 return fm

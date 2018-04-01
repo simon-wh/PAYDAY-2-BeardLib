@@ -41,7 +41,6 @@ function Slider:Init()
         name = "circle",
         w = ch,
         h = ch,
-        y = 1,
         texture = "guis/textures/menu_ui_icons",
         texture_rect = {92, 1, 34, 34},
         layer = 3,
