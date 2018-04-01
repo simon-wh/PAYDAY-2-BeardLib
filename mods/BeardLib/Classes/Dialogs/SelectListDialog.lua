@@ -13,6 +13,9 @@ function SelectListDialog:_Show(params)
     params = params or {}
     self._single_select = params.single_select or false
     self._allow_multi_insert = params.allow_multi_insert or false
+    if params.selected_list then
+        params.selected_list = clone(params.selected_list)
+    end
     self._selected_list = params.selected_list or {}
     SelectListDialog.super._Show(self, params)
 end

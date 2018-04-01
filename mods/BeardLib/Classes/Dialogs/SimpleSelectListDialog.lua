@@ -6,7 +6,7 @@ function SimpleSelectListDialog:init(params, menu)
     end
     params.w = 400
     params.h = 500
-    params.items_size = 24
+    params.size = 24
 
     SimpleSelectListDialog.super.init(self, params, menu)
 end

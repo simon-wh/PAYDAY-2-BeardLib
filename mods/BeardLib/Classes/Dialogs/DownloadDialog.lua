@@ -7,7 +7,7 @@ function DownloadDialog:init(params, menu)
     DownloadDialog.super.init(self, table.merge(params, {
         offset = 8,
         auto_height = true,
-        items_size = 20,
+        size = 20,
     }), menu)
 end
 

@@ -7,7 +7,7 @@ function SimpleListDialog:init(params, menu)
 
     params.w = 400
     params.h = 500
-    params.items_size = 24
+    params.size = 24
     
     SimpleListDialog.super.init(self, params, menu)
 end
@@ -22,6 +22,9 @@ function SimpleListDialog:_Show(params)
     if self.type_name == SimpleSelectListDialog.type_name then
         self._single_select = params.single_select or false
         self._allow_multi_insert = params.allow_multi_insert or false
+        if params.selected_list then
+            params.selected_list = clone(params.selected_list)
+        end    
         self._selected_list = params.selected_list or {}
     end
 
@@ -29,7 +32,7 @@ function SimpleListDialog:_Show(params)
     self._case_sensitive = NotNil(params.case_sensitive, false)
     self._limit = NotNil(params.limit, true)
     self._list = params.list
-    local s = self._menu.items_size
+    local s = self._menu.size
     local bs = s + self._menu:OffsetX()
     local tw = self._menu.w - (bs * 2)
     
