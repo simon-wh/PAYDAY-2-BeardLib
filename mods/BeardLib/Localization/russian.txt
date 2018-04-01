@@ -56,5 +56,6 @@
     "beardlib_reset_settings" : "Сбросить настройки",
     "beardlib_dev_mode" : "Режим разработчика",
     "beardlib_dev_mode_help" : "В режиме разработчика BeardLib в настоящее время регистрируется только некоторая информация, такая как звуковые идентификаторы",
-    "beardlib_important_notice_help" : "Должен ли BeardLib уведомлять вас, когда есть обновление для важного мод?"
+    "beardlib_important_notice_help" : "Должен ли BeardLib уведомлять вас, когда есть обновление для важного мод?",
+    "beardlib_write_failed" : "Failed writing to path :/"
 }

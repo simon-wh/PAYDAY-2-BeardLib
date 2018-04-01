@@ -56,5 +56,6 @@
     "beardlib_reset_settings" : "Einstellungen zurücksetzen",
     "beardlib_dev_mode" : "Entwickler Modus",
     "beardlib_dev_mode_help" : "BeardLib's Entwickler Modus zeigt zur Zeit nur einige informationen wie z.B. Sound IDs an.",
-    "beardlib_important_notice_help" : "Soll BeardLib dich benachrichtigen wenn ein Update für eine wichtige Mod verfügbar ist?"
+    "beardlib_important_notice_help" : "Soll BeardLib dich benachrichtigen wenn ein Update für eine wichtige Mod verfügbar ist?",
+    "beardlib_write_failed" : "Failed writing to path :/"
 }

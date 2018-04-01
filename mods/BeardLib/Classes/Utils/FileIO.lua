@@ -170,6 +170,14 @@ function FileIO:MoveTo(path, to_path)
 	SystemFS:rename_file(path, to_path)
 end
 
+function FileIO:CanWriteTo(path)
+	if SystemFS and SystemFS.can_write_to then
+		return SystemFS:can_write_to(path)
+	else
+		return true --Assume it's writable in linux for now, feel free to push a pull if you know how to do it.
+	end
+end
+
 function FileIO:Delete(path)
 	if SystemFS and SystemFS.delete_file then
 		SystemFS:delete_file(path)

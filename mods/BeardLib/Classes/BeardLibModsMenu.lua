@@ -343,6 +343,14 @@ function BeardLibModsMenu:SetModFailedUpdate(mod)
     end
 end
 
+function BeardLibModsMenu:SetModFailedWrite(mod)
+    local mod_item = self._list:GetItemByLabel(mod)
+    if mod_item then
+        self:SetModStatus(mod_item, "beardlib_write_failed")
+        mod_item:Panel():child("DownloadProgress"):set_w(0)
+    end
+end
+
 function BeardLibModsMenu:SetModNormal(mod)
     local mod_item = self._list:GetItemByLabel(mod)
     if mod_item then

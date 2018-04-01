@@ -56,5 +56,6 @@
     "beardlib_reset_settings" : "Restablecer ajustes",
     "beardlib_dev_mode" : "Modo de desarrollador",
     "beardlib_dev_mode_help" : "Actualmente, el modo de desarrollador de Beardlib solo registra algunos tipos de informacion, como IDs de sonido",
-    "beardlib_important_notice_help" : "Deberia notificarte Beardlib cuando haya una actualizacion disponible para un mod importante?"
+    "beardlib_important_notice_help" : "Deberia notificarte Beardlib cuando haya una actualizacion disponible para un mod importante?",
+    "beardlib_write_failed" : "Failed writing to path :/"
 }

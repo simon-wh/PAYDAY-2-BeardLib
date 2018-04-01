@@ -214,6 +214,16 @@ function ModAssetsModule:StoreDownloadedAssets(config, data, id)
         if self._config and not self._config.dont_delete then
             for _, dir in pairs(self.folder_names) do
                 local path = BeardLib.Utils.Path:Combine(self.install_directory, dir)
+                if not FileIO:CanWriteTo(path) then
+                    if config.failed_write then
+                        config.failed_write()
+                    elseif config.failed then
+                        config.failed()
+                    elseif self._mod then
+                        mods_menu:SetModFailedWrite(self._mod)
+                    end
+                    return
+                end
                 if FileIO:Exists(path) then
                     FileIO:Delete(path)
                 end

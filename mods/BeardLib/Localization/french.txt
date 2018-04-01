@@ -56,5 +56,6 @@
     "beardlib_reset_settings" : "Réinitialiser les paramètres",
     "beardlib_dev_mode" : "Mode développeur",
     "beardlib_dev_mode_help" : "Le mode développeur actuellement log uniquement quelques informations comme les ID de sons",
-    "beardlib_important_notice_help" : "Est-ce que BeardLib doit vous notifier pour les mises à jour importantes?"
+    "beardlib_important_notice_help" : "Est-ce que BeardLib doit vous notifier pour les mises à jour importantes?",
+    "beardlib_write_failed" : "Failed writing to path :/"
 }

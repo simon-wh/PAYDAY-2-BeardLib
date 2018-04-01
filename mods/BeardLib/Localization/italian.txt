@@ -56,5 +56,6 @@
     "beardlib_reset_settings" : "Reset settings",
     "beardlib_dev_mode" : "Developer mode",
     "beardlib_dev_mode_help" : "BeardLib's developer mode currently only logs some information such as sound ids",
-    "beardlib_important_notice_help" : "Should BeardLib notify you when there's an update for an important mod?"
+    "beardlib_important_notice_help" : "Should BeardLib notify you when there's an update for an important mod?",
+    "beardlib_write_failed" : "Failed writing to path :/"
 }
