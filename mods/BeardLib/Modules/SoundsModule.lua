@@ -1,8 +1,12 @@
 SoundsModule = SoundsModule or class(ModuleBase)
 SoundsModule.type_id = "Sounds"
-function SoundsModule:RegisterHook()
+function AddFilesModule:init(core_mod, config)
+    if not AddFilesModule.super.init(self, core_mod, config) then
+        return false
+	end
 	BeardLib.Utils:SetupXAudio()
-	self:ReadSounds(self._config)
+    self:ReadSounds(self._config)
+    return true
 end
 
 function SoundsModule:ReadSounds(data, prev_dir)
