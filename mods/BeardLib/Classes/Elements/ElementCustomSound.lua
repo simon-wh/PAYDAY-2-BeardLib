@@ -54,63 +54,54 @@ end
 function ElementCustomSound:stop_secondary()
 	
 	--Removes the secondary panel from the menu component manager
-	if managers.menu_component._secondary_panel then
+	if managers.menu_component._secondary_panel and managers.menu_component._ws then
 		managers.menu_component._ws:panel():remove(managers.menu_component._secondary_panel)
 		managers.menu_component._secondary_panel = nil
 	end
 end
 
 function ElementCustomSound:play(src)
-	if MusicModule then
-		managers.music:stop_custom()
-		Global.music_manager.source:post_event("stop_all_music")
-	    managers.music._player = managers.menu_component._main_panel:video({
-	        name = "music",
-	        video = src,
-	        visible = false,
-	        loop = self._values.loop or false
-	    })   
-	 	managers.music._player:set_volume_gain(self:_check_volume_choice())
-	end
+	managers.music:stop_custom()
+	Global.music_manager.source:post_event("stop_all_music")
+	managers.music._player = managers.menu_component._main_panel:video({
+		name = "music",
+		video = src,
+		visible = false,
+		loop = self._values.loop or false
+	})   
+	managers.music._player:set_volume_gain(self:_check_volume_choice())
 end 
 
 function ElementCustomSound:play_secondary(src)
-	if MusicModule then
-		--Removes the secondary panel, terminating all video files contained in it automatically
-		if self._values.override_others then
-			self:stop_secondary()
-			self:_check_and_create_panels()
-		end
-	
-		self._secondary_player = managers.menu_component._secondary_panel:video({
-			name = "secondary_sound",
-	        video = src,
-	        visible = false,
-	        loop = false
-		})
-
-	 	self._secondary_player:set_volume_gain(self:_check_volume_choice())
+	--Removes the secondary panel, terminating all video files contained in it automatically
+	if self._values.override_others then
+		self:stop_secondary()
+		self:_check_and_create_panels()
 	end
+
+	self._secondary_player = managers.menu_component._secondary_panel:video({
+		name = "secondary_sound",
+		video = src,
+		visible = false,
+		loop = false
+	})
+
+	self._secondary_player:set_volume_gain(self:_check_volume_choice())
 end
 
 function ElementCustomSound:play_third(src)
-	if MusicModule then
-   		self._third_player = managers.menu_component._third_panel:video({
-			name = "third_sound",
-	        video = src,
-	        visible = false,
-	        loop = self._values.third_loop or false
-		})
-	 	self._third_player:set_volume_gain(self:_check_volume_choice())
-	end
+	self._third_player = managers.menu_component._third_panel:video({
+		name = "third_sound",
+		video = src,
+		visible = false,
+		loop = self._values.third_loop or false
+	})
+	self._third_player:set_volume_gain(self:_check_volume_choice())
 end
 
-
 function ElementCustomSound:stop()
-	if MusicModule then
-		managers.music:stop_custom()
-		Global.music_manager.source:post_event("stop_all_music")
-	end
+	managers.music:stop_custom()
+	Global.music_manager.source:post_event("stop_all_music")
 end
 
 function ElementCustomSound:_check_existence(path)
