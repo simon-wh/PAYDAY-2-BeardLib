@@ -99,7 +99,9 @@ if XAudio and SoundSource then
 
     SoundSource._post_event = SoundSource._post_event or SoundSource.post_event
     function SoundSource:post_event(event, ...)
-		if not CustomSoundManager:CheckSoundID(event, self) then
+        if CustomSoundManager:CheckSoundID(event, self) then
+            return event
+        else
             return self:_post_event(event, ...)
 		end
 	end

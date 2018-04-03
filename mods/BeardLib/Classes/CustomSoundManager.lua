@@ -45,7 +45,7 @@ function C:CheckSoundID(sound_id, engine_source)
             end
             self.sources = new_sources
         end
-        return true
+        return false
     end
 
     local buffer = self:GetLoadedBuffer(sound_id, prefixes)
