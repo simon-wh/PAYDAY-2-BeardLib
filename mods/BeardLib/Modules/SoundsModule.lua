@@ -5,6 +5,9 @@ function SoundsModule:init(...)
         return false
 	end
 	BeardLib.Utils:SetupXAudio()
+	if self._config.force_autofire_fix then
+		CustomSoundManager.force_autofire_fix = true
+	end
     self:ReadSounds(self._config)
     return true
 end
