@@ -201,7 +201,6 @@ function C:Redirect(id, prefixes)
     elseif self.redirects.global[id] then
         return self.redirects.global[id]
     end
-    log("found nothing to redirect")
     return id --No need to redirect.
 end
 
