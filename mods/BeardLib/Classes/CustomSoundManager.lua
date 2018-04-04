@@ -1,11 +1,12 @@
 CustomSoundManager = CustomSoundManager or {}
 local C = CustomSoundManager
-C.buffers = {global = {}}
-C.delayed_buffers = {global = {}}
-C.stop_ids = {}
 C.sources = {}
-C.engine_sources = {}
+C.stop_ids = {}
 C.float_ids = {}
+C.engine_sources = {}
+C.buffers = {global = {}}
+C.redirects = {global = {}}
+C.delayed_buffers = {global = {}}
 C.Closed = XAudio == nil
 
 function C:CheckSoundID(sound_id, engine_source)
@@ -49,7 +50,7 @@ function C:CheckSoundID(sound_id, engine_source)
     end
 
     local buffer = self:GetLoadedBuffer(sound_id, prefixes)
-
+    
     if buffer then
         self:AddSource(engine_source, buffer)
         return true
@@ -93,7 +94,7 @@ function C:GetLoadedBuffer(sound_id, prefixes, no_load)
         end
     end
 
-    if prefixes then
+    if prefixes and #prefixes > 0 then
         for _, prefix in pairs(prefixes) do
             local prefix_tbl = self.buffers[prefix]
             local buffer = prefix_tbl and prefix_tbl[sound_id] or nil
@@ -187,6 +188,30 @@ function C:AddSource(engine_source, buffer)
     source:set_looping(buffer.data.loop)
     table.insert(self.sources, source_tbl)
     return source_tbl
+end
+
+function C:Redirect(id, prefixes)
+    if prefixes and #prefixes > 0 then
+        for _, prefix in pairs(prefixes) do
+            local prefix_tbl = self.redirects[prefix]
+            if prefix_tbl and prefix_tbl[id] then
+                return prefix_tbl[id]
+            end
+        end
+    elseif self.redirects.global[id] then
+        return self.redirects.global[id]
+    end
+    log("found nothing to redirect")
+    return id --No need to redirect.
+end
+
+function C:AddRedirect(id, to, prefix) 
+    if prefix then
+        self.redirects[prefix] = self.redirects[prefix] or {}
+        self.redirects[prefix][id] = to
+    else
+        self.redirects.global[id] = to
+    end
 end
 
 function C:IsClosed()

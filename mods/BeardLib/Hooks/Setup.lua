@@ -65,8 +65,7 @@ if XAudio and SoundSource then
     end
 
     function SoundSource:get_prefixes()
-        local switch = self:get_data().switch
-        return switch and table.map_values(switch) or nil
+        return self:get_data().mapped_prefixes
     end
 
     function SoundSource:set_link_object(object)
@@ -93,12 +92,12 @@ if XAudio and SoundSource then
         local data = self:get_data()
         data.switch = data.switch or {}
         data.switch[group] = state
-        --Group: Not sure what it is exactly, guessing like a folder, gonna ignore for now.
-        --State: Where the voice prefix actually goes to.
+        data.mapped_prefixes = table.map_values(data.switch)
     end)
 
     SoundSource._post_event = SoundSource._post_event or SoundSource.post_event
     function SoundSource:post_event(event, ...)
+        event = CustomSoundManager:Redirect(event, self:get_prefixes())
         if CustomSoundManager:CheckSoundID(event, self) then
             return event
         else

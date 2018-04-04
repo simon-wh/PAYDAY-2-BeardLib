@@ -39,6 +39,8 @@ function SoundsModule:ReadSounds(data, prev_dir)
 					prefix = prefix,
 					unload = unload,
 				}, v))
+			elseif (v._meta == "redirect" or v._meta == "Redirect") then
+				CustomSoundManager:AddRedirect(v.id, v.to, v.prefix or prefix)
 			elseif (v._meta == "sounds" or v._meta == "Sounds") then
 				self:ReadSounds(v, dir)
 			end
