@@ -168,7 +168,7 @@ elseif F == "newraycastweaponbase" then
     
     function RaycastWeaponBase:use_soundfix()
         local sounds = tweak_data.weapon[self:get_name_id()].sounds
-        return sounds and sounds.use_fix == true or CustomSoundManager.force_autofire_fix == true
+        return sounds and sounds.use_fix == true
     end
     
     --Based of https://modworkshop.net/mydownloads.php?action=view_down&did=20403
