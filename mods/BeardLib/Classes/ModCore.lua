@@ -157,3 +157,13 @@ end
 function ModCore:Enabled()
     return not self._disabled
 end
+
+--BLT Keybinds support:
+
+function ModCore:IsEnabled()
+    return self:Enabled()
+end
+
+function ModCore:WasEnabledAtStart()
+    return self:Enabled()
+end
