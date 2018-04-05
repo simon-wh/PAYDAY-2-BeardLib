@@ -13,16 +13,17 @@ function KeybindModule:init(core_mod, config)
 end
 
 function KeybindModule:Load()
-	if not self._config.keybind_id then 
+	if not self._config.keybind_id and not self._config.id then 
 		self:log("[ERROR] Keybind does not contain a definition for keybind_id!")
 		return
 	end
-	self._config.run_in_menu = self._config.run_in_menu or true
-	self._config.run_in_game = self._config.run_in_game or true
+
+	local config = table.merge({run_in_menu = true, run_in_menu = true}, self._config)
+	
 	if BLT and BLT.Keybinds then
-		BLT.Keybinds:register_keybind(self._mod, self._config)
+		BLT.Keybinds:register_keybind_json(self._mod, config)
 	else
-		LuaModManager:AddJsonKeybinding(self._config, self._mod.ModPath .. "/")		
+		LuaModManager:AddJsonKeybinding(config, self._mod.ModPath .. "/")		
 	end
 end
 
