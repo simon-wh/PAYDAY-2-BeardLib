@@ -18,7 +18,7 @@ function KeybindModule:Load()
 		return
 	end
 
-	local config = table.merge({run_in_menu = true, run_in_menu = true}, self._config)
+	local config = table.merge({run_in_menu = true, run_in_game = true}, self._config)
 	
 	if BLT and BLT.Keybinds then
 		BLT.Keybinds:register_keybind_json(self._mod, config)
