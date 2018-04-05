@@ -167,3 +167,7 @@ end
 function ModCore:WasEnabledAtStart()
     return self:Enabled()
 end
+
+function ModCore:GetName()
+    return self.Name
+end
