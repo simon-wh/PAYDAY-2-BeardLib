@@ -226,7 +226,7 @@ end
 
 function MenuUI:RunToggleClbk()
     if self.toggle_clbk then
-        self.toggle_clbk(self:Enabled())
+        self.toggle_clbk(self, self:Enabled())
     end           
 end
 
@@ -239,14 +239,10 @@ end
 function MenuUI:Toggle()
     if not self:Enabled() then
         self:enable()
-        if self.toggle_clbk then
-            self.toggle_clbk(self:Enabled())
-        end
+        self:RunToggleClbk()
     elseif self:ShouldClose() then
         self:disable()
-        if self.toggle_clbk then
-            self.toggle_clbk(self:Enabled())
-        end
+        self:RunToggleClbk()
     end
 end
 
