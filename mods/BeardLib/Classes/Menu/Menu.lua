@@ -238,14 +238,14 @@ function Menu:SetVisible(visible, animate, no_align)
     self.menu:CheckOpenedList()
 end
 
-function Menu:UpdateCanvas()
+function Menu:UpdateCanvas(additional)
     if not self:alive() then
         return
     end
     if self.type_name == "Group" then
         self:SetScrollPanelSize()
     end
-    self._scroll:update_canvas_size()
+    self._scroll:update_canvas_size(additional)
     self:CheckItems()
 end
 
@@ -331,10 +331,12 @@ function Menu:RecreateItem(item, align_items)
     if alive(panel) then
         panel:parent():remove(panel)
     end
-    if item.override_panel then
-        table.delete(item.override_panel._adopted_items, item)
-        if item.override_panel.Panel then
-            item.parent_panel = item.override_panel:Panel()
+    local pitem = item.override_panel
+    if pitem then
+        table.delete(pitem._adopted_items, item)
+        pitem._has_adopted_items = #pitem._adopted_items > 0
+        if pitem.Panel then
+            item.parent_panel = pitem:Panel()
         end
     end
     item.parent_panel = alive(item.parent_panel) and item.parent_panel or self.items_panel

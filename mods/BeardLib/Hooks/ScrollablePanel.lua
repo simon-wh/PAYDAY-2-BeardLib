@@ -58,7 +58,7 @@ function ScrollablePanelModified:set_size(...)
 	self._scroll_bg:set_x(self._scroll_bar:x())
 end
 
-function ScrollablePanelModified:update_canvas_size()
+function ScrollablePanelModified:update_canvas_size(additional_h)
 	local orig_w = self:canvas():w()
 	local max_h = 0
 	local children = self:canvas():children()
@@ -90,6 +90,8 @@ function ScrollablePanelModified:update_canvas_size()
 			end
 		end
 	end
+
+	max_h = max_h + (additional_h or 0)
 
 	if max_h <= self:scroll_panel():h() then
 		max_h = self:scroll_panel():h()

@@ -121,7 +121,7 @@ function BaseItem:WorkParams(params)
 	self:WorkParam("control_slice", 0.5)
 	self:WorkParam("font", tweak_data.menu.pd2_large_font or tweak_data.menu.default_font)
 	self:WorkParam("border_size", 2)
-	self:WorkParam("last_y_offset")
+	--self:WorkParam("last_y_offset")
 	self:WorkParam("accent_color")
 	self:WorkParam("scroll_color", self.accent_color)
 	self:WorkParam("slider_color", self.accent_color)
@@ -333,7 +333,10 @@ function BaseItem:MouseFocused(x, y)
 end
 
 --Add/Set Funcs--
-function BaseItem:AddItem(item) table.insert(self._adopted_items, item) end
+function BaseItem:AddItem(item) 
+	table.insert(self._adopted_items, item)
+	self._has_adopted_items = true
+end
 function BaseItem:SetCallback(callback) self.on_callback = callback end
 function BaseItem:SetLabel(label) self.label = label end
 function BaseItem:SetParam(k,v) self[k] = v end

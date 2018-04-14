@@ -27,11 +27,12 @@ function Menu:AlignItems(menus)
 end
 
 function Menu:AlignItemsPost(max_h, prev_item)
-    max_h = max_h + self:TextHeight() + (self.last_y_offset or (prev_item and prev_item:Offset()[2] or 0))
+    local additional = (self.last_y_offset or (prev_item and prev_item:Offset()[2] or 0))
+    max_h = max_h + self:TextHeight() + additional
     if self.auto_height and self.h ~= max_h then
         self:_SetSize(nil, max_h, true)
     end
-    self:UpdateCanvas()
+    self:UpdateCanvas(additional)
 end
 
 function Menu:AlignItemsNormal()

@@ -77,8 +77,9 @@ function Group:MousePressed(button, x, y)
 end
 
 function Group:MouseMoved(x, y)
-    if not Group.super.MouseMoved(self, x, y) then
-        return BeardLib.Items.Item.MouseMoved(self, x, y)
+    local ret = BeardLib.Items.Item.MouseMoved(self, x, y)
+    if not ret then
+        ret = Group.super.MouseMoved(self, x, y)
     end
-    return false
+    return ret
 end
