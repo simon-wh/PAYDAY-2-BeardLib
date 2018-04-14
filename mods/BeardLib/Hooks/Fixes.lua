@@ -203,6 +203,12 @@ elseif F == "newraycastweaponbase" then
 elseif F == "playermovement" then
     local trigger = PlayerMovement.trigger_teleport
     function PlayerMovement:trigger_teleport(data, ...)
+        local state = self:current_state() -- just quick teleporting for VR players for now
+        if state and state._teleport_player then
+            state:_teleport_player(data.position)
+            return
+        end
+
         data.fade_in = data.fade_in or 0
         data.sustain = data.sustain or 0
         data.fade_out = data.fade_out or 0
