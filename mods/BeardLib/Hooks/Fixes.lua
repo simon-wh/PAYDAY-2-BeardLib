@@ -200,4 +200,12 @@ elseif F == "newraycastweaponbase" then
             self:play_tweak_data_sound("stop_fire")
         end
     end)
+elseif F == "playermovement" then
+    local trigger = PlayerMovement.trigger_teleport
+    function PlayerMovement:trigger_teleport(data, ...)
+        data.fade_in = data.fade_in or 0
+        data.sustain = data.sustain or 0
+        data.fade_out = data.fade_out or 0
+        return trigger(self, data, ...)
+    end
 end

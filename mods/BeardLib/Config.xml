@@ -72,6 +72,8 @@
 		<class file="BeardLibModsMenu.lua" manager="mods_menu"/>
 	</classes>
 	<hooks>
+
+		<hook source="libunits/beings/player/playermovement" file="Fixes.lua"/>
 		<hook source="lib/units/beings/player/huskplayermovement" file="NetworkHooks.lua"/>
 	    <hook source="lib/units/beings/player/playerinventory" file="NetworkHooks.lua"/>
 	    <hook source="lib/units/weapons/newraycastweaponbase" file="NetworkHooks.lua"/>
