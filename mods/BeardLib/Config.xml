@@ -211,7 +211,6 @@
 	</script_data_formats>
 	<mission_elements>
 		<value_node value="MoveUnit"/>
-		<value_node value="TeleportPlayer"/>
 		<value_node value="Environment"/>
 		<value_node value="PushInstigator"/>
 		<value_node value="CustomSound"/>
