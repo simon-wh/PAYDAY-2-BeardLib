@@ -73,7 +73,6 @@
 	</classes>
 	<hooks>
 
-		<hook source="libunits/beings/player/playermovement" file="Fixes.lua"/>
 		<hook source="lib/units/beings/player/huskplayermovement" file="NetworkHooks.lua"/>
 	    <hook source="lib/units/beings/player/playerinventory" file="NetworkHooks.lua"/>
 	    <hook source="lib/units/weapons/newraycastweaponbase" file="NetworkHooks.lua"/>
@@ -83,6 +82,7 @@
 		<hook source="core/lib/managers/coresoundenvironmentmanager" file="Fixes.lua"/>
 		<hook source="lib/managers/mission/elementvehiclespawner" file="Fixes.lua"/>
 		<hook source="lib/managers/mission/elementinteraction" file="Fixes.lua"/>
+		<hook source="lib/units/beings/player/playermovement" file="Fixes.lua"/>
 	    <hook source="lib/units/weapons/newraycastweaponbase" file="Fixes.lua"/>
 		<hook source="lib/managers/menu/crewmanagementgui" file="Fixes.lua"/>
 		<hook source="lib/managers/weaponfactorymanager" file="Fixes.lua"/>
