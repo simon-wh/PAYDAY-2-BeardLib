@@ -47,11 +47,8 @@ function Group:SetText(...)
     self:RePositionToggle()
 end
 
-function Group:ToggleGroup()
+function Group:UpdateGroup()
     if self.closed then
-        self.closed = false
-    else
-        self.closed = true
         self.panel:set_h(self:TextHeight())
     end
     for i, item in pairs(self._my_items) do
@@ -62,6 +59,21 @@ function Group:ToggleGroup()
     self.toggle:set_texture_rect(self.closed and 42 or 2, self.closed and 2 or 0, 16, 16)
     self:AlignItems()
     self:SetSize(nil, nil, true)
+end
+
+function Group:ToggleGroup()
+    self.closed = not self.closed
+    self:UpdateGroup()
+end
+
+function Group:CloseGroup()
+    self.closed = true
+    self:UpdateGroup()
+end
+
+function Group:OpenGroup()
+    self.closed = false
+    self:UpdateGroup()
 end
 
 function Group:MouseInside(x, y) 
