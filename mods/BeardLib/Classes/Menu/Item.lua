@@ -9,6 +9,9 @@ function Item:Init(params)
 		w = self.w,
 		h = self.h or self.size,
 	})
+
+	self.panel:script().menuui_item = self
+
 	self:InitBasicItem()
 	if self.divider_type and alive(self.title) then
 		self.title:set_world_center_y(self.panel:world_center_y())

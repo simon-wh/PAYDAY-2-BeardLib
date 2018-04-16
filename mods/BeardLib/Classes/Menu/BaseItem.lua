@@ -250,7 +250,12 @@ function BaseItem:TryRendering()
 	if not self.visible then
 		return false
 	end
-	local p = self.parent_panel
+	local p
+	if self.override_panel then
+		p = self.parent_panel
+	else
+		p = self.parent._scroll._scroll_panel
+	end
 	local visible = false
 	if alive(self.panel) then		
 		local x = p:world_x()

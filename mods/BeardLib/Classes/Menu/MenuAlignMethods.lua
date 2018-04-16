@@ -43,7 +43,7 @@ function Menu:AlignItemsNormal()
     local prev_item
     local last_positioned_item
     for _, item in pairs(self._my_items) do
-        if not item.ignore_align and item:Visible() then
+        if not item.ignore_align and item.visible then
             local offset = item:Offset()
             local panel = item:Panel()
             panel:set_x(offset[1])
@@ -75,7 +75,7 @@ function Menu:AlignItemsReversed()
     local last_positioned_item
     for i=#self._my_items, 1, -1 do
         local item = self._my_items[i]
-        if not item.ignore_align and item:Visible() then
+        if not item.ignore_align and item.visible then
             local offset = item:Offset()
             local panel = item:Panel()
             panel:set_x(offset[1])
@@ -109,7 +109,7 @@ function Menu:AlignItemsGrid()
     local max_y = 0
     local items_w = self:ItemsWidth()
     for _, item in pairs(self._my_items) do
-        if not item.ignore_align and item:Visible() then
+        if not item.ignore_align and item.visible then
             local offset = item:Offset()
             local panel = item:Panel()
             if panel:w() + (max_x + offset[1]) - items_w > 0.001 then
@@ -157,7 +157,7 @@ function Menu:AlignItemsCenteredGrid()
         current_row = {}
     end
     for _, item in pairs(self._my_items) do
-        if not item.ignore_align and item:Visible() then
+        if not item.ignore_align and item.visible then
             local offset = item:Offset()
             local panel = item:Panel()
             if panel:w() + (max_x + offset[1]) - items_w > 0.001 then
@@ -209,7 +209,7 @@ function Menu:AlignItemsReversedCenteredGrid()
     end
     for i=#self._my_items, 1, -1 do
         local item = self._my_items[i]
-        if not item.ignore_align and item:Visible() then
+        if not item.ignore_align and item.visible then
             local offset = item:Offset()
             local panel = item:Panel()
             if panel:w() + (max_x + offset[1]) - items_w > 0.001 then
@@ -248,7 +248,7 @@ function Menu:AlignItemsReversedGrid()
     local max_y = 0
     for i=#self._my_items, 1, -1 do
         local item = self._my_items[i]
-        if not item.ignore_align and item:Visible() then
+        if not item.ignore_align and item.visible then
             local offset = item:Offset()
             local panel = item:Panel()
             if panel:w() + (max_x + offset[1]) - self:ItemsWidth() > 0.001 then

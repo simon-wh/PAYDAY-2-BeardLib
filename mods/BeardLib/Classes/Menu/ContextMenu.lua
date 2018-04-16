@@ -34,7 +34,8 @@ function ContextMenu:init(owner, layer)
     end
     self._scroll = ScrollablePanelModified:new(self.panel, "ItemsPanel", {
         layer = 4, 
-        padding = 0.0001, 
+        padding = 0.0001,
+        count_invisible = true,
         scroll_width = owner.scrollbar == false and 0 or self.parent.scroll_width or 12,
         hide_shade = true, 
         color = owner.scroll_color or owner.highlight_color,
@@ -51,9 +52,11 @@ function ContextMenu:alive() return alive(self.panel) end
 
 function ContextMenu:CheckItems()
     self._visible_items = {}
-    local p = self.items_panel
-	for _, item in pairs(self._item_panels) do
-        item:set_visible(p:inside(p:world_x(), item:world_y()) == true or p:inside(p:world_x(), item:world_bottom()) == true)
+    local p = self.items_panel:parent()
+    for _, item in pairs(self._item_panels) do
+        local can_render = p:inside(p:world_x(), item:world_y()) == true or p:inside(p:world_x(), item:world_bottom()) == true
+        item:set_visible(can_render)
+        item:script().count_height = true
         if item:visible() then
             table.insert(self._visible_items, item)
         end
@@ -246,12 +249,13 @@ function ContextMenu:MouseMoved(x, y)
     local _, pointer = self._scroll:mouse_moved(nil, x, y) 
     if pointer then
         managers.mouse_pointer:set_pointer_image(pointer)
+        self:CheckItems()
         return true
     else
         managers.mouse_pointer:set_pointer_image("arrow")
     end
     for k, item in pairs(self._visible_items) do
-        if alive(item)  then
+        if alive(item) then
             self:HightlightItem(item, item:inside(x,y))
         end
     end

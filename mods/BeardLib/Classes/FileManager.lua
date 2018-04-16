@@ -54,7 +54,7 @@ function fm:Process(ids_ext, ids_path, name_mt)
 							BeardLib:log("[WARNING] Script Mod with ID: '%s', Path:'%s.%s' may potentially overwrite changes from other mods! Continuing...", id, k_path, k_ext)							
 						end
 					end
-					local new_data = mdata.tbl or FileIO:ReadScriptDataFrom(mdata.file, mdata.type)
+					local new_data = mdata.tbl or FileIO:ReadScriptData(mdata.file, mdata.type)
 					if new_data then
                         if ids_ext == Idstring("nav_data") then
                             BeardLib.Utils:RemoveMetas(new_data)

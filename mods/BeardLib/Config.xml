@@ -66,6 +66,7 @@
 		<class file="Dialogs/SimpleSelectListDialog.lua"/>
 		<class file="Utils/MenuHelperPlus.lua"/>
 		<class file="Utils/JsonUtils.lua"/>
+		<class file="Utils/XmlUtils.lua"/>
 		<class file="ModAssetUpdateManager.lua" manager="asset_update"/>
 		<class file="ModuleBase.lua"/>
 		<class file="Dialogs/MenuDialogManager.lua" manager="dialog"/>

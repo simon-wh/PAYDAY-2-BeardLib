@@ -818,7 +818,8 @@ end
 function BeardLib.Utils.Path:Combine(start, ...)
 	local paths = {...}
 	local final_string = start
-	for i, path_part in pairs(paths) do
+    for i, path_part in pairs(paths) do
+        path_part = tostring(path_part)
 		if string.begins(path_part, ".") then
 			path_part = string.sub(path_part, 2, #path_part)
 		end

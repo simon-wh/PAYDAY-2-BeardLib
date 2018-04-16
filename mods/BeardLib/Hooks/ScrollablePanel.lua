@@ -8,6 +8,7 @@ function ScrollablePanelModified:init(panel, name, data)
 	data.color = data.color or Color.black
 	self._scroll_width = data.scroll_width
 	self._scroll_speed = data.scroll_speed or 28
+	self._count_invisible = data.count_invisible
 
 	local panel = self:panel()
 	self:canvas():set_w(panel:w() - data.scroll_width)
@@ -62,8 +63,11 @@ function ScrollablePanelModified:update_canvas_size(additional_h)
 	local orig_w = self:canvas():w()
 	local max_h = 0
 	local children = self:canvas():children()
+	local visible_children = {}
 	for i, panel in pairs(children) do
-		if panel:visible() then
+		local item = panel:script().menuui_item
+		if self._count_invisible or (item and item.visible) or panel:visible() then
+			table.insert(visible_children, panel)
 			local h = panel:bottom()
 			if max_h < h then
 				max_h = h
@@ -82,12 +86,10 @@ function ScrollablePanelModified:update_canvas_size(additional_h)
 
 	max_h = 0
 
-	for i, panel in pairs(children) do
-		if panel:visible() then
-			local h = panel:bottom()
-			if max_h < h then
-				max_h = h
-			end
+	for _, panel in pairs(visible_children) do
+		local h = panel:bottom()
+		if max_h < h then
+			max_h = h
 		end
 	end
 
