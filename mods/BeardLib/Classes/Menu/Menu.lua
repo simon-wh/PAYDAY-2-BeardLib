@@ -11,6 +11,7 @@ function Menu:Init(params)
         visible = self.visible == true,
         layer = self.layer or 1,
     })
+    self.panel:script().menuui_item = self
     self.bg = self.panel:bitmap({
         name = "background",
         halign = "grow",

@@ -273,6 +273,7 @@ function BaseItem:SetVisible(visible, no_align)
 	if not self:alive() then
 		return
 	end
+	self._hidden_by_menu = nil
     self.visible = visible == true
     self.panel:set_visible(self.visible)
     if not self.visible then

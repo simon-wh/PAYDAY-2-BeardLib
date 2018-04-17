@@ -52,12 +52,15 @@ function Group:UpdateGroup()
         self.panel:set_h(self:TextHeight())
     end
     for i, item in pairs(self._my_items) do
-        if item:ParentPanel() == self:ItemsPanel() then
+        if item:ParentPanel() == self:ItemsPanel() and (item.visible or item._hidden_by_menu) then --handle only visible items.
             item:SetVisible(not self.closed)
+            if self.closed then
+                item._hidden_by_menu = true
+            end
         end
     end
     self.toggle:set_texture_rect(self.closed and 42 or 2, self.closed and 2 or 0, 16, 16)
-    self:AlignItems()
+    self:AlignItems(true)
     self:SetSize(nil, nil, true)
 end
 
