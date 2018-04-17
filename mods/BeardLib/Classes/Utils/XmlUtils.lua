@@ -201,3 +201,12 @@ function XML:Clean(tbl, shallow)
 
     return tbl
 end
+
+--allows both key and index to be removed, useful for tables cleaned by XML:Clean
+function table.remove_key(tbl, key)
+    if type(key) == "number" and #tbl <= key then
+        table.remove(tbl, key)
+    else
+        tbl[key] = nil
+    end
+end
