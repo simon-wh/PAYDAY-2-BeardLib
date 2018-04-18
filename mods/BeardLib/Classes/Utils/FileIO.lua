@@ -228,5 +228,5 @@ function FileIO:GetFolders(path)
 	end
 end
 
-function FileIO:ReadScriptDataFrom(...)	self:ReadScriptData(...) end
-function FileIO:WriteScriptDataTo(...) self:WriteScriptData(...) end
+function FileIO:ReadScriptDataFrom(...) return self:ReadScriptData(...) end
+function FileIO:WriteScriptDataTo(...) return self:WriteScriptData(...) end
