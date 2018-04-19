@@ -60,7 +60,8 @@ function ColorDialog:_Show(params)
         name = "Alpha",
         text = "Alpha",
         min = 0,
-        max = 100,
+		max = 100,
+		visible = params.use_alpha,
         on_callback = ClassClbk(self, "update_color"),
         value = params.color.alpha * 100
     })

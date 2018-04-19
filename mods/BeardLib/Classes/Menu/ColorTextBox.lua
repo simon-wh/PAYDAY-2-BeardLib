@@ -22,7 +22,7 @@ function ColorTextBox:UpdateColor()
 end
 
 function ColorTextBox:Value()
-    local value = self.value
+	local value = self.value
     if type_name(value) == "Color" then
         self.value = value:to_hex()
         return value
@@ -40,9 +40,17 @@ function ColorTextBox:HexValue()
     end
 end
 
+function ColorTextBox:VectorValue()
+	local v = self:Value()
+	return Vector3(v.r, v.g, v.b)
+end
+
 function ColorTextBox:SetValue(value, ...)
-    if type_name(value) == "Color" then
-        value = value:to_hex()
+	local t = type_name(value)
+    if t == "Color" then
+		value = value:to_hex()
+	elseif t == "Vector3" then
+		value = Color(value.x, value.y, value.z):to_hex()
     end
     return ColorTextBox.super.SetValue(self, value, ...)
 end
@@ -62,7 +70,7 @@ function ColorTextBox:MousePressed(button, x, y)
             self:RunCallback(self.show_color_dialog)
             return true
         elseif not self.no_color_dialog then
-            BeardLib.managers.dialog:Color():Show({color = self:Value(), force = true, callback = function(color)
+            BeardLib.managers.dialog:Color():Show({color = self:Value(), use_alpha = self.use_alpha, force = true, callback = function(color)
                 self:SetValue(color, true)
             end})
             return true

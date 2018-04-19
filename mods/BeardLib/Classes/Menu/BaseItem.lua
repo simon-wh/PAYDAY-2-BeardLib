@@ -140,6 +140,7 @@ function BaseItem:WorkParams(params)
 	self:WorkParam("supports_keyboard")
 	self:WorkParam("supports_mouse")
 	self:WorkParam("color_dialog")
+	self:WorkParam("use_alpha")
 
 	self.name = NotNil(self.name, self.text, "")
 	self.text = NotNil(self.text, self.text ~= false and self.name)

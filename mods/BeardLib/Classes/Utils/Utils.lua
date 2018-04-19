@@ -965,7 +965,6 @@ function Color:from_hex(hex)
         return hex
     end
     if not hex or type(hex) ~= "string" then
-        log(debug.traceback())
         return Color()
     end
     if hex:match("#") then
