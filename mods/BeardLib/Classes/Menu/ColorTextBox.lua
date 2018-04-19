@@ -13,8 +13,8 @@ end
 
 function ColorTextBox:UpdateColor()
     local preview = self:Panel():child("color_preview")
-    if preview then
-        preview:set_color(self:Value())
+	if preview then
+        preview:set_color(self:ColorValue())
         local s = self._textbox.panel:h()
         preview:set_size(s,s)
         preview:set_right(self._textbox.panel:right())
@@ -22,27 +22,38 @@ function ColorTextBox:UpdateColor()
 end
 
 function ColorTextBox:Value()
+	return self:ColorValue()
+end
+
+function ColorTextBox:ColorValue()
 	local value = self.value
-    if type_name(value) == "Color" then
+	local t = type_name(value)
+    if t == "Color" then
         self.value = value:to_hex()
-        return value
-    else
+		return value
+	elseif t == "Vector3" then
+		local col = value:color()
+		self.value = col:to_hex()
+		return col
+	else
         return Color:from_hex(value)
     end
 end
 
 function ColorTextBox:HexValue()
     local value = self.value
-    if type_name(value) == "Color" then
+	local t = type_name(value)
+    if t == "Color" then
         return value:to_hex()
-    else
+	elseif t == "Vector3" then
+		return value:color():to_hex()
+	else
         return value
     end
 end
 
 function ColorTextBox:VectorValue()
-	local v = self:Value()
-	return Vector3(v.r, v.g, v.b)
+	return self:Value():vector()
 end
 
 function ColorTextBox:SetValue(value, ...)
@@ -50,7 +61,7 @@ function ColorTextBox:SetValue(value, ...)
     if t == "Color" then
 		value = value:to_hex()
 	elseif t == "Vector3" then
-		value = Color(value.x, value.y, value.z):to_hex()
+		value = value:color():to_hex()
     end
     return ColorTextBox.super.SetValue(self, value, ...)
 end

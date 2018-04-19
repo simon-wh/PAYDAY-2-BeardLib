@@ -69,12 +69,13 @@ end
 
 function BaseItem:BestAlpha(...)
 	local big
+	
 	for _, c in pairs({...}) do
-		if c and (not big or c.alpha > big.alpha) then
+		if c and c.a and (not big or c.a > big.a) then
 			big = c
 		end
 	end
-	return big
+	return big or Color.white
 end
 
 --Hopefully this reaches the base MenuUI and not cause a stack overflow xd

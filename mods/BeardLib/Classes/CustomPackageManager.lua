@@ -58,6 +58,8 @@ function C:HasPackage(id)
     return not not self.custom_packages[id:key()]
 end
 
+local UNIT_LOAD = "unit_load"
+local ADD = "add"
 function C:LoadPackageConfig(directory, config)
     if not (SystemFS and SystemFS.exists) then
         BeardLib:log("[ERROR] SystemFS does not exist! Custom Packages cannot function without this! Do you have an outdated game version?")
@@ -74,7 +76,7 @@ function C:LoadPackageConfig(directory, config)
             local path = child.path
             local load_clbk = child.load_clbk
             if not load_clbk or load_clbk(path, typ) then
-                if typ == "unit_load" or typ == "add" then
+                if typ == UNIT_LOAD or typ == ADD then
                     self:LoadPackageConfig(directory, child)
                 elseif typ and path then
                     path = BeardLib.Utils.Path:Normalize(path)

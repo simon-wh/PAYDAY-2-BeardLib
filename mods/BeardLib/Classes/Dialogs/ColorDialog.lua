@@ -20,13 +20,13 @@ function ColorDialog:_Show(params)
         return
     end
     params.color = params.color or Color.white
-    self._color = params.color
+	self._color = params.color:color()
     local preview = self._menu:Divider({
         name = "ColorPreview",
         text = "",
         size = 32,
         offset = 0,
-        background_color = params.color,
+        background_color = self._color,
     })
     self._menu:TextBox({
         name = "Hex",
@@ -53,7 +53,7 @@ function ColorDialog:_Show(params)
             min = 0,
             max = 255,
             on_callback = ClassClbk(self, "update_color"),
-            value = params.color[ctrl:lower()] * 255
+            value = self._color[ctrl:lower()] * 255
         })   
     end
     self._menu:Slider({
@@ -63,7 +63,7 @@ function ColorDialog:_Show(params)
 		max = 100,
 		visible = params.use_alpha,
         on_callback = ClassClbk(self, "update_color"),
-        value = params.color.alpha * 100
+        value = self._color.alpha * 100
     })
     self._menu:Button({
         name = "Apply",

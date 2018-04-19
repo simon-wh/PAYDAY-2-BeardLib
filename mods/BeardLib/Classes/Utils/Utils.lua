@@ -959,6 +959,22 @@ function ClassClbk(clss, func, a, b, c, ...)
     end
 end
 
+function Color:color()
+	return self
+end
+
+function Color:vector()
+	return Vector3(self.r, self.g, self.b)
+end
+
+function Vector3:vector()
+	return self
+end
+
+function Vector3:color()
+	return Color(self:unpack())
+end
+
 --If only Color supported alpha for hex :P
 function Color:from_hex(hex)
     if type_name(hex) == "Color" then
