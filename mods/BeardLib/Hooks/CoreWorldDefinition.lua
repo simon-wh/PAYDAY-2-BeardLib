@@ -171,7 +171,7 @@ function WorldDefinition:add_trigger_sequence(unit, triggers, ...)
     return add_trigger_sequence(self, unit, fixed_triggers, ...)
 end
 
-Hooks:PostHook(WorldDefinition, "assign_unit_data", "BeardLibAssignUnitData", function(unit, data)
+Hooks:PostHook(WorldDefinition, "assign_unit_data", "BeardLibAssignUnitData", function(self, unit, data)
 	self:_setup_cubemaps(unit, data)
 end)
 
