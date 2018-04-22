@@ -101,8 +101,9 @@ function NarrativeModule:AddNarrativeData(narr_self, tweak_data)
 
     narr_self.jobs[tostring(self._config.id)] = data
     
-    if #data.chain > 0 then 
-        table.insert(narr_self._jobs_index, tostring(self._config.id))
+    local id = tostring(self._config.id)
+    if #data.chain > 0 and not table.contains(narr_self._jobs_index, id) then 
+        table.insert(narr_self._jobs_index, id)
     end
     narr_self:set_job_wrappers()
 end
