@@ -22,23 +22,25 @@ function ModuleBase:init(core_mod, config)
 end
 
 function ModuleBase:post_init()
-    if self._post_init_complete then
-        return false
-    end
-
-    if self._config.post_init_clbk then
-        local clbk = self._mod:StringToCallback(self._config.post_init_clbk)
+	local post_init = self._config.post_init_clbk or self._config.post_init
+    if post_init then
+        local clbk = self._mod:StringToCallback(post_init)
         if clbk then
             clbk()
         end
     end
-
-    self._post_init_complete = true
-    return true
 end
 
 function ModuleBase:log(str, ...)
     self._mod:log(string.format("[%s] ", self._name) .. str, ...)
+end
+
+function ModuleBase:GetPath(directory, prev_dir)
+	if prev_dir then
+		return Path:Combine(prev_dir, directory)
+	else
+		return Path:Combine(self._mod.ModPath, directory)
+	end
 end
 
 ItemModuleBase = ItemModuleBase or class(ModuleBase)

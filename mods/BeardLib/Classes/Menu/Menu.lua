@@ -27,7 +27,7 @@ function Menu:Init(params)
         layer = 4,
         padding = 0, 
         scroll_width = self.scrollbar == false and 0 or self.scroll_width, 
-        hide_shade = true, 
+		hide_shade = true,
         color = self.scroll_color or self.highlight_color,
         hide_scroll_background = self.hide_scroll_background,
         scroll_speed = self.scroll_speed
@@ -78,26 +78,23 @@ function Menu:WorkParams(params)
     end
 end
 
-function Menu:SetSize(w, h, no_recreate)
+function Menu:SetSize(w, h)
     self.orig_h = h
-    self:_SetSize(w, h, no_recreate)
+    self:_SetSize(w, h)
 end
 
-function Menu:_SetSize(w, h, no_recreate)
+function Menu:_SetSize(w, h)
     if not self:alive() then
         return
-    end
-    w = w or self.w
-    h = self.closed and self:TextHeight() or (h or self.orig_h or self.h)
-    h = math.clamp(h, self.min_height or 0, self.max_height or h)
-    self.panel:set_size(w, h)
-    self:SetScrollPanelSize()
-    self.w = w
-    self.h = h
+	end
+	
+	w = w or self.w
+	h = h or self.orig_h or self.h
+	h = math.clamp(h, self.min_height or 0, self.max_height or h)
+	self.panel:set_size(w, h)
+	self:SetScrollPanelSize()
+    self.w, self.h = self.panel:size()
     self:Reposition()
-    if not no_recreate then
-        self:RecreateItems()
-    end
     self:MakeBorder()
 end
 
@@ -106,7 +103,22 @@ function Menu:SetScrollPanelSize()
         return
     end
     self._scroll:set_size(self.panel:w(), self.panel:h() - self:TextHeight())
-    self._scroll:panel():set_bottom(self:Height())
+	self._scroll:panel():set_bottom(self.panel:h())
+	self._scroll:force_scroll()
+end
+
+function Menu:UpdateCanvas(h)
+    if not self:alive() then
+        return
+	end
+	if not self.auto_height and h <= self._scroll:scroll_panel():h() then
+		h = self._scroll:scroll_panel():h()
+	end
+	
+	self._scroll:set_canvas_size(nil, h)
+	self:_SetSize(nil, self.auto_height and self.items_panel:h() + self:TextHeight() or nil, true)
+
+	self:CheckItems()
 end
 
 function Menu:KeyPressed(o, k)
@@ -239,17 +251,6 @@ function Menu:SetVisible(visible, animate, no_align)
     self.menu:CheckOpenedList()
 end
 
-function Menu:UpdateCanvas(additional)
-    if not self:alive() then
-        return
-    end
-    if self.type_name == "Group" then
-        self:SetScrollPanelSize()
-    end
-    self._scroll:update_canvas_size(additional)
-    self:CheckItems()
-end
-
 function Menu:GetMenu(name, shallow)
     for _, menu in pairs(self._my_items) do
         if menu.menu_type then
@@ -312,7 +313,6 @@ function Menu:ClearItems(label)
     if self.auto_align then
         self:AlignItems(true)
     end
-    self:UpdateCanvas()
 end
 
 function Menu:RecreateItems()

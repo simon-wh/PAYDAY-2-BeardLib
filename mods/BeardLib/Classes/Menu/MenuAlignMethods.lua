@@ -8,31 +8,28 @@ local align_methods = {
     reversed_centered_grid = "AlignItemsReversedCenteredGrid"
 }
 
-function Menu:AlignItems(menus)
+function Menu:AlignItems(menus, no_parent)
+	if menus then
+		for _, item in pairs(self._my_items) do
+			if item.menu_type then
+				item:AlignItems(true, true)
+			end
+		end
+	end
     if self.align_method and align_methods[self.align_method] then
         self[align_methods[self.align_method]](self)
     else
         self:AlignItemsNormal()
     end
-    if self.parent.AlignItems then
+    if self.parent.AlignItems and not no_parent then
         self.parent:AlignItems()
-    end
-    if menus then
-        for _, item in pairs(self._my_items) do
-            if item.menu_type then
-                item:AlignItems(true)
-            end
-        end
     end
 end
 
 function Menu:AlignItemsPost(max_h, prev_item)
-    local additional = (self.last_y_offset or (prev_item and prev_item:Offset()[2] or 0))
-    max_h = max_h + self:TextHeight() + additional
-    if self.auto_height and self.h ~= max_h then
-        self:_SetSize(nil, max_h, true)
-    end
-    self:UpdateCanvas(additional)
+	local additional = (self.last_y_offset or (prev_item and prev_item:Offset()[2] or 0))
+	max_h = max_h + additional -- self:TextHeight() + additional
+	self:UpdateCanvas(max_h)
 end
 
 function Menu:AlignItemsNormal()

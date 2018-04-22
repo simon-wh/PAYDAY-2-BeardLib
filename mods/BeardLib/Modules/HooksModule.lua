@@ -11,20 +11,17 @@ function HooksModule:init(core_mod, config)
     return true
 end
 
-function HooksModule:Load(config)
-    local path = self:GetPath(config and config.directory or nil)
+function HooksModule:Load(config, prev_dir)
     config = config or self._config
+	local dir = self:GetPath(config.directory, prev_dir)
+	
     for _, hook in ipairs(config) do
         if hook._meta == "hook" then
-            ModManager:RegisterHook(hook.source_file, path, hook.file, hook.type, self)
+            ModManager:RegisterHook(hook.source_file, dir, hook.file, hook.type, self)
         elseif hook._meta == "hooks" then
-            self:Load(hook)
+            self:Load(hook, dir)
         end
     end
-end
-
-function HooksModule:GetPath(additional)
-    return BeardLib.Utils.Path:Combine(self._mod.ModPath, self._config.directory, additional or "")
 end
 
 BeardLib:RegisterModule(HooksModule.type_name, HooksModule)

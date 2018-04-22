@@ -25,7 +25,7 @@ function BeardLibModsMenu:CreateItems(menu)
     
     self._holder = menu:Menu({
         name = "Main",
-        scrollbar = false,
+		scrollbar = false,
         background_color = Color(0.8, 0.2, 0.2, 0.2),
         highlight_color = menu.foreground:with_alpha(0.1),
         size = 20,
@@ -81,7 +81,7 @@ function BeardLibModsMenu:CreateItems(menu)
         h = self._holder:ItemsHeight() - text:OuterHeight() - (self._holder.offset[2] * 2),
         fit_width = false,
         offset = 4,
-        size = 16,
+		size = 16,
         position = "CenterxBottomOffset-y",
         auto_align = false,
         align_method = "grid",

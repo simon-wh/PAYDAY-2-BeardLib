@@ -172,11 +172,16 @@ function BaseItem:WorkParams(params)
 		end	
 	end
 
-	if not self.initialized and self.parent ~= self.menu then
-		if (not self.w or self.fit_width) then
-			self.w = (self.w or self.parent_panel:w()) - ((self.size_by_text or self.type_name == "ImageButton") and 0 or self.offset[1] * 2)
+	if not self.initialized then
+		if self.parent ~= self.menu then
+			if (not self.w or self.fit_width) then
+				self.w = (self.w or self.parent_panel:w()) - ((self.size_by_text or self.type_name == "ImageButton") and 0 or self.offset[1] * 2)
+			end
+			self.w = math.clamp(self.w, self.min_width or 0, self.max_width or self.w)
+		else
+			self.w = self.w or self.parent_panel:w()
+			self.h = self.h or self.parent_panel:h()
 		end
-		self.w = math.clamp(self.w, self.min_width or 0, self.max_width or self.w)
 	end
 	self.should_render = true
 end
@@ -264,9 +269,6 @@ function BaseItem:TryRendering()
 	 	visible = p:inside(x, self.panel:world_y()) == true or p:inside(x, self.panel:world_bottom()) == true
 		self.panel:set_visible(visible)
 		self.should_render = visible
-		if self.debug then
-			BeardLib:log("Item %s has been set to rendering=%s", tostring(self), tostring(visible))
-		end
 	end
 	return visible
 end

@@ -2,7 +2,7 @@ core:import("CoreSerialize")
 
 ModCore = ModCore or class()
 ModCore._ignored_modules = {}
-function ModCore:init(config_path, load_modules, post_init)
+function ModCore:init(config_path, load_modules)
     if not FileIO:Exists(config_path) then
         BeardLib:log("[ERROR] Config file at path '%s' is not readable!", config_path)
         return
@@ -13,24 +13,46 @@ function ModCore:init(config_path, load_modules, post_init)
     if disabled_mods[ModPath] and not blt_mod then
         BeardLib:log("[Info] Mod at path '%s' is disabled!", tostring(ModPath))
         self._disabled = true
-    end
-    self._auto_post_init = post_init
+	end
+	
     self.ModPath = ModPath
     self.Priority = 1001
-    self.SavePath = SavePath
+	self.SavePath = SavePath
+	
     if blt_mod then
         table.insert(BeardLib.Mods, self)
-    end
-    self:LoadConfigFile(config_path)
-    if load_modules then
-        self:init_modules()
+	end
+	
+	self:LoadConfigFile(config_path)
+
+	if self._config and not self._config.min_lib_ver or self._config.min_lib_ver <= BeardLib.Version then
+		if load_modules then
+			self:init_modules()
+		end
+	elseif self._config then
+		self:log("[ERROR] BeardLib version %s or above is required to run the mod.", tostring(self._config.min_lib_ver))
+		self._disabled = true
+        return
     end
 end
 
 function ModCore:post_init(ignored_modules)
     if self._disabled then
         return
+	end
+
+	if self._core_class then
+		self._core_class:Init()
+	end
+	
+	local post_init = self._config.post_init_clbk or self._config.post_init
+    if post_init then
+        local clbk = self:StringToCallback(post_init)
+        if clbk then
+            clbk()
+        end
     end
+
     for _, module in pairs(self._modules) do
         if (not ignored_modules or not table.contains(ignored_modules, module._name)) then
             local success, err = pcall(function() module:post_init() end)
@@ -60,12 +82,30 @@ function ModCore:LoadConfigFile(path)
     self._config = config
 end
 
+local load_first = {
+	["Hooks"] = true,
+	["Classes"] = true
+}
+
 function ModCore:init_modules()
     if self.modules_initialized or self._disabled then
         return
     end
 
-    self._modules = {}
+	self._modules = {}
+	
+	local order = self._config.load_first or load_first
+	
+	table.sort(self._config, function(a,b)
+		local a_ok = type(a) == "table" and order[a._meta] or false
+		local b_ok = type(b) == "table" and order[b._meta] or false
+		return a_ok and not b_ok
+	end)
+
+	if self._config.core_class then
+		self._core_class = dofile(Path:Combine(self.ModPath, self._config.core_class)) or self
+	end
+
     for i, module_tbl in ipairs(self._config) do
         if type(module_tbl) == "table" then
             if not table.contains(self._ignored_modules, module_tbl._meta) then
@@ -100,9 +140,12 @@ function ModCore:init_modules()
         end
     end
 
-    if self._auto_post_init or self._config.post_init then
-        self:post_init()
-    end
+	local framework = self._config.framework and BeardLib.Frameworks[self._config.framework] or nil
+	if framework then
+		framework:AddMod(self.ModPath, self)
+	end
+
+    self:post_init()
     self.modules_initialized = true
 end
 
@@ -150,24 +193,13 @@ function ModCore:StringToCallback(str, self_tbl)
     end
 end
 
-function ModCore:GetPath()
-    return self.ModPath
-end
-
-function ModCore:Enabled()
-    return not self._disabled
-end
+function ModCore:Init() end
+function ModCore:GetPath() return self.ModPath end
+function ModCore:Disabled() return self._disabled end
+function ModCore:Enabled() return not self._disabled end
 
 --BLT Keybinds support:
 
-function ModCore:IsEnabled()
-    return self:Enabled()
-end
-
-function ModCore:WasEnabledAtStart()
-    return self:Enabled()
-end
-
-function ModCore:GetName()
-    return self.Name
-end
+function ModCore:IsEnabled() return self:Enabled()end
+function ModCore:WasEnabledAtStart() return self:Enabled()end
+function ModCore:GetName() return self.Name end

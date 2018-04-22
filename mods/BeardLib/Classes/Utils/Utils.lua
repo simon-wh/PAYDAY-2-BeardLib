@@ -815,6 +815,11 @@ function BeardLib.Utils.Path:Normalize(str)
 	return str
 end
 
+function BeardLib.Utils.Path:CombineDir(...)
+	local s = self:Combine(...)
+	return s .. "/"
+end
+
 function BeardLib.Utils.Path:Combine(start, ...)
 	local paths = {...}
 	local final_string = start

@@ -9,8 +9,9 @@ Hooks:PostHook(WeaponFactoryTweakData, "_init_content_unfinished", "CallWeaponFa
     Hooks:Call(c_weap_mods_hook, self)
 end)
 
-BeardLib.managers.MapFramework:RegisterHooks()
-BeardLib.managers.AddFramework:RegisterHooks()
+for _, framework in pairs(BeardLib.Frameworks) do
+	framework:RegisterHooks()
+end
 
 function HudIconsTweakData:get_icon_data(icon_id, default_rect)
 	local icon_data = tweak_data.hud_icons[icon_id]

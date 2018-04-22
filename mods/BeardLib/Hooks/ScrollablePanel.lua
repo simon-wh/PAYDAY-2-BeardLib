@@ -110,6 +110,10 @@ function ScrollablePanelModified:canvas_max_width()
 	return self:canvas_scroll_width()
 end
 
+function ScrollablePanelModified:force_scroll()
+	self:perform_scroll(0, 0)
+end
+
 function ScrollablePanelModified:scroll(x, y, direction)
 	if self:panel():inside(x, y) then
 		self:perform_scroll(self._scroll_speed * TimerManager:main():delta_time() * 200, direction)
@@ -144,11 +148,17 @@ end
 function ScrollablePanelModified:set_canvas_size(w, h)
 	w = w or self:canvas():w()
 	h = h or self:canvas():h()
-	if h <= self:scroll_panel():h() then
-		h = self:scroll_panel():h()
-		self:canvas():set_y(0)
-	end
+	--if h <= self:scroll_panel():h() then
+		--h = self:scroll_panel():h()
+		--self:canvas():set_y(0)
+	--end
 	self:canvas():set_size(w, h)
+
+	if self:canvas():y() > self:scroll_panel():h() or self:canvas():bottom() < 0 then
+		self:canvas():set_y(0)
+		self:force_scroll()
+	end
+
 	local show_scrollbar = (h - self:scroll_panel():h()) > 0.5
 	if not show_scrollbar then
 		self._scroll_bar:set_alpha(0)
@@ -186,8 +196,8 @@ end
 
 function ScrollablePanelModified:_check_scroll_indicator_states()
 	local canvas_h = self:canvas():h() ~= 0 and self:canvas():h() or 1
-	local at = self:canvas():top() / (self:scroll_panel():h() - canvas_h)
+	local at = self:canvas():y() / (self:scroll_panel():h() - canvas_h)
 	local max = self:panel():h() - self._scroll_bar:h()
 
-	self._scroll_bar:set_top(max * at)
+	self._scroll_bar:set_y(max * at)
 end

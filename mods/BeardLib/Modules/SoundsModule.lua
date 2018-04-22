@@ -45,12 +45,4 @@ function SoundsModule:ReadSounds(data, prev_dir)
 	end
 end
 
-function SoundsModule:GetPath(directory, prev_dir)
-	if prev_dir then
-		return Path:Combine(prev_dir, directory)
-	else
-		return Path:Combine(self._mod.ModPath, directory)
-	end
-end
-
 BeardLib:RegisterModule(SoundsModule.type_id, SoundsModule)

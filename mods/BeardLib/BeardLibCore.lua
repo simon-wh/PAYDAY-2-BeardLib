@@ -12,6 +12,7 @@ if not _G.BeardLib then
     self.modules = {}
 	self.Items = {}
 	self.Mods = {}
+	self.Frameworks = {}
 	self._paused_updaters = {}
 	self._updaters = {}
 	self._call_next_update = {}
@@ -89,6 +90,10 @@ if not _G.BeardLib then
 		end
 	end
 
+	function self:RegisterFramework(name, clss)
+		self.Frameworks[name] = clss
+	end
+	
 	function self:RegisterModule(key, module)
         if not key or type(key) ~= "string" then
             self:log("[ERROR] BeardLib:RegisterModule parameter #1, string expected got %s", key and type(key) or "nil")

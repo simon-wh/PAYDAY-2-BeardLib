@@ -54,9 +54,11 @@ function LevelModule:Load()
 end
 
 function LevelModule:AddLevelDataToTweak(l_self)
-    l_self[self._config.id] = table.merge(clone(self._config), {
-        name_id = self._config.name_id or "heist_" .. self._config.id .. "_name",
-        briefing_id = self._config.brief_id or "heist_" .. self._config.id .. "_brief",
+	local id = tostring(self._config.id)
+
+    l_self[id] = table.merge(clone(self._config), {
+        name_id = self._config.name_id or "heist_" .. id .. "_name",
+        briefing_id = self._config.brief_id or "heist_" .. id .. "_brief",
         world_name = "mods/" .. self._config.id,
         ai_group_type = l_self.ai_groups[self._config.ai_group_type] or l_self.ai_groups.default,
         intro_event = self._config.intro_event or "nothing",
@@ -66,9 +68,11 @@ function LevelModule:AddLevelDataToTweak(l_self)
         custom = true
     })
     if self._config.merge_data then
-        table.merge(l_self[self._config.id], BeardLib.Utils:RemoveMetas(self._config.merge_data, true))
-    end
-    table.insert(l_self._level_index, self._config.id)
+        table.merge(l_self[id], BeardLib.Utils:RemoveMetas(self._config.merge_data, true))
+	end
+	if not table.contains(l_self._level_index, id) then
+		table.insert(l_self._level_index, id)
+	end
 end
 
 function LevelModule:AddAssetsDataToTweak(a_self)
