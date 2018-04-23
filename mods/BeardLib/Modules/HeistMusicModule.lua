@@ -49,13 +49,14 @@ function HeistMusic:RegisterHook()
 				v.alt_source = Path:Combine(dir, v.alt_source)
 				v.alt_start_source = Path:Combine(dir, v.alt_start_source)
 				v.alt_chance = v.alt_chance and tonumber(v.alt_chance) or 0.1
+				v.allow_switch = v.allow_switch ~= nil and v.allow_switch or true
 			end
 			if v.source then
 				v.source = Path:Combine(dir, v.source)
 			else
 				self:log("[Warning] Event named %s in heist music %s has no defined source", tostring(self._config.id), tostring(v.name))
 			end
-			music.events[v.name] = {source = self:MakeBuffer(v.source), start_source = self:MakeBuffer(v.start_source), alt_source = self:MakeBuffer(v.alt_source), alt_start_source = self:MakeBuffer(v.alt_start_source), alt_chance = v.alt_chance}
+			music.events[v.name] = {source = self:MakeBuffer(v.source), start_source = self:MakeBuffer(v.start_source), alt_source = self:MakeBuffer(v.alt_source), alt_start_source = self:MakeBuffer(v.alt_start_source), alt_chance = v.alt_chance, allow_switch = v.allow_switch}
 		end
 	end
 
