@@ -111,7 +111,8 @@ function MusicManager:attempt_play(track, event, stop)
 	end
 	if next_music then
 		local next = next_event or next_music
-		local source = next.start_source or next.alt_source and math.random() < next.alt_chance and next.alt_source or next.source
+		local use_alt_source = next.alt_source and math.random() < next.alt_chance
+		local source = use_alt_source and (next.alt_start_source or next.start_source or next.alt_source) or next.start_source or next.source
 		if next_music.xaudio then
 			if not source then
 				BeardLib:log("[ERROR] No buffer found to play for music '%s'", tostring(self._current_custom_track))
@@ -122,12 +123,11 @@ function MusicManager:attempt_play(track, event, stop)
 				return true
 			end
 		end
-		local switch_at_end = next.start_source and next.source or nil
 		local volume = next.volume or next_music.volume
 		self._switch_at_end = (next.start_source or next.alt_source) and {
-			source = next.source,
-			alt_source = next.alt_source,
-			alt_chance = next.alt_chance,
+			source = (next.allow_switch or not use_alt_source) and next.source or next.alt_source,
+			alt_source = next.allow_switch and next.alt_source,
+			alt_chance = next.allow_switch and next.alt_chance,
 			xaudio = next_music.xaudio,
 			volume = volume
 		}
