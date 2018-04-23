@@ -48,10 +48,16 @@ function MusicModule:RegisterHook()
 		if music.start_source then
 			table.insert(add, {_meta = "movie", path = music.start_source})
 		end
+		if music.alt_source then
+			table.insert(add, {_meta = "movie", path = music.alt_source})
+		end
 		for _, event in pairs(music.events) do
 			table.insert(add, {_meta = "movie", path = event.source})
 			if event.start_source then
 				table.insert(add, {_meta = "movie", path = event.start_source})
+			end
+			if event.alt_source then
+				table.insert(add, {_meta = "movie", path = event.alt_source})
 			end
 		end
 		self._mod._config.AddFiles = AddFilesModule:new(self._mod, add)
