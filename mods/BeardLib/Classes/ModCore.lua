@@ -7,24 +7,30 @@ function ModCore:init(config_path, load_modules)
         BeardLib:log("[ERROR] Config file at path '%s' is not readable!", config_path)
         return
     end
-    local disabled_mods = BeardLib.Options:GetValue("DisabledMods")
-    local blt_mod = config_path:match("mods")
 
-    if disabled_mods[ModPath] and not blt_mod then
-        BeardLib:log("[Info] Mod at path '%s' is disabled!", tostring(ModPath))
-        self._disabled = true
-	end
-	
-    self.ModPath = ModPath
+	self.ModPath = ModPath
     self.Priority = 1001
 	self.SavePath = SavePath
 	
-    if blt_mod then
-        table.insert(BeardLib.Mods, self)
+    local disabled_mods = BeardLib.Options:GetValue("DisabledMods")
+    self._blt_mod = config_path:find(FrameworkBase._format) == 1
+
+    if disabled_mods[ModPath] and not self._blt_mod then
+        BeardLib:log("[Info] Mod at path '%s' is disabled!", tostring(ModPath))
+        self._disabled = true
+	end
+
+    if self._blt_mod then
+		local mod = BLT.Mods:GetModOwnerOfFile(ModPath)
+		if mod and not mod:IsEnabled() then
+			self._disabled = true
+			return
+		end
 	end
 	
 	self:LoadConfigFile(config_path)
-
+	table.insert(BeardLib.Mods, self)
+	
 	if self._config and not self._config.min_lib_ver or self._config.min_lib_ver <= BeardLib.Version then
 		if load_modules then
 			self:init_modules()
@@ -33,7 +39,7 @@ function ModCore:init(config_path, load_modules)
 		self:log("[ERROR] BeardLib version %s or above is required to run the mod.", tostring(self._config.min_lib_ver))
 		self._disabled = true
         return
-    end
+	end
 end
 
 function ModCore:post_init(ignored_modules)
@@ -140,11 +146,6 @@ function ModCore:init_modules()
         end
     end
 
-	local framework = self._config.framework and BeardLib.Frameworks[self._config.framework] or nil
-	if framework then
-		framework:AddMod(self.ModPath, self)
-	end
-
     self:post_init()
     self.modules_initialized = true
 end
@@ -191,6 +192,25 @@ function ModCore:StringToCallback(str, self_tbl)
     else
         return nil
     end
+end
+
+function ModCore:RegisterHook(source_file, file, type)
+	local path = self:GetPath()
+    local hook_file = Path:Combine(path, file)
+    local dest_tbl = type == "pre" and (_prehooks or (BLT and BLT.hook_tables.pre)) or (_posthooks or (BLT and BLT.hook_tables.post))
+	if dest_tbl then
+		if FileIO:Exists(hook_file) then
+			local req_script = source_file:lower()
+			dest_tbl[req_script] = dest_tbl[req_script] or {}
+			table.insert(dest_tbl[req_script], {
+				mod_path = path,
+				mod = self,
+				script = file
+			})
+		else
+			self:log("[ERROR] Failed reading hook file %s of type %s", tostring(hook_file), tostring(type or "post"))
+		end
+	end
 end
 
 function ModCore:Init() end

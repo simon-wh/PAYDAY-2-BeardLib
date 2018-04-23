@@ -37,9 +37,9 @@ end
 
 function ModuleBase:GetPath(directory, prev_dir)
 	if prev_dir then
-		return Path:Combine(prev_dir, directory)
+		return Path:CombineDir(prev_dir, directory)
 	else
-		return Path:Combine(self._mod.ModPath, directory)
+		return Path:CombineDir(self._mod.ModPath, directory)
 	end
 end
 

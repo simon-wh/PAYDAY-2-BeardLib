@@ -5,29 +5,11 @@ Framework._ignore_detection_errors = false
 Framework._ignore_folders = {"backups", "prefabs"}
 Framework._directory = BeardLib.config.maps_dir
 Framework.type_name = "map"
+Framework.menu_color = Color(0.1, 0.6, 0.1)
 
 function Framework:RegisterHooks(...)
 	self:AddCustomContact()
-	MapFramework.super.RegisterFramework(self, ...)
-end
-
-function Framework:RegisterHooks()
-    table.sort(self._loaded_mods, function(a,b)
-        return a.Priority < b.Priority
-    end)
-    for _, mod in pairs(self._loaded_mods) do
-        if not mod._disabled and mod._modules then
-            for _, module in pairs(mod._modules) do
-                if module.RegisterHook then
-                    local success, err = pcall(function() module:RegisterHook() end)
-					module.Registered = true
-                    if not success then
-                        BeardLib:log("[ERROR] An error occured on the hook registration of %s. Error:\n%s", module._name, tostring(err))
-                    end
-                end
-            end
-        end
-    end
+	MapFramework.super.RegisterHooks(self, ...)
 end
 
 function Framework:GetMapByJobId(job_id)
@@ -53,5 +35,4 @@ function Framework:AddCustomContact()
     }):RegisterHook()
 end
 
-BeardLib:RegisterFramework(Framework .type_name, Framework)
 return Framework
