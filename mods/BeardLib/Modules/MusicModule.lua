@@ -28,13 +28,17 @@ function MusicModule:RegisterHook()
 			if v.start_source then
 				v.start_source = dir .. v.start_source
 			end
+			if v.alt_source then
+				v.alt_source = Path:Combine(dir, v.alt_source)
+				v.alt_chance = v.alt_chance and tonumber(v.alt_chance) or 0.1
+			end
 			if v.source then
 				v.source = dir .. v.source
 			else
 				self:log("[ERROR] Music with the id '%s' has an event that has no source!", self._config.id)
 				return
 			end
-			music.events[v.name] = {source = v.source, start_source = v.start_source}
+			music.events[v.name] = {source = v.source, start_source = v.start_source, alt_source = v.alt_source, alt_chance = v.alt_chance}
 		end
 	end
 
