@@ -30,6 +30,7 @@ function MusicModule:RegisterHook()
 			end
 			if v.alt_source then
 				v.alt_source = Path:Combine(dir, v.alt_source)
+				v.alt_start_source = v.alt_start_source and Path:Combine(dir, v.alt_start_source)
 				v.alt_chance = v.alt_chance and tonumber(v.alt_chance) or 0.1
 			end
 			if v.source then
@@ -38,7 +39,7 @@ function MusicModule:RegisterHook()
 				self:log("[ERROR] Music with the id '%s' has an event that has no source!", self._config.id)
 				return
 			end
-			music.events[v.name] = {source = v.source, start_source = v.start_source, alt_source = v.alt_source, alt_chance = v.alt_chance}
+			music.events[v.name] = {source = v.source, start_source = v.start_source, alt_source = v.alt_source, alt_start_source = v.alt_start_source, alt_chance = v.alt_chance}
 		end
 	end
 
@@ -48,10 +49,22 @@ function MusicModule:RegisterHook()
 		if music.start_source then
 			table.insert(add, {_meta = "movie", path = music.start_source})
 		end
+		if music.alt_source then
+			table.insert(add, {_meta = "movie", path = music.alt_source})
+			if music.alt_start_source then
+				table.insert(add, {_meta = "movie", path = music.alt_start_source})
+			end
+		end
 		for _, event in pairs(music.events) do
 			table.insert(add, {_meta = "movie", path = event.source})
 			if event.start_source then
 				table.insert(add, {_meta = "movie", path = event.start_source})
+			end
+			if event.alt_source then
+				table.insert(add, {_meta = "movie", path = event.alt_source})
+				if event.alt_start_source then
+					table.insert(add, {_meta = "movie", path = event.alt_start_source})
+				end
 			end
 		end
 		self._mod._config.AddFiles = AddFilesModule:new(self._mod, add)

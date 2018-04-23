@@ -111,7 +111,7 @@ function MusicManager:attempt_play(track, event, stop)
 	end
 	if next_music then
 		local next = next_event or next_music
-		local source = next.start_source or next.alt_source and math.random() < next.alt_chance and next.alt_source or next.source
+		local source = next.alt_source and math.random() < next.alt_chance and (next.alt_start_source or next.start_source or next.alt_source) or next.start_source or next.source
 		if next_music.xaudio then
 			if not source then
 				BeardLib:log("[ERROR] No buffer found to play for music '%s'", tostring(self._current_custom_track))
