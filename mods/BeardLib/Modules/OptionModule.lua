@@ -47,6 +47,9 @@ function OptionModule:init_options()
 end
 
 function OptionModule:OnValueChanged(full_name, value)
+	if not self._config.value_changed then
+		return
+	end
 	if not self._value_changed then
 		self._value_changed = self._mod:StringToCallback(self._config.value_changed)
 	end
