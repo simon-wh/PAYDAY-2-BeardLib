@@ -88,6 +88,7 @@
 		<hook source="lib/managers/menu/crewmanagementgui" file="Fixes.lua"/>
 		<hook source="lib/managers/weaponfactorymanager" file="Fixes.lua"/>
         <hook source="lib/managers/blackmarketmanager" file="Fixes.lua"/>
+        <hook source="lib/managers/dialogmanager" file="Fixes.lua"/>
 
         <hook source="core/lib/managers/viewport/environment/coreenvironmentmanager" file="EnvironmentManager.lua"/>
         <hook source="lib/network/matchmaking/networkmatchmakingsteam" file="NetworkMatchmakingSteam.lua"/>

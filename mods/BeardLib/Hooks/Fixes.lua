@@ -213,5 +213,19 @@ elseif F == "playermovement" then
         data.sustain = data.sustain or 0
         data.fade_out = data.fade_out or 0
         return trigger(self, data, ...)
-    end
+	end
+elseif F == "dialogmanager" then
+	Hooks:PreHook(DialogManager, "queue_dialog", "BeardLibQueueDialogFixIds", function(self, id)
+		if id and not managers.dialog._dialog_list[id] then
+			local buffer = CustomSoundManager:GetLoadedBuffer(id)
+			if buffer then
+				managers.dialog._dialog_list[id] = {
+					id = id,
+					sound = id,
+					string_id = buffer.subtitle_id,
+					priority = buffer.priority and tonumber(buffer.priority) or tweak_data.dialog.DEFAULT_PRIORITY
+				}
+			end
+		end
+	end)
 end

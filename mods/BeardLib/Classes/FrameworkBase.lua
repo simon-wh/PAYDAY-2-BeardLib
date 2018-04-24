@@ -77,12 +77,11 @@ function Framework:GetModByName(name)
     return nil
 end
 
-local cap = string.capitalize
 function Framework:LoadMod(dir, path, main_file)
 	rawset(_G, "ModPath", path)
 	local success, mod = pcall(function() return self._mod_core:new(main_file, self.auto_init_modules) end)
 	if success then
-		self:log("Loaded Config: %s", cap(self.type_name), path)
+		self:log("Loaded Config: %s", path)
 		local framework = mod._config and mod._config.framework and BeardLib.Frameworks[mod._config.framework] or self
 		if framework then
 			framework:AddMod(dir, mod)

@@ -1,6 +1,7 @@
 BeardLib.Items.ContextMenu = BeardLib.Items.ContextMenu or class()
 local ContextMenu = BeardLib.Items.ContextMenu
 function ContextMenu:init(owner, layer)
+	BeardLib:AddUpdater("ContextMenuUpdate"..tostring(self), ClassClbk(self, "Update"), true)
     self.owner = owner
     self.parent = owner.parent
     self.menu = owner.menu
@@ -67,39 +68,49 @@ function ContextMenu:CreateItems()
     self.items_panel:clear()
     local bg = self.panel:child("bg")
     local color = bg:color():contrast()
-    self._item_panels = {}
-    for k, text in pairs(self._my_items) do
-        if type(text) == "table" then
-            text = text.text
-        end
-        local font_size = (self.owner.font_size or self.owner.size) - 2
-        local panel = self.items_panel:panel({
-            name = "Item-"..tostring(text),
-            h = font_size,
-            y = (k - 1) * font_size,
-        })
-        panel:text({
-            name = "text",
-            text = self.owner.items_localized and managers.localization:text(tostring(text)) or tostring(text),
-            w = panel:w() - (self.owner.text_offset[1] * 2),
-            h = panel:h(),
-            x = self.owner.text_offset[1],
-            vertical = "center",
-            layer = 1,
-            color = color,
-            font = self.owner.font,
-            font_size = font_size - 2
-        })
-        panel:rect({
-            name = "bg",
-            color = self.owner.background_color,
-            alpha = 0,
-            h = self.type_name == "Group" and self.size,
-            halign = self.type_name ~= "Group" and "grow",
-            valign = self.type_name ~= "Group" and "grow",
-            layer = 0
-        })
-        table.insert(self._item_panels, panel)
+	self._item_panels = {}
+
+	local offset = self.owner.text_offset[1]
+	local offset_sides = self.owner.text_offset[1] * 2
+	local font_size = (self.owner.font_size or self.owner.size) - 2
+	local loc = managers.localization
+	local is_loc = self.owner.items_localized
+	for k, text in pairs(self._my_items) do
+		local typ = type(text)
+		local tbl = typ == "table"
+        if tbl then
+			text = text.text
+		end
+		if tbl or typ == "string" then
+			local panel = self.items_panel:panel({
+				name = text,
+				h = font_size,
+				visible = false,
+				y = (k - 1) * font_size,
+			})
+			panel:text({
+				name = "text",
+				text = is_loc and loc:text(text) or text,
+				w = panel:w() - offset_sides,
+				h = panel:h(),
+				x = offset,
+				vertical = "center",
+				layer = 1,
+				color = color,
+				font = self.owner.font,
+				font_size = font_size - 2
+			})
+			panel:rect({
+				name = "bg",
+				color = self.owner.background_color,
+				alpha = 0,
+				h = self.type_name == "Group" and self.size,
+				halign = self.type_name ~= "Group" and "grow",
+				valign = self.type_name ~= "Group" and "grow",
+				layer = 0
+			})
+			table.insert(self._item_panels, panel)
+		end
     end
     if self.menu._openlist == self then
         self:reposition()
@@ -120,7 +131,7 @@ end
 function ContextMenu:reposition()
     local size = (self.owner.font_size or self.owner.size) - 2
     local bottom_h = (self.menu._panel:world_bottom() - self.owner.panel:world_bottom()) 
-    local top_h = (self.owner.panel:world_y() - self.menu._panel:world_y()) 
+	local top_h = (self.owner.panel:world_y() - self.menu._panel:world_y())
     local items_h = (#self._my_items * size) + (self.owner.searchbox and self.owner.size or 0)
     local normal_pos = items_h <= bottom_h or bottom_h >= top_h
     if (normal_pos and items_h > bottom_h) or (not normal_pos and items_h > top_h) then
@@ -210,28 +221,47 @@ function ContextMenu:textbox()
     return self.owner._textbox or self._textbox
 end
 
+function ContextMenu:Update(t, dt)
+	if self._do_search and self._do_search <= t then
+		
+		local text = self:textbox() and self:textbox():Value() or ""
+		self._my_items = {}
+		for _, v in pairs(self.owner.items) do
+			if type(v) == "table" then
+				v = v.text
+			end
+			if text == "" then
+				table.insert(self._my_items, v)
+			else
+				local match = tostring(v):find(text)
+				if match then
+					table.insert(self._my_items, 1, v)
+				else
+					table.insert(self._my_items, v)
+				end
+			end
+		end
+
+		self:CreateItems()
+		self._do_search = nil
+	end
+end
+
 function ContextMenu:update_search(force_show)
-    if force_show == true and not self:showing() then
+	local showing = self:showing()
+    if force_show == true and not showing then
         self:show()
-    end
-    local text = self:textbox() and self:textbox():Value() or ""
-    self._my_items = {}
-    for _, v in pairs(self.owner.items) do
-        if type(v) == "table" then
-            v = v.text
-        end
-        local match = tostring(v):lower():match(tostring(text))
-        if text == "" then
-            table.insert(self._my_items, v)
-        else
-            if match then
-                table.insert(self._my_items, 1, v)
-            else
-                table.insert(self._my_items, v)
-            end
-        end
-    end
-    self:CreateItems()
+	end
+
+	if not showing then
+		return
+	end
+
+	if #self._my_items == 0 then
+		self._do_search = 0
+	else
+		self._do_search = TimerManager:main():time() + 0.5
+	end
 end
 
 function ContextMenu:HightlightItem(item, highlight)
