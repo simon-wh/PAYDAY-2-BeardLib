@@ -13,8 +13,9 @@ function WeaponModModule:RegisterHook()
     self._config.default_amount = self._config.default_amount and tonumber(self._config.default_amount) or 1
     self._config.global_value = self._config.global_value or self.defaults.global_value
     self._config.drop = self._config.drop ~= nil and self._config.drop or true
+	local config = self._config
+
     Hooks:Add("BeardLibCreateCustomWeaponMods", self._config.id .. "AddWeaponModTweakData", function(w_self)
-        local config = self._config
         if w_self.parts[config.id] then
             BeardLib:log("[ERROR] Weapon mod with id '%s' already exists!", config.id)
             return
@@ -48,15 +49,18 @@ function WeaponModModule:RegisterHook()
                 global_value = data.global_value
             }}, "dlc", data.dlc, "content", "loot_drops")
         end
-
+	end)
+	
+	--Due to some parts getting inserted to uses_parts in blackmarket tweakdata I had to push this event to a different point.
+	Hooks:Add("BeardLibAddCustomWeaponModsToWeapons", self._config.id .. "AddWeaponModToWeapons", function(w_self)
         if config.weapons then
             for _, weap in ipairs(config.weapons) do
                 if w_self[weap] and w_self[weap].uses_parts then
-                    table.insert(w_self[weap].uses_parts, config.id)
+					table.insert(w_self[weap].uses_parts, config.id)
                 end
             end
         end
-    end)
+	end)
 end
 
 BeardLib:RegisterModule(WeaponModModule.type_name, WeaponModModule)

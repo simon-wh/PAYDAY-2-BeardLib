@@ -41,12 +41,16 @@ Hooks:Add(peer_send_hook, "BeardLibCustomWeaponFix", function(self, func_name, p
 			orig_NetworkPeer_send(self, "send_chat_message", LuaNetworking.HiddenChannel, parse_as_lnetwork_string(send_outfit_id, orig_outift .. "|" .. params[2]))
 		elseif string.ends(func_name, "set_unit") then
 			params[3] = BeardLib.Utils:CleanOutfitString(params[3], params[4] == 0)
-        elseif func_name == "set_equipped_weapon" then
-            if params[2] == -1 then
+		elseif func_name == "set_equipped_weapon" then
+			if params[2] == -1 then
                 local index, data = BeardLib.Utils:GetCleanedWeaponData()
                 params[2] = index
-                params[3] = data
-            end
+				params[3] = data
+			else
+				local factory_id = HuskPlayerInventory._get_weapon_name_from_sync_index(params[2])
+				local blueprint = managers.weapon_factory:unpack_blueprint_from_string(factory_id, params[3])
+				params[3] = managers.weapon_factory:blueprint_to_string(factory_id, BeardLib.Utils:GetCleanedBlueprint(blueprint))
+			end
         end
     end
 end)

@@ -3,10 +3,15 @@ local c_weap_mods_hook = "BeardLibCreateCustomWeaponMods"
 
 Hooks:Register(c_weap_hook)
 Hooks:Register(c_weap_mods_hook)
+Hooks:Register("BeardLibAddCustomWeaponModsToWeapons")
 
 Hooks:PostHook(WeaponFactoryTweakData, "_init_content_unfinished", "CallWeaponFactoryAdditionHooks", function(self)
     Hooks:Call(c_weap_hook, self)
     Hooks:Call(c_weap_mods_hook, self)
+end)
+
+Hooks:PostHook(BlackMarketTweakData, "init", "CallAddCustomWeaponModsToWeapons", function(self, tweak_data)
+	Hooks:Call("BeardLibAddCustomWeaponModsToWeapons", tweak_data.weapon.factory)
 end)
 
 for _, framework in pairs(BeardLib.Frameworks) do
