@@ -111,7 +111,11 @@ function ScrollablePanelModified:canvas_max_width()
 end
 
 function ScrollablePanelModified:force_scroll()
-	self:perform_scroll(0, 0)
+	if self:canvas():h() <= self:scroll_panel():h() then
+		self:canvas():set_y(0)
+	else
+		self:perform_scroll(0, 0)
+	end
 end
 
 function ScrollablePanelModified:scroll(x, y, direction)
@@ -152,12 +156,9 @@ function ScrollablePanelModified:set_canvas_size(w, h)
 		--h = self:scroll_panel():h()
 		--self:canvas():set_y(0)
 	--end
+	
 	self:canvas():set_size(w, h)
-
-	if self:canvas():y() > self:scroll_panel():h() or self:canvas():bottom() < 0 then
-		self:canvas():set_y(0)
-		self:force_scroll()
-	end
+	self:force_scroll()
 
 	local show_scrollbar = (h - self:scroll_panel():h()) > 0.5
 	if not show_scrollbar then
