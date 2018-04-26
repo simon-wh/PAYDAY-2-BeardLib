@@ -1,13 +1,6 @@
 HeistMusic = HeistMusic or class(ItemModuleBase)
 HeistMusic.type_id = "HeistMusic"
 
-function HeistMusic:init(core_mod, config)
-    if not self.super.init(self, core_mod, config) then
-        return false
-    end
-    return true
-end
-
 function HeistMusic:MakeBuffer(source)
 	if source then
 		if FileIO:Exists(source) then

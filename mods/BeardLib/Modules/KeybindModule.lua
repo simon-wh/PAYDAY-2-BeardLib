@@ -1,16 +1,5 @@
-KeybindModule = KeybindModule or class(ModuleBase)
-
+KeybindModule = KeybindModule or class(BasicModuleBase)
 KeybindModule.type_name = "Keybind"
-
-function KeybindModule:init(core_mod, config)
-    if not KeybindModule.super.init(self, core_mod, config) then
-        return false
-    end
-
-    self:Load()
-
-    return true
-end
 
 function KeybindModule:Load()
 	if not self._config.keybind_id and not self._config.id then 

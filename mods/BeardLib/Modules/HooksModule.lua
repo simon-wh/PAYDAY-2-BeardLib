@@ -1,15 +1,5 @@
-HooksModule = HooksModule or class(ModuleBase)
+HooksModule = HooksModule or class(BasicModuleBase)
 HooksModule.type_name = "Hooks"
-
-function HooksModule:init(core_mod, config)
-    if not HooksModule.super.init(self, core_mod, config) then
-        return false
-    end
-
-    self:Load()
-
-    return true
-end
 
 function HooksModule:Load(config, prev_dir)
 	config = config or self._config

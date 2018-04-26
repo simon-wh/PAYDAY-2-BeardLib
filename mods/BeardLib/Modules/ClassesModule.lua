@@ -1,14 +1,5 @@
-ClassesModule = ClassesModule or class(ModuleBase)
+ClassesModule = ClassesModule or class(BasicModuleBase)
 ClassesModule.type_name = "Classes"
-
-function ClassesModule:init(core_mod, config)
-    if not ClassesModule.super.init(self, core_mod, config) then
-        return false
-    end
-
-    self:Load()
-    return true
-end
 
 function ClassesModule:Load(config, prev_dir)
 	config = config or self._config

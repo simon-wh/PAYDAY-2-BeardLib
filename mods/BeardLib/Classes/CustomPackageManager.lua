@@ -79,10 +79,10 @@ function C:LoadPackageConfig(directory, config)
                 if typ == UNIT_LOAD or typ == ADD then
                     self:LoadPackageConfig(directory, child)
                 elseif typ and path then
-                    path = BeardLib.Utils.Path:Normalize(path)
+                    path = Path:Normalize(path)
                     local ids_ext = Idstring(self.ext_convert[typ] or typ)
                     local ids_path = Idstring(path)
-                    local file_path = BeardLib.Utils.Path:Combine(directory, path) ..".".. typ
+                    local file_path = Path:Combine(directory, path) ..".".. typ
                     if SystemFS:exists(file_path) then
                         if (not DB:has(ids_ext, ids_path) or child.force) then
                             FileManager:AddFile(ids_ext, ids_path, file_path)
@@ -115,7 +115,7 @@ function C:UnloadPackageConfig(config)
             local typ = child._meta
             local path = child.path
             if typ and path then
-                path = BeardLib.Utils.Path:Normalize(path)
+                path = Path:Normalize(path)
                 local ids_ext = Idstring(self.ext_convert[typ] or typ)
                 local ids_path = Idstring(path)
                 if DB:has(ids_ext, ids_path) then

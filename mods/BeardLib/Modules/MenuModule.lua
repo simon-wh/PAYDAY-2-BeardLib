@@ -1,18 +1,12 @@
-MenuModule = MenuModule or class(ModuleBase)
+MenuModule = MenuModule or class(BasicModuleBase)
 MenuModule.type_name = "Menu"
 
-function MenuModule:init(core_mod, config)
+function MenuModule:init(...)
     self.required_params = table.add(clone(self.required_params), {"menu"})
-    if not MenuModule.super.init(self, core_mod, config) then
-        return false
-    end
-
-    self:create_hooks()
-
-    return true
+    return MenuModule.super.init(self, ...)
 end
 
-function MenuModule:create_hooks()
+function MenuModule:Load()
     Hooks:Add("MenuManagerSetupCustomMenus", self._mod.Name .. "Build" .. self._name .. "Menu", function(self_menu, nodes)
         self:build_node(self._config.menu, nodes.lua_mod_options_menu or nodes.blt_options)
     end)

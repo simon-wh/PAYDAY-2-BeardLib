@@ -1,9 +1,8 @@
 CrimeSpreeMissionModule = CrimeSpreeMissionModule or class(ItemModuleBase)
-
 CrimeSpreeMissionModule.type_name = "CrimeSpreeMission"
 
 function CrimeSpreeMissionModule:AddMissionDataToTweak(c_self, tweak_data)
-    local icon = self._config.icon and "mods_"..BeardLib.Utils.Path:GetFileNameWithoutExtension(self._config.icon)
+    local icon = self._config.icon and "mods_"..Path:GetFileNameWithoutExtension(self._config.icon)
     if icon then
         tweak_data.hud_icons[icon] = {texture = self._config.icon, texture_rect = self._config.icon_rect or false, custom = true}
     end

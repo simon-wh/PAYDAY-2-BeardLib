@@ -1,19 +1,9 @@
 MaskModule = MaskModule or class(ItemModuleBase)
-
 MaskModule.type_name = "Mask"
 
-function MaskModule:init(core_mod, config)
-    self.clean_table = table.add(clone(self.clean_table), {
-        {
-            param ="pcs",
-            action = "no_number_indexes"
-        }
-    })
-    if not MaskModule.super.init(self, core_mod, config) then
-        return false
-    end
-
-    return true
+function MaskModule:init(...)
+    self.clean_table = table.add(clone(self.clean_table), {{param = "pcs", action = "no_number_indexes"}})
+	return MaskModule.super.init(self, ...)
 end
 
 function MaskModule:RegisterHook()

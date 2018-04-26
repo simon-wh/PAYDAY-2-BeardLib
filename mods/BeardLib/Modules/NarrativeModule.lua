@@ -1,14 +1,10 @@
 NarrativeModule = NarrativeModule or class(ItemModuleBase)
-
 NarrativeModule.type_name = "narrative"
 NarrativeModule._loose = true
 
-function NarrativeModule:init(core_mod, config)
+function NarrativeModule:init(...)
     self.clean_table = table.add(clone(self.clean_table), {
-        {
-            param = "chain",
-            action = {"number_indexes", "remove_metas"}
-        },        
+        {param = "chain", action = {"number_indexes", "remove_metas"}},        
         {
             param = "chain",
             action = function(tbl)
@@ -21,50 +17,21 @@ function NarrativeModule:init(core_mod, config)
                         end
                     end
                 end
-            end
-        },        
-        {
-            param = "crimenet_callouts",
-            action = "number_indexes"
-        },
-        {
-            param = "crimenet_videos",
-            action = "number_indexes"
-        },
-        {
-            param = "payout",
-            action = "number_indexes"
-        },
-        {
-            param = "contract_cost",
-            action = "number_indexes"
-        },
-        {
-            param = "experience_mul",
-            action = "number_indexes"
-        },
-        {
-            param = "min_mission_xp",
-            action = "number_indexes"
-        },
-        {
-            param = "max_mission_xp",
-            action = "number_indexes"
-        },
-        {
-            param = "allowed_gamemodes",
-            action = "number_indexes"
-        }
+            end},        
+        {param = "crimenet_callouts", action = "number_indexes"},
+        {param = "crimenet_videos", action = "number_indexes"},
+        {param = "payout",action = "number_indexes"},
+        {param = "contract_cost", action = "number_indexes"},
+        {param = "experience_mul", action = "number_indexes"},
+        {param = "min_mission_xp", action = "number_indexes"},
+        {param = "max_mission_xp", action = "number_indexes"},
+        {param = "allowed_gamemodes", action = "number_indexes"}
     })
-    if not NarrativeModule.super.init(self, core_mod, config) then
-        return false
-    end
-
-    return true
+    return NarrativeModule.super.init(self, ...)
 end
 
 function NarrativeModule:AddNarrativeData(narr_self, tweak_data)
-    local icon = self._config.icon and "mods_"..BeardLib.Utils.Path:GetFileNameWithoutExtension(self._config.icon)
+    local icon = self._config.icon and "mods_"..Path:GetFileNameWithoutExtension(self._config.icon)
     if icon then
         tweak_data.hud_icons[icon] = {texture = self._config.icon, texture_rect = self._config.icon_rect or false, custom = true}
     end

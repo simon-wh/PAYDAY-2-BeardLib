@@ -1,11 +1,9 @@
 OptionModule = OptionModule or class(ModuleBase)
-
---Need a better name for this
 OptionModule.type_name = "Options"
 
-function OptionModule:init(core_mod, config)
+function OptionModule:init(...)
     self.required_params = table.add(clone(self.required_params), {"options"})
-    if not OptionModule.super.init(self, core_mod, config) then
+    if not OptionModule.super.init(self, ...) then
         return false
     end
 

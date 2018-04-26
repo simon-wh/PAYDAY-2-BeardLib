@@ -33,7 +33,7 @@ Hooks:Add(peer_send_hook, "BeardLibCustomHeistFix", function(self, func_name, pa
     end
 end)
 
-Hooks:Add(peer_send_hook, "BeardLibCustomWeaponFix", function(self, func_name, params)
+Hooks:Add("NetworkPeerSend", "BeardLibCustomWeaponFix", function(self, func_name, params)
     if self ~= managers.network:session():local_peer() then
         if func_name == "sync_outfit" then
 			local orig_outift = params[1]

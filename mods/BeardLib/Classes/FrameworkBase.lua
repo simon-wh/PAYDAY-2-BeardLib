@@ -92,7 +92,6 @@ function Framework:LoadMod(dir, path, main_file)
 end
 
 function Framework:AddMod(dir, mod)
-	log("adding mod ", tostring(dir))
 	self._loaded_mods[dir] = mod
 end
 

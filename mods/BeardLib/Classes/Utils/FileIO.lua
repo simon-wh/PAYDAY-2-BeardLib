@@ -8,7 +8,7 @@ function FileIO:Open(path, flags)
 end
 
 function FileIO:WriteTo(path, data, flags)
-	local dir = BeardLib.Utils.Path:GetDirectory(path)
+	local dir = Path:GetDirectory(path)
 	if not self:Exists(dir) then
 		self:MakeDir(dir)
 	end
@@ -107,7 +107,7 @@ function FileIO:Exists(path)
 end
 
 function FileIO:CopyFileTo(path, to_path)
-	local dir = BeardLib.Utils.Path:GetDirectory(to_path)
+	local dir = Path:GetDirectory(to_path)
 	if not self:Exists(dir) then
 		self:MakeDir(dir)
 	end

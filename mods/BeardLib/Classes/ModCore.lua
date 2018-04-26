@@ -1,5 +1,4 @@
 core:import("CoreSerialize")
-
 ModCore = ModCore or class()
 ModCore._ignored_modules = {}
 function ModCore:init(config_path, load_modules)

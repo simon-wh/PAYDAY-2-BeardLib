@@ -1,13 +1,6 @@
 MusicModule = MusicModule or class(ItemModuleBase)
 MusicModule.type_id = "Music"
 
-function MusicModule:init(core_mod, config)
-    if not self.super.init(self, core_mod, config) then
-        return false
-    end
-    return true
-end
-
 function MusicModule:RegisterHook()
 	self._config.id = self._config.id or "Err"
 	

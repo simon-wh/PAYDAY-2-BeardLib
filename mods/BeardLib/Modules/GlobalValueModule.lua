@@ -1,19 +1,9 @@
 GlobalValueModule = GlobalValueModule or class(ItemModuleBase)
-
 GlobalValueModule.type_name = "GlobalValue"
 
-function GlobalValueModule:init(core_mod, config)
-    self.clean_table = table.add(clone(self.clean_table), {
-        {
-            param = "color",
-            action = "normalize"
-        }
-    })
-    if not GlobalValueModule.super.init(self, core_mod, config) then
-        return false
-    end
-
-    return true
+function GlobalValueModule:init(...)
+    self.clean_table = table.add(clone(self.clean_table), {{param = "color", action = "normalize"}})
+    return GlobalValueModule.super.init(self, ...)
 end
 
 function GlobalValueModule:RegisterHook()

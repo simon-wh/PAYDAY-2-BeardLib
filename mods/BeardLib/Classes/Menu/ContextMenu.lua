@@ -56,7 +56,7 @@ function ContextMenu:CheckItems()
     local p = self.items_panel:parent()
     for _, item in pairs(self._item_panels) do
         local can_render = p:inside(p:world_x(), item:world_y()) == true or p:inside(p:world_x(), item:world_bottom()) == true
-        item:set_visible(can_render)
+       	item:set_visible(can_render)
         item:script().count_height = true
         if item:visible() then
             table.insert(self._visible_items, item)
@@ -81,7 +81,8 @@ function ContextMenu:CreateItems()
         if tbl then
 			text = text.text
 		end
-		if tbl or typ == "string" then
+		if text then
+			text = tostring(text)
 			local panel = self.items_panel:panel({
 				name = text,
 				h = font_size,

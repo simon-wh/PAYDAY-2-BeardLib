@@ -157,7 +157,7 @@ function FileBrowserDialog:MakeFilesAndFolders(files, folders)
         local pass = true
         if self._extensions then
             for _, ext in pairs(self._extensions) do
-                if ext == BeardLib.Utils.Path:GetFileExtension(v) then
+                if ext == Path:GetFileExtension(v) then
                     pass = true
                     break
                 else
@@ -169,7 +169,7 @@ function FileBrowserDialog:MakeFilesAndFolders(files, folders)
             self._files_menu:Button({
                 name = tbl and v.name or v,
                 text = tbl and v.name or v,
-                path = tbl and v.path or BeardLib.Utils.Path:Combine(self._current_dir, v),
+                path = tbl and v.path or Path:Combine(self._current_dir, v),
                 on_callback = ClassClbk(self, "FileClick"), 
                 label = "temp2",
             })

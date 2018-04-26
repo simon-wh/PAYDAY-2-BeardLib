@@ -1,20 +1,8 @@
-ScriptReplacementsModule = ScriptReplacementsModule or class(ModuleBase)
-
---Need a better name for this
+ScriptReplacementsModule = ScriptReplacementsModule or class(BasicModuleBase)
 ScriptReplacementsModule.type_name = "ScriptMods"
 
-function ScriptReplacementsModule:init(core_mod, config)
-    if not ScriptReplacementsModule.super.init(self, core_mod, config) then
-        return false
-    end
-
-    self.ScriptDirectory = self._config.directory and BeardLib.Utils.Path:Combine(self._mod.ModPath, self._config.directory) or self._mod.ModPath
-    self:Load()
-    
-    return true
-end
-
 function ScriptReplacementsModule:Load()
+	self.ScriptDirectory = self._config.directory and Path:Combine(self._mod.ModPath, self._config.directory) or self._mod.ModPath
     for _, v in ipairs(self._config) do
         if v._meta == "mod" then
             local options = v.options or {} 
@@ -31,7 +19,7 @@ function ScriptReplacementsModule:Load()
             local opt = {mode = options.merge_mode, use_clbk = use_clbk}
             local file = options.file or options.replacement
             if file then
-                local file = BeardLib.Utils.Path:Combine(self.ScriptDirectory, file)
+                local file = Path:Combine(self.ScriptDirectory, file)
                 local file_type = options.type or options.replacement_type
                 FileManager:ScriptReplaceFile(ext, target, file, table.merge(opt, {type = file_type}))
             elseif v.tbl then

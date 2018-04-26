@@ -1,20 +1,10 @@
 MaskPatternModule = MaskPatternModule or class(ItemModuleBase)
-
 MaskPatternModule.type_name = "MaskPattern"
 
-function MaskPatternModule:init(core_mod, config)
-    self.clean_table = table.add(clone(self.clean_table), {
-        {
-            param ="pcs",
-            action = "no_number_indexes"
-        }
-    })
+function MaskPatternModule:init(...)
+    self.clean_table = table.add(clone(self.clean_table), {{param = "pcs",action = "no_number_indexes"}})
     self.required_params = table.add(clone(self.required_params), {"texture"})
-    if not MaskPatternModule.super.init(self, core_mod, config) then
-        return false
-    end
-
-    return true
+    return MaskPatternModule.super.init(self, ...)
 end
 
 function MaskPatternModule:RegisterHook()

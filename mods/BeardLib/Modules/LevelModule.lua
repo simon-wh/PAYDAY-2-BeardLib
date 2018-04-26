@@ -2,8 +2,8 @@ LevelModule = LevelModule or class(ItemModuleBase)
 
 LevelModule.type_name = "level"
 LevelModule.levels_folder = "levels/mods/"
-function LevelModule:init(core_mod, config, load)
-    if not LevelModule.super.init(self, core_mod, config) then
+function LevelModule:init(...)
+    if not LevelModule.super.init(self, ...) then
         return false
     end
 
@@ -20,8 +20,8 @@ function LevelModule:Load()
         for i, include_data in ipairs(self._config.include) do
             if include_data.file then
                 local file_split = string.split(include_data.file, "[.]")
-                local complete_path = BeardLib.Utils.Path:Combine(self._mod.ModPath, self._config.include.directory, include_data.file)
-                local new_path = BeardLib.Utils.Path:Combine(self.levels_folder, self._config.id, file_split[1])
+                local complete_path = Path:Combine(self._mod.ModPath, self._config.include.directory, include_data.file)
+                local new_path = Path:Combine(self.levels_folder, self._config.id, file_split[1])
                 if FileIO:Exists(complete_path) then
                     if include_data.type then
                         BeardLib:ReplaceScriptData(complete_path, include_data.type, new_path, file_split[2], {add = true})
@@ -118,8 +118,8 @@ InstanceModule.type_name = "instance"
 InstanceModule.levels_folder = "levels/instances/mods/"
 InstanceModule._loaded_packages = {}
 
-function InstanceModule:init(core_mod, config)
-    if not LevelModule.super.init(self, core_mod, config) then
+function InstanceModule:init(...)
+    if not LevelModule.super.init(self, ...) then
         return false
     end
     self._world_path = Path:Combine(self.levels_folder, self._config.id, "world")

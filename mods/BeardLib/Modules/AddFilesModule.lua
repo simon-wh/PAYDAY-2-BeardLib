@@ -1,16 +1,5 @@
-AddFilesModule = AddFilesModule or class(ModuleBase)
-
+AddFilesModule = AddFilesModule or class(BasicModuleBase)
 AddFilesModule.type_name = "AddFiles"
-
-function AddFilesModule:init(core_mod, config)
-    if not AddFilesModule.super.init(self, core_mod, config) then
-        return false
-    end
-
-    self:Load()
-
-    return true
-end
 
 function AddFilesModule:Load()
     local use_clbk = self._config.use_clbk and self._mod:StringToCallback(self._config.use_clbk) or nil
@@ -18,7 +7,7 @@ function AddFilesModule:Load()
         return
     end
     
-    local directory = self._config.full_directory or BeardLib.Utils.Path:Combine(self._mod.ModPath, self._config.directory)
+    local directory = self._config.full_directory or Path:Combine(self._mod.ModPath, self._config.directory)
     CustomPackageManager:LoadPackageConfig(directory, self._config)
 end
 

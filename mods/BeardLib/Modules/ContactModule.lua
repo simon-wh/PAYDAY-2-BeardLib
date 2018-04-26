@@ -1,20 +1,6 @@
-ContactModule = ContactModule or class(ModuleBase)
-
+ContactModule = ContactModule or class(BasicModuleBase)
 ContactModule.type_name = "contact"
 ContactModule._loose = true
-
-function ContactModule:init(core_mod, config)
-    if not ContactModule.super.init(self, core_mod, config) then
-        return false
-    end
-
-    if not self._config.id then
-        BeardLib:log("[ERROR] The ID must be specified for a contact")
-        return false
-    end
-
-    return true
-end
 
 function ContactModule:AddContactData(narr_self)
     if not self._config.id then

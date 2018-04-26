@@ -1,13 +1,6 @@
 MenuMusicModule = MenuMusicModule or class(ItemModuleBase)
 MenuMusicModule.type_id = "MenuMusic"
 
-function MenuMusicModule:init(core_mod, config)
-    if not self.super.init(self, core_mod, config) then
-        return false
-    end
-    return true
-end
-
 function MenuMusicModule:MakeBuffer(source)
 	if source then
 		if FileIO:Exists(source) then

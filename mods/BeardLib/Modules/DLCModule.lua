@@ -1,26 +1,15 @@
-DLCModule = DLCModule or class(ModuleBase)
-
+DLCModule = DLCModule or class(BasicModuleBase)
 DLCModule.type_name = "DLC"
 
-function DLCModule:init(core_mod, config)
+function DLCModule:init(...)
     self.required_params = table.add(clone(self.required_params), {"id"})
-
-    if not DLCModule.super.init(self, core_mod, config) then
-        return false
-    end
-
-    self:Load()
-    return true
+	return DLCModule.super.init(self, ...)
 end
 
 function DLCModule:Load()
     TweakDataHelper:ModifyTweak(table.merge({
-        free = true,
-        content = {
-            --loot_global_value = "mod",
-            loot_drops = {},
-            upgrades = {}
-        }
+		free = true,
+        content = {loot_drops = {}, upgrades = {}}
     }, self._config), "dlc", self._config.id)
 end
 

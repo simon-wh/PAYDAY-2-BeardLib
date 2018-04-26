@@ -1,4 +1,4 @@
-ModAssetsModule = ModAssetsModule or class(ModuleBase)
+ModAssetsModule = ModAssetsModule or class(BasicModuleBase)
 ModAssetsModule.type_name = "AssetUpdates"
 ModAssetsModule._default_version_file = "version.txt"
 ModAssetsModule._providers = {}
@@ -11,11 +11,7 @@ if providers then
     end
 end
 
-function ModAssetsModule:init(core_mod, config)
-    if not ModAssetsModule.super.init(self, core_mod, config) then
-        return false
-    end
-
+function ModAssetsModule:Load()
     self.steamid = Steam:userid()
     self.id = self._config.id
 
@@ -37,8 +33,8 @@ function ModAssetsModule:init(core_mod, config)
     end
 
     self.folder_names = self._config.use_local_dir and {table.remove(string.split(self._mod.ModPath, "/"))} or (type(self._config.folder_name) == "string" and {self._config.folder_name} or BeardLib.Utils:RemoveNonNumberIndexes(self._config.folder_name))
-    self.install_directory = (self._config.install_directory and ModCore:GetRealFilePath(self._config.install_directory, self)) or (self._config.use_local_path ~= false and BeardLib.Utils.Path:GetDirectory(self._mod.ModPath)) or BeardLib.config.mod_override_dir
-    self.version_file = self._config.version_file and ModCore:GetRealFilePath(self._config.version_file, self) or BeardLib.Utils.Path:Combine(self.install_directory, self.folder_names[1], self._default_version_file)
+    self.install_directory = (self._config.install_directory and ModCore:GetRealFilePath(self._config.install_directory, self)) or (self._config.use_local_path ~= false and Path:GetDirectory(self._mod.ModPath)) or BeardLib.config.mod_override_dir
+    self.version_file = self._config.version_file and ModCore:GetRealFilePath(self._config.version_file, self) or Path:Combine(self.install_directory, self.folder_names[1], self._default_version_file)
     self.version = 0
     
     self._update_manager_id = self._mod.Name .. self._name
@@ -54,12 +50,10 @@ function ModAssetsModule:init(core_mod, config)
     if not self._config.manual_check then
         self:RegisterAutoUpdateCheckHook()
     end
-
-    return true
 end
 
 function ModAssetsModule:GetMainInstallDir()
-    return BeardLib.Utils.Path:GetDirectory(self.version_file)
+    return Path:GetDirectory(self.version_file)
 end
 
 function ModAssetsModule:RegisterAutoUpdateCheckHook()
@@ -214,7 +208,7 @@ function ModAssetsModule:StoreDownloadedAssets(config, data, id)
         
         if self._config and not self._config.dont_delete then
             for _, dir in pairs(self.folder_names) do
-                local path = BeardLib.Utils.Path:Combine(self.install_directory, dir)
+                local path = Path:Combine(self.install_directory, dir)
                 if not FileIO:CanWriteTo(path) then
                     if config.failed_write then
                         config.failed_write()
@@ -298,8 +292,7 @@ function ModAssetsModule:InitializeNode(node)
 end
 
 DownloadCustomMap = DownloadCustomMap or class(ModAssetsModule)
-function DownloadCustomMap:init()
-end
+function DownloadCustomMap:init() end
 
 function DownloadCustomMap:DownloadFailed()
     BeardLibEditor.managers.Dialog:Show({title = managers.localization:text("mod_assets_error"), message = managers.localization:text("custom_map_failed_download"), force = true})

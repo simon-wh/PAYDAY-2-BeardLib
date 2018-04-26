@@ -1,7 +1,7 @@
 WeaponModule = WeaponModule or class(ItemModuleBase)
 WeaponModule.type_name = "Weapon"
 
-function WeaponModule:init(core_mod, config)
+function WeaponModule:init(...)
     self.required_params = {}
     self.clean_table = table.add(clone(self.clean_table), {
         {param = "weapon.kick", action = "remove_metas"},
@@ -13,12 +13,9 @@ function WeaponModule:init(core_mod, config)
         {param = "factory.animations", action = "remove_metas"},
         {param = "factory.override", action = {"remove_metas", "no_number_indexes"}},
         {param = "factory.adds", action = {"remove_metas", "no_number_indexes"}}
-    })
-    if not WeaponModule.super.init(self, core_mod, config) then
-        return false
-    end
-
-    return true
+	})
+	
+    return WeaponModule.super.init(self, ...)
 end
 
 local default_weap = "glock_17"

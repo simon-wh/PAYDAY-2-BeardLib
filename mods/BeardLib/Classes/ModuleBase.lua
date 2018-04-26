@@ -5,7 +5,7 @@ function ModuleBase:init(core_mod, config)
     self._mod = core_mod
     self._name = config.name or self.type_name
     if config.file ~= nil then
-        local file_path = self._mod:GetRealFilePath(BeardLib.Utils.Path:Combine(self._mod.ModPath, config.file))
+        local file_path = self._mod:GetRealFilePath(Path:Combine(self._mod.ModPath, config.file))
         self._config = table.merge(config, FileIO:ReadScriptData(file_path, config.file_type or "custom_xml", config.clean_file))
     else
         self._config = config
@@ -92,3 +92,15 @@ function ItemModuleBase:do_clean_table(config)
 end
 
 function ItemModuleBase:RegisterHook() end
+
+
+BasicModuleBase = BasicModuleBase or class(ModuleBase)
+function BasicModuleBase:init(...)
+    if not BasicModuleBase.super.init(self, ...) then
+        return false
+    end
+    self:Load()
+    return true
+end
+
+function BasicModuleBase:Load() end

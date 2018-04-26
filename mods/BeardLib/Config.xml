@@ -26,7 +26,47 @@
 					<default_value/>
 				</option>
 			</options>
-		</Options>
+		</Options>	
+		<Hooks directory="Hooks">
+			<hook source_file="lib/units/beings/player/huskplayermovement" file="NetworkHooks.lua"/>
+			<hook source_file="lib/units/beings/player/playerinventory" file="NetworkHooks.lua"/>
+			<hook source_file="lib/units/weapons/newraycastweaponbase" file="NetworkHooks.lua"/>
+			
+			<hook source_file="lib/network/base/handlers/connectionnetworkhandler" file="Fixes.lua"/>
+			<hook source_file="core/lib/managers/menu/items/coremenuitemslider" file="Fixes.lua"/>
+			<hook source_file="core/lib/managers/coresoundenvironmentmanager" file="Fixes.lua"/>
+			<hook source_file="lib/managers/mission/elementvehiclespawner" file="Fixes.lua"/>
+			<hook source_file="lib/managers/mission/elementinteraction" file="Fixes.lua"/>
+			<hook source_file="lib/units/beings/player/playermovement" file="Fixes.lua"/>
+			<hook source_file="lib/units/weapons/newraycastweaponbase" file="Fixes.lua"/>
+			<hook source_file="lib/managers/menu/crewmanagementgui" file="Fixes.lua"/>
+			<hook source_file="lib/managers/weaponfactorymanager" file="Fixes.lua"/>
+			<hook source_file="lib/managers/blackmarketmanager" file="Fixes.lua"/>
+			<hook source_file="lib/managers/dialogmanager" file="Fixes.lua"/>
+
+			<hook source_file="lib/setups/gamesetup" file="OtherHooks.lua"/>
+			<hook source_file="lib/tweak_data/tweakdata" file="OtherHooks.lua"/>
+			<hook source_file="lib/tweak_data/tweakdatapd2" file="OtherHooks.lua"/>
+			<hook source_file="lib/managers/missionmanager" file="OtherHooks.lua"/>
+
+			<hook source_file="core/lib/managers/viewport/environment/coreenvironmentmanager" file="EnvironmentManager.lua"/>
+			<hook source_file="lib/network/matchmaking/networkmatchmakingsteam" file="NetworkMatchmakingSteam.lua"/>
+			<hook source_file="core/lib/utils/dev/editor/coreworlddefinition" file="CoreWorldDefinition.lua"/>
+			<hook source_file="lib/managers/menu/menucomponentmanager" file="BeardLibModsMenuButton.lua"/>
+			<hook source_file="lib/network/base/clientnetworksession" file="ClientNetworkSession.lua"/>
+			<hook source_file="lib/managers/gameplaycentralmanager" file="GamePlayCentralManager.lua"/>
+			<hook source_file="core/lib/managers/coresequencemanager" file="CoreSequenceManager.lua"/>
+			<hook source_file="lib/managers/menu/scrollablepanel" file="ScrollablePanel.lua"/>
+			<hook source_file="lib/managers/systemmenumanager" file="SystemMenuManager.lua"/>
+			<hook source_file="lib/managers/crimenetmanager" file="CrimeNetManager.lua"/>
+			<hook source_file="lib/network/base/networkpeer" file="NetworkPeer.lua"/>
+			<hook source_file="lib/managers/musicmanager" file="MusicManager.lua"/>
+			<hook source_file="lib/managers/menumanager" file="MenuManager.lua"/>
+			<hook source_file="core/lib/system/coresystem" file="CoreSystem.lua"/>
+			<hook source_file="lib/managers/menu/menuinput" file="MenuInput.lua"/>
+			<hook source_file="lib/managers/killzonemanager" file="KillzoneManager.lua"/>
+			<hook source_file="lib/setups/setup" file="Setup.lua"/>
+		</Hooks>
 	</load_modules>
 	<classes>
 		<class file="Utils/Utils.lua"/>
@@ -72,45 +112,6 @@
 		<class file="Dialogs/MenuDialogManager.lua" manager="dialog"/>
 		<class file="BeardLibModsMenu.lua" manager="mods_menu"/>
 	</classes>
-	<hooks>
-
-		<hook source="lib/units/beings/player/huskplayermovement" file="NetworkHooks.lua"/>
-	    <hook source="lib/units/beings/player/playerinventory" file="NetworkHooks.lua"/>
-	    <hook source="lib/units/weapons/newraycastweaponbase" file="NetworkHooks.lua"/>
-		
-	 	<hook source="lib/network/base/handlers/connectionnetworkhandler" file="Fixes.lua"/>
-		<hook source="core/lib/managers/menu/items/coremenuitemslider" file="Fixes.lua"/>
-		<hook source="core/lib/managers/coresoundenvironmentmanager" file="Fixes.lua"/>
-		<hook source="lib/managers/mission/elementvehiclespawner" file="Fixes.lua"/>
-		<hook source="lib/managers/mission/elementinteraction" file="Fixes.lua"/>
-		<hook source="lib/units/beings/player/playermovement" file="Fixes.lua"/>
-	    <hook source="lib/units/weapons/newraycastweaponbase" file="Fixes.lua"/>
-		<hook source="lib/managers/menu/crewmanagementgui" file="Fixes.lua"/>
-		<hook source="lib/managers/weaponfactorymanager" file="Fixes.lua"/>
-        <hook source="lib/managers/blackmarketmanager" file="Fixes.lua"/>
-        <hook source="lib/managers/dialogmanager" file="Fixes.lua"/>
-
-        <hook source="core/lib/managers/viewport/environment/coreenvironmentmanager" file="EnvironmentManager.lua"/>
-        <hook source="lib/network/matchmaking/networkmatchmakingsteam" file="NetworkMatchmakingSteam.lua"/>
-        <hook source="core/lib/utils/dev/editor/coreworlddefinition" file="CoreWorldDefinition.lua"/>
-        <hook source="lib/managers/menu/menucomponentmanager" file="BeardLibModsMenuButton.lua"/>
-        <hook source="lib/network/base/clientnetworksession" file="ClientNetworkSession.lua"/>
-        <hook source="lib/managers/gameplaycentralmanager" file="GamePlayCentralManager.lua"/>
-		<hook source="core/lib/managers/coresequencemanager" file="CoreSequenceManager.lua"/>
-		<hook source="lib/managers/menu/scrollablepanel" file="ScrollablePanel.lua"/>
-        <hook source="lib/managers/systemmenumanager" file="SystemMenuManager.lua"/>
-        <hook source="lib/tweak_data/tweakdatapd2" file="PreTweakData.lua"/>
-        <hook source="lib/managers/crimenetmanager" file="CrimeNetManager.lua"/>
-        <hook source="lib/network/base/networkpeer" file="NetworkPeer.lua"/>
-        <hook source="lib/managers/musicmanager" file="MusicManager.lua"/>
-		<hook source="lib/managers/menumanager" file="MenuManager.lua"/>
-        <hook source="lib/tweak_data/tweakdata" file="TweakData.lua"/>
-		<hook source="core/lib/system/coresystem" file="CoreSystem.lua"/>
-		<hook source="lib/managers/menu/menuinput" file="MenuInput.lua"/>
-        <hook source="lib/managers/killzonemanager" file="KillzoneManager.lua"/>
-        <hook source="lib/managers/missionmanager" file="MissionManager.lua"/>
-		<hook source="lib/setups/setup" file="Setup.lua"/>
-	</hooks>
 	<script_data_types>
 		<value_node value="sequence_manager"/>
 		<value_node value="environment"/>
