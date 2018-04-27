@@ -64,6 +64,13 @@ function Group:UpdateGroup()
     self:SetSize(nil, nil, true)
 end
 
+function Group:_SetSize(w, h)
+	if self.closed then
+		h = self:TextHeight()
+	end
+	return Group.super._SetSize(self, w, h)
+end
+
 function Group:ToggleGroup()
     self.closed = not self.closed
     self:UpdateGroup()

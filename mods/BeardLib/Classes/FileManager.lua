@@ -85,7 +85,6 @@ end
 local texture_key = "8c5b5ab050e16853" 
 function fm:AddFile(ext, path, file)
 	if not DB.create_entry then
-		BeardLib:log("[ERROR] Cannot add files!")
 		return
 	end
 

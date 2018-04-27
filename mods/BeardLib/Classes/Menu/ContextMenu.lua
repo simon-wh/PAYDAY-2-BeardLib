@@ -72,23 +72,19 @@ function ContextMenu:CreateItems()
 
 	local offset = self.owner.text_offset[1]
 	local offset_sides = self.owner.text_offset[1] * 2
-	local font_size = (self.owner.font_size or self.owner.size) - 2
+	local font_size = (self.owner.font_size or self.owner.size)
 	local loc = managers.localization
 	local is_loc = self.owner.items_localized
-	for k, text in pairs(self._my_items) do
-		local typ = type(text)
-		local tbl = typ == "table"
-        if tbl then
-			text = text.text
-		end
+	for k, context_item in pairs(self._my_items) do
+		local item, text = context_item.item, context_item.text
 		if text then
-			text = tostring(text)
 			local panel = self.items_panel:panel({
 				name = text,
 				h = font_size,
 				visible = false,
 				y = (k - 1) * font_size,
 			})
+			panel:script().context_item = item
 			panel:text({
 				name = "text",
 				text = is_loc and loc:text(text) or text,
@@ -130,7 +126,7 @@ function ContextMenu:hide()
 end
 
 function ContextMenu:reposition()
-    local size = (self.owner.font_size or self.owner.size) - 2
+    local size = (self.owner.font_size or self.owner.size)
     local bottom_h = (self.menu._panel:world_bottom() - self.owner.panel:world_bottom()) 
 	local top_h = (self.owner.panel:world_y() - self.menu._panel:world_y())
     local items_h = (#self._my_items * size) + (self.owner.searchbox and self.owner.size or 0)
@@ -189,9 +185,9 @@ function ContextMenu:MousePressed(button, x, y)
                 self:CheckItems()
                 return true
             end
-            for k, item in pairs(self.owner.items) do
-                local item_p = self.items_panel:child("Item-"..tostring(item))
-                if alive(item_p) and item_p:inside(x,y) then
+            for k, panel in pairs(self._visible_items) do
+                local item = alive(panel) and panel:script().context_item or nil
+				if item and panel:inside(x, y) then
                     if self.owner.ContextMenuCallback then
                         self.owner:ContextMenuCallback(item)
                     else
@@ -225,20 +221,22 @@ end
 function ContextMenu:Update(t, dt)
 	if self._do_search and self._do_search <= t then
 		
-		local text = self:textbox() and self:textbox():Value() or ""
+		local search = self:textbox() and self:textbox():Value() or ""
 		self._my_items = {}
-		for _, v in pairs(self.owner.items) do
-			if type(v) == "table" then
-				v = v.text
+		for _, item in pairs(self.owner.items) do
+			local text = item
+			if type(text) == "table" then
+				text = item.text
 			end
+			local context_item = {text = tostring(text), item = item}
 			if text == "" then
-				table.insert(self._my_items, v)
+				table.insert(self._my_items, context_item)
 			else
-				local match = tostring(v):find(text)
+				local match = context_item.text:find(search)
 				if match then
-					table.insert(self._my_items, 1, v)
+					table.insert(self._my_items, 1, context_item)
 				else
-					table.insert(self._my_items, v)
+					table.insert(self._my_items, context_item)
 				end
 			end
 		end
