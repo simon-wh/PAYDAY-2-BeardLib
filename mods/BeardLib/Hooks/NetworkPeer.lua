@@ -156,13 +156,13 @@ end)
 
 local orig_NetworkPeer_set_outfit_string = NetworkPeer.set_outfit_string
 
-function NetworkPeer:set_outfit_string(outfit_string, outfit_version, outfit_signature)
+function NetworkPeer:set_outfit_string(outfit_string, outfit_version, outfit_signature, ...)
 	if outfit_signature == false then
 		self._real_outfit_string = outfit_string
 		return
 	end
 
-    orig_NetworkPeer_set_outfit_string(self, outfit_string, outfit_version, outfit_signature or self._signature)
+    orig_NetworkPeer_set_outfit_string(self, outfit_string, outfit_version, outfit_signature or self._signature, ...)
 
     if self._real_outfit_string then
 

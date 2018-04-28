@@ -18,7 +18,8 @@ function MaskPatternModule:RegisterHook()
             name_id = "pattern_" .. self._config.id .. "_title",
             dlc = self.defaults.dlc,
             pcs = {},
-            value = 0,
+			value = 0,
+			texture_bundle_folder = "mods",
             global_value = self.defaults.global_value,
             custom = true
         }, self._config)

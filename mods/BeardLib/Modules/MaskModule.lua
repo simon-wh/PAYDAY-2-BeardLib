@@ -18,7 +18,8 @@ function MaskModule:RegisterHook()
             desc_id = "bm_msk_" .. self._config.id .. "_desc",
             dlc = self.defaults.dlc,
             pcs = {},
-            value = 0,
+			value = 0,
+			texture_bundle_folder = "mods",
             global_value = self.defaults.global_value,
             custom = true
         }, self._config.item or self._config)

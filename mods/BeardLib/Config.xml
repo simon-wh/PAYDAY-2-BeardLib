@@ -62,7 +62,6 @@
 			<hook source_file="lib/network/base/networkpeer" file="NetworkPeer.lua"/>
 			<hook source_file="lib/managers/musicmanager" file="MusicManager.lua"/>
 			<hook source_file="lib/managers/menumanager" file="MenuManager.lua"/>
-			<hook source_file="core/lib/system/coresystem" file="CoreSystem.lua"/>
 			<hook source_file="lib/managers/menu/menuinput" file="MenuInput.lua"/>
 			<hook source_file="lib/managers/killzonemanager" file="KillzoneManager.lua"/>
 			<hook source_file="lib/setups/setup" file="Setup.lua"/>

@@ -100,6 +100,14 @@ function fm:AddFile(ext, path, file)
 	end
 end
 
+function fm:AddFileWithCheck(ext, path, file)
+	if FileIO:Exists(file) then
+		self:AddFile(ext, path, file)
+	else
+		BeardLib:log("[ERROR] File does not exist! %s", tostring(file))
+	end
+end
+
 function fm:RemoveFile(ext, path)
 	ext = ext:id()
 	path = path:id()
