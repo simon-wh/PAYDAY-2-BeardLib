@@ -51,6 +51,18 @@ Hooks:Add("NetworkPeerSend", "BeardLibCustomWeaponFix", function(self, func_name
 				local blueprint = managers.weapon_factory:unpack_blueprint_from_string(factory_id, params[3])
 				params[3] = managers.weapon_factory:blueprint_to_string(factory_id, BeardLib.Utils:GetCleanedBlueprint(blueprint, factory_id))
 			end
+		elseif func_name == "sync_grenades" then
+			params[1] = BeardLib.Utils:GetSpoofedGrenade(params[1])
+			params[2] = 3
+		elseif func_name == "sync_throw_projectile" then
+			local projectile_i = params[4]
+			if projectile_i then
+				local projectile_name = tweak_data.blackmarket:get_projectile_name_from_index(projectile_i)
+				if projectile_name then
+					projectile_name = BeardLib.Utils:GetSpoofedGrenade(projectile_name)
+					params[4] = tweak_data.blackmarket:get_index_from_projectile_id(projectile_name) or 1
+				end
+			end
         end
     end
 end)

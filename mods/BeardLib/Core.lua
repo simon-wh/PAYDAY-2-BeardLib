@@ -194,6 +194,8 @@ function self:RegisterHook(...) return ModCore.RegisterHook(self, ...) end
 
 Hooks:Register("BeardLibAddCustomWeaponModsToWeapons")
 Hooks:Register("BeardLibCreateCustomNodesAndButtons")
+Hooks:Register("BeardLibPostCreateCustomProjectiles")
+Hooks:Register("BeardLibCreateCustomProjectiles")
 Hooks:Register("BeardLibCreateCustomWeaponMods")
 Hooks:Register("BeardLibPreProcessScriptData")
 Hooks:Register("BeardLibCreateCustomWeapons")

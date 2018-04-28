@@ -476,6 +476,14 @@ function BeardLib.Utils:GetCleanedBlueprint(blueprint, factory_id)
     return new_blueprint
 end
 
+function BeardLib.Utils:GetSpoofedGrenade(grenade)
+	local grenade_tweak = tweak_data.blackmarket.projectiles[grenade]
+	if grenade_tweak and grenade_tweak.custom then
+		return grenade_tweak.based_on or managers.blackmarket._defaults.grenade
+	end
+	return grenade
+end
+
 function BeardLib.Utils:CleanOutfitString(str, is_henchman)
     local bm = managers.blackmarket
     local factory = tweak_data.weapon.factory
@@ -522,27 +530,31 @@ function BeardLib.Utils:CleanOutfitString(str, is_henchman)
     	end
     end
 
-	if not is_henchman and list.secondary then
-        local secondary = list.secondary.factory_id
-        if factory[secondary].custom then
-    		list.secondary.factory_id = self:GetBasedOnFactoryId(secondary) or self.WeapConv[1]
-            list.secondary.blueprint = factory[list.secondary.factory_id].default_blueprint
-    	end
+	if not is_henchman then
+		if list.secondary then
+			local secondary = list.secondary.factory_id
+			if factory[secondary].custom then
+				list.secondary.factory_id = self:GetBasedOnFactoryId(secondary) or self.WeapConv[1]
+				list.secondary.blueprint = factory[list.secondary.factory_id].default_blueprint
+			end
 
-        local melee = tweak_data.blackmarket.melee_weapons[list.melee_weapon]
-        if melee and melee.custom then
-            local based_on = melee.based_on
-            local melee = tweak_data.upgrades.definitions[based_on] 
-            if not melee or (melee.dlc and not managers.dlc:is_dlc_unlocked(melee.dlc)) then
-                based_on = nil
-            end
-            list.melee_weapon = based_on or "weapon"
-        end
+			local melee = tweak_data.blackmarket.melee_weapons[list.melee_weapon]
+			if melee and melee.custom then
+				local based_on = melee.based_on
+				local melee = tweak_data.upgrades.definitions[based_on] 
+				if not melee or (melee.dlc and not managers.dlc:is_dlc_unlocked(melee.dlc)) then
+					based_on = nil
+				end
+				list.melee_weapon = based_on or "weapon"
+			end
 
-        for _, weap in pairs({list.primary, list.secondary}) do
-            weap.blueprint = self:GetCleanedBlueprint(weap.blueprint, weap.factory_id)
-    	end
-    end
+			for _, weap in pairs({list.primary, list.secondary}) do
+				weap.blueprint = self:GetCleanedBlueprint(weap.blueprint, weap.factory_id)
+			end
+		end
+
+		list.grenade = self:GetSpoofedGrenade(list.grenade)
+	end
 	return self:OutfitStringFromList(list, is_henchman)
 end
 
@@ -560,7 +572,11 @@ end
 local searchTypes = {
     "Vector3",
     "Rotation",
-    "Color",
+	"Color",
+	"SimpleClbk",
+	"ClassClbk",
+	"SafeClassClbk",
+	"SafeClbk",
     "callback"
 }
 
@@ -735,6 +751,10 @@ function BeardLib.Utils:UrlEncode(str)
 	end
 
 	return string.gsub(str, ".", encode_chars)
+end
+
+function BeardLib.Utils:ModExists(name)
+	return self:FindMod(name) ~= nil
 end
 
 function BeardLib.Utils:FindMod(name)

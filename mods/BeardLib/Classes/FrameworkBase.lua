@@ -47,8 +47,8 @@ function Framework:RegisterHooks()
     for _, mod in pairs(self._loaded_mods) do
         if not mod._disabled and mod._modules then
             for _, module in pairs(mod._modules) do
-                if module.RegisterHook and not module.Registered then
-                    local success, err = pcall(function() module:RegisterHook() end)
+                if module.DoRegisterHook and not module.Registered then
+                    local success, err = pcall(function() module:DoRegisterHook() end)
                     module.Registered = true
                     if not success then
                         self:log("[ERROR] An error occured on the hook registration of %s. Error:\n%s", module._name, tostring(err))
@@ -69,11 +69,13 @@ function Framework:GetModByDir(dir)
 end
 
 function Framework:GetModByName(name)
-    for _, mod in pairs(self._loaded_mods) do
-        if mod.Name == name then
-            return mod
-        end
-    end
+	if self._loaded_mods then
+		for _, mod in pairs(self._loaded_mods) do
+			if mod.Name == name then
+				return mod
+			end
+		end
+	end
     return nil
 end
 

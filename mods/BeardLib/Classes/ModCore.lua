@@ -178,19 +178,22 @@ function ModCore:StringToTable(str)
     return BeardLib.Utils:StringToTable(str, global_tbl)
 end
 
-function ModCore:StringToCallback(str, self_tbl)
-    local split = string.split(str, ":")
+function ModCore:StringToCallback(str, self_tbl)	
+	local value = BeardLib.Utils:normalize_string_value(str)
+	if type(value) == "function" then
+		return value
+	else
+		local split = string.split(str, ":")
+		local func_name = table.remove(split)
+		local global_tbl_name = split[1]
 
-    local func_name = table.remove(split)
-
-    local global_tbl_name = split[1]
-
-    local global_tbl = self:StringToTable(global_tbl_name)
-    if global_tbl then
-        return callback(self_tbl or global_tbl, global_tbl, func_name)
-    else
-        return nil
-    end
+		local global_tbl = self:StringToTable(global_tbl_name)
+		if global_tbl then
+			return callback(self_tbl or global_tbl, global_tbl, func_name)
+		else
+			return nil
+		end
+	end
 end
 
 function ModCore:RegisterHook(source_file, file, type)

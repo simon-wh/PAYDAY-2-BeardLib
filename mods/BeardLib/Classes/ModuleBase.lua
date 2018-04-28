@@ -11,6 +11,13 @@ function ModuleBase:init(core_mod, config)
         self._config = config
     end
 
+	if self._config.init_clbk then
+        local clbk = self._mod:StringToCallback(self._config.init_clbk)
+        if clbk and not clbk() then
+            return
+        end
+	end
+
     for _, param in pairs(self.required_params) do
         if BeardLib.Utils:StringToTable(param, self._config, true) == nil then
             self:log("[ERROR] Parameter '%s' is required!", param)
@@ -93,6 +100,15 @@ end
 
 function ItemModuleBase:RegisterHook() end
 
+function ItemModuleBase:DoRegisterHook(...) 
+	if self._config.register_hook_clbk then
+        local clbk = self._mod:StringToCallback(self._config.register_hook_clbk)
+        if clbk and not clbk() then
+            return
+        end
+	end
+	self:RegisterHook(...)
+end
 
 BasicModuleBase = BasicModuleBase or class(ModuleBase)
 function BasicModuleBase:init(...)
