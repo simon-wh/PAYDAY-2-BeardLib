@@ -81,8 +81,12 @@ function ComboBox:GetValueText()
         text = self.items_localized and text and managers.localization:text(text) or type(text) ~= "nil" and tostring(text) or ""
     elseif self.free_typing then
         text = self.value
-    end
-    return text
+	end
+
+	local is_upper = self.items_uppercase
+	local is_lower = self.items_lowercase
+	local is_pretty = self.items_pretty
+    return (is_upper and text:upper()) or (is_lower and text:lower()) or (is_pretty and text:pretty(true)) or text
 end
     
 function ComboBox:UpdateValueText()

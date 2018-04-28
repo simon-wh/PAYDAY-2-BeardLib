@@ -131,7 +131,6 @@ function BaseItem:WorkParams(params)
 	self:WorkParam("ignore_align", self.override_panel)
 	self:WorkParam("localized")
 	self:WorkParam("help_localized", self.localized)
-	self:WorkParam("items_localized", self.localized)
 	self:WorkParam("animate_colors")
 
 	--Specific items
@@ -142,6 +141,9 @@ function BaseItem:WorkParams(params)
 	self:WorkParam("supports_mouse")
 	self:WorkParam("color_dialog")
 	self:WorkParam("use_alpha")
+	self:WorkParam("items_localized", self.localized)
+	self:WorkParam("items_uppercase")
+	self:WorkParam("items_lowercase")
 
 	self.name = NotNil(self.name, self.text, "")
 	self.text = NotNil(self.text, self.text ~= false and self.name)
@@ -316,6 +318,7 @@ function BaseItem:Center() return self:Panel():center() end
 function BaseItem:Name() return self.name end
 function BaseItem:Label() return self.label end
 function BaseItem:Text() return type(self.text) == "string" and self.text or "" end
+function BaseItem:TextValue() return BaseItem.Text(self) end
 function BaseItem:Height() return self:Panel():h() end
 function BaseItem:OuterHeight() return self:Height() + self:Offset()[2] end
 function BaseItem:Width() return self:Panel():w() end

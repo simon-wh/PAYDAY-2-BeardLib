@@ -251,6 +251,23 @@ function Menu:SetVisible(visible, animate, no_align)
     self.menu:CheckOpenedList()
 end
 
+function Menu:GetMenus(match, deep, menus)
+	menus = menus or {}
+    for _, menu in pairs(self._my_items) do
+        if menu.menu_type then
+            if not match or menu.name:find(match) then
+                table.insert(menus, menu)
+            elseif deep then
+                local item = menu:GetMenus(name, true, menus)
+                if item and item.name then
+                    return item
+                end
+            end
+        end
+    end
+    return menus
+end
+
 function Menu:GetMenu(name, shallow)
     for _, menu in pairs(self._my_items) do
         if menu.menu_type then

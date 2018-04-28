@@ -75,6 +75,10 @@ function ContextMenu:CreateItems()
 	local font_size = (self.owner.font_size or self.owner.size)
 	local loc = managers.localization
 	local is_loc = self.owner.items_localized
+	local is_upper = self.owner.items_uppercase
+	local is_lower = self.owner.items_lowercase
+	local is_pretty = self.owner.items_pretty
+
 	for k, context_item in pairs(self._my_items) do
 		local item, text = context_item.item, context_item.text
 		if text then
@@ -85,9 +89,10 @@ function ContextMenu:CreateItems()
 				y = (k - 1) * font_size,
 			})
 			panel:script().context_item = item
+			text = is_loc and loc:text(text) or text
 			panel:text({
 				name = "text",
-				text = is_loc and loc:text(text) or text,
+				text = (is_upper and text:upper()) or (is_lower and text:lower()) or (is_pretty and text:pretty(true)) or text,
 				w = panel:w() - offset_sides,
 				h = panel:h(),
 				x = offset,
