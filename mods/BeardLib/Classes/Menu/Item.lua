@@ -12,10 +12,6 @@ function Item:Init(params)
 	})
 
 	self.panel:script().menuui_item = self
-
-	if self.type_name == Item.type_name then
-		self.button_type = true
-	end
 		
 	self:InitBasicItem()
 	if self.divider_type and alive(self.title) then

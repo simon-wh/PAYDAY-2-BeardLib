@@ -433,7 +433,6 @@ end
 
 function Menu:Group(params) return self:NewItem(BeardLib.Items.Group:new(self:ConfigureItem(params, true))) end
 function Menu:Menu(params) return self:NewItem(BeardLib.Items.Menu:new(self:ConfigureItem(params, true))) end
-function Menu:Button(params) return self:NewItem(BeardLib.Items.Item:new(self:ConfigureItem(params))) end
 function Menu:ComboBox(params) return self:NewItem(BeardLib.Items.ComboBox:new(self:ConfigureItem(params))) end
 function Menu:TextBox(params) return self:NewItem(BeardLib.Items.TextBox:new(self:ConfigureItem(params))) end
 function Menu:ComboBox(params) return self:NewItem(BeardLib.Items.ComboBox:new(self:ConfigureItem(params))) end
@@ -441,6 +440,12 @@ function Menu:Slider(params) return self:NewItem(BeardLib.Items.Slider:new(self:
 function Menu:KeyBind(params) return self:NewItem(BeardLib.Items.KeyBindItem:new(self:ConfigureItem(params))) end
 function Menu:Toggle(params) return self:NewItem(BeardLib.Items.Toggle:new(self:ConfigureItem(params))) end
 function Menu:ItemsGroup(params) return self:Group(params) end --Deprecated--
+
+function Menu:Button(params) 
+	local _params = self:ConfigureItem(params)
+	_params.button_type = true
+	return self:NewItem(BeardLib.Items.Item:new(_params))
+end
 
 function Menu:NumberBox(params)
     local _params = self:ConfigureItem(params)

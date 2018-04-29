@@ -69,7 +69,7 @@ function Toggle:MousePressed(button, x, y)
 		return
 	end
 	if button == mouse_0 then
-		self:SetValue(not self.value)
+		self:SetValue(not self.value, true)
 		if managers.menu_component then
 			managers.menu_component:post_event(self.value and "box_tick" or "box_untick")
 		end
@@ -80,7 +80,7 @@ end
 
 function Toggle:KeyPressed(o, k)
 	if k == enter then
-		self:SetValue(not self.value)
+		self:SetValue(not self.value, true)
 		self:RunCallback()
 	end
 end
