@@ -7,7 +7,7 @@ function ImageButton:InitBasicItem()
         name = self.name,
         w = self.w,
         h = self.h,
-    })
+	})
     self:InitBGs()
     self.img = self.panel:bitmap({
         name = "img", 
@@ -29,6 +29,7 @@ function ImageButton:WorkParams(params)
     self.img_offset = self.img_offset and self:ConvertOffset(self.img_offset, true) or {0,0}
     self.img_offset[1] = self.img_offset_x or self.img_offset[1]
 	self.img_offset[2] = self.img_offset_y or self.img_offset[2]
+	self.button_type = true
 end
 
 function ImageButton:DoHighlight(highlight)

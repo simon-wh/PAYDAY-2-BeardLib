@@ -1,5 +1,6 @@
 BeardLib.Items.Item = BeardLib.Items.Item or class(BeardLib.Items.BaseItem)
 local Item = BeardLib.Items.Item
+
 function Item:Init(params)
 	self:WorkParams(params)
 	self.panel = self.parent_panel:panel({
@@ -12,6 +13,10 @@ function Item:Init(params)
 
 	self.panel:script().menuui_item = self
 
+	if self.type_name == Item.type_name then
+		self.button_type = true
+	end
+		
 	self:InitBasicItem()
 	if self.divider_type and alive(self.title) then
 		self.title:set_world_center_y(self.panel:world_center_y())
@@ -71,7 +76,7 @@ function Item:MousePressed(button, x, y)
         return
     end
 	if self:alive() and self:MouseInside(x,y) then
-        if button == Idstring("0") then
+        if self.button_type and button == Idstring("0") then
             self:RunCallback()
 			return true
 		end

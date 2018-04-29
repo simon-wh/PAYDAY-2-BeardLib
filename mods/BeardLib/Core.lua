@@ -153,8 +153,8 @@ function self:Update(t, dt)
 			manager:update(t, dt)
 		end
 	end
-	for id, clbk in pairs(self._updaters) do
-		clbk(t, dt)
+	for id, beardlib_update in pairs(self._updaters) do
+		beardlib_update(t, dt)
 	end
 	for _, call in pairs(self._call_next_update) do
 		if not call.only_paused then
@@ -170,8 +170,8 @@ function self:PausedUpdate(t, dt)
 			manager:update(t, dt)
 		end
 	end
-	for id, clbk in pairs(self._paused_updaters) do
-		clbk(t, dt)
+	for id, beardlib_paused_update in pairs(self._paused_updaters) do
+		beardlib_paused_update(t, dt)
 	end
 	for _, call in pairs(self._call_next_update) do
 		if not call.only_unpaused then

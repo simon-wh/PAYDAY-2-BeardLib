@@ -1,7 +1,6 @@
 BeardLib.Items.ContextMenu = BeardLib.Items.ContextMenu or class()
 local ContextMenu = BeardLib.Items.ContextMenu
 function ContextMenu:init(owner, layer)
-	BeardLib:AddUpdater("ContextMenuUpdate"..tostring(self), ClassClbk(self, "Update"), true)
     self.owner = owner
     self.parent = owner.parent
     self.menu = owner.menu
@@ -45,7 +44,11 @@ function ContextMenu:init(owner, layer)
     self._my_items = {}
     self._item_panels = {}
     self._visible_items = {}
-    self.items_panel = self._scroll:canvas()
+	self.items_panel = self._scroll:canvas()
+	
+	self._update_id = "ContextMenuUpdate"..tostring(self)
+	BeardLib:AddUpdater(self._update_id, ClassClbk(self, "Update"), true)
+
     self:update_search()
 end
 
@@ -220,13 +223,20 @@ function ContextMenu:KeyPressed(o, k)
 end
 
 function ContextMenu:textbox()
-    return self.owner._textbox or self._textbox
+	local t = self.owner._textbox or self._textbox
+    return t and alive(t) and t or nil
 end
 
 function ContextMenu:Update(t, dt)
+	if not self:alive() then
+		BeardLib:RemoveUpdater(self._update_id)
+		return
+	end
+
 	if self._do_search and self._do_search <= t then
 		
 		local search = self:textbox() and self:textbox():Value() or ""
+
 		self._my_items = {}
 		for _, item in pairs(self.owner.items) do
 			local text = item

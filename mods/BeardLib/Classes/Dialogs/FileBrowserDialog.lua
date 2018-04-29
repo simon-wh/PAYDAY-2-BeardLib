@@ -138,12 +138,12 @@ function FileBrowserDialog:Browse(where, params)
         f = {}
         d = {}
         for _, v in pairs(temp_f) do
-            if v:match(self._search) then
+            if v:find(self._search) then
                 table.insert(f, v)
             end
         end
         for _, v in pairs(temp_d) do
-            if v:match(self._search) then
+            if v:find(self._search) then
                 table.insert(d, v)
             end
         end

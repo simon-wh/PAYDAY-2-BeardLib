@@ -23,11 +23,13 @@ function OptionModule:init(...)
         self:BuildMenuHook()
     end
 
+    return true
+end
+
+function OptionModule:post_init()
 	if not self._config.delayed_init then
 		self:init_options()
 	end
-
-    return true
 end
 
 function OptionModule:init_options()

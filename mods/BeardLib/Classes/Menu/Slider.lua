@@ -156,7 +156,7 @@ function Slider:MousePressed(button, x, y)
                 local slider_bg = self._slider:child("bg")
                 local where = (x - slider_bg:world_left()) / (slider_bg:world_right() - slider_bg:world_left())
                 managers.menu_component:post_event("menu_enter")
-                self:SetValueByPercentage(where)
+                self:SetValueByPercentage(where, true)
             end
             return true
         end

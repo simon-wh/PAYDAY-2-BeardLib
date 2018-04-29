@@ -1,6 +1,8 @@
 core:import("CoreSerialize")
 ModCore = ModCore or class()
 ModCore._ignored_modules = {}
+ModCore._auto_post_init = true
+
 function ModCore:init(config_path, load_modules)
     if not FileIO:Exists(config_path) then
         BeardLib:log("[ERROR] Config file at path '%s' is not readable!", config_path)
@@ -31,7 +33,7 @@ function ModCore:init(config_path, load_modules)
 	table.insert(BeardLib.Mods, self)
 	
 	if self._config and not self._config.min_lib_ver or self._config.min_lib_ver <= BeardLib.Version then
-		if load_modules then
+		if load_modules == nil or load_modules then
 			self:init_modules()
 		end
 	elseif self._config then
@@ -46,6 +48,16 @@ function ModCore:post_init(ignored_modules)
         return
 	end
 
+	for _, module in pairs(self._modules) do
+        if (not ignored_modules or not table.contains(ignored_modules, module._name)) then
+            local success, err = pcall(function() module:post_init() end)
+
+            if not success then
+                self:log("[ERROR] An error occured on the post initialization of %s. Error:\n%s", module._name, tostring(err))
+            end
+        end
+    end
+
 	if self._core_class then
 		self._core_class:Init()
 	end
@@ -55,16 +67,6 @@ function ModCore:post_init(ignored_modules)
         local clbk = self:StringToCallback(post_init)
         if clbk then
             clbk()
-        end
-    end
-
-    for _, module in pairs(self._modules) do
-        if (not ignored_modules or not table.contains(ignored_modules, module._name)) then
-            local success, err = pcall(function() module:post_init() end)
-
-            if not success then
-                self:log("[ERROR] An error occured on the post initialization of %s. Error:\n%s", module._name, tostring(err))
-            end
         end
     end
 end
@@ -145,7 +147,9 @@ function ModCore:init_modules()
         end
     end
 
-    self:post_init()
+	if self._auto_post_init then
+		self:post_init()
+	end
     self.modules_initialized = true
 end
 

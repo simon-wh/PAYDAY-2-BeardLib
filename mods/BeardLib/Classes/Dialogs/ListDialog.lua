@@ -130,7 +130,7 @@ function ListDialog:SearchCheck(t)
     end
     local match
     for _, s in pairs(self._filter) do
-        match = (self._case_sensitive and string.match(t, s) or not self._case_sensitive and string.match(t:lower(), s:lower())) 
+        match = (self._case_sensitive and string.find(t, s) or not self._case_sensitive and string.find(t:lower(), s:lower())) 
     end
     return match
 end
