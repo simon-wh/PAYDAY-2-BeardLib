@@ -27,9 +27,11 @@ function OptionModule:init(...)
 end
 
 function OptionModule:post_init()
-	if not self._config.delayed_init then
-		self:init_options()
+	if self._post_init_complete then
+        return false
 	end
+	self:init_options()
+	OptionModule.super.post_init(self)
 end
 
 function OptionModule:init_options()
