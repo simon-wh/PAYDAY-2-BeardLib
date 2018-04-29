@@ -1,4 +1,4 @@
-ContactModule = ContactModule or class(BasicModuleBase)
+ContactModule = ContactModule or class(ItemModuleBase)
 ContactModule.type_name = "contact"
 ContactModule._loose = true
 

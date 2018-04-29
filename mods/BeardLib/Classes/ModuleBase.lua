@@ -35,7 +35,8 @@ function ModuleBase:post_init()
         if clbk then
             clbk()
         end
-    end
+	end
+	self._post_init_complete = true
 end
 
 function ModuleBase:log(str, ...)
