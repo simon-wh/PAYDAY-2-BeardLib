@@ -138,9 +138,6 @@ function C:LoadPackageConfig(directory, config)
                             if child.load then
                                 table.insert(loading, {ids_ext, ids_path, file_path_ext})
 							end
-							if child.force then
-								PackageManager:reload(ids_ext, ids_path)
-							end
                         end
                     else
                         BeardLib:log("[ERROR] File does not exist! %s", tostring(file_path))
