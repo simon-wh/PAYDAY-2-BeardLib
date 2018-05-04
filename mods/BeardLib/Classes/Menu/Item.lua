@@ -60,6 +60,9 @@ function Item:KeyPressed(o, k)
 end
 
 local mouse_1 = Idstring("1")
+Item.UNCLICKABLE = 1 --null is "unknown".
+Item.CLICKABLE = 2
+Item.INTERRUPTED = 3
 function Item:MousePressed(button, x, y)
 	if not self.menu_type then
 	    for _, item in pairs(self._adopted_items) do
@@ -68,22 +71,37 @@ function Item:MousePressed(button, x, y)
 	        end
 	    end
 	end
+
     if not self:MouseCheck(true) then
-        return
-    end
-	if self:alive() and self:MouseInside(x,y) then
-        if self.button_type and button == Idstring("0") then
+        return false, self.UNCLICKABLE
+	end
+
+	if self:MouseInside(x,y) then
+		if self.on_click then
+			if self:on_click(button, x, y) == false then
+				return false, self.INTERRUPTED
+			end
+		end
+		if self.button_type and button == self.click_btn then
             self:RunCallback()
 			return true
 		end
+
 		local right_click = button == mouse_1
-		if self._list and ((not self.open_list_key and right_click) or (self.open_list_key and button == self.open_list_key:id())) then
-			self._list:show()
-			return true
+		if self._list and not self.menu._openlist then
+			if (not self.open_list_key and right_click) or (self.open_list_key and button == self.open_list_key:id()) then
+				self._list:update_search()
+				self._list:show()
+				return true
+			end
 		end
+	
 		if self.on_right_click and (not self._list or self.open_list_key ~= mouse_1) then
 			self:RunCallback(self.on_right_click)
 		end
+		return false, self.CLICKABLE
+	else
+		return false
     end
 end
 

@@ -256,6 +256,20 @@ function mrotation.set_roll(rot, roll)
     return mrotation.set_yaw_pitch_roll(rot, rot:yaw(), rot:pitch(), roll)
 end
 
+function mrotation.step(rot, rot_a, rot_b, t)
+	mrotation.set_yaw_pitch_roll(
+		rot,
+		math.step(rot_a:yaw(), rot_b:yaw(), t),
+		math.step(rot_a:pitch(), rot_b:pitch(), t),
+		math.step(rot_a:roll(), rot_b:roll(), t)
+	)
+	return rot
+end
+
+function mrotation.add(rot, rot_a, rot_b)
+	mrotation.set_yaw_pitch_roll(rot, rot_a:yaw() + rot_b:yaw(), rot_a:pitch() + rot_b:pitch(), rot_a:roll() + rot_b:roll())
+end
+
 function string.pretty2(str)
     str = tostring(str)
     return str:gsub("([^A-Z%W])([A-Z])", "%1 %2"):gsub("([A-Z]+)([A-Z][^A-Z$])", "%1 %2")

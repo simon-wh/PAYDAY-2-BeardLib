@@ -133,6 +133,8 @@ function BaseItem:WorkParams(params)
 	self:WorkParam("help_localized", self.localized)
 	self:WorkParam("animate_colors")
 
+	self:WorkParam("click_btn", Idstring("0"))
+
 	--Specific items
 	self:WorkParam("wheel_control")
 	self:WorkParam("floats")
@@ -148,6 +150,7 @@ function BaseItem:WorkParams(params)
 	self.name = NotNil(self.name, self.text, "")
 	self.text = NotNil(self.text, self.text ~= false and self.name)
 	self.fit_width = NotNil(self.fit_width, self.parent.align_method ~= "grid")
+	self.click_btn = self.click_btn:id()
 
 	if not self.offset then
 		self:WorkParam("offset")

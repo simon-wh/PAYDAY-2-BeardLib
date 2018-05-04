@@ -274,7 +274,7 @@ function ContextMenu:update_search(force_show)
 	if #self._my_items == 0 then
 		self._do_search = 0
 	else
-		self._do_search = TimerManager:main():time() + 0.5
+		self._do_search = Application:time() + 0.5
 	end
 end
 

@@ -32,9 +32,26 @@ function ModAssetsModule:Load()
         return
     end
 
-    self.folder_names = self._config.use_local_dir and {table.remove(string.split(self._mod.ModPath, "/"))} or (type(self._config.folder_name) == "string" and {self._config.folder_name} or BeardLib.Utils:RemoveNonNumberIndexes(self._config.folder_name))
-    self.install_directory = (self._config.install_directory and ModCore:GetRealFilePath(self._config.install_directory, self)) or (self._config.use_local_path ~= false and Path:GetDirectory(self._mod.ModPath)) or BeardLib.config.mod_override_dir
-    self.version_file = self._config.version_file and ModCore:GetRealFilePath(self._config.version_file, self) or Path:Combine(self.install_directory, self.folder_names[1], self._default_version_file)
+	local path = self._mod:GetPath()
+	
+	if not self._config.use_local_dir and self._config.folder_name then
+		local folder = self._config.folder_name
+		self.folder_names = (type(folder) == "string" and {folder} or BeardLib.Utils:RemoveNonNumberIndexes(folder))
+	else
+		self.folder_names = {table.remove(string.split(path, "/"))} 
+	end
+
+	if not self._config.use_local_path and self.install_directory then
+		local dir = self._config.install_directory
+		self.install_directory = ModCore:GetRealFilePath(dir, self) or BeardLib.config.mod_override_dir
+	else
+		self.install_directory = Path:GetDirectory(path)
+	end
+
+	if self._config.version_file then
+		self.version_file = ModCore:GetRealFilePath(self._config.version_file, self) or Path:Combine(self.install_directory, self.folder_names[1], self._default_version_file)
+	end
+
     self.version = 0
     
     self._update_manager_id = self._mod.Name .. self._name
@@ -53,7 +70,7 @@ function ModAssetsModule:Load()
 end
 
 function ModAssetsModule:GetMainInstallDir()
-    return Path:GetDirectory(self.version_file)
+    return self.version_file and Path:GetDirectory(self.version_file) or self.folder_names
 end
 
 function ModAssetsModule:RegisterAutoUpdateCheckHook()
@@ -65,7 +82,7 @@ function ModAssetsModule:RegisterAutoUpdateCheckHook()
 end
 
 function ModAssetsModule:RetrieveCurrentVersion()
-    if FileIO:Exists(self.version_file) then
+    if self.version_file and FileIO:Exists(self.version_file) then
         local version = io.open(self.version_file):read("*all")
         if version then
             self.version = version

@@ -78,7 +78,8 @@ function MenuDialogManager:CloseDialog(dialog)
     end
     if not self._opened_dialogs[1] or not self._opened_dialogs[1]._Show then
         self._ready_to_open = true
-    end
+	end
+	BeardLib.managers.menu_ui:close_menu_event()
 end
 
 function MenuDialogManager:DialogOpened(dialog)
@@ -108,6 +109,7 @@ function MenuDialogManager:CloseLastDialog()
 end
 
 function MenuDialogManager:Show()
+	BeardLib.managers.menu_ui:close_menu_event()
     self._menu:enable()
     local dialog = self._opened_dialogs[1]
     if dialog then
@@ -117,7 +119,7 @@ function MenuDialogManager:Show()
                 dialog:ReloadInterface()
             end
         end
-    end 
+	end
 end
 
 local enter_ids = Idstring("enter")

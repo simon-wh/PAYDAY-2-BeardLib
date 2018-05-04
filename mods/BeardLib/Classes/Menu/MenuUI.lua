@@ -170,11 +170,15 @@ function MenuUI:AddMenu(menu)
 end
 
 function MenuUI:Enabled() return self._enabled end
+function MenuUI:Disabled() return not self._enabled end
 
 function MenuUI:IsMouseActive()
-    if BeardLib.managers.menu_ui:input_disabled() then
+	if BeardLib.managers.menu_ui:input_disabled() then
         return false
-    end
+	end
+	if self:Disabled() then
+		return false
+	end
     local mc = managers.mouse_pointer._mouse_callbacks
     return mc[#mc] and mc[#mc].menu_ui_object == self
 end
@@ -285,16 +289,18 @@ function MenuUI:KeyPressed(o, k)
         end
     end
     self._key_pressed = k
-    if self.active_textbox then
-        self.active_textbox:KeyPressed(o, k)
-    end
-    if self._openlist then
-        self._openlist:KeyPressed(o, k)
-    end
     if self.toggle_key and k == self.toggle_key:id() then
         self:toggle()
     end
-    if self:Enabled() and self:IsMouseActive() then
+	if self:IsMouseActive() then
+		if self.active_textbox then
+			self.active_textbox:KeyPressed(o, k)
+		end
+
+		if self._openlist then
+			self._openlist:KeyPressed(o, k)
+		end
+
         if self._highlighted and self._highlighted.parent:Enabled() and self._highlighted:KeyPressed(o, k) then
             return 
         end
@@ -480,9 +486,10 @@ end
 function MenuUI:Focused()
     if self:Typing() then
         return true
-    end
+	end
+	local x,y = managers.mouse_pointer:world_position()
 	for _, menu in pairs(self._menus) do
-		if menu:Visible() then
+		if menu:Visible() and menu:MouseInside(x,y) then
             return self._highlighted
         end
 	end

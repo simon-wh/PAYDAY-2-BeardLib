@@ -42,6 +42,11 @@ function ComboBox:Init()
     self:UpdateValueText()
 end
 
+function ComboBox:WorkParams(params)
+    ComboBox.super.WorkParams(self, params)
+	self.open_list_key = self.open_list_key or Idstring("0")
+end
+
 function ComboBox:TextBoxSetValue(value, run_clbk, ...)
     if self.free_typing then
         self:SetValue(self._textbox:Value(), run_clbk, true)
@@ -111,19 +116,6 @@ function ComboBox:DoHighlight(highlight)
             play_color(self.icon, self:GetForeground(highlight))
         else
             self.icon:set_color(self:GetForeground(highlight))
-        end
-    end
-end
-
-function ComboBox:MousePressed(button, x, y)
-    if not self:MouseCheck(true) then
-        return
-    end
-    if not self.menu._openlist and self.parent.panel:inside(x,y) and self.panel:inside(x,y) then
-        if button == Idstring("0") then
-            self._list:update_search()
-            self._list:show()
-            return true
         end
     end
 end

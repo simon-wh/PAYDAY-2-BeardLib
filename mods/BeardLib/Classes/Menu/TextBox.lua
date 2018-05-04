@@ -63,15 +63,18 @@ function TextBox:SetStep(step)
 end
 
 function TextBox:MousePressed(button, x, y)
-	if not self:MouseCheck(true) then
-		return false, true
+	local result, state = TextBox.super.MousePressed(self, button, x, y)
+	if state == self.UNCLICKABLE or state == self.INTERRUPTED then
+		return result, state
 	end
+
 	if button == Idstring("1") and self.type_name == "NumberBox" and not self.no_slide and self._textbox.panel:inside(x,y) then
 		self.menu._slider_hold = self
 		return true
 	end
+	
 	self._textbox:MousePressed(button, x, y)
-	return self._textbox.cantype
+	return self._textbox.cantype, not self._textbox.cantype and state or nil
 end
 
 function TextBox:MouseReleased(button, x, y)

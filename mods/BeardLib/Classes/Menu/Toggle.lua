@@ -62,20 +62,20 @@ function Toggle:UpdateToggle(value_changed, highlight)
 	end
 end
 
-local mouse_0 = Idstring("0")
 local enter = Idstring("enter")
 function Toggle:MousePressed(button, x, y)
-	if not self:MouseCheck(true) then
-		return
+	local result, state = Toggle.super.MousePressed(self, button, x, y)
+	if state == self.UNCLICKABLE or state == self.INTERRUPTED then
+		return result, state
 	end
-	if button == mouse_0 then
+	if state == self.CLICKABLE and button == self.click_btn then
 		self:SetValue(not self.value, true)
 		if managers.menu_component then
 			managers.menu_component:post_event(self.value and "box_tick" or "box_untick")
 		end
-		Toggle.super.MousePressed(self, button, x, y)
         return true
 	end
+	return result, state
 end
 
 function Toggle:KeyPressed(o, k)

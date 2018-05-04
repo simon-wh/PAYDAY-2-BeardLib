@@ -144,15 +144,18 @@ function KeyBindItem:MouseMoved(x, y)
 end
 
 function KeyBindItem:MousePressed(button, x, y)
-    if not self:MouseCheck(true) then
-        return
-    end
-    if button == Idstring("0") and not self.CanEdit then
-        if self.panel:inside(x, y) then
-            self._ignore_mouse = true
-            self:SetCanEdit(true)
-        end
-    end
+	local result, state = KeyBindItem.super.MousePressed(self, button, x, y)
+	if state == self.UNCLICKABLE or state == self.INTERRUPTED then
+		return result, state
+	end
+
+    if state == self.CLICKABLE and button == self.click_btn and not self.CanEdit then
+        self._ignore_mouse = true
+		self:SetCanEdit(true)
+		return true
+	end
+
+	return result, state
 end
 
 function KeyBindItem:GetKeyBind()

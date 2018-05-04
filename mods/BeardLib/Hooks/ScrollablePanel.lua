@@ -164,13 +164,11 @@ function ScrollablePanelModified:set_canvas_size(w, h)
 	if not show_scrollbar then
 		self._scroll_bar:set_alpha(0)
 		self._scroll_bar:set_visible(false)
-		self._scroll_bg:hide()
 		self._scroll_bar_box_class:hide()
 	else
 		self._scroll_bar:set_alpha(1)
 		self._scroll_bar:set_visible(true)
 		self._scroll_bar_box_class:show()
-		self._scroll_bg:show()
 		self:_set_scroll_indicator()
 		self:_check_scroll_indicator_states()
 	end
@@ -189,10 +187,7 @@ function ScrollablePanelModified:scrollbar_y_padding()
 end
 
 function ScrollablePanelModified:_set_scroll_indicator()
-	local bar_h = self:panel():h()
-	if self:canvas():h() ~= 0 then
-		self._scroll_bar:set_h(math.max((bar_h * self:scroll_panel():h()) / self:canvas():h(), self._bar_minimum_size))
-	end
+	self._scroll_bar:set_h(math.max((self:panel():h() * self:scroll_panel():h()) / self:canvas():h(), self._bar_minimum_size))
 end
 
 function ScrollablePanelModified:_check_scroll_indicator_states()

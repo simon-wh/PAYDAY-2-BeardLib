@@ -71,12 +71,13 @@ function ColorTextBox:TextBoxSetValue(...)
     self:UpdateColor()
 end
 
-local mouse_0 = Idstring("0")
 function ColorTextBox:MousePressed(button, x, y)
-    local result, bad = ColorTextBox.super.MousePressed(self, button, x, y)
-    if result then
-        return result
-    elseif not bad and button == mouse_0 and self:Panel():inside(x,y) then
+	local result, state = ColorTextBox.super.MousePressed(self, button, x, y)
+	if state == self.UNCLICKABLE or state == self.INTERRUPTED then
+		return result, state
+	end
+
+    if state == self.CLICKABLE and button == self.click_btn then
         if self.show_color_dialog then -- Old.
             self:RunCallback(self.show_color_dialog)
             return true
@@ -87,7 +88,7 @@ function ColorTextBox:MousePressed(button, x, y)
             return true
         end
     end
-    return result
+    return result, state
 end
 
 function BeardLib.Items.Menu:ColorTextBox(params)

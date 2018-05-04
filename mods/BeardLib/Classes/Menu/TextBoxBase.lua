@@ -231,7 +231,7 @@ end
 
 function TextBoxBase:enter_text(text, s)
     local number = self.owner.filter == "number"
-    if not self.menu:Enabled() or number and (tonumber(s) == nil and s ~= "-" and s ~= ".") then
+    if not self.menu:IsMouseActive() or number and (tonumber(s) == nil and s ~= "-" and s ~= ".") then
         return
     end
     for _, c in pairs(self._forbidden) do

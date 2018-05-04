@@ -38,7 +38,6 @@ function ElementMoveUnit:on_executed(instigator)
 			self:register_move_unit(unit)
 		end
 	end
-	ElementMoveUnit.super.on_executed(self, instigator)
 end
 
 function ElementMoveUnit:register_move_unit(unit)
@@ -46,7 +45,7 @@ function ElementMoveUnit:register_move_unit(unit)
 		unit:unit_data().orig_pos = unit:unit_data().orig_pos or mvector3.copy(unit:position())
 	end
 
-	local start_pos = self._values.start_pos or unit:unit_data().orig_pos or unit:position()
+	local start_pos = self._values.start_pos or self._values.unit_position_as_start_position and unit:unit_data().orig_pos or unit:position() or self._values.position
 	local end_pos = self._values.end_pos
 	if not end_pos and self._values.displacement then
 		end_pos = mvector3.copy(start_pos)

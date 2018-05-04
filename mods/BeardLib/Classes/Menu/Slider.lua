@@ -134,15 +134,15 @@ function Slider:DoHighlight(highlight)
     end
 end
 
-local mouse_0 = Idstring("0")
 local wheel_up = Idstring("mouse wheel up")
 local wheel_down = Idstring("mouse wheel down")
 function Slider:MousePressed(button, x, y)
-	Slider.super.MousePressed(self, button, x, y)
+	local result, state = Slider.super.MousePressed(self, button, x, y)
+	if state == self.UNCLICKABLE or state == self.INTERRUPTED then
+		return result, state
+	end
+
     self._textbox:MousePressed(button, x, y)
-    if not self.enabled or not alive(self.panel) then
-        return
-    end
     local inside = self._slider:inside(x,y)
     if inside then
         local wheelup = (button == wheel_up and 0) or (button == wheel_down and 1) or -1
@@ -150,7 +150,7 @@ function Slider:MousePressed(button, x, y)
             self:SetValue(self.value + ((wheelup == 1) and -self.step or self.step), true, true)
             return true
         end
-    	if button == mouse_0 then
+    	if button == self.click_btn then
             self.menu._slider_hold = self
             if self.max or self.min then
                 local slider_bg = self._slider:child("bg")
@@ -160,7 +160,8 @@ function Slider:MousePressed(button, x, y)
             end
             return true
         end
-    end
+	end
+	return result, state
 end
 
 local abs = math.abs

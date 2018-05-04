@@ -111,7 +111,7 @@ function Menu:UpdateCanvas(h)
     if not self:alive() then
         return
 	end
-	if not self.auto_height and h <= self._scroll:scroll_panel():h() then
+	if not self.auto_height and h < self._scroll:scroll_panel():h() then
 		h = self._scroll:scroll_panel():h()
 	end
 	

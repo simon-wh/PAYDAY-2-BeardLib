@@ -23,12 +23,12 @@ function Manager:get_active_menu()
 end
 
 function Manager:disable_input()
-    self._input_disabled = true
+	self._input_disabled = true
 end
 
 function Manager:enable_input()
     self._input_disabled = nil
-    self._next_update_enable_input = nil
+	self._enable_input_t = nil
 end
 
 function Manager:input_enabled()
@@ -48,12 +48,12 @@ function Manager:input_allowed(...)
 end
 
 function Manager:close_menu_event()
-    self:disable_input()
-    self._next_update_enable_input = true
+	self:disable_input()
+	self._enable_input_t = Application:time() + 0.01
 end
 
-function Manager:update()
-    if self._next_update_enable_input and self._input_disabled then
+function Manager:update(t, dt)
+	if self._input_disabled and self._enable_input_t and self._enable_input_t <= t then
         self:enable_input()
     end
 end
