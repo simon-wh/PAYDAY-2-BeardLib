@@ -77,7 +77,7 @@ local MAT_CONFIG_IDS = MAT_CONFIG:id()
 local SEQ_MANAGER_IDS = SEQ_MANAGER:id()
 local COOKED_PHYSICS_IDS = COOKED_PHYSICS:id()
 
-local CP_DEFAULT = BeardLib:GetPath() .. "/Assets/units/default_cp.cooked_physics"
+local CP_DEFAULT = BeardLib:GetPath() .. "Assets/units/default_cp.cooked_physics"
 function C:LoadPackageConfig(directory, config)
     if not (SystemFS and SystemFS.exists) then
         BeardLib:log("[ERROR] SystemFS does not exist! Custom Packages cannot function without this! Do you have an outdated game version?")
@@ -111,10 +111,6 @@ function C:LoadPackageConfig(directory, config)
                     if FileIO:Exists(file_path_ext) then
 						if (not DB:has(ids_ext, ids_path) or child.force) then
 							if ids_ext == UNIT_IDS then
-								--Realistically speaking, most custom units don't load cooked physics, if you really wish to do that, use force="true"
-								if not DB:_has(ids_ext, ids_path) then
-									FileManager:AddFile(COOKED_PHYSICS_IDS, ids_path, CP_DEFAULT)
-								end
 								local all = child.include_all
 								local most = all or child.include_most
 
@@ -122,6 +118,9 @@ function C:LoadPackageConfig(directory, config)
 									FileManager:AddFileWithCheck(MODEL_IDS, ids_path, file_path.."."..MODEL)
 									FileManager:AddFileWithCheck(OBJECT_IDS, ids_path, file_path.."."..OBJECT)
 									FileManager:AddFileWithCheck(MAT_CONFIG_IDS, ids_path, file_path.."."..MAT_CONFIG)
+									if not DB:has(ids_ext, ids_path) then
+										FileManager:AddFile(COOKED_PHYSICS_IDS, ids_path, CP_DEFAULT)
+									end	
 								end
 								if most or child.include_textures then
 									FileManager:AddFileWithCheck(TEXTURE_IDS, Idstring(path.."_df"), file_path.."_df" .."."..TEXTURE)
@@ -133,7 +132,7 @@ function C:LoadPackageConfig(directory, config)
 							end
 							FileManager:AddFile(ids_ext, ids_path, file_path_ext)
                             if child.reload then
-                                PackageManager:reload(ids_ext, file_path_ext)
+                                PackageManager:reload(ids_ext, ids_path)
                             end
                             if child.load then
                                 table.insert(loading, {ids_ext, ids_path, file_path_ext})
