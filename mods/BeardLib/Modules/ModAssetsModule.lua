@@ -70,7 +70,7 @@ function ModAssetsModule:Load()
 end
 
 function ModAssetsModule:GetMainInstallDir()
-    return self.version_file and Path:GetDirectory(self.version_file) or self.folder_names
+    return self.version_file and Path:GetDirectory(self.version_file) or Path:Combine(self.install_directory, self.folder_names[1])
 end
 
 function ModAssetsModule:RegisterAutoUpdateCheckHook()
