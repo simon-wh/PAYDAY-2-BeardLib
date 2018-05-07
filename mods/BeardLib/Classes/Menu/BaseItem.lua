@@ -187,6 +187,7 @@ function BaseItem:WorkParams(params)
 			self.w = self.w or self.parent_panel:w()
 			self.h = self.h or self.parent_panel:h()
 		end
+		self.orig_h = self.h
 	end
 	self.should_render = true
 end
@@ -262,16 +263,29 @@ function BaseItem:TryRendering()
 	if not self.visible then
 		return false
 	end
-	local p
-	if self.override_panel then
-		p = self.parent_panel
-	else
-		p = self.parent._scroll._scroll_panel
-	end
+	
+	local p = self.override_panel or self.parent
+
 	local visible = false
 	if alive(self.panel) then		
-		local x = p:world_x()
-	 	visible = p:inside(x, self.panel:world_y()) == true or p:inside(x, self.panel:world_bottom()) == true
+		local y = self.panel:world_y()
+		local b = self.panel:world_bottom()
+	
+		while p ~= nil do
+			local pan = self.override_panel and self.parent_panel or p._scroll and p._scroll:scroll_panel()
+			if p.should_render and b > pan:world_y() and y < pan:world_bottom() then
+				visible = true
+				if self.override_panel or p.parent == self.menu then
+					p = nil
+				else
+					p = p.parent
+				end
+			else
+				visible = false
+				break
+			end
+		end
+
 		self.panel:set_visible(visible)
 		self.should_render = visible
 	end

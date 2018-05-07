@@ -22,7 +22,9 @@ function Menu:AlignItems(menus, no_parent)
         self:AlignItemsNormal()
     end
     if self.parent.AlignItems and not no_parent then
-        self.parent:AlignItems()
+		self.parent:AlignItems()
+	else
+		self:CheckItems()
     end
 end
 

@@ -117,8 +117,6 @@ function Menu:UpdateCanvas(h)
 	
 	self._scroll:set_canvas_size(nil, h)
 	self:_SetSize(nil, self.auto_height and self.items_panel:h() + self:TextHeight() or nil, true)
-
-	self:CheckItems()
 end
 
 function Menu:KeyPressed(o, k)
@@ -218,7 +216,10 @@ function Menu:CheckItems()
     for _, item in pairs(self._my_items) do
         if item:TryRendering() and (not item.override_panel or item.override_panel == self) then
             table.insert(self._visible_items, item)
-        end
+		end
+		if item.CheckItems then
+			item:CheckItems()
+		end
     end
 end
 

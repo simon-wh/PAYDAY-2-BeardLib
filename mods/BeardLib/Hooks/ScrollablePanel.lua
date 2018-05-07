@@ -14,6 +14,7 @@ function ScrollablePanelModified:init(panel, name, data)
 	self:canvas():set_w(panel:w() - data.scroll_width)
 	panel:child("scroll_up_indicator_arrow"):hide()
 	panel:child("scroll_down_indicator_arrow"):hide()
+	self._scroll_bar:hide()
 	self._scroll_bar:set_w(data.scroll_width)
 	self._scroll_bar:set_right(self:panel():w())
 	self._scroll_bg = panel:rect({
