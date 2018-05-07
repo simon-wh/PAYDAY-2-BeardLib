@@ -96,11 +96,12 @@ if XAudio and SoundSource then
     end)
 
     SoundSource._post_event = SoundSource._post_event or SoundSource.post_event
-    function SoundSource:post_event(event, ...)
-        event = CustomSoundManager:Redirect(event, self:get_prefixes())
-        if CustomSoundManager:CheckSoundID(event, self) then
-            return event
-        else
+	function SoundSource:post_event(event, ...)
+		event = CustomSoundManager:Redirect(event, self:get_prefixes())
+		local custom_source = CustomSoundManager:CheckSoundID(event, self)
+        if custom_source then
+            return custom_source
+		else
             return self:_post_event(event, ...)
 		end
 	end

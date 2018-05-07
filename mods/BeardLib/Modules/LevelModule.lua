@@ -25,8 +25,13 @@ function LevelModule:Load()
                 if FileIO:Exists(complete_path) then
                     if include_data.type then
                         BeardLib:ReplaceScriptData(complete_path, include_data.type, new_path, file_split[2], {add = true})
-                    else
-                        FileManager:AddFile(file_split[2]:id(), new_path:id(), complete_path)
+					else
+						local ext_id = file_split[2]:id()
+						local path_id = new_path:id()
+						FileManager:AddFile(ext_id, path_id, complete_path)
+						if include_data.reload then
+							PackageManager:reload(ext_id, path_id)
+						end
                     end
                 else
                     self:log("[ERROR] Included file '%s' is not readable by the lua state!", complete_path)

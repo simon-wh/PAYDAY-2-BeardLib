@@ -11,7 +11,7 @@ C.Closed = XAudio == nil
 
 function C:CheckSoundID(sound_id, engine_source)
     if self.Closed then
-        return false
+        return nil
     end
     
     if tonumber(sound_id) then
@@ -46,16 +46,15 @@ function C:CheckSoundID(sound_id, engine_source)
             end
             self.sources = new_sources
         end
-        return false
+        return nil
     end
 
     local buffer = self:GetLoadedBuffer(sound_id, prefixes)
     
     if buffer then
-        self:AddSource(engine_source, buffer)
-        return true
+        return self:AddSource(engine_source, buffer)
     else
-        return false
+        return nil
     end
 end
 
