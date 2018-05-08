@@ -154,10 +154,7 @@ function C:CheckSoundID(sound_id, engine_source)
 
     local buffer = self:GetLoadedBuffer(sound_id, prefixes)
     if buffer then
-		local source_tbl = self:AddSource(engine_source, buffer)
-		if source_tbl then
-			return source_tbl.source
-		end
+		return self:AddSource(engine_source, buffer)
     else
         return nil
     end
@@ -279,8 +276,8 @@ function C:AddSource(engine_source, buffer)
         return
     end
        
-    local source = XAudio.Source:new(buffer)
-    local source_tbl = {engine_source = engine_source, source = source}
+	local source = XAudio.Source:new(buffer)
+	local dummy = DummySoundSource:new(source, engine_source)
     if engine_source:is_relative() or buffer.data.relative then
         source:set_relative(true)
         if not buffer.data.auto_pause then
@@ -290,8 +287,8 @@ function C:AddSource(engine_source, buffer)
         source:set_position(engine_source:get_position())
     end
     source:set_looping(buffer.data.loop)
-    table.insert(self.sources, source_tbl)
-    return source_tbl
+    table.insert(self.sources, dummy)
+    return dummy
 end
 
 function C:Redirect(id, prefixes)
@@ -389,6 +386,20 @@ function C:update(t, dt)
             table.remove(self.sources, i)
         end
     end
+end
+
+
+DummySoundSource = DummySoundSource or class()
+function DummySoundSource:init(source, engine_source)
+	self.engine_source = engine_source
+	self.source = source
+end
+
+-- \o\
+function DummySoundSource:stop()
+	if not self.source:is_closed() then
+		self.source:stop()
+	end
 end
 
 return C
