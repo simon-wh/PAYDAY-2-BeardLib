@@ -34,6 +34,23 @@ elseif F == "gamesetup" then
 	Hooks:PostHook(GameSetup, "paused_update", "GameSetupPausedUpdateBase", function(self, t, dt)
         Hooks:Call("GameSetupPauseUpdate", t, dt)
 	end)
+elseif F == "setup" then
+	Hooks:PostHook(Setup, "init_managers", "BeardLibAddMissingDLCPackages", function(self)
+		if managers.dlc.give_missing_package then
+			managers.dlc:give_missing_package()
+		end
+		Hooks:Call("SetupInitManagers")
+	end)
+	
+	Hooks:PostHook(Setup, "init_finalize", "BeardLibInitFinalize", function(self)
+		CustomSoundManager:Open()
+		Hooks:Call("BeardLibSetupInitFinalize", self)
+	end)
+	
+	Hooks:PostHook(Setup, "unload_packages", "BeardLibUnloadPackages", function(self)
+		CustomSoundManager:Close()
+		Hooks:Call("BeardLibSetupUnloadPackages", self)
+	end)
 elseif F == "missionmanager" then
 	for _, name in ipairs(BeardLib.config.mission_elements) do 
 		dofile(BeardLib.config.classes_dir .. "Elements/Element" .. name .. ".lua") 

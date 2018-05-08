@@ -44,6 +44,7 @@
 			<hook source_file="lib/managers/blackmarketmanager" file="Fixes.lua"/>
 			<hook source_file="lib/managers/dialogmanager" file="Fixes.lua"/>
 
+			<hook source_file="lib/setups/setup" file="OtherHooks.lua"/>
 			<hook source_file="lib/setups/gamesetup" file="OtherHooks.lua"/>
 			<hook source_file="lib/tweak_data/tweakdata" file="OtherHooks.lua"/>
 			<hook source_file="lib/tweak_data/tweakdatapd2" file="OtherHooks.lua"/>
@@ -64,7 +65,6 @@
 			<hook source_file="lib/managers/menumanager" file="MenuManager.lua"/>
 			<hook source_file="lib/managers/menu/menuinput" file="MenuInput.lua"/>
 			<hook source_file="lib/managers/killzonemanager" file="KillzoneManager.lua"/>
-			<hook source_file="lib/setups/setup" file="Setup.lua"/>
 		</Hooks>
 	</load_modules>
 	<classes>

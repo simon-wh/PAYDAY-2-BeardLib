@@ -9,8 +9,111 @@ C.redirects = {global = {}}
 C.delayed_buffers = {global = {}}
 C.Closed = XAudio == nil
 
+function C:Open()
+	if self.Closed then
+		return
+	end
+	if XAudio and SoundSource and Unit then
+		local SoundSource = SoundSource
+		if type(SoundSource) == "userdata" then
+			SoundSource = getmetatable(SoundSource)
+		end
+		local sources = CustomSoundManager.engine_sources
+	
+		local Unit = Unit
+		if type(Unit) == "userdata" then
+			Unit = getmetatable(Unit)
+		end
+	
+		local orig = Unit.sound_source
+		function Unit:sound_source(...)
+			local ss = orig(self, ...)
+			if ss then
+				ss:set_link_object(self)
+			end
+			return ss
+		end
+		
+		function SoundSource:get_data()
+			--:(
+			local key = self:key()
+			local data = sources[key] or {}
+			sources[key] = data 
+			return data
+		end
+	
+		--Thanks for not making get functions ovk :)
+		function SoundSource:get_link()
+			return self:get_data().linking
+		end
+	
+		--If no position is set or is not linking to anything then we can assume it's a 2D sound.
+		function SoundSource:is_relative()
+			return self:get_position() == nil
+		end
+	
+		function SoundSource:get_position()
+			local data = self:get_data()
+			if data.position then
+				return data.position 
+			else
+				local link = self:get_link()
+				return alive(link) and link:position() or nil
+			end
+		end
+	
+		function SoundSource:get_switch()
+			return self:get_data().switch
+		end
+	
+		function SoundSource:get_prefixes()
+			return self:get_data().mapped_prefixes
+		end
+	
+		function SoundSource:set_link_object(object)
+			self:get_data().linking = object
+		end
+	
+		Hooks:PostHook(SoundSource, "stop", "BeardLibStopSounds", function(self)
+			CustomSoundManager:Stop(self)
+		end)
+	
+		Hooks:PostHook(SoundSource, "link", "BeardLibLink", function(self, object)
+			self:set_link_object(object)
+		end)
+	
+		Hooks:PostHook(SoundSource, "link_position", "BeardLibLinkPosition", function(self, object)
+			self:set_link_object(object)
+		end)
+	
+		Hooks:PostHook(SoundSource, "set_position", "BeardLibSetPosition", function(self, position)
+			self:get_data().position = position
+		end)
+	
+		Hooks:PostHook(SoundSource, "set_switch", "BeardLibSetSwitch", function(self, group, state)
+			local data = self:get_data()
+			data.switch = data.switch or {}
+			data.switch[group] = state
+			data.mapped_prefixes = table.map_values(data.switch)
+		end)
+	
+		SoundSource._post_event = SoundSource._post_event or SoundSource.post_event
+		function SoundSource:post_event(event, ...)
+			event = CustomSoundManager:Redirect(event, self:get_prefixes())
+			local custom_source = CustomSoundManager:CheckSoundID(event, self)
+			if custom_source then
+				return custom_source
+			else
+				return self:_post_event(event, ...)
+			end
+		end
+	else
+		BeardLib:log("Something went wrong when trying to initialize the custom sound manager hook")
+	end
+end
+
 function C:CheckSoundID(sound_id, engine_source)
-    if self.Closed then
+	if self.Closed then
         return nil
     end
     
@@ -45,14 +148,16 @@ function C:CheckSoundID(sound_id, engine_source)
                 end
             end
             self.sources = new_sources
-        end
+		end
         return nil
     end
 
     local buffer = self:GetLoadedBuffer(sound_id, prefixes)
-    
     if buffer then
-        return self:AddSource(engine_source, buffer)
+		local source_tbl = self:AddSource(engine_source, buffer)
+		if source_tbl then
+			return source_tbl.source
+		end
     else
         return nil
     end
