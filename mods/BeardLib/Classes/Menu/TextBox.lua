@@ -70,6 +70,7 @@ function TextBox:MousePressed(button, x, y)
 
 	if button == Idstring("1") and self.type_name == "NumberBox" and not self.no_slide and self._textbox.panel:inside(x,y) then
 		self.menu._slider_hold = self
+		self._last_mouse_position = {managers.mouse_pointer._mouse:world_position()}
 		return true
 	end
 	
@@ -79,6 +80,11 @@ end
 
 function TextBox:MouseReleased(button, x, y)
 	self._textbox:MouseReleased(button, x, y)
+	if self._last_mouse_position then
+		managers.mouse_pointer:set_mouse_world_position(unpack(self._last_mouse_position))
+		self._last_mouse_position = nil
+	end
+	managers.mouse_pointer._ws:show()
 end
 
 function TextBox:DoHighlight(highlight)
@@ -92,12 +98,14 @@ function TextBox:SetValueByMouseXPos(x)
         return
     end
     if self.menu._old_x ~= x then
-        local move = 0
-        if managers.mouse_pointer._mouse:world_x() == self.menu._panel:w() then
-            managers.mouse_pointer:set_mouse_world_position(1, managers.mouse_pointer._mouse:world_y())
+		local move = 0
+		local pointer = managers.mouse_pointer
+		pointer._ws:hide()
+        if pointer._mouse:world_x() == self.menu._panel:w() then
+            pointer:set_mouse_world_position(1, pointer._mouse:world_y())
             self.ignore_next = true
-        elseif managers.mouse_pointer._mouse:world_x() == 0 then
-            managers.mouse_pointer:set_mouse_world_position(self.menu._panel:w() - 1, managers.mouse_pointer._mouse:world_y())
+        elseif pointer._mouse:world_x() == 0 then
+            pointer:set_mouse_world_position(self.menu._panel:w() - 1, pointer._mouse:world_y())
             self.ignore_next = true
         else
             move = ctrl() and 1 or self.step or (x - self.menu._old_x)
