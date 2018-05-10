@@ -9,6 +9,7 @@ function ScrollablePanelModified:init(panel, name, data)
 	self._scroll_width = data.scroll_width
 	self._scroll_speed = data.scroll_speed or 28
 	self._count_invisible = data.count_invisible
+	self._debug = data.debug
 
 	local panel = self:panel()
 	self:canvas():set_w(panel:w() - data.scroll_width)
@@ -17,13 +18,22 @@ function ScrollablePanelModified:init(panel, name, data)
 	self._scroll_bar:hide()
 	self._scroll_bar:set_w(data.scroll_width)
 	self._scroll_bar:set_right(self:panel():w())
+	self._scroll_bar_box_class:hide()
+
+	self._scroll_rect = self._scroll_bar:rect({
+		name = "scroll_rect",
+		color = data.color,
+		halign = "grow",
+		valign = "grow"
+	})
+
 	self._scroll_bg = panel:rect({
 		name = "scroll_bg",
 		color = data.color:contrast():with_alpha(0.1),
 		visible = not data.hide_scroll_background,
 		x = self._scroll_bar:x(),
 		w = data.scroll_width,
-		h = panel:h(),
+		valign = "grow",
 	})
 
 	if data.hide_shade then
@@ -35,22 +45,7 @@ end
 
 function ScrollablePanelModified:set_scroll_color(color)
 	color = color or Color.white
-	local function set_boxgui_img(pnl)
-		for _, child in pairs(pnl:children()) do
-			local typ = type_name(child)
-			if typ == "Panel" then
-				set_boxgui_img(child)
-			elseif typ == "Bitmap" then
-				if child:texture_name() == Idstring("guis/textures/pd2/shared_lines") then
-					child:set_image("units/white_df")
-					child:set_x(0)
-					child:set_w(child:parent():w())
-				end
-				child:set_color(color)
-			end
-		end
-	end
-	set_boxgui_img(self:panel())
+	self._scroll_rect:set_color(color)
 end
 
 function ScrollablePanelModified:set_size(...)
@@ -58,6 +53,7 @@ function ScrollablePanelModified:set_size(...)
 	self:canvas():set_w(self:canvas_max_width())
 	self._scroll_bar:set_right(self:panel():w())
 	self._scroll_bg:set_x(self._scroll_bar:x())
+	self:set_scroll_state()
 end
 
 function ScrollablePanelModified:update_canvas_size(additional_h)
@@ -160,8 +156,16 @@ function ScrollablePanelModified:set_canvas_size(w, h)
 	
 	self:canvas():set_size(w, h)
 	self:force_scroll()
+	self:set_scroll_state()
+end
 
-	local show_scrollbar = (h - self:scroll_panel():h()) > 0.5
+function ScrollablePanelModified:set_scroll_state()
+	local show_scrollbar = (self:canvas():h() - self:scroll_panel():h()) > 0.5
+
+	--Weird bug, y and h are basically "nan" if I don't set them here.
+	self._scroll_rect:set_y(0)
+	self._scroll_rect:set_h(self._scroll_bar:h())
+
 	if not show_scrollbar then
 		self._scroll_bar:set_alpha(0)
 		self._scroll_bar:set_visible(false)

@@ -61,7 +61,7 @@ function Menu:AlignItemsNormal()
                 max_h = math.max(max_h, panel:bottom())
             end
         end
-    end
+	end
     self:AlignItemsPost(max_h, prev_item)
 end
 

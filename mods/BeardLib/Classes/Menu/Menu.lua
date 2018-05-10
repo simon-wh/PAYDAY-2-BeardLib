@@ -28,6 +28,7 @@ function Menu:Init(params)
         padding = 0, 
         scroll_width = self.scrollbar == false and 0 or self.scroll_width, 
 		hide_shade = true,
+		debug = self.debug,
         color = self.scroll_color or self.highlight_color,
         hide_scroll_background = self.hide_scroll_background,
         scroll_speed = self.scroll_speed
@@ -91,6 +92,7 @@ function Menu:_SetSize(w, h)
 	w = w or self.w
 	h = h or self.orig_h or self.h
 	h = math.clamp(h, self.min_height or 0, self.max_height or h)
+
 	self.panel:set_size(w, h)
 	self:SetScrollPanelSize()
     self.w, self.h = self.panel:size()
@@ -111,12 +113,13 @@ function Menu:UpdateCanvas(h)
     if not self:alive() then
         return
 	end
+
 	if not self.auto_height and h < self._scroll:scroll_panel():h() then
 		h = self._scroll:scroll_panel():h()
 	end
 	
 	self._scroll:set_canvas_size(nil, h)
-	self:_SetSize(nil, self.auto_height and self.items_panel:h() + self:TextHeight() or nil, true)
+	self:_SetSize(nil, self.auto_height and self.items_panel:h() + self:TextHeight() or nil)
 end
 
 function Menu:KeyPressed(o, k)
