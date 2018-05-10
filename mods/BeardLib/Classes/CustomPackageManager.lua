@@ -4,7 +4,7 @@ CustomPackageManager = CustomPackageManager or {}
 
 local C = CustomPackageManager
 C.custom_packages = {}
-C.ext_convert = {dds = "texture", png = "texture", tga = "texture", jpg = "texture"}
+C.ext_convert = {dds = "texture", png = "texture", tga = "texture", jpg = "texture", bik = "movie"}
 
 function C:RegisterPackage(id, directory, config)
     local func_name = "CustomPackageManager:RegisterPackage"

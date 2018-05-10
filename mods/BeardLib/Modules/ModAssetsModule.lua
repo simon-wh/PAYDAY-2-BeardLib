@@ -49,7 +49,9 @@ function ModAssetsModule:Load()
 	end
 
 	if self._config.version_file then
-		self.version_file = ModCore:GetRealFilePath(self._config.version_file, self) or Path:Combine(self.install_directory, self.folder_names[1], self._default_version_file)
+		self.version_file = ModCore:GetRealFilePath(self._config.version_file, self)
+	elseif not self._config.version then
+		self.version_file = Path:Combine(self.install_directory, self.folder_names[1], self._default_version_file)
 	end
 
     self.version = 0
@@ -70,7 +72,7 @@ function ModAssetsModule:Load()
 end
 
 function ModAssetsModule:GetMainInstallDir()
-    return self.version_file and Path:GetDirectory(self.version_file) or Path:Combine(self.install_directory, self.folder_names[1])
+    return Path:Combine(self.install_directory, self.folder_names[1])
 end
 
 function ModAssetsModule:RegisterAutoUpdateCheckHook()
