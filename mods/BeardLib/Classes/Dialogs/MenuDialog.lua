@@ -82,7 +82,7 @@ function MenuDialog:CreateCustomStuff(params)
             name = "No",
             text = params.no,
             reachable = true,
-            on_callback = ClassClbk(self, "hide")
+            on_callback = ClassClbk(self, "hide", false)
         })
     end
 end

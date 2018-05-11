@@ -217,13 +217,13 @@ elseif F == "playermovement" then
 elseif F == "dialogmanager" then
 	Hooks:PreHook(DialogManager, "queue_dialog", "BeardLibQueueDialogFixIds", function(self, id)
 		if id and not managers.dialog._dialog_list[id] then
-			local buffer = CustomSoundManager:GetLoadedBuffer(id)
-			if buffer then
+			local sound = CustomSoundManager:GetSound(id)
+			if sound then
 				managers.dialog._dialog_list[id] = {
 					id = id,
 					sound = id,
-					string_id = buffer.subtitle_id,
-					priority = buffer.priority and tonumber(buffer.priority) or tweak_data.dialog.DEFAULT_PRIORITY
+					string_id = sound.subtitle_id,
+					priority = sound.priority and tonumber(sound.priority) or tweak_data.dialog.DEFAULT_PRIORITY
 				}
 			end
 		end
