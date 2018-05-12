@@ -36,16 +36,18 @@ function ContextMenu:init(owner, layer)
         layer = 4, 
         padding = 0.0001,
         count_invisible = true,
-        scroll_width = owner.scrollbar == false and 0 or self.parent.scroll_width or 12,
+        scroll_width = owner.context_scroll_width or 10,
         hide_shade = true, 
         color = owner.scroll_color or owner.highlight_color,
         scroll_speed = owner.scroll_speed or 48
     })
-    self._my_items = {}
+	self._my_items = {}
+	self._best_itmes = {}
     self._item_panels = {}
     self._visible_items = {}
 	self.items_panel = self._scroll:canvas()
-	
+	self._widest_boi = self.owner:Panel():w() * self.owner.control_slice
+
 	self._update_id = "ContextMenuUpdate"..tostring(self)
 	BeardLib:AddUpdater(self._update_id, ClassClbk(self, "Update"), true)
 
@@ -82,21 +84,24 @@ function ContextMenu:CreateItems()
 	local is_lower = self.owner.items_lowercase
 	local is_pretty = self.owner.items_pretty
 
+	self._widest_boi = self.owner:Panel():w() * self.owner.control_slice
+
 	for k, context_item in pairs(self._my_items) do
 		local item, text = context_item.item, context_item.text
 		if text then
 			local panel = self.items_panel:panel({
 				name = text,
+				halign = "grow",
 				h = font_size,
 				visible = false,
 				y = (k - 1) * font_size,
 			})
 			panel:script().context_item = item
 			text = is_loc and loc:text(text) or text
-			panel:text({
+			local best = table.contains(self._best_itmes, context_item)
+			local t = panel:text({
 				name = "text",
 				text = (is_upper and text:upper()) or (is_lower and text:lower()) or (is_pretty and text:pretty(true)) or text,
-				w = panel:w() - offset_sides,
 				h = panel:h(),
 				x = offset,
 				vertical = "center",
@@ -105,15 +110,17 @@ function ContextMenu:CreateItems()
 				font = self.owner.font,
 				font_size = font_size - 2
 			})
+			local _,_,w,_ = t:text_rect()
+			t:set_w(w)
+
 			panel:rect({
 				name = "bg",
 				color = self.owner.background_color,
-				alpha = 0,
-				h = self.type_name == "Group" and self.size,
-				halign = self.type_name ~= "Group" and "grow",
-				valign = self.type_name ~= "Group" and "grow",
+				halign = "grow",
+				valign = "grow",
 				layer = 0
 			})
+			self._widest_boi = math.max(self._widest_boi, t:w() + offset_sides)
 			table.insert(self._item_panels, panel)
 		end
     end
@@ -134,27 +141,38 @@ function ContextMenu:hide()
 end
 
 function ContextMenu:reposition()
-    local size = (self.owner.font_size or self.owner.size)
-    local bottom_h = (self.menu._panel:world_bottom() - self.owner.panel:world_bottom()) 
-	local top_h = (self.owner.panel:world_y() - self.menu._panel:world_y())
-    local items_h = (#self._my_items * size) + (self.owner.searchbox and self.owner.size or 0)
-    local normal_pos = items_h <= bottom_h or bottom_h >= top_h
-    if (normal_pos and items_h > bottom_h) or (not normal_pos and items_h > top_h) then
-        self.panel:set_h(math.min(bottom_h, top_h))
-    else
-        self.panel:set_h(items_h)
-    end
-    self.panel:set_world_right(self.owner.panel:world_right())
+	local size = (self.owner.font_size or self.owner.size)
+	local offset_y = self.owner.context_screen_offset_y or 32
+    local bottom_h = (self.menu._panel:world_bottom() - self.owner.panel:world_bottom()) - offset_y 
+	local top_h = (self.owner.panel:world_y() - self.menu._panel:world_y()) - offset_y
+	local items_h = (#self._my_items * size) + (self.owner.searchbox and self.owner.size or 0)
+	
+	local normal_pos
+	local best_h = items_h
+
+	if items_h < bottom_h then
+		normal_pos = true
+	elseif items_h < top_h then
+		normal_pos = false
+	elseif bottom_h >= top_h then
+		normal_pos = true
+		best_h = bottom_h
+	else
+		normal_pos = false
+		best_h = top_h
+	end
+
+	self.panel:set_size(self._widest_boi, best_h)
+	self.panel:set_world_right(self.owner.panel:world_right())
+
     if normal_pos then
         self.panel:set_world_y(self.owner.panel:world_bottom())
     else
         self.panel:set_world_bottom(self.owner.panel:world_y())
-    end
+	end
+	
     self._scroll:panel():set_y(self.owner.searchbox and self.owner.size or 0) 
-    self._scroll:set_size(self.panel:w(), self.panel:h() - (self.owner.searchbox and self.owner.size or 0))
-
-    self._scroll:panel():child("scroll_up_indicator_arrow"):set_top(6 - self._scroll:y_padding())
-    self._scroll:panel():child("scroll_down_indicator_arrow"):set_bottom(self._scroll:panel():h() - 6 - self._scroll:y_padding())
+    self._scroll:set_size(self._widest_boi, self.panel:h() - (self.owner.searchbox and self.owner.size or 0))
 
     self._scroll:update_canvas_size()
 end
@@ -238,6 +256,7 @@ function ContextMenu:Update(t, dt)
 		local search = self:textbox() and self:textbox():Value() or ""
 
 		self._my_items = {}
+		self._best_itmes = {}
 		for _, item in pairs(self.owner.items) do
 			local text = item
 			if type(text) == "table" then
@@ -250,6 +269,7 @@ function ContextMenu:Update(t, dt)
 				local match = context_item.text:find(search)
 				if match then
 					table.insert(self._my_items, 1, context_item)
+					table.insert(self._best_itmes, context_item)
 				else
 					table.insert(self._my_items, context_item)
 				end
@@ -271,6 +291,13 @@ function ContextMenu:update_search(force_show)
 		return
 	end
 
+	local search = self:textbox() and self:textbox():Value() or ""
+	if self._last_search and search == self._last_search then
+		return
+	end
+
+	self._last_search = search
+
 	if #self._my_items == 0 then
 		self._do_search = 0
 	else
@@ -282,8 +309,13 @@ function ContextMenu:HightlightItem(item, highlight)
     if self._highlighting and self._highlighting ~= item and highlight then
         self:HightlightItem(self._highlighting, false)
         self._highlighting = item
-    end
-    play_color(item:child("bg"), highlight and self.owner.highlight_color or self.owner.background_color or Color.white)
+	end
+	local color = highlight and self.owner.highlight_color or self.owner.background_color or Color.white
+	if self.owner.animate_colors then
+		play_color(item:child("bg"), color)
+	else
+		item:child("bg"):set_color(color)
+	end
 end
 
 function ContextMenu:MouseMoved(x, y)
