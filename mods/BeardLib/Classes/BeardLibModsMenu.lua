@@ -142,15 +142,20 @@ function BeardLibModsMenu:AddMod(mod, framework)
     self._list:SetScrollSpeed(mod_item:Height())
     local text = function(t, opt)
         return mod_item:Divider(table.merge({text_vertical = "top", text = t, localized = false}, opt))
-    end
+	end
     if show_images then
-        local img = mod._config.image
+		local img = mod._config.image
+		local auto_color = img == nil
+		if not auto_color and mod._config.auto_image_color then
+			auto_color = true
+		end
         img = img and DB:has(texutre_ids, img:id()) and img or nil
         local image = mod_item:Image({
             name = "Image",
             w = 100,
-            h = 100,
-            foreground = (not mod._config.auto_image_color or not mod._config.image) and Color.white or nil,
+			h = 100,
+			foreground = Color.white,
+			auto_foreground = auto_color,
             count_as_aligned = true,
             texture = img or "guis/textures/pd2/none_icon",
             position = "CenterTop"
