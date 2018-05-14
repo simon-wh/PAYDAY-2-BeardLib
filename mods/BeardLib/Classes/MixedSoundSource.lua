@@ -2,7 +2,7 @@ if not XAudio then
 	return
 end
 
-MixedSoundSource = MixedSoundSource or class(XAudio)
+MixedSoundSource = MixedSoundSource or class(XAudio.Source)
 function MixedSoundSource:init(queue, engine_source, clbk, cookie)
 	MixedSoundSource.super.init(self)
 	self._engine_source = engine_source
