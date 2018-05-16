@@ -109,7 +109,7 @@ function C:LoadPackageConfig(directory, config)
 					local file_path = child.full_path or Path:Combine(directory, config.file_path or path)
 					local file_path_ext = file_path.."."..typ
                     if FileIO:Exists(file_path_ext) then
-						if (not DB:has(ids_ext, ids_path) or child.force) then
+						if (child.force or not DB:has(ids_ext, ids_path)) then
 							if ids_ext == UNIT_IDS then
 								local all = child.include_all
 								local most = all or child.include_most

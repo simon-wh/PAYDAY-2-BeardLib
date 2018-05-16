@@ -3,10 +3,11 @@ if not XAudio then
 end
 
 MixedSoundSource = MixedSoundSource or class(XAudio.Source)
-function MixedSoundSource:init(queue, engine_source, clbk, cookie)
+function MixedSoundSource:init(sound_id, queue, engine_source, clbk, cookie)
 	MixedSoundSource.super.init(self)
 	self._engine_source = engine_source
 	self._callback = clbk
+	self._sound_id = sound_id
 	self._queue = queue
 	self._cookie = cookie
 	self._closed = false
@@ -139,4 +140,20 @@ function MixedSoundSource:update(t, dt)
 			self:next_in_queue()
 		end
 	end
+end
+
+function MixedSoundSource:engine_source()
+	return self._engine_source
+end
+
+function MixedSoundSource:queue()
+	return self._queue
+end
+
+function MixedSoundSource:cookie()
+	return self._cookie
+end
+
+function MixedSoundSource:sound_id()
+	return self._sound_id
 end

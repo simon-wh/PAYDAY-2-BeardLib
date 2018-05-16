@@ -31,24 +31,17 @@ function C:CheckSoundID(sound_id, engine_source, clbk, cookie)
     local stop_ids = self.stop_ids[sound_id]
 	if stop_ids then
 		for _, stop_id in pairs(stop_ids) do
-			local buffer = self:GetLoadedBuffer(stop_id, prefixes, true)
-			if buffer then
-				local new_sources = {}
-				for _, tbl in pairs(self.sources) do
-					local source = tbl.source
-					if source and not source:is_closed() then
-						local sndbuff = source._buffer
-						if sndbuff then
-							if sndbuff == buffer then
-								source:close()
-							else
-								table.insert(new_sources, tbl)
-							end
-						end
+			local new_sources = {}
+			for _, source in pairs(self.sources) do
+				if source and not source:is_closed() then
+					if source:sound_id() == stop_id then
+						source:close()
+					else
+						table.insert(new_sources, source)
 					end
 				end
-				self.sources = new_sources
 			end
+			self.sources = new_sources
 		end
         return nil
     end
@@ -206,7 +199,7 @@ function C:AddSource(sound_id, prefixes, engine_source, clbk, cookie)
 		end
 
 		if #queue > 0 then
-			local source = MixedSoundSource:new(queue, engine_source, clbk, cookie)
+			local source = MixedSoundSource:new(sound_id, queue, engine_source, clbk, cookie)
 			if sound.loop then
 				source:set_looping(sound.loop)
 			end
