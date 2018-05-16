@@ -84,6 +84,9 @@ function SoundsModule:ReadSounds(data, prev_dir)
 					v.queue = queue
 					CustomSoundManager:AddSoundID(v)
 				elseif meta == stop or meta == Stop then
+					if v.sound_id then
+						CustomSoundManager:AddStop(v.id, v.sound_id)
+					end
 					for _, sound in ipairs(v) do
 						if type(sound) == "table" and (sound._meta == sound_s or sound._meta == Sound_s) then
 							CustomSoundManager:AddStop(v.id, sound.id)
