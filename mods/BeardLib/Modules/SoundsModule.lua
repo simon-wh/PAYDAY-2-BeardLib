@@ -18,6 +18,8 @@ local redirect_s = "redirect"
 local Redirect_s = "Redirect"
 local queue_s = "queue"
 local Queue_s = "Queue"
+local stop = "stop"
+local Stop = "Stop"
 
 function SoundsModule:ReadSounds(data, prev_dir)
 	if not XAudio then
@@ -81,6 +83,12 @@ function SoundsModule:ReadSounds(data, prev_dir)
 					end
 					v.queue = queue
 					CustomSoundManager:AddSoundID(v)
+				elseif meta == stop or meta == Stop then
+					for _, sound in ipairs(v) do
+						if type(sound) == "table" and (sound._meta == sound_s or sound._meta == Sound_s) then
+							CustomSoundManager:AddStop(v.id, sound.id)
+						end
+					end
 				end
 			end
 		end

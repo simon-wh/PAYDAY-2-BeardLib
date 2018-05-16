@@ -102,15 +102,21 @@ function C:StoreFloat(sound_id, stop_id)
 	end
 end
 
+function C:AddStop(stop_id, sound_id)
+	self.stop_ids[stop_id] = self.stop_ids[stop_id] or {}
+	table.insert(self.stop_ids[stop_id], sound_id)
+end
+
 function C:AddSoundID(data)
 	local sound_id, stop_id = data.id, data.stop_id
     if not data.dont_store_float then
 		self:StoreFloat(sound_id, stop_id)
 	end
+
 	if stop_id then
-		self.stop_ids[stop_id] = self.stop_ids[stop_id] or {}
-		table.insert(self.stop_ids[stop_id], sound_id)
+		self:AddStop(stop_id, sound_id)
 	end
+
 	for _, prefix in pairs(data.prefixes or default_prefix) do
 		self.sound_ids[prefix] = self.sound_ids[prefix] or {}
 		self.sound_ids[prefix][sound_id] = data
