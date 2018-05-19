@@ -188,7 +188,8 @@ function ContextMenu:show()
     end
     self:reposition()
     self.panel:show()
-    self:update_search()
+	self:update_search()
+	self.menu:CloseLastList()
     self.menu._openlist = self
 end
 

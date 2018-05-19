@@ -234,6 +234,12 @@ function MenuUI:RunToggleClbk()
     end           
 end
 
+function MenuUI:CloseLastList()
+	if self._openlist then
+		self._openlist:hide()
+	end
+end
+
 function MenuUI:CheckOpenedList()
 	if self._openlist and not self._openlist.parent:Enabled() then
 		self._openlist:hide()
