@@ -263,7 +263,22 @@ function MenuUI:Update()
     self._old_y = y
     if self._showing_help and (not alive(self._showing_help) or not self._showing_help:MouseInside(x, y)) then
         self:HideHelp()
-    end
+	end
+	if self._highlighted and not alive(self._highlighted) then
+		self:UnHighlight()
+		return
+	end
+end
+
+function MenuUI:UnHighlight()
+	self._highlighted = nil
+	self:SetPointer()
+end
+
+function MenuUI:SetPointer(state)
+	if managers.mouse_pointer.set_pointer_image then
+		managers.mouse_pointer:set_pointer_image(state or "arrow")
+	end
 end
 
 function MenuUI:KeyReleased(o, k)

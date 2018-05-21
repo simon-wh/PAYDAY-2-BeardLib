@@ -191,19 +191,19 @@ function Menu:MousePressed(button, x, y)
     return false
 end
 
+function Menu:SetPointer(state)
+	self.menu:SetPointer(state)
+end
+
 function Menu:MouseMoved(x, y)
     if self:Enabled() and self:MouseFocused(x, y) then
-        local _, pointer = self._scroll:mouse_moved(nil, x, y) 
+		local _, pointer = self._scroll:mouse_moved(nil, x, y)
         if pointer then
             self:CheckItems()
-            if managers.mouse_pointer.set_pointer_image then
-                managers.mouse_pointer:set_pointer_image(pointer)
-            end
+			self:SetPointer(pointer)
             return true
-        else
-            if managers.mouse_pointer.set_pointer_image then
-                managers.mouse_pointer:set_pointer_image("arrow")
-            end
+		else
+			self:SetPointer()
         end
         for _, item in pairs(self._visible_items) do
             if item:MouseMoved(x, y) then
@@ -228,8 +228,8 @@ end
 
 function Menu:MouseReleased(button, x, y)
     self._scroll:mouse_released(button, x, y)
-    if not self.menu._highlighted then
-        managers.mouse_pointer:set_pointer_image("arrow")
+	if not self.menu._highlighted then
+		self:SetPointer()
     end
     for _, item in pairs(self._my_items) do
         if item:MouseReleased(button, x, y) then
@@ -391,8 +391,12 @@ function Menu:RemoveItem(item)
 
     if item._list then
         item._list:Destroy()
-    end
-    
+	end
+	
+	if item == self.menu._highlighted then
+		self.menu:UnHighlight()
+	end
+	
     table.delete(self._reachable_items, item)
     table.delete(self._my_items, item)
     table.delete(self._adopted_items, item)
