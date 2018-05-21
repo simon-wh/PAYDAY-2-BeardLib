@@ -128,7 +128,7 @@ function BaseItem:WorkParams(params)
 	self:WorkParam("slider_color", self.accent_color)
 	self:WorkParam("border_color", self.accent_color)
 	self:WorkParam("line_color", self.accent_color)
-	self:WorkParam("ignore_align", self.override_panel)
+	self.ignore_align = NotNil(self.ignore_align, self.override_panel)
 	self:WorkParam("localized")
 	self:WorkParam("help_localized", self.localized)
 	self:WorkParam("animate_colors")
@@ -477,7 +477,7 @@ function BaseItem:SetValue(value, run_callback)
 end
 
 function BaseItem:MouseCheck(press)
-	if not self:alive() or not self.enabled or (press and self.menu._highlighted ~= self) then
+	if not self:alive() or not self.enabled or not self.visible or not self.should_render or (press and self.menu._highlighted ~= self) then
 		return false
 	end
 	return not self.divider_type, true

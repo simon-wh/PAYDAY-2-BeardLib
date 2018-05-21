@@ -129,16 +129,6 @@ function ScrollablePanelModified:mouse_moved(button, x, y)
 		return true, "grab"
 	elseif alive(self._scroll_bar) and self._scroll_bar:visible() and self._scroll_bar:inside(x, y) then
 		return true, "hand"
-	elseif self:panel():child("scroll_up_indicator_arrow"):inside(x, y) then
-		if self._pressing_arrow_up then
-			self:perform_scroll(self._scroll_speed * 0.1, 1)
-		end
-		return true, "link"
-	elseif self:panel():child("scroll_down_indicator_arrow"):inside(x, y) then
-		if self._pressing_arrow_down then
-			self:perform_scroll(self._scroll_speed * 0.1, -1)
-		end
-		return true, "link"
 	end
 end
 
@@ -169,10 +159,10 @@ function ScrollablePanelModified:set_scroll_state()
 
 	if not show_scrollbar then
 		self._scroll_bar:set_alpha(0)
-		self._scroll_bar:set_visible(false)
+		self._scroll_bar:hide()
 	else
 		self._scroll_bar:set_alpha(1)
-		self._scroll_bar:set_visible(true)
+		self._scroll_bar:show()
 		self:_set_scroll_indicator()
 		self:_check_scroll_indicator_states()
 	end
