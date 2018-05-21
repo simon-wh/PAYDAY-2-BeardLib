@@ -210,3 +210,11 @@ function table.remove_key(tbl, key)
         tbl[key] = nil
     end
 end
+
+--like table delete only allows key values(doesn't force table.remove which accepts only indices)
+function table.delete_value(tbl, value)
+	local key = table.get_key(tbl, value)
+	if key then
+		table.remove_key(tbl, key)
+	end
+end
