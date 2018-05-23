@@ -221,5 +221,6 @@
 		<value_node value="CustomSound"/>
 		<value_node value="ExecuteWithCode"/>
 		<value_node value="OverrideInstigator"/>
+		<value_node value="XAudio"/>
 	</mission_elements>
 </table>
