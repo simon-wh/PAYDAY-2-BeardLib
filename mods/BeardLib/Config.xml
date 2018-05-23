@@ -38,7 +38,7 @@
 			<hook source_file="lib/managers/mission/elementvehiclespawner" file="Fixes.lua"/>
 			<hook source_file="lib/managers/mission/elementinteraction" file="Fixes.lua"/>
 			<hook source_file="lib/units/beings/player/playermovement" file="Fixes.lua"/>
-			<hook source_file="lib/units/weapons/newraycastweaponbase" file="Fixes.lua"/>
+			<hook source_file="lib/units/weapons/raycastweaponbase" file="Fixes.lua"/>
 			<hook source_file="lib/managers/menu/crewmanagementgui" file="Fixes.lua"/>
 			<hook source_file="lib/managers/weaponfactorymanager" file="Fixes.lua"/>
 			<hook source_file="lib/managers/blackmarketmanager" file="Fixes.lua"/>

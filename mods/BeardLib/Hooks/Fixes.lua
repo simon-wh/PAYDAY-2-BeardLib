@@ -161,7 +161,7 @@ elseif F == "coremenuitemslider" then
             row_item.gui_slider_text:set_text(self:show_value() and self:value_string() or string.format("%.0f", self:percentage()) .. "%")
         end
     end)
-elseif F == "newraycastweaponbase" then
+elseif F == "raycastweaponbase" then
     if RaycastWeaponBase._soundfix_should_play_normal then
         return --Don't run if fix installed.
     end
