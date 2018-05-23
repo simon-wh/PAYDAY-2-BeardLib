@@ -1,12 +1,12 @@
 BeardLib.Builders = {}
-_G.utils = BeardLib.Utils
+_G.builders = BeardLib.Builders
 
 BeardLib.Builders.StringBuilder = {}
 _G.string_builder = BeardLib.Builders.StringBuilder
 local StringBuilder = BeardLib.Builders.StringBuilder
 
 function StringBuilder:newStringBuilder(string)
-    self.string = string or ""
+    self.string = tostring(string) or ""
     return self
 end
 
@@ -56,10 +56,10 @@ end
 --[[ local test = StringBuilder:newStringBuilder("number 15\n")
     :append("burger king foot lettuce\n")
     :append("the last thing you'd want")
-    :append("in your burger king\n")
-    :append(" is someone's foot fungus")
-    :insert(98, "old meme")
-    :delete(106)
+    :append(" in your burger king\n")
+    :append("is someone's foot fungus")
+    :insert(95, "old meme")
+    :delete(103)
     :build()
 
 log("BEARDLIB: " .. tostring(test)) ]]
