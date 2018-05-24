@@ -281,6 +281,21 @@ function string.key(str)
     return tostring(key)
 end
 
+--As dumb as it is, it's the only way I found to make it work.
+function math.rot_to_quat(rot)
+	local t = ScriptSerializer:to_custom_xml({x = rot})
+	local quad = {}
+	for x in string.gmatch(t, "%d[%d.,]*") do
+		table.insert(quad, x)
+	end
+	return quad
+end
+
+function math.quat_to_rot(x, y, z, w)
+	local t = ScriptSerializer:from_custom_xml('<table x="'..x.." "..y.." "..z.." "..w..'"/>')
+	return t.x
+end
+
 function math.EulerToQuarternion(x, y, z)
     local quad = {
         math.cos(z / 2) * math.cos(y / 2) * math.cos(x / 2) + math.sin(z / 2) * math.sin(y / 2) * math.sin(x / 2),

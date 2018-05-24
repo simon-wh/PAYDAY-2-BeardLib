@@ -30,24 +30,25 @@ overwrite_meta_function(World, "spawn_unit", function(self, unit_name, ...)
 	return self:_spawn_unit(unit_name, ...)
 end)
 
-local ids_element = Idstring("element")
+local ids_effect = Idstring("effect")
+local key_effect = ids_effect:key()
 overwrite_meta_function(World:effect_manager(), "spawn", function(self, data, ...)
-	if Global.fm.added_files[ids_element] then
-		local file = Global.fm.added_files[ids_element][data.effect:key()]
+	if Global.fm.added_files[key_effect] then
+		local file = Global.fm.added_files[key_effect][data.effect:key()]
 		if file then
-			FileManager:LoadAsset(ids_element, data.effect, file)
+			FileManager:LoadAsset(ids_effect, data.effect, file)
 		end
 	end
 	return self:_spawn(data, ...)
 end)
 
---Kept for the future, atm looking at massunit's binary I'm mostly confused by the rotation of it.
 local ids_massunit = Idstring("massunit")
+local key_massunit = ids_massunit:key()
 overwrite_meta_function(MassUnitManager, "load", function(self, path, ...)
-	if Global.fm.added_files[ids_massunit] then
-		local file = Global.fm.added_files[ids_massunit][path:id()]
+	if Global.fm.added_files[key_massunit] then
+		local file = Global.fm.added_files[key_massunit][path:key()]
 		if file then
-			FileManager:LoadAsset(ids_element, path, file)
+			FileManager:LoadAsset(ids_massunit, path, file)
 		end
 	end
 	return self:_load(path, ...)
