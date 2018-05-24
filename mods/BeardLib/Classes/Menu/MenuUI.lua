@@ -210,6 +210,7 @@ function MenuUI:Enable()
 		id = self._mouse_id,
         menu_ui_object = self
 	})
+	self:RunToggleClbk()
 end
 
 function MenuUI:Disable()
@@ -225,7 +226,8 @@ function MenuUI:Disable()
 	if self._highlighted then self._highlighted:UnHighlight() end
     if self._openlist then self._openlist:hide() end
     managers.mouse_pointer:remove_mouse(self._mouse_id)
-    BeardLib.managers.menu_ui:close_menu_event()
+	BeardLib.managers.menu_ui:close_menu_event()
+	self:RunToggleClbk()
 end
 
 function MenuUI:RunToggleClbk()
@@ -248,11 +250,9 @@ end
 
 function MenuUI:Toggle()
     if not self:Enabled() then
-        self:enable()
-        self:RunToggleClbk()
+        self:Enable()
     elseif self:ShouldClose() then
-        self:disable()
-        self:RunToggleClbk()
+        self:Disable()
     end
 end
 
