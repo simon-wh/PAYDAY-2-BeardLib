@@ -33,8 +33,8 @@ function MusicManager:stop_custom()
 	end
 end
 
-local orig_post = CoreMusicManager.post_event
-function CoreMusicManager:post_event(name, ...)
+local orig_post = MusicManager.post_event
+function MusicManager:post_event(name, ...)
 	if name and Global.music_manager.current_event ~= name then
 		if not self._skip_play then
 			if not self:attempt_play(nil, name, true) then
