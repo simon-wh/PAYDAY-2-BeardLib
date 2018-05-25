@@ -202,6 +202,18 @@ function XML:Clean(tbl, shallow)
     return tbl
 end
 
+--Inserts a node properly so script serializer won't think the key and first index are the same thing.
+function XML:InsertNode(tbl, node)
+	local nodes = self:GetMetaIndices(tbl, node._meta)
+	for _, k in pairs(nodes) do
+		if #nodes == 1 and tonumber(k) == nil then
+			table.insert(tbl, tbl[k])
+			tbl[k] = nil
+		end
+	end
+	table.insert(tbl, node)
+end
+
 --allows both key and index to be removed, useful for tables cleaned by XML:Clean
 function table.remove_key(tbl, key)
     if type(key) == "number" and #tbl <= key then
