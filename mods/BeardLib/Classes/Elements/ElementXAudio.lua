@@ -29,7 +29,7 @@ function XAudioInitializer:PlaySound(data)
     end
 
     if self._sound_sources[data.name] then
-        self._sound_buffers[data.name]:close(true)
+        self._sound_buffers[data.name]:close()
         self._sound_sources[data.name]:close()
         self._sound_sources[data.name] = nil
     end
