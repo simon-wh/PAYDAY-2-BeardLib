@@ -188,6 +188,7 @@ function ElementXAudioOperator:init(...)
 end
 
 function ElementXAudioOperator:client_on_executed(...)
+	self:on_executed(...)
 end
 
 function ElementXAudioOperator:on_executed(instigator)
