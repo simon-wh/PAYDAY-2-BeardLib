@@ -1,8 +1,8 @@
 ModAssetsModule._providers.modworkshop = {}
 local mws = ModAssetsModule._providers.modworkshop
-mws.check_url = "https://api.modwork.shop/api.php?command=CompareVersion&did=$id$&vid=$version$&steamid=$steamid$&token=Je3KeUETqqym6V8b5T7nFdudz74yWXgU"
-mws.get_files_url = "https://api.modwork.shop/api.php?command=AssocFiles&did=$id$&steamid=$steamid$&token=Je3KeUETqqym6V8b5T7nFdudz74yWXgU"
-mws.download_url = "https://api.modwork.shop/api.php?command=DownloadFile&fid=$fid$&steamid=$steamid$&token=Je3KeUETqqym6V8b5T7nFdudz74yWXgU"
+mws.check_url = "https://api.modwork.shop/api.php?command=CompareVersion&did=$id$&vid=$version$&token=Je3KeUETqqym6V8b5T7nFdudz74yWXgU"
+mws.get_files_url = "https://api.modwork.shop/api.php?command=AssocFiles&did=$id$&token=Je3KeUETqqym6V8b5T7nFdudz74yWXgU"
+mws.download_url = "https://api.modwork.shop/api.php?command=DownloadFile&fid=$fid$&token=Je3KeUETqqym6V8b5T7nFdudz74yWXgU"
 mws.page_url = "https://modwork.shop/$id$"
 function mws:check_func()
     local id = tonumber(self.id)
@@ -38,7 +38,7 @@ function mws:download_file_func()
     dohttpreq(get_files_url, function(data, id)
         local fid = string.split(data, '"')[1]
         if fid then
-            self:_DownloadAssets({fid = fid, steamid = self.steamid})
+            self:_DownloadAssets({fid = fid})
             if self.id then
                 Global.beardlib_checked_updates[self.id] = nil --check again later for hotfixes.
             end

@@ -12,7 +12,6 @@ if providers then
 end
 
 function ModAssetsModule:Load()
-    self.steamid = Steam:userid()
     self.id = self._config.id
 
     if self._config.provider then
