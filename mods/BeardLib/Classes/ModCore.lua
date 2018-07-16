@@ -31,18 +31,7 @@ function ModCore:init(config_path, load_modules)
 	
 	self:LoadConfigFile(config_path)
 	table.insert(BeardLib.Mods, self)
-	
-	self.Priority = self.Priority or self._config.priority
-
-	if self._config and not self._config.min_lib_ver or self._config.min_lib_ver <= BeardLib.Version then
-		if load_modules == nil or load_modules then
-			self:init_modules()
-		end
-	elseif self._config then
-		self:log("[ERROR] BeardLib version %s or above is required to run the mod.", tostring(self._config.min_lib_ver))
-		self._disabled = true
-        return
-	end
+	self:pre_init_modules(load_modules)
 end
 
 function ModCore:post_init(ignored_modules)
@@ -89,6 +78,18 @@ function ModCore:LoadConfigFile(path)
 
     self._clean_config = deep_clone(config)
     self._config = config
+end
+
+function ModCore:pre_init_modules(load_modules)
+	if self._config and not self._config.min_lib_ver or self._config.min_lib_ver <= BeardLib.Version then
+		if load_modules == nil or load_modules then
+			self:init_modules()
+		end
+	elseif self._config then
+		self:log("[ERROR] BeardLib version %s or above is required to run the mod.", tostring(self._config.min_lib_ver))
+		self._disabled = true
+        return
+	end
 end
 
 local load_first = {
