@@ -32,6 +32,8 @@ function ModCore:init(config_path, load_modules)
 	self:LoadConfigFile(config_path)
 	table.insert(BeardLib.Mods, self)
 	
+	self.Priority = self.Priority or self._config.priority
+
 	if self._config and not self._config.min_lib_ver or self._config.min_lib_ver <= BeardLib.Version then
 		if load_modules == nil or load_modules then
 			self:init_modules()

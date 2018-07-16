@@ -21,6 +21,9 @@ function Framework:init()
 end
 
 function Framework:Load()
+	table.sort(self._loaded_mods, function(a,b)
+        return a.Priority < b.Priority
+    end)
     local dirs = FileIO:GetFolders(self._directory)
     if dirs then
         for _, dir in pairs(dirs) do
@@ -41,9 +44,6 @@ function Framework:Load()
 end
 
 function Framework:RegisterHooks()
-    table.sort(self._loaded_mods, function(a,b)
-        return a.Priority < b.Priority
-    end)
     for _, mod in pairs(self._loaded_mods) do
         if not mod._disabled and mod._modules then
             for _, module in pairs(mod._modules) do
