@@ -67,7 +67,7 @@ function ModCore:LoadConfigFile(path)
     local config = ScriptSerializer:from_custom_xml(file:read("*all"))
 
     self.Name = config.name or tostring(table.remove(string.split(self.ModPath, "/")))
-	self.Priority = config.priority or self.Priority
+	self.Priority = tonumber(config.priority) or self.Priority
     if not self._disabled then
         if config.global_key then
             self.global = config.global_key
@@ -82,8 +82,10 @@ function ModCore:LoadConfigFile(path)
 end
 
 function ModCore:pre_init_modules(load_modules)
-	if (load_modules == nil or load_modules) and self._config and not self._config.min_lib_ver or self._config.min_lib_ver <= BeardLib.Version then
-		self:init_modules()
+	if self._config and not self._config.min_lib_ver or self._config.min_lib_ver <= BeardLib.Version then
+		if load_modules == nil or load_modules then
+			self:init_modules()
+		end
 	elseif self._config then
 		self:log("[ERROR] BeardLib version %s or above is required to run the mod.", tostring(self._config.min_lib_ver))
 		self._disabled = true
