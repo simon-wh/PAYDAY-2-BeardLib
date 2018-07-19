@@ -188,6 +188,13 @@ function table.script_merge(base_tbl, new_tbl)
                                 table.remove(base_tbl, index)
                             else
                                 base_tbl[index] = nil
+							end
+						elseif mode == "insert" then
+							for i, tbl in pairs(sub) do
+                                if type(tbl) == "table" and tonumber(i) then
+                                    table.insert(found_tbl, tbl)
+                                    break
+                                end
                             end
                         end
                     end
