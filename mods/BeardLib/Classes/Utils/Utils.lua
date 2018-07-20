@@ -790,6 +790,11 @@ function BeardLib.Utils:UrlEncode(str)
 end
 
 function BeardLib.Utils:ModExists(name)
+	local mod = self:FindMod(name)
+	return mod and mod:IsEnabled() or false
+end
+
+function BeardLib.Utils:ModLoaded(name)
 	return self:FindMod(name) ~= nil
 end
 
@@ -798,14 +803,6 @@ function BeardLib.Utils:FindMod(name)
         if mod.Name == name then
             return mod
         end
-    end
-    local add = BeardLib.managers.AddFramework:GetModByName(name)
-    if add then
-        return add
-    end
-    local map = BeardLib.managers.MapFramework:GetModByName(name)
-    if map then
-        return map
     end
     return nil
 end
