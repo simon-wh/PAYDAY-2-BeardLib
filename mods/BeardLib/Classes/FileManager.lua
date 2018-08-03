@@ -41,7 +41,7 @@ function fm:Process(ids_ext, ids_path, name_mt)
 	local mods = self.modded_files[k_ext] and self.modded_files[k_ext][k_path]
 	if mods then
 		for id, mdata in pairs(mods) do
-			if not mdata.clbk or mdata.clbk() then
+			if not mdata.use_clbk or mdata.use_clbk() then
 				if mdata.mode and not self.process_modes[mdata.mode] then
 					BeardLib:log("[ERROR] The process mode '%s' does not exist! Skipping...", data.mode)
 				else
