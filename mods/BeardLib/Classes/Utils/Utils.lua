@@ -589,7 +589,7 @@ function BeardLib.Utils:CleanOutfitString(str, is_henchman)
 			end
 		end
 
-		list.grenade = self:GetSpoofedGrenade(list.grenade)
+		--list.grenade = self:GetSpoofedGrenade(list.grenade)
 	end
 	return self:OutfitStringFromList(list, is_henchman)
 end
