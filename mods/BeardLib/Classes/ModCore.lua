@@ -35,8 +35,12 @@ function ModCore:init(config_path, load_modules)
 end
 
 function ModCore:post_init(ignored_modules)
-    if self._disabled then
+    if self._disabled or self._post_init_done then
         return
+	end
+
+	if self._core_class then
+		self._core_class:PreInit()
 	end
 
 	for _, module in pairs(self._modules) do
@@ -59,7 +63,8 @@ function ModCore:post_init(ignored_modules)
         if clbk then
             clbk()
         end
-    end
+	end
+	self._post_init_done = true
 end
 
 function ModCore:LoadConfigFile(path)
@@ -223,6 +228,7 @@ function ModCore:RegisterHook(source_file, file, type)
 	end
 end
 
+function ModCore:PreInit() end
 function ModCore:Init() end
 function ModCore:GetPath() return self.ModPath end
 function ModCore:Disabled() return self._disabled end

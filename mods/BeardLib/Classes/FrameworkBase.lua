@@ -17,13 +17,52 @@ function Framework:init()
 	BeardLib:RegisterFramework(self.type_name, self)
 	self._ignored_configs = {}
 	self._loaded_mods = {}
+	self._sorted_mods = {}
+	self._waiting_to_load = {}
+
+	Hooks:Add("BeardLibRequireHook", self.type_name.."_framework_require", function(post, file)
+		self:CheckModQueue(post, file)
+	end)
+
 	self:Load()
 	self:SortMods()
 	self:InitMods()
 end
 
+function Framework:CheckModQueue(post, file)
+	if #self._waiting_to_load == 0 or post == nil or file == nil then
+		return
+	end
+	local shortened = file
+	for part, _ in string.gmatch(file, "%w+") do
+		shortened = part
+	end
+	shortened = shortened:lower()
+
+	local next_queue = {}
+	local load = {}
+	local pre = not post
+	for _, mod in pairs(self._waiting_to_load) do
+		local config = mod._config
+		if (post and config.post_hook == shortened) or (pre and config.pre_hook == shortened) then
+			table.insert(load, mod)
+		else
+			table.insert(next_queue, mod)
+		end
+	end
+
+	for _, mod in pairs(load) do
+		mod:pre_init_modules(self.auto_init_modules)
+	end
+
+	self._waiting_to_load = next_queue
+end
+
 function Framework:SortMods()
-	table.sort(self._loaded_mods, function(a,b)
+	table.sort(self._sorted_mods, function(a,b)
+        return a.Priority < b.Priority
+	end)
+	table.sort(self._waiting_to_load, function(a,b)
         return a.Priority < b.Priority
 	end)
 end
@@ -49,14 +88,17 @@ function Framework:Load()
 end
 
 function Framework:InitMods()
-	for _, mod in pairs(self._loaded_mods) do
-		mod:pre_init_modules(self.auto_init_modules)
+	for _, mod in pairs(self._sorted_mods) do
+		local config = mod._config
+		if not config.post_hook and not config.pre_hook then
+			mod:pre_init_modules(self.auto_init_modules)
+		end
 	end
 end
 
 function Framework:RegisterHooks()
 	self:SortMods()
-    for _, mod in pairs(self._loaded_mods) do
+    for _, mod in pairs(self._sorted_mods) do
         if not mod._disabled and mod._modules then
             for _, module in pairs(mod._modules) do
                 if module.DoRegisterHook and not module.Registered then
@@ -107,6 +149,11 @@ end
 
 function Framework:AddMod(dir, mod)
 	self._loaded_mods[dir] = mod
+	table.insert(self._sorted_mods, mod)
+	local config = mod._config
+	if config and (config.post_hook or config.pre_hook) then
+		table.insert(self._waiting_to_load, mod)
+	end
 end
 
 function Framework:RemoveMod(dir)

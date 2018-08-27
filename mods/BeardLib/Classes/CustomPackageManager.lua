@@ -78,7 +78,7 @@ local SEQ_MANAGER_IDS = SEQ_MANAGER:id()
 local COOKED_PHYSICS_IDS = COOKED_PHYSICS:id()
 
 local CP_DEFAULT = BeardLib:GetPath() .. "Assets/units/default_cp.cooked_physics"
-function C:LoadPackageConfig(directory, config)
+function C:LoadPackageConfig(directory, config, mod)
     if not (SystemFS and SystemFS.exists) then
         BeardLib:log("[ERROR] SystemFS does not exist! Custom Packages cannot function without this! Do you have an outdated game version?")
         return
@@ -89,7 +89,14 @@ function C:LoadPackageConfig(directory, config)
 		return
 	end
 
-    if config.load_clbk and not config.load_clbk() then
+	if mod then
+		local use_clbk = config.use_clbk and mod:StringToCallback(config.use_clbk) or nil
+		if use_clbk and not use_clbk(config) then
+			return
+		end
+	end
+	
+    if config.load_clbk and not config.load_clbk(config) then
         return
 	end
 	

@@ -200,11 +200,22 @@ Hooks:Register("BeardLibCreateCustomWeaponMods")
 Hooks:Register("BeardLibPreProcessScriptData")
 Hooks:Register("BeardLibCreateCustomWeapons")
 Hooks:Register("BeardLibSetupUnloadPackages")
+Hooks:Register("BeardLibRequireHook")
 Hooks:Register("BeardLibCreateCustomMenus")
 Hooks:Register("BeardLibProcessScriptData")
 Hooks:Register("BeardLibSetupInitFinalize")
 Hooks:Register("GameSetupPauseUpdate")
 Hooks:Register("SetupInitManagers")
+
+--Wish I didn't have to do this. But sadly I don't think there's a hook for this.
+local OrigRequire = require
+BeardLib.OrigRequire = OrigRequire
+function require(...)
+	Hooks:Call("BeardLibRequireHook", false, ...)
+	local res = OrigRequire(...)
+	Hooks:Call("BeardLibRequireHook", true, ...)
+	return res
+end
 
 self:Init()
 
