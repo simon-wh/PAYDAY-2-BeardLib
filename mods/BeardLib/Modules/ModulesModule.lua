@@ -9,7 +9,7 @@ function ModulesModule:Load(config, prev_dir)
 			local module_path = dir and Path:Combine(dir, moodule.file) or moodule.file
 			
 			local mod_path = self._mod:GetPath()
-    		local hook_file = Path:Combine(mod_path, module_path)
+			local hook_file = Path:Combine(mod_path, module_path)
 			
 			dofile(hook_file)
 			local hook_object_name = moodule.name
