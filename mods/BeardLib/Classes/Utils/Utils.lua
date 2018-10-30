@@ -288,6 +288,10 @@ function string.key(str)
     return tostring(key)
 end
 
+function string.escape_special(str)
+    return str:gsub("([^%w])", "%%%1")
+end
+
 --As dumb as it is, it's the only way I found to make it work.
 function math.rot_to_quat(rot)
 	local t = ScriptSerializer:to_custom_xml({x = rot})

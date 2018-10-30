@@ -49,6 +49,7 @@ elseif F == "setup" then
 	
 	Hooks:PostHook(Setup, "unload_packages", "BeardLibUnloadPackages", function(self)
 		CustomSoundManager:Close()
+		CustomPackageManager:Unload()
 		Hooks:Call("BeardLibSetupUnloadPackages", self)
 	end)
 elseif F == "missionmanager" then

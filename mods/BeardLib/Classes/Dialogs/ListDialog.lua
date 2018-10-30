@@ -182,6 +182,7 @@ end
 function ListDialog:Search(item)
     self._filter = {}
     for _, s in pairs(string.split(item:Value(), ",")) do
+        s = s:escape_special()
         table.insert(self._filter, s)
     end
     self:MakeListItems()

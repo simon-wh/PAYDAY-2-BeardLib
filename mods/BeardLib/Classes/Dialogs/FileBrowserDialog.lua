@@ -186,7 +186,7 @@ function FileBrowserDialog:MakeFilesAndFolders(files, folders)
 end
 
 function FileBrowserDialog:Search(item)
-    self._search = item:Value()
+    self._search = item:Value():escape_special()
     self:Browse(self._current_dir)
 end
 

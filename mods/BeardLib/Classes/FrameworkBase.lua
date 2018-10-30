@@ -25,8 +25,6 @@ function Framework:init()
 	end)
 
 	self:Load()
-	self:SortMods()
-	self:InitMods()
 end
 
 function Framework:CheckModQueue(post, file)
@@ -68,14 +66,14 @@ function Framework:SortMods()
 end
 
 function Framework:Load()
-    local dirs = FileIO:GetFolders(self._directory)
+	local dirs = FileIO:GetFolders(self._directory)
     if dirs then
         for _, dir in pairs(dirs) do
             if not self._ignore_folders[dir] then
                 local p = path:CombineDir(self._directory, dir)
                 local main_file = path:Combine(p, self.main_file_name)
                 if FileIO:Exists(main_file) then
-                    if not self._loaded_mods[dir] then
+					if not self._loaded_mods[dir] then
                         self:LoadMod(dir, p, main_file)
                     end
                 elseif not self._ignore_detection_errors and not self._ignored_configs[main_file] then
@@ -85,6 +83,8 @@ function Framework:Load()
             end
         end
 	end
+	self:SortMods()
+	self:InitMods()
 end
 
 function Framework:InitMods()

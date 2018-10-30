@@ -255,7 +255,7 @@ function ContextMenu:Update(t, dt)
 	if self._do_search and self._do_search <= t then
 		
 		local search = self:textbox() and self:textbox():Value() or ""
-
+        search = search:escape_special()
 		self._my_items = {}
 		self._best_itmes = {}
 		for _, item in pairs(self.owner.items) do

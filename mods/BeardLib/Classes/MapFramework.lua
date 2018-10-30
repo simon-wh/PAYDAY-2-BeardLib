@@ -13,7 +13,7 @@ function Framework:RegisterHooks(...)
 end
 
 function Framework:GetMapByJobId(job_id)
-    for _, map in pairs(self._sorted_mods) do
+    for _, map in pairs(self._loaded_mods) do
         if map._modules then
             for _, module in pairs(map._modules) do
                 if module.type_name == "narrative" and module._config and module._config.id == job_id then

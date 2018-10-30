@@ -6,10 +6,8 @@ function TextBoxBase:init(parent, params)
     self.parent = parent.parent
     self.menu = parent.menu
     self.size = params.size or parent.size
-    self._forbidden = {'%', '(', ")", "[", "]"}
-    if self.owner.forbidden_chars then
-        table.merge(self._forbidden, self.owner.forbidden_chars)
-    end
+    self.forbidden_chars = parent.forbidden_chars or {}
+    self.no_magic_chars = NotNil(parent.no_magic_chars, true)
 	self.panel = params.panel:panel({
 		name = "text_panel",
 		w = params.w,
@@ -48,7 +46,7 @@ function TextBoxBase:init(parent, params)
     if self.owner.text_offset then
         self.text:set_y(self.owner.text_offset[2])
     end
-    local len = self.text:text():len()
+    local len = self:Value():len()
     self.text:set_selection(len, len)
     local caret = self.panel:rect({
         name = "caret",
@@ -66,7 +64,7 @@ function TextBoxBase:init(parent, params)
 
 	self.lines = params.lines
 	self.btn = params.btn or "0"
-    self.history = {params.value and self.text:text()}
+    self.history = {params.value and self:Value()}
  	self.text:enter_text(ClassClbk(self, "enter_text"))
     self.update_text = params.update_text or ClassClbk(self.owner, "TextBoxSetValue")
 end
@@ -107,13 +105,13 @@ end
 
 function TextBoxBase:CheckText(text, no_clbk)
     if self.filter == "number" then
-        if tonumber(text:text()) ~= nil then
-            self.update_text(self:tonumber(text:text()), not no_clbk, true)
+        if tonumber(self:Value()) ~= nil then
+            self.update_text(self:tonumber(self:Value()), not no_clbk, true)
         else
             self.update_text(self:tonumber(self:one_point_back()), not no_clbk, true)
         end
     else
-        self.update_text(text:text(), not no_clbk, true)
+        self.update_text(self:Value(), not no_clbk, true)
     end
 end
  
@@ -130,19 +128,27 @@ function TextBoxBase:key_hold(text, k)
     local first
     while self.cantype and self.menu._key_pressed == k and self.menu.active_textbox == self do
         local s, e = text:selection()
-        local n = utf8.len(text:text())
+        local n = utf8.len(self:Value())
         if ctrl() then
             if KB:Down("a") then
-                text:set_selection(0, text:text():len())
+                text:set_selection(0, self:Value():len())
             elseif KB:Down("c") then
                 Application:set_clipboard(tostring(text:selected_text()))
             elseif KB:Down("v") then
-                if (self.filter == "number" and tonumber(Application:get_clipboard()) == nil) then
+                local copy = tostring(Application:get_clipboard())
+                if (self.filter == "number" and tonumber(copy) == nil) then
                     return
                 end
-                text:replace_text(tostring(Application:get_clipboard()))
-                self:add_history_point(text:text())
-                self.update_text(text:text(), true, true, true)
+
+                for _, c in pairs(self.forbidden_chars) do
+                    if s:find(c) ~= nil then
+                        return
+                    end
+                end
+
+                text:replace_text(copy)
+                self:add_history_point(self:Value())
+                self.update_text(self:Value(), true, true, true)
             elseif shift() then
                 if KB:Down(Idstring("left")) then text:set_selection(s - 1, e)
                 elseif KB:Down(Idstring("right")) then text:set_selection(s, e + 1) end
@@ -160,14 +166,14 @@ function TextBoxBase:key_hold(text, k)
             end
         else
             if k == Idstring("backspace") or k == Idstring("delete") then
-                if not (utf8.len(text:text()) < 1) then
+                if not (utf8.len(self:Value()) < 1) then
                     if s == e and s > 0 then
                         text:set_selection(s - 1, e)
                     end
                     text:replace_text("")
-                    self:add_history_point(text:text())
-                    if self:fixed_text(text:text()) == text:text() then
-                        self.update_text(text:text(), true, false, true)
+                    self:add_history_point(self:Value())
+                    if self:fixed_text(self:Value()) == self:Value() then
+                        self.update_text(self:Value(), true, false, true)
                     end
                 end
             elseif k == Idstring("left") then
@@ -224,27 +230,27 @@ function TextBoxBase:fixed_text(text)
                 return clamp
             end
         end
-	else
-		return text
+    else
+        return text
 	end
 end
 
 function TextBoxBase:enter_text(text, s)
     local number = self.owner.filter == "number"
-    if not self.menu:IsMouseActive() or number and (tonumber(s) == nil and s ~= "-" and s ~= ".") then
+    if not self.cantype or not self.menu:IsMouseActive() or (number and (tonumber(s) == nil and s ~= "-" and s ~= ".")) then
         return
     end
-    for _, c in pairs(self._forbidden) do
-        if s == c then
+    for _, c in pairs(self.forbidden_chars) do
+        if s:find(c) ~= nil then
             return
         end
     end
     if self.menu.active_textbox == self and self.cantype and not ctrl() then
         text:replace_text(s)       
-        self:add_history_point(number and (tonumber(text:text()) or self:one_point_back()) or text:text())
+        self:add_history_point(number and (tonumber(self:Value()) or self:one_point_back()) or self:Value())
         self:update_caret()
-        if self:fixed_text(text:text()) == text:text() then
-            self.update_text(text:text(), true, false, true)
+        if self:fixed_text(self:Value()) == self:Value() then
+            self.update_text(self:Value(), true, false, true)
         end
     end
 end
