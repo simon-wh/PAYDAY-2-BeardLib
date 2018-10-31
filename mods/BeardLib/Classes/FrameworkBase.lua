@@ -56,16 +56,13 @@ function Framework:CheckModQueue(post, file)
 	self._waiting_to_load = next_queue
 end
 
-function Framework:SortMods()
-	table.sort(self._sorted_mods, function(a,b)
-        return a.Priority < b.Priority
-	end)
-	table.sort(self._waiting_to_load, function(a,b)
-        return a.Priority < b.Priority
-	end)
+function Framework:Load()
+	self:FindMods()
+	self:SortMods()
+	self:InitMods()
 end
 
-function Framework:Load()
+function Framework:FindMods()
 	local dirs = FileIO:GetFolders(self._directory)
     if dirs then
         for _, dir in pairs(dirs) do
@@ -83,8 +80,15 @@ function Framework:Load()
             end
         end
 	end
-	self:SortMods()
-	self:InitMods()
+end
+
+function Framework:SortMods()
+	table.sort(self._sorted_mods, function(a,b)
+        return a.Priority < b.Priority
+	end)
+	table.sort(self._waiting_to_load, function(a,b)
+        return a.Priority < b.Priority
+	end)
 end
 
 function Framework:InitMods()

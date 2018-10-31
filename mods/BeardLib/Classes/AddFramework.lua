@@ -6,7 +6,7 @@ Framework.type_name = "add"
 Framework._directory = BeardLib.config.mod_override_dir
 Framework.menu_color = Color(0, 0.25, 1)
 
-function Framework:Load()
+function Framework:FindMods()
     local dirs = FileIO:GetFolders(self._directory)
     if dirs then
         for _, dir in pairs(dirs) do
