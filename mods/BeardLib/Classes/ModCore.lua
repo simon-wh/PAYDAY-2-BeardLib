@@ -10,7 +10,7 @@ function ModCore:init(config_path, load_modules)
     end
 
 	self.ModPath = ModPath
-    self.Priority = 1001
+    self.Priority = 1
 	self.SavePath = SavePath
 	
     local disabled_mods = BeardLib.Options:GetValue("DisabledMods")
