@@ -20,6 +20,7 @@ local queue_s = "queue"
 local Queue_s = "Queue"
 local stop = "stop"
 local Stop = "Stop"
+local scan = "scan"
 
 function SoundsModule:ReadSounds(data, prev_dir)
 	if not XAudio then
@@ -90,6 +91,21 @@ function SoundsModule:ReadSounds(data, prev_dir)
 					for _, sound in ipairs(v) do
 						if type(sound) == "table" and (sound._meta == sound_s or sound._meta == Sound_s) then
 							CustomSoundManager:AddStop(v.id, sound.id)
+						end
+					end
+				elseif meta == scan then
+					for _, file in pairs(FileIO:GetFiles(dir)) do
+						local splt = table.split(file, "%.")
+						local id, ext = splt[1], splt[2]
+						if ext == "ogg" then
+							CustomSoundManager:AddBuffer({
+								id = id,
+								path = v.id..".ogg", 								
+								full_path = Path:Combine(dir, v.path),
+								load_on_play = load_on_play,
+								stop_id = stop_id or id.."_stop",
+								unload = unload
+							})
 						end
 					end
 				end
