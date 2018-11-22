@@ -98,10 +98,11 @@ function SoundsModule:ReadSounds(data, prev_dir)
 						local splt = table.split(file, "%.")
 						local id, ext = splt[1], splt[2]
 						if ext == "ogg" then
+							local path = id..".ogg"
 							CustomSoundManager:AddBuffer({
 								id = id,
-								path = v.id..".ogg", 								
-								full_path = Path:Combine(dir, v.path),
+								path = path, 								
+								full_path = Path:Combine(dir, path),
 								load_on_play = load_on_play,
 								stop_id = stop_id or id.."_stop",
 								unload = unload
