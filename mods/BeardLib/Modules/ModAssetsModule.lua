@@ -92,7 +92,7 @@ function ModAssetsModule:RetrieveCurrentVersion()
         self.version = self._config.version
     end
     if tonumber(self.version) then -- has to be here, xml seems to fuckup numbers.
-        self.version = BeardLib.Utils.Math:Round(tonumber(self.version), 4)
+        self.version = math.round_with_precision(tonumber(self.version), 4)
     end
 end
 

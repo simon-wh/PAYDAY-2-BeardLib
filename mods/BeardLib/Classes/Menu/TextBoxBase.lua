@@ -124,16 +124,35 @@ function TextBoxBase:tonumber(text)
     end
 end
 
+function TextBoxBase:remove_selected()
+    local text = self.panel:child("text")
+    local s, e = text:selection()
+    if not (utf8.len(self:Value()) < 1) then
+        if s == e and s > 0 then
+            text:set_selection(s - 1, e)
+        end
+        text:replace_text("")
+        self:add_history_point(self:Value())
+        if self:fixed_text(self:Value()) == self:Value() then
+            self.update_text(self:Value(), true, false, true)
+        end
+    end
+end
+
 function TextBoxBase:key_hold(text, k)
     local first
     while self.cantype and self.menu._key_pressed == k and self.menu.active_textbox == self do
         local s, e = text:selection()
         local n = utf8.len(self:Value())
+        local x = KB:Down("x")
         if ctrl() then
             if KB:Down("a") then
                 text:set_selection(0, self:Value():len())
-            elseif KB:Down("c") then
+            elseif KB:Down("c") or x then
                 Application:set_clipboard(tostring(text:selected_text()))
+                if x and math.abs(s - e) > 0 then
+                    self:remove_selected()
+                end
             elseif KB:Down("v") then
                 local copy = tostring(Application:get_clipboard())
                 if (self.filter == "number" and tonumber(copy) == nil) then
@@ -166,16 +185,7 @@ function TextBoxBase:key_hold(text, k)
             end
         else
             if k == Idstring("backspace") or k == Idstring("delete") then
-                if not (utf8.len(self:Value()) < 1) then
-                    if s == e and s > 0 then
-                        text:set_selection(s - 1, e)
-                    end
-                    text:replace_text("")
-                    self:add_history_point(self:Value())
-                    if self:fixed_text(self:Value()) == self:Value() then
-                        self.update_text(self:Value(), true, false, true)
-                    end
-                end
+                self:remove_selected()
             elseif k == Idstring("left") then
                 if s < e then
                     text:set_selection(s, s)

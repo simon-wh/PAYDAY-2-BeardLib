@@ -22,8 +22,8 @@ end
 
 local orig_NetworkMatchMakingSTEAM_lobby_to_numbers = NetworkMatchMakingSTEAM._lobby_to_numbers
 function NetworkMatchMakingSTEAM:_lobby_to_numbers(lobby, ...)
-	log("Received level: " .. tostring(lobby:key_value("level_id")))
-	log("Received narrative: " .. tostring(lobby:key_value("job_key")))
+	BeardLib:DevLog("Received level: " .. tostring(lobby:key_value("level_id")))
+	BeardLib:DevLog("Received narrative: " .. tostring(lobby:key_value("job_key")))
 	if not tonumber(lobby:key_value("job_id")) then
 		lobby:set_key_value("job_id", -1) --Such a fucking weird issue..
 	end
@@ -46,11 +46,11 @@ function NetworkMatchMakingSTEAM:_lobby_to_numbers(lobby, ...)
 	local provider = lobby:key_value("level_update_provider")
 	local url = lobby:key_value("level_update_download_url")
 	if is_key_valid(level_name) then
-		log("Received level real name: " .. tostring(level_name))
+		BeardLib:DevLog("Received level real name: " .. tostring(level_name))
 		if is_key_valid(uid) or is_key_valid(provider) or is_key_valid(url) then
-			log("Received custom map data, id: " .. tostring(uid))
-			log("provider: " .. tostring(provider))
-			log("download url: " .. tostring(url))
+			BeardLib:DevLog("Received custom map data, id: " .. tostring(uid))
+			BeardLib:DevLog("provider: " .. tostring(provider))
+			BeardLib:DevLog("download url: " .. tostring(url))
 			data["level_id"] = lobby:key_value("level_id")
 			data["job_key"] = lobby:key_value("job_key")
 			data["level_update_key"] = uid

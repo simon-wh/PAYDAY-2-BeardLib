@@ -69,6 +69,12 @@
 	</load_modules>
 	<classes>
 		<class file="Utils/Utils.lua"/>
+		<class file="Utils/Table.lua"/>
+		<class file="Utils/Path.lua"/>
+		<class file="Utils/String.lua"/>
+		<class file="Utils/Math.lua"/>
+		<class file="Utils/Input.lua"/>
+		<class file="Utils/Hooks.lua"/>
 		<class file="ModCore.lua"/>
 		<class file="CustomPackageManager.lua"/>
 		<class file="CustomSoundManager.lua" manager="sound"/>
@@ -105,8 +111,8 @@
 		<class file="Dialogs/DownloadDialog.lua"/>
 		<class file="Dialogs/SimpleSelectListDialog.lua"/>
 		<class file="Utils/MenuHelperPlus.lua"/>
-		<class file="Utils/JsonUtils.lua"/>
-		<class file="Utils/XmlUtils.lua"/>
+		<class file="Utils/JSON.lua"/>
+		<class file="Utils/XML.lua"/>
 		<class file="Utils/Builders.lua"/>
 		<class file="ModAssetUpdateManager.lua" manager="asset_update"/>
 		<class file="ModuleBase.lua"/>

@@ -10,6 +10,7 @@ function OptionModule:init(...)
     self.FileName = self._config.save_file or self._mod.Name .. "_Options.txt"
 
     self._storage = {}
+    self._menu_items = {}
 
     if self._config.loaded_callback then
         self._on_load_callback = self._mod:StringToCallback(self._config.loaded_callback)
@@ -56,7 +57,7 @@ function OptionModule:OnValueChanged(full_name, value)
 		self._value_changed = self._mod:StringToCallback(self._config.value_changed)
 	end
 	if self._value_changed then
-		self._value_changed()
+		self._value_changed(full_name, value)
 	end
 end
 
@@ -243,6 +244,8 @@ function OptionModule:GetOption(name)
         end
 
         return tbl[option_name]
+    elseif name == "" then
+        return self._storage
     else
         return self._storage[name]
     end
@@ -282,6 +285,35 @@ function OptionModule:_LoadDefaultValues(option_tbl)
             elseif sub_tbl._meta == "option_group" or sub_tbl._meta == "option_set" then
                 self:_LoadDefaultValues(option_tbl[sub_tbl.name])
             end
+        end
+    end
+end
+
+function OptionModule:ResetToDefaultValues(path, shallow, no_save)
+    local option_tbl = self:GetOption(path)
+    if option_tbl then
+        local next_path = path == "" and "" or path .. "/"
+        for i, sub_tbl in pairs(option_tbl) do
+            if sub_tbl._meta then
+                if sub_tbl._meta == "option" and sub_tbl.default_value ~= nil then
+                    local sub_tbl_path = next_path..sub_tbl.name
+                    self:SetValue(sub_tbl_path, sub_tbl.default_value)
+                    local item = self._menu_items[sub_tbl_path]
+                    if item then
+                        local value = self:GetValue(sub_tbl_path)
+                        if item.TYPE == "toggle" then
+                            item:set_value(value and "on" or "off")
+                        else
+                            item:set_value(value)
+                        end
+                    end
+                elseif (sub_tbl._meta == "option_group" or sub_tbl._meta == "option_set") and not shallow then
+                    self:ResetToDefaultValues(next_path..sub_tbl.name, no_save, true)
+                end
+            end
+        end
+        if not no_save then
+            self:Save()
         end
     end
 end
@@ -338,15 +370,10 @@ function OptionModule:CreateSlider(parent_node, option_tbl, option_path)
         enabled = option_tbl:enabled_callback()
     end
 
-    local self_vars = {
-        option_key = option_path,
-        module = self
-    }
-
     local merge_data = self:GetParameter(option_tbl, "merge_data") or {}
     merge_data = BeardLib.Utils:RemoveAllNumberIndexes(merge_data)
 
-    MenuHelperPlus:AddSlider(table.merge({
+    self._menu_items[option_path] = MenuHelperPlus:AddSlider(table.merge({
         id = self:GetParameter(option_tbl, "name"),
         title = self:GetParameter(option_tbl, "title_id") or id .. "TitleID",
         node = parent_node,
@@ -359,7 +386,7 @@ function OptionModule:CreateSlider(parent_node, option_tbl, option_path)
         enabled = enabled,
         value = self:GetValue(option_path),
         show_value = self:GetParameter(option_tbl, "show_value"),
-        merge_data = self_vars
+        merge_data = {option_key = option_path, module = self}
     }, merge_data))
 end
 
@@ -374,15 +401,10 @@ function OptionModule:CreateToggle(parent_node, option_tbl, option_path)
         enabled = option_tbl:enabled_callback()
     end
 
-    local self_vars = {
-        option_key = option_path,
-        module = self
-    }
-
     local merge_data = self:GetParameter(option_tbl, "merge_data") or {}
     merge_data = BeardLib.Utils:RemoveAllNumberIndexes(merge_data)
 
-    MenuHelperPlus:AddToggle(table.merge({
+    self._menu_items[option_path] = MenuHelperPlus:AddToggle(table.merge({
         id = self:GetParameter(option_tbl, "name"),
         title = self:GetParameter(option_tbl, "title_id") or id .. "TitleID",
         node = parent_node,
@@ -390,7 +412,7 @@ function OptionModule:CreateToggle(parent_node, option_tbl, option_path)
         callback = "OptionModuleGeneric_ValueChanged",
         value = self:GetValue(option_path),
         enabled = enabled,
-        merge_data = self_vars
+        merge_data = {option_key = option_path, module = self}
     }, merge_data))
 end
 
@@ -411,15 +433,10 @@ function OptionModule:CreateMultiChoice(parent_node, option_tbl, option_path)
         enabled = option_tbl:enabled_callback()
     end
 
-    local self_vars = {
-        option_key = option_path,
-        module = self
-    }
-
     local merge_data = self:GetParameter(option_tbl, "merge_data") or {}
     merge_data = BeardLib.Utils:RemoveAllNumberIndexes(merge_data)
 
-    MenuHelperPlus:AddMultipleChoice(table.merge({
+    self._menu_items[option_path] = MenuHelperPlus:AddMultipleChoice(table.merge({
         id = self:GetParameter(option_tbl, "name"),
         title = self:GetParameter(option_tbl, "title_id") or id .. "TitleID",
         node = parent_node,
@@ -429,7 +446,7 @@ function OptionModule:CreateMultiChoice(parent_node, option_tbl, option_path)
         items = options,
         localized_items = self:GetParameter(option_tbl, "localized_items"),
         enabled = enabled,
-        merge_data = self_vars
+        merge_data = {option_key = option_path, module = self}
     }, merge_data))
 end
 
@@ -503,7 +520,7 @@ function OptionModule:CreateColour(parent_node, option_tbl, option_path)
     local merge_data = self:GetParameter(option_tbl, "merge_data") or {}
     merge_data = BeardLib.Utils:RemoveAllNumberIndexes(merge_data)
 
-    MenuHelperPlus:AddColorButton(table.merge({
+    self._menu_items[option_path] = MenuHelperPlus:AddColorButton(table.merge({
         id = self:GetParameter(option_tbl, "name"),
         title = self:GetParameter(option_tbl, "title_id") or id .. "TitleID",
         node = parent_node,
@@ -512,10 +529,7 @@ function OptionModule:CreateColour(parent_node, option_tbl, option_path)
         enabled = enabled,
         value = self:GetValue(option_path),
         show_value = self:GetParameter(option_tbl, "show_value"),
-        merge_data = {
-            option_key = option_path,
-            module = self
-        }
+        merge_data = {option_key = option_path, module = self}
     }, merge_data))
 end
 
@@ -555,6 +569,35 @@ function OptionModule:CreateDivider(parent_node, tbl)
     }, merge_data))
 end
 
+function OptionModule:CreateButton(parent_node, option_tbl, option_path)
+    local alpha = not not self:GetParameter(option_tbl, "alpha")
+    local id = self._mod.Name .. option_tbl.name
+
+    local enabled = not self:GetParameter(option_tbl, "disabled")
+
+    if option_tbl.enabled_callback then
+        enabled = option_tbl:enabled_callback()
+    end
+
+    local clbk = self:GetParameter(option_tbl, "clicked")
+    local merge_data = self:GetParameter(option_tbl, "merge_data") or {}
+    merge_data = BeardLib.Utils:RemoveAllNumberIndexes(merge_data)
+    MenuHelperPlus:AddButton(table.merge({
+        id = self:GetParameter(option_tbl, "name"),
+        title = self:GetParameter(option_tbl, "title_id") or id .. "TitleID",
+        node = parent_node,
+        desc = self:GetParameter(option_tbl, "desc_id") or id .. "DescID",
+        callback = self:GetParameter(option_tbl, "reset_button") and "OptionModuleGeneric_ResetOptions" or "OptionModuleGeneric_ButtonPressed",
+        enabled = enabled,
+        merge_data = {
+            option_path = option_path,
+            shallow_reset = self:GetParameter(option_tbl, "shallow_reset"),
+            clicked = clbk and self._mod:StringToCallback(clbk) or nil,
+            module = self
+        }
+    }, merge_data))
+end
+
 function OptionModule:CreateSubMenu(parent_node, option_tbl, option_path)
     option_path = option_path or ""
     local name = self:GetParameter(option_tbl, "name")
@@ -591,6 +634,8 @@ function OptionModule:InitializeNode(node, option_tbl, option_path)
                 self:CreateOption(node, sub_tbl, option_path)
             elseif sub_tbl._meta == "divider" then
                 self:CreateDivider(node, sub_tbl)
+            elseif sub_tbl._meta == "button" then
+                self:CreateButton(node, sub_tbl, option_path)
             elseif sub_tbl._meta == "option_group" or sub_tbl._meta == "option_set" and (sub_tbl.build_menu == nil or sub_tbl.build_menu) then
                 self:CreateSubMenu(node, sub_tbl, option_path)
             end
@@ -610,14 +655,27 @@ end
 
 --Create MenuCallbackHandler callbacks
 Hooks:Add("BeardLibCreateCustomNodesAndButtons", "BeardLibOptionModuleCreateCallbacks", function(self_menu)
-    MenuCallbackHandler.OptionModuleGeneric_ValueChanged = function(this, item)
+    function MenuCallbackHandler:OptionModuleGeneric_ButtonPressed(item)
+        if item._parameters.clicked then
+            item._parameters.clicked(item)
+        end
+    end
+
+    function MenuCallbackHandler:OptionModuleGeneric_ResetOptions(item)
+        local params = item._parameters
+        if params then
+            params.module:ResetToDefaultValues(params.option_path, params.shallow_reset)
+        end
+    end
+    
+    function MenuCallbackHandler:OptionModuleGeneric_ValueChanged(item)
         local value = item:value()
         if item.TYPE == "toggle" then value = value == "on" end
         OptionModule.SetValue(item._parameters.module, item._parameters.option_key, value)
     end
 
-    MenuCallbackHandler.OptionModuleVector_ValueChanged = function(this, item)
-        local cur_val =  OptionModule.GetValue(item._parameters.module, item._parameters.option_key)
+    function MenuCallbackHandler:OptionModuleVector_ValueChanged(item)
+        local cur_val = OptionModule.GetValue(item._parameters.module, item._parameters.option_key)
         local new_value = item:value() / item._parameters.scale_factor
         if item._parameters.opt_type == "colour" or item._parameters.opt_type == "color" then
             cur_val[item._parameters.component] = new_value
@@ -631,9 +689,7 @@ Hooks:Add("BeardLibCreateCustomNodesAndButtons", "BeardLibOptionModuleCreateCall
             end
         elseif item._parameters.opt_type == "rotation" then
             local comp = item._parameters.component
-            self:log("1" .. tostring(cur_val))
             mrotation.set_yaw_pitch_roll(cur_val, comp == "yaw" and new_value or cur_val:yaw(), comp == "pitch" and new_value or cur_val:pitch(), comp == "roll" and new_value or cur_val:roll())
-            self:log("2" .. tostring(cur_val))
         end
 
         OptionModule.SetValue(item._parameters.module, item._parameters.option_key, cur_val)
