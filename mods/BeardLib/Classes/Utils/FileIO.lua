@@ -230,3 +230,26 @@ end
 
 function FileIO:ReadScriptDataFrom(...) return self:ReadScriptData(...) end
 function FileIO:WriteScriptDataTo(...) return self:WriteScriptData(...) end
+
+
+function FileIO:LoadLocalization(path, overwrite)
+	-- Should we overwrite existing localization strings
+	if overwrite == nil then
+		overwrite = true
+	end
+
+	local file = io.open(path, "r")
+	if file then
+		local data = file:read("*all")
+		file:close()
+		local contents
+		local passed = pcall(function()
+			contents = json10.decode(data)
+		end)
+		if not passed then
+			return false
+		end
+		LocalizationManager:add_localized_strings(contents, overwrite)
+		return true
+	end
+end

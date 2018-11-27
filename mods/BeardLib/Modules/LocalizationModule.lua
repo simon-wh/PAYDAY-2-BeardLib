@@ -26,10 +26,18 @@ function LocalizationModule:Load()
 end
 
 function LocalizationModule:LoadLocalization()
+    local path
     if self.Localizations[SystemInfo:language():key()] then
-        LocalizationManager:load_localization_file(Path:Combine(self.LocalizationDirectory, self.Localizations[SystemInfo:language():key()]))
+        path = Path:Combine(self.LocalizationDirectory, self.Localizations[SystemInfo:language():key()])
     else
-        LocalizationManager:load_localization_file(Path:Combine(self.LocalizationDirectory, self.DefaultLocalization))
+        path = Path:Combine(self.LocalizationDirectory, self.DefaultLocalization)
+    end
+
+    --if it fails, just force the author to fix their errors.
+    if not FileIO:Exists(path) then
+        self:log("[ERROR] JSON file not found! Path %s", path)
+    elseif not FileIO:LoadLocalization(path) then
+        self:log("[ERROR] JSON file has errors and cannot be loaded! Path %s", path)
     end
 end
 
