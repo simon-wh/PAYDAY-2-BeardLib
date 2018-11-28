@@ -24,7 +24,7 @@ function MouseInput:Id(str) return str end
 function InputUtils:TriggerDataFromString(str, clbk)
     local additional_key
     local key = str
-    if str:match("+") then
+    if str:find("+") then
         local split = string.split(str, "+")
         key = split[1]
         additional_key = split[2]
@@ -36,7 +36,7 @@ function InputUtils:Triggered(trigger, check_mouse_too)
     if not trigger.key then
         return false
     end
-    if check_mouse_too and trigger.key:match("mouse") then
+    if check_mouse_too and trigger.key:find("mouse") then
         return MouseInput:Pressed(trigger.key)
     end
     if trigger.additional_key then

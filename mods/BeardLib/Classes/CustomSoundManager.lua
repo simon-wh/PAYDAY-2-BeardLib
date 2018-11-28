@@ -1,14 +1,12 @@
 CustomSoundManager = CustomSoundManager or {}
 local C = CustomSoundManager
-local default_prefix = {"global"}
 C.sources = {}
 C.stop_ids = {}
 C.float_ids = {}
 C.engine_sources = {}
-C.sound_ids = {global = {}}
-C.buffers = {global = {}}
-C.redirects = {global = {}}
-C.delayed_buffers = {global = {}}
+C.sound_ids = {}
+C.buffers = {}
+C.redirects = {}
 C.Closed = XAudio == nil
 
 function C:CheckSoundID(sound_id, engine_source, clbk, cookie)
@@ -54,44 +52,23 @@ function C:CheckSoundID(sound_id, engine_source, clbk, cookie)
     end
 end
 
-function C:GetDelayedBuffer(sound_id, prefixes)
-    if prefixes then
-        for _, prefix in pairs(prefixes) do
-            local prefix_tbl = self.delayed_buffers[prefix]
-            local buffer = prefix_tbl and prefix_tbl[sound_id] or nil
-            if buffer then
-                return buffer, prefix_tbl
-            end
-        end
-    else
-        local global_prefix = self.delayed_buffers.global
-        return global_prefix[sound_id], global_prefix
-    end
-    return nil
-end
-
 function C:GetLoadedBuffer(sound_id, prefixes, no_load)
-    local delayed_buffer, prefix_tbl = self:GetDelayedBuffer(sound_id, prefixes)
-    if delayed_buffer then
-        if not no_load then
-            prefix_tbl[sound_id] = nil
-            return self:AddBuffer(delayed_buffer, true)
-        else
-            return nil
-        end
-    end
-
-    if prefixes and #prefixes > 0 then
-        for _, prefix in pairs(prefixes) do
-            local prefix_tbl = self.buffers[prefix]
-            local buffer = prefix_tbl and prefix_tbl[sound_id] or nil
-            if buffer then
+    for i, buffer in pairs(self.buffers) do
+        local sound = buffer.load_on_play and buffer or buffer.data
+        if self:ComparePrefixes(sound, sound_id, prefixes) then
+            if buffer.load_on_play then
+                if no_load then
+                    return nil
+                else
+                    table.remove(self.buffers, i)
+                    return self:AddBuffer(buffer, true)
+                end
+            else
                 return buffer
             end
         end
-    else
-        return self.buffers.global[sound_id]
     end
+
     return nil
 end
 
@@ -117,10 +94,13 @@ function C:AddSoundID(data)
 		self:AddStop(stop_id, sound_id)
 	end
 
-	for _, prefix in pairs(data.prefixes or default_prefix) do
-		self.sound_ids[prefix] = self.sound_ids[prefix] or {}
-		self.sound_ids[prefix][sound_id] = data
-	end
+    for i, sound in pairs(self.sound_ids) do
+        if self:CompareSound(sound, sound_id, data.prefixes) then
+            table.remove(self.sound_ids, i)
+            break
+        end
+    end
+    table.insert(self.sound_ids, data)
 end
 
 function C:AddBuffer(data, force)
@@ -128,65 +108,66 @@ function C:AddBuffer(data, force)
         return
 	end
 	
-	local sound_id = data.id
-    local prefix = data.prefix
-    if not force and data.load_on_play then
-        if prefix then
-            if not self.delayed_buffers[prefix] then
-                self.delayed_buffers[prefix] = {}
-            end
-            local prefix_tbl = self.delayed_buffers[prefix]
-            if not prefix_tbl then
-                prefix_tbl = {}
-                self.delayed_buffers[prefix] = prefix_tbl
-            end
-            prefix_tbl[sound_id] = data
-        else
-            self.delayed_buffers.global[sound_id] = data
-        end
-        return
-    end
-    
-    local buffer = XAudio.Buffer:new(data.full_path)
     local close_previous = data.close_previous
-    buffer.data = data
+	local sound_id = data.id
+    local buffer
 
-    if prefix then
-        local prefix_tbl = self.buffers[prefix]
-        if not prefix_tbl then
-            prefix_tbl = {}
-            self.buffers[prefix] = prefix_tbl
-        end
-        if close_previous then
-            local buffer = prefix_tbl[sound_id]
-            if buffer then
-                buffer:close(true)
+    if not data.load_on_play or force then
+        buffer = XAudio.Buffer:new(data.full_path)
+        buffer.data = data
+    end
+
+    for i, other_buffer in pairs(self.buffers) do
+        local sound = other_buffer.load_on_play and other_buffer or other_buffer.data
+        if self:CompareSound(sound, sound_id, data.prefixes) then
+            table.remove(self.buffers, i)
+            if not other_buffer.close and close_previous then
+                other_buffer:close(true)
             end
+            break
         end
-        prefix_tbl[sound_id] = buffer
-    else
-        if close_previous then
-            local buffer = self.buffers.global[sound_id]
-            if buffer then
-                buffer:close(true)
-            end
-        end
-        self.buffers.global[sound_id] = buffer
-	end
-	
-	self:AddSoundID(table.merge({queue = {{id = sound_id}}}, data))
+    end
+    table.insert(self.buffers, buffer or data)
+    
+    if buffer then
+        self:AddSoundID(table.merge({queue = {{id = sound_id}}}, data))
+    end
 
     return buffer
 end
 
-function C:GetSound(sound_id, prefixes) 
-	prefixes = prefixes or default_prefix
-	for _, prefix in pairs(prefixes) do
-		local sound = self.sound_ids[prefix] and self.sound_ids[prefix][sound_id]
-		if sound then
-			return sound
-		end
-	end
+function C:CompareSound(data, sound_id, prefixes)
+    return data.id == sound_id 
+    and ((prefixes == nil and data.prefixes == nil) 
+    or (prefixes ~= nil and data.prefixes ~= nil and table.equals(prefixes, data.prefixes)))
+end
+
+function C:ComparePrefixes(data, sound_id, prefixes)
+    if data.id == sound_id then
+        if data.prefixes and prefixes then
+            local match = false
+            for _, snd_prefix in pairs(data.prefixes) do
+                if data.prefixes_strict then
+                    match = table.contains(prefixes, snd_prefix)
+                else
+                    for _, prefix in pairs(prefixes) do
+                        if prefix == snd_prefix then return true end
+                    end
+                end
+            end
+            if match then return true end
+        elseif data.prefix == nil then --Global
+            return true
+        end
+    end
+end
+
+function C:GetSound(sound_id, prefixes)
+    for _, sound in pairs(self.sound_ids) do
+        if self:ComparePrefixes(sound, sound_id, prefixes) then
+            return sound
+        end
+    end
 end
 
 function C:AddSource(sound_id, prefixes, engine_source, clbk, cookie) 
@@ -194,15 +175,22 @@ function C:AddSource(sound_id, prefixes, engine_source, clbk, cookie)
 		return
 	end
 	
-	prefixes = prefixes or default_prefix
 	local sound = self:GetSound(sound_id, prefixes)
 
 	if sound then
 		local queue = {}
-		for _, data in pairs(sound.queue) do
-			--if not buffer, assume it's a vanilla sound.
-			table.insert(queue, {buffer = self:GetLoadedBuffer(data.id, prefixes), data = data})
-		end
+        --if not buffer, assume it's a vanilla sound. 
+
+        if sound.is_random then
+            local data = table.random(sound.queue)
+            if data then
+                table.insert(queue, {buffer = self:GetLoadedBuffer(data.id, prefixes), data = data})
+            end
+        else
+            for _, data in pairs(sound.queue) do
+                table.insert(queue, {buffer = self:GetLoadedBuffer(data.id, prefixes), data = data})
+            end
+        end
 
 		if #queue > 0 then
 			local source = MixedSoundSource:new(sound_id, queue, engine_source, clbk, cookie)
@@ -221,46 +209,29 @@ function C:AddSource(sound_id, prefixes, engine_source, clbk, cookie)
 end
 
 function C:Redirect(id, prefixes)
-    if prefixes and #prefixes > 0 then
-        for _, prefix in pairs(prefixes) do
-            local prefix_tbl = self.redirects[prefix]
-            if prefix_tbl and prefix_tbl[id] then
-                return prefix_tbl[id]
-            end
+    for _, redirect in pairs(self.redirects) do
+        if self:ComparePrefixes(redirect, id, prefixes) then
+            return redirect.to
         end
-    elseif self.redirects.global[id] then
-        return self.redirects.global[id]
     end
     return id --No need to redirect.
 end
 
-function C:AddRedirect(id, to, prefix) 
-    if prefix then
-        self.redirects[prefix] = self.redirects[prefix] or {}
-        self.redirects[prefix][id] = to
-    else
-        self.redirects.global[id] = to
-    end
+function C:AddRedirect(data)
+    table.insert(self.redirects, data)
 end
 
-function C:CloseBuffer(sound_id, prefix, soft)
-    local prefix_tbl
-    if prefix then
-        prefix_tbl = self.buffers[prefix]
-        local buffer = prefix_tbl and prefix_tbl[sound_id] or nil
-        if buffer then
-            buffer:close(not soft and true)
-            if not soft then
-                prefix_tbl[sound_id] = nil
+function C:CloseBuffer(sound_id, prefixes, soft)
+    for i, buffer in pairs(self.buffers) do
+        local sound = buffer.load_on_play and buffer or buffer.data
+        if (buffer.prefixes == nil and prefixes == nil) or (buffer.prefixes ~= nil and prefixes ~= nil and table.equals(buffer.prefixes, prefixes)) then
+            if not buffer.load_on_play then
+                buffer:close(not soft and true)
             end
-        end
-    else
-        local buffer = self.buffers.global[sound_id]
-        if buffer then
-            buffer:close(not soft and true)
             if not soft then
-                self.buffers.global[sound_id] = nil 
+                table.remove(self.buffers, i)
             end
+            return
         end
     end
 end
@@ -281,14 +252,12 @@ end
 
 function C:Close()
     if not self:IsClosed() then
-        for _, prefix_tbl in pairs(self.buffers) do
-            for _, buffer in pairs(prefix_tbl) do
-                if buffer.close then
-                    buffer:close(not not buffer.data.unload)
-                end
+        for _, buffer in pairs(self.buffers) do
+            if buffer.close then
+                buffer:close(not not buffer.data.unload)
             end
         end
-        self.buffers = {global = {}}
+        self.buffers = {}
         self.sources = {}
         self.Closed = true
     end
@@ -308,7 +277,6 @@ end
 function C:IsClosed() return self.Closed end
 function C:Queued() return self.queued end
 function C:Redirects() return self.redirects end
-function C:DelayedBuffers() return self.delayed_buffers end
 function C:Sources() return self.sources end
 function C:Buffers() return self.buffers end
 

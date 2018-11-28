@@ -104,7 +104,7 @@ function KeyBindItem:SetCanEdit(CanEdit)
                     end
                 end
                 if additional_key then
-                    if additional_key:match("ctrl") or additional_key:match("alt") or additional_key:match("shift") then
+                    if additional_key:find("ctrl") or additional_key:find("alt") or additional_key:find("shift") then
                         local old_k = key
                         key = additional_key
                         additional_key = old_k
@@ -114,7 +114,7 @@ function KeyBindItem:SetCanEdit(CanEdit)
                 elseif is_mouse then
                     self:SetCanEdit(false)
                 end
-                if is_mouse and not key:match("mouse") then
+                if is_mouse and not key:find("mouse") then
                     key = "mouse " .. key
                 end
                 self:SetValue(key, true)

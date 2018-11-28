@@ -238,7 +238,7 @@ end
 function BeardLibModsMenu:SearchMods(item)
     for _, mod_item in pairs(self._list._my_items) do
         local search = tostring(item:Value()):lower()
-        local visible = tostring(mod_item.name):lower():match(search) ~= nil
+        local visible = tostring(mod_item.name):lower():find(search) ~= nil
         if search == " " or search:len() < 1 then
             visible = true
         end
