@@ -32,6 +32,10 @@ function SoundsModule:ReadSounds(data, prev_dir)
 	local dir = self:GetPath(data.directory, prev_dir)
 	local prefix = data.prefix
 	local prefixes = data.prefixes or data.prefix and {data.prefix}
+	if prefix == "global" then
+		prefix = nil
+		prefixes = nil
+	end
 	local prefixes_strict = data.prefixes_strict or false
 	local load_on_play = data.load_on_play or false
 	local unload = data.unload
@@ -64,6 +68,12 @@ function SoundsModule:ReadSounds(data, prev_dir)
 				wait = wait,
 				volume = volume
 			}, v)
+
+			if v.prefix == "global" then
+				v.prefix = nil
+				v.prefxies = nil
+			end
+
 			if (meta == redirect_s or meta == Redirect_s) then
 				CustomSoundManager:AddRedirect(v)
 			elseif (meta == sound_s or meta == Sound_s) and v.id then
