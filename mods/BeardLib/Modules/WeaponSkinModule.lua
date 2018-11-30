@@ -15,6 +15,18 @@ function WeaponSkinModule:RegisterHook()
     self._config.desc = self._config.desc or "bm_wskn_p90_woodland_desc" -- These descs are 99% of the time empty, excepted for legendaries :|
     self._config.rarity = self._config.rarity or "common"
     self._config.skin_folder = self._config.skin_folder and self:GetPath(self._config.skin_folder) or self:log("[ERROR] The weapon skin '%s' is not shipped with the skin folder.", self._config.skin_folder)
+    self._config.locked = self._config.locked or nil
+    self._config.unique_name = self._config.unique_name and self._config.name or nil
+
+    if self._config.skin_attachments then
+        self._skin_attachments = self._config.skin_attachments
+
+        for k, v in pairs(self._skin_attachments) do
+            if k == "_meta" then
+                table.remove_key( self._skin_attachments, "_meta" )
+            end
+        end
+    end
 
     self._assets_folders = self._config.skin_folder
 
@@ -59,6 +71,8 @@ function WeaponSkinModule:RegisterHook()
             rarity = config.rarity,
             is_a_unlockable = true,
             custom = true,
+            locked = config.locked,
+            unique_name_id = config.unique_name,
             texture_bundle_folder = self._config.id,
             bonus = "recoil_p1", -- Aint gonna code a "statboost" version cause nobody would care for one. It's just to fill the table.
             reserve_quality = true,
@@ -72,7 +86,8 @@ function WeaponSkinModule:RegisterHook()
             uv_offset_rot = self._skin_design.uv_offset_rot,
             cubemap_pattern_control = self._skin_design.cubemap_pattern_control,
             types = self._skin_design.types,
-            parts = self._skin_design.parts
+            parts = self._skin_design.parts,
+            default_blueprint = self._skin_attachments
         }
         self:log("Added skin '%s' to the weapon '%s'", config.id, config.weapon_id)
     end)

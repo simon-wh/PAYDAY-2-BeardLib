@@ -1,6 +1,4 @@
-require("lib/managers/WorkshopManager")
 require("lib/managers/workshop/UGCItem")
-require("lib/managers/workshop/SkinEditor")
 
 WeaponSkinExtension = WeaponSkinExtension or class()
 WeaponSkinExtension.TEXTURE_FILE_TYPE = "texture"
