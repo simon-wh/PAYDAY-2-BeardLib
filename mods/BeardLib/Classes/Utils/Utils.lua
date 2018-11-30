@@ -190,7 +190,21 @@ function Utils:CleanOutfitString(str, is_henchman)
     local material = is_henchman and list.mask_blueprint.material or list.mask.blueprint.material
 	if material and tweak_data.blackmarket.materials[material.id].custom then
 		material.id = "plastic"
-	end
+    end
+    
+    if list.primary and list.primary.cosmetics then
+        local cosmetic_primary = tweak_data.blackmarket.weapon_skins[list.primary.cosmetics.id]
+        if cosmetic_primary and cosmetic_primary.custom then
+            list.primary.cosmetics = nil
+        end
+    end
+
+    if list.secondary and list.secondary.cosmetics then
+        local cosmetic_secondary = tweak_data.blackmarket.weapon_skins[list.secondary.cosmetics.id]
+        if cosmetic_secondary and cosmetic_secondary.custom then
+            list.secondary.cosmetics = nil
+        end
+    end
 
     if list.primary then
         local primary = is_henchman and list.primary or list.primary.factory_id
