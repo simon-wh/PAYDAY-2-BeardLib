@@ -117,19 +117,29 @@ function C:LoadPackageConfig(directory, config, mod, temp)
 					local file_path = child.full_path or Path:Combine(directory, config.file_path or path)
 					local file_path_ext = file_path.."."..typ
                     if FileIO:Exists(file_path_ext) then
-						if (child.force or not DB:has(ids_ext, ids_path)) then
+                        local load = child.force
+                        if not load then
+                            if child.force_if_not_loaded then
+                                load = not PackageManager:has(ids_ext, ids_path)
+                            else
+                                load = not DB:has(ids_ext, ids_path)
+                            end
+                        end
+						if load then
 							if ids_ext == UNIT_IDS then
 								local all = child.include_all
 								local most = all or child.include_most
-
 								if most or child.include_default then
 									FileManager:AddFileWithCheck(MODEL_IDS, ids_path, file_path.."."..MODEL)
 									FileManager:AddFileWithCheck(OBJECT_IDS, ids_path, file_path.."."..OBJECT)
 									FileManager:AddFileWithCheck(MAT_CONFIG_IDS, ids_path, file_path.."."..MAT_CONFIG)
 									if not DB:has(ids_ext, ids_path) then
 										FileManager:AddFile(COOKED_PHYSICS_IDS, ids_path, CP_DEFAULT)
-									end	
-								end
+									end
+                                end
+                                if child.include_cooked_physics then
+                                    FileManager:AddFile(COOKED_PHYSICS_IDS, ids_path, CP_DEFAULT)
+                                end
 								if most or child.include_textures then
 									FileManager:AddFileWithCheck(TEXTURE_IDS, Idstring(path.."_df"), file_path.."_df" .."."..TEXTURE)
 									FileManager:AddFileWithCheck(TEXTURE_IDS, Idstring(path.."_nm"), file_path.."_nm" .."."..TEXTURE)

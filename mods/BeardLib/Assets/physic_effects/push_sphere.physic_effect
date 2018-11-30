@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<physic_effects>
+
+	<push name="exp_push" velocity="( dir( target - source ) + ( Z * 0.5 ) ) * clamp( 1 - ( len( target - source ) / param1 ), 0.3, 1) * 500" at="target" mass="param2"/>
+	<sphere name="sphere" radius="param1" />
+	
+	<effect>
+		<world action="exp_push" shape="sphere"/>
+	</effect>
+</physic_effects>
