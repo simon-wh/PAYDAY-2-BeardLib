@@ -227,5 +227,28 @@ elseif F == "dialogmanager" then
 				}
 			end
 		end
-	end)
+    end)
+elseif F == "networkpeer" then
+    local tradable_item_verif = NetworkPeer.tradable_verify_outfit
+    function NetworkPeer:tradable_verify_outfit(signature)
+        local outfit = self:blackmarket_outfit()
+        
+        if outfit.primary and outfit.primary.cosmetics then
+            if tweak_data.blackmarket.weapon_skins[outfit.primary.cosmetics.id].is_a_unlockable  then
+                return
+            end
+        else
+            return
+        end
+
+        if outfit.secondary and outfit.secondary.cosmetics then
+            if tweak_data.blackmarket.weapon_skins[outfit.secondary.cosmetics.id].is_a_unlockable  then
+                return
+            end
+        else
+            return
+        end
+
+        return tradable_item_verif(self, signature)
+    end
 end

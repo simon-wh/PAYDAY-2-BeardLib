@@ -39,17 +39,17 @@ Hooks:Add("NetworkPeerSend", "BeardLibCustomWeaponFix", function(self, func_name
 			local orig_outift = params[1]
 			params[1] = BeardLib.Utils:CleanOutfitString(params[1])
 			orig_NetworkPeer_send(self, "send_chat_message", LuaNetworking.HiddenChannel, parse_as_lnetwork_string(send_outfit_id, orig_outift .. "|" .. params[2]))
-		elseif string.ends(func_name, "set_unit") then
+        elseif string.ends(func_name, "set_unit") then
 			params[3] = BeardLib.Utils:CleanOutfitString(params[3], params[4] == 0)
-		elseif func_name == "set_equipped_weapon" then
-			if params[2] == -1 then
+        elseif func_name == "set_equipped_weapon" then            
+            if params[2] == -1 then
                 local index, data = BeardLib.Utils:GetCleanedWeaponData()
                 params[2] = index
-				params[3] = data
-			else
+                params[3] = data
+            else              
 				local factory_id = PlayerInventory._get_weapon_name_from_sync_index(params[2])
 				local blueprint = managers.weapon_factory:unpack_blueprint_from_string(factory_id, params[3])
-				params[3] = managers.weapon_factory:blueprint_to_string(factory_id, BeardLib.Utils:GetCleanedBlueprint(blueprint, factory_id))
+                params[3] = managers.weapon_factory:blueprint_to_string(factory_id, BeardLib.Utils:GetCleanedBlueprint(blueprint, factory_id))
 			end
 		--[[
 		OUTDATED CODE!
@@ -65,7 +65,7 @@ Hooks:Add("NetworkPeerSend", "BeardLibCustomWeaponFix", function(self, func_name
 					params[4] = tweak_data.blackmarket:get_index_from_projectile_id(projectile_name) or 1
 				end
 			end
-		]]
+		--]]
         end
     end
 end)
@@ -181,7 +181,7 @@ function NetworkPeer:set_outfit_string(outfit_string, outfit_version, outfit_sig
 
     if self._real_outfit_string then
 
-    	local old_outfit_string = self._profile.outfit_string
+        local old_outfit_string = self._profile.outfit_string
 
         local old_outfit_list = managers.blackmarket:unpack_outfit_from_string(old_outfit_string)
         local new_outfit_list = managers.blackmarket:unpack_outfit_from_string(self._real_outfit_string)
@@ -200,6 +200,18 @@ function NetworkPeer:set_outfit_string(outfit_string, outfit_version, outfit_sig
 
         if tweak_data.blackmarket.melee_weapons[new_outfit_list.melee_weapon] and tweak_data.blackmarket.melee_weapons[new_outfit_list.melee_weapon].custom then
             old_outfit_list.melee_weapon = new_outfit_list.melee_weapon
+        end
+
+        if new_outfit_list.primary.cosmetics then
+            if tweak_data.blackmarket.weapon_skins[new_outfit_list.primary.cosmetics.id] and tweak_data.weapon_skins[new_outfit_list.primary.cosmetics.id].custom then
+                old_outfit_list.primary.cosmetics.id = new_outfit_list.primary.cosmetics.id
+            end
+        end
+
+        if new_outfit_list.secondary.cosmetics then
+            if tweak_data.blackmarket.weapon_skins[new_outfit_list.secondary.cosmetics.id] and tweak_data.blackmarket.weapon_skins[new_outfit_list.secondary.cosmetics.id].custom then
+                old_outfit_list.secondary.cosmetics.id = new_outfit_list.secondary.cosmetics.id
+            end
         end
 
         self._profile.outfit_string = BeardLib.Utils:OutfitStringFromList(old_outfit_list)

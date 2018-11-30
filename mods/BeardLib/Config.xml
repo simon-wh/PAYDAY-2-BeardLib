@@ -47,6 +47,7 @@
 			<hook source_file="lib/managers/weaponfactorymanager" file="Fixes.lua"/>
 			<hook source_file="lib/managers/blackmarketmanager" file="Fixes.lua"/>
 			<hook source_file="lib/managers/dialogmanager" file="Fixes.lua"/>
+			<hook source_file="lib/network/base/networkpeer" file="Fixes.lua"/>
 
 			<hook source_file="lib/setups/setup" file="OtherHooks.lua"/>
 			<hook source_file="lib/setups/gamesetup" file="OtherHooks.lua"/>
@@ -122,6 +123,7 @@
 		<class file="ModuleBase.lua"/>
 		<class file="Dialogs/MenuDialogManager.lua" manager="dialog"/>
 		<class file="BeardLibModsMenu.lua" manager="mods_menu"/>
+		<class file="WeaponSkinExtension.lua"/>
 	</classes>
 	<script_data_types>
 		<value_node value="sequence_manager"/>
