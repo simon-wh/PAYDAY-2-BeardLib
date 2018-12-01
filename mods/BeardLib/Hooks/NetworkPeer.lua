@@ -192,7 +192,7 @@ function NetworkPeer:set_equipped_weapon_beardlib(weapon_string, outfit_version)
     local weapon = managers.blackmarket:unpack_beardlib_weapon_string(weapon_string)
     if self._unit then
         local inv = self._unit:inventory()
-        local id = outfit.id.."_npc"
+        local id = weapon.id.."_npc"
         local npc_weapon = tweak_data.weapon.factory[id]
         if npc_weapon and DB:has(Idstring("unit"), npc_weapon.unit:id()) then
             self._last_beardlib_weapon_string = weapon_string
@@ -200,7 +200,7 @@ function NetworkPeer:set_equipped_weapon_beardlib(weapon_string, outfit_version)
             inv:add_unit_by_factory_name(id, true, true, "", weapon.cosmetics_string or self:cosmetics_string_from_peer(peer, weapon.id))
         end
     else
-        self._last_beardlib_outfit = nil
+        self._last_beardlib_weapon_string = nil
     end
 end
 
