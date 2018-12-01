@@ -58,16 +58,22 @@ Hooks:Add(peer_send_hook, "BeardLibCustomWeaponFix", function(self, func_name, p
             else              
 				local factory_id = PlayerInventory._get_weapon_name_from_sync_index(params[2])
 				local blueprint = managers.weapon_factory:unpack_blueprint_from_string(factory_id, params[3])
-                params[3] = managers.weapon_factory:blueprint_to_string(factory_id, BeardLib.Utils:GetCleanedBlueprint(blueprint, factory_id))
-
-                for _, part_id in pairs(blueprint) do
-                    local part = factory.parts[part_id]
-                    if part and part.custom then
-                        --If the weapon has custom parts, treat it as a custom weapon.
-                        SendMessage(self, set_equipped_weapon, managers.blackmarket:beardlib_weapon_string(selection_index) .. "|" .. current_outfit_version)
-                        return
-                    end
-                end
+				local wep = tweak_data.weapon[managers.weapon_factory:get_weapon_id_by_factory_id(factory_id)]
+				
+				params[3] = managers.weapon_factory:blueprint_to_string(factory_id, BeardLib.Utils:GetCleanedBlueprint(blueprint, factory_id))
+				
+				if wep then
+					local index = wep.use_data.selection_index
+					local wep_data = managers.blackmarket:beardlib_get_weapon(index)
+					for _, part_id in pairs(wep_data.blueprint) do
+						local part = tweak_data.weapon.factory.parts[part_id]
+						if part and part.custom then
+							--If the weapon has custom parts, treat it as a custom weapon.
+							SendMessage(self, set_equipped_weapon, managers.blackmarket:beardlib_weapon_string(index) .. "|" .. current_outfit_version)
+							return
+						end
+					end
+				end
                 SendMessage(self, set_equipped_weapon, "")
             end
 
@@ -198,7 +204,7 @@ function NetworkPeer:set_equipped_weapon_beardlib(weapon_string, outfit_version)
         return
     end
 
-    local weapon = managers.blackmarket:unpack_beardlib_weapon_string(weapon_string)
+	local weapon = managers.blackmarket:unpack_beardlib_weapon_string(weapon_string)
     if self._unit and weapon.id then
         local inv = self._unit:inventory()
         local id = weapon.id.."_npc"
@@ -216,7 +222,7 @@ function NetworkPeer:set_equipped_weapon_beardlib(weapon_string, outfit_version)
                         for i, blueprint_part in pairs(blueprint) do
                             if blueprint_part == uses_part then 
                                 ins = false 
-                            elseif (fac[blueprint_part] and fac[uses_part]) and fac[blueprint_part].type == fac[uses_part].type then
+							elseif (fac.parts[blueprint_part] and fac.parts[uses_part]) and fac.parts[blueprint_part].type == fac.parts[uses_part].type then
                                 blueprint[i] = uses_part
                                 ins = false
                             end
@@ -270,17 +276,21 @@ function NetworkPeer:set_outfit_string_beardlib(outfit_string, outfit_version)
     local factory = tweak_data.weapon.factory
     for i=1,2 do
         local current = i == 1 and "primary" or "secondary"
-        if new_outfit[current].cosmetics then
-            if skins[new_outfit[current].cosmetics.id] and skins[new_outfit[current].cosmetics.id].custom then
-                old_outfit[current].cosmetics = new_outfit[current].cosmetics
+        local current_new = new_outfit[current]
+        local current_old = old_outfit[current]
+        if new_outfit and new_outfit.factory_id then
+            if current_new.cosmetics then
+                if skins[current_new.cosmetics.id] and skins[current_new.cosmetics.id].custom then
+                    current_old.cosmetics = current_new.cosmetics
+                end
             end
-        end
-        local weapon = factory[new_outfit[current].factory_id]
-        local npc_weapon = factory[new_outfit[current].factory_id.."_npc"]
-        if weapon and npc_weapon and weapon.custom then
-            if DB:has(Idstring("unit"), npc_weapon.unit:id()) then
-                old_outfit[current].factory_id = new_outfit[current].factory_id
-                old_outfit[current].blueprint = factory[new_outfit[current].factory_id].default_blueprint
+            local weapon = factory[current_new.factory_id]
+            local npc_weapon = factory[current_new.factory_id.."_npc"]
+            if weapon and npc_weapon and weapon.custom then
+                if DB:has(Idstring("unit"), npc_weapon.unit:id()) then
+                    current_old.factory_id = current_new.factory_id
+                    current_old.blueprint = factory[current_new.factory_id].default_blueprint
+                end
             end
         end
     end

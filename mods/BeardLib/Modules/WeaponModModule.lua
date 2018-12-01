@@ -48,7 +48,11 @@ function WeaponModModule:RegisterHook()
         if config.weapons then
             for _, weap in ipairs(config.weapons) do
                 if w_self[weap] and w_self[weap].uses_parts then
-					table.insert(w_self[weap].uses_parts, config.id)
+                    table.insert(w_self[weap].uses_parts, config.id)
+                end
+                local npc_weapon = w_self[weap.."_npc"]
+                if npc_weapon and npc_weapon.uses_parts then
+                    table.insert(npc_weapon.uses_parts, config.id)
                 end
             end
         end

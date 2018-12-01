@@ -102,13 +102,15 @@ function BlackMarketManager:compact_outfit_string()
 	return s
 end
 
+function BlackMarketManager:beardlib_get_weapon(selection_index)
+	return selection_index == 2 and self:equipped_primary() or self:equipped_secondary()
+end
 
 function BlackMarketManager:beardlib_weapon_string(selection_index)
 	local s = ""
 
-	local equipped = selection_index == 2 and self:equipped_primary() or self:equipped_secondary()
+	local equipped = self:beardlib_get_weapon(selection_index)
 	if equipped then
-		local clean_blueprint = BeardLib.Utils:GetCleanedBlueprint(equipped.blueprint, equipped.factory_id)
 		local blueprint = {}
 		for _, part in pairs(equipped.blueprint) do
 			table.insert(blueprint, string.key(part))
