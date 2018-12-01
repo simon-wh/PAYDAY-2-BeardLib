@@ -59,6 +59,15 @@ Hooks:Add(peer_send_hook, "BeardLibCustomWeaponFix", function(self, func_name, p
 				local factory_id = PlayerInventory._get_weapon_name_from_sync_index(params[2])
 				local blueprint = managers.weapon_factory:unpack_blueprint_from_string(factory_id, params[3])
                 params[3] = managers.weapon_factory:blueprint_to_string(factory_id, BeardLib.Utils:GetCleanedBlueprint(blueprint, factory_id))
+
+                for _, part_id in pairs(blueprint) do
+                    local part = factory.parts[part_id]
+                    if part and part.custom then
+                        --If the weapon has custom parts, treat it as a custom weapon.
+                        SendMessage(self, set_equipped_weapon, managers.blackmarket:beardlib_weapon_string(selection_index) .. "|" .. current_outfit_version)
+                        return
+                    end
+                end
                 SendMessage(self, set_equipped_weapon, "")
             end
 
@@ -193,8 +202,8 @@ function NetworkPeer:set_equipped_weapon_beardlib(weapon_string, outfit_version)
     if self._unit and weapon.id then
         local inv = self._unit:inventory()
         local id = weapon.id.."_npc"
-        local factory = tweak_data.weapon.factory
-        local npc_weapon = factory[id]
+        local fac = tweak_data.weapon.factory
+        local npc_weapon = fac[id]
         if npc_weapon and DB:has(Idstring("unit"), npc_weapon.unit:id()) then
             self._last_beardlib_weapon_string = weapon_string
             local blueprint = clone(npc_weapon.default_blueprint)
@@ -220,7 +229,7 @@ function NetworkPeer:set_equipped_weapon_beardlib(weapon_string, outfit_version)
                 end
             end
         
-            inv:add_unit_by_factory_name(id, true, true, table.concat(blueprint, "_"), weapon.cosmetics_string or self:cosmetics_string_from_peer(peer, weapon.id))
+            inv:add_unit_by_factory_name(id, true, true, managers.weapon_factory:blueprint_to_string(id, blueprint), weapon.cosmetics or self:cosmetics_string_from_peer(peer, weapon.id))
         end
     else
         self._last_beardlib_weapon_string = nil
