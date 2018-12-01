@@ -109,9 +109,11 @@ function BlackMarketManager:beardlib_weapon_string(selection_index)
 	local equipped = selection_index == 2 and self:equipped_primary() or self:equipped_secondary()
 	if equipped then
 		local clean_blueprint = BeardLib.Utils:GetCleanedBlueprint(equipped.blueprint, equipped.factory_id)
-		local str = managers.weapon_factory:blueprint_to_string(equipped.factory_id, clean_blueprint)
-		str = string.gsub(str, " ", "_")
-		s = s .. " " .. equipped.factory_id .. " " .. str
+		local blueprint = {}
+		for _, part in pairs(equipped.blueprint) do
+			table.insert(blueprint, string.key(part))
+		end
+		s = s .. " " .. equipped.factory_id .. " " .. table.concat(blueprint, "_")
 	else
 		s = s .. " " .. "nil" .. " " .. "0"
 	end
@@ -138,7 +140,7 @@ function BlackMarketManager:unpack_beardlib_weapon_string(outfit_string)
 
 	return {
 		id = get(1) or "wpn_fps_ass_amcar",
-		blueprint_string = get(2),
+		blueprint_string = string.split(get(2), "_"),
 		cosmetics_string = get(3)
 	}
 end

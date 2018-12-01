@@ -190,14 +190,37 @@ function NetworkPeer:set_equipped_weapon_beardlib(weapon_string, outfit_version)
     end
 
     local weapon = managers.blackmarket:unpack_beardlib_weapon_string(weapon_string)
-    if self._unit then
+    if self._unit and weapon.id then
         local inv = self._unit:inventory()
         local id = weapon.id.."_npc"
-        local npc_weapon = tweak_data.weapon.factory[id]
+        local factory = tweak_data.weapon.factory
+        local npc_weapon = factory[id]
         if npc_weapon and DB:has(Idstring("unit"), npc_weapon.unit:id()) then
             self._last_beardlib_weapon_string = weapon_string
-            --TODO: Properly sync blueprint
-            inv:add_unit_by_factory_name(id, true, true, "", weapon.cosmetics_string or self:cosmetics_string_from_peer(peer, weapon.id))
+            local blueprint = clone(npc_weapon.default_blueprint)
+
+            --Goes through each part and checks if the part can be added
+            for _, part in pairs(weapon.blueprint) do
+                for _, uses_part in pairs(npc_weapon.uses_parts) do
+                    if string.key(uses_part) == part then
+                        local ins = true
+                        for i, blueprint_part in pairs(blueprint) do
+                            if blueprint_part == uses_part then 
+                                ins = false 
+                            elseif (fac[blueprint_part] and fac[uses_part]) and fac[blueprint_part].type == fac[uses_part].type then
+                                blueprint[i] = uses_part
+                                ins = false
+                            end
+                        end
+                        if ins then
+                            table.insert(blueprint, uses_part)
+                        end
+                        break
+                    end
+                end
+            end
+        
+            inv:add_unit_by_factory_name(id, true, true, table.concat(blueprint, "_"), weapon.cosmetics_string or self:cosmetics_string_from_peer(peer, weapon.id))
         end
     else
         self._last_beardlib_weapon_string = nil
