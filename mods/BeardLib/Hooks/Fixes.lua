@@ -68,7 +68,7 @@ elseif F == "blackmarketmanager" then
     end
 elseif F == "crewmanagementgui" then
     local orig = CrewManagementGui.populate_primaries
-    --Blocks out custom weapons that are don't have support for AI.
+    --Blocks out custom weapons that don't have support for AI.
     function CrewManagementGui:populate_primaries(i, data, ...)
         local res = orig(self, i, data, ...)
         for k, v in ipairs(data) do
@@ -92,6 +92,16 @@ elseif F == "connectionnetworkhandler" then
         self._ignore_stage_settings_once = true
     end
     
+    --Sets the correct data out of NetworkPeer instead of straight from the parameters
+    Hooks:PostHook(ConnectionNetworkHandler, "sync_outfit", "BeardLibSyncOutfitProperly", function(self, outfit_string, outfit_version, outfit_signature, sender)
+        local peer = self._verify_sender(sender)
+        if not peer then
+            return
+        end
+    
+        peer:beardlib_reload_outfit()
+    end)
+
     local orig_sync_stage_settings = ConnectionNetworkHandler.sync_stage_settings
     function ConnectionNetworkHandler:sync_stage_settings(level_id_index, ...)
         if self._ignore_stage_settings_once then

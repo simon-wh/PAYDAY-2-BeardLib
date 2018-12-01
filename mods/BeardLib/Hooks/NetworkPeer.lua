@@ -1,9 +1,11 @@
 local sync_stage_settings_id = "BeardLib_sync_stage_settings"
 local sync_game_settings_id = "BeardLib_sync_game_settings"
 local lobby_sync_update_level_id = "BeardLib_lobby_sync_update_level_id"
-local send_outfit_id = "BeardLib_check_send_outfit"
+local send_outfit_id = "BCO" --BeardLib compact outfit
+local set_equipped_weapon = "BSEW" --BeardLib set equipped weapon
+local current_outfit_version = "1.0"
 
-local orig_NetworkPeer_send = NetworkPeer.send
+local NetworkPeerSend = NetworkPeer.send
 
 local is_custom = function()
     return managers.job:has_active_job() and (managers.job:current_level_data() and managers.job:current_level_data().custom or managers.job:current_job_data().custom)
@@ -14,18 +16,23 @@ local parse_as_lnetwork_string = function(type_prm, data)
 	return dataString
 end
 
+local function SendMessage(peer, name, msg)
+    NetworkPeerSend(peer, "send_chat_message", LuaNetworking.HiddenChannel, parse_as_lnetwork_string(name, msg))
+end
+
 local peer_send_hook = "NetworkPeerSend"
 Hooks:Register(peer_send_hook)
 
 Hooks:Add(peer_send_hook, "BeardLibCustomHeistFix", function(self, func_name, params)
     if self ~= managers.network:session():local_peer() and is_custom() then
         if func_name == "sync_game_settings" or func_name == "sync_lobby_data" then
-            orig_NetworkPeer_send(self, "send_chat_message", LuaNetworking.HiddenChannel, parse_as_lnetwork_string(sync_game_settings_id, BeardLib.Utils:GetJobString()))
+            SendMessage(self, sync_game_settings_id, BeardLib.Utils:GetJobString())
         elseif func_name == "lobby_sync_update_level_id" then
-            orig_NetworkPeer_send(self, "send_chat_message", LuaNetworking.HiddenChannel, parse_as_lnetwork_string(lobby_sync_update_level_id, Global.game_settings.level_id))
+            SendMessage(self, lobby_sync_update_level_id, Global.game_settings.level_id)
         elseif func_name == "sync_stage_settings" then
-            orig_NetworkPeer_send(self, "send_chat_message", LuaNetworking.HiddenChannel, parse_as_lnetwork_string(sync_stage_settings_id, string.format("%s|%s|%s|%s", Global.game_settings.level_id, tostring(managers.job._global.current_job.current_stage), tostring(managers.job._global.alternative_stage or 0), tostring(managers.job._global.interupt_stage))))      
-		elseif string.ends(func_name,"join_request_reply") then
+            local glbl = managers.job._global
+            SendMessage(self, lobby_sync_update_level_id, string.format("%s|%s|%s|%s", sync_stage_settings_id, tostring(glbl.current_job.current_stage), tostring(glbl.alternative_stage or 0), tostring(glbl.interupt_stage)))
+        elseif string.ends(func_name,"join_request_reply") then
             if params[1] == 1 then
                 params[15] = BeardLib.Utils:GetJobString()
             end
@@ -33,24 +40,28 @@ Hooks:Add(peer_send_hook, "BeardLibCustomHeistFix", function(self, func_name, pa
     end
 end)
 
-Hooks:Add("NetworkPeerSend", "BeardLibCustomWeaponFix", function(self, func_name, params)
+Hooks:Add(peer_send_hook, "BeardLibCustomWeaponFix", function(self, func_name, params)
     if self ~= managers.network:session():local_peer() then
+        if func_name == "sync_outfit" or string.ends(func_name, "set_unit") then
+            SendMessage(self, send_outfit_id, managers.blackmarket:compact_outfit_string() .. "|" .. current_outfit_version)
+        end
         if func_name == "sync_outfit" then
-			local orig_outift = params[1]
-			params[1] = BeardLib.Utils:CleanOutfitString(params[1])
-			orig_NetworkPeer_send(self, "send_chat_message", LuaNetworking.HiddenChannel, parse_as_lnetwork_string(send_outfit_id, orig_outift .. "|" .. params[2]))
+            params[1] = BeardLib.Utils:CleanOutfitString(params[1])
         elseif string.ends(func_name, "set_unit") then
 			params[3] = BeardLib.Utils:CleanOutfitString(params[3], params[4] == 0)
         elseif func_name == "set_equipped_weapon" then            
             if params[2] == -1 then
-                local index, data = BeardLib.Utils:GetCleanedWeaponData()
+                local index, data, selection_index = BeardLib.Utils:GetCleanedWeaponData()
                 params[2] = index
                 params[3] = data
+                SendMessage(self, set_equipped_weapon, managers.blackmarket:beardlib_weapon_string(selection_index) .. "|" .. current_outfit_version)
             else              
 				local factory_id = PlayerInventory._get_weapon_name_from_sync_index(params[2])
 				local blueprint = managers.weapon_factory:unpack_blueprint_from_string(factory_id, params[3])
                 params[3] = managers.weapon_factory:blueprint_to_string(factory_id, BeardLib.Utils:GetCleanedBlueprint(blueprint, factory_id))
-			end
+                SendMessage(self, set_equipped_weapon, "")
+            end
+
 		--[[
 		OUTDATED CODE!
 		elseif func_name == "sync_grenades" then
@@ -76,8 +87,7 @@ function NetworkPeer:send(func_name, ...)
 	end
 	local params = table.pack(...)
     Hooks:Call(peer_send_hook, self, func_name, params)
-
-    orig_NetworkPeer_send(self, func_name, unpack(params, 1, params.n))
+    NetworkPeerSend(self, func_name, unpack(params, 1, params.n))
 end
 
 Hooks:Add("NetworkReceivedData", lobby_sync_update_level_id, function(sender, id, data)
@@ -155,71 +165,129 @@ Hooks:Add("NetworkReceivedData", sync_stage_settings_id, function(sender, id, da
             log("[ERROR] RPC is nil!")
         end
     end
-
 end)
 
 Hooks:Add("NetworkReceivedData", send_outfit_id, function(sender, id, data)
-    if id == send_outfit_id then
-        local outfit = string.split(data, "|")
-        local peer = managers.network:session():peer(sender)
-        if peer then
-            peer:set_outfit_string(outfit[1], outfit[2], false)
+    local peer = managers.network:session():peer(sender)
+    if peer then
+        if id == send_outfit_id then
+            local str = string.split(data, "|")
+            peer:set_outfit_string_beardlib(str[1], str[2])
+        elseif id == set_equipped_weapon then
+            if data == "" or not data then
+                peer._last_beardlib_weapon_string = nil
+            else
+                local str = string.split(data, "|")
+                peer:set_equipped_weapon_beardlib(str[1], str[2])
+            end
         end
     end
 end)
 
-
-local orig_NetworkPeer_set_outfit_string = NetworkPeer.set_outfit_string
-
-function NetworkPeer:set_outfit_string(outfit_string, outfit_version, outfit_signature, ...)
-	if outfit_signature == false then
-		self._real_outfit_string = outfit_string
-		return
-	end
-
-    orig_NetworkPeer_set_outfit_string(self, outfit_string, outfit_version, outfit_signature or self._signature, ...)
-
-    if self._real_outfit_string then
-
-        local old_outfit_string = self._profile.outfit_string
-
-        local old_outfit_list = managers.blackmarket:unpack_outfit_from_string(old_outfit_string)
-        local new_outfit_list = managers.blackmarket:unpack_outfit_from_string(self._real_outfit_string)
-
-        if tweak_data.blackmarket.masks[new_outfit_list.mask.mask_id] and tweak_data.blackmarket.masks[new_outfit_list.mask.mask_id].custom then
-            old_outfit_list.mask.mask_id = new_outfit_list.mask.mask_id
-        end
-
-        if tweak_data.blackmarket.textures[new_outfit_list.mask.blueprint.pattern.id] and tweak_data.blackmarket.textures[new_outfit_list.mask.blueprint.pattern.id].custom then
-    		old_outfit_list.mask.blueprint.pattern.id = new_outfit_list.mask.blueprint.pattern.id
-    	end
-
-    	if tweak_data.blackmarket.materials[new_outfit_list.mask.blueprint.material.id] and tweak_data.blackmarket.materials[new_outfit_list.mask.blueprint.material.id].custom then
-    		old_outfit_list.mask.blueprint.material.id = new_outfit_list.mask.blueprint.material.id
-    	end
-
-        if tweak_data.blackmarket.melee_weapons[new_outfit_list.melee_weapon] and tweak_data.blackmarket.melee_weapons[new_outfit_list.melee_weapon].custom then
-            old_outfit_list.melee_weapon = new_outfit_list.melee_weapon
-        end
-
-        if new_outfit_list.primary.cosmetics then
-            if tweak_data.blackmarket.weapon_skins[new_outfit_list.primary.cosmetics.id] and tweak_data.weapon_skins[new_outfit_list.primary.cosmetics.id].custom then
-                old_outfit_list.primary.cosmetics.id = new_outfit_list.primary.cosmetics.id
-            end
-        end
-
-        if new_outfit_list.secondary.cosmetics then
-            if tweak_data.blackmarket.weapon_skins[new_outfit_list.secondary.cosmetics.id] and tweak_data.blackmarket.weapon_skins[new_outfit_list.secondary.cosmetics.id].custom then
-                old_outfit_list.secondary.cosmetics.id = new_outfit_list.secondary.cosmetics.id
-            end
-        end
-
-        self._profile.outfit_string = BeardLib.Utils:OutfitStringFromList(old_outfit_list)
-        
-        if old_outfit_string ~= self._profile.outfit_string then
-    		self:_reload_outfit()
-    	end
+function NetworkPeer:set_equipped_weapon_beardlib(weapon_string, outfit_version)
+    if outfit_version ~= current_outfit_version then
+        return
     end
 
-	return self._profile.outfit_string, self._outfit_version, self._signature
+    local outfit = managers.blackmarket:unpack_beardlib_weapon_string(weapon_string)
+    if self._unit then
+        local inv = self._unit:inventory()
+        local id = outfit.id.."_npc"
+        if tweak_data.weapon.factory[id] then
+            self._last_beardlib_weapon_string = weapon_string
+            --TODO: Properly sync blueprint
+            inv:add_unit_by_factory_name(id, true, true, "", outfit.cosmetics_string or self:cosmetics_string_from_peer(peer, outfit.id))
+        end
+    else
+        self._last_beardlib_outfit = nil
+    end
+end
+
+function NetworkPeer:set_outfit_string_beardlib(outfit_string, outfit_version)
+    if outfit_version ~= current_outfit_version then --Avoid sync to avoid issues.
+        return
+    end
+    
+    self._last_beardlib_outfit = outfit_string
+
+    local old_outfit_string = self._profile.outfit_string
+
+    local old_outfit = managers.blackmarket:unpack_outfit_from_string(old_outfit_string)
+    local new_outfit = managers.blackmarket:unpack_compact_outfit(outfit_string)
+    local bm = tweak_data.blackmarket
+
+    local mask =new_outfit.mask 
+    if bm.masks[mask.mask_id] and bm.masks[mask.mask_id].custom then
+        old_outfit.mask.mask_id = new_outfit.mask.mask_id
+    end
+
+    if bm.textures[mask.blueprint.pattern.id] and bm.textures[mask.blueprint.pattern.id].custom then
+        old_outfit.mask.blueprint.pattern.id = new_outfit.mask.blueprint.pattern.id
+    end
+
+    if bm.materials[mask.blueprint.material.id] and bm.materials[mask.blueprint.material.id].custom then
+        old_outfit.mask.blueprint.material.id = new_outfit.mask.blueprint.material.id
+    end
+
+    if bm.melee_weapons[new_outfit.melee_weapon] and bm.melee_weapons[new_outfit.melee_weapon].custom then
+        old_outfit.melee_weapon = new_outfit.melee_weapon
+    end
+
+    local skins = tweak_data.blackmarket.weapon_skins
+    local factory = tweak_data.weapon.factory
+    for i=1,2 do
+        local current = i == 1 and "primary" or "secondary"
+        if new_outfit[current].cosmetics then
+            if skins[new_outfit[current].cosmetics.id] and skins[new_outfit[current].cosmetics.id].custom then
+                old_outfit[current].cosmetics = new_outfit[current].cosmetics
+            end
+        end
+        local weapon = factory[new_outfit[current].factory_id]
+        local npc_weapon = factory[new_outfit[current].factory_id.."_npc"]
+        if weapon and npc_weapon and weapon.custom then
+            if DB:has(Idstring("unit"), npc_weapon.unit:id()) then
+                old_outfit[current].factory_id = new_outfit[current].factory_id
+                old_outfit[current].blueprint = factory[new_outfit[current].factory_id].default_blueprint
+            end
+        end
+    end
+
+    self._profile.outfit_string = BeardLib.Utils:OutfitStringFromList(old_outfit)
+    
+    if old_outfit_string ~= self._profile.outfit_string then
+        self:_reload_outfit()
+    end
+
+    self:beardlib_reload_outfit()
+end
+
+function NetworkPeer:beardlib_reload_outfit()
+	local local_peer = managers.network:session() and managers.network:session():local_peer()
+    local in_lobby = local_peer and local_peer:in_lobby() and game_state_machine:current_state_name() ~= "ingame_lobby_menu" and not setup:is_unloading()
+
+	if managers.menu_scene and in_lobby then
+		managers.menu_scene:set_lobby_character_out_fit(self:id(), self._profile.outfit_string, self:rank())
+	end
+
+	local kit_menu = managers.menu:get_menu("kit_menu")
+
+    if kit_menu then
+		kit_menu.renderer:set_slot_outfit(self:id(), self:character(), self._profile.outfit_string)
+    end
+    
+	if managers.menu_component then
+		managers.menu_component:peer_outfit_updated(self:id())
+    end
+end
+
+local set_outfit_string = NetworkPeer.set_outfit_string
+function NetworkPeer:set_outfit_string(...)
+    local a,b,c,d,e = set_outfit_string(self, ...)
+    local local_peer = managers.network:session() and managers.network:session():local_peer()
+
+    if self._last_beardlib_outfit then
+        self:set_outfit_string_beardlib(self._last_beardlib_outfit, current_outfit_version)
+    end
+
+    return a,b,c,d,e
 end

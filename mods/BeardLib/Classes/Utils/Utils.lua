@@ -106,7 +106,7 @@ function Utils:GetCleanedWeaponData(unit)
     local based_on_fac = self:GetBasedOnFactoryId(nil, wep)
 
     local new_weap_name = (not is_npc and based_on_fac) or self.WeapConv[wep.use_data.selection_index] .. (is_npc and "_npc" or "")
-    return PlayerInventory._get_weapon_sync_index(new_weap_name), managers.weapon_factory:blueprint_to_string(new_weap_name, tweak_data.weapon.factory[new_weap_name].default_blueprint)
+    return PlayerInventory._get_weapon_sync_index(new_weap_name), managers.weapon_factory:blueprint_to_string(new_weap_name, tweak_data.weapon.factory[new_weap_name].default_blueprint), wep.use_data.selection_index
 end
 
 function Utils:OutfitStringFromList(outfit, is_henchman)

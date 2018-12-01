@@ -35,6 +35,7 @@
 			<hook source_file="lib/units/beings/player/huskplayermovement" file="NetworkHooks.lua"/>
 			<hook source_file="lib/units/beings/player/playerinventory" file="NetworkHooks.lua"/>
 			<hook source_file="lib/units/weapons/newraycastweaponbase" file="NetworkHooks.lua"/>
+			<hook source_file="lib/network/handlers/unitnetworkhandler" file="NetworkHooks.lua"/>
 			
 			<hook source_file="lib/network/base/handlers/connectionnetworkhandler" file="Fixes.lua"/>
 			<hook source_file="core/lib/managers/menu/items/coremenuitemslider" file="Fixes.lua"/>
@@ -70,6 +71,7 @@
 			<hook source_file="lib/managers/menumanager" file="MenuManager.lua"/>
 			<hook source_file="lib/managers/menu/menuinput" file="MenuInput.lua"/>
 			<hook source_file="lib/managers/killzonemanager" file="KillzoneManager.lua"/>
+			<hook source_file="lib/managers/blackmarketmanager" file="BlackMarketManager.lua"/>
 		</Hooks>
 	</load_modules>
 	<classes>
