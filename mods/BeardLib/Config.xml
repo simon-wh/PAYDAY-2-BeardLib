@@ -49,6 +49,7 @@
 			<hook source_file="lib/managers/blackmarketmanager" file="Fixes.lua"/>
 			<hook source_file="lib/managers/dialogmanager" file="Fixes.lua"/>
 			<hook source_file="lib/network/base/networkpeer" file="Fixes.lua"/>
+			<hook source_file="lib/states/ingamewaitingforplayers" file="Fixes.lua"/>
 
 			<hook source_file="lib/setups/setup" file="OtherHooks.lua"/>
 			<hook source_file="lib/setups/gamesetup" file="OtherHooks.lua"/>

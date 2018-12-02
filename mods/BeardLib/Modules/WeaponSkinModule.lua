@@ -89,7 +89,7 @@ function WeaponSkinModule:RegisterHook()
             parts = self._skin_design.parts,
             default_blueprint = self._skin_attachments
         }
-        self:log("Added skin '%s' to the weapon '%s'", config.id, config.weapon_id)
+        --self:log("Added skin '%s' to the weapon '%s'", config.id, config.weapon_id)
     end)
 end
 

@@ -39,6 +39,20 @@ elseif F == "playerinventory" then
             end
         end
     end)
+
+    --[[forces the game to call "set_eqiupped_weapon" which is the function that deals best with custom weapons.
+    local add_unit_by_name = PlayerInventory.add_unit_by_name
+    Hooks:PostHook(PlayerInventory, "add_unit_by_name", "BeardLib.AddUnitByName", function(self)
+        if managers.player:player_unit():inventory() == self then
+            self:_send_equipped_weapon()
+        end
+    end)
+
+    Hooks:PostHook(PlayerInventory, "add_unit_by_factory_name", "BeardLib.AddUnitByFactoryName", function(self)
+        if managers.player:player_unit():inventory() == self then
+            managers.player:player_unit():inventory():_send_equipped_weapon()
+        end
+    end)]]
 elseif F == "newraycastweaponbase" then
     --Gotta replace it all sadly.
     function NewRaycastWeaponBase:blueprint_to_string()

@@ -7,7 +7,6 @@ if F == "weaponfactorymanager" then
     function WeaponFactoryManager:unpack_blueprint_from_string(factory_id, ...)
         local factory = tweak_data.weapon.factory
         if not factory[factory_id] then
-            BeardLib:log("[Fixes][Warning] Weapon with the factory ID %s does not exist, returning empty table.", tostring(factory_id))
             return {}
         end
         return orig_unpack(self, factory_id, ...)
@@ -261,4 +260,13 @@ elseif F == "networkpeer" then
 
         return tradable_item_verif(self, signature)
     end
+elseif F == 'ingamewaitingforplayers' then
+    --[[--Fixes custom weapon not appearing at first
+    Hooks:PostHook(IngameWaitingForPlayersState, "_start_audio", "BeardLib.StartAudio", function()
+        DelayedCalls:Add("PleaseShowCorrectWeaponBrokenPieceOf", 1, function()
+            if managers.player:player_unit() then
+                managers.player:player_unit():inventory():_send_equipped_weapon()
+            end
+        end)
+    end)]]
 end

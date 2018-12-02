@@ -59,7 +59,7 @@ Hooks:Add(peer_send_hook, "BeardLibCustomWeaponFix", function(self, func_name, p
 				local factory_id = PlayerInventory._get_weapon_name_from_sync_index(params[2])
 				local blueprint = managers.weapon_factory:unpack_blueprint_from_string(factory_id, params[3])
 				local wep = tweak_data.weapon[managers.weapon_factory:get_weapon_id_by_factory_id(factory_id)]
-				
+                
 				params[3] = managers.weapon_factory:blueprint_to_string(factory_id, BeardLib.Utils:GetCleanedBlueprint(blueprint, factory_id))
 				
 				if wep then
@@ -68,13 +68,15 @@ Hooks:Add(peer_send_hook, "BeardLibCustomWeaponFix", function(self, func_name, p
 					for _, part_id in pairs(wep_data.blueprint) do
 						local part = tweak_data.weapon.factory.parts[part_id]
 						if part and part.custom then
-							--If the weapon has custom parts, treat it as a custom weapon.
+                            --If the weapon has custom parts, treat it as a custom weapon.
 							SendMessage(self, set_equipped_weapon, managers.blackmarket:beardlib_weapon_string(index) .. "|" .. current_outfit_version)
 							return
 						end
 					end
-				end
-                SendMessage(self, set_equipped_weapon, "")
+                end
+                if type(factory_id) == "string" then
+                    SendMessage(self, set_equipped_weapon, "")
+                end
             end
 
 		--[[
@@ -188,13 +190,13 @@ Hooks:Add("NetworkReceivedData", send_outfit_id, function(sender, id, data)
         if id == send_outfit_id then
             local str = string.split(data, "|")
             peer:set_outfit_string_beardlib(str[1], str[2])
-        elseif id == set_equipped_weapon then
+        --[[elseif id == set_equipped_weapon then
             if data == "" or not data then
                 peer._last_beardlib_weapon_string = nil
             else
                 local str = string.split(data, "|")
                 peer:set_equipped_weapon_beardlib(str[1], str[2])
-            end
+            end]]
         end
     end
 end)
@@ -278,7 +280,7 @@ function NetworkPeer:set_outfit_string_beardlib(outfit_string, outfit_version)
         local current = i == 1 and "primary" or "secondary"
         local current_new = new_outfit[current]
         local current_old = old_outfit[current]
-        if new_outfit and new_outfit.factory_id then
+        if current_new and current_new.factory_id then
             if current_new.cosmetics then
                 if skins[current_new.cosmetics.id] and skins[current_new.cosmetics.id].custom then
                     current_old.cosmetics = current_new.cosmetics
