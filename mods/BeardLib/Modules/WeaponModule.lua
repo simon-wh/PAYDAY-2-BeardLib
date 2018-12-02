@@ -93,14 +93,7 @@ function WeaponModule:RegisterHook()
             data = table.merge(data, config.override)
         end
 
-        w_self[config.id] = data
-        local npc_data = clone(data)
-        local based_on = self[self:GetBasedOn(self, config.based_on.."_crew")]
-
-        npc_data.sounds.prefix = config.id.."_npc"
-        npc_data.autohit = false -- a little fix to some weird crash
-        npc_data.hold = npc_data.hold or based_on and based_on.hold or "rifle"
-        w_self[config.id .. "_crew"] = npc_data
+        --w_self[config.id .. "_crew"] = npc_data
     end)
 
     Hooks:PostHook(TweakDataVR , "init", self._config.weapon.id .. "AddVRWeaponTweakData", function(vrself)
