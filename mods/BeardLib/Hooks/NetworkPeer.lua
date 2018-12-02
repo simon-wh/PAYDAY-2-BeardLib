@@ -185,20 +185,27 @@ Hooks:Add("NetworkReceivedData", sync_stage_settings_id, function(sender, id, da
 end)
 
 Hooks:Add("NetworkReceivedData", send_outfit_id, function(sender, id, data)
-    local peer = managers.network:session():peer(sender)
-    if peer then
-        if id == send_outfit_id then
+    if id == send_outfit_id then
+        local peer = managers.network:session():peer(sender)
+        if peer then
             local str = string.split(data, "|")
             peer:set_outfit_string_beardlib(str[1], str[2])
-        --[[elseif id == set_equipped_weapon then
+        end
+    end
+end)
+
+Hooks:Add("NetworkReceivedData", set_equipped_weapon, function(sender, id, data)
+    --[[if id == set_equipped_weapon then
+        local peer = managers.network:session():peer(sender)
+        if peer then
             if data == "" or not data then
                 peer._last_beardlib_weapon_string = nil
             else
                 local str = string.split(data, "|")
                 peer:set_equipped_weapon_beardlib(str[1], str[2])
-            end]]
+            end
         end
-    end
+    end--]]
 end)
 
 function NetworkPeer:set_equipped_weapon_beardlib(weapon_string, outfit_version)
@@ -274,6 +281,7 @@ function NetworkPeer:set_outfit_string_beardlib(outfit_string, outfit_version)
         old_outfit.melee_weapon = new_outfit.melee_weapon
     end
 
+    --[[
     local skins = tweak_data.blackmarket.weapon_skins
     local factory = tweak_data.weapon.factory
     for i=1,2 do
@@ -295,7 +303,7 @@ function NetworkPeer:set_outfit_string_beardlib(outfit_string, outfit_version)
                 end
             end
         end
-    end
+    end--]]
 
     self._profile.outfit_string = BeardLib.Utils:OutfitStringFromList(old_outfit)
     
