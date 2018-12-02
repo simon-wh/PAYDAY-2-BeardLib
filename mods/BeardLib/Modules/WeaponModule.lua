@@ -92,7 +92,9 @@ function WeaponModule:RegisterHook()
         if config.override then
             data = table.merge(data, config.override)
         end
-
+	
+	 w_self[config.id] = data
+			
         --w_self[config.id .. "_crew"] = npc_data
     end)
 
