@@ -200,6 +200,9 @@ function MenuUI:Enable()
     else
         self._panel:set_alpha(1)
     end
+    if self.disable_player_controls and game_state_machine then
+      game_state_machine:current_state():set_controller_enabled(not managers.player:player_unit())
+    end
 	self._enabled = true
     self._mouse_id = self._mouse_id or managers.mouse_pointer:get_id()
 	managers.mouse_pointer:use_mouse({
@@ -221,6 +224,9 @@ function MenuUI:Disable()
         play_anim(self._panel, {set = {alpha = 0}, time = 0.2})
     else
         self._panel:set_alpha(0)
+    end
+    if self.disable_player_controls and game_state_machine then
+      game_state_machine:current_state():set_controller_enabled(true)
     end
 	self._enabled = false
 	if self._highlighted then self._highlighted:UnHighlight() end
