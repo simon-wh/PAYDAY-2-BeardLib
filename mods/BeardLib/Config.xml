@@ -17,6 +17,10 @@
 			<object path="core/units/run_sequence_dummy/run_sequence_dummy" force_if_not_loaded="true"/>
 			<sequence_manager path="core/units/run_sequence_dummy/run_sequence_dummy" force_if_not_loaded="true"/>
 			<physic_effect path="physic_effects/push_sphere" force_if_not_loaded="true"/>
+			<unit path="core/units/cubemap_gizmo/cubemap_gizmo" force_if_not_loaded="true"/>
+			<object path="core/units/cubemap_gizmo/cubemap_gizmo" force_if_not_loaded="true"/>
+			<model path="core/units/cubemap_gizmo/cubemap_gizmo" force_if_not_loaded="true"/>
+			<cooked_physics path="core/units/cubemap_gizmo/cubemap_gizmo" force_if_not_loaded="true"/>
 			<texture path="guis/textures/menu_ui_icons"/>
 			<texture path="guis/textures/beardlib_logo"/>
 		</AddFiles>
