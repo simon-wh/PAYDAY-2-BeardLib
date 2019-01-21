@@ -11,6 +11,7 @@ WeaponSkinModule.type_id = "WeaponSkin"
 function WeaponSkinModule:RegisterHook()
     self._config.id = self._config.id or self:log("[ERROR] Cannot add a weapon skin : No ID specified.")
     self._config.weapon_id = self._config.weapon_id or "amcar"
+    self._config.weapon_ids = self._config.weapon_ids or nil
     self._config.name = self._config.name or "weapon_skin_name empty..."
     self._config.desc = self._config.desc or "bm_wskn_p90_woodland_desc" -- These descs are 99% of the time empty, excepted for legendaries :|
     self._config.rarity = self._config.rarity or "common"
@@ -68,6 +69,7 @@ function WeaponSkinModule:RegisterHook()
             name_id = config.name,
             desc_id = config.desc,
             weapon_id = config.weapon_id,
+            weapon_ids = config.weapon_ids, -- Ovk are a bunch of retards sometimes
             rarity = config.rarity,
             is_a_unlockable = true,
             custom = true,
