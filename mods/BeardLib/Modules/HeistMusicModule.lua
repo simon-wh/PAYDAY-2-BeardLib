@@ -40,7 +40,7 @@ function HeistMusic:RegisterHook()
 			end
 			if v.alt_source then
 				v.alt_source = Path:Combine(dir, v.alt_source)
-				v.alt_start_source = Path:Combine(dir, v.alt_start_source)
+				v.alt_start_source = v.alt_start_source and Path:Combine(dir, v.alt_start_source)
 				v.alt_chance = v.alt_chance and tonumber(v.alt_chance) or 0.1
 				v.allow_switch = NotNil(v.allow_switch, true)
 			end
