@@ -1075,8 +1075,8 @@ Item.UNCLICKABLE = 1 --null is "unknown".
 Item.CLICKABLE = 2
 Item.INTERRUPTED = 3
 function Item:MousePressed(b, x, y)
-	if self.menu_type then
-		return self:MousePressedMenuEvent(b, x, y)
+	if self.menu_type and self:MousePressedMenuEvent(b, x, y) then
+		return true
 	else
 		return self:MousePressedSelfEvent(b, x, y)
 	end

@@ -107,7 +107,7 @@ function Group:MouseMoved(x, y)
 end
 
 function Group:ToolbarMenu()
-    if not self.toolbar then
+    if not alive(self.toolbar) then
         self.toolbar = self:SimpleToolbar({
             name = "Toolbar",
             label = "Toolbar",
