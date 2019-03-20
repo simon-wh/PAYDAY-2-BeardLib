@@ -28,20 +28,19 @@ function ColorDialog:_Show(params)
         offset = 0,
         background_color = self._color,
     })
-    self._menu:TextBox({
+    preview:TextBox({
         name = "Hex",
         text = "Hex:",
         value = "",
         lines = 1,
+        offset = {8, 4},
         auto_foreground = false,
         foreground_highlight = false,
-        position = "CenterLeft",
         background_color = false,
         highlight_color = false,
         on_callback = ClassClbk(self, "update_hex"),
         w = 120,
-        size = 20,
-        override_panel = preview
+        size = 20
     })
     if params.create_items then
         params.create_items(self._menu)

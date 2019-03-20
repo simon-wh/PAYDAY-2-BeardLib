@@ -106,16 +106,17 @@ function Group:MouseMoved(x, y)
     return ret
 end
 
-function Group:ToolbarMenu()
-    if not alive(self.toolbar) then
-        self.toolbar = self:SimpleToolbar({
+function Group:GetToolbar()
+    if not alive(self.tb) then
+        self.tb = self:Toolbar({
             name = "Toolbar",
             label = "Toolbar",
             ignore_align = true,
             position = "RightTop",
+            align_method = "grid_from_right",
             h = self.highlight_bg:h(),
             use_main_panel = true
         })
     end
-    return self.toolbar
+    return self.tb
 end

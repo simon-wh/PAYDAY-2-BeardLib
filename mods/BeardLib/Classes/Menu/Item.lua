@@ -390,12 +390,13 @@ function Item:Divider(params)
     return self:NewItem(BeardLib.Items.Item:new(_params))
 end
 
-function Item:SimpleToolbar(params)
+function Item:Toolbar(params)
     params.text = params.text or ""
     local _params = self:ConfigureItem(params)
     _params.divider_type = true
     _params.menu_type = true
-    
+	_params.align_method = _params.align_method or "grid"
+	
     return self:NewItem(BeardLib.Items.Item:new(_params))
 end
 
@@ -451,6 +452,7 @@ function Item:NewItem(item)
 	if self.override_panel then
 		self.override_panel:Create(self.type_name, item)
 		self.override_panel = nil
+		return
 	end
 
     self:Menuify()
