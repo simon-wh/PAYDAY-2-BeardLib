@@ -1,26 +1,33 @@
+local Item = BeardLib.Items.Item
 local Menu = BeardLib.Items.Menu
-local align_methods = {
+Item.align_methods = {
     grid = "AlignItemsGrid",
     normal = "AlignItemsNormal",
     reversed = "AlignItemsReversed",
     reversed_grid = "AlignItemsReversedGrid",
     centered_grid = "AlignItemsCenteredGrid",
-    reversed_centered_grid = "AlignItemsReversedCenteredGrid"
+    reversed_centered_grid = "AlignItemsReversedCenteredGrid",
+    grid_from_right = "AlignItemsGridFromRight",
+    grid_from_right_reversed = "AlignItemsGridFromRightReversed",
 }
 
-function Menu:AlignItems(menus, no_parent)
+function Item:AlignItems(menus, no_parent)
+    if not self.menu_type then return end 
 	if menus then
 		for _, item in pairs(self._my_items) do
 			if item.menu_type then
 				item:AlignItems(true, true)
 			end
 		end
-	end
-    if self.align_method and align_methods[self.align_method] then
-        self[align_methods[self.align_method]](self)
+    end
+
+    local method = self.align_method
+    if method and self.align_methods[method] then
+        self[self.align_methods[method]](self)
     else
         self:AlignItemsNormal()
     end
+
     if self.parent.AlignItems and not no_parent then
 		self.parent:AlignItems()
 	else
@@ -28,256 +35,233 @@ function Menu:AlignItems(menus, no_parent)
     end
 end
 
-function Menu:AlignItemsPost(max_h, prev_item)
+function Item:AlignItemsPost(max_h, prev_item)
 	local additional = (self.last_y_offset or (prev_item and prev_item:Offset()[2] or 0))
 	max_h = max_h + additional -- self:TextHeight() + additional
 	self:UpdateCanvas(max_h)
 end
 
-function Menu:RepositionItem(item, last_positioned_item, prev_item, max_h)
+function Item:RepositionItem(item, last_positioned_item, prev_item, max_h, max_right)
 	local repos = item:Reposition(last_positioned_item, prev_item)
 	if repos then
 		last_positioned_item = item
 	end
-	local count = not repos or item.count_as_aligned
-	if count then
-		prev_item = item
+    local count = (not repos and not item.ignore_align) or item.count_as_aligned
+    local panel = item:Panel()
+
+    if count then
+        if self.dbg then
+            log(tostring(item), tostring(not repos), tostring(not item.ignore_align), tostring(item.count_as_aligned))
+        end
+        prev_item = item
+        if max_right then
+            max_right = math.max(max_right, panel:right())
+        end
 	end
 	if max_h and count or item.count_height then
-		max_h = math.max(max_h, item:Panel():bottom())
-	end
-	return last_positioned_item, prev_item, max_h
+		max_h = math.max(max_h, panel:bottom())
+    end
+
+	return last_positioned_item, prev_item, max_h, max_right
 end
 
-function Menu:AlignItemsNormal()
+function Item:AlignItemsNormal(reversed)
     if not self:alive() then
         return
     end
-    local max_h = 0
-    local prev_item
-    local last_positioned_item
-	for _, item in pairs(self._my_items) do
-		if item.visible and item:alive() then
-			if not item.ignore_align then
-				local offset = item:Offset()
-				local panel = item:Panel()
-				panel:set_x(offset[1])
-				if alive(prev_item) then
-					panel:set_world_y(prev_item:Panel():world_bottom() + offset[2])
-				else
-					panel:set_y(offset[2])
-				end
-			end
-			last_positioned_item, prev_item, max_h = self:RepositionItem(item, last_positioned_item, prev_item, max_h)
-		end
-	end
-    self:AlignItemsPost(max_h, prev_item)
-end
-
-function Menu:AlignItemsReversed()
-    if not self:alive() then
-        return
-    end
-    local max_h = 0
-    local prev_item
-    local last_positioned_item
-    for i=#self._my_items, 1, -1 do
-		local item = self._my_items[i]
-		if item.visible and item:alive() then
-			if not item.ignore_align then
-				local panel = item:Panel()
-				local offset = item:Offset()
-				panel:set_x(offset[1])
-				if alive(prev_item) then
-					panel:set_world_y(prev_item:Panel():world_bottom() + offset[2])
-				else
-					panel:set_y(offset[2])
-				end
-			end
+    local max_h, prev_item, last_positioned_item = 0, nil, nil
+    local function align(item)
+        if item:_Visible() then
+            if not item.ignore_align then
+                local offset = item:Offset()
+                local panel = item:Panel()
+                panel:set_x(offset[1])
+                if alive(prev_item) then
+                    panel:set_world_y(prev_item:Panel():world_bottom() + offset[2])
+                else
+                    panel:set_y(offset[2])
+                end
+            end
             last_positioned_item, prev_item, max_h = self:RepositionItem(item, last_positioned_item, prev_item, max_h)
         end
     end
-    self:AlignItemsPost(max_h, prev_item)
-end
 
-function Menu:AlignItemsGrid()
-    if not self:alive() then
-        return
-    end
-    local prev_item
-    local last_positioned_item
-    local max_h = 0
-    local max_x = 0
-    local max_y = 0
-    local items_w = self:ItemsWidth()
-    for _, item in pairs(self._my_items) do
-		if item.visible and item:alive() then
-			local panel = item:Panel()
-			if not item.ignore_align then
-				local offset = item:Offset()
-				if panel:w() + (max_x + offset[1]) - items_w > 0.001 then
-					max_y = max_h
-					max_x = 0
-				end
-				panel:set_position(max_x + offset[1], max_y + offset[2])
-			end
-			local repos = item:Reposition(last_positioned_item, prev_item)
-            if repos then
-                last_positioned_item = item
-            end
-            local was_aligned = not repos or item.count_as_aligned
-			if was_aligned then
-				prev_item = item
-				max_x = math.max(max_x, panel:right())
-			end
-            if was_aligned or item.count_height then
-                max_h = math.max(max_h, panel:bottom())
-            end
+    local items = self._my_items
+    if reversed then
+        for i=#items, 1, -1 do
+            align(items[i])
         end
-    end    
+    else
+        for i=1, #items do
+            align(items[i])
+        end
+    end
+
     self:AlignItemsPost(max_h, prev_item)
 end
 
-function Menu:AlignItemsCenteredGrid()
+function Item:AlignItemsReversed()
+    self:AlignItemsNormal(true)
+end
+
+function Item:AlignItemsGrid(reversed)
     if not self:alive() then
         return
     end
-    local prev_item
-    local last_positioned_item
-    local max_h = 0
-    local max_x = 0
-    local max_y = 0
+    local items_w = self:ItemsWidth()
+    local prev_item, last_positioned_item
+    local max_h, max_right, max_y = 0, 0, 0
+
+    local function align(item)
+        if item:_Visible() then
+            if not item.ignore_align then
+                local panel = item:Panel()
+                local offset = item:Offset()
+                if (panel:w() + (max_right + offset[1]) - items_w) > 0.001 then
+                    max_y = max_h
+                    max_right = 0
+                end
+                panel:set_position(max_right + offset[1], max_y + offset[2])            
+            end
+            last_positioned_item, prev_item, max_h, max_right = self:RepositionItem(item, last_positioned_item, prev_item, max_h, max_right)
+        end
+    end
+
+    local items = self._my_items
+    if reversed then
+        for i=#items, 1, -1 do
+            align(items[i])
+        end
+    else
+        for i=1, #items do
+            align(items[i])
+        end
+    end
+
+    self:AlignItemsPost(max_h, prev_item)
+end
+
+function Item:AlignItemsReversedGrid()
+    self:AlignItemsGrid(true)
+end
+
+function Item:AlignItemsCenteredGrid(reversed)
+    if not self:alive() then
+        return
+    end
+    local prev_item, last_positioned_item
+    local max_h, max_right, max_y = 0, 0, 0
     local items_w = self:ItemsWidth()
     local center = items_w / 2
     local current_row = {}
-    local function centerify_row()
+
+    local function centerify()
         if #current_row == 0 then return end
-        local centerify = center - (max_x / 2)
+        local centerify = center - (max_right / 2)
         for _, row_item in pairs(current_row) do
             if not row_item.repos then
                 row_item.panel:move(centerify)
             end
         end
-        current_row = {}
     end
-    for _, item in pairs(self._my_items) do
-		if item.visible and item:alive() then
-			local panel = item:Panel()
-			if not item.ignore_align then
-				local offset = item:Offset()
-				if panel:w() + (max_x + offset[1]) - items_w > 0.001 then
-					centerify_row()
-					max_y = max_h
-					max_x = 0
-				end
-				panel:set_position(max_x + offset[1], max_y + offset[2])
-			end
-			local repos = item:Reposition(last_positioned_item, prev_item)
+
+    local function align(item)
+        if item:_Visible() then
+            local panel = item:Panel()
+            if not item.ignore_align then
+                local offset = item:Offset()
+                if (panel:w() + (max_right + offset[1]) - items_w) > 0.001 then
+                    centerify()
+                    current_row = {}
+                    max_y = max_h
+                    max_right = 0
+                end
+                panel:set_position(max_right + offset[1], max_y + offset[2])
+            end
+            local repos = item:Reposition(last_positioned_item, prev_item)
             if repos then
                 last_positioned_item = item
             end
-            local was_aligned = not repos or item.count_as_aligned
+            local was_aligned = (not repos and not item.ignore_align) or item.count_as_aligned 
             if was_aligned or item.count_height then
                 if was_aligned then
                     prev_item = item
-                    max_x = math.max(max_x, panel:right())
+                    max_right = math.max(max_right, panel:right())
                 end
                 table.insert(current_row, {panel = panel, repos = repos})
                 max_h = math.max(max_h, panel:bottom())
             end
         end
     end
-    centerify_row()
+
+    local items = self._my_items
+    if reversed then
+        for i=#items, 1, -1 do
+            align(items[i])
+        end
+    else
+        for i=1, #items do
+            align(items[i])
+        end
+    end
+
+    centerify()
     self:AlignItemsPost(max_h, prev_item)
 end
 
-function Menu:AlignItemsReversedCenteredGrid()
+function Item:AlignItemsReversedCenteredGrid()
+    self:AlignItemCenteredGrid(true)
+end
+
+function Item:AlignItemsGridFromRight(reversed, dbg)
     if not self:alive() then
         return
     end
-    local prev_item
-    local last_positioned_item
-    local max_h = 0
-    local max_x = 0
-    local max_y = 0
     local items_w = self:ItemsWidth()
-    local center = items_w / 2
-    local current_row = {}
-    local function centerify_row()
-        if #current_row == 0 then return end
-        local centerify = center - (max_x / 2)
-        for _, row_item in pairs(current_row) do
-            if not row_item.repos then
-                row_item.panel:move(centerify)
-            end
-        end
-        current_row = {}
-    end
-    for i=#self._my_items, 1, -1 do
-        local item = self._my_items[i]
-		if item.visible and item:alive() then
-			local panel = item:Panel()
-			if not item.ignore_align then
-				local offset = item:Offset()
-				if panel:w() + (max_x + offset[1]) - items_w > 0.001 then
-					centerify_row()
-					max_y = max_h
-					max_x = 0
-				end
-				panel:set_position(max_x + offset[1], max_y + offset[2])
-			end
-			local repos = item:Reposition(last_positioned_item, prev_item)
-            if repos then
-                last_positioned_item = item
-            end
-			local was_aligned = not repos or item.count_as_aligned
-            if was_aligned or item.count_height then
-                if was_aligned then
-                    prev_item = item
-                    max_x = math.max(max_x, panel:right())
-                end
-                table.insert(current_row, {panel = panel, repos = repos})
-                max_h = math.max(max_h, panel:bottom())
-            end
-        end
-    end
-    centerify_row()
-    self:AlignItemsPost(max_h, prev_item)
-end
+    local prev_item, last_positioned_item
+    local max_h, max_right, max_y = 0, items_w, 0
 
-function Menu:AlignItemsReversedGrid()
-    if not self:alive() then
-        return
-    end
-    local prev_item
-    local last_positioned_item
-    local max_h = 0
-    local max_x = 0
-    local max_y = 0
-    for i=#self._my_items, 1, -1 do
-        local item = self._my_items[i]
-		if item.visible and item:alive() then
-			local panel = item:Panel()
-			if not item.ignore_align then
-				local offset = item:Offset()
-				if panel:w() + (max_x + offset[1]) - self:ItemsWidth() > 0.001 then
-					max_y = max_h
-					max_x = 0
-				end
-				panel:set_position(max_x + offset[1], max_y + offset[2])
-			end
-			local repos = item:Reposition(last_positioned_item, prev_item)
+    local function align(item)
+        if item:_Visible() then
+            if not item.ignore_align then
+                local panel = item:Panel()
+                local offset = item:Offset()
+                if ((max_right - offset[1]) - panel:w()) < -0.001 then
+                   max_y = max_h
+                   max_right = items_w
+                end
+                panel:set_righttop(max_right - offset[1], max_y + offset[2])            end
+
             if repos then
                 last_positioned_item = item
             end
-			if not repos or item.count_as_aligned then
+            local count = (not repos and not item.ignore_align) or item.count_as_aligned
+            local panel = item:Panel()
+        
+            if count then
                 prev_item = item
-                max_x = math.max(max_x, panel:right())
+                max_right = math.min(max_right, panel:left())
             end
-            if (not repos or item.count_as_aligned or item.count_height) then
+            if count or item.count_height then
                 max_h = math.max(max_h, panel:bottom())
             end
         end
-    end    
+    end
+
+    local items = self._my_items
+    if reversed then
+        for i=#items, 1, -1 do
+            align(items[i])
+        end
+    else
+        for i=1, #items do
+            align(items[i])
+        end
+    end
+    
     self:AlignItemsPost(max_h, prev_item)
+end
+
+function Item:AlignItemsGridFromRightReversed()
+    self:AlignItemsGridFromRight(true)
 end

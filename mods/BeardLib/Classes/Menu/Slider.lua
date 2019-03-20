@@ -113,8 +113,9 @@ function Slider:SetValueByPercentage(percent, run_callback)
     self:SetValue(self.min + (self.max - self.min) * percent, run_callback, true)
 end
 
-function Slider:MouseReleased(button, x, y)
-    self._textbox:MouseReleased(button, x, y)
+function Slider:MouseReleased(b, x, y)
+    self._textbox:MouseReleased(b, x, y)
+    return Slider.super.MouseReleased(self, b,x,y)
 end
 
 function Slider:DoHighlight(highlight)

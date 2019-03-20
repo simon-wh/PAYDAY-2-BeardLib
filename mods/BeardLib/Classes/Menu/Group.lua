@@ -105,3 +105,17 @@ function Group:MouseMoved(x, y)
     end
     return ret
 end
+
+function Group:ToolbarMenu()
+    if not self.toolbar then
+        self.toolbar = self:SimpleToolbar({
+            name = "Toolbar",
+            label = "Toolbar",
+            ignore_align = true,
+            position = "RightTop",
+            h = self.highlight_bg:h(),
+            use_main_panel = true
+        })
+    end
+    return self.toolbar
+end

@@ -78,13 +78,14 @@ function TextBox:MousePressed(button, x, y)
 	return self._textbox.cantype, not self._textbox.cantype and state or nil
 end
 
-function TextBox:MouseReleased(button, x, y)
-	self._textbox:MouseReleased(button, x, y)
+function TextBox:MouseReleased(b, x, y)
+	self._textbox:MouseReleased(b, x, y)
 	if self._last_mouse_position then
 		managers.mouse_pointer:set_mouse_world_position(unpack(self._last_mouse_position))
 		self._last_mouse_position = nil
 	end
 	managers.mouse_pointer._ws:show()
+	return TextBox.super.MouseReleased(self, b,x,y)
 end
 
 function TextBox:DoHighlight(highlight)
