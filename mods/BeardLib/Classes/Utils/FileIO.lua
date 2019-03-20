@@ -181,7 +181,7 @@ function FileIO:Delete(path)
 	if SystemFS and SystemFS.delete_file then
 		SystemFS:delete_file(path)
 	else
-		os.execute("rm -r " .. path)
+		error("[BeardLib] Cannot delete files or folders [SystemFS not available]")
 	end
 end
 
