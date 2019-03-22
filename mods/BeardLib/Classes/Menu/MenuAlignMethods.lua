@@ -71,7 +71,7 @@ function Item:AlignItemsNormal(reversed)
     end
     local max_h, prev_item, last_positioned_item = 0, nil, nil
     local function align(item)
-        if item:_Visible() then
+        if item and item:_Visible() then
             if not item.ignore_align then
                 local offset = item:Offset()
                 local panel = item:Panel()
@@ -113,7 +113,7 @@ function Item:AlignItemsGrid(reversed)
     local max_h, max_right, max_y = 0, 0, 0
 
     local function align(item)
-        if item:_Visible() then
+        if item and item:_Visible() then
             if not item.ignore_align then
                 local panel = item:Panel()
                 local offset = item:Offset()
@@ -166,7 +166,7 @@ function Item:AlignItemsCenteredGrid(reversed)
     end
 
     local function align(item)
-        if item:_Visible() then
+        if item and item:_Visible() then
             local panel = item:Panel()
             if not item.ignore_align then
                 local offset = item:Offset()
@@ -222,7 +222,7 @@ function Item:AlignItemsGridFromRight(reversed, dbg)
     local max_h, max_right, max_y = 0, items_w, 0
 
     local function align(item)
-        if item:_Visible() then
+        if item and item:_Visible() then
             if not item.ignore_align then
                 local panel = item:Panel()
                 local offset = item:Offset()
