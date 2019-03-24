@@ -46,6 +46,7 @@
 			<hook source_file="core/lib/managers/coresoundenvironmentmanager" file="Fixes.lua"/>
 			<hook source_file="lib/managers/mission/elementvehiclespawner" file="Fixes.lua"/>
 			<hook source_file="lib/managers/mission/elementinteraction" file="Fixes.lua"/>
+			<hook source_file="core/lib/managers/mission/coreelementinstance" file="Fixes.lua"/>
 			<hook source_file="lib/units/beings/player/playermovement" file="Fixes.lua"/>
 			<hook source_file="lib/units/weapons/raycastweaponbase" file="Fixes.lua"/>
 			<hook source_file="lib/managers/menu/crewmanagementgui" file="Fixes.lua"/>

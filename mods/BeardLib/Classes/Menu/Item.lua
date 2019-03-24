@@ -199,7 +199,7 @@ function Item:WorkParams(params)
 	self:WorkParam("text_align", "left")
 	self:WorkParam("text_vertical", "top")
 	self:WorkParam("size_by_text")
-	self:WorkParam("control_slice", 0.5)
+	self:WorkParam("control_slice", 0.6)
 	self:WorkParam("font", tweak_data.menu.pd2_large_font or tweak_data.menu.default_font)
 	self:WorkParam("border_size", 2)
 	--self:WorkParam("last_y_offset")
@@ -273,6 +273,10 @@ function Item:WorkParams(params)
 		else
 			self.w = self.w or self.parent_panel:w()
 			self.h = self.h or self.parent_panel:h()
+		end
+		if self.shrink_width then
+			self.w = self.w * self.shrink_width
+			self.shrink_width = nil
 		end
 		self.orig_h = self.h
 	end
@@ -390,7 +394,7 @@ function Item:Divider(params)
     return self:NewItem(BeardLib.Items.Item:new(_params))
 end
 
-function Item:Toolbar(params)
+function Item:ToolBar(params)
     params.text = params.text or ""
     local _params = self:ConfigureItem(params)
     _params.divider_type = true

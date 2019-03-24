@@ -157,6 +157,12 @@ elseif F == "coresoundenvironmentmanager" then
     function CoreSoundEnvironmentManager:ambience_events()
         return {""}
     end
+elseif F == "coreelementinstance" then
+    core:module("CoreElementInstance")
+    core:import("CoreMissionScriptElement")
+    function ElementInstancePoint:client_on_executed(...)
+        self:on_executed(...)
+    end
 elseif F == "coremenuitemslider" then
     core:module("CoreMenuItemSlider")
     --Although slider is supposed to have 5 decimal points(based on decomp), it's 2 by default.

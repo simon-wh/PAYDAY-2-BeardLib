@@ -108,7 +108,7 @@ end
 
 function Group:GetToolbar()
     if not alive(self.tb) then
-        self.tb = self:Toolbar({
+        self.tb = self:ToolBar({
             name = "Toolbar",
             label = "Toolbar",
             ignore_align = true,
