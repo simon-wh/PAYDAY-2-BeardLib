@@ -93,7 +93,11 @@ function fm:AddFile(ext, path, file)
 	path = path:id()
 	local k_ext = ext:key()
 	local loaded
-    DB:create_entry(ext, path, file)
+	if BLT.AssetManager then
+		BLT.AssetManager:CreateEntry(path, ext, file)
+	else
+		DB:create_entry(ext, path, file)
+	end
     Global.fm.added_files[k_ext] = Global.fm.added_files[k_ext] or {}
 	Global.fm.added_files[k_ext][path:key()] = file
 	if k_ext == texture_key then
