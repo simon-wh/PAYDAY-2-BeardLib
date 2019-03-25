@@ -3,11 +3,22 @@ LevelModule = LevelModule or class(ItemModuleBase)
 LevelModule.type_name = "level"
 LevelModule.levels_folder = "levels/mods/"
 function LevelModule:init(...)
+    self.clean_table = table.add(clone(self.clean_table), {
+        {param = "preplanning", action = function(tbl)
+            for i, v in ipairs(tbl) do
+                if v._meta == "default_plans" or v._meta == "start_location" then
+                    table.remove(tbl, i)
+                end
+            end
+        end}
+    })
+    
     if not LevelModule.super.init(self, ...) then
         return false
     end
 
     self._config.id = tostring(self._config.id)
+ 
     if Global.level_data and Global.level_data.level_id == self._config.id then
         BeardLib.current_level = self
         self:Load()
@@ -105,6 +116,10 @@ function LevelModule:AddAssetsDataToTweak(a_self)
     end
 end
 
+function LevelModule:AddPrePlanningDataToTweak(pp_self)
+    pp_self.locations[self._config.id] = self._config.preplanning
+end
+
 function LevelModule:RegisterHook()
     if tweak_data and tweak_data.levels then    
         self:AddLevelDataToTweak(tweak_data.levels)
@@ -117,6 +132,14 @@ function LevelModule:RegisterHook()
             self:AddAssetsDataToTweak(tweak_data.assets)
         else
             Hooks:PostHook(AssetsTweakData, "init", self._config.id .. "AddAssetsData", ClassClbk(self, "AddAssetsDataToTweak"))
+        end
+    end
+
+    if self._config.preplanning then
+        if tweak_data and tweak_data.preplanning then
+            self:AddPrePlanningDataToTweak(tweak_data.preplanning)
+        else
+            Hooks:PostHook(PrePlanningTweakData, "init", self._config.id .. "AddPrePlanningData", ClassClbk(self, "AddPrePlanningDataToTweak"))
         end
     end
 end
