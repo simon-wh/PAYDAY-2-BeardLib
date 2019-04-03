@@ -77,9 +77,9 @@ function Item:InitBGs()
 		color = self.background_color,
 		visible = self.background_color ~= false,
 		alpha = self.highlight and 0 or 1,
-		h = self.type_name == "Group" and self.size,
-		halign = self.type_name ~= "Group" and "grow",
-		valign = self.type_name ~= "Group" and "grow",
+		h = self.GROUP and self.size,
+		halign = not self.GROUP and "grow",
+		valign = not self.GROUP and "grow",
 		layer = 0
 	})
 	self.highlight_bg = self.panel:rect({
@@ -87,9 +87,9 @@ function Item:InitBGs()
 		color = self.highlight_color,
 		visible = self.highlight_color ~= false, 
 		alpha = self.highlight and 1 or 0,
-		h = self.type_name == "Group" and self.size,
-		halign = self.type_name ~= "Group" and "grow",
-		valign = self.type_name ~= "Group" and "grow",
+		h = self.GROUP and self.size,
+		halign = not self.GROUP and "grow",
+		valign = not self.GROUP and "grow",
 		layer = 1
 	})
 end
@@ -247,6 +247,12 @@ function Item:WorkParams(params)
 		self:WorkParam("text_offset")
 	end
 
+	self:WorkParam("shrink_width")
+	self:WorkParam("max_height")
+	self:WorkParam("min_height")
+	self:WorkParam("max_width")
+	self:WorkParam("min_width")
+
 	self.offset = self:ConvertOffset(self.offset)
 	self.text_offset = self:ConvertOffset(self.text_offset, true) or {4,2}
 
@@ -277,6 +283,9 @@ function Item:WorkParams(params)
 		if self.shrink_width then
 			self.w = self.w * self.shrink_width
 			self.shrink_width = nil
+		end
+		if self.w == "half" then
+			self.w = self.parent_panel:w() / 2
 		end
 		self.orig_h = self.h
 	end
@@ -353,6 +362,8 @@ function Item:Create(type, ...)
 end
 
 function Item:Group(params) return self:NewItem(BeardLib.Items.Group:new(self:ConfigureItem(params, true))) end
+function Item:NoteBook(params) return self:NewItem(BeardLib.Items.NoteBook:new(self:ConfigureItem(params, true))) end
+function Item:PopupMenu(params) return self:NewItem(BeardLib.Items.PopupMenu:new(self:ConfigureItem(params, true))) end
 function Item:Menu(params) return self:NewItem(BeardLib.Items.Menu:new(self:ConfigureItem(params, true))) end
 function Item:ComboBox(params) return self:NewItem(BeardLib.Items.ComboBox:new(self:ConfigureItem(params))) end
 function Item:TextBox(params) return self:NewItem(BeardLib.Items.TextBox:new(self:ConfigureItem(params))) end
@@ -644,6 +655,20 @@ function Item:GetItem(name, shallow)
     return nil
 end
 
+function Item:GetItemWithType(name, type, shallow)
+    for _, item in pairs(self._my_items) do
+        if item.type_name == type and item.name == name then
+            return item
+        elseif item.menu_type and not shallow then
+            local i = item:GetItem(name)
+            if i then
+                return i
+            end
+        end
+    end
+    return nil
+end
+
 function Item:GetItemByLabel(label, shallow)
     for _, item in pairs(self._my_items) do
         if item.label == label then
@@ -787,6 +812,8 @@ function Item:SetEnabled(enabled)
 end
 
 function Item:SetBorder(config)
+	self.border_size = NotNil(config.size, self.border_size)
+	self.border_visible = NotNil(config.visible, self.border_visible)
 	self.border_color = NotNil(config.color, self.border_color)
 	self.border_left = NotNil(config.left, self.border_left)
 	self.border_right = NotNil(config.right, self.border_right)
@@ -843,6 +870,7 @@ function Item:SetText(text)
 	if self.parent.auto_align then
 		self.parent:AlignItems()
 	end
+	self:MakeBorder()
 end
 
 function Item:WorkParam(param, ...)
@@ -973,6 +1001,13 @@ function Item:SetVisible(visible, animate, no_align)
 	end
 end
 
+function Item:SetChecked(name, checked, run_callback)
+	local toggle = self:GetItemWithType(name, "Toggle", true)
+	if toggle then
+		toggle:SetValue(checked, run_callback)
+	end
+end
+
 --Events
 function Item:RunCallback(clbk, ...)
 	clbk = clbk or self.on_callback
@@ -1074,6 +1109,9 @@ function Item:KeyPressed(o, k)
 	if k == enter_ids and self.type_name == "Button" and self.menu._highlighted == self then
 		self:RunCallback()
 	end
+	if self.on_key_press then
+		self.on_key_press(self, k)
+	end
 end
 
 local mouse_1 = Idstring("1")
@@ -1095,7 +1133,7 @@ function Item:MousePressedSelfEvent(button, x, y)
 
 	if self:MouseInside(x,y) then
 		if self.on_click then
-			if self:on_click(button, x, y) == false then
+			if self.on_click(self, button, x, y) == false then
 				return false, self.INTERRUPTED
 			end
 		end
@@ -1204,14 +1242,20 @@ function Item:MouseMovedMenuEvent(x, y)
 end
 
 function Item:MouseDoubleClick(button, x, y)
-    if self.menu_type and self:Enabled() then
-        local menu = self.menu
-        if menu._highlighted and menu._highlighted.parent == self then
-            if menu._highlighted.MouseDoubleClick and menu._highlighted:MouseDoubleClick(button, x, y) then
-                return true
-            end
-        end
-    end
+	if self:Enabled() then
+		if self.menu_type then
+			for _, item in pairs(self._visible_items) do
+				if item:MouseDoubleClick(button, x, y) then
+					return true
+				end
+			end
+		end
+
+		if self:MouseInside(x,y) and self.on_double_click then
+			self.on_double_click(item, button, x, y)
+			return true
+		end
+	end
 end
 
 Item.GrowHeight = Item.AlignItems

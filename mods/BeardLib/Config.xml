@@ -11,7 +11,7 @@
 	auto_image_color="true"
 	mod_override_dir="assets/mod_overrides/">
 	<load_modules>
-		<AssetUpdates id="14924" version="3.27" provider="modworkshop" use_local_dir="true" use_local_path="true" important="true"/>
+		<AssetUpdates id="14924" version="3.28" provider="modworkshop" use_local_dir="true" use_local_path="true" important="true"/>
 		<AddFiles directory="Assets">
 			<unit path="core/units/run_sequence_dummy/run_sequence_dummy" force_if_not_loaded="true"/>
 			<object path="core/units/run_sequence_dummy/run_sequence_dummy" force_if_not_loaded="true"/>
@@ -107,6 +107,8 @@
 		<class file="Menu/MenuAlignMethods.lua"/>
 		<class file="Menu/KeyBind.lua"/>
 		<class file="Menu/Group.lua"/>
+		<class file="Menu/NoteBook.lua"/>
+		<class file="Menu/PopupMenu.lua"/>
 		<class file="Menu/ImageButton.lua"/>
 		<class file="Menu/Toggle.lua"/>
 		<class file="Menu/ComboBox.lua"/>

@@ -58,9 +58,24 @@ function ComboBox:ContextMenuCallback(item)
     self:SetSelectedItem(item, true)
 end
 
+function ComboBox:Clear()
+    self.items = {}
+    self:RefreshList()
+end
+
+function ComboBox:Append(item)
+    table.insert(self.items, item)
+    self:RefreshList()
+end
+
 function ComboBox:SetItems(items)
     self.items = items or {}
+    self:RefreshList()
+end
+
+function ComboBox:RefreshList()
     self._list:update_search()
+    self._list._do_search = 0
 end
 
 function ComboBox:SetValue(value, run_callback, no_items_clbk)

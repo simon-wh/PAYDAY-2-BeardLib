@@ -231,6 +231,7 @@ function MenuUI:Disable()
 	self._enabled = false
 	if self._highlighted then self._highlighted:UnHighlight() end
     if self._openlist then self._openlist:hide() end
+    if self._popupmenu then self._popupmenu:hide() end
     managers.mouse_pointer:remove_mouse(self._mouse_id)
 	BeardLib.managers.menu_ui:close_menu_event()
 	self:RunToggleClbk()
@@ -245,7 +246,7 @@ end
 function MenuUI:CloseLastList()
 	if self._openlist then
 		self._openlist:hide()
-	end
+    end
 end
 
 function MenuUI:CheckOpenedList()
@@ -328,6 +329,10 @@ function MenuUI:KeyPressed(o, k)
 			self._openlist:KeyPressed(o, k)
 		end
 
+        if alive(self._popupmenu) then
+			self._popupmenu:KeyPressed(o, k)
+        end
+        
         if self._highlighted and self._highlighted.parent:Enabled() and self._highlighted:KeyPressed(o, k) then
             return 
         end
@@ -375,8 +380,8 @@ function MenuUI:MouseDoubleClick(o, button, x, y)
             return
         end
     end
-	for _, menu in pairs(self._menus) do
-		if menu:MouseDoubleClick(button, x, y) then
+    for _, menu in pairs(self._menus) do
+        if menu:MouseDoubleClick(button, x, y) then
             return
 		end
 	end
@@ -409,7 +414,12 @@ function MenuUI:MousePressed(o, button, x, y)
         else
             self._openlist:hide()
         end
-    else    
+    else
+        if alive(self._popupmenu) then
+           if self._popupmenu:MousePressed(button, x, y) then
+                return
+           end
+        end
     	for _, menu in pairs(self._menus) do
             if menu:MouseFocused() then
         		if menu:MousePressed(button, x, y) then
@@ -458,6 +468,11 @@ function MenuUI:MouseMoved(o, x, y)
         if self._highlighted and not self._highlighted:MouseFocused() and not self._scroll_hold and not self._highlighted.parent.always_highlighting then
             self._highlighted:UnHighlight()
         else
+            if alive(self._popupmenu) then
+                if self._popupmenu:MouseMoved(x, y) then
+                    return
+                end
+             end
             for _, menu in pairs(self._menus) do
                 if menu:MouseMoved(x, y) then
                     return

@@ -1,6 +1,8 @@
 BeardLib.Items.Group = BeardLib.Items.Group or class(BeardLib.Items.Menu)
 local Group = BeardLib.Items.Group
 Group.type_name = "Group"
+Group.GROUP = true
+
 function Group:Init(...)
     Group.super.Init(self, ...)
     self:InitBasicItem()
@@ -59,7 +61,9 @@ function Group:UpdateGroup()
             end
         end
     end
-    self.toggle:set_texture_rect(self.closed and 42 or 2, self.closed and 2 or 0, 16, 16)
+    if alive(self.toggle) then
+        self.toggle:set_texture_rect(self.closed and 42 or 2, self.closed and 2 or 0, 16, 16)
+    end
     self:AlignItems()
     self:_SetSize(nil, nil, true)
 end

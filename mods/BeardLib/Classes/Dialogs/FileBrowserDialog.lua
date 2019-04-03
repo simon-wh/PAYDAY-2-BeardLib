@@ -11,6 +11,8 @@ function FileBrowserDialog:_Show(params, force)
     self._file_click = params.file_click
     self._base_path = params.base_path
     self._browse_func = params.browse_func
+    self._openclose:SetText(params.save and "Save" or "Open")
+    self._save = params.save
     self:Browse(params.where)
     self:show_dialog()
 end
@@ -21,41 +23,17 @@ function FileBrowserDialog:init(params, menu)
     end
 
     menu = menu or BeardLib.managers.dialog:Menu()
-    
-    self._folders_menu = menu:Menu(table.merge(params, {
-        w = 300,
-        h = 600,
-        background_color = params.background_color or Color(0.6, 0.2, 0.2, 0.2),
-        name = "Folders",
-        position = function(item)
-            item:SetPositionByString("CenterLeft")
-            item:Panel():move(200)
-        end,
-        auto_height = false,
-        visible = false
-    })) 
-
-    self._files_menu = menu:Menu(table.merge(params, {
-        name = "Files",
-        position = function(item)
-            item:Panel():set_position(self._folders_menu:Panel():right() + 1, self._folders_menu:Panel():top())
-        end,
-        w = 600
-    }))
-    local s = self._files_menu.size + 8
     FileBrowserDialog.super.init(self, table.merge(params, {
         w = 900,
-        h = s,
+        h = 624,
         auto_height = false,
-        position = function(item)
-            item:Panel():set_leftbottom(self._folders_menu:Panel():left(), self._folders_menu:Panel():top() - 1)
-        end,
-        text_align = "center",
+        --text_align = "center",
         text_vertical = "center",
         align_method = "grid",
         offset = 0
     }), menu)
-    self._menus = {self._files_menu, self._folders_menu}
+ 
+   -- local s = self._menu.size
     self._menu:Button({
         name = "Backward",
         w = 30,
@@ -68,7 +46,6 @@ function FileBrowserDialog:init(params, menu)
     self._menu:Button({
         name = "Forward",
         w = 30,
-        h = s,
         text = ">",
         on_callback = function()
             self:Browse(self._old_dir)
@@ -77,18 +54,16 @@ function FileBrowserDialog:init(params, menu)
     })    
     self._menu:TextBox({
         name = "CurrentPath",
-        text = false,
+        text = " ",
         w = 540,
-        h = s,
         lines = 1,
         control_slice = 1,
         forbidden_chars = {':','*','?','"','<','>','|'},
         on_callback = ClassClbk(self, "OpenPathSetDialog"),
     })
-    self._menu:TextBox({
+    local search = self._menu:TextBox({
         name = "Search",
         w = 260,
-        h = s,
         lines = 1,
         control_slice = 0.75,
         text_align = "left",
@@ -98,7 +73,7 @@ function FileBrowserDialog:init(params, menu)
     self._menu:ImageButton({
         name = "Close",
         w = 40,
-        h = s,
+        h = search:H(),
         icon_w = 14,
         icon_h = 14,
         texture = "guis/textures/menu_ui_icons",
@@ -106,6 +81,53 @@ function FileBrowserDialog:init(params, menu)
         on_callback = ClassClbk(self, "hide"),  
         label = "temp"
     })
+
+    self._folders_menu = self._menu:Menu({
+        name = "Folders",
+        private = {offset = 0},
+        w = 300,
+        h = 540,
+        auto_height = false,
+    }) 
+
+    self._files_menu = self._menu:Menu({
+        name = "Files",
+        private = {offset = 0},
+        w = 600,
+        h = 540
+    })
+
+    self._actions_menu = self._menu:Menu({
+        name = "Actions",
+        align_method = "grid_from_right",
+        private = {offset = 0},
+        w = 900,
+        h = 60
+    })
+    self._file_types = self._actions_menu:ComboBox({
+        name = "FileType",
+        value = 1,
+        items = {},
+        text = " ",
+        control_slice = 1,
+        shrink_width = 0.2
+    })
+    self._file_name = self._actions_menu:TextBox({
+        name = "File name",
+        control_slice = 0.8,
+        shrink_width = 0.75
+    })
+    self._actions_menu:Button({
+        name = "Cancel",
+        w = 95,
+        on_callback = ClassClbk(self, "hide", false)
+    })
+    self._openclose = self._actions_menu:Button({
+        name = "Open",
+        w = 95,
+        on_callback = ClassClbk(self, "FileDoubleClick")
+    })
+
     self._search = ""
 end
 
@@ -124,6 +146,12 @@ function FileBrowserDialog:Browse(where, params)
     self._menu:GetItem("CurrentPath"):SetValue(where)
     self._menu:GetItem("Backward"):SetEnabled(enabled)
     self._menu:GetItem("Forward"):SetEnabled(enabled)
+    self._file_name:SetValue("")
+    self._file_types:SetItems({'All Files ("*.*")'})
+    self._file_types:SetValue(1)
+    for _, ext in pairs(self._extensions) do
+        self._file_types:Append(ext)
+    end
     local f = {}
     local d = {}
     if self._browse_func then  
@@ -152,17 +180,23 @@ function FileBrowserDialog:Browse(where, params)
 end
 
 function FileBrowserDialog:MakeFilesAndFolders(files, folders)
-    for _,v in pairs(files) do
+    for _, v in pairs(files) do
         local tbl = type(v) == "table"
         local pass = true
         if self._extensions then
-            for _, ext in pairs(self._extensions) do
-                if ext == Path:GetFileExtension(v) then
-                    pass = true
-                    break
-                else
-                    pass = false
+            local file_ext = Path:GetFileExtension(v)
+            local selected_ext = self._file_types:SelectedItem()
+            if self._file_types:Value() == 1 then
+                for _, ext in pairs(self._extensions) do
+                    if ext == file_ext  then
+                        pass = true
+                        break
+                    else
+                        pass = false
+                    end
                 end
+            else
+                pass = file_ext == selected_ext
             end
         end
         if pass then
@@ -170,6 +204,8 @@ function FileBrowserDialog:MakeFilesAndFolders(files, folders)
                 name = tbl and v.name or v,
                 text = tbl and v.name or v,
                 path = tbl and v.path or Path:Combine(self._current_dir, v),
+                on_double_click = ClassClbk(self, "FileDoubleClick"),
+                on_key_press = ClassClbk(self, "FileDoubleClick"),
                 on_callback = ClassClbk(self, "FileClick"), 
                 label = "temp2",
             })
@@ -195,10 +231,25 @@ function FileBrowserDialog:OpenPathSetDialog(item)
 end
 
 function FileBrowserDialog:FileClick(item)
-    if self._file_click then
-        self._file_click(item.path)
-    end
+    self._file_name:SetValue(item.text)
 end 
+
+function FileBrowserDialog:FileDoubleClick(item)
+    if self._file_click then
+        local path = self._current_dir .. "/" .. self._file_name:Value()
+        if FileIO:Exists(path) then
+            if self._save then
+                QuickDialog({force = true, dialog = BLE.Dialog, title = "Alert", message = "File already exists, replace the file?", no = "No"}, {{"Yes", SimpleClbk(self._file_click, path)}})
+            else
+                self._file_click(path)
+            end
+        elseif self._save then
+            self._file_click(path)
+        else
+            BLE.Dialog:Show({force = true, title = "Error", message = "File does not exist!"})
+        end
+    end
+end
 
 function FileBrowserDialog:FolderClick(item)
     self._old_dir = nil
@@ -228,6 +279,7 @@ function FileBrowserDialog:hide( ... )
         self._file_click = nil
         self._browse_func = nil
         self._base_path = nil
+        self._save = nil
         return true
     end
 end

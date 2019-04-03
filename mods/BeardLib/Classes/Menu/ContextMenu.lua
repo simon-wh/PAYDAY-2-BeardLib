@@ -42,7 +42,7 @@ function ContextMenu:init(owner, layer)
         scroll_speed = owner.scroll_speed or 48
     })
 	self._my_items = {}
-	self._best_itmes = {}
+	self._best_items = {}
     self._item_panels = {}
     self._visible_items = {}
 	self.items_panel = self._scroll:canvas()
@@ -98,7 +98,7 @@ function ContextMenu:CreateItems()
 			})
 			panel:script().context_item = item
 			text = is_loc and loc:text(text) or text
-			local best = table.contains(self._best_itmes, context_item)
+			local best = table.contains(self._best_items, context_item)
 			local t = panel:text({
 				name = "text",
 				text = (is_upper and text:upper()) or (is_lower and text:lower()) or (is_pretty and text:pretty(true)) or text,
@@ -257,7 +257,7 @@ function ContextMenu:Update(t, dt)
 		local search = self:textbox() and self:textbox():Value() or ""
         search = search:escape_special()
 		self._my_items = {}
-		self._best_itmes = {}
+		self._best_items = {}
 		for _, item in pairs(self.owner.items) do
 			local text = item
 			if type(text) == "table" then
@@ -270,7 +270,7 @@ function ContextMenu:Update(t, dt)
 				local match = context_item.text:find(search)
 				if match then
 					table.insert(self._my_items, 1, context_item)
-					table.insert(self._best_itmes, context_item)
+					table.insert(self._best_items, context_item)
 				else
 					table.insert(self._my_items, context_item)
 				end

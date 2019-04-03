@@ -50,9 +50,6 @@ function Item:RepositionItem(item, last_positioned_item, prev_item, max_h, max_r
     local panel = item:Panel()
 
     if count then
-        if self.dbg then
-            log(tostring(item), tostring(not repos), tostring(not item.ignore_align), tostring(item.count_as_aligned))
-        end
         prev_item = item
         if max_right then
             max_right = math.max(max_right, panel:right())
