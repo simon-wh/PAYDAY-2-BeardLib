@@ -72,10 +72,11 @@ function Item:InitBasicItem()
 end
 
 function Item:InitBGs()
+	local bgc = self.unhighlight_color or self.background_color
 	self.bg = self.panel:rect({
 		name = "background",
-		color = self.background_color,
-		visible = self.background_color ~= false,
+		color = bgc or bgc,
+		visible = bgc ~= false,
 		alpha = self.highlight and 0 or 1,
 		h = self.GROUP and self.size,
 		halign = not self.GROUP and "grow",
@@ -167,6 +168,7 @@ function Item:WorkParams(params)
 	params = params or {}
 	self.enabled = NotNil(self.enabled, true)
 	self.visible = NotNil(self.visible, true)
+	self:WorkParam("unhighlight_color")
 	self:WorkParam("highlight_color", Color.white:with_alpha(0.1))
 	self:WorkParam("context_background_color", self.background_color, Color.black)	
 	self:WorkParam("background_color", Color.transparent)
@@ -697,7 +699,7 @@ end
 function Item:GetForeground(highlight)
 	highlight = highlight or self.highlight
 	local fgcolor = highlight and self.foreground_highlight or self.foreground
-	return NotNil(fgcolor) or (highlight and self.highlight_color or self.background_color or Color.black):contrast()
+	return NotNil(fgcolor) or (highlight and self.highlight_color or self.unhighlight_color or self.background_color or Color.black):contrast()
 end
 
 function Item:BestAlpha(...)

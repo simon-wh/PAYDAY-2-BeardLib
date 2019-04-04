@@ -13,7 +13,7 @@ function Menu:Init(params)
         layer = self.layer or 1,
     })
     self.panel:script().menuui_item = self
-    self.bg = self.panel:bitmap({
+    self.menubg = self.panel:bitmap({
         name = "background",
         halign = "grow",
         valign = "grow",

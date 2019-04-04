@@ -13,6 +13,7 @@ function NoteBook:InitBasicItem()
         name = "arrow_left",
         w = self.title:h() - 4,
         h = self.title:h() - 4,
+        alpha = 0.5,
         texture = "guis/textures/menu_ui_icons",
         color = self:GetForeground(highlight),
         y = 2,
@@ -23,6 +24,7 @@ function NoteBook:InitBasicItem()
         name = "arrow_right",
         w = self.title:h() - 4,
         h = self.title:h() - 4,
+        alpha = 0.5,
         texture = "guis/textures/menu_ui_icons",
         color = self:GetForeground(highlight),
         y = 2,
@@ -84,7 +86,7 @@ function NoteBook:SetPage(page)
 end
 
 function NoteBook:GetCurrentPage()
-    return self.page
+    return self.page or 0
 end
 
 function NoteBook:GetPageCount()
@@ -111,6 +113,9 @@ function NoteBook:RemovePage(indx)
 end
 
 function NoteBook:UpdatePage()
+    self.arrow_right:set_alpha(self.page < #self._pages and 1 or 0.5)
+    self.arrow_left:set_alpha(self.page > 1 and 1 or 0.5)
+
     local page_data = self._pages[self.page]
     self.page_name:set_text(page_data and page_data.name or "")
     local x, y, w, h = self.page_name:text_rect()
