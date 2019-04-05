@@ -302,9 +302,9 @@ function MenuUI:KeyReleased(o, k)
     if self.key_released then self.key_release(o, k) end
 end
 
-function MenuUI:MouseInside()
+function MenuUI:MouseInside(excluded_label)
     for _, menu in pairs(self._menus) do
-        if menu:MouseFocused() then
+        if (not excluded_label or menu.label ~= excluded_label) and menu:MouseFocused() then
             return true
         end
     end

@@ -12,6 +12,7 @@ Item.align_methods = {
 }
 
 function Item:AlignItems(menus, no_parent)
+    if self.align_method == "none" then self:CheckItems() return end
     if not self.menu_type then return end 
 	if menus then
 		for _, item in pairs(self._my_items) do
@@ -30,9 +31,8 @@ function Item:AlignItems(menus, no_parent)
 
     if self.parent.AlignItems and not no_parent then
 		self.parent:AlignItems()
-	else
-		self:CheckItems()
     end
+	self:CheckItems()
 end
 
 function Item:AlignItemsPost(max_h, prev_item)

@@ -234,7 +234,7 @@ function Item:WorkParams(params)
         self:WorkParam("align_method", "grid_from_right")
     end
 
-    self.auto_align = NotNil(self.auto_align, true)
+	self:WorkParam("auto_align", true)
 
 	self.name = NotNil(self.name, self.text, "")
 	self.text = NotNil(self.text, self.text ~= false and self.name)
