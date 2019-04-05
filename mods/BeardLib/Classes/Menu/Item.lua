@@ -739,6 +739,17 @@ function Item:MouseFocused(x, y)
     return self:alive() and self.panel:inside(x,y) and self:Visible()
 end
 
+function Item:ChildrenMouseFocused(x, y, excluded_label)
+    if not x and not y then
+        x,y = managers.mouse_pointer._mouse:world_position()
+    end
+	for _, item in pairs(self._my_items) do
+		if (not excluded_label or item.label == excluded_label) and item:MouseFocused(x,y) then
+			return true
+		end
+	end
+end
+
 function Item:Panel() return self.panel end
 function Item:Parent() return self.parent end
 function Item:ParentPanel() return self.panel:parent() end
@@ -1167,7 +1178,7 @@ function Item:MousePressedMenuEvent(button, x, y)
     if self:Enabled() then
         for _, item in pairs(self._visible_items) do
             if item:MousePressed(button, x, y) then
-                return true
+                return true, item
             end
         end
         if self._scroll then

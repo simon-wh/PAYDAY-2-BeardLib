@@ -34,6 +34,8 @@ function PopupMenu:InitBasicItem()
 function PopupMenu:WorkParams(params)
     self.auto_height = NotNil(self.auto_height, true)
     self:WorkParam("offset", 0)
+    self:WorkParam("keep_menu_open", false)
+    
     PopupMenu.super.WorkParams(self, params)
 end
 
@@ -153,6 +155,14 @@ function PopupMenu:Close()
         self.opened = false
         self._popup_menu:hide()
     end
+end
+
+function PopupMenu:MousePressedMenuEvent(...)
+    local ret, item = PopupMenu.super.MousePressedMenuEvent(self, ...)
+    if not self.keep_menu_open and ret and item.type_name == "Button" then
+        self:Close()
+    end
+    return ret, item
 end
 
 function PopupMenu:MousePressedSelfEvent(button, x, y)

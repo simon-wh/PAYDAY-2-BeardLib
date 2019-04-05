@@ -93,9 +93,27 @@ function NoteBook:GetPageCount()
     return #self._pages
 end
 
+function NoteBook:GetItemPage(item)
+    for i, page in pairs(self._pages) do
+        for _, page_item in pairs(page.items) do
+            if page_item == item then
+                return i
+            end
+        end
+    end
+end
+
 function NoteBook:AddItemPage(name, item)
     self:AddPage(name)
     self:AddToPage(item, #self._pages)
+end
+
+function NoteBook:SetPageName(indx, name)
+    local page = self._pages[indx]
+    if page then
+        page.name = name
+    end
+    self:UpdatePage()
 end
 
 function NoteBook:AddPage(name, indx)
@@ -107,12 +125,26 @@ function NoteBook:AddPage(name, indx)
     end
 end
 
+function NoteBook:RemoveAllPages()
+    self._pages = {}
+    self:UpdatePage()
+end
+
+function NoteBook:RemovePageWithItem(item)
+    local indx = self:GetItemPage(item)
+    if indx then
+        table.remove(self._pages, indx)
+        self:UpdatePage()
+    end
+end
+
 function NoteBook:RemovePage(indx)
     table.remove(self._pages, indx)
     self:UpdatePage()
 end
 
 function NoteBook:UpdatePage()
+    self.page = math.clamp(self.page, 1, #self._pages)
     self.arrow_right:set_alpha(self.page < #self._pages and 1 or 0.5)
     self.arrow_left:set_alpha(self.page > 1 and 1 or 0.5)
 

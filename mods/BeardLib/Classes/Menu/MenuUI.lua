@@ -252,7 +252,10 @@ end
 function MenuUI:CheckOpenedList()
 	if self._openlist and not self._openlist.parent:Enabled() then
 		self._openlist:hide()
-	end
+    end
+    if self._popupmenu and not self._popupmenu:Enabled() then
+        self._popupmenu:Close()
+    end
 end
 
 function MenuUI:Toggle()
