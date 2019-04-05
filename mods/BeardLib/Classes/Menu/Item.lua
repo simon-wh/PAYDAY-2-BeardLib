@@ -744,10 +744,11 @@ function Item:ChildrenMouseFocused(x, y, excluded_label)
         x,y = managers.mouse_pointer._mouse:world_position()
     end
 	for _, item in pairs(self._my_items) do
-		if (not excluded_label or item.label == excluded_label) and item:MouseFocused(x,y) then
+		if (not excluded_label or item.label ~= excluded_label) and item:MouseFocused(x,y) then
 			return true
 		end
 	end
+	return false
 end
 
 function Item:Panel() return self.panel end
