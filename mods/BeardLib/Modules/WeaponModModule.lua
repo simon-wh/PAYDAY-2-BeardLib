@@ -4,7 +4,7 @@ WeaponModModule.type_name = "WeaponMod"
 function WeaponModModule:RegisterHook()
     self._config.default_amount = self._config.default_amount and tonumber(self._config.default_amount) or 1
     self._config.global_value = self._config.global_value or self.defaults.global_value
-    self._config.drop = self._config.drop ~= nil and self._config.drop or true
+    self._config.drop = NotNil(self._config.drop, true)
 	local config = self._config
 
     Hooks:Add("BeardLibCreateCustomWeaponMods", self._config.id .. "AddWeaponModTweakData", function(w_self)
@@ -33,13 +33,13 @@ function WeaponModModule:RegisterHook()
             table.merge(data, config.merge_data)
         end
         w_self.parts[config.id] = data
-        if data.drop ~= false and data.dlc then
+        if data.drop ~= false then
             TweakDataHelper:ModifyTweak({{
                 type_items = "weapon_mods",
                 item_entry = config.id,
                 amount = config.default_amount,
                 global_value = data.global_value
-            }}, "dlc", data.dlc, "content", "loot_drops")
+            }}, "dlc", data.dlc or self.defaults.dlc, "content", "loot_drops")
         end
 	end)
 	
