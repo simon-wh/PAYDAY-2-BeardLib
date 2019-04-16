@@ -100,6 +100,9 @@ function ScrollablePanelModified:update_canvas_size(additional_h)
 end
 
 function ScrollablePanelModified:is_scrollable()
+	if not self:alive() then
+		return false
+	end
 	return (self:canvas():h() - self:scroll_panel():h()) > 2
 end
 
