@@ -6,6 +6,7 @@ function TextBoxBase:init(parent, params)
     self.parent = parent.parent
     self.menu = parent.menu
     self.size = params.size or parent.size
+    self.fit_text = params.fit_text
     self.forbidden_chars = parent.forbidden_chars or {}
     self.no_magic_chars = NotNil(parent.no_magic_chars, true)
 	self.panel = params.panel:panel({
@@ -43,7 +44,9 @@ function TextBoxBase:init(parent, params)
 		font = parent.font or "fonts/font_medium_mf",
 		font_size = self.size
     })
-    if self.owner.text_offset then
+    if self.fit_text then
+        self.text:set_vertical("center")
+    elseif self.owner.text_offset then
         self.text:set_y(self.owner.text_offset[2])
     end
     local len = self:Value():len()
@@ -309,6 +312,14 @@ function TextBoxBase:update_caret()
         return
     end
     local text = self.panel:child("text")
+
+    if self.fit_text then
+        text:set_font_size(self.size)
+        local _,_,w,_ = text:text_rect()
+        local pw = text:parent():w() - 2
+        text:set_font_size(math.clamp(self.size * pw / w, 8, self.size))
+    end
+
     local lines = math.max(1, text:number_of_lines())
     local _,_,_,h = text:text_rect()
     h = math.max(h, text:font_size())

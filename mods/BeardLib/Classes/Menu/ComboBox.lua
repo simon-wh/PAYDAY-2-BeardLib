@@ -22,16 +22,19 @@ function ComboBox:Init()
 	self._textbox = BeardLib.Items.TextBoxBase:new(self, {
         panel = self.panel,
         lines = 1,
+        fit_text = true,
         line_color = self.line_color or self.highlight_color,
         w = self.panel:w() * (self.text == nil and 1 or self.control_slice),
         value = self:GetValueText(),
     })
     self._textbox:PostInit()
+     
     combo_bg:set_right(self.panel:w())
     self.icon = self.panel:bitmap({
         name = "icon_arrow",
         w = self.size - 6,
         h = self.size - 6,
+        alpha = 0.5,
         texture = "guis/textures/menu_ui_icons",
         texture_rect = {4,0,16,16},
         color = self:GetForeground(highlight),
@@ -111,7 +114,8 @@ end
     
 function ComboBox:UpdateValueText()
     if alive(self.panel) then
-       self._textbox:Text():set_text(self:GetValueText())
+        self._textbox:Text():set_text(self:GetValueText())
+        self._textbox:update_caret()
     end
 end
 

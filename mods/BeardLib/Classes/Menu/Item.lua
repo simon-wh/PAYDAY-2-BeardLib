@@ -216,6 +216,8 @@ function Item:WorkParams(params)
 	self:WorkParam("animate_colors")
 	self:WorkParam("context_screen_offset_y", 32)
 	self:WorkParam("context_scroll_width", 10)
+	self:WorkParam("context_font_size", 20)
+	self:WorkParam("context_text_offset")
 	
 	self:WorkParam("click_btn", ids_0)
 

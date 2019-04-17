@@ -75,9 +75,10 @@ function ContextMenu:CreateItems()
     local color = bg:color():contrast()
 	self._item_panels = {}
 
-	local offset = self.owner.text_offset[1]
-	local offset_sides = self.owner.text_offset[1] * 2
-	local font_size = (self.owner.font_size or self.owner.size)
+	local offset_x = (self.owner.context_text_offset or self.owner.text_offset)[1]
+	local offset_y = (self.owner.context_text_offset or self.owner.text_offset)[2]
+	local offset_sides = offset_x * 2
+	local font_size = self.owner.context_font_size or self.owner.font_size or self.owner.size
 	local loc = managers.localization
 	local is_loc = self.owner.items_localized
 	local is_upper = self.owner.items_uppercase
@@ -103,12 +104,12 @@ function ContextMenu:CreateItems()
 				name = "text",
 				text = (is_upper and text:upper()) or (is_lower and text:lower()) or (is_pretty and text:pretty(true)) or text,
 				h = panel:h(),
-				x = offset,
+				x = offset_x,
 				vertical = "center",
 				layer = 1,
 				color = color,
 				font = self.owner.font,
-				font_size = font_size - 2
+				font_size = font_size - offset_y
 			})
 			local _,_,w,_ = t:text_rect()
 			t:set_w(w)
@@ -119,8 +120,9 @@ function ContextMenu:CreateItems()
 				halign = "grow",
 				valign = "grow",
 				layer = 0
-			})
-			self._widest_boi = math.max(self._widest_boi, t:w() + offset_sides)
+            })
+            self._widest_boi = math.max(self._widest_boi, w + offset_sides)
+            
 			table.insert(self._item_panels, panel)
 		end
     end
@@ -141,7 +143,7 @@ function ContextMenu:hide()
 end
 
 function ContextMenu:reposition()
-	local size = (self.owner.font_size or self.owner.size)
+	local size = self.owner.context_font_size or self.owner.font_size or self.owner.size
 	local offset_y = self.owner.context_screen_offset_y or 32
     local bottom_h = (self.menu._panel:world_bottom() - self.owner.panel:world_bottom()) - offset_y 
 	local top_h = (self.owner.panel:world_y() - self.menu._panel:world_y()) - offset_y
@@ -162,7 +164,7 @@ function ContextMenu:reposition()
 		best_h = top_h
 	end
 
-	self.panel:set_size(self._widest_boi, best_h)
+	self.panel:set_size(self._widest_boi + self._scroll._scroll_bar:w(), best_h)
 	self.panel:set_world_right(self.owner.panel:world_right())
 
     if normal_pos then
@@ -172,7 +174,7 @@ function ContextMenu:reposition()
 	end
 	
     self._scroll:panel():set_y(self.owner.searchbox and self.owner.size or 0) 
-    self._scroll:set_size(self._widest_boi, self.panel:h() - (self.owner.searchbox and self.owner.size or 0))
+    self._scroll:set_size(self.panel:w(), self.panel:h() - (self.owner.searchbox and self.owner.size or 0))
 
     self._scroll:update_canvas_size()
 end
