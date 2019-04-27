@@ -1257,11 +1257,7 @@ function Item:MouseMovedMenuEvent(x, y)
     return false
 end
 
-function Item:MouseDoubleClick(button, x, y)
-	if not self:MouseCheck(true) then
-        return false
-	end
-
+function Item:MouseDoubleClick(button, x, y)	
 	if self:Enabled() then
 		if self.menu_type then
 			for _, item in pairs(self._visible_items) do
@@ -1270,7 +1266,11 @@ function Item:MouseDoubleClick(button, x, y)
 				end
 			end
 		end
-
+		
+		if not self:MouseCheck(true) then
+			return false
+		end
+		
 		if self:MouseInside(x,y) and self.on_double_click then
 			self.on_double_click(item, button, x, y)
 			return true
