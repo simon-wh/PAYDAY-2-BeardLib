@@ -16,10 +16,13 @@ function ElementPushInstigator:on_executed(instigator)
         return
     end
     if alive(instigator) and instigator:camera() then
-        local velocity = self._values.velocity
-        local pos = self._values.forward and instigator:camera():forward() or velocity
-        mvector3.multiply(pos, self._values.multiply or 1)
-        instigator:push(self._values.mass, pos:with_z(self._values.no_z and 0 or pos.z))
+        local vel = self._values.velocity
+        if self._values.forward then
+            local fwd = instigator:camera():forward()
+            vel = Vector3(vel.x*fwd.x, vel.y*fwd.y, vel.z)
+        end
+        mvector3.multiply(vel, self._values.multiply or 1)
+        instigator:push(self._values.mass, vel:with_z(self._values.no_z and 0 or vel.z))
     end
     ElementPushInstigator.super.on_executed(self, instigator)
 end

@@ -144,7 +144,7 @@ end
 
 function TextBoxBase:key_hold(text, k)
     local first
-    while self.cantype and self.menu._key_pressed == k and self.menu.active_textbox == self do
+    while alive(text) and self.cantype and self.menu._key_pressed == k and self.menu.active_textbox == self do
         local s, e = text:selection()
         local n = utf8.len(self:Value())
         local x = KB:Down("x")

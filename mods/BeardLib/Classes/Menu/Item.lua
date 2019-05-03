@@ -25,6 +25,7 @@ function Item:Init(params)
 
 	self.panel = self.parent_panel:panel({
 		name = self.name,
+		layer = self.layer or 1,
 		visible = self.visible,
 		alpha = self.enabled and self.enabled_alpha or self.disabled_alpha,
 		w = self.w,
@@ -1028,11 +1029,12 @@ end
 function Item:RunCallback(clbk, ...)
 	clbk = clbk or self.on_callback
 	if clbk then
-		clbk(self, ...)
+		table.insert(self.menu._callbacks, SimpleClbk(clbk, self, ...))
 	elseif self.callback then --Old.
-		self.callback(self.parent, self, ...)
+		table.insert(self.menu._callbacks, SimpleClbk(self.callback, self, ...))
 	end
 end
+
 
 function Item:Reposition(last_positioned_item, prev_item)
 	if not self:alive() then

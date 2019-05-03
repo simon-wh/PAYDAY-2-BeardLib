@@ -275,4 +275,13 @@ elseif F == 'ingamewaitingforplayers' then
             end
         end)
     end)]]
+elseif F == "playerdamage" then
+    Hooks:PostHook(PlayerDamage, "init", "BeardLibPlyDmgInit", function(self)
+        local level_tweak = tweak_data.levels[managers.job:current_level_id()]
+    
+        if level_tweak and level_tweak.player_invulnerable then
+            self:set_mission_damage_blockers("damage_fall_disabled", true)
+            self:set_mission_damage_blockers("invulnerable", true)
+        end
+    end)
 end

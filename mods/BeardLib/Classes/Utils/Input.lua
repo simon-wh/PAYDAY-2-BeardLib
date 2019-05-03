@@ -24,7 +24,7 @@ function MouseInput:Id(str) return str end
 function InputUtils:TriggerDataFromString(str, clbk)
     local additional_key
     local key = str
-    if str:find("+") then
+    if string.find(str, "+") then
         local split = string.split(str, "+")
         key = split[1]
         additional_key = split[2]
