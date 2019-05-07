@@ -102,7 +102,7 @@ function MenuDialog:basic_show(params, force)
     self._tbl = {}
     self._params = params
     params = type_name(params) == "table" and params or {}
-    self._callback = params.callback
+    self._callback = params.on_callback or params.callback
     self._no_callback = params.no_callback
     if not self._no_clearing_menu then
         self._menu:ClearItems()

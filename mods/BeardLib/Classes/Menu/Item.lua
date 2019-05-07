@@ -1031,7 +1031,7 @@ function Item:RunCallback(clbk, ...)
 	if clbk then
 		table.insert(self.menu._callbacks, SimpleClbk(clbk, self, ...))
 	elseif self.callback then --Old.
-		table.insert(self.menu._callbacks, SimpleClbk(self.callback, self, ...))
+		table.insert(self.menu._callbacks, SimpleClbk(self.callback, self.parent, self, ...))
 	end
 end
 
