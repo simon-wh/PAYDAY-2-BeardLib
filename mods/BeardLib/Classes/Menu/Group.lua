@@ -64,8 +64,8 @@ function Group:UpdateGroup()
     if alive(self.toggle) then
         self.toggle:set_texture_rect(self.closed and 42 or 2, self.closed and 2 or 0, 16, 16)
     end
-    self:AlignItems()
     self:_SetSize(nil, nil, true)
+    self:_AlignItems()
 end
 
 function Group:_SetSize(w, h)
@@ -123,4 +123,12 @@ function Group:GetToolbar()
         })
     end
     return self.tb
+end
+
+function Group:NewItem(item, ...)
+	if self.closed then
+		item:SetVisible(false)
+		item._hidden_by_menu = true
+	end
+	return Group.super.NewItem(self, item, ...)
 end

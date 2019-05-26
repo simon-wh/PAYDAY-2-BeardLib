@@ -11,6 +11,20 @@ Item.align_methods = {
     grid_from_right_reversed = "AlignItemsGridFromRightReversed",
 }
 
+function Item:_AlignItems(...)
+    if self.delay_align_items then
+        local key = self:Key()
+        for _, tbl in pairs(self.menu._align_items_funcs) do
+            if tbl.key == key then
+                return
+            end
+        end
+        table.insert(self.menu._align_items_funcs, {key = key, clbk = ClassClbk(self, "AlignItems", ...)})
+    else
+        self:AlignItems(...)
+    end
+end
+
 function Item:AlignItems(menus, no_parent)
     if self.align_method == "none" then self:CheckItems() return end
     if not self.menu_type then return end 

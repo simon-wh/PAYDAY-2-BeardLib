@@ -53,6 +53,8 @@ function MenuUI:init(params)
     self._menus = {}
     self.private = {}
     self._callbacks = {}
+    self._align_items_funcs = {}
+
 	if self.visible == true and managers.mouse_pointer then self:enable() end
 
     BeardLib:AddUpdater("MenuUIUpdate"..tostring(self), ClassClbk(self, "Update"), true)
@@ -271,7 +273,7 @@ function MenuUI:RunCallbackNextUpdate(clbk)
     table.insert(self._callbacks, clbk)
 end
 
-function MenuUI:Update()
+function MenuUI:Update(t, dt)
     local x,y = managers.mouse_pointer:world_position()
     if self._slider_hold then self._slider_hold:SetValueByMouseXPos(x) end
     self._old_x = x
@@ -287,6 +289,10 @@ function MenuUI:Update()
         clbk()
     end
     self._callbacks = {}
+    for _, delayed in pairs(self._align_items_funcs) do
+        delayed.clbk()
+    end
+    self._align_items_funcs = {}
 end
 
 function MenuUI:UnHighlight()

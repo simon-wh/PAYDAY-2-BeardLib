@@ -162,8 +162,7 @@ function NoteBook:UpdatePage()
         end
     end
     
-    self:AlignItems()
-    self:_SetSize(nil, nil, true)
+    self:_AlignItems()
 end
  
 function NoteBook:MousePressed(button, x, y)

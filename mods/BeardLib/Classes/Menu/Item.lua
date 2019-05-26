@@ -173,7 +173,8 @@ function Item:WorkParams(params)
 	self:WorkParam("highlight_color", Color.white:with_alpha(0.1))
 	self:WorkParam("context_background_color", self.background_color, Color.black)	
 	self:WorkParam("background_color", Color.transparent)
-
+	self:WorkParam("full_bg_color")
+	
 	local bg, bgh
 	self:WorkParam("auto_foreground")
 
@@ -219,6 +220,7 @@ function Item:WorkParams(params)
 	self:WorkParam("context_scroll_width", 10)
 	self:WorkParam("context_font_size", 20)
 	self:WorkParam("context_text_offset")
+	self:WorkParam("delay_align_items")
 	
 	self:WorkParam("click_btn", ids_0)
 
@@ -277,21 +279,22 @@ function Item:WorkParams(params)
 	
 	if not self.initialized then
 		if self.parent ~= self.menu then
-			if (not self.w or self.fit_width) then
+			if self.w ~= "half" and (not self.w or self.fit_width) then
 				self.w = (self.w or self.parent_panel:w()) - ((self.size_by_text or self.type_name == "ImageButton") and 0 or self.offset[1] * 2)
 			end
-			self.w = math.clamp(self.w, self.min_width or 0, self.max_width or self.w)
 		else
 			self.w = self.w or self.parent_panel:w()
 			self.h = self.h or self.parent_panel:h()
+		end
+		if self.w == "half" then
+			self.w = self.parent_panel:w() / 2
 		end
 		if self.shrink_width then
 			self.w = self.w * self.shrink_width
 			self.shrink_width = nil
 		end
-		if self.w == "half" then
-			self.w = self.parent_panel:w() / 2
-		end
+
+		self.w = math.clamp(self.w, self.min_width or 0, self.max_width or self.w)
 		self.orig_h = self.h
 	end
 	
@@ -489,7 +492,7 @@ function Item:NewItem(item)
 	end
 	
     item.indx = item.indx or index
-    if self.auto_align then self:AlignItems() end
+    if self.auto_align then self:_AlignItems() end
 	if managers.mouse_pointer then
 		item:MouseMoved(managers.mouse_pointer:world_position())
 	end
@@ -540,7 +543,7 @@ function Item:RemoveItem(item)
         panel:parent():remove(panel)
     end
     if self.auto_align then
-        self:AlignItems()
+        self:_AlignItems()
     end
 end
 
@@ -559,7 +562,7 @@ function Item:RecreateItem(item, align_items)
         item:RecreateItems()
     end
     if align_items then
-        self:AlignItems(true)
+        self:_AlignItems()
     end
 end
 
@@ -567,9 +570,7 @@ function Item:RecreateItems()
     for _, item in pairs(self._my_items) do
         self:RecreateItem(item)
     end
-    if self.auto_align then
-        self:AlignItems(true)
-    end
+    self:_AlignItems()
 end
 
 function Item:ClearItems(label)
@@ -592,7 +593,7 @@ function Item:ClearItems(label)
     end
     self.menu:CheckOpenedList()
     if self.auto_align then
-        self:AlignItems(true)
+        self:_AlignItems()
     end
 end
 
@@ -601,6 +602,17 @@ function Item:ItemsPanel() return self.panel end
 function Item:ItemsWidth() return self:Panel():w() end
 function Item:ItemsHeight() return self:Panel():h() end
 function Item:Items() return self._my_items end
+
+function Item:GetItemValue(name)
+	local item = self:GetItem(name)
+	if item then
+		return item:Value()
+	else
+		BeardLib:DevLog("[ERROR] GetItemValue didn't find item named %s")
+		return nil
+	end
+end
+
 function Item:ShouldClose()
 	local should_close = not ((self._textbox and self._textbox.cantype) or self.CanEdit)
 	if self.menu_type then
@@ -797,8 +809,17 @@ function Item:Inside(x, y) return self.panel:inside(x,y) end
 function Item:Visible() return self:alive() and self.visible and self.should_render end
 function Item:_Visible() return self:alive() and self.visible end
 function Item:TextHeight() return self:title_alive() and self.title:bottom() + self:TextOffsetY() or 0 end
-
+function Item:Key() return self:Panel():key() end
 --Set Funcs
+
+function Item:SetItemValue(name, ...)
+	local item = self:GetItem(name)
+	if item then
+		item:SetValue(...)
+	else
+		BeardLib:DevLog("[ERROR] SetItemValue didn't find item named %s")
+	end
+end
 
 function Item:SetLayer(layer)
     self:Panel():set_layer(layer)
@@ -885,7 +906,7 @@ end
 function Item:SetText(text)
 	self:_SetText(text)
 	if self.parent.auto_align then
-		self.parent:AlignItems()
+		self.parent:_AlignItems()
 	end
 	self:MakeBorder()
 end
@@ -977,7 +998,7 @@ function Item:SetIndex(index, no_align)
 	table.delete(self.parent._my_items, self)
 	table.insert(self.parent._my_items, index, self)
 	if not no_align and self.parent.auto_align then
-		self:AlignItems(true)
+		self:_AlignItems()
 	end
 end
 
@@ -1002,7 +1023,7 @@ function Item:SetVisible(visible, animate, no_align)
 			self:SetEnabled(true)
 		end	
 		if not no_align and self.parent.auto_align then
-			self.parent:AlignItems()
+			self.parent:_AlignItems()
 		end
 	end
 	self.menu:CheckOpenedList()
