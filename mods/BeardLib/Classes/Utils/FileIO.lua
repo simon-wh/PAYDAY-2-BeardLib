@@ -50,6 +50,8 @@ function FileIO:ReadConfig(path, tbl)
 	end
 end
 
+local isWin32 = not BLT.GetOS or (BLT.GetOS and BLT:GetOS() == "windows") --No need to convert in Windows.
+
 function FileIO:ConvertScriptData(data, typ, clean) 
 	local new_data
     if typ == "json" then
@@ -61,12 +63,11 @@ function FileIO:ConvertScriptData(data, typ, clean)
     elseif typ == "generic_xml" then
         new_data = ScriptSerializer:from_generic_xml(data)
     elseif typ == "binary" then
-        if blt and blt.scriptdata then
-            local info = blt.scriptdata.identify(data)
+        if not isWin32 and blt and blt.scriptdata then
+			local info = blt.scriptdata.identify(data)
             local sys32bit = blt.blt_info().arch == "x86"
-
             -- If we're trying to load a 32-bit encoded file on a 64-bit encoded platform or vice-versa, convert it
-            if info.is32bit ~= sys32bit then
+			if info.is32bit ~= sys32bit then
                 data = blt.scriptdata.recode(data, {
                     is32bit = sys32bit,
                 })
