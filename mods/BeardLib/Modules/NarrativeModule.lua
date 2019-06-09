@@ -74,12 +74,12 @@ function NarrativeModule:AddNarrativeData(narr_self, tweak_data)
     if not data.hide_from_crimenet and ((data.job_wrapper and #data.job_wrapper > 0) or #data.chain > 0) and not table.contains(narr_self._jobs_index, id) then 
         table.insert(narr_self._jobs_index, id)
     end
-    narr_self:set_job_wrappers()
 end
 
 function NarrativeModule:RegisterHook()
     if tweak_data and tweak_data.narrative then
         self:AddNarrativeData(tweak_data.narrative, tweak_data)
+        tweak_data.narrative:set_job_wrappers()
     else
         Hooks:PostHook(NarrativeTweakData, "init", self._config.id .. "AddNarrativeData", ClassClbk(self, "AddNarrativeData"))
     end

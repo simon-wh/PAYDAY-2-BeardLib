@@ -9,7 +9,8 @@ Framework.menu_color = Color(0.1, 0.6, 0.1)
 
 function Framework:RegisterHooks(...)
 	self:AddCustomContact()
-	MapFramework.super.RegisterHooks(self, ...)
+    MapFramework.super.RegisterHooks(self, ...)
+    tweak_data.narrative:set_job_wrappers()
 end
 
 function Framework:GetMapByJobId(job_id)
