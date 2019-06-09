@@ -53,12 +53,14 @@ function NarrativeModule:AddNarrativeData(narr_self, tweak_data)
         ignore_heat = true,
         custom = true
     })
-    for _, stage in pairs(data.chain) do
-        if stage.level_id then
-            narr_self.stages[stage.level_id] = stage
-        else
-            for _, _stage in pairs(stage) do
-                narr_self.stages[_stage.level_id] = _stage
+    if data.chain then
+        for _, stage in pairs(data.chain) do
+            if stage.level_id then
+                narr_self.stages[stage.level_id] = stage
+            else
+                for _, _stage in pairs(stage) do
+                    narr_self.stages[_stage.level_id] = _stage
+                end
             end
         end
     end

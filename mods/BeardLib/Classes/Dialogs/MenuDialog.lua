@@ -26,6 +26,11 @@ function MenuDialog:init(params, menu)
     BeardLib.managers.dialog:AddDialog(self)
 end
 
+function MenuDialog:Destroy()
+    BeardLib.managers.dialog:RemoveDialog(self)
+    self._menu:Destroy()
+end
+
 function MenuDialog:Show(params)
     BeardLib.managers.dialog:OpenDialog(self, type_name(params) == "table" and params or nil)
 end

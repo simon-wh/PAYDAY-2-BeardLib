@@ -564,6 +564,38 @@ function MenuUI:Typing()
     return alive(self.active_textbox) and self.active_textbox.cantype
 end
 
+function MenuUI:Destroy()
+    if self._ws then
+        self:Disable()
+        managers.gui_data:destroy_workspace(self._ws)
+        BeardLib:RemoveUpdater("MenuUIUpdate"..tostring(self))
+        BeardLib.managers.menu_ui:remove_menu(self)
+    end
+end
+
+function MenuUI:RemoveItem(item)
+    if not item then
+        return
+    end
+    if item.menu_type then
+        item:ClearItems()
+    end
+
+    if item._list then
+        item._list:Destroy()
+	end
+	
+	if item == self._highlighted then
+		self:UnHighlight()
+	end
+	
+    table.delete(self._menus, item)
+    local panel = item:Panel()
+	if alive(panel) then		
+        panel:parent():remove(panel)
+    end
+end
+
 function MenuUI:enable() return self:Enable() end
 function MenuUI:disable() return self:Disable() end
 function MenuUI:toggle() return self:Toggle() end

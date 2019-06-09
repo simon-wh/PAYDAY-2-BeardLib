@@ -97,6 +97,12 @@ function Menu:_SetSize(w, h)
     self:MakeBorder()
 end
 
+function Menu:SetScrollY(y)
+    self.items_panel:set_y(y)
+    self:CheckItems()
+    self._scroll:_check_scroll_indicator_states()
+end
+
 function Menu:SetScrollPanelSize()
     if not self:alive() or not self._scroll:alive() then
         return

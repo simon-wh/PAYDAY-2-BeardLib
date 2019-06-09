@@ -154,5 +154,6 @@ function MenuDialogManager:Menu() return self._menu end
 function MenuDialogManager:Hide() self._menu:disable() end
 function MenuDialogManager:GetMyIndex(dialog) return (#self._opened_dialogs + 1) - tonumber(table.get_key(self._opened_dialogs, dialog)) or 0 end
 function MenuDialogManager:AddDialog(dialog) table.insert(self._dialogs, dialog) end
+function MenuDialogManager:RemoveDialog(dialog) log(#self._dialogs) table.delete(self._dialogs, dialog) log(#self._dialogs) end
 
 return MenuDialogManager
