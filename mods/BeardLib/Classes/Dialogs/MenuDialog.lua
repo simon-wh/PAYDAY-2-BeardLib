@@ -27,7 +27,13 @@ function MenuDialog:init(params, menu)
 end
 
 function MenuDialog:Destroy()
+    self:hide()
     BeardLib.managers.dialog:RemoveDialog(self)
+    if self._menus then
+        for _, menu in pairs(self._menus) do
+            menu:Destroy()
+        end
+    end
     self._menu:Destroy()
 end
 
