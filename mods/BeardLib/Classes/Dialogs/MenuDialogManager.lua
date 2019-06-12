@@ -5,6 +5,7 @@ function MenuDialogManager:Init()
         name = "BeardLibDialogs",
         layer = 5000,
         background_blur = true,
+        bg_callbacks = false,
         pre_key_press = ClassClbk(self, "KeyPressed"),
     })
     self._dialogs = {}

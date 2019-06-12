@@ -234,7 +234,9 @@ function Item:WorkParams(params)
 	self:WorkParam("use_alpha")
 	self:WorkParam("items_localized", self.localized)
 	self:WorkParam("items_uppercase")
-    self:WorkParam("items_lowercase")
+	self:WorkParam("items_lowercase")
+	self:WorkParam("bg_callbacks", true)
+	
     if not self.MENU then
         self:WorkParam("align_method", "grid_from_right")
     end
@@ -1049,10 +1051,19 @@ end
 --Events
 function Item:RunCallback(clbk, ...)
 	clbk = clbk or self.on_callback
+	local final
 	if clbk then
-		table.insert(self.menu._callbacks, SimpleClbk(clbk, self, ...))
-	elseif self.callback then --Old.
-		table.insert(self.menu._callbacks, SimpleClbk(self.callback, self.parent, self, ...))
+		final = SimpleClbk(clbk, self, ...)
+	else
+		final = SimpleClbk(self.callback, self.parent, self, ...)
+	end
+
+	if final then
+		if self.bg_callbacks then
+			table.insert(self.menu._callbacks, final)		
+		else
+			final()
+		end
 	end
 end
 

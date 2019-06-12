@@ -136,7 +136,7 @@ function ListDialog:SearchCheck(t)
 end
 
 function ListDialog:MakeListItems(params)
-    self._list_menu:ClearItems("temp2")
+    self._list_menu:ClearItems("list_items")
     local case = self._case_sensitive
     local limit = self._limit
     local groups = {}
@@ -154,7 +154,7 @@ function ListDialog:MakeListItems(params)
                     auto_align = false,
                     name = v.create_group,
                     text = v.create_group,
-                    label = "temp2"
+                    label = "list_items"
                 }) 
                 groups[v.create_group] = menu
             end
@@ -166,7 +166,7 @@ function ListDialog:MakeListItems(params)
                         self._callback(v)
                     end
                 end, 
-                label = "temp2"
+                label = "list_items"
             }))
         end
     end
