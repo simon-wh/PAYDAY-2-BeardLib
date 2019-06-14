@@ -157,6 +157,14 @@ function InstanceModule:init(...)
     end
     self._world_path = Path:Combine(self.levels_folder, self._config.id, "world")
     BeardLib.managers.MapFramework._loaded_instances[self._world_path] = self --long ass line
+
+    --USED ONLY IN EDITOR!
+    if Global.editor_loaded_instance then
+        if Global.level_data and Global.level_data.level_id == "instances/mods/"..self._config.id then
+            BeardLib.current_level = self
+            self:Load()
+        end
+    end
     return true
 end
 

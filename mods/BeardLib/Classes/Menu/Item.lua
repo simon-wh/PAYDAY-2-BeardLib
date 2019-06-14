@@ -72,6 +72,28 @@ function Item:InitBasicItem()
 	self:MakeBorder()
 end
 
+function Item:InitBasicMenu()
+    self.panel = self.parent_panel:panel({
+        name = self.name .. "_panel",
+        w = self.w,
+        h = self.h,
+        visible = self.visible == true,
+        layer = self.layer or 1,
+    })
+    self.panel:script().menuui_item = self
+    self.menubg = self.panel:bitmap({
+        name = "background",
+        halign = "grow",
+        valign = "grow",
+        visible = NotNil(self.full_bg_color) or self.background_visible,
+        render_template = self.background_blur and "VertexColorTexturedBlur3D",
+        texture = self.background_blur and "guis/textures/test_blur_df",
+        color = self.full_bg_color or self.background_color,
+        alpha = self.background_alpha,
+        layer = 0
+    })
+end
+
 function Item:InitBGs()
 	local bgc = self.unhighlight_color or self.background_color
 	self.bg = self.panel:rect({
@@ -235,7 +257,7 @@ function Item:WorkParams(params)
 	self:WorkParam("items_localized", self.localized)
 	self:WorkParam("items_uppercase")
 	self:WorkParam("items_lowercase")
-	self:WorkParam("bg_callbacks", true)
+	self:WorkParam("bg_callbacks")
 	
     if not self.MENU then
         self:WorkParam("align_method", "grid_from_right")
@@ -363,8 +385,6 @@ function Item:UnHighlight()
 	self:DoHighlight(false)
 end
 
-
-
 --Item Creation--
 
 function Item:Create(type, ...)
@@ -375,6 +395,7 @@ function Item:Group(params) return self:NewItem(BeardLib.Items.Group:new(self:Co
 function Item:NoteBook(params) return self:NewItem(BeardLib.Items.NoteBook:new(self:ConfigureItem(params, true))) end
 function Item:PopupMenu(params) return self:NewItem(BeardLib.Items.PopupMenu:new(self:ConfigureItem(params, true))) end
 function Item:Menu(params) return self:NewItem(BeardLib.Items.Menu:new(self:ConfigureItem(params, true))) end
+function Item:Holder(params) return self:NewItem(BeardLib.Items.Holder:new(self:ConfigureItem(params, true))) end
 function Item:ComboBox(params) return self:NewItem(BeardLib.Items.ComboBox:new(self:ConfigureItem(params))) end
 function Item:TextBox(params) return self:NewItem(BeardLib.Items.TextBox:new(self:ConfigureItem(params))) end
 function Item:ComboBox(params) return self:NewItem(BeardLib.Items.ComboBox:new(self:ConfigureItem(params))) end

@@ -52,12 +52,17 @@ function Toggle:UpdateToggle(value_changed, highlight)
 	if alive(self.panel) then
 		local fgcolor = self:GetForeground(highlight)
 		local s = value and self.size - 4 or 0
-		play_color(self.toggle, fgcolor)
+		if self.animate_colors then
+			play_color(self.toggle, fgcolor)
+		else
+			self.toggle:set_color(fgcolor)
+			self.toggle_value:set_color(fgcolor)
+		end
 		play_anim(self.toggle_value, {
 			after = function()
 				self.toggle_value:set_center(self.toggle:center())
 			end,
-			set = {w = s, h = s, color = fgcolor}
+			set = {w = s, h = s, color = self.animate_colors and fgcolor}
 		})
 	end
 end

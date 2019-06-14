@@ -53,19 +53,23 @@ function Group:UpdateGroup()
     if self.closed then
         self.panel:set_h(self:TextHeight())
     end
-    for i, item in pairs(self._my_items) do
-        if item:ParentPanel() == self:ItemsPanel() and (item.visible or item._hidden_by_menu) then --handle only visible items.
-            item:SetVisible(not self.closed)
-            if self.closed then
-                item._hidden_by_menu = true
+    if not self.divider_type then
+        for i, item in pairs(self._my_items) do
+            if item:ParentPanel() == self:ItemsPanel() and (item.visible or item._hidden_by_menu) then --handle only visible items.
+                item:SetVisible(not self.closed)
+                if self.closed then
+                    item._hidden_by_menu = true
+                end
             end
         end
+        if alive(self.toggle) then
+            self.toggle:set_texture_rect(self.closed and 42 or 2, self.closed and 2 or 0, 16, 16)
+        end
+        self:_SetSize()
     end
-    if alive(self.toggle) then
-        self.toggle:set_texture_rect(self.closed and 42 or 2, self.closed and 2 or 0, 16, 16)
+    if not self.divider_type or self.auto_align then
+        self:_AlignItems()
     end
-    self:_SetSize(nil, nil, true)
-    self:_AlignItems()
 end
 
 function Group:_SetSize(w, h)

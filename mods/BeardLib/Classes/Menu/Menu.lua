@@ -5,25 +5,7 @@ Menu.MENU = true
 function Menu:Init(params)
     self:WorkParams(params)
     self.menu_type = true
-    self.panel = self.parent_panel:panel({
-        name = self.name .. "_panel",
-        w = self.w,
-        h = self.h,
-        visible = self.visible == true,
-        layer = self.layer or 1,
-    })
-    self.panel:script().menuui_item = self
-    self.menubg = self.panel:bitmap({
-        name = "background",
-        halign = "grow",
-        valign = "grow",
-        visible = NotNil(self.full_bg_color) or self.background_visible,
-        render_template = self.background_blur and "VertexColorTexturedBlur3D",
-        texture = self.background_blur and "guis/textures/test_blur_df",
-        color = self.full_bg_color or self.background_color,
-        alpha = self.background_alpha,
-        layer = 0
-    })
+    self:InitBasicMenu()
     self._scroll = ScrollablePanelModified:new(self.panel, "ItemsPanel", {
         layer = 4,
         padding = 0, 
@@ -41,7 +23,6 @@ function Menu:Init(params)
     self:Reposition()
     self:SetEnabled(self.enabled)
     self:SetVisible(self.visible)
-    self:GrowHeight()
 end
 
 function Menu:GrowHeight(speed)
