@@ -565,7 +565,7 @@ function MenuUI:Typing()
 end
 
 function MenuUI:Destroy()
-    if self._ws then
+    if alive(self._ws) then
         self:Disable()
         managers.gui_data:destroy_workspace(self._ws)
         BeardLib:RemoveUpdater("MenuUIUpdate"..tostring(self))
