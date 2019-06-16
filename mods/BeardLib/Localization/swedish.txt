@@ -57,5 +57,18 @@
 	"beardlib_dev_mode" : "Utvecklarläge",
 	"beardlib_dev_mode_help" : "Just nu kan BeardLibs utvecklarläge bara logga viss information som ljud-ID",
 	"beardlib_important_notice_help" : "Ska BeardLib meddela dig när det finns en uppdatering till en viktig modifikation?",
-	"beardlib_write_failed" : "Misslyckades med att skriva till väg :/"
+	"beardlib_write_failed" : "Misslyckades med att skriva till väg :/",
+    "beardlib_customachievementmenu_title" : "Custom Achievements",
+    "beardlib_customachievementmenu_desc" : "Track and view the custom achievements currently installed.",
+    "beardlib_customachievementmenu_packages_installed" : "$nbpackages packages installed",
+    "beardlib_customachievementmenu_completed_achievements" : "$completed / $total completed achievements ( $percent % )",
+    "beardlib_customachievementmenu_unlocked" : "Unlocked: $time",
+    "beardlib_customachievementmenu_header_objectives" : "Objectives",
+    "beardlib_customachievementmenu_header_rewards" : "Rewards",
+    "beardlib_customachievementmenu_header_unlocked" : "Unlocked",
+    "beardlib_customachievementmenu_header_unlocked_date" : "Date: $time",
+    "beardlib_customachievementmenu_reward_exp" : "Experience",
+    "beardlib_customachievementmenu_reward_cash" : "Spendable Cash",
+    "beardlib_customachievementmenu_reward_offshore" : "Offshore Cash",
+    "beardlib_customachievementmenu_reward_cc" : "Continental Coins"
 }

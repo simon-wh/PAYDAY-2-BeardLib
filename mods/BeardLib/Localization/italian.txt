@@ -57,5 +57,18 @@
     "beardlib_dev_mode" : "Modalità sviluppatore",
     "beardlib_dev_mode_help" : "La modalità sviluppatore di Beardlib attualmente cataloga solo alcune informazioni, come l'id dei suoni",
     "beardlib_important_notice_help" : "BeardLib deve informarti se è presente un'aggiornamento importante per una mod?",
-    "beardlib_write_failed" : "Errore di scrittura nel percorso :/"
+    "beardlib_write_failed" : "Errore di scrittura nel percorso :/",
+    "beardlib_customachievementmenu_title" : "Custom Achievements",
+    "beardlib_customachievementmenu_desc" : "Track and view the custom achievements currently installed.",
+    "beardlib_customachievementmenu_packages_installed" : "$nbpackages packages installed",
+    "beardlib_customachievementmenu_completed_achievements" : "$completed / $total completed achievements ( $percent % )",
+    "beardlib_customachievementmenu_unlocked" : "Unlocked: $time",
+    "beardlib_customachievementmenu_header_objectives" : "Objectives",
+    "beardlib_customachievementmenu_header_rewards" : "Rewards",
+    "beardlib_customachievementmenu_header_unlocked" : "Unlocked",
+    "beardlib_customachievementmenu_header_unlocked_date" : "Date: $time",
+    "beardlib_customachievementmenu_reward_exp" : "Experience",
+    "beardlib_customachievementmenu_reward_cash" : "Spendable Cash",
+    "beardlib_customachievementmenu_reward_offshore" : "Offshore Cash",
+    "beardlib_customachievementmenu_reward_cc" : "Continental Coins"
 }

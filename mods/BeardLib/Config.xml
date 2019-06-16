@@ -23,6 +23,10 @@
 			<cooked_physics path="core/units/cubemap_gizmo/cubemap_gizmo" force_if_not_loaded="true"/>
 			<texture path="guis/textures/menu_ui_icons"/>
 			<texture path="guis/textures/beardlib_logo"/>
+			<texture path="guis/textures/achievement_trophy_white"/>
+			<texture path="guis/textures/achievement_package_default"/>
+			<texture path="guis/textures/achievement_banner_topper"/>
+			<texture path="guis/textures/checkmark"/>
 		</AddFiles>
 		<Options build_menu="false" auto_load="true">
 			<options>
@@ -136,6 +140,8 @@
 		<class file="Dialogs/MenuDialogManager.lua" manager="dialog"/>
 		<class file="BeardLibModsMenu.lua" manager="mods_menu"/>
 		<class file="WeaponSkinExtension.lua"/>
+		<class file="CustomAchievementManager.lua" manager="custom_achievement"/>
+		<class file="CustomAchievementMenu.lua" manager="custom_achievement_menu"/>
 	</classes>
 	<script_data_types>
 		<value_node value="sequence_manager"/>
@@ -248,5 +254,6 @@
 		<value_node value="ExecuteWithCode"/>
 		<value_node value="OverrideInstigator"/>
 		<value_node value="XAudio"/>
+		<value_node value="BLCustomAchievement"/>
 	</mission_elements>
 </table>
