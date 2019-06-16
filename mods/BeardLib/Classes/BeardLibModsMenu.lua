@@ -42,27 +42,37 @@ function BeardLibModsMenu:CreateItems(menu)
         position = {4, 6},
         count_as_aligned = true
     })
-    self._holder:Button({
+    local button_holder = self._holder:Holder({
+        name = "button_holder",
+        w = 500,
+        position = "RightTop"
+    })
+    button_holder:Button({
         name = "Close",
         text = "beardlib_close",
         size_by_text = true,
-        position = "RightTopOffset-xy",
         on_callback = ClassClbk(self, "SetEnabled", false)
     })
-    self._holder:Button({
+    button_holder:Button({
         name = "UpdateAllMods",
         text = "beardlib_update_all",
         size_by_text = true,
-        position = SimpleClbk(self._holder.AlignRight),
         on_callback = ClassClbk(self, "UpdateAllMods"),
     })
-    self._holder:Button({
+    button_holder:Button({
         name = "Settings",
         text = "beardlib_settings",
         size_by_text = true,
-        position = SimpleClbk(self._holder.AlignRight),
         on_callback = ClassClbk(self, "OpenSettings"),
     })
+    button_holder:Button({
+        name = "Custom achievements",
+        text = "beardlib_customachievementmenu_title",
+        help = "beardlib_customachievementmenu_desc",
+        size_by_text = true,
+        callback = ClassClbk(BeardLib.managers.custom_achievement_menu, "_show", true)
+    })
+
     self._holder:TextBox({
         name = "search",
         text = false,
