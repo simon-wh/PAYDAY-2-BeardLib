@@ -93,8 +93,8 @@ function CustomAchievementMenu:_init_panels(parent)
 	})
 
 	self._achievement_list_header = parent:Menu({
-		scrollbar = false, 
-		background_color = Color.black:with_alpha(0.75), 
+		scrollbar = false,
+		background_color = Color.black:with_alpha(0.75),
 		h = 90, 
 		w = parent._panel:w() - self._account_progression:Panel():w() - (default_margin * 3),
 		offset = default_margin,
@@ -106,8 +106,8 @@ function CustomAchievementMenu:_init_panels(parent)
 
 	self._achievement_panel = parent:Menu({
 		scrollbar = false,
-		background_color = Color.black:with_alpha(0.5),
 		align_method = "grid",
+		background_color = Color.black:with_alpha(0.75),
 		h = parent._panel:h() - self._achievement_list_header:Panel():h() - self._header:Panel():h() - (default_margin * 3),
 		w = self._achievement_list_header:Panel():w(),
 		position = function(item)
@@ -128,18 +128,20 @@ function CustomAchievementMenu:_init_panels(parent)
 	self._achievement_list = self._achievement_panel:Menu({
 		h = self._achievement_panel:Panel():h(),
 		align_method = "grid",
-		offset = 5,
 		w = self._achievement_panel:Panel():w() / 1.6,
 		visible = false
 	})
 
-	self._achievement_details = self._achievement_panel:Menu({
+	self._achievement_details = parent:Menu({
 		scrollbar = false,
 		align_method = "grid",
-		background_color = Color.black:with_alpha(0.75),
 		h = self._achievement_panel:Panel():h(),
 		w = self._achievement_panel:Panel():w() - self._achievement_list:Panel():w() - 15,
-		visible = false
+		visible = false,
+		position = function(item)
+			item:Panel():set_top(self._achievement_panel:Panel():top() + 5)
+			item:Panel():set_right(self._achievement_panel:Panel():right() - 5)
+		end
 	})
 end
 
@@ -564,6 +566,22 @@ function CustomAchievementMenu:_display_achievement_details(achievement)
 		text = achiev_details.obj,
 		offset = 10
 	})
+
+	if not achievement:_is_unlocked() and achievement:_has_amount_value() then
+		local achiev_progress_header = panel:Divider({
+			text = utf8.to_upper("Progress"),
+			text_align = "center",
+			background_color = Color(achiev_details.rank_color):with_alpha(0.5),
+			offset = 5
+		})
+
+		local progress = achievement:_current_amount_value() * 100 / achievement:_amount_value()
+
+		local achiev_progress_details = panel:Divider({
+			text = tostring(achievement:_current_amount_value()) .. " / " .. tostring(achievement:_amount_value()) .. " ( " .. math.floor(progress) .. " %)",
+			offset = 10
+		})
+	end
 
 	if achievement:_has_reward() then
 		local achiev_rewards_header = panel:Divider({
