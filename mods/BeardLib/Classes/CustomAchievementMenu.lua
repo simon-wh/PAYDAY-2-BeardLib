@@ -575,7 +575,7 @@ function CustomAchievementMenu:_display_achievement_details(achievement)
 			offset = 5
 		})
 
-		local progress = achievement:_current_amount_value() / achievement:_amount_value()
+		local progress = achievement:_current_amount_value() * 100 / achievement:_amount_value()
 
 		local achiev_progress_details = panel:Divider({
 			text = tostring(achievement:_current_amount_value()) .. " / " .. tostring(achievement:_amount_value()) .. " ( " .. progress .. " %)",
