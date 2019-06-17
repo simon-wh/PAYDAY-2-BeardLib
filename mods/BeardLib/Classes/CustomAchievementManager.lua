@@ -470,7 +470,7 @@ function CustomAchievement:_check_completion()
         return
     end
 
-    if self._amount >= self._saved_amount then
+    if self._saved_amount >= self._amount then
         self:_unlock()
     end
 end
