@@ -125,17 +125,28 @@ elseif F == "connectionnetworkhandler" then
     end
 elseif F == "elementinteraction" then
     --Checks if the interaction unit is loaded to avoid crashes
+    --Checks if interaction tweak id exists
     core:import("CoreMissionScriptElement")
     ElementInteraction = ElementInteraction or class(CoreMissionScriptElement.MissionScriptElement)
     local orig_init = ElementInteraction.init
     local unit_ids = Idstring("unit")
     local norm_ids = Idstring("units/dev_tools/mission_elements/point_interaction/interaction_dummy")
     local nosync_ids = Idstring("units/dev_tools/mission_elements/point_interaction/interaction_dummy_nosync")
-    function ElementInteraction:init(...)
+    function ElementInteraction:init(mission_script, data, ...)
         if not PackageManager:has(unit_ids, norm_ids) or not PackageManager:has(unit_ids, nosync_ids) then
-            return ElementInteraction.super.init(self, ...)
+            return ElementInteraction.super.init(self, mission_script, data, ...)
         end
-        return orig_init(self, ...)
+        if data and data.values and not tweak_data.interaction[data.values.tweak_data_id] then
+            return ElementInteraction.super.init(self, mission_script, data, ...)
+        end
+        return orig_init(self, mission_script, data, ...)
+    end
+
+    function MissionScriptElement:init(mission_script, data)
+        self._mission_script = mission_script
+        self._id = data.id
+        self._editor_name = data.editor_name
+        self._values = data.values
     end
 elseif F == "elementvehiclespawner" then
     --Same as interaction element but checks the selected vehicle

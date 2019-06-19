@@ -19,6 +19,9 @@ function Holder:WorkParams(params)
 end
 
 Holder.SetSize = BeardLib.Items.Menu.SetSize
+Holder.MousePressed = Holder.MousePressedMenuEvent
+Holder.MouseMoved = Holder.MouseMovedMenuEvent
+
 
 function Holder:_SetSize(w, h)
     if not self:alive() then
