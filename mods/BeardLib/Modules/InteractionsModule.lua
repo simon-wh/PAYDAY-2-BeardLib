@@ -3,7 +3,7 @@ InteractionModule.type_name = "Interactions"
 
 function InteractionModule:RegisterHook()
     Hooks:PostHook(InteractionTweakData, "init", self._config.id .. "AddInteractionData", function(i_self)
-        for _, data in ipairs(self._config.data) do
+        for _, data in ipairs(self._config) do
             if data._meta == "interaction" then
                 if i_self[data.id] then
                     BeardLib:log("[ERROR] Interaction with id '%s' already exists!", data.id)
