@@ -68,10 +68,6 @@ function LevelModule:Load()
     if self._config.hooks then
         HooksModule:new(self._mod, self._config.hooks)
     end
-
-    if self._config.interactions then
-        InteractionsModule:new(self._mod, self._config.interactions)
-    end
 end
 
 function LevelModule:AddLevelDataToTweak(l_self)
@@ -125,6 +121,11 @@ function LevelModule:AddPrePlanningDataToTweak(pp_self)
 end
 
 function LevelModule:RegisterHook()
+    if self._config.interactions then
+        local interactions = InteractionsModule:new(self._mod, self._config.interactions)
+        interactions:RegisterHook()
+    end
+
     if tweak_data and tweak_data.levels then    
         self:AddLevelDataToTweak(tweak_data.levels)
     else
