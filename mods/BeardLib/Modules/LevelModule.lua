@@ -68,6 +68,10 @@ function LevelModule:Load()
     if self._config.hooks then
         HooksModule:new(self._mod, self._config.hooks)
     end
+
+    if self._config.interactions then
+        InteractionsModule:new(self._mod, self._config.interactions)
+    end
 end
 
 function LevelModule:AddLevelDataToTweak(l_self)
