@@ -86,7 +86,7 @@ function SelectListDialog:MakeListItems(params)
         end
     end
     self:show_dialog()
-    self._list_menu:AlignItems()
+    self._list_menu:AlignItems(true)
 end
 
 function SelectListDialog:ToggleClbk(value, item, no_refresh)
