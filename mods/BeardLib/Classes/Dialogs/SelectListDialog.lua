@@ -1,5 +1,6 @@
 SelectListDialog = SelectListDialog or class(ListDialog)
 SelectListDialog.type_name = "SelectListDialog"
+SelectListDialog.MAX_ITEMS = 150
 
 function SelectListDialog:init(params, menu)
     if self.type_name == SelectListDialog.type_name then
@@ -62,7 +63,7 @@ function SelectListDialog:ShowItem(t, selected)
         return false
     end
     if self:SearchCheck(t) then
-        if not self._limit or #self._visible_items <= 250 then
+        if not self._limit or #self._visible_items <= self._max_items then
             return true
         end
     end
@@ -85,7 +86,7 @@ function SelectListDialog:MakeListItems(params)
         end
     end
     self:show_dialog()
-    self._list_menu:AlignItems(true)
+    self._list_menu:AlignItems()
 end
 
 function SelectListDialog:ToggleClbk(value, item, no_refresh)

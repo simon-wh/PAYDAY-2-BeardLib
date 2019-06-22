@@ -1,6 +1,7 @@
 ListDialog = ListDialog or class(MenuDialog)
 ListDialog.type_name = "ListDialog"
 ListDialog._no_reshaping_menu = true
+ListDialog.MAX_ITEMS = 500 
 
 function ListDialog:init(params, menu)
     if self.type_name == ListDialog.type_name then
@@ -83,10 +84,27 @@ function ListDialog:_Show(params)
     if not self:basic_show(params) then
         return
     end
-    self._filter = {}
+    if not params.no_reset_search then
+        self._search = nil
+        self._filter = {}
+    end
     self._case_sensitive = params.case_sensitive
     self._limit = NotNil(params.limit, true)
     self._list = params.list
+    self._max_items = params.max_items or self.MAX_ITEMS
+    
+    self._params = params
+    self:CreateTopMenu(params)
+    if params.sort ~= false then
+        table.sort(params.list, function(a, b) 
+            return (type(a) == "table" and a.name or a) < (type(b) == "table" and b.name or b) 
+        end)
+    end
+    self:MakeListItems(params)
+end
+
+function ListDialog:CreateTopMenu()
+    self._menu:ClearItems()
     local offset, bw = self:CreateShortcuts(params)
     local close = self._menu:ImageButton({
         name = "Close",
@@ -107,17 +125,12 @@ function ListDialog:_Show(params)
         focus_mode = true,
         auto_focus = true,
         index = 1,
+        value = self._search,
         text = "beardlib_search",
         localized = true,
         on_callback = ClassClbk(self, "Search"),  
         label = "temp"
     })
-    if params.sort ~= false then
-        table.sort(params.list, function(a, b) 
-            return (type(a) == "table" and a.name or a) < (type(b) == "table" and b.name or b) 
-        end)
-    end
-    self:MakeListItems(params)
 end
 
 function ListDialog:ItemsCount()
@@ -145,7 +158,7 @@ function ListDialog:MakeListItems(params)
         local t = type(v) == "table" and v.name or v
         if self:SearchCheck(t) then
             i = i + 1
-            if limit and i >= 500 then
+            if limit and i >= self._max_items then
                 break
             end
             local menu = self._list_menu
@@ -165,7 +178,7 @@ function ListDialog:MakeListItems(params)
                     if self._callback then
                         self._callback(v)
                     end
-                end, 
+                end,
                 label = "list_items"
             }))
         end
@@ -180,8 +193,9 @@ function ListDialog:ReloadInterface()
 end
 
 function ListDialog:Search(item)
+    self._search = item:Value()
     self._filter = {}
-    for _, s in pairs(string.split(item:Value(), ",")) do
+    for _, s in pairs(string.split(self._search, ",")) do
         s = s:escape_special()
         table.insert(self._filter, s)
     end
