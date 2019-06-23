@@ -32,28 +32,30 @@ function ModAssetsModule:Load()
     end
 
 	local path = self._mod:GetPath()
-	
-	if not self._config.use_local_dir and self._config.folder_name then
+    self.ModPath = path
+
+	if self._config.folder_name and self._config.use_local_dir ~= true then
 		local folder = self._config.folder_name
 		self.folder_names = (type(folder) == "string" and {folder} or BeardLib.Utils:RemoveNonNumberIndexes(folder))
 	else
 		self.folder_names = {table.remove(string.split(path, "/"))} 
 	end
 
-	if not self._config.use_local_path and self.install_directory then
+	if self._config.install_directory and self._config.use_local_path ~= true then
 		local dir = self._config.install_directory
-		self.install_directory = ModCore:GetRealFilePath(dir, self) or BeardLib.config.mod_override_dir
+        self.install_directory = ModCore:GetRealFilePath(dir, self) or BeardLib.config.mod_override_dir
 	else
 		self.install_directory = Path:GetDirectory(path)
 	end
 
-	if self._config.version_file then
+    if self._config.version_file then
 		self.version_file = ModCore:GetRealFilePath(self._config.version_file, self)
 	elseif not self._config.version then
 		self.version_file = Path:Combine(self.install_directory, self.folder_names[1], self._default_version_file)
 	end
 
     self.version = 0
+    
     
     self._update_manager_id = self._mod.Name .. self._name
     local download_url = self._config.downlad_url or (self._config.custom_provider and self._config.custom_provider.download_url) or nil
@@ -63,6 +65,7 @@ function ModAssetsModule:Load()
         provider = not download_url and self._config.provider,
         download_url = download_url
     }
+
     self:RetrieveCurrentVersion()
 
     if not self._config.manual_check then
@@ -242,7 +245,7 @@ function ModAssetsModule:StoreDownloadedAssets(config, data, id)
                 end
             end
         end
-        unzip(temp_zip_path, config.install_directory or self.install_directory)
+        unzip(temp_zip_path, config.custom_install_directory or self.install_directory)
         FileIO:Delete(temp_zip_path)
 
         ModAssetsModule:SetReady()
@@ -324,7 +327,7 @@ function DownloadCustomMap:_DownloadAssets(data)
     local dialog = BeardLib.managers.dialog.download
     dialog:Show({title = managers.localization:text("beardlib_downloading")..self.level_name or "No Map Name", force = true})				
     dohttpreq(download_url, ClassClbk(self, "StoreDownloadedAssets", {
-        install_directory = BeardLib.config.maps_dir, 
+        custom_install_directory = BeardLib.config.maps_dir, 
         done_callback = self.done_map_download,
         install = ClassClbk(dialog, "SetInstalling"),
         failed = function()

@@ -230,7 +230,12 @@ function BeardLibModsMenu:UpdateTitle(mod)
     local mod_item = self._list:GetItemByLabel(mod)
     if mod_item then
         local title = mod_item:GetItem("Title")
-        title:SetText((mod.Name or "Missing name?") ..(mod.update_module_data and "("..mod.update_module_data.module.version..")" or ""))
+        if mod.update_module_data then
+            local module = mod.update_module_data.module
+            title:SetText((module._config.custom_name or mod.Name or "Missing name?") .."("..module.version..")")            
+        else
+            title:SetText((mod.Name or "Missing name?"))
+        end
     end
 end
 
