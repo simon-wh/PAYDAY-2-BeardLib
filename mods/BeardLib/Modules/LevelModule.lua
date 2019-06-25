@@ -21,6 +21,7 @@ function LevelModule:init(...)
  
     if Global.level_data and Global.level_data.level_id == self._config.id then
         BeardLib.current_level = self
+        self._currently_loaded = true
         self:Load()
     end
     return true
@@ -121,30 +122,32 @@ function LevelModule:AddPrePlanningDataToTweak(pp_self)
 end
 
 function LevelModule:RegisterHook()
-    if self._config.interactions then
-        local interactions = InteractionsModule:new(self._mod, self._config.interactions)
-        interactions:RegisterHook()
-    end
-
     if tweak_data and tweak_data.levels then    
         self:AddLevelDataToTweak(tweak_data.levels)
     else
         Hooks:PostHook(LevelsTweakData, "init", self._config.id .. "AddLevelData", ClassClbk(self, "AddLevelDataToTweak"))
     end
 
-    if self._config.assets then
-        if tweak_data and tweak_data.assets then
-            self:AddAssetsDataToTweak(tweak_data.assets)
-        else
-            Hooks:PostHook(AssetsTweakData, "init", self._config.id .. "AddAssetsData", ClassClbk(self, "AddAssetsDataToTweak"))
+    if self._currently_loaded then
+        if self._config.interactions then
+            local interactions = InteractionsModule:new(self._mod, self._config.interactions)
+            interactions:RegisterHook()
         end
-    end
-
-    if self._config.preplanning then
-        if tweak_data and tweak_data.preplanning then
-            self:AddPrePlanningDataToTweak(tweak_data.preplanning)
-        else
-            Hooks:PostHook(PrePlanningTweakData, "init", self._config.id .. "AddPrePlanningData", ClassClbk(self, "AddPrePlanningDataToTweak"))
+    
+        if self._config.assets then
+            if tweak_data and tweak_data.assets then
+                self:AddAssetsDataToTweak(tweak_data.assets)
+            else
+                Hooks:PostHook(AssetsTweakData, "init", self._config.id .. "AddAssetsData", ClassClbk(self, "AddAssetsDataToTweak"))
+            end
+        end
+    
+        if self._config.preplanning then
+            if tweak_data and tweak_data.preplanning then
+                self:AddPrePlanningDataToTweak(tweak_data.preplanning)
+            else
+                Hooks:PostHook(PrePlanningTweakData, "init", self._config.id .. "AddPrePlanningData", ClassClbk(self, "AddPrePlanningDataToTweak"))
+            end
         end
     end
 end
