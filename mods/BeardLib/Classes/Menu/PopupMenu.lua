@@ -95,41 +95,6 @@ function PopupMenu:UpdateCanvas(h)
 	self._scroll:set_canvas_size(nil, h)
 end
 
-function PopupMenu:AlignItemsNormal(reversed)
-    if not self:alive() then
-        return
-    end
-    local max_h, prev_item, last_positioned_item = 0, nil, nil
-    local function align(item)
-        if item and item:_Visible() then
-            if not item.ignore_align then
-                local offset = item:Offset()
-                local panel = item:Panel()
-                panel:set_x(offset[1])
-                if alive(prev_item) then
-                    panel:set_world_y(prev_item:Panel():world_bottom() + offset[2])
-                else
-                    panel:set_y(offset[2])
-                end
-            end
-            last_positioned_item, prev_item, max_h = self:RepositionItem(item, last_positioned_item, prev_item, max_h)
-        end
-    end
-
-    local items = self._my_items
-    if reversed then
-        for i=#items, 1, -1 do
-            align(items[i])
-        end
-    else
-        for i=1, #items do
-            align(items[i])
-        end
-    end
-
-    self:AlignItemsPost(max_h, prev_item)
-end
-
 function PopupMenu:MousePressed(b, x, y)
 	if self.menu_type and self.opened and self:MousePressedMenuEvent(b, x, y) then
 		return true

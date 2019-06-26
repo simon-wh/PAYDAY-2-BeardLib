@@ -78,7 +78,7 @@ function Menu:_SetSize(w, h)
     self:MakeBorder()
 end
 
-function Menu:ScrollY(y)
+function Menu:ScrollY()
     return self.items_panel:y()
 end
 

@@ -2,6 +2,7 @@ BeardLib.Items.Group = BeardLib.Items.Group or class(BeardLib.Items.Menu)
 local Group = BeardLib.Items.Group
 Group.type_name = "Group"
 Group.GROUP = true
+Group.HYBRID = true
 
 function Group:Init(...)
     Group.super.Init(self, ...)
@@ -14,8 +15,8 @@ function Group:InitBasicItem()
     if not self.divider_type then
 	    self.toggle = self.panel:bitmap({
 	        name = "toggle",
-	        w = self.title:h() - 4,
-	        h = self.title:h() - 4,
+	        w = self.title:h() * 0.78,
+	        h = self.title:h() * 0.78,
 	        texture = "guis/textures/menu_ui_icons",
 	        color = self:GetForeground(highlight),
 	        y = 2,
@@ -30,7 +31,7 @@ function Group:RePositionToggle()
     if self:title_alive() then
         local _,_,w,_ = self.title:text_rect()
         if alive(self.toggle) then
-            local s = self.title:h() - 4
+            local s = self.title:h() * 0.78
             self.toggle:set_size(s, s)
             self.toggle:set_x(w + 4)
             self.toggle:set_center_y(self.title:center_y())
@@ -106,13 +107,7 @@ function Group:MousePressed(button, x, y)
     return Group.super.MousePressed(self, button, x, y)
 end
 
-function Group:MouseMoved(x, y)
-    local ret = BeardLib.Items.Item.MouseMoved(self, x, y)
-    if not ret then
-        ret = Group.super.MouseMoved(self, x, y)
-    end
-    return ret
-end
+Group.MouseMoved = BeardLib.Items.Item.MouseMoved
 
 function Group:GetToolbar()
     if not alive(self.tb) then
@@ -123,6 +118,7 @@ function Group:GetToolbar()
             position = "RightTop",
             align_method = "grid_from_right",
             h = self.highlight_bg:h(),
+            auto_height = false,
             use_main_panel = true
         })
     end

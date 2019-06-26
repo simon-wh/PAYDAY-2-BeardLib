@@ -1,10 +1,13 @@
-BeardLib.Items.NoteBook = BeardLib.Items.NoteBook or class(BeardLib.Items.Group)
+BeardLib.Items.NoteBook = BeardLib.Items.NoteBook or class(BeardLib.Items.Menu)
 local NoteBook = BeardLib.Items.NoteBook
 NoteBook.type_name = "NoteBook"
-NoteBook.divider_type = true
+NoteBook.HYBRID = true
+
 function NoteBook:Init(...)
     self._pages = {}
     NoteBook.super.Init(self, ...)
+    self:InitBasicItem()
+    self:GrowHeight()
 end
 
 function NoteBook:InitBasicItem()
@@ -43,21 +46,40 @@ function NoteBook:InitBasicItem()
 	})
     self.arrow_right:set_right(self.panel:w())
     self.arrow_left:set_right(self.arrow_right:x() - 2)
+    self:RePositionPageCtrls()
 end
 
-function NoteBook:RePositionToggle()
-    NoteBook.super.RePositionToggle(self)
-    if alive(self.arrow_right) and alive(self.title) then
-        local center_y = self.title:center_y()
+function NoteBook:RePositionPageCtrls()
+    if self:title_alive() then
+        if alive(self.bg) and alive(self.highlight_bg) then
+            self.bg:set_h(self:TextHeight())
+            self.highlight_bg:set_h(self:TextHeight())
+        end
+     
+        if alive(self.arrow_right) then
+            local center_y = self.title:center_y()
 
-        self.arrow_right:set_center_y(center_y)
-        self.arrow_left:set_center_y(center_y)
+            self.arrow_right:set_center_y(center_y)
+            self.arrow_left:set_center_y(center_y)
+        end
     end
+end
+
+function NoteBook:SetText(...)
+    if NoteBook.super.SetText(self, ...) then
+        self:SetScrollPanelSize()
+    end
+    self:RePositionPageCtrls()
 end
 
 function NoteBook:WorkParams(params)
     NoteBook.super.WorkParams(self, params)
     self:WorkParam("page", 1)
+    if self.initial_pages then
+        for _, page in pairs(self.initial_pages) do
+            self:AddPage(page)
+        end
+    end
 end
 
 function NoteBook:AddToPage(item, page)
@@ -103,9 +125,9 @@ function NoteBook:GetItemPage(item)
     end
 end
 
-function NoteBook:AddItemPage(name, item)
+function NoteBook:AddItemPage(name, item, indx)
     self:AddPage(name)
-    self:AddToPage(item, #self._pages)
+    self:AddToPage(item, indx or #self._pages)
 end
 
 function NoteBook:SetPageName(indx, name)
@@ -178,6 +200,8 @@ function NoteBook:MousePressed(button, x, y)
     return NoteBook.super.MousePressed(self, button, x, y)
 end
 
-function NoteBook:MouseMoved(x, y)
-    return NoteBook.super.MouseMoved(self, x, y)
+function NoteBook:MouseInside(x, y) 
+    return self.highlight_bg:inside(x,y) 
 end
+
+NoteBook.MouseMoved = BeardLib.Items.Item.MouseMoved

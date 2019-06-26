@@ -64,7 +64,7 @@ function Item:InitBasicItem()
 		layer = 3,
 		color = self:GetForeground(),
 		font = self.font,
-		font_size = self.font_size or self.size,
+		font_size = self.font_size or self.size - self.text_shrink,
 		kern = self.kerning
 	})
 	self:InitBGs()
@@ -101,9 +101,8 @@ function Item:InitBGs()
 		color = bgc or bgc,
 		visible = bgc ~= false,
 		alpha = self.highlight and 0 or 1,
-		h = self.GROUP and self.size,
-		halign = not self.GROUP and "grow",
-		valign = not self.GROUP and "grow",
+		h = self.HYBRID and self.size,
+		valign = not self.HYBRID and "grow",
 		layer = 0
 	})
 	self.highlight_bg = self.panel:rect({
@@ -111,9 +110,8 @@ function Item:InitBGs()
 		color = self.highlight_color,
 		visible = self.highlight_color ~= false, 
 		alpha = self.highlight and 1 or 0,
-		h = self.GROUP and self.size,
-		halign = not self.GROUP and "grow",
-		valign = not self.GROUP and "grow",
+		h = self.HYBRID and self.size,
+		valign = not self.HYBRID and "grow",
 		layer = 1
 	})
 end
@@ -223,7 +221,7 @@ function Item:WorkParams(params)
 	self:WorkParam("disabled_alpha", 0.5)
 	self:WorkParam("background_alpha")
 	self:WorkParam("text_align", "left")
-	self:WorkParam("text_vertical", "top")
+	self:WorkParam("text_vertical", "center")
 	self:WorkParam("size_by_text")
 	self:WorkParam("control_slice", 0.6)
 	self:WorkParam("font", tweak_data.menu.pd2_large_font or tweak_data.menu.default_font)
@@ -231,7 +229,6 @@ function Item:WorkParams(params)
 	--self:WorkParam("last_y_offset")
 	self:WorkParam("accent_color")
 	self:WorkParam("scroll_color", self.accent_color)
-	self:WorkParam("slider_color", self.accent_color)
 	self:WorkParam("border_color", self.accent_color)
 	self:WorkParam("line_color", self.accent_color)
 	self.ignore_align = NotNil(self.ignore_align, false)
@@ -241,6 +238,9 @@ function Item:WorkParams(params)
 	self:WorkParam("context_screen_offset_y", 32)
 	self:WorkParam("context_scroll_width", 10)
 	self:WorkParam("context_font_size", 20)
+	self:WorkParam("font_size")
+	self:WorkParam("text_shrink", 0)
+	
 	self:WorkParam("context_text_offset")
 	self:WorkParam("delay_align_items")
 	
@@ -427,7 +427,7 @@ function Item:NumberBox(params)
 end
 
 function Item:Text(text, params)
-    return self:Divider({text = text}, params)
+    return self:Divider(table.merge({text = text}, params))
 end
 
 function Item:Divider(params)
@@ -439,11 +439,9 @@ end
 function Item:ToolBar(params)
     params.text = params.text or ""
     local _params = self:ConfigureItem(params)
-    _params.divider_type = true
-    _params.menu_type = true
 	_params.align_method = _params.align_method or "grid"
 	
-    return self:NewItem(BeardLib.Items.Item:new(_params))
+    return self:NewItem(BeardLib.Items.Holder:new(_params))
 end
 
 function Item:Image(params)
@@ -626,8 +624,8 @@ function Item:ItemsWidth() return self:Panel():w() end
 function Item:ItemsHeight() return self:Panel():h() end
 function Item:Items() return self._my_items end
 
-function Item:GetItemValue(name)
-	local item = self:GetItem(name)
+function Item:GetItemValue(name, shallow)
+	local item = self:GetItem(name, shallow)
 	if item then
 		return item:Value()
 	else
@@ -890,36 +888,46 @@ function Item:SetColor(color)
 end
 
 function Item:_SetText(text)
-    if self:alive() and self:title_alive() then
+	if self:alive() and self:title_alive() then
+		local title = self.title
         self.text = text
-        self.title:set_text(self.localized and text and managers.localization:text(text) or text)
+        title:set_text(self.localized and text and managers.localization:text(text) or text)
         local offset_x = math.max(self.border_left and self.border_width or 0, self.text_offset[1])
 		local offset_y = math.max(self.border_top and self.border_size or 0, self.text_offset[2])
 		local offset_w = offset_x * 2
-		local offset_h = offset_y * 2
-
-		local lines = math.max(1, self.title:number_of_lines())
-		
-		self.title:set_shape(offset_x, offset_y, self.panel:w() - offset_w, math.max(self.title:line_height(), self.panel:h() - offset_h))
+		local offset_h = offset_y * 2		
+		title:set_position(offset_x, offset_y)
         local _,_,w,h = self.title:text_rect()
-        self.title:set_h(math.clamp(h, self.min_height and self.min_height - offset_h or h, self.max_height and self.max_height - offset_h or h))
         if self.size_by_text then
+            title:set_h(math.clamp(h, self.min_height and self.min_height - offset_h or h, self.max_height and self.max_height - offset_h or h))
 			local new_w = w + offset_w + (self.type_name == "Toggle" and self.size or 0)
 			local new_h = self.title:bottom() + offset_y
             self.panel:set_size(math.clamp(new_w, self.min_width or 0, self.max_width or new_w), math.clamp(new_h, self.min_height or 0, self.max_height or new_h))
             self.w, self.h = self.panel:size()
-            self.title:set_w(math.clamp(w, self.min_width and self.min_width - offset_w or w, self.max_width and self.max_width - offset_w or w))
+            title:set_w(math.clamp(w, self.min_width and self.min_width - offset_w or w, self.max_width and self.max_width - offset_w or w))
 		end
-		if self.SetScrollPanelSize then
+        if self.SetScrollPanelSize then
+            title:set_size(self.panel:w() - offset_w, math.max(h+offset_h, self.size))
             self:SetScrollPanelSize()
+            if self.HYBRID then
+                self.bg:set_size(self.panel:w(), title:h())
+                self.highlight_bg:set_size(self.bg:size())
+                self.menubg:set_size(self.panel:size())
+            end
 		elseif not self.size_by_text and not self.h then
-			local new_h = math.max(self.title:bottom() + offset_y, self.size, self._textbox and alive(self._textbox.panel) and self._textbox.panel:h() or 0)
+			local new_h = math.max(h+offset_h, self.size)
+			if self._textbox and alive(self._textbox.panel) then
+				new_h = math.max(new_h, self._textbox.panel:h())
+			end
             self.panel:set_h(math.clamp(new_h, self.min_height or 0, self.max_height or new_h))
-		end
+            title:set_size(self.panel:w() - offset_w, self.panel:h() - offset_h)
+        end
+		
         return true
     end
     return false
 end
+
 
 function Item:SetTextLight(text)
 	self.text = text

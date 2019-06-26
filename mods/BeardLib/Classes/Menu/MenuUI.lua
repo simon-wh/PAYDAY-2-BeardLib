@@ -158,6 +158,22 @@ function MenuUI:Menu(params)
     return self:AddMenu(BeardLib.Items.Menu:new(self:ConfigureMenu(params)))
 end
 
+function MenuUI:Holder(params)
+    return self:NewItem(BeardLib.Items.Holder:new(self:ConfigureMenu(params, true))) 
+end
+
+function MenuUI:Holder(params)
+    return self:NewItem(BeardLib.Items.Holder:new(self:ConfigureMenu(params, true))) 
+end
+
+function MenuUI:NoteBook(params) 
+    return self:NewItem(BeardLib.Items.NoteBook:new(self:ConfigureMenu(params, true)))
+end
+
+function MenuUI:PopupMenu(params) 
+    return self:NewItem(BeardLib.Items.PopupMenu:new(self:ConfigureMenu(params, true)))
+end
+
 function MenuUI:ConfigureMenu(params)
     local _params = clone(params)
     _params.parent_panel = self._panel
