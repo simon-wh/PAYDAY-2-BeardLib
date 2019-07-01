@@ -175,6 +175,7 @@ function NoteBook:UpdatePage()
     local x, y, w, h = self.page_name:text_rect()
 	self.page_name:set_size(w, h)
     self.page_name:set_right(self.arrow_left:x() - 2)
+    self.page_name:set_center_y(self.bg:center_y())
 
     for i, item in pairs(self._my_items) do
         if item:ParentPanel() == self:ItemsPanel() and (item.visible or item._hidden_by_menu) then --handle only visible items.
@@ -204,4 +205,22 @@ function NoteBook:MouseInside(x, y)
     return self.highlight_bg:inside(x,y) 
 end
 
-NoteBook.MouseMoved = BeardLib.Items.Item.MouseMoved
+function NoteBook:MouseMoved(x, y)
+    local ret = self:MouseMovedSelfEvent(x, y)
+    if not ret then
+        ret = self:MouseMovedMenuEvent(x, y)
+    end
+    return ret
+end
+
+function NoteBook:DoHighlight(highlight)
+    NoteBook.super.DoHighlight(self, highlight)
+    if alive(self.page_name) then
+        local foreground = self:GetForeground(highlight)
+        if self.animate_colors then
+            play_color(self.page_name, foreground)
+        else
+            self.page_name:set_color(foreground)
+        end
+    end
+end

@@ -53,7 +53,7 @@ function Menu:WorkParams(params)
     self:WorkParam("scroll_speed", 48)
     self.background_visible = NotNil(self.background_visible, self.type_name == "Menu" and true or false)
     self.private.background_color = NotNil(self.private.background_color, self.background_visible and self.background_color or nil)
-    self.auto_height = NotNil(self.auto_height, self.GROUP and true or false)
+    self.auto_height = NotNil(self.auto_height, self.HYBRID and true or false)
     self.scrollbar = NotNil(self.scrollbar, self.auto_height ~= true or self.min_height ~= nil or self.max_height ~= nil)
 end
 

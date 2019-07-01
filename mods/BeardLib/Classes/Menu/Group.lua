@@ -116,6 +116,7 @@ function Group:GetToolbar()
             label = "Toolbar",
             ignore_align = true,
             position = "RightTop",
+            full_bg_color = false,
             align_method = "grid_from_right",
             h = self.highlight_bg:h(),
             auto_height = false,

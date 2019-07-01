@@ -102,6 +102,7 @@ function Item:InitBGs()
 		visible = bgc ~= false,
 		alpha = self.highlight and 0 or 1,
 		h = self.HYBRID and self.size,
+		halign = "grow",
 		valign = not self.HYBRID and "grow",
 		layer = 0
 	})
@@ -111,6 +112,7 @@ function Item:InitBGs()
 		visible = self.highlight_color ~= false, 
 		alpha = self.highlight and 1 or 0,
 		h = self.HYBRID and self.size,
+		halign = "grow",
 		valign = not self.HYBRID and "grow",
 		layer = 1
 	})
@@ -910,9 +912,8 @@ function Item:_SetText(text)
             title:set_size(self.panel:w() - offset_w, math.max(h+offset_h, self.size))
             self:SetScrollPanelSize()
             if self.HYBRID then
-                self.bg:set_size(self.panel:w(), title:h())
-                self.highlight_bg:set_size(self.bg:size())
-                self.menubg:set_size(self.panel:size())
+                self.bg:set_h(title:h())
+                self.highlight_bg:set_h(self.bg:h())
             end
 		elseif not self.size_by_text and not self.h then
 			local new_h = math.max(h+offset_h, self.size)
