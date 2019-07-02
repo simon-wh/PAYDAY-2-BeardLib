@@ -1,4 +1,6 @@
 Hooks:PostHook(BLTNotificationsGui, "_setup", "BeardLibModsManagerSetup", function(self)
+    self._beardlib_accent = BeardLib.Options:GetValue("MenuColor")
+
     self._beardlib_panel = self._panel:parent():panel({
         layer = 50,
         h = 36,
@@ -23,6 +25,7 @@ Hooks:PostHook(BLTNotificationsGui, "_setup", "BeardLibModsManagerSetup", functi
         name = "Icon",
         texture = "guis/textures/menu_ui_icons",        
         texture_rect = {93, 2, 32, 32},
+        color = self._beardlib_accent,
         layer = 5,
         w = 20,
         h = 20,
@@ -35,7 +38,7 @@ Hooks:PostHook(BLTNotificationsGui, "_setup", "BeardLibModsManagerSetup", functi
         font_size = 16,
         font = tweak_data.menu.pd2_medium_font,
         layer = 10,
-        color = tweak_data.screen_colors.title,
+        color = self._beardlib_accent:contrast(),
         text = "0",
         align = "center",
         vertical = "center"
@@ -43,12 +46,11 @@ Hooks:PostHook(BLTNotificationsGui, "_setup", "BeardLibModsManagerSetup", functi
     self._beardlib_achievements = self._beardlib_panel:bitmap({
         name = "CustomAchievments",
         texture = "guis/textures/achievement_trophy_white",        
-        --texture_rect = {93, 2, 32, 32},
         w = 28,
         h = 28,
         y = 8,
         x = self._beardlib_updates:right() + 4,
-        color = Color(0, 0.4, 1),
+        color = self._beardlib_accent
     })
 end)
 
@@ -70,19 +72,10 @@ function BLTNotificationsGui:mouse_moved(o, x, y)
     if not self._enabled then
         return
     end
+    
     if alive(self._beardlib_updates) and alive(self._beardlib_achievements) then
-        local icon = self._beardlib_updates:child("Icon")
-        if self._beardlib_updates:inside(x,y) then
-            play_color(icon, Color(0, 0.1, 1))
+        if self._beardlib_achievements:inside(x,y) or self._beardlib_updates:inside(x,y)  then
             return true, "link"
-        else
-            play_color(icon, Color(0, 0.4, 1))
-        end
-        if self._beardlib_achievements:inside(x,y) then
-            play_color(self._beardlib_achievements, Color(0, 0.1, 1))
-            return true, "link"
-        else
-            play_color(self._beardlib_achievements, Color(0, 0.4, 1))
         end
     end
     return mouse_move(self, x, y)

@@ -29,11 +29,16 @@ function CustomAchievementMenu:init()
 		return
 	end
 
+	local accent_color = BeardLib.Options:GetValue("MenuColor")
+
 	self._menu = MenuUI:new({
 		name = "CustomAchievementMenu",
+		animate_colors = true,
 		layer = 1500,
 		use_default_close_key = true,
 		background_blur = true,
+		auto_foreground = true,
+		accent_color = accent_color,
 		inherit_values = {
 			background_color = Color.transparent,
 			scroll_color = Color.white:with_alpha(0.1),
@@ -46,7 +51,7 @@ function CustomAchievementMenu:init()
 end
 
 function CustomAchievementMenu:InitPanels(parent)
-	self._header = parent:Grid({background_color = Color.black:with_alpha(0.75), h = 32})
+	self._header = parent:Grid({background_color = self._menu.accent_color, h = 32})
 	self._account_progression = parent:Grid({
 		background_color = Color.black:with_alpha(0.75), 
 		h = 120, 
@@ -127,11 +132,9 @@ function CustomAchievementMenu:InitHeader()
 	self._header:Divider({
 		text = managers.localization:text("beardlib_customachievementmenu_title"),
 		size_by_text = true,
-		size = 24, 
-		position = function(item) 
-			item:Panel():set_left(icon_trophy:Panel():right()) 
-			item:Panel():set_world_center_y(icon_trophy:Panel():world_center_y()) 
-		end 
+		size = 24,
+		count_as_aligned = true,
+		position = "Centery"
 	})
 
 	self._header:Button({

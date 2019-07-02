@@ -23,27 +23,34 @@ end
 function BeardLibModsMenu:CreateItems(menu)
     self._downloading_string = managers.localization:text("beardlib_downloading")    
     
-    self._holder = menu:Menu({
+    self._holder = menu:Holder({
         name = "Main",
-		scrollbar = false,
         background_color = Color(0.8, 0.2, 0.2, 0.2),
         highlight_color = menu.foreground:with_alpha(0.1),
         size = 20,
     })
-    self._menu._panel:rect({
-        name = "title_bg",
-        layer = 2,
-        color = self._menu.accent_color,
-        h = 34,
+
+    self._top = menu:Grid({
+        name = "Top",
+        background_color = self._menu.accent_color,
+        h = 34
     })
-    local text = self._holder:Divider({
+    self._top:Image({
+        texture = "guis/textures/beardlib_logo",
+        position = "Centery",
+        count_as_aligned = true,
+        size = 32
+    })
+    local text =  self._top:FitDivider({
         name = "title",
-        text = "beardlib_mods_manager",
-        position = {4, 6},
-        count_as_aligned = true
+        size = 24,
+        position = "Centery",
+        count_as_aligned = true,
+        text = "beardlib_mods_manager"
     })
-    local button_holder = self._holder:Holder({
+    local button_holder = self._top:Holder({
         name = "button_holder",
+        align_method = "grid_from_right",
         w = 500,
         position = "RightTop"
     })
@@ -70,10 +77,10 @@ function BeardLibModsMenu:CreateItems(menu)
         text = "beardlib_customachievementmenu_title",
         help = "beardlib_customachievementmenu_desc",
         size_by_text = true,
-        callback = ClassClbk(BeardLib.managers.custom_achievement_menu, "_show", true)
+        callback = ClassClbk(BeardLib.managers.custom_achievement_menu, "SetEnabled", true)
     })
 
-    self._holder:TextBox({
+    self._top:TextBox({
         name = "search",
         text = false,
         w = 300,
@@ -86,15 +93,14 @@ function BeardLibModsMenu:CreateItems(menu)
         end,
         on_callback = ClassClbk(self, "SearchMods")
     })
-    self._list = self._holder:Menu({
+    self._list = self._holder:GridMenu({
         name = "ModList",
-        h = self._holder:ItemsHeight() - text:OuterHeight() - (self._holder.offset[2] * 2),
+        h = self._holder:ItemsHeight() - self._top:OuterHeight(),
         fit_width = false,
         offset = 4,
 		size = 16,
         position = "CenterxBottomOffset-y",
-        auto_align = false,
-        align_method = "grid",
+        auto_align = false
 	})
 	local base = BeardLib.Frameworks.base
 	self:AddMod(BeardLib, base)
