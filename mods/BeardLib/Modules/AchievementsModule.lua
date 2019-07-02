@@ -60,7 +60,7 @@ function AchievementsModule:RegisterHook()
                 a_self.custom_achievements[self._package_id][achievement_data.id] = achievement_data
 
                 if achievement.icon then
-                    CustomAchievementManager:_add_to_icon_spoofer({
+                    CustomAchievementManager:AddToIconSpoofer({
                         achievement_data.icon
                     })
                 end

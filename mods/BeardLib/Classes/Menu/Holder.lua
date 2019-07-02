@@ -2,6 +2,7 @@ BeardLib.Items.Holder = BeardLib.Items.Holder or class(BeardLib.Items.Item)
 local Holder = BeardLib.Items.Holder
 Holder.type_name = "Holder"
 Holder.HOLDER = true
+Holder.MENU = true
 
 function Holder:Init()
     self:WorkParams(params)
@@ -14,8 +15,9 @@ end
 function Holder:WorkParams(params)
     Holder.super.WorkParams(self, params)
     params = params or {}
+    self.background_visible = NotNil(self.background_visible, true)
     self.private.background_color = NotNil(self.private.background_color, self.background_visible and self.background_color or nil)
-    self.auto_height = NotNil(self.auto_height, true)
+    self.auto_height = NotNil(self.auto_height, self.h == nil)
 end
 
 Holder.SetSize = BeardLib.Items.Menu.SetSize

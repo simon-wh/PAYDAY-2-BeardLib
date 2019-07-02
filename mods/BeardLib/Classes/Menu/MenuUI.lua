@@ -159,19 +159,29 @@ function MenuUI:Menu(params)
 end
 
 function MenuUI:Holder(params)
-    return self:NewItem(BeardLib.Items.Holder:new(self:ConfigureMenu(params, true))) 
+    return self:AddMenu(BeardLib.Items.Holder:new(self:ConfigureMenu(params, true))) 
 end
 
 function MenuUI:Holder(params)
-    return self:NewItem(BeardLib.Items.Holder:new(self:ConfigureMenu(params, true))) 
+    return self:AddMenu(BeardLib.Items.Holder:new(self:ConfigureMenu(params, true))) 
 end
 
 function MenuUI:NoteBook(params) 
-    return self:NewItem(BeardLib.Items.NoteBook:new(self:ConfigureMenu(params, true)))
+    return self:AddMenu(BeardLib.Items.NoteBook:new(self:ConfigureMenu(params, true)))
 end
 
 function MenuUI:PopupMenu(params) 
-    return self:NewItem(BeardLib.Items.PopupMenu:new(self:ConfigureMenu(params, true)))
+    return self:AddMenu(BeardLib.Items.PopupMenu:new(self:ConfigureMenu(params, true)))
+end
+
+function MenuUI:Grid(params)
+	params.align_method = "grid"
+	return self:Holder(params)
+end
+
+function MenuUI:GridMenu(params)
+	params.align_method = "grid"
+	return self:Menu(params)
 end
 
 function MenuUI:ConfigureMenu(params)

@@ -1,3 +1,4 @@
+
 BeardLib.Items.TextBoxBase = BeardLib.Items.TextBoxBase or class()
 local TextBoxBase = BeardLib.Items.TextBoxBase
 local KB = BeardLib.Utils.Input
@@ -8,6 +9,9 @@ function TextBoxBase:init(parent, params)
     self.size = params.size or parent.size
     self.fit_text = params.fit_text
     self.forbidden_chars = parent.forbidden_chars or {}
+    self.text_align = params.text_align or parent.text_align or "left"
+    self.font_size = params.font_size or parent.font_size or parent.size
+    self.text_vertical = params.text_vertical or parent.text_vertical
     self.no_magic_chars = NotNil(parent.no_magic_chars, true)
 	self.panel = params.panel:panel({
 		name = "text_panel",
@@ -40,9 +44,11 @@ function TextBoxBase:init(parent, params)
         wrap = not params.lines or params.lines > 1,
         word_wrap = not params.lines or params.lines > 1,
         color = color,
+        align = self.text_align,
+        vertical = self.text_vertical or nil,
         selection_color = color:with_alpha(0.5), --I fucking wish there was something better..
 		font = parent.font or "fonts/font_medium_mf",
-		font_size = self.size
+		font_size = self.font_size
     })
     if self.fit_text then
         self.text:set_vertical("center")
@@ -53,7 +59,7 @@ function TextBoxBase:init(parent, params)
     self.text:set_selection(len, len)
     local caret = self.panel:rect({
         name = "caret",
-        w = 2,
+        w = 1,
         visible = false,
         color = color:with_alpha(1),
         h = self.text:font_size() - (line:h() * 2),
@@ -313,15 +319,14 @@ function TextBoxBase:update_caret()
     end
     local text = self.panel:child("text")
 
+    local _,_,w,h = text:text_rect()
     if self.fit_text then
-        text:set_font_size(self.size)
-        local _,_,w,_ = text:text_rect()
+        text:set_font_size(self.font_size)
         local pw = text:parent():w() - 2
-        text:set_font_size(math.clamp(self.size * pw / w, 8, self.size))
+        text:set_font_size(math.clamp(self.font_size * pw / w, 8, self.font_size))
     end
 
     local lines = math.max(1, text:number_of_lines())
-    local _,_,_,h = text:text_rect()
     h = math.max(h, text:font_size())
     if self.owner.text_offset then
         h = h + self.owner.text_offset[2]
@@ -337,6 +342,7 @@ function TextBoxBase:update_caret()
         end
         self.panel:child("line"):set_bottom(self.panel:h())
     end
+    text:set_h(self.panel:h())
     if self.parent and old_h ~= self.panel:h() then
         self.parent:AlignItems()
     end

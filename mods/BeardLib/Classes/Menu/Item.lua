@@ -240,6 +240,7 @@ function Item:WorkParams(params)
 	self:WorkParam("context_screen_offset_y", 32)
 	self:WorkParam("context_scroll_width", 10)
 	self:WorkParam("context_font_size", 20)
+
 	self:WorkParam("font_size")
 	self:WorkParam("text_shrink", 0)
 	
@@ -406,6 +407,16 @@ function Item:KeyBind(params) return self:NewItem(BeardLib.Items.KeyBindItem:new
 function Item:Toggle(params) return self:NewItem(BeardLib.Items.Toggle:new(self:ConfigureItem(params))) end
 Item.ItemsGroup = Item.Group
 
+function Item:Grid(params)
+	params.align_method = "grid"
+	return self:Holder(params)
+end
+
+function Item:GridMenu(params)
+	params.align_method = "grid"
+	return self:Menu(params)
+end
+
 function Item:ImageButton(params)
     local w = params.w or not params.icon_h and params.size
     local h = params.h or params.icon_h or params.size
@@ -428,7 +439,21 @@ function Item:NumberBox(params)
     return self:NewItem(BeardLib.Items.TextBox:new(_params))
 end
 
-function Item:Text(text, params)
+function Item:FitButton(params)
+	params.size_by_text = true
+    return self:Button(params)
+end
+
+function Item:FitDivider(params)
+	params.size_by_text = true
+    return self:Divider(params)
+end
+
+function Item:FitText(text, params)
+    return self:Divider(table.merge({text = text, size_by_text = true}, params))
+end
+
+function Item:QuickText(text, params)
     return self:Divider(table.merge({text = text}, params))
 end
 
@@ -801,6 +826,7 @@ function Item:ParentPanel() return self.panel:parent() end
 function Item:AdoptedItems() return {} end
 function Item:Position() return self.position end
 function Item:Location() return self:Panel():position() end
+function Item:XY() return self:Panel():position() end
 function Item:LeftTop() return self:Panel():lefttop() end
 function Item:RightTop() return self:Panel():righttop() end
 function Item:LeftBottom() return self:Panel():leftbottom() end
@@ -915,12 +941,14 @@ function Item:_SetText(text)
                 self.bg:set_h(title:h())
                 self.highlight_bg:set_h(self.bg:h())
             end
-		elseif not self.size_by_text and not self.h then
+		elseif not self.size_by_text then
 			local new_h = math.max(h+offset_h, self.size)
 			if self._textbox and alive(self._textbox.panel) then
 				new_h = math.max(new_h, self._textbox.panel:h())
 			end
-            self.panel:set_h(math.clamp(new_h, self.min_height or 0, self.max_height or new_h))
+			if not self.h then
+				self.panel:set_h(math.clamp(new_h, self.min_height or 0, self.max_height or new_h))
+			end
             title:set_size(self.panel:w() - offset_w, self.panel:h() - offset_h)
         end
 		
@@ -961,6 +989,20 @@ function Item:WorkParam(param, ...)
 	end
 end
 
+function Item:SetX(x) return self:Panel():set_x(x) end
+function Item:SetY(y) return self:Panel():set_y(y) end
+function Item:SetRight(x) return self:Panel():set_right(x) end
+function Item:SetBottom(y) return self:Panel():set_bottom(y) end
+function Item:SetCenterX(x) return self:Panel():set_center_x(x) end
+function Item:SetCenterY(y) return self:Panel():set_center_y(y) end
+function Item:SetXY(x,y) return self:Panel():set_position(x,y) end
+function Item:Move(x,y) return self:Panel():move(x,y) end
+function Item:SetLocation(x,y) return self:Panel():set_position(x,y) end
+function Item:SetRightBottom(x,y) return self:Panel():set_rightbottom(x,y) end
+function Item:SetLeftBottom(x,y) return self:Panel():set_leftbottom(x,y) end
+function Item:SetRightTop(x,y) return self:Panel():set_righttop(x,y) end
+function Item:SetCenter(x,y) return self:Panel():set_center(x,y) end
+
 function Item:SetPosition(x,y)
     if type(x) == "number" or type(y) == "number" then
         self.position = {x or self.panel:x(),y or self.panel:y()}
@@ -983,10 +1025,10 @@ end
 local pos_funcs = {
     ["Left"] = function(panel) panel:set_x(0) end,
     ["Top"] = function(panel) panel:set_y(0) end,
-    ["Right"] = function(panel, parent) panel:set_right(parent:w()) end,
-    ["Bottom"] = function(panel, parent) panel:set_bottom(parent:h()) end,
-    ["Centerx"] = function(panel, parent) panel:set_center_x(parent:w() / 2) end,
-    ["Centery"] = function(panel, parent) panel:set_center_y(parent:y() / 2) end,
+    ["Right"] = function(panel, parent) panel:set_world_right(parent:world_right()) end,
+    ["Bottom"] = function(panel, parent) panel:set_world_bottom(parent:world_bottom()) end,
+    ["Centerx"] = function(panel, parent) panel:set_world_center_x(parent:world_center_x()) end,
+    ["Centery"] = function(panel, parent) panel:set_world_center_y(parent:world_center_y()) end,
     ["Center"] = function(panel, parent) panel:set_world_center(parent:world_center()) end,
     ["Offsetx"] = function(panel, parent, offset) panel:move(offset[1]) end,
     ["Offset-x"] = function(panel, parent, offset) panel:move(-offset[1]) end,

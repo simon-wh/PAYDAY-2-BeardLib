@@ -33,7 +33,7 @@ function CustomAchievementMenu:init()
 		name = "CustomAchievementMenu",
 		layer = 1500,
 		use_default_close_key = true,
-		background_color = Color.white:with_alpha(0.05),
+		background_blur = true,
 		inherit_values = {
 			background_color = Color.transparent,
 			scroll_color = Color.white:with_alpha(0.1),
@@ -45,74 +45,52 @@ function CustomAchievementMenu:init()
 	self._initialized = false
 end
 
-function CustomAchievementMenu:_init_background(parent)
-	parent:bitmap({
-		name = "bg_blur",
-		w = parent:w(),
-		h = parent:h(),
-		texture = "guis/textures/test_blur_df",
-		render_template = "VertexColorTexturedBlur3D",
-		halign = "scale",
-		valign = "scale"
-	})
-
-	parent:rect({
-		name = "bg",
-		color = Color.black,
-		alpha = 0.4,
-		layer = -1,
-		halign = "scale",
-		valign = "scale"
-	})
-end
-
-function CustomAchievementMenu:_init_panels(parent)
-	self._header = parent:Menu({scrollbar = false, background_color = Color.black:with_alpha(0.75), h = 32, align_method = "grid"})
-	self._account_progression = parent:Menu({
-		scrollbar = false, 
+function CustomAchievementMenu:InitPanels(parent)
+	self._header = parent:Grid({background_color = Color.black:with_alpha(0.75), h = 32})
+	self._account_progression = parent:Grid({
 		background_color = Color.black:with_alpha(0.75), 
 		h = 120, 
 		w = parent._panel:w() / 3,
+		foreground = Color("808080"),
 		offset = default_margin,
 		position = function(item)
-			item:Panel():set_top(self._header:Panel():bottom() + default_margin)
-			item:Panel():set_x(default_margin)
+			if alive(self._header) then
+				item:SetXY(default_margin, self._header:Bottom() + default_margin)
+			end
 		end
 	})
-	self._package_list = parent:Menu({
+	self._package_list = parent:GridMenu({
 		background_color = Color.black:with_alpha(0.75),
-		h = parent._panel:h() - self._account_progression:Panel():h() - self._header:Panel():h() - (default_margin * 3),
+		h = parent._panel:h() - self._account_progression:ItemsHeight() - self._header:ItemsHeight() - (default_margin * 3),
 		w = parent._panel:w() / 3,
 		offset = 2,
-		align_method = "grid",
-		text_vertical = "center",
 		position = function(item)
-			item:Panel():set_top(self._account_progression:Panel():bottom() + default_margin)
-			item:Panel():set_x(default_margin)
+			if alive(self._account_progression) then
+				item:SetXY(default_margin, self._account_progression:Bottom() + default_margin)
+			end
 		end
 	})
 
-	self._achievement_list_header = parent:Menu({
-		scrollbar = false,
+	self._achievement_list_header = parent:Holder({
 		background_color = Color.black:with_alpha(0.75),
 		h = 90, 
 		w = parent._panel:w() - self._account_progression:Panel():w() - (default_margin * 3),
 		offset = default_margin,
 		position = function(item)
-			item:Panel():set_top(self._header:Panel():bottom() + default_margin)
-			item:Panel():set_left(self._account_progression:Panel():right() + default_margin)
+			if alive(self._account_progression) then
+				item:SetXY(self._account_progression:Right() + default_margin, self._header:Bottom() + default_margin)
+			end
 		end
 	})
 
-	self._achievement_panel = parent:Menu({
-		scrollbar = false,
-		align_method = "grid",
+	self._achievement_panel = parent:Grid({
 		background_color = Color.black:with_alpha(0.75),
 		h = parent._panel:h() - self._achievement_list_header:Panel():h() - self._header:Panel():h() - (default_margin * 3),
 		w = self._achievement_list_header:Panel():w(),
 		position = function(item)
-			item:Panel():set_top(self._achievement_list_header:Panel():bottom() + default_margin)
-			item:Panel():set_left(self._achievement_list_header:Panel():left())
+			if alive(self._achievement_list_header) then
+				item:SetXY(self._achievement_list_header:X(), self._achievement_list_header:Bottom() + default_margin)
+			end
 		end
 	})
 
@@ -125,27 +103,25 @@ function CustomAchievementMenu:_init_panels(parent)
 		end
 	})
 
-	self._achievement_list = self._achievement_panel:Menu({
+	self._achievement_list = self._achievement_panel:GridMenu({
 		h = self._achievement_panel:Panel():h(),
-		align_method = "grid",
 		w = self._achievement_panel:Panel():w() / 1.6,
 		visible = false
 	})
 
-	self._achievement_details = parent:Menu({
-		scrollbar = false,
-		align_method = "grid",
+	self._achievement_details = parent:Grid({
 		h = self._achievement_panel:Panel():h(),
 		w = self._achievement_panel:Panel():w() - self._achievement_list:Panel():w() - 15,
 		visible = false,
 		position = function(item)
-			item:Panel():set_top(self._achievement_panel:Panel():top() + 5)
-			item:Panel():set_right(self._achievement_panel:Panel():right() - 5)
+			if alive(self._achievement_panel)then
+				item:SetRightTop(self._achievement_panel:Right() - 5, self._achievement_panel:Y() + 5)
+			end
 		end
 	})
 end
 
-function CustomAchievementMenu:_init_header()
+function CustomAchievementMenu:InitHeader()
 	local icon_trophy = self._header:Image({texture = "guis/textures/achievement_trophy_white", h = 30, w = 30, highlight_color = Color.transparent})
 	
 	self._header:Divider({
@@ -161,18 +137,22 @@ function CustomAchievementMenu:_init_header()
 	self._header:Button({
 		text = managers.localization:text("beardlib_close"),
 		text_align = "right",
-		text_vertical = "center",
 		position = "RightOffset-x",
 		size_by_text = true,
 		size = 24,
 		foreground = Color("fff"),
-		on_callback = ClassClbk(self, "_close")
+		on_callback = ClassClbk(self, "Close")
 	})
 end
 
-function CustomAchievementMenu:_init_account()
+function CustomAchievementMenu:InitAccount()
 	local panel = self._account_progression
-	local steam_avatar = panel:Image({texture = "guis/texture/pd2/none_icon", w = 64, h = 64})
+	local steam_avatar = panel:Image({texture = "guis/texture/pd2/none_icon", img_color = Color.white, w = 64, h = 64})
+	local stats = panel:Grid({
+		name = "Stats",
+		inherit_values = {offset = {0, 3}},
+		w = panel:ItemsWidth() - steam_avatar:OuterWidth() - panel:OffsetX()*2
+	})
 	local steam_name = managers.network.account:username()
 
 	Steam:friend_avatar(2, Steam:userid(), function (texture)
@@ -180,87 +160,75 @@ function CustomAchievementMenu:_init_account()
 		steam_avatar:SetImage(avatar)
 	end)
 
-	DelayedCalls:Add( "BeardLib_Recheck_Account_Avatar", 2, function()
+	DelayedCalls:Add("BeardLib_Recheck_Account_Avatar", 2, function()
 		Steam:friend_avatar(2, Steam:userid(), function (texture)
 			local avatar = texture or "guis/textures/pd2/none_icon"
-			steam_avatar:SetImage(avatar)
+			if alive(steam_avatar) then
+				steam_avatar:SetImage(avatar)
+			end
 		end)
 	end)
 
-	local steam_name_text = panel:Divider({
-		text = steam_name, 
-		position = function(item) 
-			item:Panel():set_left(steam_avatar:Panel():right() + default_margin)
-			item:Panel():set_top(steam_avatar:Panel():top())
-		end,
+	local steam_name_text = stats:Divider({
+		name = "SteamName",
+		text = steam_name,
 		size = 22
 	})
 
 	local percent_total = "--"
 
-	if CustomAchievementManager:_number_of_achievements() > 0 then
-		percent_total = math.floor(CustomAchievementManager:_completed_achievements_total() * 100 / CustomAchievementManager:_number_of_achievements())
+	if CustomAchievementManager:NumberOfAchievements() > 0 then
+		percent_total = math.floor(CustomAchievementManager:CompletedAchievementsTotal() * 100 / CustomAchievementManager:NumberOfAchievements())
 	end
 
-	local total_achievements = panel:Divider({
-		text = managers.localization:text("beardlib_customachievementmenu_completed_achievements", {completed = CustomAchievementManager:_completed_achievements_total(), total = CustomAchievementManager:_number_of_achievements(), percent = percent_total}),
-		foreground = Color("808080"),
-		position = function(item) 
-			item:Panel():set_left(steam_avatar:Panel():right() + default_margin)
-			item:Panel():set_top(steam_name_text:Panel():bottom())
-		end
-	})
+	local total_achievements = stats:QuickText(managers.localization:text("beardlib_customachievementmenu_completed_achievements", {
+		completed = CustomAchievementManager:CompletedAchievementsTotal(), total = CustomAchievementManager:NumberOfAchievements(), percent = percent_total
+	}))
 
-	local total_packages = panel:Divider({
-		text = managers.localization:text("beardlib_customachievementmenu_packages_installed", {nbpackages = CustomAchievementManager:_number_of_packages()}),
-		foreground = Color("808080"),
-		position = function(item) 
-			item:Panel():set_left(steam_avatar:Panel():right() + default_margin)
-			item:Panel():set_top(total_achievements:Panel():bottom())
-		end
-	})
+	local total_packages = stats:QuickText(managers.localization:text("beardlib_customachievementmenu_packages_installed", {
+		nbpackages = CustomAchievementManager:NumberOfPackages()
+	}))
 
-	for idx, nb in ipairs(CustomAchievementManager:_get_all_completed_ranks()) do
-		local rank_texture = "guis/textures/achievement_trophy_white"
-		local rank_icon = panel:Panel():bitmap({
+	local rank_texture = "guis/textures/achievement_trophy_white"
+	for idx, nb in ipairs(CustomAchievementManager:GetAllCompletedRanks()) do
+		local rank_icon = stats:Image({
 			name = "rank_icon_".. idx,
 			texture = rank_texture,
 			w = 24,
 			h = 24,
 			layer = 5,
-			color = Color(CustomAchievementManager._ranks[idx].color)
+			img_color = Color(CustomAchievementManager._ranks[idx].color)
 		})
 
-		rank_icon:set_top(total_packages:Panel():bottom() + 5)
-		rank_icon:set_left(total_packages:Panel():left())
+	--	rank_icon:set_position(total_packages:Panel():x(), total_packages:Panel():bottom() + 5)
 
-		if idx > 1 then
-			rank_icon:set_left(panel:Panel():child("rank_icon_".. (idx - 1)):left() + 80)
-		end
+		--if idx > 1 then
+		--	rank_icon:set_x(stats:GetItem("rank_icon_".. (idx - 1)):x() + 80)
+		--end
 
-		local rank_amount = panel:Panel():text({
+		local rank_amount = stats:Divider({
 			text = "x".. tostring(nb),
+			size_by_text = true,
+			count_as_aligned = true,
+			position = function(item)
+				item:SetCenterY(rank_icon:CenterY())
+			end,
 			font = "fonts/font_large_mf",
-			font_size = 16,
-			layer = 5
+			font_size = 16
 		})
-		make_fine_text(rank_amount)
-
-		rank_amount:set_left(rank_icon:right() + 5)
-		rank_amount:set_world_center_y(rank_icon:world_center_y())
 	end
 end
 
-function CustomAchievementMenu:_init_packages()
+function CustomAchievementMenu:InitPackages()
 	local panel = self._package_list
 	local sorted_packages = {}
 
-	for i, package_id in ipairs(CustomAchievementManager:_fetch_packages()) do
+	for i, package_id in ipairs(CustomAchievementManager:FetchPackages()) do
 		local pck = CustomAchievementPackage:new(package_id)
-		sorted_packages[i] = {id = package_id, name = pck:_get_name() }
+		sorted_packages[i] = {id = package_id, name = pck:GetName()}
 	end
 
-	table.sort( sorted_packages, function(a, b)
+	table.sort(sorted_packages, function(a, b)
 		return a.name < b.name
 	end)
 
@@ -269,34 +237,22 @@ function CustomAchievementMenu:_init_packages()
 		local package = CustomAchievementPackage:new(package_id)
 
 		local package_icon = panel:Image({
-			texture = package:_get_icon(),
+			texture = package:GetIcon(),
 			w = 32,
 			h = 32,
 			highlight_color = Color.transparent
 		})
 
 		local package_name = panel:Button({
-			--text = package:_get_name(),
+			text = package:GetName(),
 			h = 32,
 			w = panel:Panel():w() - package_icon:Panel():w() - 100,
-			--size = 24,
-			--foreground = Color("cccccc"),
-			--text_vertical = "center",
-			on_callback = ClassClbk(self, "_display_achievements_from_package", package) 
-		})
-
-		package_name:Panel():text({
-			text = package:_get_name(),
-			font = "fonts/font_large_mf",
-			color = Color("eeeeee"),
-			font_size = 16,
-			vertical = "center",    -- Luffy please add "text_vertical" and "text_align" support to buttons, thank
-			x = default_margin
+			foreground = Color("eeeeee"),
+			on_callback = ClassClbk(self, "DisplayAchievementsFromPackage", package) 
 		})
 
 		panel:Divider({
-			text = package:_get_completed_achievements() .. " / " .. package:_get_total_achievements(),
-			text_vertical = "center",
+			text = package:GetCompletedAchievements() .. " / " .. package:GetTotalAchievements(),
 			text_align = "center",
 			foreground = Color("808080"),
 			h = 32,
@@ -305,7 +261,7 @@ function CustomAchievementMenu:_init_packages()
 	end
 end
 
-function CustomAchievementMenu:_display_achievements_from_package(package)
+function CustomAchievementMenu:DisplayAchievementsFromPackage(package)
 	local panel = self._achievement_list
 	panel:ClearItems()
 	panel:SetVisible(true)
@@ -313,9 +269,9 @@ function CustomAchievementMenu:_display_achievements_from_package(package)
 
 	local sorted_achievements = {}
 
-	for achievement_id, achievement_data in pairs(package:_fetch_achievements()) do
-		local ach = CustomAchievement:new(package:_get_config_of(achievement_id), package._package_id)
-		table.insert(sorted_achievements, {id = ach._id, rank = ach:_get_rank_id()})
+	for achievement_id, achievement_data in pairs(package:FetchAchievements()) do
+		local ach = CustomAchievement:new(package:GetConfigOf(achievement_id), package._package_id)
+		table.insert(sorted_achievements, {id = ach._id, rank = ach:GetRankID()})
 	end
 
 	table.sort(sorted_achievements, function(a, b)
@@ -324,91 +280,68 @@ function CustomAchievementMenu:_display_achievements_from_package(package)
    
 	for _, achievement_data in pairs(sorted_achievements) do
 		local achievement_id = achievement_data.id
-		local achievement = CustomAchievement:new(package:_get_config_of(achievement_id), package._package_id)
+		local achievement = CustomAchievement:new(package:GetConfigOf(achievement_id), package._package_id)
 		local icon_panel
 
-		if achievement:_is_default_icon() then
+		if achievement:IsDefaultIcon() then
 			icon_panel = panel:Image({
-				texture = achievement:_get_icon(),
+				texture = achievement:GetIcon(),
 				h = 48,
 				w = 48,
 				layer = 1,
-				foreground = Color(achievement:_get_rank_color()):with_alpha(0.7),
+				foreground = Color(achievement:GetRankColor()):with_alpha(0.7),
 				highlight_color = Color.transparent
 			})
 		else
 			icon_panel = panel:Image({
-				texture = achievement:_get_icon(),
+				texture = achievement:GetIcon(),
 				h = 48,
 				w = 48,
 				highlight_color = Color.transparent
 			})
 		end
 
-		local unlocked_checkmark = icon_panel:Panel():bitmap({
+		local unlocked_checkmark = icon_panel:Image({
 			texture = "guis/textures/checkmark",
 			w = 48,
 			h = 48,
-			visible = false,
+			offset = 0,
 			layer = 10,
-			color = Color.green,
-			x = icon_panel:Panel():x(),
-			y = icon_panel:Panel():y()
-		})
-
-		unlocked_checkmark:set_world_center_y(icon_panel:Panel():world_center_y())
-		unlocked_checkmark:set_world_center_x(icon_panel:Panel():world_center_x())
-
-		BoxGuiObject:new(icon_panel:Panel(), {
-			sides = {
-				1,
-				1,
-				1,
-				1
-			}
+			visible = false,
+			img_color = Color.green,
 		})
 
 		local achievement_button = panel:Button({
 			h = 48,
 			w = 442,
-			on_callback = ClassClbk(self, "_display_achievement_details", achievement)
+			text = achievement:GetName(),
+			on_callback = ClassClbk(self, "DisplayAchievementDetails", achievement)
 		})
 
-		local achievement_name = achievement_button:Panel():text({
-			text = achievement:_get_name(),
-			font = "fonts/font_large_mf",
-			font_size = 18,
-			x = 5,
-			y = 5
-		})
-		make_fine_text(achievement_name)
-
-		local achievement_rank_icon = achievement_button:Panel():bitmap({
+		achievement_button:Image({
+			img_color = Color(achievement:GetRankColor()),
 			texture = "guis/textures/achievement_trophy_white",
+			position = "RightCentery",
 			h = 24,
 			w = 24,
-			y = 5,
-			color = Color(achievement:_get_rank_color())
 		})
-
-		achievement_rank_icon:set_left(achievement_button:Panel():right() - 90)
-
-		if achievement:_is_unlocked() then
-			local unlocked_achievement_text = achievement_button:Panel():text({
-				text = managers.localization:to_upper_text("beardlib_customachievementmenu_unlocked", {time = os.date('%d/%m/%Y @ %H:%M:%S', achievement:_get_unlock_timestamp())}),
-				font = "fonts/font_large_mf",
+ 
+		if achievement:IsUnlocked() then
+			local unlocked_achievement_text = achievement_button:Divider({
+				text = managers.localization:to_upper_text("beardlib_customachievementmenu_unlocked", {time = os.date('%d/%m/%Y @ %H:%M:%S', achievement:GetUnlockTimestamp())}),
 				font_size = 14,
-				color = Color.white:with_alpha(0.5),
-				x = 5,
-				y = 5
+				size_by_text = true,
+				position = function(item)
+					if alive(achievement_name) then
+						item:SetXY(achievement_name:LeftBottom())
+					end
+				end,
+				foreground = Color.white:with_alpha(0.5)
 			})
-
-			make_fine_text(unlocked_achievement_text)
-			unlocked_achievement_text:set_top(achievement_name:bottom() + 2)
-
-			unlocked_checkmark:set_visible(true)
-		elseif not achievement:_is_unlocked() and achievement:_has_amount_value() then
-			local progress = achievement:_current_amount_value() / achievement:_amount_value()
+			
+			unlocked_checkmark:SetVisible(true)
+		elseif not achievement:IsUnlocked() and achievement:HasAmountValue() then
+			local progress = achievement:CurrentAmountValue() / achievement:AmountValue()
 
 			local bar = TextProgressBar:new(achievement_button:Panel(), {
 				h = 16,
@@ -423,23 +356,24 @@ function CustomAchievementMenu:_display_achievements_from_package(package)
 		end
 	end
 
-	self:_display_package_header(package)
+	self:DisplayPackageHeader(package)
 end
 
-function CustomAchievementMenu:_display_package_header(package)
+function CustomAchievementMenu:DisplayPackageHeader(package)
 	local panel = self._achievement_list_header
-	local name = package:_get_name()
-	local desc = package:_get_desc()
-	local icon = package:_get_icon()
-	local banner = package:_get_banner()
-	local total_achievements = package:_get_total_achievements()
-	local completed_achievements = package:_get_completed_achievements()
+	local name = package:GetName()
+	local desc = package:GetDesc()
+	local icon = package:GetIcon()
+	local banner = package:GetBanner()
+	local total_achievements = package:GetTotalAchievements()
+	local completed_achievements = package:GetCompletedAchievements()
 	local percent_display = total_achievements > 0 and math.floor(completed_achievements * 100 / total_achievements) or '--'
 
 	panel:ClearItems()
 	self._package_not_selected_label:SetVisible(false)
 
-	local banner_panel = panel:Divider({
+	local banner_panel = panel:Grid({
+		name = "banner_panel",
 		w = panel:Panel():w(),
 		h = panel:Panel():h(),
 		offset = 0
@@ -461,65 +395,59 @@ function CustomAchievementMenu:_display_package_header(package)
 		})
 	end
 
-	local package_icon = banner_panel:Panel():bitmap({
+	banner_panel:Image({
+		name = "package_icon",
 		texture = icon,
 		h = 86,
 		w = 86,
-		x = 2,
-		y = 2,
-		layer = 10
+		offset = 2
 	})
 
-	local package_name = banner_panel:Panel():text({
+	local package_name = banner_panel:FitDivider({
+		name = "package_name",
 		text = utf8.to_upper(name),
-		font = "fonts/font_large_mf",
-		font_size = 28,
-		x = 10,
-		y = 10,
-		layer = 5
+		font_size = 28
 	})
-	make_fine_text(package_name)
 
-	package_name:set_left(package_icon:right() + 20)
-
-	local current_progress = banner_panel:Panel():text({
+	local current_progress = banner_panel:FitDivider({
+		name = "current_progress",
 		text = managers.localization:to_upper_text("beardlib_customachievementmenu_completed_achievements", {completed = completed_achievements, total = total_achievements, percent = percent_display}),
-		font = "fonts/font_large_mf",
+		position = function(item)
+			if alive(package_name) then
+				item:SetXY(package_name:LeftBottom())
+			end
+		end,
 		font_size = 18,
-		color = Color(0.3, 0.3, 0.3),
-		layer = 5
+		foreground = Color(0.3, 0.3, 0.3),
 	})
-	make_fine_text(current_progress)
 
-	current_progress:set_top(package_name:bottom())
-	current_progress:set_left(package_name:left())
-
-	local package_desc = banner_panel:Panel():text({
+	local package_desc = banner_panel:FitDivider({
+		name = "package_desc",
 		text = "\"" .. desc .. "\"",
-		font = "fonts/font_large_mf",
+		position = function(item)
+			if alive(current_progress) then
+				item:SetXY(current_progress:LeftBottom())
+				item:Move(0, 14)
+			end
+		end,
 		font_size = 16,
-		layer = 5,
 		visible = desc ~= ""
 	})
-	make_fine_text(package_desc)
-
-	package_desc:set_top(current_progress:bottom() + 14)
-	package_desc:set_left(package_name:left())
 end
 
-function CustomAchievementMenu:_display_achievement_details(achievement)
+function CustomAchievementMenu:DisplayAchievementDetails(achievement)
 	local panel = self._achievement_details
 	panel:SetVisible(true)
 	panel:ClearItems()
 
 	local achiev_details = {
-		name = achievement:_get_name(),
-		icon = achievement:_get_icon(),
-		desc = achievement:_get_desc(),
-		obj = achievement:_get_objective(),
-		rank_name = achievement:_get_rank_name(),
-		rank_color = achievement:_get_rank_color(),
-		is_unlocked = achievement:_is_unlocked()
+		name = achievement:GetName(),
+		icon = achievement:GetIcon(),
+		desc = achievement:GetDesc(),
+		obj = achievement:GetObjective(),
+		rank_name = achievement:GetRankName(),
+		rank_color = achievement:GetRankColor(),
+		is_unlocked = achievement:IsUnlocked()
 	}
 
 	local achiev_text = panel:Divider({
@@ -535,7 +463,7 @@ function CustomAchievementMenu:_display_achievement_details(achievement)
 		w = 64,
 		h = 64,
 		offset = 10,
-		foreground = achievement:_is_default_icon() and not achievement:_is_hidden() and Color(achiev_details.rank_color) or nil,
+		foreground = achievement:IsDefaultIcon() and not achievement:IsHidden() and Color(achiev_details.rank_color) or nil,
 		highlight_color = Color.transparent
 	})
 
@@ -567,7 +495,7 @@ function CustomAchievementMenu:_display_achievement_details(achievement)
 		offset = 10
 	})
 
-	if not achievement:_is_unlocked() and achievement:_has_amount_value() then
+	if not achievement:IsUnlocked() and achievement:HasAmountValue() then
 		local achiev_progress_header = panel:Divider({
 			text = utf8.to_upper("Progress"),
 			text_align = "center",
@@ -575,15 +503,15 @@ function CustomAchievementMenu:_display_achievement_details(achievement)
 			offset = 5
 		})
 
-		local progress = achievement:_current_amount_value() * 100 / achievement:_amount_value()
+		local progress = achievement:CurrentAmountValue() * 100 / achievement:AmountValue()
 
 		local achiev_progress_details = panel:Divider({
-			text = tostring(achievement:_current_amount_value()) .. " / " .. tostring(achievement:_amount_value()) .. " ( " .. math.floor(progress) .. " %)",
+			text = tostring(achievement:CurrentAmountValue()) .. " / " .. tostring(achievement:AmountValue()) .. " ( " .. math.floor(progress) .. " %)",
 			offset = 10
 		})
 	end
 
-	if achievement:_has_reward() then
+	if achievement:HasReward() then
 		local achiev_rewards_header = panel:Divider({
 			text = managers.localization:to_upper_text("beardlib_customachievementmenu_header_rewards"),
 			text_align = "center",
@@ -591,9 +519,9 @@ function CustomAchievementMenu:_display_achievement_details(achievement)
 			offset = 5
 		})
 
-		local achiev_reward_panel = panel:Menu({scrollbar = false, h = 68, w = panel:Panel():w() - 10, align_method = "grid"})
+		local achiev_reward_panel = panel:Grid({h = 68, w = panel:Panel():w() - 10})
 
-		if achievement:_get_reward_type() == "xp" then
+		if achievement:GetRewardType() == "xp" then
 			local reward_icon = achiev_reward_panel:Image({
 				texture = xp_icon,
 				h = 64,
@@ -601,9 +529,9 @@ function CustomAchievementMenu:_display_achievement_details(achievement)
 			})
 
 			local reward_title = achiev_reward_panel:Divider({text = managers.localization:to_upper_text("beardlib_customachievementmenu_reward_exp"), size_by_text = true})
-			achiev_reward_panel:Divider({text = "+ ".. thousand_sep(achievement:_sanitize_max_rewards(achievement:_get_reward_amount())), size_by_text = true, position = function(item) item:Panel():set_top(reward_title:Panel():bottom() + 20) item:Panel():set_left(reward_title:Panel():left()) end})
+			achiev_reward_panel:Divider({text = "+ ".. thousand_sep(achievement:SanitizeMaxRewards(achievement:GetRewardAmount())), size_by_text = true, position = function(item) item:Panel():set_top(reward_title:Panel():bottom() + 20) item:Panel():set_left(reward_title:Panel():left()) end})
 		
-		elseif achievement:_get_reward_type() == "cash" then
+		elseif achievement:GetRewardType() == "cash" then
 			local reward_icon = achiev_reward_panel:Image({
 				texture = cash_icon,
 				h = 64,
@@ -611,8 +539,8 @@ function CustomAchievementMenu:_display_achievement_details(achievement)
 			})
 
 			local reward_title = achiev_reward_panel:Divider({text = managers.localization:to_upper_text("beardlib_customachievementmenu_reward_cash"), size_by_text = true})
-			achiev_reward_panel:Divider({text = "+ ".. thousand_sep(achievement:_sanitize_max_rewards(achievement:_get_reward_amount())), size_by_text = true, position = function(item) item:Panel():set_top(reward_title:Panel():bottom() + 20) item:Panel():set_left(reward_title:Panel():left()) end})
-		elseif achievement:_get_reward_type() == "offshore" then
+			achiev_reward_panel:Divider({text = "+ ".. thousand_sep(achievement:SanitizeMaxRewards(achievement:GetRewardAmount())), size_by_text = true, position = function(item) item:Panel():set_top(reward_title:Panel():bottom() + 20) item:Panel():set_left(reward_title:Panel():left()) end})
+		elseif achievement:GetRewardType() == "offshore" then
 			local reward_icon = achiev_reward_panel:Image({
 				texture = cash_icon,
 				h = 64,
@@ -620,9 +548,9 @@ function CustomAchievementMenu:_display_achievement_details(achievement)
 			})
 
 			local reward_title = achiev_reward_panel:Divider({text = managers.localization:to_upper_text("beardlib_customachievementmenu_reward_offshore"), size_by_text = true})
-			achiev_reward_panel:Divider({text = "+ ".. thousand_sep(achievement:_sanitize_max_rewards(achievement:_get_reward_amount())), size_by_text = true, position = function(item) item:Panel():set_top(reward_title:Panel():bottom() + 20) item:Panel():set_left(reward_title:Panel():left()) end})
+			achiev_reward_panel:Divider({text = "+ ".. thousand_sep(achievement:SanitizeMaxRewards(achievement:GetRewardAmount())), size_by_text = true, position = function(item) item:Panel():set_top(reward_title:Panel():bottom() + 20) item:Panel():set_left(reward_title:Panel():left()) end})
 		
-		elseif achievement:_get_reward_type() == "cc" then
+		elseif achievement:GetRewardType() == "cc" then
 			local reward_icon = achiev_reward_panel:Image({
 				texture = cc_icon,
 				h = 64,
@@ -630,7 +558,7 @@ function CustomAchievementMenu:_display_achievement_details(achievement)
 			})
 
 			local reward_title = achiev_reward_panel:Divider({text = managers.localization:to_upper_text("beardlib_customachievementmenu_reward_cc"), size_by_text = true})
-			achiev_reward_panel:Divider({text = "+ ".. thousand_sep(achievement:_sanitize_max_rewards(achievement:_get_reward_amount())), size_by_text = true, position = function(item) item:Panel():set_top(reward_title:Panel():bottom() + 20) item:Panel():set_left(reward_title:Panel():left()) end})
+			achiev_reward_panel:Divider({text = "+ ".. thousand_sep(achievement:SanitizeMaxRewards(achievement:GetRewardAmount())), size_by_text = true, position = function(item) item:Panel():set_top(reward_title:Panel():bottom() + 20) item:Panel():set_left(reward_title:Panel():left()) end})
 		end
 	end
 
@@ -643,7 +571,7 @@ function CustomAchievementMenu:_display_achievement_details(achievement)
 		})
 
 		panel:Divider({
-			text = managers.localization:text("beardlib_customachievementmenu_header_unlocked_date", {time = os.date('%d/%m/%Y @ %H:%M:%S', achievement:_get_unlock_timestamp())}),
+			text = managers.localization:text("beardlib_customachievementmenu_header_unlocked_date", {time = os.date('%d/%m/%Y @ %H:%M:%S', achievement:GetUnlockTimestamp())}),
 			foreground = Color("aaaaaa"), -- AAAAAAAA
 			text_align = "center",
 			offset = 10
@@ -651,19 +579,18 @@ function CustomAchievementMenu:_display_achievement_details(achievement)
 	end
 end
 
-function CustomAchievementMenu:_close()
+function CustomAchievementMenu:Close()
 	self._menu:SetEnabled(false)
 end
 
-function CustomAchievementMenu:_show(state)
+function CustomAchievementMenu:SetEnabled(state)
 	self._menu:SetEnabled(state)
 	
 	if not self._initialized then
-		self:_init_background(self._menu._panel)
-		self:_init_panels(self._menu)
-		self:_init_header()
-		self:_init_account()
-		self:_init_packages()
+		self:InitPanels(self._menu)
+		self:InitHeader()
+		self:InitAccount()
+		self:InitPackages()
 
 		self._initialized = true
 	end

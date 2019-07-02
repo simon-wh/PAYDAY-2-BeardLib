@@ -1,6 +1,7 @@
 BeardLib.Items.ImageButton = BeardLib.Items.ImageButton or class(BeardLib.Items.Item)
 local ImageButton = BeardLib.Items.ImageButton 
 ImageButton.type_name = "ImageButton"
+ImageButton.IMG = true
 function ImageButton:InitBasicItem()
     self.h = self.h or self.w
     self.panel = self.parent_panel:panel({ 

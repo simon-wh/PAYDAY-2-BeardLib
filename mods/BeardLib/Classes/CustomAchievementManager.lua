@@ -35,18 +35,18 @@ function CustomAchievementManager:init()
     end
 
     self._tweak_data = tweak_data.achievement.custom_achievements or {}
-    self:_setup_achievements()
+    self:SetupAchievements()
 end
 
-function CustomAchievementManager:_get_rank_details(rank_id)
+function CustomAchievementManager:GetRankDetails(rank_id)
     return self._ranks[rank_id]
 end
 
-function CustomAchievementManager:_add_to_icon_spoofer(params)
+function CustomAchievementManager:AddToIconSpoofer(params)
     table.insert(self._achievement_icons_spoofer, params)
 end
 
-function CustomAchievementManager:_has_package(package_id)
+function CustomAchievementManager:HasPackage(package_id)
     if self._tweak_data[package_id] then
         return true
     end
@@ -54,8 +54,8 @@ function CustomAchievementManager:_has_package(package_id)
     return false
 end
 
-function CustomAchievementManager:_has_any_package()
-    if self:_number_of_packages() > 0 then
+function CustomAchievementManager:HasAnyPackage()
+    if self:NumberOfPackages() > 0 then
         return true
     end
 
@@ -63,7 +63,7 @@ function CustomAchievementManager:_has_any_package()
 end
 
 -- Use CustomAchievementPackage when possible.
-function CustomAchievementManager:_has_achievement(package_id, achievement_id)
+function CustomAchievementManager:HasAchievement(package_id, achievement_id)
     if self._tweak_data[package_id][achievement_id] then
         return true
     end
@@ -71,7 +71,7 @@ function CustomAchievementManager:_has_achievement(package_id, achievement_id)
     return false
 end
 
-function CustomAchievementManager:_setup_achievements()
+function CustomAchievementManager:SetupAchievements()
     -- I --     Make the base directory.
     FileIO:MakeDir(CustomAchievementManager._achievements_folder)
 
@@ -84,7 +84,7 @@ function CustomAchievementManager:_setup_achievements()
         -- III --   Create achievement file by packages.
         local package = CustomAchievementPackage:new(package_id)
 
-        for achievement_id, achievement_data in pairs(package:_fetch_achievements()) do
+        for achievement_id, achievement_data in pairs(package:FetchAchievements()) do
             if achievement_id ~= "icon" then    -- Prevent adding package icon param to achievements.
                 local achievement_path = package_path .. "/" .. achievement_id .. ".json"
                 if not FileIO:Exists(achievement_path) then
@@ -103,8 +103,8 @@ function CustomAchievementManager:_setup_achievements()
     end
 end
 
-function CustomAchievementManager:_fetch_packages()
-    if not self:_has_any_package() then
+function CustomAchievementManager:FetchPackages()
+    if not self:HasAnyPackage() then
         return {}
     end
 
@@ -117,7 +117,7 @@ function CustomAchievementManager:_fetch_packages()
     return packages
 end
 
-function CustomAchievementManager:_number_of_packages()
+function CustomAchievementManager:NumberOfPackages()
     local nb = 0
     local tweak = tweak_data.achievement.custom_achievements or {}
 
@@ -128,7 +128,7 @@ function CustomAchievementManager:_number_of_packages()
     return nb
 end
 
-function CustomAchievementManager:_number_of_achievements()
+function CustomAchievementManager:NumberOfAchievements()
     local nb = 0
     local tweak = tweak_data.achievement.custom_achievements or {}
 
@@ -143,7 +143,7 @@ function CustomAchievementManager:_number_of_achievements()
     return nb
 end
 
-function CustomAchievementManager:_completed_achievements_total()
+function CustomAchievementManager:CompletedAchievementsTotal()
     local nb = 0
 
     if not self._tweak_data then -- i hate this game
@@ -153,13 +153,13 @@ function CustomAchievementManager:_completed_achievements_total()
     for package_id, _ in pairs(self._tweak_data or {}) do
         local package = CustomAchievementPackage:new(package_id)
 
-        for achievement_id, _ in pairs(package:_fetch_achievements()) do
-            local config = package:_get_config_of(achievement_id)
+        for achievement_id, _ in pairs(package:FetchAchievements()) do
+            local config = package:GetConfigOf(achievement_id)
             --log("config is " .. tostring(config))
             if type(config) == "table" then
                 local achievement = CustomAchievement:new(config, package_id)
-                --log(tostring(achievement:_get_name()) .. " unlock state: " .. tostring(achievement:_is_unlocked()))
-                if achievement:_is_unlocked() then
+                --log(tostring(achievement:GetName()) .. " unlock state: " .. tostring(achievement:IsUnlocked()))
+                if achievement:IsUnlocked() then
                     nb = nb + 1
                 end
             end
@@ -169,7 +169,7 @@ function CustomAchievementManager:_completed_achievements_total()
     return nb
 end
 
-function CustomAchievementManager:_get_all_completed_ranks()
+function CustomAchievementManager:GetAllCompletedRanks()
     local t = {
         [1] = 0,
         [2] = 0,
@@ -182,14 +182,14 @@ function CustomAchievementManager:_get_all_completed_ranks()
     for package_id, _ in pairs(tweak) do
         local package = CustomAchievementPackage:new(package_id)
 
-        for achievement_id, _ in pairs(package:_fetch_achievements()) do
-            local config = package:_get_config_of(achievement_id)
+        for achievement_id, _ in pairs(package:FetchAchievements()) do
+            local config = package:GetConfigOf(achievement_id)
             
             if type(config) == "table" then
                 local achievement = CustomAchievement:new(config, package_id)
 
-                if achievement:_is_unlocked() then
-                    t[achievement:_get_rank_id()] = t[achievement:_get_rank_id()] + 1
+                if achievement:IsUnlocked() then
+                    t[achievement:GetRankID()] = t[achievement:GetRankID()] + 1
                 end
             end
         end
@@ -210,11 +210,11 @@ function CustomAchievementPackage:init(package_id)
     self._banner = tweak_data.achievement.custom_achievements_packages[self._package_id].banner
 end
 
-function CustomAchievementPackage:_get_name()
+function CustomAchievementPackage:GetName()
     return managers.localization:text(self._name_id)
 end
 
-function CustomAchievementPackage:_get_desc()
+function CustomAchievementPackage:GetDesc()
     if not self._desc_id then
         return ""
     end
@@ -222,30 +222,30 @@ function CustomAchievementPackage:_get_desc()
     return managers.localization:text(self._desc_id)
 end
 
-function CustomAchievementPackage:_get_icon()
+function CustomAchievementPackage:GetIcon()
     return self._icon
 end
 
-function CustomAchievementPackage:_get_banner()
+function CustomAchievementPackage:GetBanner()
     return self._banner
 end
 
-function CustomAchievementPackage:_fetch_achievements()
+function CustomAchievementPackage:FetchAchievements()
     return self._achievements
 end
 
-function CustomAchievementPackage:_manual_achievement_addition(achievement_id, config)
+function CustomAchievementPackage:ManualAchievementAddition(achievement_id, config)
     if tweak_data and tweak_data.achievement then
         tweak_data.achievement.custom_achievements[self._package_id][achievement_id] = config
-        BeardLib.managers.custom_achievement:_setup_achievements()
+        BeardLib.managers.custom_achievement:SetupAchievements()
     end
 end
 
-function CustomAchievementPackage:_get_config_of(achievement_id)
+function CustomAchievementPackage:GetConfigOf(achievement_id)
     return self._achievements[achievement_id]
 end
 
-function CustomAchievementPackage:_has_achievement(achievement_id)
+function CustomAchievementPackage:HasAchievement(achievement_id)
     if self._achievements[achievement_id] then
         return true
     end
@@ -253,32 +253,32 @@ function CustomAchievementPackage:_has_achievement(achievement_id)
     return false
 end
 
-function CustomAchievementPackage:_achievement(achievement_id)
-    if not self:_has_achievement(achievement_id) then
+function CustomAchievementPackage:Achievement(achievement_id)
+    if not self:HasAchievement(achievement_id) then
         return BeardLib:log("[CustomAchievementPackage] [ERROR] '%s' does not exist for the achievement package '%s'", achievement_id, self._package_id)
     end
 
-    return CustomAchievement:new(self:_get_config_of(achievement_id), self._package_id)
+    return CustomAchievement:new(self:GetConfigOf(achievement_id), self._package_id)
 end
 
-function CustomAchievementPackage:_generate_achievement_table()
+function CustomAchievementPackage:GenerateAchievementTable()
     local achievement_table = {}
     achievement_table[self._package_id] = {}
-    local fetched_achievements = self:_fetch_achievements()
+    local fetched_achievements = self:FetchAchievements()
     achievement_table[self._package_id] = fetched_achievements
     return achievement_table[self._package_id]
 end
 
-function CustomAchievementPackage:_get_completed_achievements()
+function CustomAchievementPackage:GetCompletedAchievements()
     local nb = 0
 
-    for achievement_id, _ in pairs(self:_fetch_achievements()) do
-        local config = self:_get_config_of(achievement_id)
+    for achievement_id, _ in pairs(self:FetchAchievements()) do
+        local config = self:GetConfigOf(achievement_id)
         
         if type(config) == "table" then
             local achievement = CustomAchievement:new(config, self._package_id)
 
-            if achievement:_is_unlocked() then
+            if achievement:IsUnlocked() then
                 nb = nb + 1
             end
         end
@@ -288,21 +288,21 @@ function CustomAchievementPackage:_get_completed_achievements()
 end
 
 -- Useful for "complete all achievements" achievement.
-function CustomAchievementPackage:_all_achievements_completed_except_one()
-    local nb = self:_get_total_achievements() - 1
+function CustomAchievementPackage:AllAchievementsCompletedExceptOne()
+    local nb = self:GetTotalAchievements() - 1
 
-    if self:_get_completed_achievements() == nb then
+    if self:GetCompletedAchievements() == nb then
         return true
     end
 
     return false
 end
 
-function CustomAchievementPackage:_get_total_achievements()
+function CustomAchievementPackage:GetTotalAchievements()
     local nb = 0
 
-    for achievement_id, _ in pairs(self:_fetch_achievements()) do
-        local config = self:_get_config_of(achievement_id)
+    for achievement_id, _ in pairs(self:FetchAchievements()) do
+        local config = self:GetConfigOf(achievement_id)
         
         if type(config) == "table" then
             nb = nb + 1
@@ -356,68 +356,68 @@ function CustomAchievement:init(config, package)
     self._unlocked = false          --  In Progression File
     self._timestamp_unlocked = 0    --  In Progression File
 
-    self:_load_progress()
+    self:LoadProgress()
 end
 
-function CustomAchievement:_get_name()
-    if self:_is_hidden() and not self:_is_unlocked() then
+function CustomAchievement:GetName()
+    if self:IsHidden() and not self:IsUnlocked() then
         return "Hidden Achievement"
     end
 
     return managers.localization:text(self._name_id)
 end
 
-function CustomAchievement:_get_desc()
-    if self:_is_hidden() and not self:_is_unlocked() then
+function CustomAchievement:GetDesc()
+    if self:IsHidden() and not self:IsUnlocked() then
         return "Details will be revealed once the achievement is unlocked."
     end
 
     return managers.localization:text(self._desc_id)
 end
 
-function CustomAchievement:_get_objective()
-    if self:_is_hidden() and not self:_is_unlocked() then
+function CustomAchievement:GetObjective()
+    if self:IsHidden() and not self:IsUnlocked() then
         return "???"
     end
 
     return managers.localization:text(self._obj_id)
 end
 
-function CustomAchievement:_get_icon()
-    if self:_is_hidden() and not self:_is_unlocked() then
+function CustomAchievement:GetIcon()
+    if self:IsHidden() and not self:IsUnlocked() then
         return "guis/textures/achievement_trophy_white"
     end
 
     return self._icon_path
 end
 
-function CustomAchievement:_get_unlock_timestamp()
+function CustomAchievement:GetUnlockTimestamp()
     return self._timestamp_unlocked
 end
 
-function CustomAchievement:_get_rank_name()
-    local rank_id = self:_is_hidden() and 0 or self._rank
+function CustomAchievement:GetRankName()
+    local rank_id = self:IsHidden() and 0 or self._rank
 
-    local rank = CustomAchievementManager:_get_rank_details(rank_id)
+    local rank = CustomAchievementManager:GetRankDetails(rank_id)
     return rank.name
 end
 
-function CustomAchievement:_get_rank_color()
-    local rank_id = self:_is_hidden() and 0 or self._rank
+function CustomAchievement:GetRankColor()
+    local rank_id = self:IsHidden() and 0 or self._rank
 
-    local rank = CustomAchievementManager:_get_rank_details(rank_id)
+    local rank = CustomAchievementManager:GetRankDetails(rank_id)
     return rank.color
 end
 
-function CustomAchievement:_is_default_icon()
-    if self:_is_hidden() or self._icon_path == "guis/textures/achievement_trophy_white" then
+function CustomAchievement:IsDefaultIcon()
+    if self:IsHidden() or self._icon_path == "guis/textures/achievement_trophy_white" then
         return true
     end
 
     return false
 end
 
-function CustomAchievement:_package()
+function CustomAchievement:Package()
     if not self._package_id then
         return BeardLib:log("[CustomAchievementPackage] [ERROR] Achievement '%s' lacking package id. Did you invoked the CustomAchievement class with the package ID?", self._id)
     end
@@ -425,7 +425,7 @@ function CustomAchievement:_package()
     return CustomAchievementPackage:new(self._package_id)
 end
 
-function CustomAchievement:_load_progress()
+function CustomAchievement:LoadProgress()
     local progress_data = json.custom_decode(FileIO:ReadFrom(self._progress_file))
     
     self._saved_amount = progress_data.amount
@@ -433,7 +433,7 @@ function CustomAchievement:_load_progress()
     self._timestamp_unlocked = progress_data.date_unlocked
 end
 
-function CustomAchievement:_save_progress()
+function CustomAchievement:SaveProgress()
     local data = {
         amount = self._saved_amount,
         completed = self._unlocked,
@@ -443,15 +443,15 @@ function CustomAchievement:_save_progress()
     FileIO:WriteTo(self._progress_file, json.custom_encode(data), "w+")
 end
 
-function CustomAchievement:_increase_amount(amt, to_max)
-    if self:_is_unlocked() then
+function CustomAchievement:IncreaseAmount(amt, to_max)
+    if self:IsUnlocked() then
         return
     end
 
     if to_max then
         self._saved_amount = self._amount
-        self:_save_progress()
-        self:_check_completion()
+        self:SaveProgress()
+        self:CheckCompletion()
         return
     end
 
@@ -461,22 +461,22 @@ function CustomAchievement:_increase_amount(amt, to_max)
         self._saved_amount = self._amount
     end
 
-    self:_save_progress()
-    self:_check_completion()
+    self:SaveProgress()
+    self:CheckCompletion()
 end
 
-function CustomAchievement:_check_completion()
-    if self:_is_unlocked() then
+function CustomAchievement:CheckCompletion()
+    if self:IsUnlocked() then
         return
     end
 
     if self._saved_amount >= self._amount then
-        self:_unlock()
+        self:Unlock()
     end
 end
 
-function CustomAchievement:_unlock()
-    if self:_is_unlocked() then
+function CustomAchievement:Unlock()
+    if self:IsUnlocked() then
         return
     end
 
@@ -491,26 +491,26 @@ function CustomAchievement:_unlock()
         )
     end
 
-    self:_give_reward()
-    self:_increase_amount(nil, true)
-    self:_save_progress()
+    self:GiveReward()
+    self:IncreaseAmount(nil, true)
+    self:SaveProgress()
 end
 
-function CustomAchievement:_lock()
+function CustomAchievement:Lock()
     self._unlocked = false
     self._timestamp_unlocked = 0
-    self:_save_progress()
+    self:SaveProgress()
 end
 
-function CustomAchievement:_get_reward_type()
+function CustomAchievement:GetRewardType()
     return tostring(self._reward_type)
 end
 
-function CustomAchievement:_get_reward_amount()
+function CustomAchievement:GetRewardAmount()
     return self._reward_amount
 end
 
-function CustomAchievement:_give_reward()
+function CustomAchievement:GiveReward()
     if not self._reward_type then
         return
     end
@@ -552,11 +552,11 @@ function CustomAchievement:_give_reward()
     end
 end
 
-function CustomAchievement:_is_unlocked()
+function CustomAchievement:IsUnlocked()
     return self._unlocked
 end
 
-function CustomAchievement:_sanitize_max_rewards(amount)
+function CustomAchievement:SanitizeMaxRewards(amount)
     if amount > CustomAchievement.limits[self._reward_type] then
         amount = CustomAchievement.limits[self._reward_type]
     end
@@ -568,7 +568,7 @@ function CustomAchievement:_sanitize_max_rewards(amount)
     return amount
 end
 
-function CustomAchievement:_has_amount_value()
+function CustomAchievement:HasAmountValue()
     if self._amount > 0 then
         return true
     end
@@ -576,28 +576,28 @@ function CustomAchievement:_has_amount_value()
     return false
 end
 
-function CustomAchievement:_amount_value()
+function CustomAchievement:AmountValue()
     return self._amount
 end
 
-function CustomAchievement:_current_amount_value()
+function CustomAchievement:CurrentAmountValue()
     return self._saved_amount
 end
 
-function CustomAchievement:_is_hidden()
-    if self:_is_unlocked() then
+function CustomAchievement:IsHidden()
+    if self:IsUnlocked() then
         return false
     end
 
     return self._hidden_details
 end
 
-function CustomAchievement:_has_reward()
+function CustomAchievement:HasReward()
     return self._reward_type and true or false
 end
 
-function CustomAchievement:_get_rank_id()
-    if self:_is_hidden() and not self:_is_unlocked() then
+function CustomAchievement:GetRankID()
+    if self:IsHidden() and not self:IsUnlocked() then
         return 0
     end
 
