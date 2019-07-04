@@ -22,7 +22,7 @@ function C:CheckSoundID(sound_id, engine_source, clbk, cookie)
     end
 
     local prefixes = engine_source:get_prefixes()
-    if BeardLib.DevMode then
+    if BeardLib.LogSounds then
         BeardLib:log("Incoming sound check: ID %s Prefixes %s", tostring(sound_id), tostring(prefixes and table.concat(prefixes, ", ") or "none"))
     end
 

@@ -74,8 +74,8 @@ function BeardLibModsMenu:CreateItems(menu)
     })
     button_holder:Button({
         name = "Custom achievements",
-        text = "beardlib_customachievementmenu_title",
-        help = "beardlib_customachievementmenu_desc",
+        text = "beardlib_achieves_title",
+        help = "beardlib_achieves_desc",
         size_by_text = true,
         callback = ClassClbk(BeardLib.managers.custom_achievement_menu, "SetEnabled", true)
     })
@@ -310,8 +310,15 @@ function BeardLibModsMenu:OpenSettings()
                     help = "beardlib_dev_mode_help",
                     value = BeardLib.Options:GetValue("DevMode"),
                     on_callback = ClassClbk(self, "SetOption")
-                })    
+                })
             end
+            holder:Toggle({
+                name = "LogSounds",
+                text = "beardlib_log_sounds",
+                help = "beardlib_log_sounds_help",
+                value = BeardLib.Options:GetValue("LogSounds"),
+                on_callback = ClassClbk(self, "SetOption")
+            })
             holder:Button({
                 name = "ResetSettings",
                 text = "beardlib_reset_settings",

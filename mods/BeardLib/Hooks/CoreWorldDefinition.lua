@@ -136,7 +136,8 @@ function WorldDefinition:try_loading_custom_instance(instance)
     if module then
         self._custom_instances = self._custom_instances or {}
         if not self._custom_instances[instance] then
-            self._custom_instances[instance] = module:Load()
+            module:Load()
+            self._custom_instances[instance] = module
         end
     end   
 end

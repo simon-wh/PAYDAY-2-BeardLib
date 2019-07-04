@@ -130,7 +130,7 @@ function CustomAchievementMenu:InitHeader()
 	local icon_trophy = self._header:Image({texture = "guis/textures/achievement_trophy_white", h = 30, w = 30, highlight_color = Color.transparent})
 	
 	self._header:Divider({
-		text = managers.localization:text("beardlib_customachievementmenu_title"),
+		text = managers.localization:text("beardlib_achieves_title"),
 		size_by_text = true,
 		size = 24,
 		count_as_aligned = true,
@@ -184,11 +184,11 @@ function CustomAchievementMenu:InitAccount()
 		percent_total = math.floor(CustomAchievementManager:CompletedAchievementsTotal() * 100 / CustomAchievementManager:NumberOfAchievements())
 	end
 
-	local total_achievements = stats:QuickText(managers.localization:text("beardlib_customachievementmenu_completed_achievements", {
+	local total_achievements = stats:QuickText(managers.localization:text("beardlib_achieves_completed_achievements", {
 		completed = CustomAchievementManager:CompletedAchievementsTotal(), total = CustomAchievementManager:NumberOfAchievements(), percent = percent_total
 	}))
 
-	local total_packages = stats:QuickText(managers.localization:text("beardlib_customachievementmenu_packages_installed", {
+	local total_packages = stats:QuickText(managers.localization:text("beardlib_achieves_packages_installed", {
 		nbpackages = CustomAchievementManager:NumberOfPackages()
 	}))
 
@@ -331,7 +331,7 @@ function CustomAchievementMenu:DisplayAchievementsFromPackage(package)
  
 		if achievement:IsUnlocked() then
 			local unlocked_achievement_text = achievement_button:Divider({
-				text = managers.localization:to_upper_text("beardlib_customachievementmenu_unlocked", {time = os.date('%d/%m/%Y @ %H:%M:%S', achievement:GetUnlockTimestamp())}),
+				text = managers.localization:to_upper_text("beardlib_achieves_unlocked", {time = os.date('%d/%m/%Y @ %H:%M:%S', achievement:GetUnlockTimestamp())}),
 				font_size = 14,
 				size_by_text = true,
 				position = function(item)
@@ -414,7 +414,7 @@ function CustomAchievementMenu:DisplayPackageHeader(package)
 
 	local current_progress = banner_panel:FitDivider({
 		name = "current_progress",
-		text = managers.localization:to_upper_text("beardlib_customachievementmenu_completed_achievements", {completed = completed_achievements, total = total_achievements, percent = percent_display}),
+		text = managers.localization:to_upper_text("beardlib_achieves_completed_achievements", {completed = completed_achievements, total = total_achievements, percent = percent_display}),
 		position = function(item)
 			if alive(package_name) then
 				item:SetXY(package_name:LeftBottom())
@@ -487,7 +487,7 @@ function CustomAchievementMenu:DisplayAchievementDetails(achievement)
 	})--]]
 
 	local achiev_objective_header = panel:Divider({
-		text = managers.localization:to_upper_text("beardlib_customachievementmenu_header_objectives"),
+		text = managers.localization:to_upper_text("beardlib_achieves_header_objectives"),
 		text_align = "center",
 		background_color = Color(achiev_details.rank_color):with_alpha(0.5),
 		offset = 5
@@ -516,7 +516,7 @@ function CustomAchievementMenu:DisplayAchievementDetails(achievement)
 
 	if achievement:HasReward() then
 		local achiev_rewards_header = panel:Divider({
-			text = managers.localization:to_upper_text("beardlib_customachievementmenu_header_rewards"),
+			text = managers.localization:to_upper_text("beardlib_achieves_header_rewards"),
 			text_align = "center",
 			background_color = Color(achiev_details.rank_color):with_alpha(0.5),
 			offset = 5
@@ -531,7 +531,7 @@ function CustomAchievementMenu:DisplayAchievementDetails(achievement)
 				w = 64
 			})
 
-			local reward_title = achiev_reward_panel:Divider({text = managers.localization:to_upper_text("beardlib_customachievementmenu_reward_exp"), size_by_text = true})
+			local reward_title = achiev_reward_panel:Divider({text = managers.localization:to_upper_text("beardlib_achieves_reward_exp"), size_by_text = true})
 			achiev_reward_panel:Divider({text = "+ ".. thousand_sep(achievement:SanitizeMaxRewards(achievement:GetRewardAmount())), size_by_text = true, position = function(item) item:Panel():set_top(reward_title:Panel():bottom() + 20) item:Panel():set_left(reward_title:Panel():left()) end})
 		
 		elseif achievement:GetRewardType() == "cash" then
@@ -541,7 +541,7 @@ function CustomAchievementMenu:DisplayAchievementDetails(achievement)
 				w = 64
 			})
 
-			local reward_title = achiev_reward_panel:Divider({text = managers.localization:to_upper_text("beardlib_customachievementmenu_reward_cash"), size_by_text = true})
+			local reward_title = achiev_reward_panel:Divider({text = managers.localization:to_upper_text("beardlib_achieves_reward_cash"), size_by_text = true})
 			achiev_reward_panel:Divider({text = "+ ".. thousand_sep(achievement:SanitizeMaxRewards(achievement:GetRewardAmount())), size_by_text = true, position = function(item) item:Panel():set_top(reward_title:Panel():bottom() + 20) item:Panel():set_left(reward_title:Panel():left()) end})
 		elseif achievement:GetRewardType() == "offshore" then
 			local reward_icon = achiev_reward_panel:Image({
@@ -550,7 +550,7 @@ function CustomAchievementMenu:DisplayAchievementDetails(achievement)
 				w = 64
 			})
 
-			local reward_title = achiev_reward_panel:Divider({text = managers.localization:to_upper_text("beardlib_customachievementmenu_reward_offshore"), size_by_text = true})
+			local reward_title = achiev_reward_panel:Divider({text = managers.localization:to_upper_text("beardlib_achieves_reward_offshore"), size_by_text = true})
 			achiev_reward_panel:Divider({text = "+ ".. thousand_sep(achievement:SanitizeMaxRewards(achievement:GetRewardAmount())), size_by_text = true, position = function(item) item:Panel():set_top(reward_title:Panel():bottom() + 20) item:Panel():set_left(reward_title:Panel():left()) end})
 		
 		elseif achievement:GetRewardType() == "cc" then
@@ -560,21 +560,21 @@ function CustomAchievementMenu:DisplayAchievementDetails(achievement)
 				w = 64
 			})
 
-			local reward_title = achiev_reward_panel:Divider({text = managers.localization:to_upper_text("beardlib_customachievementmenu_reward_cc"), size_by_text = true})
+			local reward_title = achiev_reward_panel:Divider({text = managers.localization:to_upper_text("beardlib_achieves_reward_cc"), size_by_text = true})
 			achiev_reward_panel:Divider({text = "+ ".. thousand_sep(achievement:SanitizeMaxRewards(achievement:GetRewardAmount())), size_by_text = true, position = function(item) item:Panel():set_top(reward_title:Panel():bottom() + 20) item:Panel():set_left(reward_title:Panel():left()) end})
 		end
 	end
 
 	if achiev_details.is_unlocked then
 		local unlock_header = panel:Divider({
-			text = managers.localization:to_upper_text("beardlib_customachievementmenu_header_unlocked"),
+			text = managers.localization:to_upper_text("beardlib_achieves_header_unlocked"),
 			text_align = "center",
 			offset = 5,
 			background_color = Color.green
 		})
 
 		panel:Divider({
-			text = managers.localization:text("beardlib_customachievementmenu_header_unlocked_date", {time = os.date('%d/%m/%Y @ %H:%M:%S', achievement:GetUnlockTimestamp())}),
+			text = managers.localization:text("beardlib_achieves_header_unlocked_date", {time = os.date('%d/%m/%Y @ %H:%M:%S', achievement:GetUnlockTimestamp())}),
 			foreground = Color("aaaaaa"), -- AAAAAAAA
 			text_align = "center",
 			offset = 10

@@ -7,6 +7,9 @@ function ContactModule:AddContactData(narr_self)
         self:log("[ERROR] Contact does not contain a definition for id!")
         return
     end
+    if not self.force and narr_self.contacts[self._config.id] then
+        return
+    end
 
     local data = {
         name_id = self._config.name_id,

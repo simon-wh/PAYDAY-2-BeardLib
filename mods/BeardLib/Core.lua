@@ -53,6 +53,7 @@ function self:Init()
 	
 	self:RegisterTweak()
 	self.DevMode = self.Options:GetValue("DevMode")
+	self.LogSounds = self.Options:GetValue("LogSounds")
 end
 
 function self:LoadClasses()
