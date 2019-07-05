@@ -19,6 +19,7 @@ self.Mods = {}
 self._call_next_update = {}
 self._paused_updaters = {}
 self._updaters = {}
+self._errors = {}
 
 function self:Init()
 	Global.beardlib_checked_updates = Global.beardlib_checked_updates or {}
@@ -188,6 +189,11 @@ function self:DevLog(str, ...)
 	end
 end
 
+function self:ModError(mod, str, ...)
+	self._errors[mod.ModPath] = self._errors[mod.ModPath] or {}
+	table.insert(self._errors[mod.ModPath], string.format(str, ...))
+end
+
 function self:log(...) ModCore.log(self, ...) end
 function self:GetPath() return ModCore.GetPath(self) end
 function self:GetRealFilePath(...) return ModCore.GetRealFilePath(self, ...) end
@@ -232,3 +238,22 @@ Hooks:Add("MenuManagerInitialize", "BeardLibCreateMenuHooks", function(mself)
 	
     self.managers.dialog:Init()
 end)
+
+Hooks:Add("MenuManagerOnOpenMenu", "BeardLibShowErrors", function(mself)
+	if BeardLib.Options:GetValue("NoErrorAlert") then
+		return
+	end
+	if table.size(BeardLib._errors) > 0 then
+		local loc = managers.localization
+		local s = ""
+		for mod_path, err_list in pairs(BeardLib._errors) do
+			s = s.."MOD: "..tostring(mod_path).."\n"
+			for _, err in pairs(err_list) do
+				s = s.."    "..err.."\n"
+			end
+		end
+		s = s:sub(0, #s-1)
+		QuickMenuPlus:new(loc:text("beardlib_found_errors"), s)
+	end
+end)
+

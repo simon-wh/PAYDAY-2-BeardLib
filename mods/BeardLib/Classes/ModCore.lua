@@ -18,28 +18,27 @@ function ModCore:init(config_path, load_modules)
 
     if disabled_mods[ModPath] and not self._blt_mod then
         BeardLib:log("[Info] Mod at path '%s' is disabled!", tostring(ModPath))
-        self._disabled = true
+        self:ForceDisable()
 	end
 
     if self._blt_mod then
 		local mod = BLT.Mods:GetModOwnerOfFile(ModPath)
 		if mod and not mod:IsEnabled() then
-			self._disabled = true
+			self:ForceDisable()
 			return
 		end
 	end
 	
 	self:LoadConfigFile(config_path)
 	table.insert(BeardLib.Mods, self)
-	self:pre_init_modules(load_modules)
 end
 
 function ModCore:post_init(ignored_modules)
-    if self._disabled or self._post_init_done then
+    if self._post_init_done then
         return
 	end
 
-	if self._core_class then
+	if not self._disabled and self._core_class then
 		self._core_class:PreInit()
 	end
 
@@ -51,6 +50,10 @@ function ModCore:post_init(ignored_modules)
                 self:log("[ERROR] An error occured on the post initialization of %s. Error:\n%s", module._name, tostring(err))
             end
         end
+    end
+    
+    if self._disabled then
+        return
     end
 
 	if self._core_class then
@@ -72,7 +75,17 @@ function ModCore:LoadConfigFile(path)
     local config = ScriptSerializer:from_custom_xml(file:read("*all"))
 
     self.Name = config.name or tostring(table.remove(string.split(self.ModPath, "/")))
-	self.Priority = tonumber(config.priority) or self.Priority
+    self.Priority = tonumber(config.priority) or self.Priority
+    
+    if config.min_lib_ver and (config.min_lib_ver > BeardLib.Version) then
+        local ver = math.round_with_precision(tonumber(self._config.min_lib_ver), 4)
+        if self._config.notify_about_version ~= false then
+            log(debug.traceback())
+            self:ModError("The mod requires BeardLib version %s or higher in order to run.", tostring(ver))
+        end
+        self:ForceDisable()
+    end
+
     if not self._disabled then
         if config.global_key then
             self.global = config.global_key
@@ -86,15 +99,16 @@ function ModCore:LoadConfigFile(path)
 	self._config = config
 end
 
+function ModCore:ModError(...)
+    BeardLib:ModError(self, ...)
+    self:ForceDisable()
+end
+
 function ModCore:pre_init_modules(load_modules)
-	if self._config and not self._config.min_lib_ver or self._config.min_lib_ver <= BeardLib.Version then
+	if self._config and not self._disabled then
 		if load_modules == nil or load_modules then
 			self:init_modules()
-		end
-	elseif self._config then
-		self:log("[ERROR] BeardLib version %s or above is required to run the mod.", tostring(self._config.min_lib_ver))
-		self._disabled = true
-        return
+        end
 	end
 end
 
@@ -103,10 +117,20 @@ local load_first = {
 	["Classes"] = true
 }
 
+local updates = "AssetUpdates"
+
 function ModCore:init_modules()
-    if self.modules_initialized or self._disabled then
+    if self.modules_initialized then
         return
     end
+
+    if not self._disabled and self._config.core_class then
+        self._core_class = dofile(Path:Combine(self.ModPath, self._config.core_class)) or self
+        --Allows to check for things before initializing the modules. Call :ModError from here only.
+        if self._core_class and self._core_class.PreModuleInit then
+            self._core_class:PreModuleInit()
+        end
+	end
 
 	self._modules = {}
 	
@@ -118,17 +142,14 @@ function ModCore:init_modules()
 		return a_ok and not b_ok
 	end)
 
-	if self._config.core_class then
-		self._core_class = dofile(Path:Combine(self.ModPath, self._config.core_class)) or self
-	end
-
     for i, module_tbl in ipairs(self._config) do
         if type(module_tbl) == "table" then
-            if not table.contains(self._ignored_modules, module_tbl._meta) then
-                local node_class = BeardLib.modules[module_tbl._meta]
+            local meta = module_tbl._meta
+            if (not self._disabled or (not self._config.no_disabled_updates and meta == updates)) and not table.contains(self._ignored_modules, meta) then
+                local node_class = BeardLib.modules[meta]
 
                 if not node_class and module_tbl._force_search then
-                    node_class = CoreSerialize.string_to_classtable(module_tbl._meta)
+                    node_class = CoreSerialize.string_to_classtable(meta)
                 end
 
                 if node_class then
@@ -147,10 +168,10 @@ function ModCore:init_modules()
                             table.insert(self._modules, node_obj)
                         end
                     else
-                        self:log("[ERROR] An error occured on initilization of module: %s. Error:\n%s", module_tbl._meta, tostring(node_obj))
+                        self:log("[ERROR] An error occured on initilization of module: %s. Error:\n%s", meta, tostring(node_obj))
                     end
                 elseif not self._config.ignore_errors then
-                    self:log("[ERROR] Unable to find module with key %s", module_tbl._meta)
+                    self:log("[ERROR] Unable to find module with key %s", meta)
                 end
             end
         end
@@ -158,7 +179,11 @@ function ModCore:init_modules()
 
 	if self._auto_post_init then
 		self:post_init()
-	end
+    end
+    
+    if self._disabled and self.global and _G[self.global] then
+        rawset( _G, self.global, nil)
+    end
     self.modules_initialized = true
 end
 
@@ -226,6 +251,10 @@ function ModCore:RegisterHook(source_file, file, type)
 			self:log("[ERROR] Failed reading hook file %s of type %s", tostring(hook_file), tostring(type or "post"))
 		end
 	end
+end
+
+function ModCore:ForceDisable()
+    self._disabled = true
 end
 
 function ModCore:PreInit() end

@@ -303,6 +303,13 @@ function BeardLibModsMenu:OpenSettings()
                 value = BeardLib.Options:GetValue("ImportantNotice"),
                 on_callback = ClassClbk(self, "SetOption")
             })
+            holder:Toggle({
+                name = "NoErrorAlert",
+                text = "beardlib_no_error_alert",
+                help = "beardlib_no_error_alert_help",
+                value = BeardLib.Options:GetValue("NoErrorAlert"),
+                on_callback = ClassClbk(self, "SetOption")
+            })            
             if FileIO:Exists("mods/developer.txt") then
                 holder:Toggle({
                     name = "DevMode",
