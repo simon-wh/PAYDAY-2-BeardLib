@@ -79,6 +79,8 @@ function ItemModuleBase:do_clean_table(config)
             for _, action in pairs(type(clean.action) == "table" and clean.action or {clean.action}) do
                 if action == "no_subtables" then
                     tbl[i] = BeardLib.Utils:RemoveAllSubTables(tbl[i])
+                elseif action == "shallow_no_number_indexes" then
+                    tbl[i] = BeardLib.Utils:RemoveAllNumberIndexes(tbl[i], true)
                 elseif action == "no_number_indexes" then
                     tbl[i] = BeardLib.Utils:RemoveAllNumberIndexes(tbl[i], clean.shallow)
                 elseif action == "number_indexes" then

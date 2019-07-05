@@ -20,7 +20,7 @@ function NarrativeModule:init(...)
             end},        
         {param = "crimenet_callouts", action = "number_indexes"},
         {param = "crimenet_videos", action = "number_indexes"},
-        {param = "payout",action = "number_indexes"},
+        {param = "payout", action = "number_indexes"},
         {param = "contract_cost", action = "number_indexes"},
         {param = "experience_mul", action = "number_indexes"},
         {param = "min_mission_xp", action = "number_indexes"},

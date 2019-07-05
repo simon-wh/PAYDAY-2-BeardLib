@@ -11,8 +11,8 @@ function WeaponModule:init(...)
         {param = "factory.uses_parts",  action = "remove_metas"},
         {param = "factory.optional_types", action = "remove_metas"},
         {param = "factory.animations", action = "remove_metas"},
-        {param = "factory.override", action = {"remove_metas", "no_number_indexes"}},
-        {param = "factory.adds", action = {"remove_metas", "no_number_indexes"}}
+        {param = "factory.override", action = {"remove_metas", "shallow_no_number_indexes"}},
+        {param = "factory.adds", action = {"remove_metas", "shallow_no_number_indexes"}}
 	})
 	
     return WeaponModule.super.init(self, ...)
@@ -140,12 +140,10 @@ function WeaponModule:RegisterHook()
             return
         end
 
-        local data = table.merge({
-            custom = true
-        }, config)
+        config.custom = true
 
-        w_self[config.id] = data
-        local npc_data = clone(data)
+        w_self[config.id] = config
+        local npc_data = clone(config)
         npc_data.unit = npc_data.unit.."_npc"
         w_self[config.id .. "_npc"] = npc_data
     end)
