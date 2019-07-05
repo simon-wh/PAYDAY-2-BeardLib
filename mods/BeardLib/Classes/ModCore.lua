@@ -142,39 +142,8 @@ function ModCore:init_modules()
 		return a_ok and not b_ok
 	end)
 
-    for i, module_tbl in ipairs(self._config) do
-        if type(module_tbl) == "table" then
-            local meta = module_tbl._meta
-            if (not self._disabled or (not self._config.no_disabled_updates and meta == updates)) and not table.contains(self._ignored_modules, meta) then
-                local node_class = BeardLib.modules[meta]
-
-                if not node_class and module_tbl._force_search then
-                    node_class = CoreSerialize.string_to_classtable(meta)
-                end
-
-                if node_class then
-                    local success, node_obj, valid = pcall(function() return node_class:new(self, module_tbl) end)
-                    if success then
-                        if valid == false then
-                            self:log("Module with name %s does not contain a valid config. See above for details", node_obj._name)
-                        else
-                            if not node_obj._loose or node_obj._name ~= node_obj.type_name then
-                                if self[node_obj._name] then
-                                    self:log("The name of module: %s already exists in the mod table, please make sure this is a unique name!", node_obj._name)
-                                end
-
-                                self[node_obj._name] = node_obj
-                            end
-                            table.insert(self._modules, node_obj)
-                        end
-                    else
-                        self:log("[ERROR] An error occured on initilization of module: %s. Error:\n%s", meta, tostring(node_obj))
-                    end
-                elseif not self._config.ignore_errors then
-                    self:log("[ERROR] Unable to find module with key %s", meta)
-                end
-            end
-        end
+    for _, module_tbl in ipairs(self._config) do
+        self:AddModule(module_tbl)
     end
 
 	if self._auto_post_init then
@@ -185,6 +154,41 @@ function ModCore:init_modules()
         rawset( _G, self.global, nil)
     end
     self.modules_initialized = true
+end
+
+function ModCore:AddModule(module_tbl)
+    if type(module_tbl) == "table" then
+        local meta = module_tbl._meta
+        if (not self._disabled or (not self._config.no_disabled_updates and meta == updates)) and not table.contains(self._ignored_modules, meta) then
+            local node_class = BeardLib.modules[meta]
+
+            if not node_class and module_tbl._force_search then
+                node_class = CoreSerialize.string_to_classtable(meta)
+            end
+
+            if node_class then
+                local success, node_obj, valid = pcall(function() return node_class:new(self, module_tbl) end)
+                if success then
+                    if valid == false then
+                        self:log("Module with name %s does not contain a valid config. See above for details", node_obj._name)
+                    else
+                        if not node_obj._loose or node_obj._name ~= node_obj.type_name then
+                            if self[node_obj._name] then
+                                self:log("The name of module: %s already exists in the mod table, please make sure this is a unique name!", node_obj._name)
+                            end
+
+                            self[node_obj._name] = node_obj
+                        end
+                        table.insert(self._modules, node_obj)
+                    end
+                else
+                    self:log("[ERROR] An error occured on initilization of module: %s. Error:\n%s", meta, tostring(node_obj))
+                end
+            elseif not self._config.ignore_errors then
+                self:log("[ERROR] Unable to find module with key %s", meta)
+            end
+        end
+    end
 end
 
 function ModCore:GetRealFilePath(path, lookup_tbl)
