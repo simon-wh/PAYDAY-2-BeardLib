@@ -30,7 +30,10 @@ function ModCore:init(config_path, load_modules)
 	end
 	
 	self:LoadConfigFile(config_path)
-	table.insert(BeardLib.Mods, self)
+    table.insert(BeardLib.Mods, self)
+    if load_modules == nil or load_modules then
+        self:pre_init_modules()
+    end
 end
 
 function ModCore:post_init(ignored_modules)
@@ -104,11 +107,9 @@ function ModCore:ModError(...)
     self:ForceDisable()
 end
 
-function ModCore:pre_init_modules(load_modules)
+function ModCore:pre_init_modules()
 	if self._config and not self._disabled then
-		if load_modules == nil or load_modules then
-			self:init_modules()
-        end
+		self:init_modules()
 	end
 end
 

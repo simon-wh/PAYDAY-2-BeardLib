@@ -37,7 +37,6 @@ function CustomAchievementMenu:init()
 		layer = 1500,
 		use_default_close_key = true,
 		background_blur = true,
-		auto_foreground = true,
 		accent_color = accent_color,
 		inherit_values = {
 			background_color = Color.transparent,
@@ -51,7 +50,7 @@ function CustomAchievementMenu:init()
 end
 
 function CustomAchievementMenu:InitPanels(parent)
-	self._header = parent:Grid({background_color = self._menu.accent_color, h = 32})
+	self._header = parent:Grid({background_color = self._menu.accent_color, auto_foreground = true, h = 32})
 	self._account_progression = parent:Grid({
 		background_color = Color.black:with_alpha(0.75), 
 		h = 120, 
@@ -308,8 +307,8 @@ function CustomAchievementMenu:DisplayAchievementsFromPackage(package)
 			texture = "guis/textures/checkmark",
 			w = 48,
 			h = 48,
+			layer = 999,
 			offset = 0,
-			layer = 10,
 			visible = false,
 			img_color = Color.green,
 		})
@@ -317,14 +316,16 @@ function CustomAchievementMenu:DisplayAchievementsFromPackage(package)
 		local achievement_button = panel:Button({
 			h = 48,
 			w = 442,
-			text = achievement:GetName(),
+			text = false,
 			on_callback = ClassClbk(self, "DisplayAchievementDetails", achievement)
 		})
+		
+		achievement_button:QuickText(achievement:GetName())
 
 		achievement_button:Image({
 			img_color = Color(achievement:GetRankColor()),
 			texture = "guis/textures/achievement_trophy_white",
-			position = "RightCentery",
+			position = "RightTop",
 			h = 24,
 			w = 24,
 		})
@@ -334,14 +335,9 @@ function CustomAchievementMenu:DisplayAchievementsFromPackage(package)
 				text = managers.localization:to_upper_text("beardlib_achieves_unlocked", {time = os.date('%d/%m/%Y @ %H:%M:%S', achievement:GetUnlockTimestamp())}),
 				font_size = 14,
 				size_by_text = true,
-				position = function(item)
-					if alive(achievement_name) then
-						item:SetXY(achievement_name:LeftBottom())
-					end
-				end,
+				offset_y = 1,
 				foreground = Color.white:with_alpha(0.5)
 			})
-			
 			unlocked_checkmark:SetVisible(true)
 		elseif not achievement:IsUnlocked() and achievement:HasAmountValue() then
 			local progress = achievement:CurrentAmountValue() / achievement:AmountValue()
@@ -351,7 +347,6 @@ function CustomAchievementMenu:DisplayAchievementsFromPackage(package)
 				w = achievement_button:Panel():w(),
 				y = achievement_button:Panel():h() - 16,
 				back_color = Color(255, 60, 60, 65) / 255,
-				layer = 5
 			}, {
 				font = "fonts/font_medium_mf",
 				font_size = 16
