@@ -33,7 +33,7 @@ Hooks:PostHook(BLTNotificationsGui, "_setup", "BeardLibModsManagerSetup", functi
         x = logo:right() - 8
     })
 
-    self._beardlib_updates:text({
+    self._beardlib_updates_count = self._beardlib_updates:text({
         name = "UpdatesCount",
         font_size = 16,
         font = tweak_data.menu.pd2_medium_font,
@@ -42,7 +42,8 @@ Hooks:PostHook(BLTNotificationsGui, "_setup", "BeardLibModsManagerSetup", functi
         text = "0",
         align = "center",
         vertical = "center"
-    }):set_center(icon:center())
+    })
+    self._beardlib_updates_count:set_center(icon:center())
     self._beardlib_achievements = self._beardlib_panel:bitmap({
         name = "CustomAchievments",
         texture = "guis/textures/achievement_trophy_white",        
@@ -60,9 +61,12 @@ end)
 
 Hooks:PostHook(BLTNotificationsGui, "update", "BeardLibModsManagerUpdate", function(self)
     if alive(self._beardlib_updates) then
-        local count = self._beardlib_updates:child("UpdatesCount")
-        if alive(count) then
-            count:set_text(#BeardLib.managers.mods_menu._waiting_for_update)
+        local updates = #BeardLib.managers.mods_menu._waiting_for_update
+        if alive(self._beardlib_updates_count) and tonumber(self._beardlib_updates_count:text()) ~= updates then
+            self._beardlib_updates_count:set_text(updates)
+        end
+        if alive(self._panel) and alive(self._beardlib_panel) then
+            self._beardlib_panel:set_y(self._panel:y()-4)
         end
     end
 end)
