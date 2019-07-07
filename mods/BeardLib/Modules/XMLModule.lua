@@ -11,7 +11,7 @@ function XMLModule:Load()
     local file_path = self._mod:GetRealFilePath(Path:Combine(self._mod.ModPath, self._config.path))
     self._loaded_config = FileIO:ReadScriptData(file_path, self._config.file_type or "custom_xml", self._config.clean_file)
 
-    local order = self._config.load_first or load_first
+    local order = self._loaded_config.load_first or load_first
 
     table.sort(self._loaded_config, function(a,b)
 		local a_ok = type(a) == "table" and order[a._meta] or false
