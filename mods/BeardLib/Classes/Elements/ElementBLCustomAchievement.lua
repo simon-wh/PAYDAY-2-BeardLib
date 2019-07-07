@@ -38,8 +38,8 @@ function ElementBLCustomAchievement:on_executed(instigator)
 
         if award_achievement then
             local package = CustomAchievementPackage:new(self._values.package_id)
-            local achievement = package:_achievement(self._values.achievement_id)
-            achievement:_unlock()
+            local achievement = package:Achievement(self._values.achievement_id)
+            achievement:Unlock()
         end
     else
         local increase_achievement_amount = true
@@ -65,8 +65,8 @@ function ElementBLCustomAchievement:on_executed(instigator)
 
         if increase_achievement_amount then
             local package = CustomAchievementPackage:new(self._values.package_id)
-            local achievement = package:_achievement(self._values.achievement_id)
-            achievement:_increase_amount(self._values.amount_increase)
+            local achievement = package:Achievement(self._values.achievement_id)
+            achievement:IncreaseAmount(self._values.amount_increase)
         end
     end
 end
