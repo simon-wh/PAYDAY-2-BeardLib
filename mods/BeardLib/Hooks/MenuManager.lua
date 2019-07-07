@@ -64,11 +64,13 @@ function MenuCallbackHandler:start_job(job_data)
     	Global.game_settings.mission = managers.job:current_mission()
     	Global.game_settings.world_setting = managers.job:current_world_setting()
     	Global.game_settings.difficulty = job_data.difficulty
+        Global.game_settings.one_down = job_data.one_down
     	local matchmake_attributes = self:get_matchmake_attributes()
     	if Network:is_server() then
     		local job_id_index = tweak_data.narrative:get_index_from_job_id(managers.job:current_job_id())
     		local level_id_index = tweak_data.levels:get_index_from_level_id(Global.game_settings.level_id)
     		local difficulty_index = tweak_data:difficulty_to_index(Global.game_settings.difficulty)
+            local one_down = Global.game_settings.one_down
     		--managers.network:session():send_to_peers("sync_game_settings", job_id_index, level_id_index, difficulty_index)
             sync_game_settings()
     		managers.network.matchmake:set_server_attributes(matchmake_attributes)
