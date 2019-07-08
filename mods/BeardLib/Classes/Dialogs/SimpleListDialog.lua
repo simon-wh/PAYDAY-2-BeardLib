@@ -31,6 +31,7 @@ function SimpleListDialog:_Show(params)
     self._filter = {}
     self._case_sensitive = NotNil(params.case_sensitive, false)
     self._limit = NotNil(params.limit, true)
+    self._max_items = params.max_items or self.MAX_ITEMS
     self._list = params.list
     local s = self._menu.size
     local bs = s + self._menu:OffsetX()
