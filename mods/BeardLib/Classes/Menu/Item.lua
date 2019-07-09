@@ -248,7 +248,8 @@ function Item:WorkParams(params)
 	self:WorkParam("delay_align_items")
 	
 	self:WorkParam("click_btn", ids_0)
-
+	self:WorkParam("fit_text")
+	
 	--Specific items
 	self:WorkParam("wheel_control")
 	self:WorkParam("floats")
@@ -260,7 +261,9 @@ function Item:WorkParams(params)
 	self:WorkParam("items_localized", self.localized)
 	self:WorkParam("items_uppercase")
 	self:WorkParam("items_lowercase")
+	self:WorkParam("items_pretty")
 	self:WorkParam("bg_callbacks")
+	self:WorkParam("no_slide")
 	
     if not self.MENU then
         self:WorkParam("align_method", "grid_from_right")

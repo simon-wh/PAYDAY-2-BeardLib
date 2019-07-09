@@ -10,7 +10,8 @@ function TextBox:Init()
     end
 	self._textbox = BeardLib.Items.TextBoxBase:new(self, {
         panel = self.panel,
-        lines = self.lines,
+		lines = self.lines,
+		fit_text = self.fit_text,
 		focus_mode = self.focus_mode,
 		auto_focus = self.auto_focus,
         line_color = self.line_color or self.highlight_color,
@@ -19,7 +20,7 @@ function TextBox:Init()
 	})
 	self.auto_focus = nil
     self.value = self.value or ""
-    self._textbox:PostInit()
+	self._textbox:PostInit()
 end
 
 function TextBox:TextBoxSetValue(value, run_callback, reset_selection)

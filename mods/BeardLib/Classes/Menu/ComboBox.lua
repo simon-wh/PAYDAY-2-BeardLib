@@ -71,6 +71,11 @@ function ComboBox:Append(item)
     self:RefreshList()
 end
 
+function ComboBox:Prepend(item)
+    table.insert(self.items, 1, item)
+    self:RefreshList()
+end
+
 function ComboBox:SetItems(items)
     self.items = items or {}
     self:RefreshList()
