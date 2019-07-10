@@ -299,19 +299,10 @@ function CustomAchievementMenu:DisplayAchievementsFromPackage(package)
 				texture = achievement:GetIcon(),
 				h = 48,
 				w = 48,
+				layer = -1,
 				highlight_color = Color.transparent
 			})
 		end
-
-		local unlocked_checkmark = icon_panel:Image({
-			texture = "guis/textures/checkmark",
-			w = 48,
-			h = 48,
-			layer = 999,
-			offset = 0,
-			visible = false,
-			img_color = Color.green,
-		})
 
 		local achievement_button = panel:Button({
 			h = 48,
@@ -320,7 +311,7 @@ function CustomAchievementMenu:DisplayAchievementsFromPackage(package)
 			on_callback = ClassClbk(self, "DisplayAchievementDetails", achievement)
 		})
 		
-		achievement_button:QuickText(achievement:GetName())
+		local achievement_name = achievement_button:QuickText(achievement:GetName(), { foreground = achievement:IsUnlocked() and Color.green or Color.white} )
 
 		achievement_button:Image({
 			img_color = Color(achievement:GetRankColor()),
@@ -338,7 +329,6 @@ function CustomAchievementMenu:DisplayAchievementsFromPackage(package)
 				offset_y = 1,
 				foreground = Color.white:with_alpha(0.5)
 			})
-			unlocked_checkmark:SetVisible(true)
 		elseif not achievement:IsUnlocked() and achievement:HasAmountValue() then
 			local progress = achievement:CurrentAmountValue() / achievement:AmountValue()
 
