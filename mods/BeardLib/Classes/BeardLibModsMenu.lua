@@ -208,7 +208,7 @@ function BeardLibModsMenu:AddMod(mod, framework)
         color = color:contrast():with_alpha(0.25),
         w = 0,
     })
-    if mod.update_module_data ~= nil then
+    if mod.update_module_data ~= nil and mod.update_module_data.provider and mod.update_module_data.provider.page_url then
         mod_item:Button({
             name = "View",
             on_callback = ClassClbk(self, "ViewMod", mod),

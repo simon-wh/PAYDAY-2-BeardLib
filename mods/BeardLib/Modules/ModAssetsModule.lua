@@ -58,7 +58,7 @@ function ModAssetsModule:Load()
     
     
     self._update_manager_id = self._mod.Name .. self._name
-    local download_url = self._config.downlad_url or (self._config.custom_provider and self._config.custom_provider.download_url) or nil
+    local download_url = self._config.download_url or (self._config.custom_provider and self._config.custom_provider.download_url) or nil
     self._mod.update_module_data = {
         id = (self._config.is_standalone ~= false) and self.id,
         module = self,
@@ -99,11 +99,7 @@ function ModAssetsModule:RetrieveCurrentVersion()
     end
 end
 
-function ModAssetsModule:CheckVersion(force)
-    if not force and not BeardLib.managers.asset_update:CheckUpdateStatus(self._update_manager_id) then
-        return
-    end
-
+function ModAssetsModule:CheckVersion()
     if self.provider.check_func then
         self.provider.check_func(self, force)
     else
@@ -187,11 +183,11 @@ end
 function ModAssetsModule:_DownloadAssets(data)
     local download_url = ModCore:GetRealFilePath(self.provider.download_url, data or self)
     self:log("Downloading assets from url: %s", download_url)
-    dohttpreq(download_url, ClassClbk(self, "StoreDownloadedAssets", false), self._mod and ClassClbk(BeardLib.managers.mods_menu, "SetModProgress", self._mod) or nil)
+    dohttpreq(download_url, ClassClbk(self, "StoreDownloadedAssets"), self._mod and ClassClbk(BeardLib.managers.mods_menu, "SetModProgress", self._mod) or nil)
 end
 
-function ModAssetsModule:StoreDownloadedAssets(config, data, id)
-    config = config or self._config
+function ModAssetsModule:StoreDownloadedAssets(data, id)
+    local config = self._config
     local mods_menu = BeardLib.managers.mods_menu
     local coroutine = mods_menu._menu._ws:panel():panel({})
     coroutine:animate(function()
@@ -313,7 +309,9 @@ function ModAssetsModule:InitializeNode(node)
 end
 
 DownloadCustomMap = DownloadCustomMap or class(ModAssetsModule)
-function DownloadCustomMap:init() end
+function DownloadCustomMap:init()
+    self._config = {custom_install_directory = BeardLib.config.maps_dir}
+end
 
 function DownloadCustomMap:DownloadFailed()
     BeardLibEditor.managers.Dialog:Show({title = managers.localization:text("mod_assets_error"), message = managers.localization:text("custom_map_failed_download"), force = true})
@@ -325,9 +323,8 @@ end
 function DownloadCustomMap:_DownloadAssets(data)
     local download_url = ModCore:GetRealFilePath(self.provider.download_url, data or self)
     local dialog = BeardLib.managers.dialog.download
-    dialog:Show({title = managers.localization:text("beardlib_downloading")..self.level_name or "No Map Name", force = true})				
-    dohttpreq(download_url, ClassClbk(self, "StoreDownloadedAssets", {
-        custom_install_directory = BeardLib.config.maps_dir, 
+    dialog:Show({title = managers.localization:text("beardlib_downloading")..self.level_name or "No Map Name", force = true})
+    table.merge(self._config, {
         done_callback = self.done_map_download,
         install = ClassClbk(dialog, "SetInstalling"),
         failed = function()
@@ -337,7 +334,8 @@ function DownloadCustomMap:_DownloadAssets(data)
             dialog:SetFailed()
         end,
         finish = ClassClbk(dialog, "SetFinished"),
-    }), ClassClbk(dialog, "SetProgress"))
+    })
+    dohttpreq(download_url, ClassClbk(self, "StoreDownloadedAssets"), ClassClbk(dialog, "SetProgress"))
 end
 
 BeardLib:RegisterModule(ModAssetsModule.type_name, ModAssetsModule)
