@@ -99,7 +99,11 @@ function ModAssetsModule:RetrieveCurrentVersion()
     end
 end
 
-function ModAssetsModule:CheckVersion()
+function ModAssetsModule:CheckVersion(force)
+    if not force and not BeardLib.managers.asset_update:CheckUpdateStatus(self._update_manager_id) then
+        return
+    end
+
     if self.provider.check_func then
         self.provider.check_func(self, force)
     else
