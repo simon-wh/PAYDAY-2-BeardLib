@@ -928,11 +928,12 @@ function Item:_SetText(text)
 		local offset_w = offset_x * 2
 		local offset_h = offset_y * 2		
 		title:set_position(offset_x, offset_y)
-        local _,_,w,h = self.title:text_rect()
+		title:set_w(self.panel:w() - offset_w)
+        local _,_,w,h = title:text_rect()
         if self.size_by_text then
             title:set_h(math.clamp(h, self.min_height and self.min_height - offset_h or h, self.max_height and self.max_height - offset_h or h))
 			local new_w = w + offset_w + (self.type_name == "Toggle" and self.size or 0)
-			local new_h = self.title:bottom() + offset_y
+			local new_h = title:bottom() + offset_y
             self.panel:set_size(math.clamp(new_w, self.min_width or 0, self.max_width or new_w), math.clamp(new_h, self.min_height or 0, self.max_height or new_h))
             self.w, self.h = self.panel:size()
             title:set_w(math.clamp(w, self.min_width and self.min_width - offset_w or w, self.max_width and self.max_width - offset_w or w))
