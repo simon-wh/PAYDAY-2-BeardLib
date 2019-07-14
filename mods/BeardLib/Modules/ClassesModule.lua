@@ -1,4 +1,4 @@
-ClassesModule = ClassesModule or class(BasicModuleBase)
+ClassesModule = ClassesModule or class(ModuleBase)
 ClassesModule.type_name = "Classes"
 
 function ClassesModule:Load(config, prev_dir)

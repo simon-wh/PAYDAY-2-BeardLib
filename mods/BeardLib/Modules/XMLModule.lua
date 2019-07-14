@@ -1,4 +1,4 @@
-XMLModule = XMLModule or class(BasicModuleBase)
+XMLModule = XMLModule or class(ModuleBase)
 XMLModule.type_name = "XML"
 XMLModule.required_params = {"path"}
 

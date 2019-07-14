@@ -1,4 +1,4 @@
-DLCModule = DLCModule or class(BasicModuleBase)
+DLCModule = DLCModule or class(ModuleBase)
 DLCModule.type_name = "DLC"
 
 function DLCModule:init(...)

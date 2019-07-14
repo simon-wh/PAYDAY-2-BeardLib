@@ -1,4 +1,4 @@
-HooksModule = HooksModule or class(BasicModuleBase)
+HooksModule = HooksModule or class(ModuleBase)
 HooksModule.type_name = "Hooks"
 
 local PRE = "pre"

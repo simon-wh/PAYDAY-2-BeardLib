@@ -1,4 +1,4 @@
-AddFilesModule = AddFilesModule or class(BasicModuleBase)
+AddFilesModule = AddFilesModule or class(ModuleBase)
 AddFilesModule.type_name = "AddFiles"
 
 function AddFilesModule:Load()

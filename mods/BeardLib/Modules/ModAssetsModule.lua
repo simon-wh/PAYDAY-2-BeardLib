@@ -1,4 +1,4 @@
-ModAssetsModule = ModAssetsModule or class(BasicModuleBase)
+ModAssetsModule = ModAssetsModule or class(ModuleBase)
 ModAssetsModule.type_name = "AssetUpdates"
 ModAssetsModule._default_version_file = "version.txt"
 ModAssetsModule._providers = {}

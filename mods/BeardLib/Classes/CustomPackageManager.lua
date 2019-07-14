@@ -41,7 +41,7 @@ function C:LoadPackage(id)
     end
 end
 
-function C:UnLoadPackage(id)
+function C:UnloadPackage(id)
     id = id:key()
     if self.custom_packages[id] then
         local pck = self.custom_packages[id]

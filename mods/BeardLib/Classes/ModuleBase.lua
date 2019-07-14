@@ -1,6 +1,8 @@
 ModuleBase = ModuleBase or class()
 ModuleBase.type_name = "ModuleBase"
 ModuleBase.required_params = {}
+ModuleBase.auto_load = true
+
 function ModuleBase:init(core_mod, config)
     self._mod = core_mod
     self._name = config.name or self.type_name
@@ -25,7 +27,15 @@ function ModuleBase:init(core_mod, config)
         end
     end
 
+    if self.auto_load then
+        self:Load()
+    end
+
     return true
+end
+
+function ModuleBase:Load()
+
 end
 
 function ModuleBase:post_init()
@@ -57,6 +67,7 @@ ItemModuleBase.required_params = {"id"}
 ItemModuleBase.clean_table = {}
 ItemModuleBase.defaults = {global_value= "mod", dlc= "mod"}
 ItemModuleBase._loose = true
+ItemModuleBase.auto_load = false
 local remove_last = function(str)
     local tbl = string.split(str, "%.")
 
@@ -112,14 +123,3 @@ function ItemModuleBase:DoRegisterHook(...)
 	end
 	self:RegisterHook(...)
 end
-
-BasicModuleBase = BasicModuleBase or class(ModuleBase)
-function BasicModuleBase:init(...)
-    if not BasicModuleBase.super.init(self, ...) then
-        return false
-    end
-    self:Load()
-    return true
-end
-
-function BasicModuleBase:Load() end

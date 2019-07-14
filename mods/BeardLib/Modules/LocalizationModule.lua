@@ -1,4 +1,4 @@
-LocalizationModule = LocalizationModule or class(BasicModuleBase)
+LocalizationModule = LocalizationModule or class(ModuleBase)
 LocalizationModule.type_name = "Localization"
 
 function LocalizationModule:Load()

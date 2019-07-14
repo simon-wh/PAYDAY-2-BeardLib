@@ -1,5 +1,6 @@
 OptionModule = OptionModule or class(ModuleBase)
 OptionModule.type_name = "Options"
+OptionModule.auto_load = false
 
 function OptionModule:init(...)
     self.required_params = table.add(clone(self.required_params), {"options"})

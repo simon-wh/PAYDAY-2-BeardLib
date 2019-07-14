@@ -1,6 +1,7 @@
 PackageModule = PackageModule or class(ModuleBase)
 PackageModule.type_name = "Package"
 PackageModule._loose = true
+PackageModule.auto_load = false
 
 function PackageModule:init(...)
     self.required_params = table.add(clone(self.required_params), {"id"})
@@ -23,7 +24,7 @@ function PackageModule:Load()
 end
 
 function PackageModule:Unload()
-    CustomPackageManager:UnLoadPackage(self._id)
+    CustomPackageManager:UnloadPackage(self._id)
 end
 
 function PackageModule:loaded()

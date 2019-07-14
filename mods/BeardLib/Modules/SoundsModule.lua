@@ -1,5 +1,7 @@
 SoundsModule = SoundsModule or class(ModuleBase)
 SoundsModule.type_id = "Sounds"
+SoundsModule.auto_load = false
+
 function SoundsModule:init(...)
     if not SoundsModule.super.init(self, ...) then
         return false

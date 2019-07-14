@@ -1,4 +1,4 @@
-MenuModule = MenuModule or class(BasicModuleBase)
+MenuModule = MenuModule or class(ModuleBase)
 MenuModule.type_name = "Menu"
 
 function MenuModule:init(...)
@@ -8,11 +8,11 @@ end
 
 function MenuModule:Load()
     Hooks:Add("MenuManagerSetupCustomMenus", self._mod.Name .. "Build" .. self._name .. "Menu", function(self_menu, nodes)
-        self:build_node(self._config.menu, nodes.lua_mod_options_menu or nodes.blt_options)
+        self:BuildNode(self._config.menu or self._config, nodes.lua_mod_options_menu or nodes.blt_options)
     end)
 end
 
-function MenuModule:build_node_items(node, data)
+function MenuModule:BuildNodeItems(node, data)
     for i, sub_item in ipairs(data) do
         if sub_item._meta == "sub_menu" or sub_item._meta == "menu" then
             if sub_item.key then
@@ -22,7 +22,7 @@ function MenuModule:build_node_items(node, data)
                     self:log("[ERROR] Cannot find module of id '%s' in mod", sub_item.key)
                 end
             else
-                self:build_node(sub_item, node)
+                self:BuildNode(sub_item, node)
             end
         elseif sub_item._meta == "item_group" then
             if sub_item.key then
@@ -50,7 +50,7 @@ function MenuModule:CreateDivider(parent_node, tbl)
     }, merge_data))
 end
 
-function MenuModule:build_node(node_data, parent_node)
+function MenuModule:BuildNode(node_data, parent_node)
     parent_node = node_data.parent_node and MenuHelperPlus:GetNode(node_data.parent_node) or parent_node
     local base_name = node_data.name or self._mod.Name .. self._name
     local menu_name = node_data.node_name or base_name .. "Node"

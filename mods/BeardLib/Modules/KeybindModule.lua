@@ -1,4 +1,4 @@
-KeybindModule = KeybindModule or class(BasicModuleBase)
+KeybindModule = KeybindModule or class(ModuleBase)
 KeybindModule.type_name = "Keybind"
 
 function KeybindModule:Load()

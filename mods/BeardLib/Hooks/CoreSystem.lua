@@ -104,7 +104,7 @@ overwrite_meta_function(PackageManager, "unload", function(self, pck)
 	end
 
 	if CustomPackageManager:HasPackage(pck) then
-		CustomPackageManager:UnLoadPackage(pck)
+		CustomPackageManager:UnloadPackage(pck)
 		return
 	end
 
