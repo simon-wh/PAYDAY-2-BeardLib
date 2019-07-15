@@ -27,6 +27,10 @@ function PackageModule:Unload()
     CustomPackageManager:UnloadPackage(self._id)
 end
 
+function PackageModule:Loaded()
+    return CustomPackageManager:PackageLoaded(self._id)
+end
+
 function PackageModule:loaded()
     return CustomPackageManager:PackageLoaded(self._id)
 end

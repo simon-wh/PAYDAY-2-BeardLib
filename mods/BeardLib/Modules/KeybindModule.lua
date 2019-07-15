@@ -7,6 +7,7 @@ function KeybindModule:Load()
 		return
 	end
 
+	self._config.keybind_id = self._config.keybind_id or self._config.id
 	local config = table.merge({run_in_menu = true, run_in_game = true}, self._config)
 	
 	if BLT and BLT.Keybinds then

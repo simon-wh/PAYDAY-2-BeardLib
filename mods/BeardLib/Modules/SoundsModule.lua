@@ -47,6 +47,8 @@ function SoundsModule:ReadSounds(data, prev_dir)
 	local stop_id = data.stop_id
 	local wait = data.wait
 	local volume = data.volume
+	local prefixes_strict = data.prefixes_strict
+	
 
 	if prefixes then
 		prefixes._meta = nil
@@ -65,6 +67,7 @@ function SoundsModule:ReadSounds(data, prev_dir)
 				prefixes_strict = prefixes_strict,
 				dont_store_float = dont_store_float,
 				auto_pause = auto_pause,
+				prefixes_strict = prefixes_strict,
 				stop_id = stop_id,
 				relative = relative,
 				wait = wait,

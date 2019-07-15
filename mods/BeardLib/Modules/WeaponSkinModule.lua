@@ -65,15 +65,10 @@ function WeaponSkinModule:RegisterHook()
 
         local config = self._config
 
-        bm_self.weapon_skins[config.id] = {
+        bm_self.weapon_skins[config.id] = table.merge({
             name_id = config.name,
             desc_id = config.desc,
-            weapon_id = config.weapon_id,
-            weapon_ids = config.weapon_ids, -- Ovk are a bunch of retards sometimes
-            rarity = config.rarity,
             is_a_unlockable = true,
-            custom = true,
-            locked = config.locked,
             unique_name_id = config.unique_name,
             texture_bundle_folder = self._config.id,
             bonus = "recoil_p1", -- Aint gonna code a "statboost" version cause nobody would care for one. It's just to fill the table.
@@ -89,8 +84,9 @@ function WeaponSkinModule:RegisterHook()
             cubemap_pattern_control = self._skin_design.cubemap_pattern_control,
             types = self._skin_design.types,
             parts = self._skin_design.parts,
-            default_blueprint = self._skin_attachments
-        }
+            default_blueprint = self._skin_attachments,
+            custom = true
+        }, config)
         --self:log("Added skin '%s' to the weapon '%s'", config.id, config.weapon_id)
     end)
 end
