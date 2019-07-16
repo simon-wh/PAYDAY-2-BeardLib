@@ -63,7 +63,7 @@ function LevelModule:Load()
 
     if self._config.script_data_mods then
         local script_mods = ScriptReplacementsModule:new(self._mod, self._config.script_data_mods)
-        script_mods:post_init()
+        script_mods:PostInit()
 	end
 
     if self._config.hooks then

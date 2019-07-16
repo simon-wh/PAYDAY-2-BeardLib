@@ -28,15 +28,15 @@ function OptionModule:init(...)
     return true
 end
 
-function OptionModule:post_init()
+function OptionModule:PostInit()
 	if self._post_init_complete then
         return false
 	end
-	self:init_options()
-	OptionModule.super.post_init(self)
+	self:InitFirstOptions()
+	OptionModule.super.PostInit(self)
 end
 
-function OptionModule:init_options()
+function OptionModule:InitFirstOptions()
 	if self._options_init then
 		return
 	end

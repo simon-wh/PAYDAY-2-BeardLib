@@ -38,7 +38,7 @@ function self:Init()
 		if BeardLib.modules[name] then
 			local module = BeardLib.modules[name]:new(self, config)
 			self[module._name] = module
-			module:post_init()
+			module:PostInit()
 		end
 	end
 

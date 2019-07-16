@@ -3,8 +3,8 @@ ModuleBase.type_name = "ModuleBase"
 ModuleBase.required_params = {}
 ModuleBase.auto_load = true
 
-function ModuleBase:init(core_mod, config)
-    self._mod = core_mod
+function ModuleBase:init(mod, config)
+    self._mod = mod
     self._name = config.name or self.type_name
     if config.file ~= nil then
         local file_path = self._mod:GetRealFilePath(Path:Combine(self._mod.ModPath, config.file))
@@ -38,7 +38,7 @@ function ModuleBase:Load()
 
 end
 
-function ModuleBase:post_init()
+function ModuleBase:PostInit()
 	local post_init = self._config.post_init_clbk or self._config.post_init
     if post_init then
         local clbk = self._mod:StringToCallback(post_init)
@@ -61,6 +61,9 @@ function ModuleBase:GetPath(directory, prev_dir)
 	end
 end
 
+
+ModuleBase.post_init = ModuleBase.PostInit
+
 ItemModuleBase = ItemModuleBase or class(ModuleBase)
 ItemModuleBase.type_name = "ItemModuleBase"
 ItemModuleBase.required_params = {"id"}
@@ -74,15 +77,15 @@ local remove_last = function(str)
     return table.remove(tbl), #tbl > 0 and table.concat(tbl, ".")
 end
 
-function ItemModuleBase:init(core_mod, config)
-    if not ModuleBase.init(self, core_mod, config) then
+function ItemModuleBase:init(mod, config)
+    if not ModuleBase.init(self, mod, config) then
         return false
     end
-    self:do_clean_table(self._config)
+    self:DoCleanTable(self._config)
     return true
 end
 
-function ItemModuleBase:do_clean_table(config)
+function ItemModuleBase:DoCleanTable(config)
     for _, clean in pairs(self.clean_table) do
         local i, search_string = remove_last(clean.param)
         local tbl = search_string and BeardLib.Utils:StringToTable(search_string, config, true) or config
@@ -115,11 +118,18 @@ end
 function ItemModuleBase:RegisterHook() end
 
 function ItemModuleBase:DoRegisterHook(...) 
-	if self._config.register_hook_clbk then
-        local clbk = self._mod:StringToCallback(self._config.register_hook_clbk)
+    local register_hook = self._config.register_hook or self._config.register_hook_clbk
+	if register_hook then
+        local clbk = self._mod:StringToCallback(register_hook)
         if clbk and not clbk() then
             return
         end
 	end
-	self:RegisterHook(...)
+    self:RegisterHook(...)
+    if self._config.post_register_hook then
+        local clbk = self._mod:StringToCallback(self._config.post_register_hook)
+        if clbk and not clbk() then
+            return
+        end
+	end
 end

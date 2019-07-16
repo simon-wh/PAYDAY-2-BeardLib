@@ -32,11 +32,11 @@ function ModCore:init(config_path, load_modules)
 	self:LoadConfigFile(config_path)
     table.insert(BeardLib.Mods, self)
     if load_modules == nil or load_modules then
-        self:pre_init_modules()
+        self:PreInitModules()
     end
 end
 
-function ModCore:post_init(ignored_modules)
+function ModCore:PostInit(ignored_modules)
     if self._post_init_done then
         return
 	end
@@ -47,7 +47,7 @@ function ModCore:post_init(ignored_modules)
 
 	for _, module in pairs(self._modules) do
         if (not ignored_modules or not table.contains(ignored_modules, module._name)) then
-            local success, err = pcall(function() module:post_init() end)
+            local success, err = pcall(function() module:PostInit() end)
 
             if not success then
                 self:log("[ERROR] An error occured on the post initialization of %s. Error:\n%s", module._name, tostring(err))
@@ -81,9 +81,8 @@ function ModCore:LoadConfigFile(path)
     self.Priority = tonumber(config.priority) or self.Priority
     
     if config.min_lib_ver and (config.min_lib_ver > BeardLib.Version) then
-        local ver = math.round_with_precision(tonumber(self._config.min_lib_ver), 4)
-        if self._config.notify_about_version ~= false then
-            log(debug.traceback())
+        local ver = math.round_with_precision(tonumber(config.min_lib_ver), 4)
+        if config.notify_about_version ~= false then
             self:ModError("The mod requires BeardLib version %s or higher in order to run.", tostring(ver))
         end
         self:ForceDisable()
@@ -107,9 +106,9 @@ function ModCore:ModError(...)
     self:ForceDisable()
 end
 
-function ModCore:pre_init_modules()
+function ModCore:PreInitModules()
 	if self._config and not self._disabled then
-		self:init_modules()
+		self:InitModules()
 	end
 end
 
@@ -120,7 +119,7 @@ local load_first = {
 
 local updates = "AssetUpdates"
 
-function ModCore:init_modules()
+function ModCore:InitModules()
     if self.modules_initialized then
         return
     end
@@ -148,7 +147,7 @@ function ModCore:init_modules()
     end
 
 	if self._auto_post_init then
-		self:post_init()
+		self:PostInit()
     end
     
     if self._disabled and self.global and _G[self.global] then
@@ -156,6 +155,7 @@ function ModCore:init_modules()
     end
     self.modules_initialized = true
 end
+
 
 function ModCore:AddModule(module_tbl)
     if type(module_tbl) == "table" then
@@ -273,3 +273,6 @@ function ModCore:Enabled() return not self._disabled end
 function ModCore:IsEnabled() return self:Enabled()end
 function ModCore:WasEnabledAtStart() return self:Enabled()end
 function ModCore:GetName() return self.Name end
+
+ModCore.post_init = ModCore.PostInit
+ModCore.init_modules = ModCore.InitModules

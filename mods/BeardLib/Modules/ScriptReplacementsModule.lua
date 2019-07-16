@@ -2,7 +2,7 @@ ScriptReplacementsModule = ScriptReplacementsModule or class(ModuleBase)
 ScriptReplacementsModule.type_name = "ScriptMods"
 ScriptReplacementsModule.auto_load = false
 
-function ScriptReplacementsModule:post_init()
+function ScriptReplacementsModule:PostInit()
 	self.ScriptDirectory = self._config.directory and Path:Combine(self._mod.ModPath, self._config.directory) or self._mod.ModPath
     for _, v in ipairs(self._config) do
         if v._meta == "mod" then
