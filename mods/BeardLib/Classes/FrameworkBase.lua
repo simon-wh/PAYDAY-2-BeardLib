@@ -50,7 +50,7 @@ function Framework:CheckModQueue(post, file)
 	end
 
 	for _, mod in pairs(load) do
-		mod:pre_init_modules(self.auto_init_modules)
+		mod:PreInitModules(self.auto_init_modules)
 	end
 
 	self._waiting_to_load = next_queue
@@ -95,7 +95,7 @@ function Framework:InitMods()
 	for _, mod in pairs(self._sorted_mods) do
 		local config = mod._config
 		if not config.post_hook and not config.pre_hook then
-			mod:pre_init_modules(self.auto_init_modules)
+			mod:PreInitModules(self.auto_init_modules)
 			self:log("Initialized Mod: %s", mod.ModPath)
 		end
 	end
