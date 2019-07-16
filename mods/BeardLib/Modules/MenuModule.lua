@@ -61,7 +61,7 @@ function MenuModule:BuildNode(node_data, parent_node)
         name = menu_name
     }, merge_data))
 
-    self:build_node_items(main_node, node_data)
+    self:BuildNodeItems(main_node, node_data)
 
     MenuHelperPlus:AddButton({
         id = base_name .. "Button",
