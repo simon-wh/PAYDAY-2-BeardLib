@@ -1,6 +1,5 @@
 core:import("CoreSerialize")
 ModCore = ModCore or class()
-ModCore._ignored_modules = {}
 ModCore._auto_post_init = true
 
 function ModCore:init(config_path, load_modules)
@@ -36,7 +35,7 @@ function ModCore:init(config_path, load_modules)
     end
 end
 
-function ModCore:PostInit(ignored_modules)
+function ModCore:PostInit()
     if self._post_init_done then
         return
 	end
@@ -46,12 +45,10 @@ function ModCore:PostInit(ignored_modules)
 	end
 
 	for _, module in pairs(self._modules) do
-        if (not ignored_modules or not table.contains(ignored_modules, module._name)) then
-            local success, err = pcall(function() module:PostInit() end)
+        local success, err = pcall(function() module:PostInit() end)
 
-            if not success then
-                self:log("[ERROR] An error occured on the post initialization of %s. Error:\n%s", module._name, tostring(err))
-            end
+        if not success then
+            self:log("[ERROR] An error occured on the post initialization of %s. Error:\n%s", module._name, tostring(err))
         end
     end
     
@@ -160,7 +157,7 @@ end
 function ModCore:AddModule(module_tbl)
     if type(module_tbl) == "table" then
         local meta = module_tbl._meta
-        if (not self._disabled or (not self._config.no_disabled_updates and meta == updates)) and not table.contains(self._ignored_modules, meta) then
+        if (not self._disabled or (not self._config.no_disabled_updates and meta == updates)) and not (self._config.ignored_modules and table.contains(self._config.ignored_modules, meta)) then
             local node_class = BeardLib.modules[meta]
 
             if not node_class and module_tbl._force_search then
@@ -204,7 +201,7 @@ function ModCore:log(str, ...)
     log("[" .. self.Name .. "] " .. string.format(str, ...))
 end
 
-function ModCore:StringToTable(str)
+function ModCore:StringToValue(str)
     if str == "self" then return self end
 
     if (string.find(str, "$")) then
@@ -218,10 +215,10 @@ function ModCore:StringToTable(str)
         global_tbl = self
     end
 
-    return BeardLib.Utils:StringToTable(str, global_tbl)
+    return BeardLib.Utils:StringToValue(str, global_tbl)
 end
 
-function ModCore:StringToCallback(str, self_tbl)	
+function ModCore:StringToCallback(str)	
 	local value = BeardLib.Utils:normalize_string_value(str)
 	if type(value) == "function" then
 		return value
@@ -230,19 +227,22 @@ function ModCore:StringToCallback(str, self_tbl)
 		local func_name = table.remove(split)
 		local global_tbl_name = split[1]
 
-		local global_tbl = self:StringToTable(global_tbl_name)
-		if global_tbl then
-			return callback(self_tbl or global_tbl, global_tbl, func_name)
-		else
+        local val = self:StringToValue(global_tbl_name)
+        local typ = type(val)
+		if val == "table" then
+			return ClassClbk(val, func_name)
+        elseif typ == "function" then
+            return val
+        else
 			return nil
 		end
 	end
 end
 
-function ModCore:RegisterHook(source_file, file, type)
+function ModCore:RegisterHook(source_file, file, pre)
 	local path = self:GetPath()
     local hook_file = Path:Combine(path, file)
-    local dest_tbl = type == "pre" and (_prehooks or (BLT and BLT.hook_tables.pre)) or (_posthooks or (BLT and BLT.hook_tables.post))
+    local dest_tbl = pre and (_prehooks or (BLT and BLT.hook_tables.pre)) or (_posthooks or (BLT and BLT.hook_tables.post))
 	if dest_tbl then
 		if FileIO:Exists(hook_file) then
 			local req_script = source_file:lower()
@@ -253,7 +253,7 @@ function ModCore:RegisterHook(source_file, file, type)
 				script = file
 			})
 		else
-			self:log("[ERROR] Failed reading hook file %s of type %s", tostring(hook_file), tostring(type or "post"))
+			self:log("[ERROR] Failed reading hook file %s of type %s", tostring(hook_file), tostring(pre and "pre" or "post"))
 		end
 	end
 end
@@ -267,6 +267,9 @@ function ModCore:Init() end
 function ModCore:GetPath() return self.ModPath end
 function ModCore:Disabled() return self._disabled end
 function ModCore:Enabled() return not self._disabled end
+function ModCore:Config() return not self._config end
+function ModCore:Priority() return not self.Priority end
+function ModCore:IsBLTMod() return self._blt_mod end
 
 --BLT Keybinds support:
 
@@ -276,3 +279,4 @@ function ModCore:GetName() return self.Name end
 
 ModCore.post_init = ModCore.PostInit
 ModCore.init_modules = ModCore.InitModules
+ModCore.StringToTable = ModCore.StringToValue

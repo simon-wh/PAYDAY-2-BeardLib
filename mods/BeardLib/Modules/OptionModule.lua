@@ -139,7 +139,7 @@ function OptionModule:InitOptions(tbl, option_tbl)
         if sub_tbl._meta then
             if sub_tbl._meta == "option" then
                 if sub_tbl.type == "multichoice" then
-                    sub_tbl.values = sub_tbl.values_tbl and self._mod:StringToTable(sub_tbl.values_tbl) or BeardLib.Utils:RemoveNonNumberIndexes(sub_tbl.values)
+                    sub_tbl.values = sub_tbl.values_tbl and self._mod:StringToValue(sub_tbl.values_tbl) or BeardLib.Utils:RemoveNonNumberIndexes(sub_tbl.values)
                 end
 
                 if sub_tbl.value_changed then
@@ -163,7 +163,7 @@ function OptionModule:InitOptions(tbl, option_tbl)
                 if not sub_tbl.not_pre_generated then
                     local tbl = sub_tbl.items and BeardLib.Utils:RemoveNonNumberIndexes(sub_tbl.items)
                     if sub_tbl.items_tbl then
-                        tbl = self._mod:StringToTable(sub_tbl.values_tbl)
+                        tbl = self._mod:StringToValue(sub_tbl.values_tbl)
                     elseif sub_tbl.populate_items then
                         local clbk = self._mod:StringToCallback(sub_tbl.populate_items)
                         tbl = assert(clbk)()

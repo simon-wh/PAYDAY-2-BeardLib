@@ -283,11 +283,12 @@ function Utils:normalize_string_value(value)
 	return value
 end
 
-function Utils:StringToTable(global_tbl_name, global_tbl, silent)
+
+function Utils:StringToValue(global_tbl_name, global_tbl, silent)
     local global_tbl = global_tbl or _G
     if string.find(global_tbl_name, "%.") then
         local global_tbl_split = string.split(global_tbl_name, "[.]")
-
+        
         for _, str in pairs(global_tbl_split) do
             global_tbl = rawget(global_tbl, str)
             if not global_tbl then
@@ -306,9 +307,11 @@ function Utils:StringToTable(global_tbl_name, global_tbl, silent)
             return nil
         end
     end
-
+    
     return global_tbl
 end
+
+Utils.StringToTable = Utils.StringToValue
 
 function Utils:RemoveAllSubTables(tbl)
     for i, sub in pairs(tbl) do

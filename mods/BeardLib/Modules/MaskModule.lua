@@ -2,7 +2,14 @@ MaskModule = MaskModule or class(ItemModuleBase)
 MaskModule.type_name = "Mask"
 
 function MaskModule:init(...)
-    self.clean_table = table.add(clone(self.clean_table), {{param = "pcs", action = "no_number_indexes"}})
+    self.clean_table = table.add(clone(self.clean_table), {
+        {param = "pcs", action = "no_number_indexes"}, 
+        {param = "offsets", action = function(tbl)
+            for _, v in pairs(tbl) do
+                v[2] = BeardLib.Utils:normalize_string_value(v[2])
+            end
+        end}
+    })
 	return MaskModule.super.init(self, ...)
 end
 
@@ -18,11 +25,12 @@ function MaskModule:RegisterHook()
             desc_id = "bm_msk_" .. self._config.id .. "_desc",
             dlc = self.defaults.dlc,
             pcs = {},
-			value = 0,
+            value = 0,
 			texture_bundle_folder = "mods",
             global_value = self.defaults.global_value,
             custom = true
         }, self._config.item or self._config)
+        data.unit = data.unit or "units/mods/masks/msk_"..self._id.."/msk_"..self._id
         bm_self.masks[self._config.id] = data
         if data.drop ~= false and data.dlc then
             TweakDataHelper:ModifyTweak({{

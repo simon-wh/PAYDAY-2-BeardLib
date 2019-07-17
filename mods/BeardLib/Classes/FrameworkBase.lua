@@ -65,13 +65,13 @@ end
 function Framework:FindMods()
 	local dirs = FileIO:GetFolders(self._directory)
     if dirs then
-        for _, dir in pairs(dirs) do
-            if not self._ignore_folders[dir] then
-                local p = path:CombineDir(self._directory, dir)
-                local main_file = path:Combine(p, self.main_file_name)
+        for _, folder_name in pairs(dirs) do
+            if not self._ignore_folders[folder_name] then
+                local directory = path:CombineDir(self._directory, folder_name)
+                local main_file = path:Combine(directory, self.main_file_name)
                 if FileIO:Exists(main_file) then
-					if not self._loaded_mods[dir] then
-                        self:LoadMod(dir, p, main_file)
+					if not self._loaded_mods[folder_name] then
+                        self:LoadMod(folder_name, directory, main_file)
                     end
                 elseif not self._ignore_detection_errors and not self._ignored_configs[main_file] then
                     self:log("Could not read %s", main_file)
@@ -142,22 +142,22 @@ function Framework:GetModByName(name)
     return nil
 end
 
-function Framework:LoadMod(dir, path, main_file)
-	rawset(_G, "ModPath", path)
+function Framework:LoadMod(folder_name, directory, main_file)
+	rawset(_G, "ModPath", directory)
 	local success, mod = pcall(function() return self._mod_core:new(main_file, false) end)
 	if success then
-		self:DevLog("Loaded Config: %s", path)
+		self:DevLog("Loaded Config: %s", directory)
 		local framework = mod._config and mod._config.framework and BeardLib.Frameworks[mod._config.framework] or self
 		if framework then
-			framework:AddMod(dir, mod)
+			framework:AddMod(folder_name, mod)
 		end
 	else
-		self:log("[ERROR] An error occured on initilization of mod %s. Error:\n%s", dir, tostring(mod))
+		self:log("[ERROR] An error occured on initilization of mod %s. Error:\n%s", folder_name, tostring(mod))
 	end
 end
 
-function Framework:AddMod(dir, mod)
-	self._loaded_mods[dir] = mod
+function Framework:AddMod(folder_name, mod)
+	self._loaded_mods[folder_name] = mod
 	table.insert(self._sorted_mods, mod)
 	local config = mod._config
 	if config and (config.post_hook or config.pre_hook) then
@@ -165,8 +165,13 @@ function Framework:AddMod(dir, mod)
 	end
 end
 
-function Framework:RemoveMod(dir)
-	self._loaded_mods[dir] = nil
+function Framework:RemoveMod(folder_name)
+	local mod = self._loaded_mods[folder_name] 
+	if mod then
+		table.delete(self._sorted_mods, mod)
+		table.delete(self._waiting_to_load, mod)
+		self._loaded_mods[folder_name] = nil
+	end
 end
 
 return Framework

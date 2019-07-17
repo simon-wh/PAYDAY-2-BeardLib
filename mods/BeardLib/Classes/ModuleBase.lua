@@ -21,7 +21,7 @@ function ModuleBase:init(mod, config)
 	end
 
     for _, param in pairs(self.required_params) do
-        if BeardLib.Utils:StringToTable(param, self._config, true) == nil then
+        if BeardLib.Utils:StringToValue(param, self._config, true) == nil then
             self:log("[ERROR] Parameter '%s' is required!", param)
             return false
         end
@@ -88,7 +88,7 @@ end
 function ItemModuleBase:DoCleanTable(config)
     for _, clean in pairs(self.clean_table) do
         local i, search_string = remove_last(clean.param)
-        local tbl = search_string and BeardLib.Utils:StringToTable(search_string, config, true) or config
+        local tbl = search_string and BeardLib.Utils:StringToValue(search_string, config, true) or config
         if tbl and tbl[i] then
             for _, action in pairs(type(clean.action) == "table" and clean.action or {clean.action}) do
                 if action == "no_subtables" then

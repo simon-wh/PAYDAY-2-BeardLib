@@ -1,6 +1,5 @@
 AddFramework = AddFramework or class(FrameworkBase)
 local Framework = AddFramework
-Framework._ignore_detection_errors = true
 Framework.add_file = "add.xml"
 Framework.type_name = "add"
 Framework._directory = BeardLib.config.mod_override_dir

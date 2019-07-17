@@ -9,7 +9,10 @@ function TweakModifyModule:RegisterHook()
 			if type(path) == "string" then
 				path = string.split(path, "/")
 			end
-			if tweak.overwrite then
+			if self._config.normalize or tweak.normalize then
+				tweak.data = BeardLib.Utils:normalize_string_value(tweak.data)
+			end
+			if (self._config.overwrite or tweak.overwrite) or type(tweak.data) ~= "table" then
 				TweakDataHelper:OverwriteTweak(tweak.data, unpack(path))
 			else
 				TweakDataHelper:ModifyTweak(tweak.data, unpack(path))

@@ -39,7 +39,7 @@ function WeaponModule:RegisterHook()
     end
 
     for _, param in pairs({"weapon", "factory", "weapon.id", "factory.id"}) do
-        if BeardLib.Utils:StringToTable(param, self._config, true) == nil then
+        if BeardLib.Utils:StringToValue(param, self._config, true) == nil then
             self:log("[ERROR] Parameter '%s' is required!", param)
             return false
         end
