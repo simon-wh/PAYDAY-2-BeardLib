@@ -44,7 +44,9 @@ Hooks:PostHook(GamePlayCentralManager, "update", "BeardLibGamePlayCentralManager
 		for k, task in pairs(self._rotate_units) do
 			if task.t == task.total_time then
 				table.remove(self._rotate_units, k)
-				task.done_callback()
+				if task.done_callback then
+					task.done_callback()
+				end
 			else
 				local rot = Rotation()
 				task.t = math.min(task.t + dt, task.total_time)
@@ -62,7 +64,9 @@ Hooks:PostHook(GamePlayCentralManager, "update", "BeardLibGamePlayCentralManager
 		for k, task in pairs(self._move_units) do
 			if task.t == task.total_time then
 				table.remove(self._move_units, k)
-				task.done_callback()
+				if task.done_callback then
+					task.done_callback()
+				end
 			else
 				local pos = Vector3()
 				task.t = math.min(task.t + dt, task.total_time)
@@ -76,6 +80,19 @@ Hooks:PostHook(GamePlayCentralManager, "update", "BeardLibGamePlayCentralManager
 		end
 	end
 end)
+
+function GamePlayCentralManager:is_unit_moving(unit)
+	for k, task in pairs(self._rotate_units) do
+		if task.unit == unit then
+			return
+		end
+	end
+	for k, task in pairs(self._move_units) do
+		if task.unit == unit then
+			return
+		end
+	end
+end
 
 function GamePlayCentralManager:set_position(unit, position, rotation, offset)
 	if position then

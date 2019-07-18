@@ -27,8 +27,6 @@ function ElementMoveUnit:on_executed(instigator)
 		return
 	end
 
-	instigator = self:_check_instigator(instigator)
-
 	if not self._values.end_pos and not self._values.displacement then
 		BeardLib:log("[ERROR] MoveUnit must either have a displacement or end position defined!")
 		return
@@ -56,10 +54,15 @@ function ElementMoveUnit:register_move_unit(unit)
 		end_pos = mvector3.copy(start_pos)
 		mvector3.add(end_pos, self._values.displacement)
 	end
-	managers.game_play_central:add_move_unit(unit, start_pos, end_pos, self._values.speed, ClassClbk(self, "done_callback", unit))
+	managers.game_play_central:add_move_unit(unit, start_pos, end_pos, self._values.speed, self._values.execute_on_executed_when_done and ClassClbk(self, "done_callback", unit) or nil)
 end
 
 function ElementMoveUnit:done_callback(instigator)
+	for _, unit in pairs(self._units) do --If this is empty then we can assume we have less then 2 so no issues.
+		if managers.game_play_central:is_unit_moving(unit) then --Avoiding calling the final on execute a few times
+			return
+		end
+	end
 	ElementMoveUnit.super._trigger_execute_on_executed(self, instigator)
 end
 
