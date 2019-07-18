@@ -5,10 +5,11 @@ core:import("CoreMissionScriptElement")
 ElementMoveUnit = ElementMoveUnit or class(CoreMissionScriptElement.MissionScriptElement)
 function ElementMoveUnit:init(...)
 	self._units = {}
+	self:_finalize_values()
 	ElementMoveUnit.super.init(self, ...)
 end
 
-function ElementMoveUnit:finalize_values()
+function ElementMoveUnit:_finalize_values()
 	self._values.execute_on_executed_when_done = NotNil(self._values.execute_on_executed_when_done, true)
 end
 
