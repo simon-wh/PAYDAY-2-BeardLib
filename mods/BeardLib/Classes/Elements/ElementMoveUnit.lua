@@ -8,7 +8,15 @@ function ElementMoveUnit:init(...)
 	ElementMoveUnit.super.init(self, ...)
 end
 
+function ElementMoveUnit:finalize_values()
+	self._values.execute_on_executed_when_done = NotNil(self._values.execute_on_executed_when_done, true)
+end
+
 function ElementMoveUnit:on_script_activated()
+	if self._has_fetched_units then
+		return
+	end
+	
 	for _, id in pairs(self._values.unit_ids) do
 		local unit = managers.worlddefinition:get_unit_on_load(id)
 		if unit then
@@ -27,12 +35,16 @@ function ElementMoveUnit:on_executed(instigator)
 		return
 	end
 
+	if not self._has_fetched_units then
+		self:on_script_activated()
+	end
+
 	if not self._values.end_pos and not self._values.displacement then
 		BeardLib:log("[ERROR] MoveUnit must either have a displacement or end position defined!")
 		return
 	end
 
-	ElementMoveUnit.super.on_executed(self, instigator, nil, NotNil(self._values.execute_on_executed_when_done, true))
+	ElementMoveUnit.super.on_executed(self, instigator, nil, self._values.execute_on_executed_when_done)
 
 	if #self._units == 0 and alive(instigator) then
 		self:register_move_unit(instigator)
