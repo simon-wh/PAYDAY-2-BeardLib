@@ -239,21 +239,23 @@ Hooks:Add("MenuManagerInitialize", "BeardLibCreateMenuHooks", function(mself)
     self.managers.dialog:Init()
 end)
 
-Hooks:Add("MenuManagerOnOpenMenu", "BeardLibShowErrors", function(mself)
-	if BeardLib.Options:GetValue("NoErrorAlert") then
-		return
-	end
-	if table.size(BeardLib._errors) > 0 then
-		local loc = managers.localization
-		local s = ""
-		for mod_path, err_list in pairs(BeardLib._errors) do
-			s = s.."MOD: "..tostring(mod_path).."\n"
-			for _, err in pairs(err_list) do
-				s = s.."    "..err.."\n"
-			end
+Hooks:Add("MenuManagerOnOpenMenu", "BeardLibShowErrors", function(mself, menu)
+	if menu == "menu_main" and not LuaNetworking:IsMultiplayer() then
+		if BeardLib.Options:GetValue("NoErrorAlert") then
+			return
 		end
-		s = s:sub(0, #s-1)
-		QuickMenuPlus:new(loc:text("beardlib_found_errors"), s)
+		if table.size(BeardLib._errors) > 0 then
+			local loc = managers.localization
+			local s = ""
+			for mod_path, err_list in pairs(BeardLib._errors) do
+				s = s.."MOD: "..tostring(mod_path).."\n"
+				for _, err in pairs(err_list) do
+					s = s.."    "..err.."\n"
+				end
+			end
+			s = s:sub(0, #s-1)
+			QuickMenuPlus:new(loc:text("beardlib_found_errors"), s)
+		end
 	end
 end)
 

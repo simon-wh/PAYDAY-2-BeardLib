@@ -1,25 +1,7 @@
 --Based of ElementMoveUnit
 
 core:import("CoreMissionScriptElement")
-ElementRotateUnit = ElementRotateUnit or class(CoreMissionScriptElement.MissionScriptElement)
-function ElementRotateUnit:init(...)
-	self._units = {}
-	ElementRotateUnit.super.init(self, ...)
-end
-
-function ElementRotateUnit:on_script_activated()
-	for _, id in pairs(self._values.unit_ids) do
-		local unit = managers.worlddefinition:get_unit_on_load(id)
-		if unit then
-			table.insert(self._units, unit)
-		end
-	end
-	self._has_fetched_units = true
-end
-
-function ElementRotateUnit:client_on_executed(...)
-	self:on_executed(...)
-end
+ElementRotateUnit = ElementRotateUnit or class(ElementMoveUnit)
 
 function ElementRotateUnit:on_executed(instigator)
 	if not self._values.enabled then
@@ -28,6 +10,15 @@ function ElementRotateUnit:on_executed(instigator)
 	if not self._values.end_rot then
 		BeardLib:log("[ERROR] Rotateunit must have an end rotation defined!")
 		return
+	end
+
+	--Sync before beginning the move
+	if Network:is_server() then
+		if instigator and alive(instigator) and instigator:id() ~= -1 then
+			managers.network:session():send_to_peers_synched("run_mission_element", self._id, instigator, self._last_orientation_index or 0)
+		else
+			managers.network:session():send_to_peers_synched("run_mission_element_no_instigator", self._id, self._last_orientation_index or 0)
+		end
 	end
 
 	if #self._units == 0 and alive(instigator) then
@@ -55,20 +46,4 @@ function ElementRotateUnit:register(unit)
 	end
 	]]
 	managers.game_play_central:add_rotate_unit(unit, start_rot, end_rot, self._values.speed, ClassClbk(self, "done_callback", unit))
-end
-
-function ElementRotateUnit:done_callback(instigator)
-	ElementRotateUnit.super.on_executed(self, instigator)
-end
-
-function ElementRotateUnit:save(data)
-	data.save_me = true
-	data.enabled = self._values.enabled
-end
-
-function ElementRotateUnit:load(data)
-	if not self._has_fetched_units then
-		self:on_script_activated()
-	end
-	self:set_enabled(data.enabled)
 end

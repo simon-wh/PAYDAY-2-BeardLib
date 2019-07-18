@@ -26,6 +26,18 @@ function ElementMoveUnit:on_executed(instigator)
 	if not self._values.enabled then
 		return
 	end
+
+	instigator = self:_check_instigator(instigator)
+
+	--Sync before beginning the move
+	if Network:is_server() then
+		if instigator and alive(instigator) and instigator:id() ~= -1 then
+			managers.network:session():send_to_peers_synched("run_mission_element", self._id, instigator, self._last_orientation_index or 0)
+		else
+			managers.network:session():send_to_peers_synched("run_mission_element_no_instigator", self._id, self._last_orientation_index or 0)
+		end
+	end
+
 	if not self._values.end_pos and not self._values.displacement then
 		BeardLib:log("[ERROR] MoveUnit must either have a displacement or end position defined!")
 		return
@@ -37,6 +49,22 @@ function ElementMoveUnit:on_executed(instigator)
 		for _, unit in pairs(self._units) do
 			self:register_move_unit(unit)
 		end
+	end
+end
+
+-- Removed sync code so the excution can still be delayed (To be able to have one move unit run after the other is done)
+function ElementMoveUnit:on_executed(instigator, alternative, skip_execute_on_executed)
+	if not self._values.enabled then
+		return
+	end
+
+	self._last_orientation_index = nil
+
+	self:_print_debug_on_executed(instigator)
+	self:_reduce_trigger_times()
+
+	if not skip_execute_on_executed or CoreClass.type_name(skip_execute_on_executed) ~= "boolean" then
+		self:_trigger_execute_on_executed(instigator, alternative)
 	end
 end
 
