@@ -12,14 +12,7 @@ function ElementRotateUnit:on_executed(instigator)
 		return
 	end
 
-	--Sync before beginning the move
-	if Network:is_server() then
-		if instigator and alive(instigator) and instigator:id() ~= -1 then
-			managers.network:session():send_to_peers_synched("run_mission_element", self._id, instigator, self._last_orientation_index or 0)
-		else
-			managers.network:session():send_to_peers_synched("run_mission_element_no_instigator", self._id, self._last_orientation_index or 0)
-		end
-	end
+	ElementMoveUnit.super.on_executed(self, instigator, nil, NotNil(self._values.execute_on_executed_when_done, true))
 
 	if #self._units == 0 and alive(instigator) then
 		self:register(instigator)
