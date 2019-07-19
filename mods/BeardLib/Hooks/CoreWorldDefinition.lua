@@ -45,9 +45,8 @@ end
 local WorldDefinitionunload_packages = WorldDefinition.unload_packages
 function WorldDefinition:unload_packages(...)
     if Global.level_data then
-        if Global.level_data._add then
-            Global.level_data._add:Unload()
-            Global.level_data._add = nil
+        if BeardLib.current_level and BeardLib.current_level._loaded_addfiles then
+            BeardLib.current_level._loaded_addfiles:Unload()
         end
 
         if self._custom_instances then

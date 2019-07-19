@@ -58,7 +58,6 @@ function LevelModule:Load()
 
     if self._config.add then
         self._loaded_addfiles = AddFilesModule:new(self._mod, self._config.add)
-        Global.level_data._add = Global.level_data._add or self._loaded_addfiles
     end
 
     if self._config.script_data_mods then
