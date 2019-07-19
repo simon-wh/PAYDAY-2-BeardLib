@@ -35,7 +35,7 @@ function ModCore:init(config_path, load_modules)
     end
 end
 
-function ModCore:PostInit()
+function ModCore:PostInit(ignored_modules)
     if self._post_init_done then
         return
 	end
@@ -44,11 +44,14 @@ function ModCore:PostInit()
 		self._core_class:PreInit()
 	end
 
-	for _, module in pairs(self._modules) do
-        local success, err = pcall(function() module:PostInit() end)
-
-        if not success then
-            self:log("[ERROR] An error occured on the post initialization of %s. Error:\n%s", module._name, tostring(err))
+    ignored_modules = ignored_modules or self._config.ignored_post_init_modules
+    for _, module in pairs(self._modules) do
+        if (not ignored_modules or not table.contains(ignored_modules, module._name)) then
+            local success, err = pcall(function() module:PostInit() end)
+            
+            if not success then
+                self:log("[ERROR] An error occured on the post initialization of %s. Error:\n%s", module._name, tostring(err))
+            end
         end
     end
     
@@ -138,7 +141,7 @@ function ModCore:InitModules()
 	table.sort(self._config, function(a,b)
 		local a_ok = type(a) == "table" and order[a._meta] or false
 		local b_ok = type(b) == "table" and order[b._meta] or false
-		return a_ok and not b_ok
+		return (a_ok and not b_ok) or (a.priority or 1) > (b.priority or 1)
 	end)
 
     for _, module_tbl in ipairs(self._config) do
@@ -159,7 +162,7 @@ end
 function ModCore:AddModule(module_tbl)
     if type(module_tbl) == "table" then
         local meta = module_tbl._meta
-        if (not self._disabled or (not self._config.no_disabled_updates and meta == updates)) and not (self._config.ignored_modules and table.contains(self._config.ignored_modules, meta)) then
+        if (not self._disabled or (not self._config.no_disabled_updates and meta == updates)) and self._config.auto_init ~= false and not (self._config.ignored_modules and table.contains(self._config.ignored_modules, meta)) then
             local node_class = BeardLib.modules[meta]
 
             if not node_class and module_tbl._force_search then

@@ -13,10 +13,10 @@ function XMLModule:Load()
 
     local order = self._loaded_config.load_first or load_first
 
-    table.sort(self._loaded_config, function(a,b)
+	table.sort(self._loaded_config, function(a,b)
 		local a_ok = type(a) == "table" and order[a._meta] or false
 		local b_ok = type(b) == "table" and order[b._meta] or false
-		return a_ok and not b_ok
+		return (a_ok and not b_ok) or (a.priority or 1) > (b.priority or 1)
 	end)
 
     if self._loaded_config then

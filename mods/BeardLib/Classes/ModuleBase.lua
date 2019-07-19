@@ -6,12 +6,15 @@ ModuleBase.auto_load = true
 function ModuleBase:init(mod, config)
     self._mod = mod
     self._name = config.name or self.type_name
+
     if config.file ~= nil then
         local file_path = self._mod:GetRealFilePath(Path:Combine(self._mod.ModPath, config.file))
         self._config = table.merge(config, FileIO:ReadScriptData(file_path, config.file_type or "custom_xml", config.clean_file))
     else
         self._config = config
     end
+    
+    self.Priority = tonumber(self._config.priority) or 1
 
 	if self._config.init_clbk then
         local clbk = self._mod:StringToCallback(self._config.init_clbk)
@@ -39,6 +42,10 @@ function ModuleBase:Load()
 end
 
 function ModuleBase:PostInit()
+    if self._config.auto_post_init == false then
+        return
+    end
+    
 	local post_init = self._config.post_init_clbk or self._config.post_init
     if post_init then
         local clbk = self._mod:StringToCallback(post_init)
@@ -117,7 +124,11 @@ end
 
 function ItemModuleBase:RegisterHook() end
 
-function ItemModuleBase:DoRegisterHook(...) 
+function ItemModuleBase:DoRegisterHook(...)
+    if self.auto_register_hook == false then
+        return
+    end
+
     local register_hook = self._config.register_hook or self._config.register_hook_clbk
 	if register_hook then
         local clbk = self._mod:StringToCallback(register_hook)

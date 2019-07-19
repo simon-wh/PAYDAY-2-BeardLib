@@ -159,6 +159,7 @@ end
 function Framework:AddMod(folder_name, mod)
 	self._loaded_mods[folder_name] = mod
 	table.insert(self._sorted_mods, mod)
+	mod._framework = self
 	local config = mod._config
 	if config and (config.post_hook or config.pre_hook) then
 		table.insert(self._waiting_to_load, mod)
@@ -171,6 +172,7 @@ function Framework:RemoveMod(folder_name)
 		table.delete(self._sorted_mods, mod)
 		table.delete(self._waiting_to_load, mod)
 		self._loaded_mods[folder_name] = nil
+		mod._framework = nil
 	end
 end
 
