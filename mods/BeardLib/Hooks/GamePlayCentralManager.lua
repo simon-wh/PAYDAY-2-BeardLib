@@ -82,14 +82,18 @@ Hooks:PostHook(GamePlayCentralManager, "update", "BeardLibGamePlayCentralManager
 end)
 
 function GamePlayCentralManager:is_unit_moving(unit)
-	for k, task in pairs(self._rotate_units) do
-		if task.unit == unit then
-			return
+	if self._move_units then
+		for k, task in pairs(self._move_units) do
+			if task.unit == unit then
+				return
+			end
 		end
 	end
-	for k, task in pairs(self._move_units) do
-		if task.unit == unit then
-			return
+	if self._rotate_units then
+		for k, task in pairs(self._rotate_units) do
+			if task.unit == unit then
+				return
+			end
 		end
 	end
 end

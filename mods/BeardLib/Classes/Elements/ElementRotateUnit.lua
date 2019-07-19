@@ -12,7 +12,7 @@ function ElementRotateUnit:on_executed(instigator)
 		return
 	end
 
-	ElementMoveUnit.super.on_executed(self, instigator, nil, NotNil(self._values.execute_on_executed_when_done, true))
+	ElementMoveUnit.super.on_executed(self, instigator, nil, self._values.execute_on_executed_when_done)
 
 	if #self._units == 0 and alive(instigator) then
 		self:register(instigator)
@@ -38,5 +38,5 @@ function ElementRotateUnit:register(unit)
 		end_rot = end_rot:inverse()
 	end
 	]]
-	managers.game_play_central:add_rotate_unit(unit, start_rot, end_rot, self._values.speed, ClassClbk(self, "done_callback", unit))
+	managers.game_play_central:add_rotate_unit(unit, start_rot, end_rot, self._values.speed, self._values.execute_on_executed_when_done and ClassClbk(self, "done_callback", unit) or nil)
 end

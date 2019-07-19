@@ -5,8 +5,8 @@ core:import("CoreMissionScriptElement")
 ElementMoveUnit = ElementMoveUnit or class(CoreMissionScriptElement.MissionScriptElement)
 function ElementMoveUnit:init(...)
 	self._units = {}
-	self:_finalize_values()
 	ElementMoveUnit.super.init(self, ...)
+	self:_finalize_values()
 end
 
 function ElementMoveUnit:_finalize_values()
