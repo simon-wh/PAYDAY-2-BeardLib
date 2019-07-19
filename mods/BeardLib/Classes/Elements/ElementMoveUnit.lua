@@ -4,27 +4,32 @@
 core:import("CoreMissionScriptElement")
 ElementMoveUnit = ElementMoveUnit or class(CoreMissionScriptElement.MissionScriptElement)
 function ElementMoveUnit:init(...)
-	self._units = {}
 	ElementMoveUnit.super.init(self, ...)
-	self:_finalize_values()
+	self:_finalize_values(true)
 end
 
-function ElementMoveUnit:_finalize_values()
+function ElementMoveUnit:_finalize_values(no_script_activate)
 	self._values.execute_on_executed_when_done = NotNil(self._values.execute_on_executed_when_done, true)
+	self._units = {}
+	self._has_fetched_units = false
+	if not no_script_activate then
+		self:on_script_activated()
+	end
 end
 
 function ElementMoveUnit:on_script_activated()
-	if self._has_fetched_units then
-		return
-	end
-	
 	for _, id in pairs(self._values.unit_ids) do
-		local unit = managers.worlddefinition:get_unit_on_load(id)
+		local unit = managers.worlddefinition:get_unit_on_load(id, function(unit)
+			table.insert(self._units, unit)
+		end)
 		if unit then
 			table.insert(self._units, unit)
 		end
 	end
+
 	self._has_fetched_units = true
+
+	self._mission_script:add_save_state_cb(self._id)
 end
 
 function ElementMoveUnit:client_on_executed(...)
@@ -34,10 +39,6 @@ end
 function ElementMoveUnit:on_executed(instigator)
 	if not self._values.enabled then
 		return
-	end
-
-	if not self._has_fetched_units then
-		self:on_script_activated()
 	end
 
 	if not self._values.end_pos and not self._values.displacement then
