@@ -29,6 +29,9 @@ function OptionModule:init(...)
 end
 
 function OptionModule:PostInit()
+    if self._config.auto_post_init == false then
+        return
+    end
 	if self._post_init_complete then
         return false
 	end
@@ -166,7 +169,7 @@ function OptionModule:InitOptions(tbl, option_tbl)
                         tbl = self._mod:StringToValue(sub_tbl.values_tbl)
                     elseif sub_tbl.populate_items then
                         local clbk = self._mod:StringToCallback(sub_tbl.populate_items)
-                        tbl = assert(clbk)()
+                        tbl = assert(clbk, string.format("Could not find a populate items function %s", tostring(sub_tbl.populate_items)))()
                     end
 
                     for _, item in pairs(tbl) do

@@ -234,7 +234,7 @@ function ModCore:StringToCallback(str)
 
         local val = self:StringToValue(global_tbl_name)
         local typ = type(val)
-		if val == "table" then
+        if typ == "table" then
 			return ClassClbk(val, func_name)
         elseif typ == "function" then
             return val
