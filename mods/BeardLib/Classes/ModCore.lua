@@ -47,10 +47,12 @@ function ModCore:PostInit(ignored_modules)
     ignored_modules = ignored_modules or self._config.ignored_post_init_modules
     for _, module in pairs(self._modules) do
         if (not ignored_modules or not table.contains(ignored_modules, module._name)) then
-            local success, err = pcall(function() module:PostInit() end)
-            
-            if not success then
-                self:log("[ERROR] An error occured on the post initialization of %s. Error:\n%s", module._name, tostring(err))
+            if module._config.auto_post_init ~= false then
+                local success, err = pcall(function() module:PostInit() end)
+                
+                if not success then
+                    self:log("[ERROR] An error occured on the post initialization of %s. Error:\n%s", module._name, tostring(err))
+                end
             end
         end
     end

@@ -29,9 +29,6 @@ function OptionModule:init(...)
 end
 
 function OptionModule:PostInit()
-    if self._config.auto_post_init == false then
-        return
-    end
 	if self._post_init_complete then
         return false
 	end

@@ -105,8 +105,8 @@ function Framework:RegisterHooks()
 	self:SortMods()
     for _, mod in pairs(self._sorted_mods) do
         if not mod._disabled and mod._modules then
-            for _, module in pairs(mod._modules) do
-                if module.DoRegisterHook and not module.Registered then
+			for _, module in pairs(mod._modules) do
+                if module.DoRegisterHook and self.auto_register_hook ~= false and not module.Registered then
                     local success, err = pcall(function() module:DoRegisterHook() end)
                     module.Registered = true
                     if not success then
