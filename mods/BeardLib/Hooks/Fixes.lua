@@ -174,6 +174,17 @@ elseif F == "coreelementinstance" then
     function ElementInstancePoint:client_on_executed(...)
         self:on_executed(...)
     end
+elseif F == "coreelementshape"  or F == "coreelementarea" then
+    Hooks:PostHook(F == "coreelementshape" and ElementShape or ElemetArea, "init", "BeardLibAddSphereShape", function(self)
+        if self._values.shape_type == "sphere" then
+            self:_add_shape(CoreShapeManager.ShapeSphere:new({
+                position = self._values.position,
+                rotation = self._values.rotation,
+                height = self._values.height,
+                radius = self._values.radius
+            }))
+        end
+    end)
 elseif F == "coremenuitemslider" then
     core:module("CoreMenuItemSlider")
     --Although slider is supposed to have 5 decimal points(based on decomp), it's 2 by default.
