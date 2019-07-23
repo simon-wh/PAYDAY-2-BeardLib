@@ -98,7 +98,7 @@ function WeaponModule:RegisterHook()
             data = table.merge(data, config.override)
         end
 	
-	 w_self[config.id] = data
+	    w_self[config.id] = data
 			
         --w_self[config.id .. "_crew"] = npc_data
     end)
@@ -138,22 +138,54 @@ function WeaponModule:RegisterHook()
         tweak_sound_overrides[id] = sound_overrides and table.merge(sound_overrides, config.sound_overrides) or config.sound_overrides or nil
     end)
     
-    Hooks:Add("BeardLibCreateCustomWeapons", self._config.factory.id .. "AddWeaponFactoryTweakData", function(w_self)
+    Hooks:Add("BeardLibCreateCustomWeapons", self._config.factory.id .. "AddWeaponFactoryTweakData", function(f_self)
         local config = self._config.factory
-        if w_self[config.id] then
+        if f_self[config.id] then
             self:log("[ERROR] Weapon with factory id '%s' already exists!", config.id)
             return
         end
 
         config.custom = true
 
-        w_self[config.id] = config
+        if config.guess_unit ~= false then
+            config.unit = config.unit or "units/mods/weapons/"..config.id.."/"..config.id
+        end
+
+        if config.based_on then
+            f_self[config.id] = table.merge(deep_clone(self:GetBasedOn(f_self, config.based_on)), config)
+        else
+            f_self[config.id] = config
+        end
+        
         local npc_data = clone(config)
         npc_data.unit = npc_data.unit.."_npc"
-        w_self[config.id .. "_npc"] = npc_data
+        f_self[config.id .. "_npc"] = npc_data
     end)
 
     Hooks:PostHook(UpgradesTweakData, "init", self._config.weapon.id .. "AddWeaponUpgradesData", function(u_self)
+
+        --Stance mod stuff. We can't do this in weapon factory hook since upgrade tweakdata isn't ready yet (and we use it to find the factory ids)
+        local fac_id = self._config.factory.id
+        local based_on_fac = u_self.definitions[self:GetBasedOn(u_self.definitions, self._config.factory.based_on)].factory_id
+        local factory = _tweakdata.weapon.factory
+        local fac_config = factory[fac_id]
+        local sight_adds = self._config.factory.sight_adds
+        for _, part_id in pairs(fac_config.uses_parts) do
+            local part = factory.parts[part_id]
+            if part and part.stance_mod then
+                if not part.stance_mod[fac_id] and part.stance_mod[based_on_fac] then
+                    part.stance_mod[fac_id] = deep_clone(part.stance_mod[based_on_fac])
+                end
+                if sight_adds then
+                    part.stance_mod[fac_id].adds = table.merge(part.stance_mod[fac_id].adds or {}, sight_adds)
+                end
+            end
+            if not part.stance_mod[fac_id] and (part and not part.custom and part.stance_mod and part.stance_mod[based_on_fac]) then
+                part.stance_mod[fac_id] = deep_clone(part.stance_mod[based_on_fac])
+            end
+        end
+        --
+
         u_self.definitions[self._config.weapon.id] = {
             category = "weapon",
             weapon_id = self._config.weapon.id,
