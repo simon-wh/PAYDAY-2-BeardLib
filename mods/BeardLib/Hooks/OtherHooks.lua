@@ -10,7 +10,6 @@ elseif F == "tweakdatapd2" then
 	end)
 	
 	Hooks:PostHook(BlackMarketTweakData, "init", "CallAddCustomWeaponModsToWeapons", function(self, tweak_data)
-		_tweakdata = tweak_data
 		Hooks:Call("BeardLibAddCustomWeaponModsToWeapons", tweak_data.weapon.factory, tweak_data)
 		Hooks:Call("BeardLibCreateCustomProjectiles", self, tweak_data)
 	end)

@@ -70,6 +70,48 @@ local MAT_CONFIG = "material_config"
 local SEQ_MANAGER = "sequence_manager"
 local COOKED_PHYSICS = "cooked_physics"
 
+
+local UNIT_ALL = "unit_all"
+local UNIT_SIMPLE = "unit_simple"
+local UNIT_TEX = "unit_tex"
+local UNIT_MAT = "unit_mat"
+local UNIT_SEQ = "unit_seq"
+local UNIT_MAT_SEQ = "unit_mat_seq"
+local UNIT_THQ = "unit_thq"
+local UNIT_NPC = "unit_npc"
+local UNIT_CC = "unit_cc"
+local UNIT_SIMPLE_SEQ = "simple_seq"
+
+local DF_NM = "df_nm"
+
+--Default: unit, cooked phyiscs, model, object.
+
+--all: Adds Adds material_config, textures and sequence manager.
+--tex: Adds material_config and textures. 
+--mat: Adds material_config.
+--mat_seq: Adds material_config and sequence_manager.
+--seq: Adds material_config, textures and sequence_manager.
+--simple_seq: Adds sequence manager.
+--simple: Adds nothing.
+
+--thq: Adds _thq material config.
+--npc: Adds _npc unit.
+--cc: Adds _thq and cc material configs.
+
+local SPECIAL = {
+    [UNIT_ALL] = true,
+    [UNIT_SIMPLE] = true,
+    [UNIT_TEX] = true,
+    [UNIT_MAT] = true,
+    [UNIT_SEQ] = true,
+    [UNIT_MAT_SEQ] = true,
+    [UNIT_THQ] = true,
+    [UNIT_NPC] = true,
+    [UNIT_CC] = true,
+    [UNIT_SIMPLE_SEQ] = true
+}
+
+
 local UNIT_IDS = UNIT:id()
 local MODEL_IDS = MODEL:id()
 local OBJECT_IDS = OBJECT:id()
@@ -110,6 +152,54 @@ function C:LoadPackageConfig(directory, config, mod, temp)
             if not load_clbk or load_clbk(path, typ) then
                 if typ == UNIT_LOAD or typ == ADD then
                     self:LoadPackageConfig(directory, child)
+                elseif SPECIAL[typ] then
+                    local ids_path = Idstring(path)
+                    local file_path = child.full_path or Path:Combine(directory, config.file_path or path)
+
+                    FileManager:AddFile(UNIT_IDS, ids_path, file_path.."."..UNIT)
+                    if not DB:has(COOKED_PHYSICS_IDS, ids_path) then
+                        FileManager:AddFile(COOKED_PHYSICS_IDS, ids_path, CP_DEFAULT)
+                    end
+
+                    FileManager:AddFileWithCheck(MODEL_IDS, ids_path, file_path.."."..MODEL)
+                    FileManager:AddFileWithCheck(OBJECT_IDS, ids_path, file_path.."."..OBJECT)
+
+                    local all = typ == UNIT_ALL
+                    local mat = typ == UNIT_MAT
+                    local mat_seq = typ == UNIT_MAT_SEQ
+                    local seq = typ == UNIT_SEQ
+                    local cc = typ == UNIT_CC
+                    local thq = typ == UNIT_THQ
+
+                    if all or mat or tex or seq or mat_seq or thq or cc then
+                        FileManager:AddFileWithCheck(MAT_CONFIG_IDS, ids_path, file_path.."."..MAT_CONFIG)
+                        if tex or seq then
+                            FileManager:AddFileWithCheck(TEXTURE_IDS, Idstring(path.."_df"), file_path.."_df".."."..TEXTURE)
+                            FileManager:AddFileWithCheck(TEXTURE_IDS, Idstring(path.."_nm"), file_path.."_nm".."."..TEXTURE)
+                        end
+                        if seq or mat_seq then
+                            FileManager:AddFileWithCheck(SEQ_MANAGER_IDS, ids_path, file_path.."."..SEQ_MANAGER)
+                        end
+                    end
+
+                    if typ == UNIT_SEQ then
+                        FileManager:AddFileWithCheck(SEQ_MANAGER_IDS, ids_path, file_path.."."..SEQ_MANAGER)
+                    elseif typ == UNIT_NPC then
+                        FileManager:AddFile(UNIT_IDS, Idstring(path.."_npc"), file_path.."_npc."..UNIT)
+                    end
+            
+                    if thq or typ == cc then
+                        FileManager:AddFile(UNIT_IDS, Idstring(path.."_thq"), file_path.."."..UNIT)
+                    end
+                    if cc then
+                        FileManager:AddFile(MAT_CONFIG_IDS, Idstring(path.."_cc"), file_path.."_cc."..MAT_CONFIG)
+                        FileManager:AddFile(MAT_CONFIG_IDS, Idstring(path.."_cc_thq"), file_path.."_cc_thq."..MAT_CONFIG)
+                    end
+                elseif typ == DF_NM then
+                    path = Path:Normalize(path)
+                    local file_path = child.full_path or Path:Combine(directory, config.file_path or path)
+                    FileManager:AddFileWithCheck(TEXTURE_IDS, Idstring(path.."_df"), file_path.."_df".."."..TEXTURE)
+                    FileManager:AddFileWithCheck(TEXTURE_IDS, Idstring(path.."_nm"), file_path.."_nm".."."..TEXTURE)
                 elseif typ and path then
                     path = Path:Normalize(path)
                     local ids_ext = Idstring(self.ext_convert[typ] or typ)
@@ -125,28 +215,7 @@ function C:LoadPackageConfig(directory, config, mod, temp)
                                 load = not DB:has(ids_ext, ids_path)
                             end
                         end
-						if load then
-                            if ids_ext == UNIT_IDS then
-                                if not DB:has(ids_ext, ids_path) then
-                                    FileManager:AddFile(COOKED_PHYSICS_IDS, ids_path, CP_DEFAULT)
-                                end
-								local all = child.include_all or child.include_weapon
-								local most = all or child.include_most
-								if most or child.include_default then
-									FileManager:AddFileWithCheck(MODEL_IDS, ids_path, file_path.."."..MODEL)
-                                    FileManager:AddFileWithCheck(OBJECT_IDS, ids_path, file_path.."."..OBJECT)
-                                    if not child.include_weapon then
-                                        FileManager:AddFileWithCheck(MAT_CONFIG_IDS, ids_path, file_path.."."..MAT_CONFIG)
-                                    end
-                                end
-								if (most and child.include_textures ~= false) or child.include_textures then
-									FileManager:AddFileWithCheck(TEXTURE_IDS, Idstring(path.."_df"), file_path.."_df" .."."..TEXTURE)
-									FileManager:AddFileWithCheck(TEXTURE_IDS, Idstring(path.."_nm"), file_path.."_nm" .."."..TEXTURE)
-								end
-								if (all and child.include_sequence ~= false) or child.include_sequence then
-									FileManager:AddFileWithCheck(SEQ_MANAGER_IDS, ids_path, file_path.."."..SEQ_MANAGER)
-								end
-							end
+                        if load then
 							FileManager:AddFile(ids_ext, ids_path, file_path_ext)
                             if child.reload then
                                 PackageManager:reload(ids_ext, ids_path)

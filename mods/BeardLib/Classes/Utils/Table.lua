@@ -88,7 +88,7 @@ function table.search(tbl, search_term)
                 local term_split = string.split(term, "=")
                 search_keys.params[term_split[1]] = assert(loadstring("return " .. term_split[2]))()
                 if not search_keys.params[term_split[1]] then
-                    BeardLib:log(string.format("[ERROR] An error occured while trying to parse the value %s", term_split[2]))
+                    BeardLib:log(string.format("[ERROR] An error occurred while trying to parse the value %s", term_split[2]))
                 end
             elseif not search_keys._meta then
                 search_keys._meta = term

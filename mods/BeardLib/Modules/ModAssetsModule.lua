@@ -223,7 +223,7 @@ function ModAssetsModule:StoreDownloadedAssets(data, id)
             file:write(data)
             file:close()
         else
-            self:log("[ERROR] An error occured while trying to store the downloaded asset data")
+            self:log("[ERROR] An error occurred while trying to store the downloaded asset data")
             return
         end
         

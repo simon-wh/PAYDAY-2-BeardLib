@@ -51,7 +51,7 @@ function ModCore:PostInit(ignored_modules)
                 local success, err = pcall(function() module:PostInit() end)
                 
                 if not success then
-                    self:log("[ERROR] An error occured on the post initialization of %s. Error:\n%s", module._name, tostring(err))
+                    self:log("[ERROR] An error occurred on the post initialization of %s. Error:\n%s", module._name, tostring(err))
                 end
             end
         end
@@ -187,7 +187,7 @@ function ModCore:AddModule(module_tbl)
                         table.insert(self._modules, node_obj)
                     end
                 else
-                    self:log("[ERROR] An error occured on initilization of module: %s. Error:\n%s", meta, tostring(node_obj))
+                    self:log("[ERROR] An error occurred on initilization of module: %s. Error:\n%s", meta, tostring(node_obj))
                 end
             elseif not self._config.ignore_errors then
                 self:log("[ERROR] Unable to find module with key %s", meta)

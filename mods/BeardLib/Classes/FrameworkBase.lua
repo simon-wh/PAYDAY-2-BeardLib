@@ -110,7 +110,7 @@ function Framework:RegisterHooks()
                     local success, err = pcall(function() module:DoRegisterHook() end)
                     module.Registered = true
                     if not success then
-                        self:log("[ERROR] An error occured on the hook registration of %s. Error:\n%s", module._name, tostring(err))
+                        self:log("[ERROR] An error occurred on the hook registration of %s. Error:\n%s", module._name, tostring(err))
                     end
                 end
             end
@@ -152,7 +152,7 @@ function Framework:LoadMod(folder_name, directory, main_file)
 			framework:AddMod(folder_name, mod)
 		end
 	else
-		self:log("[ERROR] An error occured on initilization of mod %s. Error:\n%s", folder_name, tostring(mod))
+		self:log("[ERROR] An error occurred on initilization of mod %s. Error:\n%s", folder_name, tostring(mod))
 	end
 end
 
