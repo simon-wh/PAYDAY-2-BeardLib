@@ -166,11 +166,18 @@ function C:LoadPackageConfig(directory, config, mod, temp)
                     self:LoadPackageConfig(directory, child)
                 elseif UNIT_SHORTCUTS[typ] then
                     local ids_path = Idstring(path)
+
+
+
                     local file_path = child.full_path or Path:Combine(directory, config.file_path or path)
 
-                    FileManager:AddFile(UNIT_IDS, ids_path, file_path.."."..UNIT)
+
+
+
+
+                    FileManager:AddFileWithCheck(UNIT_IDS, ids_path, file_path.."."..UNIT)
                     if not child.custom_cp then
-                        FileManager:AddFile(COOKED_PHYSICS_IDS, ids_path, CP_DEFAULT)
+                        FileManager:AddFileWithCheck(COOKED_PHYSICS_IDS, ids_path, CP_DEFAULT)
                     end
 
                     FileManager:AddFileWithCheck(MODEL_IDS, ids_path, file_path.."."..MODEL)
@@ -198,18 +205,18 @@ function C:LoadPackageConfig(directory, config, mod, temp)
                     if typ == UNIT_SEQ then
                         FileManager:AddFileWithCheck(SEQ_MANAGER_IDS, ids_path, file_path.."."..SEQ_MANAGER)
                     elseif typ == UNIT_NPC then
-                        FileManager:AddFile(UNIT_IDS, Idstring(path.."_npc"), file_path.."_npc."..UNIT)
+                        FileManager:AddFileWithCheck(UNIT_IDS, Idstring(path.."_npc"), file_path.."_npc."..UNIT)
                     end
             
                     if thq or typ == cc then
-                        FileManager:AddFile(UNIT_IDS, Idstring(path.."_thq"), file_path.."."..UNIT)
+                        FileManager:AddFileWithCheck(UNIT_IDS, Idstring(path.."_thq"), file_path.."."..UNIT)
                     end
                     if cc or mat_cc then
                         if cc then
-                            FileManager:AddFile(TEXTURE_IDS, Idstring(path.."_df_cc"), file_path.."_df_cc".."."..TEXTURE)
+                            FileManager:AddFileWithCheck(TEXTURE_IDS, Idstring(path.."_df_cc"), file_path.."_df_cc".."."..TEXTURE)
                         end
-                        FileManager:AddFile(MAT_CONFIG_IDS, Idstring(path.."_cc"), file_path.."_cc."..MAT_CONFIG)
-                        FileManager:AddFile(MAT_CONFIG_IDS, Idstring(path.."_cc_thq"), file_path.."_cc_thq."..MAT_CONFIG)
+                        FileManager:AddFileWithCheck(MAT_CONFIG_IDS, Idstring(path.."_cc"), file_path.."_cc."..MAT_CONFIG)
+                        FileManager:AddFileWithCheck(MAT_CONFIG_IDS, Idstring(path.."_cc_thq"), file_path.."_cc_thq."..MAT_CONFIG)
                     end
                 elseif TEXTURE_SHORTCUTS[typ] then
                     path = Path:Normalize(path)

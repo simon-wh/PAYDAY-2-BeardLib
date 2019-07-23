@@ -168,20 +168,18 @@ function WeaponModule:RegisterHook()
         local fac_id = self._config.factory.id
         local based_on_fac = u_self.definitions[self:GetBasedOn(u_self.definitions, self._config.factory.based_on)].factory_id
         local factory = _tweakdata.weapon.factory
-        local fac_config = factory[fac_id]
+        local fac_weapon = factory[fac_id]
         local sight_adds = self._config.factory.sight_adds
-        for _, part_id in pairs(fac_config.uses_parts) do
+        for _, part_id in pairs(fac_weapon.uses_parts) do
             local part = factory.parts[part_id]
             if part and part.stance_mod then
                 if not part.stance_mod[fac_id] and part.stance_mod[based_on_fac] then
                     part.stance_mod[fac_id] = deep_clone(part.stance_mod[based_on_fac])
                 end
+                
                 if sight_adds then
-                    part.stance_mod[fac_id].adds = table.merge(part.stance_mod[fac_id].adds or {}, sight_adds)
+                    fac_weapon.adds[fac_id] = table.merge(fac_weapon.adds[fac_id], sight_adds)
                 end
-            end
-            if not part.stance_mod[fac_id] and (part and not part.custom and part.stance_mod and part.stance_mod[based_on_fac]) then
-                part.stance_mod[fac_id] = deep_clone(part.stance_mod[based_on_fac])
             end
         end
         --
