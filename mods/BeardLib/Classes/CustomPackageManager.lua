@@ -126,25 +126,24 @@ function C:LoadPackageConfig(directory, config, mod, temp)
                             end
                         end
 						if load then
-							if ids_ext == UNIT_IDS then
-								local all = child.include_all
+                            if ids_ext == UNIT_IDS then
+                                if not DB:has(ids_ext, ids_path) then
+                                    FileManager:AddFile(COOKED_PHYSICS_IDS, ids_path, CP_DEFAULT)
+                                end
+								local all = child.include_all or child.include_weapon
 								local most = all or child.include_most
 								if most or child.include_default then
 									FileManager:AddFileWithCheck(MODEL_IDS, ids_path, file_path.."."..MODEL)
-									FileManager:AddFileWithCheck(OBJECT_IDS, ids_path, file_path.."."..OBJECT)
-									FileManager:AddFileWithCheck(MAT_CONFIG_IDS, ids_path, file_path.."."..MAT_CONFIG)
-									if not DB:has(ids_ext, ids_path) then
-										FileManager:AddFile(COOKED_PHYSICS_IDS, ids_path, CP_DEFAULT)
-									end
+                                    FileManager:AddFileWithCheck(OBJECT_IDS, ids_path, file_path.."."..OBJECT)
+                                    if not child.include_weapon then
+                                        FileManager:AddFileWithCheck(MAT_CONFIG_IDS, ids_path, file_path.."."..MAT_CONFIG)
+                                    end
                                 end
-                                if child.include_cooked_physics then
-                                    FileManager:AddFile(COOKED_PHYSICS_IDS, ids_path, CP_DEFAULT)
-                                end
-								if most or child.include_textures then
+								if (most and child.include_textures ~= false) or child.include_textures then
 									FileManager:AddFileWithCheck(TEXTURE_IDS, Idstring(path.."_df"), file_path.."_df" .."."..TEXTURE)
 									FileManager:AddFileWithCheck(TEXTURE_IDS, Idstring(path.."_nm"), file_path.."_nm" .."."..TEXTURE)
 								end
-								if all or child.include_sequence then
+								if (all and child.include_sequence ~= false) or child.include_sequence then
 									FileManager:AddFileWithCheck(SEQ_MANAGER_IDS, ids_path, file_path.."."..SEQ_MANAGER)
 								end
 							end
