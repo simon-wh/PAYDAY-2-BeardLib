@@ -12,7 +12,12 @@ function WeaponModule:init(...)
         {param = "factory.optional_types", action = "remove_metas"},
         {param = "factory.animations", action = "remove_metas"},
         {param = "factory.override", action = {"remove_metas", "shallow_no_number_indexes"}},
-        {param = "factory.adds", action = {"remove_metas", "shallow_no_number_indexes"}}
+        {param = "factory.adds", action = {"remove_metas", "shallow_no_number_indexes"}},
+        {param = "factory.sight_adds", action = {"remove_metas", "shallow_no_number_indexes"}},
+        {param = "stance.standard.shoulders.rotation", action = "normalize"},
+        {param = "stance.steelsight.shoulders.rotation", action = "normalize"},
+        {param = "stance.crouched.shoulders.rotation", action = "normalize"},
+        {param = "stance.bipod.shoulders.rotation", action = "normalize"},
 	})
 	
     return WeaponModule.super.init(self, ...)
