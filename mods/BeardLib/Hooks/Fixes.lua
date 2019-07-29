@@ -65,6 +65,30 @@ elseif F == "blackmarketmanager" then
         end
         return orig_string_mask(self, ...)
     end
+
+    --Fixes #211.
+    --Fixes duplicates with custom weapon mods that use gloval values by forcing 1 of each weapon mod.
+    local orig_get_mods = BlackMarketManager.get_dropable_mods_by_weapon_id
+    function BlackMarketManager:get_dropable_mods_by_weapon_id(weapon_id, weapon_data)
+        local parts = tweak_data.weapon.factory.parts
+        local droppable_mods = orig_get_mods(self, weapon_id, weapon_data)
+        for k, v in pairs(droppable_mods) do
+            local new_tbl = {}
+            local duplicate = {}
+            for _, drop in pairs(v) do
+                if not duplicate[drop[1]] then
+                    local part = parts[drop[1]]
+                    if part and part.global_value and not part.allow_duplicates then
+                        drop[2] = part.global_value
+                        duplicate[drop[1]] = true
+                    end
+                    table.insert(new_tbl, drop)
+                end
+            end
+            droppable_mods[k] = new_tbl
+        end
+        return droppable_mods
+    end
 elseif F == "crewmanagementgui" then
     local orig = CrewManagementGui.populate_primaries
     --Blocks out custom weapons that don't have support for AI.
