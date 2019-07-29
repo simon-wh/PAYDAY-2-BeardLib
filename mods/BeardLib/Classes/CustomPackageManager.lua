@@ -78,6 +78,7 @@ local UNIT_MAT = "unit_mat"
 local UNIT_SEQ = "unit_seq"
 local UNIT_MAT_SEQ = "unit_mat_seq"
 local UNIT_THQ = "unit_thq"
+local UNIT_MAT_THQ = "unit_mat_thq"
 local UNIT_NPC = "unit_npc"
 local UNIT_CC = "unit_cc"
 local UNIT_MAT_CC = "unit_mat_cc"
@@ -93,7 +94,8 @@ local UNIT_SIMPLE_SEQ = "simple_seq"
 --simple_seq: Adds sequence manager.
 --simple: Adds nothing.
 
---thq: Adds _thq material config.
+--thq: Adds _thq, material config and textures.
+--mat_thq: Adds _thq and material_config.
 --npc: Adds _npc unit.
 --cc: Adds _thq, _cc, material_config, textures and cc texture.
 --mat_cc: Adds _thq, _cc and material_config.
@@ -109,6 +111,7 @@ local UNIT_SHORTCUTS = {
     [UNIT_NPC] = true,
     [UNIT_CC] = true,
     [UNIT_MAT_CC] = true,
+    [UNIT_MAT_THQ] = true,
     [UNIT_SIMPLE_SEQ] = true
 }
 
@@ -166,14 +169,7 @@ function C:LoadPackageConfig(directory, config, mod, temp)
                     self:LoadPackageConfig(directory, child)
                 elseif UNIT_SHORTCUTS[typ] then
                     local ids_path = Idstring(path)
-
-
-
                     local file_path = child.full_path or Path:Combine(directory, config.file_path or path)
-
-
-
-
 
                     FileManager:AddFileWithCheck(UNIT_IDS, ids_path, file_path.."."..UNIT)
                     if not child.custom_cp then
@@ -190,10 +186,11 @@ function C:LoadPackageConfig(directory, config, mod, temp)
                     local cc = typ == UNIT_CC
                     local mat_cc = typ == UNIT_MAT_CC
                     local thq = typ == UNIT_THQ
+                    local mat_thq = typ == UNIT_MAT_THQ
 
-                    if all or mat or tex or seq or mat_seq or thq or cc or mat_cc then
+                    if all or mat or tex or seq or mat_seq or thq or cc or mat_cc or mat_thq then
                         FileManager:AddFileWithCheck(MAT_CONFIG_IDS, ids_path, file_path.."."..MAT_CONFIG)
-                        if tex or seq or cc then
+                        if tex or seq or cc or thq then
                             FileManager:AddFileWithCheck(TEXTURE_IDS, Idstring(path.."_df"), file_path.."_df".."."..TEXTURE)
                             FileManager:AddFileWithCheck(TEXTURE_IDS, Idstring(path.."_nm"), file_path.."_nm".."."..TEXTURE)
                         end
@@ -245,6 +242,14 @@ function C:LoadPackageConfig(directory, config, mod, temp)
                             end
                         end
                         if load then
+                            if ids_ext == UNIT_IDS then
+								if child.include_default then --Old
+									FileManager:AddFileWithCheck(MODEL_IDS, ids_path, file_path.."."..MODEL)
+									FileManager:AddFileWithCheck(OBJECT_IDS, ids_path, file_path.."."..OBJECT)
+									FileManager:AddFileWithCheck(MAT_CONFIG_IDS, ids_path, file_path.."."..MAT_CONFIG)
+									FileManager:AddFile(COOKED_PHYSICS_IDS, ids_path, CP_DEFAULT)
+                                end
+							end
                             FileManager:AddFile(ids_ext, ids_path, file_path_ext)
                             if child.default_cp then
                                 FileManager:AddFile(COOKED_PHYSICS_IDS, ids_path, CP_DEFAULT)
@@ -257,7 +262,7 @@ function C:LoadPackageConfig(directory, config, mod, temp)
 							end
                         end
                     else
-                        BeardLib:log("[ERROR] File does not exist! %s", tostring(file_path))
+                        BeardLib:log("[ERROR] File does not exist! %s", tostring(file_path_ext))
                     end
                 else
                     BeardLib:log("[ERROR] Node in %s does not contain a definition for both type and path", tostring(directory))
