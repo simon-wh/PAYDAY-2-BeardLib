@@ -179,7 +179,7 @@ function ModCore:AddModule(module_tbl)
                     else
                         if not node_obj._loose or node_obj._name ~= node_obj.type_name then
                             if self[node_obj._name] then
-                                self:log("The name of module: %s already exists in the mod table, please make sure this is a unique name!", node_obj._name)
+                                self:log("The name of module: %s (%s) already exists in the mod table, please make sure this is a unique name!", node_obj._name, node_obj.type_name)
                             end
 
                             self[node_obj._name] = node_obj
