@@ -27,6 +27,7 @@ function WeaponModModule:RegisterHook()
             config.perks = {config.perks}
         end
         local based_on = self:GetBasedOn(f_self.parts)
+        config.unit = config.unit or "units/mods/weapons/wpn_fps_"..id.."/wpn_fps_"..id
         local data = table.merge(deep_clone(based_on and f_self.parts[based_on] or {}), table.merge({
             name_id = config.name_id or "bm_wp_" .. id,
             unit = config.unit,
@@ -39,7 +40,7 @@ function WeaponModModule:RegisterHook()
             stats = table.merge({value=0}, BeardLib.Utils:RemoveMetas(config.stats, true) or {}),
             type = config.type,
             animations = config.animations,
-            is_a_unlockable = config.is_a_unlockable,
+            is_a_unlockable = true,
             custom = true
         }, config))
         if config.merge_data then
@@ -59,13 +60,13 @@ function WeaponModModule:RegisterHook()
 	--Due to some parts getting inserted to uses_parts in blackmarket tweakdata I had to push this event to a different point.
     Hooks:Add("BeardLibAddCustomWeaponModsToWeapons", id .. "AddWeaponModToWeapons", function(f_self)
         config.weapons = config.weapons or {}
-        local based_on = self:GetBasedOn(f_self)
+        local based_on = self:GetBasedOn(f_self.parts)
 
         --Inheritance
         if based_on then
-            for id, weap in pairs(f_self) do
-                if weap.uses_parts and table.contains(weap.uses_parts, based_on) and not table.contains(config.weapon, weap.id) then
-                    table.insert(weap.uses_parts, weap.id)
+            for _, weap in pairs(f_self) do
+                if weap.uses_parts and table.contains(weap.uses_parts, based_on) and not table.contains(weap.uses_parts, id) then
+                    table.insert(weap.uses_parts, id)
                 end
                 if weap.adds and weap.adds[based_on] and not weap.adds[id] then
                     weap.adds[id] = deep_clone(weap.adds[based_on])
@@ -75,10 +76,10 @@ function WeaponModModule:RegisterHook()
                 end
             end
             for _, part in pairs(f_self.parts) do
-                if part.override[based_on] then
+                if part.override and part.override[based_on] then
                     part.override[id] = deep_clone(part.override[based_on])
                 end
-                if not table.contains(part.forbids, based_on) then
+                if part.forbids and table.contains(part.forbids, based_on) then
                     table.insert(part.forbids, id)
                 end
             end
@@ -104,18 +105,7 @@ function WeaponModModule:RegisterHook()
             for weapon_id, override in pairs(config.weapons_override) do
                 local weap = f_self[weapon_id]
                 if weap then
-                    weap.override = weap.override or {}
-                    weap.override[id] = override
-                end
-            end
-        end
-        
-        if config.weapons_adds then
-            for weapon_id, adds in pairs(config.weapons_adds) do
-                local weap = f_self[weapon_id]
-                if weap then
-                    weap.adds = weap.adds or {}
-                    weap.adds[id] = adds
+                    weap.override[id] = weap.override
                 end
             end
         end
@@ -124,8 +114,7 @@ function WeaponModModule:RegisterHook()
             for part_id, override in pairs(config.parts_override) do
                 local part = f_self.parts[part_id]
                 if part then
-                    part.override = part.override or {}
-                    part.override[id] = override
+                    part.override[id] = part.override[id]
                 end
             end
         end
