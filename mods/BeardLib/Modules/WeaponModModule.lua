@@ -1,5 +1,20 @@
 WeaponModModule = WeaponModModule or class(ItemModuleBase)
 WeaponModModule.type_name = "WeaponMod"
+function WeaponModModule:init(...)
+    self.required_params = {}
+    self.clean_table = table.add(clone(self.clean_table), {
+        {param = "stats", action = "remove_metas"},
+        {param = "stance_mod", action = function(tbl)
+            for _, stance in pairs(tbl) do
+                if stance.rotation then
+                    stance.rotation = BeardLib.Utils:normalize_string_value(stance.rotation)
+                end
+            end
+        end},
+	})
+	
+    return WeaponModule.super.init(self, ...)
+end
 
 function WeaponModModule:GetBasedOn(f_self, based_on)
     f_self = f_self or tweak_data.weapon.factory.parts
