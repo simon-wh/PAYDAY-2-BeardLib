@@ -1,5 +1,5 @@
 SoundsModule = SoundsModule or class(ModuleBase)
-SoundsModule.type_id = "Sounds"
+SoundsModule.type_name = "Sounds"
 SoundsModule.auto_load = false
 
 function SoundsModule:init(...)
@@ -137,4 +137,4 @@ function SoundsModule:ReadSounds(data, prev_dir)
 	end
 end
 
-BeardLib:RegisterModule(SoundsModule.type_id, SoundsModule)
+BeardLib:RegisterModule(SoundsModule.type_name, SoundsModule)
