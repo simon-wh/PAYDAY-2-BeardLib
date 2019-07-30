@@ -2,6 +2,14 @@ if not MusicManager.playlist then
 	return
 end
 
+CustomSoundManager:CreateSourceHook("BeardLibCustomMenuTrackFix", function(name, source)
+	if name == "HUDLootScreen" or name == "cleanup" then
+		source:pre_hook("FixCustomTrack", function(event)
+			managers.music:attempt_play(nil, event)
+		end)
+	end
+end)
+
 function MusicManager:check_playlist(is_menu)
     local playlist = is_menu and self:playlist_menu() or self:playlist()
     local tracklist = is_menu and tweak_data.music.track_menu_list or tweak_data.music.track_list
@@ -82,6 +90,9 @@ end
 
 local movie_ids = Idstring("movie")
 function MusicManager:attempt_play(track, event, stop)
+	if event == "music_uno_fade_reset" then
+		return
+	end
 	if stop then
 		self:stop_custom()
 	end

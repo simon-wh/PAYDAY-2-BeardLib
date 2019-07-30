@@ -296,6 +296,14 @@ elseif F == "playermovement" then
             self:update_stamina(t, dt)
             self:update_teleport(t, dt)
         end
+    else
+        local trigger = PlayerMovement.trigger_teleport
+        function PlayerMovement:trigger_teleport(data, ...)
+            data.fade_in = data.fade_in or 0
+            data.sustain = data.sustain or 0
+            data.fade_out = data.fade_out or 0
+            return trigger(self, data, ...)
+        end
     end
 elseif F == "dialogmanager" then
 	Hooks:PreHook(DialogManager, "queue_dialog", "BeardLibQueueDialogFixIds", function(self, id)

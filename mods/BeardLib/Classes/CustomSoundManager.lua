@@ -4,6 +4,7 @@ C.sources = {}
 C.stop_ids = {}
 C.float_ids = {}
 C.engine_sources = {}
+C.create_source_hooks = {}
 C.sound_ids = {}
 C.buffers = {}
 C.redirects = {}
@@ -280,23 +281,54 @@ function C:Redirects() return self.redirects end
 function C:Sources() return self.sources end
 function C:Buffers() return self.buffers end
 
+function C:CreateSourceHook(id, func)
+    table.insert(self.create_source_hooks, {id = id, func = func})
+end
+
+function C:RemoveCreateSourceHook(id)
+    for i, hook in pairs(self.create_source_hooks) do
+        if hook.id == id then
+            table.remove(self.create_source_hooks, i)
+            return
+        end
+    end
+end
+
 function C:Open()
 	if self.Closed then
 		return
 	end
 	if XAudio and SoundSource and Unit then
-		local SoundSource = SoundSource
+        local SoundSource = SoundSource
 		if type(SoundSource) == "userdata" then
 			SoundSource = getmetatable(SoundSource)
 		end
 		local sources = CustomSoundManager.engine_sources
+		local create_source_hooks = CustomSoundManager.create_source_hooks
 	
 		local Unit = Unit
 		if type(Unit) == "userdata" then
 			Unit = getmetatable(Unit)
 		end
-	
-		local orig = Unit.sound_source
+        
+		local SoundDevice = SoundDevice
+		if type(SoundDevice) == "userdata" then
+			SoundDevice = getmetatable(SoundDevice)
+        end
+        
+        local create_source = SoundDevice.create_source
+        function SoundDevice:create_source(name, ...)
+            local source = create_source(self, name, ...)  
+            if source then
+                source:get_data().name = name
+                for _, hook in pairs(create_source_hooks) do
+                    hook.func(name, source)
+                end
+            end
+            return source
+        end
+
+        local orig = Unit.sound_source
 		function Unit:sound_source(...)
 			local ss = orig(self, ...)
 			if ss then
@@ -305,14 +337,25 @@ function C:Open()
 			return ss
 		end
 		
-		function SoundSource:get_data()
+        function SoundSource:get_data()
 			--:(
 			local key = self:key()
 			local data = sources[key] or {}
 			sources[key] = data 
 			return data
 		end
-	
+    
+        function SoundSource:hook(id, func)
+            local data = self:get_data()
+            data.hooks = data.hoks or {}
+            table.insert(data.hooks, {func = func, id = id})
+        end
+           
+        function SoundSource:pre_hook(id, func)
+            local data = self:get_data()
+            data.pre_hooks = data.pre_hooks or {}
+            table.insert(data.pre_hooks, {func = func, id = id})
+        end 
 		--Thanks for not making get functions ovk :)
 		function SoundSource:get_link()
 			return self:get_data().linking
@@ -370,14 +413,29 @@ function C:Open()
 	
 		SoundSource._post_event = SoundSource._post_event or SoundSource.post_event
 
-		function SoundSource:post_event(event, clbk, cookie, ...)
+        function SoundSource:post_event(event, clbk, cookie, ...)
+            local data = self:get_data(true)
+            if data.pre_hooks then
+                for _, hook in pairs(data.pre_hooks) do
+                    if hook.func(event, clbk, cookie) == true then
+                        return
+                    end
+                end
+            end
 			event = CustomSoundManager:Redirect(event, self:get_prefixes())
 			local custom_source = CustomSoundManager:CheckSoundID(event, self, clbk, cookie)
 			if custom_source then
 				return custom_source
 			else
 				return self:_post_event(event, clbk, cookie, ...)
-			end
+            end
+            if data.hooks then
+                for _, hook in pairs(data.hooks) do
+                    if hook.func(event, clbk, cookie) == true then
+                        return
+                    end
+                end
+            end
 		end
 	else
 		BeardLib:log("Something went wrong when trying to initialize the custom sound manager hook")
