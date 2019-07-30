@@ -27,10 +27,18 @@ function WeaponModModule:GetBasedOn(f_self, based_on)
 end
 
 function WeaponModModule:RegisterHook()
-    self._config.default_amount = self._config.default_amount and tonumber(self._config.default_amount) or 1
-    self._config.global_value = self._config.global_value or self.defaults.global_value
-    self._config.droppable = NotNil(self._config.droppable, true)
     local config = self._config
+
+    config.default_amount = config.default_amount and tonumber(config.default_amount) or 1
+    config.global_value =config.global_value or self.defaults.global_value
+    local available = true
+    if config.hidden then
+        available = false
+    end
+    config.droppable = NotNil(config.droppable, available)
+    if config.drop == false and config.is_a_unlockable == false then
+        config.droppable = false
+    end
     local id = config.id
 
     Hooks:Add("BeardLibCreateCustomWeaponMods", id .. "AddWeaponModTweakData", function(f_self)
@@ -55,7 +63,7 @@ function WeaponModModule:RegisterHook()
             stats = table.merge({value=0}, BeardLib.Utils:RemoveMetas(config.stats, true) or {}),
             type = config.type,
             animations = config.animations,
-            is_a_unlockable = true,
+            is_a_unlockable = available,
             custom = true
         }, config))
         if config.merge_data then
@@ -74,11 +82,15 @@ function WeaponModModule:RegisterHook()
 	
 	--Due to some parts getting inserted to uses_parts in blackmarket tweakdata I had to push this event to a different point.
     Hooks:Add("BeardLibAddCustomWeaponModsToWeapons", id .. "AddWeaponModToWeapons", function(f_self)
+        if config.droppable == false and config.is_a_unlockable == false then
+            return
+        end
+        
         config.weapons = config.weapons or {}
         local based_on = self:GetBasedOn(f_self.parts)
-
+        
         --Inheritance
-        if based_on then
+        if based_on and config.inherit ~= false then
             for _, weap in pairs(f_self) do
                 if weap.uses_parts and table.contains(weap.uses_parts, based_on) and not table.contains(weap.uses_parts, id) then
                     table.insert(weap.uses_parts, id)
@@ -116,23 +128,36 @@ function WeaponModModule:RegisterHook()
             end
         end
 
-        if config.weapons_override then
-            for weapon_id, override in pairs(config.weapons_override) do
-                local weap = f_self[weapon_id]
-                if weap then
-                    weap.override[id] = weap.override
+        local function merge(tbl, what, tweak)
+            if tbl then
+                for wpn_or_prt_id, merge in pairs(tbl) do
+                    local weap = (tweak or f_self)[wpn_or_prt_id]
+                    if weap then
+                        weap[what][id] = table.merge(weap[what][id], merge)
+                    end
                 end
             end
         end
 
-        if config.parts_override then
-            for part_id, override in pairs(config.parts_override) do
-                local part = f_self.parts[part_id]
-                if part then
-                    part.override[id] = part.override[id]
+        local function override(tbl, what, tweak)
+            if tbl then
+                for wpn_or_prt_id, override in pairs(tbl) do
+                    local weap = (tweak or f_self)[wpn_or_prt_id]
+                    if weap then
+                        weap[what][id] = override
+                    end
                 end
             end
         end
+
+
+        override(config.weapons_adds, "adds")
+        override(config.weapons_override, "override")
+        override(config.parts_override, "override", f_self.parts)
+
+        merge(config.merge_weapons_adds, "adds")
+        merge(config.merge_weapons_override, "override")
+        merge(config.merge_parts_override, "override", f_self.parts)
 
         if config.parts_forbids then
             for _, part_id in pairs(config.parts_forbids) do
