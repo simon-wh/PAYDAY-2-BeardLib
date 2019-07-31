@@ -249,7 +249,8 @@ function C:LoadPackageConfig(directory, config, mod, temp)
                                 if not child.custom_cp and not DB:has(COOKED_PHYSICS_IDS, ids_path) then
                                     FileManager:AddFile(COOKED_PHYSICS_IDS, ids_path, CP_DEFAULT)
                                 end
-							end
+                            end
+                            FileManager:AddFile(ids_ext, ids_path, file_path_ext)
                             if child.reload then
                                 PackageManager:reload(ids_ext, ids_path)
                             end
