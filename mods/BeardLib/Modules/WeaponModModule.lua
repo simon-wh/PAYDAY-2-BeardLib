@@ -173,6 +173,7 @@ function WeaponModModule:RegisterHook()
             for _, part_id in ipairs(config.parts_forbids) do
                 local part = f_self.parts[part_id]
                 if part then
+                    part.forbids = part.forbids or {}
                     if not table.contains(part.forbids, id) then
                         table.insert(part.forbids, id)
                     end
