@@ -90,24 +90,32 @@ function WeaponModModule:RegisterHook()
         local based_on = self:GetBasedOn(f_self.parts)
         
         --Inheritance
-        if based_on and config.inherit ~= false then
+        local inherit = config.inherit
+        config.inherit_weapons = NotNil(config.inherit_weapons, inherit)
+        config.inherit_adds = NotNil(config.inherit_adds, inherit)
+        config.inherit_override = NotNil(config.inherit_override, inherit)
+        config.inherit_parts_override = NotNil(config.inherit_parts_override, inherit)
+        config.inherit_parts_forbids = NotNil(config.inherit_parts_forbids, inherit)
+        if based_on then
             for _, weap in pairs(f_self) do
-                if weap.uses_parts and table.contains(weap.uses_parts, based_on) and not table.contains(weap.uses_parts, id) then
+                if config.inherit_weapons and weap.uses_parts and table.contains(weap.uses_parts, based_on) and not table.contains(weap.uses_parts, id) then
                     table.insert(weap.uses_parts, id)
                 end
-                if weap.adds and weap.adds[based_on] and not weap.adds[id] then
+                if config.inherit_adds and weap.adds and weap.adds[based_on] and not weap.adds[id] then
                     weap.adds[id] = deep_clone(weap.adds[based_on])
                 end
-                if weap.override and weap.override[based_on] and not weap.override[id] then
+                if config.inherit_override and weap.override and weap.override[based_on] and not weap.override[id] then
                     weap.override[id] = deep_clone(weap.override[based_on])
                 end
             end
-            for _, part in pairs(f_self.parts) do
-                if part.override and part.override[based_on] then
-                    part.override[id] = deep_clone(part.override[based_on])
-                end
-                if part.forbids and table.contains(part.forbids, based_on) then
-                    table.insert(part.forbids, id)
+            if config.inherit_parts_override or config.inherit_parts_forbids then
+                for _, part in pairs(f_self.parts) do
+                    if config.inherit_parts_override and part.override and part.override[based_on] then
+                        part.override[id] = deep_clone(part.override[based_on])
+                    end
+                    if config.inherit_parts_forbids and part.forbids and table.contains(part.forbids, based_on) then
+                        table.insert(part.forbids, id)
+                    end
                 end
             end
         end
@@ -130,9 +138,10 @@ function WeaponModModule:RegisterHook()
 
         local function merge(tbl, what, tweak)
             if tbl then
-                for wpn_or_prt_id, merge in pairs(tbl) do
+                for wpn_or_prt_id, merge in ipairs(tbl) do
                     local weap = (tweak or f_self)[wpn_or_prt_id]
                     if weap then
+                        weap[what] = weap[what] or {}
                         weap[what][id] = table.merge(weap[what][id], merge)
                     end
                 end
@@ -141,9 +150,10 @@ function WeaponModModule:RegisterHook()
 
         local function override(tbl, what, tweak)
             if tbl then
-                for wpn_or_prt_id, override in pairs(tbl) do
+                for wpn_or_prt_id, override in ipairs(tbl) do
                     local weap = (tweak or f_self)[wpn_or_prt_id]
                     if weap then
+                        weap[what] = weap[what] or {}
                         weap[what][id] = override
                     end
                 end
@@ -160,10 +170,14 @@ function WeaponModModule:RegisterHook()
         merge(config.merge_parts_override, "override", f_self.parts)
 
         if config.parts_forbids then
-            for _, part_id in pairs(config.parts_forbids) do
+            for _, part_id in ipairs(config.parts_forbids) do
                 local part = f_self.parts[part_id]
-                if not table.contains(part.forbids, id) then
-                    table.insert(part.forbids, id)
+                if part then
+                    if not table.contains(part.forbids, id) then
+                        table.insert(part.forbids, id)
+                    end
+                else
+                    self:log("[Warning] Mod with ID %s does not exist. Cannot add part to forbids")
                 end
             end    
         end
