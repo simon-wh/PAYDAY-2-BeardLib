@@ -30,7 +30,9 @@ function MaskModule:RegisterHook()
             global_value = self.defaults.global_value,
             custom = true
         }, self._config.item or self._config)
-        data.unit = data.unit or "units/mods/masks/msk_"..self._id.."/msk_"..self._id
+        if self._config.guess_unit ~= false then
+            data.unit = data.unit or "units/mods/masks/msk_"..self._id.."/msk_"..self._id
+        end
         bm_self.masks[self._config.id] = data
         if data.drop ~= false and data.dlc then
             TweakDataHelper:ModifyTweak({{

@@ -50,7 +50,9 @@ function WeaponModModule:RegisterHook()
             config.perks = {config.perks}
         end
         local based_on = self:GetBasedOn(f_self.parts)
-        config.unit = config.unit or "units/mods/weapons/wpn_fps_"..id.."/wpn_fps_"..id
+        if config.guess_unit then
+            config.unit = config.unit or "units/mods/weapons/wpn_fps_"..id.."/wpn_fps_"..id
+        end
         local data = table.merge(deep_clone(based_on and f_self.parts[based_on] or {}), table.merge({
             name_id = config.name_id or "bm_wp_" .. id,
             unit = config.unit,
