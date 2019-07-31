@@ -72,7 +72,7 @@ local COOKED_PHYSICS = "cooked_physics"
 
 
 local UNIT_ALL = "unit_all"
-local UNIT_SIMPLE = "unit_simple"
+local UNIT_OBJ = "unit_obj"
 local UNIT_TEX = "unit_tex"
 local UNIT_MAT = "unit_mat"
 local UNIT_SEQ = "unit_seq"
@@ -82,17 +82,16 @@ local UNIT_MAT_THQ = "unit_mat_thq"
 local UNIT_NPC = "unit_npc"
 local UNIT_CC = "unit_cc"
 local UNIT_MAT_CC = "unit_mat_cc"
-local UNIT_SIMPLE_SEQ = "simple_seq"
+local UNIT_OBJ_SEQ = "unit_obj_seq"
 
 --Default: unit, cooked phyiscs, model, object.
 
---all: Adds Adds material_config, textures and sequence manager.
 --tex: Adds material_config and textures. 
 --mat: Adds material_config.
 --mat_seq: Adds material_config and sequence_manager.
 --seq: Adds material_config, textures and sequence_manager.
---simple_seq: Adds sequence manager.
---simple: Adds nothing.
+--obj_seq: Adds sequence manager.
+--obj: Adds nothing.
 
 --thq: Adds _thq, material config and textures.
 --mat_thq: Adds _thq and material_config.
@@ -101,8 +100,7 @@ local UNIT_SIMPLE_SEQ = "simple_seq"
 --mat_cc: Adds _thq, _cc and material_config.
 
 local UNIT_SHORTCUTS = {
-    [UNIT_ALL] = true,
-    [UNIT_SIMPLE] = true,
+    [UNIT_OBJ] = true,
     [UNIT_TEX] = true,
     [UNIT_MAT] = true,
     [UNIT_SEQ] = true,
@@ -179,7 +177,6 @@ function C:LoadPackageConfig(directory, config, mod, temp)
                     FileManager:AddFileWithCheck(MODEL_IDS, ids_path, file_path.."."..MODEL)
                     FileManager:AddFileWithCheck(OBJECT_IDS, ids_path, file_path.."."..OBJECT)
 
-                    local all = typ == UNIT_ALL
                     local mat = typ == UNIT_MAT
                     local mat_seq = typ == UNIT_MAT_SEQ
                     local seq = typ == UNIT_SEQ
@@ -188,7 +185,7 @@ function C:LoadPackageConfig(directory, config, mod, temp)
                     local thq = typ == UNIT_THQ
                     local mat_thq = typ == UNIT_MAT_THQ
 
-                    if all or mat or tex or seq or mat_seq or thq or cc or mat_cc or mat_thq then
+                    if mat or tex or seq or mat_seq or thq or cc or mat_cc or mat_thq then
                         FileManager:AddFileWithCheck(MAT_CONFIG_IDS, ids_path, file_path.."."..MAT_CONFIG)
                         if tex or seq or cc or thq then
                             FileManager:AddFileWithCheck(TEXTURE_IDS, Idstring(path.."_df"), file_path.."_df".."."..TEXTURE)
@@ -233,7 +230,7 @@ function C:LoadPackageConfig(directory, config, mod, temp)
 					local file_path = child.full_path or Path:Combine(directory, config.file_path or path)
 					local file_path_ext = file_path.."."..typ
                     if FileIO:Exists(file_path_ext) then
-                        local load = child.force
+                        local load = NotNil(child.force, config.force)
                         if not load then
                             if child.force_if_not_loaded then
                                 load = not PackageManager:has(ids_ext, ids_path)
@@ -249,11 +246,10 @@ function C:LoadPackageConfig(directory, config, mod, temp)
 									FileManager:AddFileWithCheck(MAT_CONFIG_IDS, ids_path, file_path.."."..MAT_CONFIG)
 									FileManager:AddFile(COOKED_PHYSICS_IDS, ids_path, CP_DEFAULT)
                                 end
+                                if not child.custom_cp and not DB:has(COOKED_PHYSICS_IDS, ids_path) then
+                                    FileManager:AddFile(COOKED_PHYSICS_IDS, ids_path, CP_DEFAULT)
+                                end
 							end
-                            FileManager:AddFile(ids_ext, ids_path, file_path_ext)
-                            if child.default_cp then
-                                FileManager:AddFile(COOKED_PHYSICS_IDS, ids_path, CP_DEFAULT)
-                            end
                             if child.reload then
                                 PackageManager:reload(ids_ext, ids_path)
                             end
