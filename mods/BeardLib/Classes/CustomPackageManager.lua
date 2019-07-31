@@ -110,7 +110,7 @@ local UNIT_SHORTCUTS = {
     [UNIT_CC] = true,
     [UNIT_MAT_CC] = true,
     [UNIT_MAT_THQ] = true,
-    [UNIT_SIMPLE_SEQ] = true
+    [UNIT_OBJ_SEQ] = true
 }
 
 local DF_NM = "df_nm"
