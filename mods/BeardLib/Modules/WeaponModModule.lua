@@ -73,7 +73,7 @@ function WeaponModModule:RegisterHook()
             a_obj = config.a_obj,
             dlc = config.droppable and (config.dlc or self.defaults.dlc),
             texture_bundle_folder = config.texture_bundle_folder,
-            pcs = config.pcs and BeardLib.Utils:RemoveNonNumberIndexes(config.pcs) or {},
+            pcs = config.pcs and BeardLib.Utils:RemoveNonNumberIndexes(config.pcs),
             stats = table.merge({value=0}, BeardLib.Utils:RemoveMetas(config.stats, true) or {}),
             type = config.type,
             animations = config.animations,
