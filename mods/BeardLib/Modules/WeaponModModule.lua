@@ -4,6 +4,18 @@ function WeaponModModule:init(...)
     self.required_params = {}
     self.clean_table = table.add(clone(self.clean_table), {
         {param = "stats", action = "remove_metas"},
+        {param = "weapons_adds", action = "shallow_no_number_indexes"},
+        {param = "weapons_override", action = "shallow_no_number_indexes"},
+        {param = "parts_override", action = "shallow_no_number_indexes"},
+        {param = "merge_weapons_adds", action = "shallow_no_number_indexes"},
+        {param = "merge_weapons_override", action = "shallow_no_number_indexes"},
+        {param = "merge_parts_override", action = "shallow_no_number_indexes"},
+        {param = "weapons_adds", action = "remove_metas"},
+        {param = "weapons_override", action = "remove_metas"},
+        {param = "parts_override", action = "remove_metas"},
+        {param = "merge_weapons_adds", action = "remove_metas"},
+        {param = "merge_weapons_override", action = "remove_metas"},
+        {param = "merge_parts_override", action = "remove_metas"},
         {param = "stance_mod", action = function(tbl)
             for _, stance in pairs(tbl) do
                 if stance.rotation then
@@ -61,7 +73,7 @@ function WeaponModModule:RegisterHook()
             a_obj = config.a_obj,
             dlc = config.droppable and (config.dlc or self.defaults.dlc),
             texture_bundle_folder = config.texture_bundle_folder,
-            pcs = config.pcs and BeardLib.Utils:RemoveNonNumberIndexes(config.pcs),
+            pcs = config.pcs and BeardLib.Utils:RemoveNonNumberIndexes(config.pcs) or {},
             stats = table.merge({value=0}, BeardLib.Utils:RemoveMetas(config.stats, true) or {}),
             type = config.type,
             animations = config.animations,
@@ -152,16 +164,17 @@ function WeaponModModule:RegisterHook()
 
         local function override(tbl, what, tweak)
             if tbl then
-                for wpn_or_prt_id, override in ipairs(tbl) do
-                    local weap = (tweak or f_self)[wpn_or_prt_id]
-                    if weap then
-                        weap[what] = weap[what] or {}
-                        weap[what][id] = override
+                for wpn_or_prt_id, override in pairs(tbl) do
+                    if type(override) == "table" then
+                        local weap = (tweak or f_self)[wpn_or_prt_id]
+                        if weap then
+                            weap[what] = weap[what] or {}
+                            weap[what][id] = override
+                        end
                     end
                 end
             end
         end
-
 
         override(config.weapons_adds, "adds")
         override(config.weapons_override, "override")
