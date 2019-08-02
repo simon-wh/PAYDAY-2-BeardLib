@@ -203,7 +203,7 @@ function C:LoadPackageConfig(directory, config, mod, temp)
                     end
             
                     if thq or cc or mat_cc then
-                        FileManager:AddFileWithCheck(UNIT_IDS, Idstring(path.."_thq"), file_path.."."..UNIT)
+                        FileManager:AddFileWithCheck(MAT_CONFIG_IDS, Idstring(path.."_thq"), file_path.."."..UNIT)
                     end
                     if cc or mat_cc then
                         if cc then
