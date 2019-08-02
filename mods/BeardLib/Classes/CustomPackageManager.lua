@@ -96,8 +96,8 @@ local UNIT_OBJ_SEQ = "unit_obj_seq"
 --thq: Adds _thq, material config and textures.
 --mat_thq: Adds _thq and material_config.
 --npc: Adds _npc unit.
---cc: Adds _thq, _cc, material_config, textures and cc texture.
---mat_cc: Adds _thq, _cc and material_config.
+--cc: Adds _thq, _cc, _cc_thq material_config, textures and cc texture.
+--mat_cc: Adds _thq, _cc, _cc_thq and material_config.
 
 local UNIT_SHORTCUTS = {
     [UNIT_OBJ] = true,
@@ -202,7 +202,7 @@ function C:LoadPackageConfig(directory, config, mod, temp)
                         FileManager:AddFileWithCheck(UNIT_IDS, Idstring(path.."_npc"), file_path.."_npc."..UNIT)
                     end
             
-                    if thq or typ == cc then
+                    if thq or cc or mat_cc then
                         FileManager:AddFileWithCheck(UNIT_IDS, Idstring(path.."_thq"), file_path.."."..UNIT)
                     end
                     if cc or mat_cc then

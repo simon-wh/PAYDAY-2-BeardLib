@@ -39,9 +39,11 @@ function FileIO:ReadConfig(path, tbl)
 	local file = self:Open(path, "r")
 	if file then
 		local config = ScriptSerializer:from_custom_xml(file:read("*all"))
-		for i, var in pairs(config) do
-			if type(var) == "string" then
-				config[i] = string.gsub(var, "%$(%w+)%$", tbl or self)
+		if tbl then
+			for i, var in pairs(config) do
+				if type(var) == "string" then
+					config[i] = string.gsub(var, "%$(%w+)%$", tbl)
+				end
 			end
 		end
 		return config
