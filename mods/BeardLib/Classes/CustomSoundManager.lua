@@ -264,7 +264,7 @@ function C:Close()
     end
 end
 
-function C:update(t, dt)
+function C:Update(t, dt)
     if self.Closed then
         return
     end

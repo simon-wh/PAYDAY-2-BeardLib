@@ -213,3 +213,20 @@ function table.script_merge(base_tbl, new_tbl)
         end
     end
 end
+
+--allows both key and index to be removed, useful for tables cleaned by XML:Clean
+function table.remove_key(tbl, key)
+    if type(key) == "number" and #tbl >= key then
+        table.remove(tbl, key)
+    else
+        tbl[key] = nil
+    end
+end
+
+--like table delete only allows key values(doesn't force table.remove which accepts only indices)
+function table.delete_value(tbl, value)
+	local key = table.get_key(tbl, value)
+	if key then
+		table.remove_key(tbl, key)
+	end
+end

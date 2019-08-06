@@ -39,17 +39,17 @@ end
 
 function Hooks:QuickClass(hooks_name)
     local clss = {name = hooks_name}
-    function clss:Post(object, func_s, hook_func)
-        Hooks:PostHook(object, func_s, hooks_name..func_s, hook_func)
+    function clss:Post(object, func_name, hook_func)
+        Hooks:PostHook(object, func_name, hooks_name..func_name, hook_func)
     end
-    function clss:Pre(object, func_s, hook_func)
-        Hooks:PreHook(object, func_s, hooks_name.."_pre_"..func_s, hook_func)
+    function clss:Pre(object, func_name, hook_func)
+        Hooks:PreHook(object, func_name, hooks_name.."_pre_"..func_name, hook_func)
     end
-    function clss:RemovePost(object, func_s)
-        Hooks:RemovePostHookWithObject(object, hooks_name..func_s)
+    function clss:RemovePost(object, func_name)
+        Hooks:RemovePostHookWithObject(object, hooks_name..func_name)
     end
-    function clss:RemovePre(object, func_s)
-        Hooks:RemovePreHookWithObject(object, func_s)
+    function clss:RemovePre(object, func_name)
+        Hooks:RemovePreHookWithObject(object, func_name)
     end
     return clss
 end
@@ -61,17 +61,17 @@ function Hooks:LazyClass(object, hooks_name)
     function clss:SetClass(object)
         self.object = object
     end
-    function clss:Post(func_s, hook_func)
-        Hooks:PostHook(clss.object, func_s, hooks_name..func_s, hook_func)
+    function clss:Post(func_name, hook_func)
+        Hooks:PostHook(clss.object, func_name, hooks_name..func_name, hook_func)
     end
-    function clss:Pre(func_s, hook_func)
-        Hooks:PreHook(clss.object, func_s, hooks_name.."_pre_"..func_s, hook_func)
+    function clss:Pre(func_name, hook_func)
+        Hooks:PreHook(clss.object, func_name, hooks_name.."_pre_"..func_name, hook_func)
     end
-    function clss:RemovePost(func_s)
-        Hooks:RemovePostHookWithObject(clss.object, hooks_name..func_s)
+    function clss:RemovePost(func_name)
+        Hooks:RemovePostHookWithObject(clss.object, hooks_name..func_name)
     end
-    function clss:RemovePre(func_s)
-        Hooks:RemovePreHookWithObject(clss.object, func_s)
+    function clss:RemovePre(func_name)
+        Hooks:RemovePreHookWithObject(clss.object, func_name)
     end
     return clss
 end

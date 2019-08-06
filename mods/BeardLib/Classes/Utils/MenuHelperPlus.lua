@@ -451,7 +451,7 @@ end
 
 Hooks:Register("BeardLibMenuHelperPlusInitMenus")
 
-Hooks:Add( "BeardLibMenuHelperPlusInitMenus", "MenuHelperPlusCreateMenus", function(menu_manager) 
+Hooks:Add("BeardLibMenuHelperPlusInitMenus", "MenuHelperPlusCreateMenus", function(menu_manager) 
 	for id, Menu in pairs(MenuHelperPlus:GetMenus()) do
 		menu_manager:register_menu(Menu.register_data)
 	end

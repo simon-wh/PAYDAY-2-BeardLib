@@ -9,7 +9,7 @@ function Utils:RefreshCurrentNode()
     managers.menu:active_menu().renderer:highlight_item(selected_item)
 end
 
-function Utils:CheckParamsValidty(tbl, schema)
+function Utils:CheckParamsValidity(tbl, schema)
     local ret = true
     for i = 1, #schema.params do
         local var = tbl[i]
@@ -21,7 +21,7 @@ function Utils:CheckParamsValidty(tbl, schema)
     return ret
 end
 
-function Utils:CheckParamValidty(func_name, vari, var, desired_type, allow_nil)
+function Utils:CheckParamValidity(func_name, vari, var, desired_type, allow_nil)
     if (var == nil and not allow_nil) or type(var) ~= desired_type then
         log(string.format("[%s] Parameter #%s, expected %s, got %s", func_name, vari, desired_type, tostring(var and type(var) or nil)))
         return false
@@ -284,10 +284,10 @@ function Utils:normalize_string_value(value)
 end
 
 
-function Utils:StringToValue(global_tbl_name, global_tbl, silent)
+function Utils:StringToValue(str, global_tbl, silent)
     local global_tbl = global_tbl or _G
-    if string.find(global_tbl_name, "%.") then
-        local global_tbl_split = string.split(global_tbl_name, "[.]")
+    if string.find(str, "%.") then
+        local global_tbl_split = string.split(str, "[.]")
         
         for _, str in pairs(global_tbl_split) do
             global_tbl = rawget(global_tbl, str)
@@ -299,10 +299,10 @@ function Utils:StringToValue(global_tbl_name, global_tbl, silent)
             end
         end
     else
-        global_tbl = rawget(global_tbl, global_tbl_name)
+        global_tbl = rawget(global_tbl, str)
         if not global_tbl then
             if not silent then
-                BeardLib:log("[ERROR] Key " .. global_tbl_name .. " does not exist in the current global table.")
+                BeardLib:log("[ERROR] Key " .. str .. " does not exist in the current global table.")
             end
             return nil
         end
@@ -313,6 +313,7 @@ end
 
 Utils.StringToTable = Utils.StringToValue
 
+--Use Utils.XML functions!
 function Utils:RemoveAllSubTables(tbl)
     for i, sub in pairs(tbl) do
         if type(sub) == "table" then
@@ -422,6 +423,7 @@ function Utils:RemoveMetas(tbl, shallow)
 	end
 	return tbl
 end
+--Use Utils.XML functions!
 
 local encode_chars = {
 	["\t"] = "%09",
@@ -446,14 +448,14 @@ function Utils:UrlEncode(str)
 end
 
 function Utils:ModExists(name)
-	local mod = self:FindMod(name)
-	return mod and mod:IsEnabled() or false
+    return self:FindMod(name) ~= nil
 end
 
 function Utils:ModLoaded(name)
-	return self:FindMod(name) ~= nil
+    local mod = self:FindMod(name)
+    return mod and mod:IsEnabled() or false
 end
-
+ 
 function Utils:FindMod(name)
     for _, mod in pairs(BeardLib.Mods) do
         if mod.Name == name then

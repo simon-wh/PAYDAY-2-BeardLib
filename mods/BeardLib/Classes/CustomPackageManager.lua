@@ -8,14 +8,13 @@ C.unload_on_restart = {}
 C.ext_convert = {dds = "texture", png = "texture", tga = "texture", jpg = "texture", bik = "movie"}
 
 function C:RegisterPackage(id, directory, config)
-    local func_name = "CustomPackageManager:RegisterPackage"
     if (not BeardLib.Utils:CheckParamsValidty({id, directory, config},
         {
-            func_name = func_name,
+            func_name = "CustomPackageManager:RegisterPackage",
             params = {
-                { type="string", allow_nil = false },
-                { type="string", allow_nil = false },
-                { type="table", allow_nil = false }
+                {type="string", allow_nil = false},
+                {type="string", allow_nil = false},
+                {type="table", allow_nil = false}
             }
         })) then
         return false

@@ -34,6 +34,7 @@ function mrotation.set_roll(rot, roll)
     return mrotation.set_yaw_pitch_roll(rot, rot:yaw(), rot:pitch(), roll)
 end
 
+--Not sure about these 2 functions. Any help with these would be appreicated
 function mrotation.step(rot, rot_a, rot_b, t)
 	mrotation.set_yaw_pitch_roll(
 		rot,

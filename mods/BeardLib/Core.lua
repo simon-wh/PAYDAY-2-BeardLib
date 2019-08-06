@@ -151,8 +151,8 @@ end
 
 function self:Update(t, dt)
 	for _, manager in pairs(self.managers) do
-		if manager.update then
-			manager:update(t, dt)
+		if manager.Update then
+			manager:Update(t, dt)
 		end
 	end
 	for id, beardlib_update in pairs(self._updaters) do
@@ -168,8 +168,8 @@ end
 
 function self:PausedUpdate(t, dt)
 	for _, manager in pairs(self.managers) do
-		if manager.update then
-			manager:update(t, dt)
+		if manager.Update then
+			manager:Update(t, dt, true)
 		end
 	end
 	for id, beardlib_paused_update in pairs(self._paused_updaters) do

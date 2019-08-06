@@ -34,6 +34,8 @@ function Path:GetFileNameWithoutExtension(str)
     return filename
 end
 
+Path.GetFileNameNoExt = Path.GetFileNameWithoutExtension
+
 function Path:GetFileExtension(str)
 	local filename = self:GetFileName(str)
 	if not filename then
