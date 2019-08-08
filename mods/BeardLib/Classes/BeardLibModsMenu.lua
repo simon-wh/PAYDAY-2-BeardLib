@@ -309,7 +309,15 @@ function BeardLibModsMenu:OpenSettings()
                 help = "beardlib_no_error_alert_help",
                 value = BeardLib.Options:GetValue("NoErrorAlert"),
                 on_callback = ClassClbk(self, "SetOption")
-            })            
+            })
+            holder:Toggle({
+                name = "OptimizedMusicLoad",
+                text = "beardlib_optimized_music_load",
+                help = "beardlib_optimized_music_load_help",
+                value = BeardLib.Options:GetValue("OptimizedMusicLoad"),
+                on_callback = ClassClbk(self, "SetOption")
+            })
+            
             if FileIO:Exists("mods/developer.txt") then
                 holder:Toggle({
                     name = "DevMode",

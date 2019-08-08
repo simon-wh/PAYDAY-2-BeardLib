@@ -1,10 +1,34 @@
 HeistMusic = HeistMusic or class(ItemModuleBase)
 HeistMusic.type_id = "HeistMusic"
 
+
+function HeistMusic:LoadBuffers()
+    for _, event in pairs(BeardLib.MusicMods[self._config.id].events) do
+        for _, source in pairs(event) do
+            if type(source) == "table" and source.module then
+                source.buffer = XAudio.Buffer:new(source.path)
+            end
+        end
+	end
+end
+
+function HeistMusic:UnloadBuffers()
+    for _, event in pairs(BeardLib.MusicMods[self._config.id].events) do
+        for _, source in pairs(event) do
+            if type(source) == "table" and source.module then
+                if source.buffer then
+                    source.buffer:close(true)
+                end
+                source.buffer = nil
+            end
+		end
+	end
+end
+
 function HeistMusic:MakeBuffer(source)
 	if source then
 		if FileIO:Exists(source) then
-			return XAudio.Buffer:new(source)
+			return BeardLib.OptimizedMusicLoad and {path = source, module = self} or XAudio.Buffer:new(source)
 		else
 			BeardLib:log("[ERROR] Source file '%s' does not exist, music id '%s'", tostring(source), tostring(self._config.id))
 			return nil
@@ -54,12 +78,10 @@ function HeistMusic:RegisterHook()
 	end
 
 	local preview_event = self._config.preview_event or "assault"
-	if preview_event then
-		local event = music.events[preview_event]
-		if event then
-			music.source = event.source
-			music.start_source = event.source
-		end
+	local event = music.events[preview_event]
+	if event then
+		music.source = event.source
+		music.start_source = event.source
 	end
 	
 	BeardLib.MusicMods[self._config.id] = music

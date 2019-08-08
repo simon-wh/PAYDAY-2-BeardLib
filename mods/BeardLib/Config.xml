@@ -36,6 +36,7 @@
 				<option name="NoErrorAlert" type="boolean" default_value="false"/>
 				<option name="DevMode" type="boolean" default_value="false"/>
 				<option name="LogSounds" type="boolean" default_value="false"/>
+				<option name="OptimizedMusicLoad" type="boolean" default_value="true"/>
 				
 				<option name="DisabledMods" type="table">
 					<default_value/>

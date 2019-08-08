@@ -1,10 +1,29 @@
 MenuMusicModule = MenuMusicModule or class(ItemModuleBase)
 MenuMusicModule.type_id = "MenuMusic"
 
+function MenuMusicModule:LoadBuffers()
+	for _, source in pairs(BeardLib.MusicMods[self._config.id]) do
+		if type(source) == "table" and source.module then
+			source.buffer = XAudio.Buffer:new(source.path)
+		end
+	end
+end
+
+function MenuMusicModule:UnloadBuffers()
+	for _, source in pairs(BeardLib.MusicMods[self._config.id]) do
+		if type(source) == "table" and source.module then
+			if source.buffer then
+				source.buffer:close(true)
+			end
+			source.buffer = nil
+		end
+	end
+end
+
 function MenuMusicModule:MakeBuffer(source)
 	if source then
 		if FileIO:Exists(source) then
-			return XAudio.Buffer:new(source)
+			return BeardLib.OptimizedMusicLoad and {path = source, module = self} or XAudio.Buffer:new(source)
 		else
 			BeardLib:log("[ERROR] Source file '%s' does not exist, music id '%s'", tostring(source), tostring(self._config.id))
 			return nil

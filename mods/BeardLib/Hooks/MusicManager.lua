@@ -151,8 +151,25 @@ end
 function MusicManager:play(src, use_xaudio, custom_volume)
 	self:stop_custom()
 	Global.music_manager.source:post_event("stop_all_music")
+	--Uncomment if unloading is ever needed
+	--[[if type(src) == "table" and src.module and self._last_module and self._last_module ~= src.module then
+		self._last_buffer.module:UnloadBuffers()
+	end]]
 	if use_xaudio then
 		if XAudio then
+			if type(src) == "table" and src.module then
+				if not src.buffer then
+					src.module:LoadBuffers()
+				end
+				if not src.buffer then
+					BeardLib:log("Something went wrong while trying to play the source")
+					return
+				end
+				src = src.buffer
+				self._last_module = src.module
+			else
+				self._last_module = nil
+			end
 			self._xa_source = XAudio.Source:new(src)
 			self._xa_source:set_type("music")
 			self._xa_source:set_relative(true)
