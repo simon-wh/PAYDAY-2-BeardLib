@@ -14,7 +14,7 @@ function Utils:CheckParamsValidity(tbl, schema)
     for i = 1, #schema.params do
         local var = tbl[i]
         local sc = schema.params[i]
-        if not self:CheckParamValidty(schema.func_name, i, var, sc.type, sc.allow_nil) then
+        if not self:CheckParamValidity(schema.func_name, i, var, sc.type, sc.allow_nil) then
             ret = false
         end
     end
