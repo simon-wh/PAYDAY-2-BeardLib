@@ -18,6 +18,8 @@ function WeaponSkinModule:RegisterHook()
     self._config.skin_folder = self._config.skin_folder and self:GetPath(self._config.skin_folder) or self:log("[ERROR] The weapon skin '%s' is not shipped with the skin folder.", self._config.skin_folder)
     self._config.locked = self._config.locked or nil
     self._config.unique_name = self._config.unique_name and self._config.name or nil
+    self._config.universal = self._config.universal or false
+    self._config.universal_id = self._config.id
 
     if self._config.skin_attachments then
         self._skin_attachments = self._config.skin_attachments
@@ -47,30 +49,20 @@ function WeaponSkinModule:RegisterHook()
         parts = skin_data:get_parts()
     }
 
-    Hooks:PostHook( DLCTweakData, "init", self._config.id .. "_AddSkinInventory", function(dlc_self)
-        table.insert( dlc_self.starter_kit.content.loot_drops,
-            {
-                type_items = "weapon_skins",
-                item_entry = self._config.id,
-                global_value = "normal"
-            }
-        )
-    end)
+    Hooks:PostHook(TweakData, "_init_pd2", self._config.id .. "_SkinData", function(tweak_self)
+        local config = self._config
 
-    Hooks:PostHook(BlackMarketTweakData, "_init_weapon_skins", self._config.id .. "_AddSkinData", function(bm_self)
-        if bm_self.weapon_skins[self._config.id] then
-            self:log("[ERROR] The weapon skin '%s' already exists in the tweak data table.", self._config.id)
+        if tweak_self.blackmarket.weapon_skins[config.id] then
+            self:log("[ERROR] The weapon skin '%s' already exists in the tweak data table.", config.id)
             return
         end
 
-        local config = self._config
-
-        bm_self.weapon_skins[config.id] = table.merge({
+        tweak_self.blackmarket.weapon_skins[config.id] = table.merge({
             name_id = config.name,
             desc_id = config.desc,
             is_a_unlockable = true,
             unique_name_id = config.unique_name,
-            texture_bundle_folder = self._config.id,
+            texture_bundle_folder = config.id,
             bonus = "recoil_p1", -- Aint gonna code a "statboost" version cause nobody would care for one. It's just to fill the table.
             reserve_quality = true,
             base_gradient = self._skin_design.base_gradient,
@@ -87,7 +79,65 @@ function WeaponSkinModule:RegisterHook()
             default_blueprint = self._skin_attachments,
             custom = true
         }, config)
-        --self:log("Added skin '%s' to the weapon '%s'", config.id, config.weapon_id)
+
+        table.insert( tweak_self.dlc.starter_kit.content.loot_drops, {
+            type_items = "weapon_skins",
+            item_entry = config.id,
+            global_value = "normal"
+        })
+
+        if config.universal then
+            local all_weapons_id = {}
+            local weapon_tweak = tweak_self.weapon
+
+            if weapon_tweak then
+                for key, value in pairs(weapon_tweak) do
+                    if not string.find(key, "npc") and not string.find(key, "module") and not string.find(key, "crew") then
+                        table.insert(all_weapons_id, key)
+                    end
+                end
+
+                for _, weapon_id in pairs(all_weapons_id) do
+                    if weapon_id ~= config.weapon_id then
+                        
+                        tweak_self.blackmarket.weapon_skins[config.id .. "_universal_" .. weapon_id] = table.merge({
+                            name_id = config.name,
+                            desc_id = config.desc,
+                            is_a_unlockable = true,
+                            unique_name_id = config.unique_name,
+                            texture_bundle_folder = config.id,
+                            bonus = "recoil_p1", -- Aint gonna code a "statboost" version cause nobody would care for one. It's just to fill the table.
+                            reserve_quality = true,
+                            base_gradient = self._skin_design.base_gradient,
+                            pattern_gradient = self._skin_design.pattern_gradient,
+                            pattern = self._skin_design.pattern,
+                            pattern_tweak = self._skin_design.pattern_tweak,
+                            pattern_pos = self._skin_design.pattern_pos,
+                            sticker = self._skin_design.sticker,
+                            uv_scale = self._skin_design.uv_scale,
+                            uv_offset_rot = self._skin_design.uv_offset_rot,
+                            cubemap_pattern_control = self._skin_design.cubemap_pattern_control,
+                            types = self._skin_design.types,
+                            parts = self._skin_design.parts,
+                            default_blueprint = self._skin_attachments,
+                            custom = true
+                        }, config)
+
+                        tweak_self.blackmarket.weapon_skins[config.id .. "_universal_" .. weapon_id].weapon_id = weapon_id
+
+                        if weapon_id ~= "saw" then
+                            tweak_self.blackmarket.weapon_skins[config.id .. "_universal_" .. weapon_id].weapon_ids = nil
+                        end
+
+                        table.insert( tweak_self.dlc.starter_kit.content.loot_drops, {
+                            type_items = "weapon_skins",
+                            item_entry = config.id .. "_universal_" .. weapon_id,
+                            global_value = "normal"
+                        })
+                    end
+                end
+            end
+        end
     end)
 end
 
