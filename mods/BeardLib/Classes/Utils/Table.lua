@@ -67,8 +67,16 @@ function table.add(t, items)
     return t
 end
 
+--[[
+    Does a dynamic search on the table. Table being an XML table containing _meta values.
+    To navigate through the table you'd write the `search_term` like this: "meta1/meta2/meta3".
+    If you want to find a specific meta with value set to something you can do: "meta1/meta2;param1=true"
+    The function returns you first the index of the result, then the table itself and then the table it's contained in.
+]]
+
 function table.search(tbl, search_term)
     local search_terms = {search_term}
+    local parent_tbl
 
     if string.find(search_term, "/") then
         search_terms = string.split(search_term, "/")
@@ -87,7 +95,7 @@ function table.search(tbl, search_term)
             if string.find(term, "=") then
                 local term_split = string.split(term, "=")
                 search_keys.params[term_split[1]] = assert(loadstring("return " .. term_split[2]))()
-                if not search_keys.params[term_split[1]] then
+                if search_keys.params[term_split[1]] == nil then
                     BeardLib:log(string.format("[ERROR] An error occurred while trying to parse the value %s", term_split[2]))
                 end
             elseif not search_keys._meta then
@@ -111,12 +119,7 @@ function table.search(tbl, search_term)
                 end
 
                 if valid then
-                    if i == 1 then
-                        if tbl[sub._meta] then
-                            tbl[sub._meta] = sub
-                        end
-                    end
-
+                    parent_tbl = tbl
                     tbl = sub
                     found_tbl = true
                     index = i
@@ -128,34 +131,49 @@ function table.search(tbl, search_term)
             return nil
         end
     end
-    return index, tbl
+    return index, tbl, parent_tbl
 end
 
-function table.custom_insert(tbl, add_tbl, pos_phrase)
+--[[
+    A dynamic insert to a table from XML. `tbl` is the table you want to insert to, `val` is what you want to insert, and `pos_phrase`
+    is a special string split into 2 parts using a colon. First part is position to insert which is: before, after, and inside.
+    Second part is a search for the table you want to insert into basically the same string as in `table.search`.
+    So, `pos_phrase` is supposed to look like this: "after:meta1" or "before:meta1" or "before:meta1/meta2", "inside:meta1", etc.
+    The function will log a warning if the table search has failed.
+--]]
+
+function table.custom_insert(tbl, val, pos_phrase)
     if not pos_phrase then
-        table.insert(tbl, add_tbl)
-        return
+        table.insert(tbl, val)
+        return tbl
     end
 
     if tonumber(pos_phrase) ~= nil then
-        table.insert(tbl, pos_phrase, add_tbl)
+        table.insert(tbl, pos_phrase, val)
+        return tbl
     else
         local phrase_split = string.split(pos_phrase, ":")
-        local i, _ = table.search(tbl, phrase_split[2])
+        local i, tbl, parent_tbl = table.search(tbl, phrase_split[2])
 
         if not i then
-            BeardLib:log(string.format("[ERROR] Could not find table for relative placement. %s", pos_phrase))
-            table.insert(tbl, add_tbl)
+            BeardLib:Warn("Could not find table for relative placement. %s", pos_phrase)
         else
-            i = phrase_split[1] == "after" and i + 1 or i
-            table.insert(tbl, i, add_tbl)
+            local pos = phrase_split[1]
+            if pos == "inside" then
+                table.insert(tbl, val)
+            else
+                i = pos == "after" and i + 1 or i
+                table.insert(parent_tbl, i, val)
+            end
         end
+        return parent_tbl
     end
 end
 
 local special_params = {
     "search",
     "mode",
+    "insert",
     "index"
 }
 
@@ -165,7 +183,7 @@ function table.script_merge(base_tbl, new_tbl)
             if tonumber(i) then
                 if sub.search then
                     local mode = sub.mode
-                    local index, found_tbl = table.search(base_tbl, sub.search)
+                    local index, found_tbl, parent_tbl = table.search(base_tbl, sub.search)
                     if found_tbl then
                         if not mode then
                             table.script_merge(found_tbl, sub)
@@ -179,15 +197,15 @@ function table.script_merge(base_tbl, new_tbl)
                         elseif mode == "replace" then
                             for i, tbl in pairs(sub) do
                                 if type(tbl) == "table" and tonumber(i) then
-                                    base_tbl[index] = tbl
+                                    parent_tbl[index] = tbl
                                     break
                                 end
                             end
                         elseif mode == "remove" then
                             if type(index) == "number" then
-                                table.remove(base_tbl, index)
+                                table.remove(parent_tbl, index)
                             else
-                                base_tbl[index] = nil
+                                parent_tbl[index] = nil
                             end
                         elseif mode == "insert" then
                             for i, tbl in pairs(sub) do
@@ -198,10 +216,20 @@ function table.script_merge(base_tbl, new_tbl)
                             end
                         end
                     end
+                elseif sub.insert then --Same as below just fixes inconsistency with the stuff above. Basically, inserts the first table instead of the whole table.
+                    for i, tbl in pairs(sub) do
+                        if type(tbl) == "table" and tonumber(i) then
+                            local parent_tbl = table.custom_insert(base_tbl, tbl, sub.insert)
+                            if not parent_tbl[tbl._meta] then
+                                parent_tbl[tbl._meta] = tbl
+                            end     
+                            break
+                        end
+                    end
                 else
-                    table.custom_insert(base_tbl, sub, sub.index)
-                    if not base_tbl[sub._meta] then
-                        base_tbl[sub._meta] = sub
+                    local parent_tbl = table.custom_insert(base_tbl, sub, sub.index)
+                    if not parent_tbl[sub._meta] then
+                        parent_tbl[sub._meta] = sub
                     end
                     for _, param in pairs(special_params) do
                         sub[param] = nil

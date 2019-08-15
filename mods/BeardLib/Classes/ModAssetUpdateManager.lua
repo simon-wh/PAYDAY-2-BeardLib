@@ -41,7 +41,7 @@ function ModAssetUpdateManager:RegisterUpdate(func)
     table.insert(self._registered_updates, func)
 end
 
-function ModAssetUpdateManager:update(t, dt)
+function ModAssetUpdateManager:Update(t, dt)
     if self._ready_for_update and next(self._registered_updates) then
         self._ready_for_update = false
         table.remove(self._registered_updates, 1)()

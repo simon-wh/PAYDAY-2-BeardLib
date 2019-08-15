@@ -43,7 +43,10 @@ function self:Init()
 	end
 
 	self.Version = tonumber(self.AssetUpdates.version)
-	
+	self.DevMode = self.Options:GetValue("DevMode")
+	self.LogSounds = self.Options:GetValue("LogSounds")
+	self.OptimizedMusicLoad = BeardLib.Options:GetValue("OptimizedMusicLoad")
+
 	for k, manager in pairs(self.managers) do
 		if manager.new then
 			self.managers[k] = manager:new()
@@ -53,16 +56,13 @@ function self:Init()
 	end
 	
 	self:RegisterTweak()
-	self.DevMode = self.Options:GetValue("DevMode")
-	self.LogSounds = self.Options:GetValue("LogSounds")
-	self.OptimizedMusicLoad = BeardLib.Options:GetValue("OptimizedMusicLoad")
 end
 
 function self:LoadClasses()
 	for _, clss in ipairs(self._config.classes) do
 		local p = self._config.classes_dir .. clss.file
 		self:DevLog("Loading class", tostring(p))
-		local obj = loadstring( "--"..p.. "\n" .. io.open(p):read("*all"))()
+		local obj = loadstring("--"..p.. "\n" .. io.open(p):read("*all"))()
 		if clss.manager and obj then
 			self.managers[clss.manager] = obj
 		end
@@ -185,7 +185,7 @@ function self:PausedUpdate(t, dt)
 end
 
 function self:DevLog(str, ...)
-	if self.DevMode then
+	if false then
 		self:log(str, ...)
 	end
 end
@@ -195,10 +195,14 @@ function self:ModError(mod, str, ...)
 	table.insert(self._errors[mod.ModPath], string.format(str, ...))
 end
 
-function self:log(...) ModCore.log(self, ...) end
+function self:Log(...) ModCore.Log(self, ...) end
+function self:Err(...) ModCore.Err(self, ...) end
+function self:Warn(...) ModCore.Warn(self, ...) end
 function self:GetPath() return ModCore.GetPath(self) end
 function self:GetRealFilePath(...) return ModCore.GetRealFilePath(self, ...) end
 function self:RegisterHook(...) return ModCore.RegisterHook(self, ...) end
+
+self.log = self.Log
 
 Hooks:Register("BeardLibAddCustomWeaponModsToWeapons")
 Hooks:Register("BeardLibCreateCustomNodesAndButtons")
@@ -247,15 +251,21 @@ Hooks:Add("MenuManagerOnOpenMenu", "BeardLibShowErrors", function(mself, menu)
 		end
 		if table.size(BeardLib._errors) > 0 then
 			local loc = managers.localization
-			local s = ""
-			for mod_path, err_list in pairs(BeardLib._errors) do
-				s = s.."MOD: "..tostring(mod_path).."\n"
-				for _, err in pairs(err_list) do
-					s = s.."    "..err.."\n"
+			BeardLib.managers.dialog:Simple():Show({
+				w = 1000,
+				title = loc:text("beardlib_found_errors"),
+				create_items = function(menu)
+					menu:QuickText(loc:text("beardlib_errors_tip"))
+				end,
+				create_items_contained = function(scroll)
+					for mod_path, err_list in pairs(BeardLib._errors) do
+						local mod = scroll:Group({text = "Mod: "..mod_path, private = {background_color = Color.red:with_alpha(0.8), highlight_color = false}, offset = {16, 2}})
+						for _, err in pairs(err_list) do
+							mod:QuickText(err)
+						end
+					end
 				end
-			end
-			s = s:sub(0, #s-1)
-			QuickMenuPlus:new(loc:text("beardlib_found_errors"), s)
+			})
 		end
 	end
 end)

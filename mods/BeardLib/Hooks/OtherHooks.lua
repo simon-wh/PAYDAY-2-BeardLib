@@ -2,7 +2,7 @@ local F = table.remove(RequiredScript:split("/"))
 local Hooks = Hooks
 
 if F == "tweakdata" then
-	TweakDataHelper:Apply(tweak_data)
+	TweakDataHelper:Apply()
 elseif F == "tweakdatapd2" then
 	Hooks:PostHook(WeaponFactoryTweakData, "_init_content_unfinished", "CallWeaponFactoryAdditionHooks", function(self)
 		Hooks:Call("BeardLibCreateCustomWeapons", self)
@@ -43,7 +43,7 @@ elseif F == "setup" then
 		if managers.dlc.give_missing_package then
 			managers.dlc:give_missing_package()
 		end
-		Hooks:Call("SetupInitManagers")
+		Hooks:Call("SetupInitManagers", self)
 	end)
 	
 	Hooks:PostHook(Setup, "init_finalize", "BeardLibInitFinalize", function(self)

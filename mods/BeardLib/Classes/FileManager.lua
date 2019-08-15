@@ -132,16 +132,13 @@ function fm:ScriptAddFile(path, ext, file, options)
 end
 
 function fm:ScriptReplaceFile(ext, path, file, options)
-    if options ~= nil and type(options) ~= "table" then
-        BeardLib:log("[ERROR] %s:ReplaceScriptData options parameter expected as a table, got %s", self.Name, tostring(type(options)))
-        return
-    end
     if not FileIO:Exists(file) then
         BeardLib:log("[ERROR] Failed reading scriptdata at path '%s'!", file)
         return
     end
 
-    options = options or {}
+	options = options or {}
+	options.type = options.type or "custom_xml"
 	local k_ext = ext:key()
 	local k_path = path:key()
 	fm.modded_files[k_ext] = fm.modded_files[k_ext] or {}
@@ -151,11 +148,6 @@ function fm:ScriptReplaceFile(ext, path, file, options)
 end
 
 function fm:ScriptReplace(ext, path, tbl, options)
-	if options ~= nil and type(options) ~= "table" then
-        BeardLib:log("[ERROR] %s:ScriptReplace options parameter expected as a table, got %s", self.Name, tostring(type(options)))
-        return
-    end
-
     options = options or {}
 	local k_ext = ext:key()
 	local k_path = path:key()
@@ -189,7 +181,7 @@ local _LoadAsset = function(load)
     end
 end
 
-local _UnLoadAsset = function(unload)
+local _UnloadAsset = function(unload)
 	local path = unload.path
 	local ext = unload.ext
 	if managers.dyn_resource:has_resource(ext, path, managers.dyn_resource.DYN_RESOURCES_PACKAGE) then
@@ -213,16 +205,18 @@ function fm:LoadAsset(ids_ext, ids_path, file_path)
     end
 end
 
-function fm:UnLoadAsset(ids_ext, ids_path, file_path)
+function fm:UnloadAsset(ids_ext, ids_path, file_path)
 	local unload = {ext = ids_ext:id(), path = ids_path:id(), file_path = file_path}
 	if managers.dyn_resource then
-		_UnLoadAsset(unload)
+		_UnloadAsset(unload)
 	else
         table.insert(self._files_to_unload, unload)
     end
 end
 
-function fm:update(t, dt)
+fm.UnLoadAsset = fm.UnloadAsset
+
+function fm:Update(t, dt)
 	if not managers.dyn_resource then
 		return
 	end

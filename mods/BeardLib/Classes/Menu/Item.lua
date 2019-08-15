@@ -285,10 +285,10 @@ function Item:WorkParams(params)
 	end
 
 	self:WorkParam("shrink_width")
-	self:WorkParam("max_height")
-	self:WorkParam("min_height")
-	self:WorkParam("max_width")
-	self:WorkParam("min_width")
+	--self:WorkParam("max_height")
+	--self:WorkParam("min_height")
+	--self:WorkParam("max_width")
+	--self:WorkParam("min_width")
 
 	self.offset = self:ConvertOffset(self.offset)
 	self.text_offset = self:ConvertOffset(self.text_offset, true) or {4,2}
@@ -780,8 +780,9 @@ function Item:BestAlpha(...)
 end
 
 --Hopefully this reaches the base MenuUI and not cause a stack overflow xd
-function Item:GetBackground()
-	return self:BestAlpha(self.background_color, self.parent:GetBackground()) or Color.black
+function Item:GetBackground(not_me)
+	local bg = (not not_me or not self.HYBRID) and self.background_color or nil
+	return self:BestAlpha(self.full_bg_color, bg, self.parent:GetBackground(true)) or Color.black
 end
 
 function Item:ConvertOffset(offset, no_default)

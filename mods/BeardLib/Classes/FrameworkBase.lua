@@ -142,6 +142,11 @@ function Framework:GetModByName(name)
     return nil
 end
 
+function Framework:IsModedLoaded(name)
+	local mod = self:GetModByName(name)
+	return mod and mod:IsEnabled() or false
+end
+
 function Framework:LoadMod(folder_name, directory, main_file)
 	rawset(_G, "ModPath", directory)
 	local success, mod = pcall(function() return self._mod_core:new(main_file, false) end)

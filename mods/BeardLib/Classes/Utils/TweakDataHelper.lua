@@ -14,7 +14,7 @@ function tdh:ModifyTweak(data, ...)
         dest_tbl = dest_tbl[k]
 	end
 	
-    if not overwrite and type(dest_tbl[key]) == "table" then
+    if type(dest_tbl[key]) == "table" then
         table.add_merge(dest_tbl[key], data)
     else
         dest_tbl[key] = data
@@ -22,7 +22,7 @@ function tdh:ModifyTweak(data, ...)
 end
 
 function tdh:OverwriteTweak(data, ...)
-    table.insert(self._overwrite_storage, {path =  {...}, data = data})
+    table.insert(self._overwrite_storage, {path = {...}, data = data})
     if tweak_data then
         self:ApplyOverwrites(tweak_data)
     end
@@ -35,7 +35,7 @@ end
 
 --Takes tweak_main and tweak_data_tbl for cases where this is being called from a tweak init function as it wont have been inserted into the tweak_data main table yet.
 function tdh:Apply(tweak_main, tweak_data_tbl, tbl_name)
-    tweak_data_tbl = tweak_data_tbl or (tbl_name and tweak_main[tbl_name]) or tweak_main or {}
+    tweak_data_tbl = tweak_data_tbl or (tbl_name and tweak_main[tbl_name]) or tweak_main or tweak_data
     table.add_merge(tweak_data_tbl, (tbl_name and self._storage[tbl_name] or self._storage) or {})
     self:ApplyOverwrites(tweak_data_tbl)
     if tbl_name then
@@ -58,7 +58,7 @@ end
 
 function tdh:ApplyOverwrites(tweak_data_tbl)
     for _, overwrite in pairs(self._overwrite_storage) do
-        local current = tweak_data_tbl
+        local current = tweak_data_tbl or tweak_data
         for i, key in pairs(overwrite.path) do
             current[key] = current[key] or {}
             if #overwrite.path == i then

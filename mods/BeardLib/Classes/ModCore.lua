@@ -187,10 +187,10 @@ function ModCore:AddModule(module_tbl)
                         table.insert(self._modules, node_obj)
                     end
                 else
-                    self:log("[ERROR] An error occurred on initilization of module: %s. Error:\n%s", meta, tostring(node_obj))
+                    self:error("An error occurred on initilization of module: %s. Error:\n%s", meta, tostring(node_obj))
                 end
             elseif not self._config.ignore_errors then
-                self:log("[ERROR] Unable to find module with key %s", meta)
+                self:error("Unable to find module with key %s", meta)
             end
         end
     end
@@ -204,8 +204,19 @@ function ModCore:GetRealFilePath(path, lookup_tbl)
     end
 end
 
-function ModCore:log(str, ...)
+function ModCore:Log(str, ...)
     log("[" .. self.Name .. "] " .. string.format(str, ...))
+end
+
+function ModCore:Err(str, ...)
+    log("[" .. self.Name .. "][ERROR] " .. string.format(str, ...))
+    if BeardLib.DevMode then
+        BeardLib:ModError(self, str, ...)
+    end
+end
+
+function ModCore:Warn(str, ...)
+    log("[" .. self.Name .. "][WARN] " .. string.format(str, ...))
 end
 
 function ModCore:StringToValue(str)
@@ -284,6 +295,7 @@ function ModCore:IsEnabled() return self:Enabled()end
 function ModCore:WasEnabledAtStart() return self:Enabled()end
 function ModCore:GetName() return self.Name end
 
+ModCore.log = ModCore.Log
 ModCore.post_init = ModCore.PostInit
 ModCore.init_modules = ModCore.InitModules
 ModCore.StringToTable = ModCore.StringToValue

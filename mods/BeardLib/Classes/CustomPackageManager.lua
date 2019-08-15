@@ -21,7 +21,7 @@ function C:RegisterPackage(id, directory, config)
     end
     local id_key = id:key()
     if self.custom_packages[id_key] then
-        BeardLib:log("[ERROR] Package with ID '%s' already exists! Returning...", id)
+        self:Err("Package with ID '%s' already exists! Returning...", id)
         return false
     end
 
@@ -133,19 +133,19 @@ local SEQ_MANAGER_IDS = SEQ_MANAGER:id()
 local COOKED_PHYSICS_IDS = COOKED_PHYSICS:id()
 
 local CP_DEFAULT = BeardLib:GetPath() .. "Assets/units/default_cp.cooked_physics"
-function C:LoadPackageConfig(directory, config, mod, temp)
+function C:LoadPackageConfig(directory, config, temp)
     if not (SystemFS and SystemFS.exists) then
-        BeardLib:log("[ERROR] SystemFS does not exist! Custom Packages cannot function without this! Do you have an outdated game version?")
+        self:Err("SystemFS does not exist! Custom Packages cannot function without this! Do you have an outdated game version?")
         return
 	end
 	
 	if not DB.create_entry then
-		BeardLib:log("[ERROR] Create entry function does not exist, cannot add files.")
+		self:Err("Create entry function does not exist, cannot add files.")
 		return
 	end
 
-	if mod then
-		local use_clbk = config.use_clbk and mod:StringToCallback(config.use_clbk) or nil
+	if self._mod then
+		local use_clbk = config.use_clbk and self._mod:StringToCallback(config.use_clbk) or nil
 		if use_clbk and not use_clbk(config) then
 			return
 		end
@@ -202,7 +202,7 @@ function C:LoadPackageConfig(directory, config, mod, temp)
                     end
             
                     if thq or cc or mat_cc then
-                        FileManager:AddFileWithCheck(MAT_CONFIG_IDS, Idstring(path.."_thq"), file_path.."."..MAT_CONFIG)
+                        FileManager:AddFileWithCheck(MAT_CONFIG_IDS, Idstring(path.."_thq"), file_path.."_thq."..MAT_CONFIG)
                     end
                     if cc or mat_cc then
                         if cc then
@@ -224,7 +224,7 @@ function C:LoadPackageConfig(directory, config, mod, temp)
                     end
                 elseif typ and path then
                     path = Path:Normalize(path)
-                    local ids_ext = Idstring(self.ext_convert[typ] or typ)
+                    local ids_ext = Idstring(C.ext_convert[typ] or typ)
 					local ids_path = Idstring(path)
 					local file_path = child.full_path or Path:Combine(directory, config.file_path or path)
 					local file_path_ext = file_path.."."..typ
@@ -258,23 +258,35 @@ function C:LoadPackageConfig(directory, config, mod, temp)
 							end
                         end
                     else
-                        BeardLib:log("[ERROR] File does not exist! %s", tostring(file_path_ext))
+                        self:Err("File does not exist! %s", tostring(file_path_ext))
                     end
                 else
-                    BeardLib:log("[ERROR] Node in %s does not contain a definition for both type and path", tostring(directory))
+                    self:Err("Node in %s does not contain a definition for both type and path", tostring(directory))
                 end                
             end
         end
     end
 
     if config.unload_on_restart or temp then
-        table.insert(self.unload_on_restart, config)
+        table.insert(C.unload_on_restart, config)
     end
 
     --For some reason this needs to be here, instead of loading in the main loop or the game will go into a hissy fit 
     for _, file in pairs(loading) do
         FileManager:LoadAsset(unpack(file))
     end
+end
+
+function C:Err(...)
+    BeardLib:Err(...)
+end
+
+function C:AddFileWithCheck(ext, path, file)
+	if FileIO:Exists(file) then
+		FileManager:AddFile(ext, path, file)
+	else
+		self:Err("File does not exist! %s", tostring(file))
+	end
 end
 
 function C:UnloadPackageConfig(config)
@@ -284,18 +296,18 @@ function C:UnloadPackageConfig(config)
             local path = child.path
             if typ and path then
                 path = Path:Normalize(path)
-                local ids_ext = Idstring(self.ext_convert[typ] or typ)
+                local ids_ext = Idstring(C.ext_convert[typ] or typ)
                 local ids_path = Idstring(path)
                 if DB:has(ids_ext, ids_path) then
                     if child.unload ~= false then
-                        FileManager:UnLoadAsset(ids_ext, ids_path)
+                        FileManager:UnloadAsset(ids_ext, ids_path)
                     end
                     FileManager:RemoveFile(ids_ext, ids_path)
                 end
             elseif typ == "unit_load" or typ == "add" then
                 self:UnloadPackageConfig(child)
             else
-                BeardLib:log("[ERROR] Some node does not contain a definition for both type and path")
+                self:Err("Some node does not contain a definition for both type and path")
             end
         end
     end

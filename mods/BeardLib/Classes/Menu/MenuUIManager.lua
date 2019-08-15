@@ -52,7 +52,7 @@ function Manager:close_menu_event()
 	self._enable_input_t = Application:time() + 0.01
 end
 
-function Manager:update(t, dt)
+function Manager:Update(t, dt)
 	if self._input_disabled and self._enable_input_t and self._enable_input_t <= t then
         self:enable_input()
     end

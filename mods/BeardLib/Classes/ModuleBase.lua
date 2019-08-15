@@ -52,9 +52,19 @@ function ModuleBase:PostInit()
 	self._post_init_complete = true
 end
 
-function ModuleBase:log(str, ...)
-    self._mod:log(string.format("[%s] ", self._name) .. str, ...)
+function ModuleBase:Log(str, ...)
+    self._mod:Log(string.format("[%s] ", self._name) .. str, ...)
 end
+
+function ModuleBase:Err(str, ...)
+    self._mod:Err(string.format("[%s] ", self._name) .. str, ...)
+end
+
+function ModuleBase:Warn(str, ...)
+    self._mod:Warn(string.format("[%s] ", self._name) .. str, ...)
+end
+
+ModuleBase.log = ModuleBase.Log
 
 function ModuleBase:GetPath(directory, prev_dir)
 	if prev_dir then

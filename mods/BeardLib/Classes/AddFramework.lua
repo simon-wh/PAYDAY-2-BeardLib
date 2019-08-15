@@ -18,8 +18,10 @@ function Framework:FindMods()
                 self:log("[ERROR] Could not read %s", main_file)
             end
 			if FileIO:Exists(add_file) then
-				local file = io.open(add_file, "r")
-                AddFilesModule.Load({_mod = {ModPath = p}, _config = ScriptSerializer:from_custom_xml(file:read("*all"))})
+                local file = io.open(add_file, "r")
+                local config = ScriptSerializer:from_custom_xml(file:read("*all"))
+                local directory = config.full_directory or Path:Combine(p, config.directory)
+                AddFilesModule:LoadPackageConfig(directory, config)
             end
         end
     end

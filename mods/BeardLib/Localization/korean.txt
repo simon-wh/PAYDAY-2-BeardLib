@@ -55,7 +55,7 @@
     "beardlib_show_images" : "Show mod images",
     "beardlib_reset_settings" : "Reset settings",
     "beardlib_dev_mode" : "Developer mode",
-    "beardlib_dev_mode_help" : "BeardLib's developer mode currently only logs some information such as sound ids",
+    "beardlib_dev_mode_help" : "Developer mode adds more errors to show in the errors dialog (Like if a file failed to load). You should use this mode when developing any type of BeardLib mod so you can resolve the issues. Normally, this is logged into the BLT log.",
     "beardlib_important_notice_help" : "Should BeardLib notify you when there's an update for an important mod?",
     "beardlib_write_failed" : "Failed writing to path :/",
     "beardlib_achieves_title" : "Custom Achievements",
@@ -73,9 +73,10 @@
     "beardlib_achieves_reward_cc" : "Continental Coins",
     "beardlib_log_sounds" : "Log sound IDs",
     "beardlib_log_sounds_help" : "Logs each incoming sound ID. Helpful when you want to replace existing sounds and don't know what's the ID.",
-    "beardlib_found_errors" : "One or more BeardLib mods have hit an error. \nErrors:",
+    "beardlib_found_errors" : "One or more BeardLib mods have hit an error",
+    "beardlib_errors_tip" : "It's your duty to release your mods clean of errors.\nIf you're not a mod developer you can report these issues to the mod creators. Of course, making sure everything is updated.",
     "beardlib_no_error_alert" : "Don't alert me about mod errors",
-    "beardlib_no_error_alert_help" : "If a mod hits an error while loading, it will usually inform you about it.\nSo you can either update the mod or remove it.",
+    "beardlib_no_error_alert_help" : "If a mod hits an error while loading, it will usually inform you about it.\nSo you can either update the mod or remove it.\nNote: You should keep this on when using developer mode.",
     "beardlib_optimized_music_load" : "Optimized music load",
-    "beardlib_optimized_music_load_help" : "Loads music only when played. May cause a slight lag when switching songs but overall should make it so you won't crash because of reaching 32bit ram limit."
+    "beardlib_optimized_music_load_help" : "Loads custom music only when played. May cause a slight lag when switching songs but overall should make it so you won't crash because of reaching 32bit ram limit."
 }

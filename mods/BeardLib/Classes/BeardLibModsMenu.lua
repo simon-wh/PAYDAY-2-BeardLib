@@ -317,16 +317,13 @@ function BeardLibModsMenu:OpenSettings()
                 value = BeardLib.Options:GetValue("OptimizedMusicLoad"),
                 on_callback = ClassClbk(self, "SetOption")
             })
-            
-            if FileIO:Exists("mods/developer.txt") then
-                holder:Toggle({
-                    name = "DevMode",
-                    text = "beardlib_dev_mode",
-                    help = "beardlib_dev_mode_help",
-                    value = BeardLib.Options:GetValue("DevMode"),
-                    on_callback = ClassClbk(self, "SetOption")
-                })
-            end
+            holder:Toggle({
+                name = "DevMode",
+                text = "beardlib_dev_mode",
+                help = "beardlib_dev_mode_help",
+                value = BeardLib.Options:GetValue("DevMode"),
+                on_callback = ClassClbk(self, "SetOption")
+            })
             holder:Toggle({
                 name = "LogSounds",
                 text = "beardlib_log_sounds",

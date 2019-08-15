@@ -11,6 +11,7 @@ function MenuDialog:init(params, menu)
     self._menu = menu:Menu(table.merge({
         name = "dialog"..tostring(self),
         position = "Center",
+        align_items = "grid",
         w = MenuDialog._default_width,
         visible = false,
         auto_height = true,
@@ -18,6 +19,7 @@ function MenuDialog:init(params, menu)
         always_highlighting = true,
         reach_ignore_focus = true,
         scrollbar = false,
+        max_height = 700,
         size = 20,
         offset = 8,
         accent_color = BeardLib.Options:GetValue("MenuColor"),
@@ -60,7 +62,7 @@ end
 
 function MenuDialog:CreateCustomStuff(params)
     if params.title then
-        self._menu:Divider(table.merge({
+         self._menu:Divider(table.merge({
             name = "Title",
             text = params.title,
             background_color = self._menu.accent_color,
@@ -69,13 +71,7 @@ function MenuDialog:CreateCustomStuff(params)
             size = self._menu.size + 4,
         }, params.title_merge or {}))
     end
-    if params.message then
-        self._menu:Divider({
-            name = "Message",
-            text = params.message,
-            size = self._menu.size + 2,
-        })
-    end
+
     if params.create_items then
         params.create_items(self._menu)
     end
@@ -94,6 +90,17 @@ function MenuDialog:CreateCustomStuff(params)
             text = params.no,
             reachable = true,
             on_callback = ClassClbk(self, "hide", false)
+        })
+    end
+    local scroll = self._menu:Menu({name = "MessageScroll", index = 2, private = {offset = 0}, auto_height = true, h = 0, max_height = params.content_max_h or 550})
+    if params.create_items_contained then
+        params.create_items_contained(scroll)
+    end
+    if params.message then
+        scroll:Divider({
+            name = "Message",
+            text = params.message,
+            size = self._menu.size + 2,
         })
     end
 end
