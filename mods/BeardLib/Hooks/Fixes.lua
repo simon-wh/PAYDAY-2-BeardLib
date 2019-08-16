@@ -37,7 +37,7 @@ if F == "weaponfactorymanager" then
                 for _, part_id in pairs(data.uses_parts) do
                     if tweak.parts[part_id] then
                         table.insert(new_uses_parts, part_id)
-                    else
+                    elseif not factory_id:ends("_npc") then
                         BeardLib:log("[Fixes][Warning] Weapon with the factory ID %s has the part %s defined but the part does not exist", tostring(factory_id), tostring(part_id))                        
                     end
                 end
