@@ -3,7 +3,7 @@ KeybindModule.type_name = "Keybind"
 
 function KeybindModule:Load()
 	if not self._config.keybind_id and not self._config.id then 
-		self:log("[ERROR] Keybind does not contain a definition for keybind_id!")
+		self:Err("Keybind does not contain a definition for keybind_id!")
 		return
 	end
 

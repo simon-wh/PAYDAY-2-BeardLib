@@ -196,6 +196,7 @@ function self:ModError(mod, str, ...)
 end
 
 function self:Log(...) ModCore.Log(self, ...) end
+function self:LogErr(str, ...) ModCore.LogErr(self, ...) end
 function self:Err(...) ModCore.Err(self, ...) end
 function self:Warn(...) ModCore.Warn(self, ...) end
 function self:GetPath() return ModCore.GetPath(self) end

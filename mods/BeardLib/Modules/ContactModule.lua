@@ -4,7 +4,7 @@ ContactModule._loose = true
 
 function ContactModule:AddContactData(narr_self)
     if not self._config.id then
-        self:log("[ERROR] Contact does not contain a definition for id!")
+        self:Err("Contact does not contain a definition for id!")
         return
     end
     if not self.force and narr_self.contacts[self._config.id] then

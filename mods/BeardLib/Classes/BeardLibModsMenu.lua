@@ -138,7 +138,7 @@ function BeardLibModsMenu:AddMod(mod, framework)
         local orig_color = color
         color = BeardLib.Utils:normalize_string_value(mod._config.color)
         if type_name(color) ~= "Color" then
-            mod:log("[ERROR] The color defined is not a valid color!")
+            mod:Err("The color defined is not a valid color!")
             color = orig_color
         end
     end
@@ -330,6 +330,11 @@ function BeardLibModsMenu:OpenSettings()
                 help = "beardlib_log_sounds_help",
                 value = BeardLib.Options:GetValue("LogSounds"),
                 on_callback = ClassClbk(self, "SetOption")
+            })
+            holder:Button({
+                name = "ErrorsDialog",
+                text = "beardlib_errors_dialog",
+                on_callback = ClassClbk(BeardLib, "ShowErrorsDialog")
             })
             holder:Button({
                 name = "ResetSettings",

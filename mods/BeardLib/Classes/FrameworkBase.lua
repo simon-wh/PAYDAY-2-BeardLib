@@ -119,8 +119,18 @@ function Framework:RegisterHooks()
 end
 
 local cap = string.capitalize
-function Framework:log(s, ...)
-	BeardLib:log("["..cap(self.type_name).." Framework] " .. s, ...)
+function Framework:Log(s, ...)
+	BeardLib:Log("["..cap(self.type_name).." Framework] " .. s, ...)
+end
+
+Framework.log = Framework.Log
+
+function Framework:LogErr(s, ...)
+	BeardLib:LogErr("["..cap(self.type_name).." Framework] " .. s, ...)
+end
+
+function Framework:Warn(s, ...)
+	BeardLib:Warn("["..cap(self.type_name).." Framework] " .. s, ...)
 end
 
 function Framework:DevLog(s, ...)
@@ -157,7 +167,7 @@ function Framework:LoadMod(folder_name, directory, main_file)
 			framework:AddMod(folder_name, mod)
 		end
 	else
-		self:log("[ERROR] An error occurred on initilization of mod %s. Error:\n%s", folder_name, tostring(mod))
+		self:LogErr("An error occurred on initilization of mod %s. Error:\n%s", folder_name, tostring(mod))
 	end
 end
 

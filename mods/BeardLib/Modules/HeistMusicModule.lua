@@ -1,5 +1,5 @@
 HeistMusic = HeistMusic or class(ItemModuleBase)
-HeistMusic.type_id = "HeistMusic"
+HeistMusic.type_name = "HeistMusic"
 
 
 function HeistMusic:LoadBuffers()
@@ -30,7 +30,7 @@ function HeistMusic:MakeBuffer(source)
 		if FileIO:Exists(source) then
 			return BeardLib.OptimizedMusicLoad and {path = source, module = self} or XAudio.Buffer:new(source)
 		else
-			BeardLib:log("[ERROR] Source file '%s' does not exist, music id '%s'", tostring(source), tostring(self._config.id))
+			self:Err("Source file '%s' does not exist, music id '%s'", tostring(source), tostring(self._config.id))
 			return nil
 		end
 	end
@@ -38,13 +38,13 @@ end
 
 function HeistMusic:RegisterHook()
 	if not XAudio then
-		self:log("[ERROR] Heist music module requires the XAudio API!")
+		self:Err("Heist music module requires the XAudio API!")
 		return
 	end
 
 	self._config.id = self._config.id or "Err"
 	if BeardLib.MusicMods[self._config.id] then
-		self:log("[ERROR] Music with the id '%s' already exists!", self._config.id)
+		self:Err("Music with the id '%s' already exists!", self._config.id)
 		return
 	end
 	
@@ -87,4 +87,4 @@ function HeistMusic:RegisterHook()
 	BeardLib.MusicMods[self._config.id] = music
 end
 
-BeardLib:RegisterModule(HeistMusic.type_id, HeistMusic)
+BeardLib:RegisterModule(HeistMusic.type_name, HeistMusic)

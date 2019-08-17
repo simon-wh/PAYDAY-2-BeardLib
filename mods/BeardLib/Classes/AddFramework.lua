@@ -15,7 +15,7 @@ function Framework:FindMods()
             if FileIO:Exists(main_file) then
                 self:LoadMod(dir, p, main_file)
             elseif not self._ignore_detection_errors then
-                self:log("[ERROR] Could not read %s", main_file)
+                BeardLib:Err("Could not read %s", main_file)
             end
 			if FileIO:Exists(add_file) then
                 local file = io.open(add_file, "r")

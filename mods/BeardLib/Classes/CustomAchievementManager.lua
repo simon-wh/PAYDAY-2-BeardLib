@@ -255,7 +255,7 @@ end
 
 function CustomAchievementPackage:Achievement(achievement_id)
     if not self:HasAchievement(achievement_id) then
-        return BeardLib:log("[CustomAchievementPackage] [ERROR] '%s' does not exist for the achievement package '%s'", achievement_id, self._package_id)
+        return BeardLib:Err("[CustomAchievementPackage] '%s' does not exist for the achievement package '%s'", achievement_id, self._package_id)
     end
 
     return CustomAchievement:new(self:GetConfigOf(achievement_id), self._package_id)
@@ -419,7 +419,7 @@ end
 
 function CustomAchievement:Package()
     if not self._package_id then
-        return BeardLib:log("[CustomAchievementPackage] [ERROR] Achievement '%s' lacking package id. Did you invoked the CustomAchievement class with the package ID?", self._id)
+        return BeardLib:Err("[CustomAchievementPackage] Achievement '%s' lacking package id. Did you invoked the CustomAchievement class with the package ID?", self._id)
     end
 
     return CustomAchievementPackage:new(self._package_id)

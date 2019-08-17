@@ -44,18 +44,24 @@ function WeaponModModule:RegisterHook()
     config.default_amount = config.default_amount and tonumber(config.default_amount) or 1
     config.global_value =config.global_value or self.defaults.global_value
     local available = true
+    --A FUCKING MESS
+    if config.pcs and #config.pcs < 1 then
+        config.hidden = true 
+    end
     if config.hidden then
         available = false
+        config.pts = {}
     end
     config.droppable = NotNil(config.droppable, available)
     if config.drop == false and config.is_a_unlockable == false then
+        config.hidden = true
         config.droppable = false
     end
     local id = config.id
 
     Hooks:Add("BeardLibCreateCustomWeaponMods", id .. "AddWeaponModTweakData", function(f_self)
         if f_self.parts[id] then
-            BeardLib:log("[ERROR] Weapon mod with id '%s' already exists!", id)
+            self:Err("Weapon mod with id '%s' already exists!", id)
             return
         end
         if type(config.perks) == "string" then
@@ -63,7 +69,7 @@ function WeaponModModule:RegisterHook()
         end
         local based_on = self:GetBasedOn(f_self.parts)
         if config.guess_unit then
-            config.unit = config.unit or "units/mods/weapons/wpn_fps_"..id.."/wpn_fps_"..id
+            config.unit = config.unit or "units/mods/weapons/"..id.."/"..id
         end
         local data = table.merge(deep_clone(based_on and f_self.parts[based_on] or {}), table.merge({
             name_id = config.name_id or "bm_wp_" .. id,
@@ -72,12 +78,13 @@ function WeaponModModule:RegisterHook()
             third_unit = config.third_unit,
             a_obj = config.a_obj,
             dlc = config.droppable and (config.dlc or self.defaults.dlc),
-            texture_bundle_folder = config.texture_bundle_folder,
+            texture_bundle_folder = config.texture_bundle_folder or "mods",
             pcs = config.pcs and BeardLib.Utils:RemoveNonNumberIndexes(config.pcs),
             stats = table.merge({value=0}, BeardLib.Utils:RemoveMetas(config.stats, true) or {}),
             type = config.type,
             animations = config.animations,
             is_a_unlockable = available,
+            mod_path = self._mod.ModPath,
             custom = true
         }, config))
         if config.merge_data then
@@ -146,7 +153,7 @@ function WeaponModModule:RegisterHook()
                     table.insert(npc_weapon.uses_parts, id)
                 end
             else
-                self:log("[ERROR] Weapon %s does not exist. Cannot add part %s to it.", tostring(weap_id), tostring(id))
+                self:Err("Weapon %s does not exist. Cannot add part %s to it.", tostring(weap_id), tostring(id))
             end
         end
 

@@ -51,6 +51,7 @@ function NarrativeModule:AddNarrativeData(narr_self, tweak_data)
             preview_image = data.preview_image or {icon = icon}
         },
         ignore_heat = true,
+        mod_path = self._mod.ModPath,
         custom = true
     })
     if data.chain then

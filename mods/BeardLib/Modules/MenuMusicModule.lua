@@ -1,5 +1,5 @@
 MenuMusicModule = MenuMusicModule or class(ItemModuleBase)
-MenuMusicModule.type_id = "MenuMusic"
+MenuMusicModule.type_name = "MenuMusic"
 
 function MenuMusicModule:LoadBuffers()
 	for _, source in pairs(BeardLib.MusicMods[self._config.id]) do
@@ -25,7 +25,7 @@ function MenuMusicModule:MakeBuffer(source)
 		if FileIO:Exists(source) then
 			return BeardLib.OptimizedMusicLoad and {path = source, module = self} or XAudio.Buffer:new(source)
 		else
-			BeardLib:log("[ERROR] Source file '%s' does not exist, music id '%s'", tostring(source), tostring(self._config.id))
+			self:Err("Source file '%s' does not exist, music id '%s'", tostring(source), tostring(self._config.id))
 			return nil
 		end
 	end
@@ -33,13 +33,13 @@ end
 
 function MenuMusicModule:RegisterHook()
 	if not XAudio then
-		self:log("[ERROR] Menu music module requires the XAudio API!")
+		self:Err("Menu music module requires the XAudio API!")
 		return
 	end
 
 	self._config.id = self._config.id or "Err"
 	if BeardLib.MusicMods[self._config.id] and not self._config.force then
-		self:log("[ERROR] Music with the id '%s' already exists!", self._config.id)
+		self:Err("Music with the id '%s' already exists!", self._config.id)
 		return
 	end	
 
@@ -60,4 +60,4 @@ function MenuMusicModule:RegisterHook()
 	BeardLib.MusicMods[self._config.id] = music
 end
 
-BeardLib:RegisterModule(MenuMusicModule.type_id, MenuMusicModule)
+BeardLib:RegisterModule(MenuMusicModule.type_name, MenuMusicModule)

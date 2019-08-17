@@ -27,7 +27,7 @@ local random = "random"
 
 function SoundsModule:ReadSounds(data, prev_dir)
 	if not XAudio then
-		self:log("[ERROR] Sounds module requires the XAudio API!")
+		self:Err("Sounds module requires the XAudio API!")
 		return
 	end
 

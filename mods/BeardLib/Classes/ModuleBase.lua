@@ -25,7 +25,7 @@ function ModuleBase:init(mod, config)
 
     for _, param in pairs(self.required_params) do
         if BeardLib.Utils:StringToValue(param, self._config, true) == nil then
-            self:log("[ERROR] Parameter '%s' is required!", param)
+            self:Err("Parameter '%s' is required!", param)
             return false
         end
     end
@@ -58,6 +58,10 @@ end
 
 function ModuleBase:Err(str, ...)
     self._mod:Err(string.format("[%s] ", self._name) .. str, ...)
+end
+
+function ModCore:LogErr(str, ...)
+    self._mod:LogErr(string.format("[%s] ", self._name) .. str, ...)
 end
 
 function ModuleBase:Warn(str, ...)

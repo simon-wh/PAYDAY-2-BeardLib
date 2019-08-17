@@ -11,6 +11,7 @@ function CrimeSpreeMissionModule:AddMissionDataToTweak(c_self, tweak_data)
         add = self._config.add or 7,
         icon = icon or "pd2_question",
         level = tweak_data.narrative.stages[self._config.level],
+        mod_path = self._mod.ModPath,
         custom = true
     }
     if self._config.merge_data then

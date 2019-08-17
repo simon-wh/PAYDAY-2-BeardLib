@@ -1,5 +1,5 @@
 MusicModule = MusicModule or class(ItemModuleBase)
-MusicModule.type_id = "Music"
+MusicModule.type_name = "Music"
 
 function MusicModule:RegisterHook()
 	self._config.id = self._config.id or "Err"
@@ -30,7 +30,7 @@ function MusicModule:RegisterHook()
 			if v.source then
 				v.source = dir .. v.source
 			else
-				self:log("[ERROR] Music with the id '%s' has an event that has no source!", self._config.id)
+				self:Err("Music with the id '%s' has an event that has no source!", self._config.id)
 				return
 			end
 			music.events[v.name] = {source = v.source, start_source = v.start_source, alt_source = v.alt_source, alt_start_source = v.alt_start_source, alt_chance = v.alt_chance, allow_switch = v.allow_switch}
@@ -67,4 +67,4 @@ function MusicModule:RegisterHook()
 	BeardLib.MusicMods[self._config.id] = music
 end
 
-BeardLib:RegisterModule(MusicModule.type_id, MusicModule)
+BeardLib:RegisterModule(MusicModule.type_name, MusicModule)

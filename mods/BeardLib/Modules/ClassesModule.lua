@@ -11,7 +11,7 @@ function ClassesModule:Load(config, prev_dir)
             if FileIO:Exists(class_file) then
                 dofile(class_file)
             else
-                BeardLib:log("[ERROR] Class file not readable by the lua state! File: %s", class_file)
+                self:Err("Class file not readable by the lua state! File: %s", class_file)
             end
         elseif c._meta == "classes" then
             self:Load(c, dir)

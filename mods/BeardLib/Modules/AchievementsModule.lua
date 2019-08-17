@@ -3,7 +3,7 @@
 --]]
 
 AchievementsModule = AchievementsModule or class(ItemModuleBase)
-AchievementsModule.type_id = "Achievements"
+AchievementsModule.type_name = "Achievements"
 
 function AchievementsModule:RegisterHook()
     self._package_id = self._config.id
@@ -34,7 +34,7 @@ function AchievementsModule:RegisterHook()
                 local meta = achievement._meta
                 
                 local achievement_data = {
-                    id = achievement.id or self:log("[ERROR] No ID provided for an achievement..."),
+                    id = achievement.id or self:Err("No ID provided for an achievement..."),
                     name_id = achievement.name_id or achievement.id .. "_name",
                     desc_id = achievement.desc_id or achievement.id .. "_desc",
                     obj_id = achievement.objective_id or achievement.id .. "_objective",
@@ -53,7 +53,7 @@ function AchievementsModule:RegisterHook()
                 }
                 
                 if a_self.custom_achievements[self._package_id][achievement_data.id] then
-                    self:log("[ERROR] Cannot add ".. achievement_data.id .. " to package" .. self._package_id .. ". This ID already exists.")
+                    self:Err("Cannot add ".. achievement_data.id .. " to package" .. self._package_id .. ". This ID already exists.")
                     return
                 end
 
@@ -92,4 +92,4 @@ function AchievementsModule:RegisterHook()
     end)
 end
 
-BeardLib:RegisterModule(AchievementsModule.type_id, AchievementsModule)
+BeardLib:RegisterModule(AchievementsModule.type_name, AchievementsModule)

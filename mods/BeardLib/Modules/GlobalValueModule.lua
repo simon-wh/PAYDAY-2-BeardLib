@@ -10,7 +10,7 @@ function GlobalValueModule:RegisterHook()
 
     Hooks:PostHook(LootDropTweakData, "init", self._config.id .. "AddGlobalValueData", function(loot_self, tweak_data)
         if loot_self.global_values[self._config.id] and not self._config.overwrite then
-            BeardLib:log("[ERROR] Global value with key %s already exists! overwrite should be set to true if this is intentional.")
+            self:Err("Global value with key %s already exists! overwrite should be set to true if this is intentional.")
             return
         end
 

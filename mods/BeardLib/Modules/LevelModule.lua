@@ -82,6 +82,7 @@ function LevelModule:AddLevelDataToTweak(l_self)
         outro_event = self._config.outro_event or "nothing",
         music = self._config.music or "heist",
         custom_packages = self._config.packages or self._config.custom_packages,
+        mod_path = self._mod.ModPath,
         custom = true
     })
     if self._config.merge_data then
@@ -104,13 +105,13 @@ function LevelModule:AddAssetsDataToTweak(a_self)
 					table.insert(exclude and asset.exclude_stages or asset.stages, self._config.id)	
 				end
             else
-                self:log("[ERROR] Asset %s does not exist! (Map: %s)", value.name, name)
+                self:Err("Asset %s does not exist! (Map: %s)", value.name, name)
             end
         else
             if not a_self[value._meta] then
                 a_self[value._meta] = value
             else
-                self:log("[ERROR] Asset with name: %s already exists! (Map: %s)", value._meta, name)
+                self:Err("Asset with name: %s already exists! (Map: %s)", value._meta, name)
             end
         end
     end

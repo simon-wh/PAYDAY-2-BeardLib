@@ -26,12 +26,14 @@ function MeleeModule:RegisterHook()
     self._config.unlock_level = self._config.unlock_level or 1
     Hooks:PostHook(BlackMarketTweakData, "_init_melee_weapons", self._config.id .. "AddMeleeData", function(bm_self)
         if bm_self.melee_weapons[self._config.id] then
-            BeardLib:log("[ERROR] Melee weapon with id '%s' already exists!", self._config.id)
+            self:Err("Melee weapon with id '%s' already exists!", self._config.id)
             return
         end
         local data = table.merge(deep_clone(bm_self.melee_weapons[self:GetBasedOn(bm_self.melee_weapons)]), table.merge({
             name_id = "bm_melee_" .. self._config.id,
             dlc = self.defaults.dlc,
+            texture_bundle_folder = "mods",
+            mod_path = self._mod.ModPath,
             custom = true,
             free = not self._config.unlock_level
         }, self._config.item or self._config))

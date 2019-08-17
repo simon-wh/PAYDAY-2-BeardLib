@@ -126,7 +126,7 @@ end
 function MenuHelperPlus:AddButton(params)
 	local node = params.node or self:GetNode(params.menu, params.node_name)
 	if not node then
-        BeardLib:log("[ERROR] Unable to find node " .. tostring(params.node_name))
+        (params.mod or BeardLib):Err("Unable to find node " .. tostring(params.node_name))
         return
     end
 
@@ -165,7 +165,7 @@ end
 function MenuHelperPlus:AddDivider(params)
     local node = params.node or self:GetNode(params.menu, params.node_name)
 	if not node then
-        BeardLib:log("[ERROR] Unable to find node " .. params.node_name)
+        (params.mod or BeardLib):Err("Unable to find node " .. params.node_name)
         return
     end
     
@@ -195,7 +195,7 @@ end
 function MenuHelperPlus:AddToggle(params)
 	local node = params.node or self:GetNode(params.menu, params.node_name)
 	if not node then
-        BeardLib:log("[ERROR] Unable to find node " .. params.node_name)
+        (params.mod or BeardLib):Err("Unable to find node " .. params.node_name)
         return
     end
 	
@@ -265,7 +265,7 @@ end
 function MenuHelperPlus:AddSlider(params)
 	local node = params.node or self:GetNode(params.menu, params.node_name)
 	if not node then
-        BeardLib:log("[ERROR] Unable to find node " .. params.node_name)
+        (params.mod or BeardLib):Err("Unable to find node " .. params.node_name)
         return
     end
 	
@@ -314,7 +314,7 @@ end
 function MenuHelperPlus:AddMultipleChoice(params)
 	local node = params.node or self:GetNode(params.menu, params.node_name)
 	if not node then
-        BeardLib:log("[ERROR] Unable to find node " .. params.node_name)
+        (params.mod or BeardLib):Err("Unable to find node " .. params.node_name)
         return
     end
 
@@ -361,7 +361,7 @@ end
 function MenuHelperPlus:AddKeybinding(params)
 	local node = params.node or self:GetNode(params.menu, params.node_name)
 	if not node then
-        BeardLib:log("[ERROR] Unable to find node " .. params.node_name)
+        (params.mod or BeardLib):Err("Unable to find node " .. params.node_name)
         return
     end
 	
@@ -396,7 +396,7 @@ end
 function MenuHelperPlus:AddColorButton(params)
 	local node = params.node or self:GetNode(params.menu, params.node_name)
 	if not node then
-        BeardLib:log("[ERROR] Unable to find node " .. params.node_name)
+        (params.mod or BeardLib):Err("Unable to find node " .. params.node_name)
         return
     end
 	
@@ -407,6 +407,7 @@ function MenuHelperPlus:AddColorButton(params)
 		callback = params.callback,
 		disabled_color = params.disabled_color or Color(0.25, 1, 1, 1),
 		localize = params.localized,
+		localize_help = params.localized_help,
 	}, params.merge_data or {}))
 
 	item:set_value(params.value or Color.white)

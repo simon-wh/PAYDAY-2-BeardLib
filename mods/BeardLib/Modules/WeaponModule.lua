@@ -45,7 +45,7 @@ function WeaponModule:RegisterHook()
 
     for _, param in pairs({"weapon", "factory", "weapon.id", "factory.id"}) do
         if BeardLib.Utils:StringToValue(param, self._config, true) == nil then
-            self:log("[ERROR] Parameter '%s' is required!", param)
+            self:Err("Parameter '%s' is required!", param)
             return false
         end
     end
@@ -54,7 +54,7 @@ function WeaponModule:RegisterHook()
         local config = self._config.weapon
 
         if w_self[config.id] then
-            self:log("[ERROR] Weapon with id '%s' already exists!", config.id)
+            self:Err("Weapon with id '%s' already exists!", config.id)
             return
         end
 
@@ -87,6 +87,8 @@ function WeaponModule:RegisterHook()
             damage_melee = damage_melee_default,
             damage_melee_effect_mul = damage_melee_effect_multiplier_default,
             global_value = self.defaults.global_value,
+            texture_bundle_folder = "mods",
+            mod_path = self._mod.ModPath,
             custom = true
         }, config))
         data.AMMO_MAX = data.CLIP_AMMO_MAX * data.NR_CLIPS_MAX
@@ -141,7 +143,7 @@ function WeaponModule:RegisterHook()
     Hooks:Add("BeardLibCreateCustomWeapons", self._config.factory.id .. "AddWeaponFactoryTweakData", function(f_self)
         local config = self._config.factory
         if f_self[config.id] then
-            self:log("[ERROR] Weapon with factory id '%s' already exists!", config.id)
+            self:Err("Weapon with factory id '%s' already exists!", config.id)
             return
         end
 

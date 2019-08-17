@@ -75,7 +75,7 @@ function OptionModule:Load()
     local ret, data = pcall(function() return json.custom_decode(file:read("*all")) end)
 
     if not ret then
-        BeardLib:log("[ERROR] Unable to load save file for mod, " .. self._mod.Name)
+        self:Err("Unable to load save file for mod %s", self._mod.Name)
         BeardLib:log(tostring(data))
 
         --Save the corrupted file incase the option values should be recovered
@@ -378,6 +378,7 @@ function OptionModule:CreateSlider(parent_node, option_tbl, option_path)
         id = self:GetParameter(option_tbl, "name"),
         title = self:GetParameter(option_tbl, "title_id") or id .. "TitleID",
         node = parent_node,
+        mod = self._mod,
         desc = self:GetParameter(option_tbl, "desc_id") or id .. "DescID",
         callback = "OptionModuleGeneric_ValueChanged",
         min = self:GetParameter(option_tbl, "min"),
@@ -409,6 +410,7 @@ function OptionModule:CreateToggle(parent_node, option_tbl, option_path)
         id = self:GetParameter(option_tbl, "name"),
         title = self:GetParameter(option_tbl, "title_id") or id .. "TitleID",
         node = parent_node,
+        mod = self._mod,
         desc = self:GetParameter(option_tbl, "desc_id") or id .. "DescID",
         callback = "OptionModuleGeneric_ValueChanged",
         value = self:GetValue(option_path),
@@ -425,7 +427,7 @@ function OptionModule:CreateMultiChoice(parent_node, option_tbl, option_path)
     local options = self:GetParameter(option_tbl, "values")
 
     if not options then
-        BeardLib:log("[ERROR] Unable to get an option table for option " .. option_tbl.name)
+        self:Err("Unable to get an option table for option " .. option_tbl.name)
     end
 
     local enabled = not self:GetParameter(option_tbl, "disabled")
@@ -441,6 +443,7 @@ function OptionModule:CreateMultiChoice(parent_node, option_tbl, option_path)
         id = self:GetParameter(option_tbl, "name"),
         title = self:GetParameter(option_tbl, "title_id") or id .. "TitleID",
         node = parent_node,
+        mod = self._mod,
         desc = self:GetParameter(option_tbl, "desc_id") or id .. "DescID",
         callback = "OptionModuleGeneric_ValueChanged",
         value = self:GetValue(option_path),
@@ -476,6 +479,7 @@ function OptionModule:CreateMatrix(parent_node, option_tbl, option_path, compone
         id = self:GetParameter(option_tbl, "name"),
         title = managers.localization:text(self:GetParameter(option_tbl, "title_id") or id .. "TitleID"),
         node = parent_node,
+        mod = self._mod,
         desc = managers.localization:text(self:GetParameter(option_tbl, "desc_id") or id .. "DescID"),
         callback = "OptionModuleVector_ValueChanged",
         min = self:GetParameter(option_tbl, "min") or 0,
@@ -498,6 +502,7 @@ function OptionModule:CreateMatrix(parent_node, option_tbl, option_path, compone
         params.title = params.title .. " - " .. vec.title
         params.desc = params.desc .. " - " .. vec.title
         params.merge_data.component = vec.id
+        params.mod = self._mod
         if vec.max then
             params.max = vec.max
         end
@@ -525,6 +530,7 @@ function OptionModule:CreateColour(parent_node, option_tbl, option_path)
         id = self:GetParameter(option_tbl, "name"),
         title = self:GetParameter(option_tbl, "title_id") or id .. "TitleID",
         node = parent_node,
+        mod = self._mod,
         desc = self:GetParameter(option_tbl, "desc_id") or id .. "DescID",
         callback = "OptionModuleGeneric_ValueChanged",
         enabled = enabled,
@@ -556,7 +562,7 @@ function OptionModule:CreateOption(parent_node, option_tbl, option_path)
     elseif option_tbl.type == "rotation" then
         self:CreateRotation(parent_node, option_tbl, option_path)
     else
-        BeardLib:log("[ERROR] No supported type for option " .. tostring(option_tbl.name) .. " in mod " .. self._mod.Name)
+        self:Err("No supported type for option " .. tostring(option_tbl.name) .. " in mod " .. self._mod.Name)
     end
 end
 
@@ -566,6 +572,7 @@ function OptionModule:CreateDivider(parent_node, tbl)
     MenuHelperPlus:AddDivider(table.merge({
         id = self:GetParameter(tbl, "name"),
         node = parent_node,
+        mod = self._mod,
         size = self:GetParameter(tbl, "size")
     }, merge_data))
 end
@@ -587,6 +594,7 @@ function OptionModule:CreateButton(parent_node, option_tbl, option_path)
         id = self:GetParameter(option_tbl, "name"),
         title = self:GetParameter(option_tbl, "title_id") or id .. "TitleID",
         node = parent_node,
+        mod = self._mod,
         desc = self:GetParameter(option_tbl, "desc_id") or id .. "DescID",
         callback = self:GetParameter(option_tbl, "reset_button") and "OptionModuleGeneric_ResetOptions" or "OptionModuleGeneric_ButtonPressed",
         enabled = enabled,
@@ -620,6 +628,7 @@ function OptionModule:CreateSubMenu(parent_node, option_tbl, option_path)
         title = self:GetParameter(option_tbl, "title_id") or base_name .. "ButtonTitleID",
         desc = self:GetParameter(option_tbl, "desc_id") or base_name .. "ButtonDescID",
         node = parent_node,
+        mod = self._mod,
         next_node = menu_name
     })
 

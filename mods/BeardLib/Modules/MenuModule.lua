@@ -19,7 +19,7 @@ function MenuModule:BuildNodeItems(node, data)
                 if self._mod[sub_item.key] then
                     self._mod[sub_item.key]:BuildMenu(node)
                 else
-                    self:log("[ERROR] Cannot find module of id '%s' in mod", sub_item.key)
+                    self:Err("Cannot find module of id '%s' in mod", sub_item.key)
                 end
             else
                 self:BuildNode(sub_item, node)
@@ -29,10 +29,10 @@ function MenuModule:BuildNodeItems(node, data)
                 if self._mod[sub_item.key] then
                     self._mod[sub_item.key]:InitializeNode(node)
                 else
-                    self:log("[ERROR] Cannot find module of id '%s' in mod", sub_item.key)
+                    self:Err("Cannot find module of id '%s' in mod", sub_item.key)
                 end
             else
-                self:log("[ERROR] item_group must contain a definition for the parameter 'key'")
+                self:Err("item_group must contain a definition for the parameter 'key'")
             end
         elseif sub_item._meta == "divider" then
             self:CreateDivider(node, sub_item)

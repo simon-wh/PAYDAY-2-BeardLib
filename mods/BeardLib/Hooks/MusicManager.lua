@@ -126,11 +126,11 @@ function MusicManager:attempt_play(track, event, stop)
 		local source = use_alt_source and (next.alt_start_source or next.start_source or next.alt_source) or next.start_source or next.source
 		if next_music.xaudio then
 			if not source then
-				BeardLib:log("[ERROR] No buffer found to play for music '%s'", tostring(self._current_custom_track))
+				BeardLib:Err("No buffer found to play for music '%s'", tostring(self._current_custom_track))
 			end
 		else
 			if not source or not DB:has(movie_ids, source:id()) then
-				BeardLib:log("[ERROR] Source file '%s' is not loaded, music id '%s'", tostring(source), tostring(self._current_custom_track))
+				BeardLib:Err("Source file '%s' is not loaded, music id '%s'", tostring(source), tostring(self._current_custom_track))
 				return true
 			end
 		end

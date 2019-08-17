@@ -18,7 +18,7 @@ function ModAssetsModule:Load()
         if self._providers[self._config.provider] then
             self.provider = self._providers[self._config.provider]
         else
-            self:log("[ERROR] No provider information for provider: %s", self._config.provider)
+            self:Err("No provider information for provider: %s", self._config.provider)
             return
         end
     elseif self._config.custom_provider then
@@ -27,7 +27,7 @@ function ModAssetsModule:Load()
         if provider_details.download_file_func then provider_details.download_file_func = self._mod:StringToCallback(provider_details.download_file_func, self) end
         self.provider = provider_details
     else
-        self:log("[ERROR] No provider can be found for mod assets")
+        self:Err("No provider can be found for mod assets")
         return
     end
 
@@ -140,7 +140,7 @@ function ModAssetsModule:_CheckVersion(force)
                 self:ShowNoChangePrompt()
             end
         else
-            self:log("[ERROR] Unable to parse string '%s' as a version number", data)
+            self:Err("Unable to parse string '%s' as a version number", data)
         end
     end)
 end

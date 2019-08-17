@@ -6,16 +6,16 @@
 ]]
 
 WeaponSkinModule = WeaponSkinModule or class(ItemModuleBase)
-WeaponSkinModule.type_id = "WeaponSkin"
+WeaponSkinModule.type_name = "WeaponSkin"
 
 function WeaponSkinModule:RegisterHook()
-    self._config.id = self._config.id or self:log("[ERROR] Cannot add a weapon skin : No ID specified.")
+    self._config.id = self._config.id or self:Err("Cannot add a weapon skin : No ID specified.")
     self._config.weapon_id = self._config.weapon_id or "amcar"
     self._config.weapon_ids = self._config.weapon_ids or nil
     self._config.name = self._config.name or "weapon_skin_name empty..."
     self._config.desc = self._config.desc or "bm_wskn_p90_woodland_desc" -- These descs are 99% of the time empty, excepted for legendaries :|
     self._config.rarity = self._config.rarity or "common"
-    self._config.skin_folder = self._config.skin_folder and self:GetPath(self._config.skin_folder) or self:log("[ERROR] The weapon skin '%s' is not shipped with the skin folder.", self._config.skin_folder)
+    self._config.skin_folder = self._config.skin_folder and self:GetPath(self._config.skin_folder) or self:Err("The weapon skin '%s' is not shipped with the skin folder.", self._config.skin_folder)
     self._config.locked = self._config.locked or nil
     self._config.unique_name = self._config.unique_name and self._config.name or nil
     self._config.universal = self._config.universal or false
@@ -53,7 +53,7 @@ function WeaponSkinModule:RegisterHook()
         local config = self._config
 
         if tweak_self.blackmarket.weapon_skins[config.id] then
-            self:log("[ERROR] The weapon skin '%s' already exists in the tweak data table.", config.id)
+            self:Err("The weapon skin '%s' already exists in the tweak data table.", config.id)
             return
         end
 
@@ -77,6 +77,7 @@ function WeaponSkinModule:RegisterHook()
             types = self._skin_design.types,
             parts = self._skin_design.parts,
             default_blueprint = self._skin_attachments,
+            mod_path = self._mod.ModPath,
             custom = true
         }, config)
 
@@ -120,6 +121,7 @@ function WeaponSkinModule:RegisterHook()
                             types = self._skin_design.types,
                             parts = self._skin_design.parts,
                             default_blueprint = self._skin_attachments,
+                            mod_path = self._mod.ModPath,
                             custom = true
                         }, config)
 
@@ -141,4 +143,4 @@ function WeaponSkinModule:RegisterHook()
     end)
 end
 
-BeardLib:RegisterModule(WeaponSkinModule.type_id, WeaponSkinModule)
+BeardLib:RegisterModule(WeaponSkinModule.type_name, WeaponSkinModule)

@@ -4,7 +4,7 @@ ModCore._auto_post_init = true
 
 function ModCore:init(config_path, load_modules)
     if not FileIO:Exists(config_path) then
-        BeardLib:log("[ERROR] Config file at path '%s' is not readable!", config_path)
+        BeardLib:Err("Config file at path '%s' is not readable!", config_path)
         return
     end
 
@@ -51,7 +51,7 @@ function ModCore:PostInit(ignored_modules)
                 local success, err = pcall(function() module:PostInit() end)
                 
                 if not success then
-                    self:log("[ERROR] An error occurred on the post initialization of %s. Error:\n%s", module._name, tostring(err))
+                    self:Err("An error occurred on the post initialization of %s. Error:\n%s", module._name, tostring(err))
                 end
             end
         end
@@ -215,6 +215,10 @@ function ModCore:Err(str, ...)
     end
 end
 
+function ModCore:LogErr(str, ...)
+    log("[" .. self.Name .. "][ERROR] " .. string.format(str, ...))
+end
+
 function ModCore:Warn(str, ...)
     log("[" .. self.Name .. "][WARN] " .. string.format(str, ...))
 end
@@ -271,7 +275,7 @@ function ModCore:RegisterHook(source_file, file, pre)
 				script = file
 			})
 		else
-			self:log("[ERROR] Failed reading hook file %s of type %s", tostring(hook_file), tostring(pre and "pre" or "post"))
+			self:Err("Failed reading hook file %s of type %s", tostring(hook_file), tostring(pre and "pre" or "post"))
 		end
 	end
 end

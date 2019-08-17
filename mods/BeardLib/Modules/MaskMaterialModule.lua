@@ -11,7 +11,7 @@ function MaskMaterialModule:RegisterHook()
     self._config.default_amount = self._config.default_amount and tonumber(self._config.default_amount) or 1
     Hooks:PostHook(BlackMarketTweakData, "_init_materials", self._config.id .. "AddMaskMaterialData", function(bm_self)
         if bm_self.materials[self._config.id] then
-            BeardLib:log("[ERROR] Mask Material with id '%s' already exists!", self._config.id)
+            self:Err("Mask Material with id '%s' already exists!", self._config.id)
             return
         end
         local data = table.merge({
@@ -19,6 +19,7 @@ function MaskMaterialModule:RegisterHook()
             dlc = self.defaults.dlc,
             value = 0,
             global_value = self.defaults.global_value,
+            mod_path = self._mod.ModPath,
             custom = true
         }, self._config.item or self._config)
         bm_self.materials[self._config.id] = data

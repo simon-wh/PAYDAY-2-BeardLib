@@ -3,6 +3,29 @@ local Hooks = Hooks
 
 if F == "tweakdata" then
 	TweakDataHelper:Apply()
+	local function icon_check(list, folder, friendly_name)
+		for id, thing in pairs(list) do
+			if thing.custom and not thing.hidden then
+				if folder ~= "mods" or thing.pcs then
+					local guis_catalog = "guis/"
+					local bundle_folder = thing.texture_bundle_folder
+					if bundle_folder then
+						guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
+					end
+					guis_catalog = guis_catalog .. "textures/pd2/blackmarket/icons/"..folder.."/"
+					if not DB:has(Idstring("texture"), guis_catalog .. id) then
+						local mod = BeardLib.Utils:FindModWithPath(thing.mod_path) or BeardLib
+						mod:Err("Icon for %s %s doesn't exist path: %s", tostring(friendly_name), tostring(id), tostring(guis_catalog .. id))
+					end
+				end
+			end
+		end
+	end
+	icon_check(tweak_data.weapon, "weapons", "weapon")
+	icon_check(tweak_data.weapon.factory.parts, "mods", "weapon mod")
+	icon_check(tweak_data.blackmarket.melee_weapons, "melee_weapons", "melee weapon")
+	icon_check(tweak_data.blackmarket.textures, "textures", "mask pattern")
+	icon_check(tweak_data.blackmarket.materials, "materials", "mask material") 	
 elseif F == "tweakdatapd2" then
 	Hooks:PostHook(WeaponFactoryTweakData, "_init_content_unfinished", "CallWeaponFactoryAdditionHooks", function(self)
 		Hooks:Call("BeardLibCreateCustomWeapons", self)

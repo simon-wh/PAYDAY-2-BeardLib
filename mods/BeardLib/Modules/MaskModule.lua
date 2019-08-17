@@ -17,7 +17,7 @@ function MaskModule:RegisterHook()
     self._config.default_amount = self._config.default_amount and tonumber(self._config.default_amount) or 1
     Hooks:PostHook(BlackMarketTweakData, "_init_masks", self._config.id .. "AddMaskData", function(bm_self)
         if bm_self.masks[self._config.id] then
-            BeardLib:log("[ERROR] Mask with id '%s' already exists!", self._config.id)
+            self:Err("Mask with id '%s' already exists!", self._config.id)
             return
         end
         local data = table.merge({
@@ -28,6 +28,7 @@ function MaskModule:RegisterHook()
             value = 0,
 			texture_bundle_folder = "mods",
             global_value = self.defaults.global_value,
+            mod_path = self._mod.ModPath,
             custom = true
         }, self._config.item or self._config)
         if self._config.guess_unit ~= false then

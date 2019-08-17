@@ -44,15 +44,15 @@ function fm:Process(ids_ext, ids_path, name_mt)
 			local func = mdata.clbk or mdata.use_clbk
 			if not func or func() then
 				if mdata.mode and not self.process_modes[mdata.mode] then
-					BeardLib:log("[ERROR] The process mode '%s' does not exist! Skipping...", data.mode)
+					BeardLib:Err("The process mode '%s' does not exist! Skipping...", data.mode)
 				else
 					local to_replace = (not mdata.mode or mdata.mode == "replace")
 					if to_replace and #mods > 1 then
 						local id = data.id or "unknown"
 						if mdata.file then
-							BeardLib:log("[WARNING] Script Mod with ID: '%s', Path:'%s' may potentially overwrite changes from other mods! Continuing...", id, mdata.file)
+							BeardLib:Warn("Script Mod with ID: '%s', Path:'%s' may potentially overwrite changes from other mods! Continuing...", id, mdata.file)
 						else
-							BeardLib:log("[WARNING] Script Mod with ID: '%s', Path:'%s.%s' may potentially overwrite changes from other mods! Continuing...", id, k_path, k_ext)							
+							BeardLib:Warn("Script Mod with ID: '%s', Path:'%s.%s' may potentially overwrite changes from other mods! Continuing...", id, k_path, k_ext)							
 						end
 					end
 					local new_data = mdata.tbl or FileIO:ReadScriptData(mdata.file, mdata.type)
@@ -69,9 +69,9 @@ function fm:Process(ids_ext, ids_path, name_mt)
 							fm.process_modes[mdata.mode](data, new_data)
 						end
 					elseif FileIO:Exists(mdata.file) then
-						BeardLib:log("[ERROR] Failed reading file '%s', are you trying to load a file with different format?", mdata.file)
+						BeardLib:Err("Failed reading file '%s', are you trying to load a file with different format?", mdata.file)
 					else
-						BeardLib:log("[ERROR] The file '%s' does not exist!", mdata.file)
+						BeardLib:Err("The file '%s' does not exist!", mdata.file)
 					end
 				end
 			end
@@ -109,7 +109,7 @@ function fm:AddFileWithCheck(ext, path, file)
 	if FileIO:Exists(file) then
 		self:AddFile(ext, path, file)
 	else
-		BeardLib:log("[ERROR] File does not exist! %s", tostring(file))
+		BeardLib:Err("File does not exist! %s", tostring(file))
 	end
 end
 
@@ -133,7 +133,7 @@ end
 
 function fm:ScriptReplaceFile(ext, path, file, options)
     if not FileIO:Exists(file) then
-        BeardLib:log("[ERROR] Failed reading scriptdata at path '%s'!", file)
+        BeardLib:Err("Failed reading scriptdata at path '%s'!", file)
         return
     end
 

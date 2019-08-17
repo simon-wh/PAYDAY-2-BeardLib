@@ -5,7 +5,7 @@ CustomPackageManager = CustomPackageManager or {}
 local C = CustomPackageManager
 C.custom_packages = {}
 C.unload_on_restart = {}
-C.ext_convert = {dds = "texture", png = "texture", tga = "texture", jpg = "texture", bik = "movie"}
+C.EXT_CONVERT = {dds = "texture", png = "texture", tga = "texture", jpg = "texture", bik = "movie"}
 
 function C:RegisterPackage(id, directory, config)
     if (not BeardLib.Utils:CheckParamsValidity({id, directory, config},
@@ -38,6 +38,7 @@ function C:LoadPackage(id)
         Global.cmp.custom_loaded_packages[id] = true
         return true
     end
+    return false
 end
 
 function C:UnloadPackage(id)
@@ -46,8 +47,9 @@ function C:UnloadPackage(id)
         local pck = self.custom_packages[id]
         self:UnloadPackageConfig(pck.config)
         Global.cmp.custom_loaded_packages[id] = false
-        return false
+        return true
     end
+    return false
 end
 
 function C:PackageLoaded(id)
@@ -69,19 +71,6 @@ local MAT_CONFIG = "material_config"
 local SEQ_MANAGER = "sequence_manager"
 local COOKED_PHYSICS = "cooked_physics"
 
-
-local UNIT_OBJ = "unit_obj"
-local UNIT_TEX = "unit_tex"
-local UNIT_MAT = "unit_mat"
-local UNIT_SEQ = "unit_seq"
-local UNIT_MAT_SEQ = "unit_mat_seq"
-local UNIT_THQ = "unit_thq"
-local UNIT_MAT_THQ = "unit_mat_thq"
-local UNIT_NPC = "unit_npc"
-local UNIT_CC = "unit_cc"
-local UNIT_MAT_CC = "unit_mat_cc"
-local UNIT_OBJ_SEQ = "unit_obj_seq"
-
 --Default: unit, cooked phyiscs, model, object.
 
 --tex: Adds material_config and textures. 
@@ -98,29 +87,24 @@ local UNIT_OBJ_SEQ = "unit_obj_seq"
 --mat_cc: Adds _thq, _cc, _cc_thq and material_config.
 
 C.UNIT_SHORTCUTS = {
-    [UNIT_OBJ] = {},
-    [UNIT_TEX] = {texture = {"_df", "_nm"}},
-    [UNIT_MAT] = {material_config = true},
-    [UNIT_SEQ] = {sequence_manager = true, material_config = true, texture = {"_df", "_nm"}},
-    [UNIT_MAT_SEQ] = {sequence_manager = true, material_config = true},
-    [UNIT_THQ] = {material_config = {"_thq"}, texture = {"_df", "_nm"}},
-    [UNIT_NPC] = {unit = {"_npc"}},
-    [UNIT_CC] = {material_config = {"_thq", "_cc", "_cc_thq"}, texture = {"_df", "_nm", "_cc"}},
-    [UNIT_MAT_CC] = {material_config = {"_thq", "_cc", "_cc_thq"}},
-    [UNIT_MAT_THQ] = {material_config = {"_thq"}},
-    [UNIT_OBJ_SEQ] = {sequence_manager = true}
+    unit_obj = {},
+    unit_tex = {texture = {"_df", "_nm"}},
+    unit_mat = {material_config = true},
+    unit_seq = {sequence_manager = true, material_config = true, texture = {"_df", "_nm"}},
+    unit_mat_seq = {sequence_manager = true, material_config = true},
+    unit_thq = {material_config = {"_thq"}, texture = {"_df", "_nm"}},
+    unit_npc = {unit = {"_npc"}},
+    unit_cc = {material_config = {"_thq", "_cc", "_cc_thq"}, texture = {"_df", "_nm", "_df_cc"}},
+    unit_mat_cc = {material_config = {"_thq", "_cc", "_cc_thq"}},
+    unit_mat_thq = {material_config = {"_thq"}},
+    unit_obj_seq = {sequence_manager = true}
 }
 
-local DF_NM = "df_nm"
-local DF_NM_CC = "df_nm_cc"
-local DF_NM_CC_GSMA = "df_nm_cc_gsma"
-local DF_NM_GSMA = "df_nm_gsma"
-
 C.TEXTURE_SHORTCUTS = {
-    [DF_NM] = {"_df", "_nm"},
-    [DF_NM_CC] = {"_df", "_nm", "_cc"},
-    [DF_NM_CC_GSMA] = {"_df", "_nm", "_cc", "_gsma"},
-    [DF_NM_GSMA] = {"_df", "_nm", "_gsma"},
+    df_nm = {"_df", "_nm"},
+    df_nm_cc = {"_df", "_nm", "_df_cc"},
+    df_nm_cc_gsma = {"_df", "_nm", "_df_cc", "_gsma"},
+    df_nm_gsma = {"_df", "_nm", "_gsma"},
 }
 
 local UNIT_IDS = UNIT:id()
@@ -176,7 +160,9 @@ function C:LoadPackageConfig(directory, config, temp)
 
                     for load_type, load in pairs(C.UNIT_SHORTCUTS[typ]) do
                         local type_ids = load_type:id()
-                        FileManager:AddFileWithCheck(type_ids, Idstring(path), file_path.."."..load_type)
+                        if load_type ~= TEXTURE then
+                            FileManager:AddFileWithCheck(type_ids, Idstring(path), file_path.."."..load_type)
+                        end
                         if type(load) == "table" then
                             for _, suffix in pairs(load) do
                                 FileManager:AddFileWithCheck(type_ids, Idstring(path..suffix), file_path..suffix.."."..load_type)
@@ -191,7 +177,7 @@ function C:LoadPackageConfig(directory, config, temp)
                     end
                 elseif typ and path then
                     path = Path:Normalize(path)
-                    local ids_ext = Idstring(C.ext_convert[typ] or typ)
+                    local ids_ext = Idstring(C.EXT_CONVERT[typ] or typ)
 					local ids_path = Idstring(path)
 					local file_path = child.full_path or Path:Combine(directory, config.file_path or path)
 					local file_path_ext = file_path.."."..typ
@@ -263,7 +249,7 @@ function C:UnloadPackageConfig(config)
             local path = child.path
             if typ and path then
                 path = Path:Normalize(path)
-                local ids_ext = Idstring(C.ext_convert[typ] or typ)
+                local ids_ext = Idstring(C.EXT_CONVERT[typ] or typ)
                 local ids_path = Idstring(path)
                 if DB:has(ids_ext, ids_path) then
                     if child.unload ~= false then
