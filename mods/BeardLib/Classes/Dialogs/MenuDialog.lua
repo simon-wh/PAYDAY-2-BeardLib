@@ -23,7 +23,7 @@ function MenuDialog:init(params, menu)
         size = 20,
         offset = 8,
         accent_color = BeardLib.Options:GetValue("MenuColor"),
-        background_color = Color(0.6, 0.2, 0.2, 0.2),
+        background_color = Color.black:with_alpha(0.75),
     }, params))
     BeardLib.managers.dialog:AddDialog(self)
 end
@@ -92,7 +92,7 @@ function MenuDialog:CreateCustomStuff(params)
             on_callback = ClassClbk(self, "hide", false)
         })
     end
-    local scroll = self._menu:Menu({name = "MessageScroll", index = 2, private = {offset = 0}, auto_height = true, h = 0, max_height = params.content_max_h or 550})
+    local scroll = self._menu:Menu({name = "MessageScroll", index = 2, private = {offset = 0}, auto_height = true, h = 0, max_height = params.content_max_h or 540})
     if params.create_items_contained then
         params.create_items_contained(scroll)
     end

@@ -78,5 +78,6 @@
     "beardlib_no_error_alert" : "Don't alert me about mod errors",
     "beardlib_no_error_alert_help" : "If a mod hits an error while loading, it will usually inform you about it.\nSo you can either update the mod or remove it.\nNote: You should keep this on when using developer mode.",
     "beardlib_optimized_music_load" : "Optimized music load",
-    "beardlib_optimized_music_load_help" : "Loads custom music only when played. May cause a slight lag when switching songs but overall should make it so you won't crash because of reaching 32bit ram limit."
+    "beardlib_optimized_music_load_help" : "Loads custom music only when played. May cause a slight lag when switching songs but overall should make it so you won't crash because of reaching 32bit ram limit.",
+    "beardlib_errors_dialog" : "Show errors dialog"
 }

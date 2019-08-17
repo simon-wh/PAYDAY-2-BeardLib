@@ -195,6 +195,38 @@ function self:ModError(mod, str, ...)
 	table.insert(self._errors[mod.ModPath], string.format(str, ...))
 end
 
+function self:ShowErrorsDialog()
+	local loc = managers.localization
+	BeardLib.managers.dialog:Simple():Show({
+		force = true,
+		w = 1100,
+		full_bg_color = Color.black:with_alpha(0.9),
+		title = loc:text("beardlib_found_errors"),
+		create_items = function(menu)
+			menu:TextBox({name = loc:text("beardlib_search"), lines = 1, on_callback = function(item)
+				local list = menu:GetItem("MessageScroll")
+				for _, group in pairs(list:Items()) do
+					local search = item:Value()
+					local visible = search == "" or group.text:find(search) ~= nil
+					group:SetVisible(visible)
+				end
+			end})
+			menu:QuickText(loc:text("beardlib_errors_tip"))
+		end,
+		create_items_contained = function(scroll)
+			for mod_path, err_list in pairs(BeardLib._errors) do
+				if mod_path == BeardLib.ModPath then
+					mod_path = "BeardLib/Mix of mods"
+				end
+				local mod = scroll:Group({text = "Mod: "..mod_path, private = {background_color = Color.red:with_alpha(0.8), highlight_color = false}, offset = {16, 2}})
+				for _, err in pairs(err_list) do
+					mod:QuickText(err)
+				end
+			end
+		end
+	})
+end
+
 function self:Log(...) ModCore.Log(self, ...) end
 function self:LogErr(str, ...) ModCore.LogErr(self, ...) end
 function self:Err(...) ModCore.Err(self, ...) end
@@ -251,22 +283,7 @@ Hooks:Add("MenuManagerOnOpenMenu", "BeardLibShowErrors", function(mself, menu)
 			return
 		end
 		if table.size(BeardLib._errors) > 0 then
-			local loc = managers.localization
-			BeardLib.managers.dialog:Simple():Show({
-				w = 1000,
-				title = loc:text("beardlib_found_errors"),
-				create_items = function(menu)
-					menu:QuickText(loc:text("beardlib_errors_tip"))
-				end,
-				create_items_contained = function(scroll)
-					for mod_path, err_list in pairs(BeardLib._errors) do
-						local mod = scroll:Group({text = "Mod: "..mod_path, private = {background_color = Color.red:with_alpha(0.8), highlight_color = false}, offset = {16, 2}})
-						for _, err in pairs(err_list) do
-							mod:QuickText(err)
-						end
-					end
-				end
-			})
+			BeardLib:ShowErrorsDialog()
 		end
 	end
 end)
