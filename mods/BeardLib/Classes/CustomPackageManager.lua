@@ -88,7 +88,7 @@ local COOKED_PHYSICS = "cooked_physics"
 
 C.UNIT_SHORTCUTS = {
     unit_obj = {},
-    unit_tex = {texture = {"_df", "_nm"}},
+    unit_tex = {texture = {"_df", "_nm"}, material_config = true},
     unit_mat = {material_config = true},
     unit_seq = {sequence_manager = true, material_config = true, texture = {"_df", "_nm"}},
     unit_mat_seq = {sequence_manager = true, material_config = true},
@@ -150,22 +150,22 @@ function C:LoadPackageConfig(directory, config, temp)
                 elseif C.UNIT_SHORTCUTS[typ] then
                     local ids_path = Idstring(path)
                     local file_path = child.full_path or Path:Combine(directory, config.file_path or path)
-                    FileManager:AddFileWithCheck(UNIT_IDS, ids_path, file_path.."."..UNIT)
+                    self:AddFileWithCheck(UNIT_IDS, ids_path, file_path.."."..UNIT)
                     if child.auto_cp ~= false then
-                        FileManager:AddFileWithCheck(COOKED_PHYSICS_IDS, ids_path, CP_DEFAULT)
+                        self:AddFileWithCheck(COOKED_PHYSICS_IDS, ids_path, CP_DEFAULT)
                     end
 
-                    FileManager:AddFileWithCheck(MODEL_IDS, ids_path, file_path.."."..MODEL)
-                    FileManager:AddFileWithCheck(OBJECT_IDS, ids_path, file_path.."."..OBJECT)
+                    self:AddFileWithCheck(MODEL_IDS, ids_path, file_path.."."..MODEL)
+                    self:AddFileWithCheck(OBJECT_IDS, ids_path, file_path.."."..OBJECT)
 
                     for load_type, load in pairs(C.UNIT_SHORTCUTS[typ]) do
                         local type_ids = load_type:id()
                         if load_type ~= TEXTURE then
-                            FileManager:AddFileWithCheck(type_ids, Idstring(path), file_path.."."..load_type)
+                            self:AddFileWithCheck(type_ids, Idstring(path), file_path.."."..load_type)
                         end
                         if type(load) == "table" then
                             for _, suffix in pairs(load) do
-                                FileManager:AddFileWithCheck(type_ids, Idstring(path..suffix), file_path..suffix.."."..load_type)
+                                self:AddFileWithCheck(type_ids, Idstring(path..suffix), file_path..suffix.."."..load_type)
                             end
                         end
                     end
@@ -198,7 +198,7 @@ function C:LoadPackageConfig(directory, config, temp)
 									FileManager:AddFileWithCheck(MAT_CONFIG_IDS, ids_path, file_path.."."..MAT_CONFIG)
 									FileManager:AddFile(COOKED_PHYSICS_IDS, ids_path, CP_DEFAULT)
                                 end
-                                if child.auto_cp then
+                                if auto_cp ~= false and not DB:has(COOKED_PHYSICS_IDS, ids_path) then
                                     FileManager:AddFile(COOKED_PHYSICS_IDS, ids_path, CP_DEFAULT)
                                 end
                             end
