@@ -465,6 +465,15 @@ function Utils:FindMod(name)
     return nil
 end
 
+function Utils:FindModWithMatchingPath(path)
+    for _, mod in pairs(BeardLib.Mods) do
+        if path:find(mod.ModPath) ~= nil then
+            return mod
+        end
+    end
+    return nil
+end
+
 function Utils:FindModWithPath(path)
     for _, mod in pairs(BeardLib.Mods) do
         if mod.ModPath == path then
