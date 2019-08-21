@@ -38,8 +38,8 @@ function MeleeModule:RegisterHook()
             free = not self._config.unlock_level
         }, self._config.item or self._config))
         dlc = data.dlc
-        data.unit = data.unit or "units/mods/weapons/wpn_mel_"..self._id.."/wpn_mel_"..self._id
-        data.third_unit = data.third_unit or "units/mods/weapons/wpn_mel_"..self._id.."/wpn_third_mel_"..self._id
+        data.unit = data.unit or "units/mods/weapons/wpn_fps_mel_"..self._id.."/wpn_fps_mel_"..self._id
+        data.third_unit = data.third_unit or "units/mods/weapons/wpn_fps_mel_"..self._id.."/wpn_third_mel_"..self._id
 
         bm_self.melee_weapons[self._config.id] = data
 

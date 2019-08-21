@@ -45,9 +45,6 @@ function WeaponModModule:RegisterHook()
     config.global_value =config.global_value or self.defaults.global_value
     local available = true
     --A FUCKING MESS
-    if config.pcs and #config.pcs < 1 then
-        config.hidden = true 
-    end
     if config.hidden then
         available = false
         config.pts = {}
@@ -68,9 +65,12 @@ function WeaponModModule:RegisterHook()
             config.perks = {config.perks}
         end
         local based_on = self:GetBasedOn(f_self.parts)
-        if config.guess_unit then
-            config.unit = config.unit or "units/mods/weapons/"..id.."/"..id
+
+        local ver2 = config.ver == 2
+        if ver2 then
+            config.pcs = {}
         end
+
         local data = table.merge(deep_clone(based_on and f_self.parts[based_on] or {}), table.merge({
             name_id = config.name_id or "bm_wp_" .. id,
             unit = config.unit,
@@ -90,8 +90,15 @@ function WeaponModModule:RegisterHook()
         if config.merge_data then
             table.merge(data, config.merge_data)
         end
+
+        if config.guess_unit then
+            config.unit = config.unit or "units/mods/weapons/"..id.."/"..id
+        elseif config.wpn_pts then
+            config.unit = config.unit or "units/mods/weapons/"..config.wpn_pts.."_pts/"..id
+        end
+
         f_self.parts[id] = data
-        if data.droppable ~= false then
+        if not config.hidden and data.droppable ~= false then
             TweakDataHelper:ModifyTweak({{
                 type_items = "weapon_mods",
                 item_entry = id,
