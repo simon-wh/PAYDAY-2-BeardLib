@@ -43,7 +43,7 @@ function WeaponModule:RegisterHook()
         self:ConvertOldToNew()
     end
 
-    for _, param in pairs({"weapon", "factory", "weapon.id", "factory.id"}) do
+    for _, param in pairs({"weapon", "factory", "weapon.id"}) do
         if BeardLib.Utils:StringToValue(param, self._config, true) == nil then
             self:Err("Parameter '%s' is required!", param)
             return false
@@ -140,8 +140,11 @@ function WeaponModule:RegisterHook()
         tweak_sound_overrides[id] = sound_overrides and table.merge(sound_overrides, config.sound_overrides) or config.sound_overrides or nil
     end)
     
+    self._config.factory.id = self._config.factory.id or "wpn_fps_"..self._config.weapon.id
+    
     Hooks:Add("BeardLibCreateCustomWeapons", self._config.factory.id .. "AddWeaponFactoryTweakData", function(f_self)
         local config = self._config.factory
+        config.id = config.id or "wpn_fps_"..self._config.weapon
         if f_self[config.id] then
             self:Err("Weapon with factory id '%s' already exists!", config.id)
             return
@@ -152,6 +155,8 @@ function WeaponModule:RegisterHook()
         if config.guess_unit ~= false then
             config.unit = config.unit or "units/mods/weapons/"..config.id.."/"..config.id
         end
+
+        config.mod_path = self._mod.ModPath
 
         if config.based_on then
             f_self[config.id] = table.merge(deep_clone(self:GetBasedOn(f_self, config.based_on)), config)
