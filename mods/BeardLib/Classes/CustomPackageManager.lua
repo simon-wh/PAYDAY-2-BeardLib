@@ -185,7 +185,7 @@ function C:LoadPackageConfig(directory, config, temp)
                     local auto_cp = NotNil(child.auto_cp, config.auto_cp, false)
                     local force = NotNil(child.force, config.force, true)
                     local reload = NotNil(child.reload, config.reload, true)
-                    local load = NotNil(child.load, config.load, false)
+                    local dyn_load = NotNil(child.load, config.load, false)
 
                     if FileIO:Exists(file_path_ext) then
                         local load = force
@@ -213,7 +213,7 @@ function C:LoadPackageConfig(directory, config, temp)
                             if child.reload then
                                 PackageManager:reload(ids_ext, ids_path)
                             end
-                            if load then
+                            if dyn_load then
                                 table.insert(loading, {ids_ext, ids_path, file_path_ext})
 							end
                         end
