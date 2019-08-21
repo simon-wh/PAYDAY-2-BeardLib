@@ -35,6 +35,8 @@ function ModCore:init(config_path, load_modules)
     end
 end
 
+local TEXTURE = Idstring("texture")
+
 function ModCore:PostInit(ignored_modules)
     if self._post_init_done then
         return
@@ -43,6 +45,14 @@ function ModCore:PostInit(ignored_modules)
 	if not self._disabled and self._core_class then
 		self._core_class:PreInit()
 	end
+
+    
+    local path = Path:Combine(self.ModPath, "icon.png")
+    if FileIO:Exists(path) then
+        local ingame_path = Path:Combine("icons", self.Name)
+        FileManager:AddFile(TEXTURE, Idstring(ingame_path), path)
+        self._config.image = ingame_path
+    end
 
     ignored_modules = ignored_modules or self._config.ignored_post_init_modules
     for _, module in pairs(self._modules) do
