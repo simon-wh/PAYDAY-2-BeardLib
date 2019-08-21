@@ -150,8 +150,9 @@ function C:LoadPackageConfig(directory, config, temp)
                 elseif C.UNIT_SHORTCUTS[typ] then
                     local ids_path = Idstring(path)
                     local file_path = child.full_path or Path:Combine(directory, config.file_path or path)
+                    local auto_cp = NotNil(child.auto_cp, config.auto_cp, true)
                     self:AddFileWithCheck(UNIT_IDS, ids_path, file_path.."."..UNIT)
-                    if child.auto_cp ~= false then
+                    if auto_cp then
                         self:AddFileWithCheck(COOKED_PHYSICS_IDS, ids_path, CP_DEFAULT)
                     end
 
@@ -180,11 +181,17 @@ function C:LoadPackageConfig(directory, config, temp)
                     local ids_ext = Idstring(C.EXT_CONVERT[typ] or typ)
 					local ids_path = Idstring(path)
 					local file_path = child.full_path or Path:Combine(directory, config.file_path or path)
-					local file_path_ext = file_path.."."..typ
+                    local file_path_ext = file_path.."."..typ
+                    local auto_cp = NotNil(child.auto_cp, config.auto_cp, false)
+                    local force = NotNil(child.force, config.force, true)
+                    local reload = NotNil(child.reload, config.reload, true)
+                    local load = NotNil(child.load, config.load, true)
+
                     if FileIO:Exists(file_path_ext) then
-                        local load = NotNil(child.force, config.force)
+                        local load = force
                         if not load then
-                            if child.force_if_not_loaded then
+                            local force_if_not_loaded = NotNil(child.force_if_not_loaded, config.force_if_not_loaded, false)
+                            if force_if_not_loaded then
                                 load = not PackageManager:has(ids_ext, ids_path)
                             else
                                 load = not DB:has(ids_ext, ids_path)
@@ -198,7 +205,7 @@ function C:LoadPackageConfig(directory, config, temp)
 									FileManager:AddFileWithCheck(MAT_CONFIG_IDS, ids_path, file_path.."."..MAT_CONFIG)
 									FileManager:AddFile(COOKED_PHYSICS_IDS, ids_path, CP_DEFAULT)
                                 end
-                                if auto_cp ~= false and not DB:has(COOKED_PHYSICS_IDS, ids_path) then
+                                if auto_cp then
                                     FileManager:AddFile(COOKED_PHYSICS_IDS, ids_path, CP_DEFAULT)
                                 end
                             end
@@ -206,7 +213,7 @@ function C:LoadPackageConfig(directory, config, temp)
                             if child.reload then
                                 PackageManager:reload(ids_ext, ids_path)
                             end
-                            if child.load then
+                            if load then
                                 table.insert(loading, {ids_ext, ids_path, file_path_ext})
 							end
                         end
