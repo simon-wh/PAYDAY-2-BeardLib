@@ -11,9 +11,10 @@ function FileBrowserDialog:_Show(params, force)
     self._file_click = params.file_click
     self._base_path = params.base_path
     self._browse_func = params.browse_func
-    self._openclose:SetText(params.save and "Save" or "Open")
+    self._openclose:SetText(params.save and "Save" or params.folder_browser and "Select" or "Open")
     self._save = params.save
-    self:Browse(params.where)
+    self._folder_browser = params.folder_browser
+    self:Browse(Path:Normalize(params.where))
     self:show_dialog()
 end
 
@@ -58,7 +59,7 @@ function FileBrowserDialog:init(params, menu)
         w = 540,
         lines = 1,
         control_slice = 1,
-        forbidden_chars = {':','*','?','"','<','>','|'},
+      --  forbidden_chars = {':','*','?','"','<','>','|'},
         on_callback = ClassClbk(self, "OpenPathSetDialog"),
     })
     local search = self._menu:TextBox({
@@ -215,6 +216,7 @@ function FileBrowserDialog:MakeFilesAndFolders(files, folders)
          self._folders_menu:Button({
             name = v,
             text = v,
+            on_double_click = ClassClbk(self, "FolderDoubleClick"),
             on_callback = ClassClbk(self, "FolderClick"), 
             label = "temp2"
         })        
@@ -236,18 +238,28 @@ end
 
 function FileBrowserDialog:FileDoubleClick(item)
     if self._file_click then
-        local path = self._current_dir .. "/" .. self._file_name:Value()
-        if FileIO:Exists(path) then
-            if self._save then
-                QuickDialog({force = true, dialog = BLE.Dialog, title = "Alert", message = "File already exists, replace the file?", no = "No"}, {{"Yes", SimpleClbk(self._file_click, path)}})
-            else
-                self._file_click(path)
-            end
-        elseif self._save then
-            self._file_click(path)
+        if self._folder_browser then
+            self._file_click(self._current_dir)
         else
-            BLE.Dialog:Show({force = true, title = "Error", message = "File does not exist!"})
-        end
+            local path = self._current_dir .. "/" .. self._file_name:Value()
+            if FileIO:Exists(path) then
+                if self._save then
+                    QuickDialog({force = true, dialog = BLE.Dialog, title = "Alert", message = "File already exists, replace the file?", no = "No"}, {{"Yes", SimpleClbk(self._file_click, path)}})
+                else
+                    self._file_click(path)
+                end
+            elseif self._save then
+                self._file_click(path)
+            else
+                BLE.Dialog:Show({force = true, title = "Error", message = "File does not exist!"})
+            end
+        end        
+    end
+end
+
+function FileBrowserDialog:FolderDoubleClick(item)
+    if self._folder_browser and self._file_click then
+        self._file_click(self._current_dir .. "/" .. item.text)
     end
 end
 
@@ -264,7 +276,7 @@ function FileBrowserDialog:FolderBack()
         self._searching = false
         self:Browse()
     else
-        local str = string.split(self._current_dir, "/")
+        local str = string.split(Path:Normalize(self._current_dir), "/")
         table.remove(str)
         self._old_dir = self._current_dir
         self:Browse(table.concat(str, "/"))
@@ -280,6 +292,7 @@ function FileBrowserDialog:hide( ... )
         self._browse_func = nil
         self._base_path = nil
         self._save = nil
+        self._folder_browser = nil
         return true
     end
 end
