@@ -39,7 +39,7 @@ function Item:Init(params)
 	end
 	self:Reposition()
     if self.items then
-		self._list = BeardLib.Items.ContextMenu:new(self, self.parent_panel:layer() + 100) 
+		self._list = BeardLib.Items.ContextMenu:new(self, self.parent_panel:layer() + 1000) 
     end
 end
 
@@ -1383,7 +1383,7 @@ function Item:MouseDoubleClick(button, x, y)
 		end
 		
 		if self:MouseInside(x,y) and self.on_double_click then
-			self.on_double_click(item, button, x, y)
+			self.on_double_click(self, button, x, y)
 			return true
 		end
 	end

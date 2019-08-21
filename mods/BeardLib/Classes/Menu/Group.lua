@@ -31,7 +31,7 @@ function Group:RePositionToggle()
     if self:title_alive() then
         local _,_,w,_ = self.title:text_rect()
         if alive(self.toggle) then
-            local s = self.title:h() * 0.78
+            local s = self.title:font_size() * 0.78
             self.toggle:set_size(s, s)
             self.toggle:set_x(w + 4)
             self.toggle:set_center_y(self.title:center_y())
