@@ -185,7 +185,7 @@ function C:LoadPackageConfig(directory, config, temp)
                     local auto_cp = NotNil(child.auto_cp, config.auto_cp, false)
                     local force = NotNil(child.force, config.force, true)
                     local reload = NotNil(child.reload, config.reload, true)
-                    local load = NotNil(child.load, config.load, true)
+                    local load = NotNil(child.load, config.load, false)
 
                     if FileIO:Exists(file_path_ext) then
                         local load = force
