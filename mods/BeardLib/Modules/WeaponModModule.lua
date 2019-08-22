@@ -47,7 +47,6 @@ function WeaponModModule:RegisterHook()
     --A FUCKING MESS
     if config.hidden then
         available = false
-        config.pts = {}
     end
     config.droppable = NotNil(config.droppable, available)
     if config.drop == false and config.is_a_unlockable == false then
@@ -65,10 +64,24 @@ function WeaponModModule:RegisterHook()
             config.perks = {config.perks}
         end
         local based_on = self:GetBasedOn(f_self.parts)
-
+        
         local ver2 = config.ver == 2
         if ver2 then
             config.pcs = {}
+        end
+        local guess_unit = NotNil(config.guess_unit, ver2)
+
+        if config.wpn_pts then
+            config.unit = config.unit or "units/mods/weapons/"..config.wpn_pts.."_pts/"..id
+        elseif guess_unit then
+            config.unit = config.unit or "units/mods/weapons/"..id.."/"..id
+        end
+
+        if config.unit then
+            if not DB:has(Idstring("unit"), config.unit:id()) then
+                self:Err("Unit %s of part %s is not loaded.", tostring(config.unit), tostring(config.id))
+                config.unit = nil
+            end
         end
 
         local data = table.merge(deep_clone(based_on and f_self.parts[based_on] or {}), table.merge({
@@ -83,7 +96,6 @@ function WeaponModModule:RegisterHook()
             stats = table.merge({value=0}, BeardLib.Utils:RemoveMetas(config.stats, true) or {}),
             type = config.type,
             animations = config.animations,
-            is_a_unlockable = available,
             mod_path = self._mod.ModPath,
             custom = true
         }, config))
@@ -91,10 +103,11 @@ function WeaponModModule:RegisterHook()
             table.merge(data, config.merge_data)
         end
 
-        if config.guess_unit then
-            config.unit = config.unit or "units/mods/weapons/"..id.."/"..id
-        elseif config.wpn_pts then
-            config.unit = config.unit or "units/mods/weapons/"..config.wpn_pts.."_pts/"..id
+        if data.hidden then
+            data.pcs = nil
+            data.is_a_unlockable = nil
+        else
+            data.is_a_unlockable = NotNil(data.is_a_unlockable, true)
         end
 
         f_self.parts[id] = data
