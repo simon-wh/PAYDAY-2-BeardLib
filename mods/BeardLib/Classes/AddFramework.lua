@@ -4,6 +4,7 @@ Framework.add_file = "add.xml"
 Framework.type_name = "add"
 Framework._directory = BeardLib.config.mod_override_dir
 Framework.menu_color = Color(0, 0.25, 1)
+Framework.add_configs = {}
 
 function Framework:FindMods()
     local dirs = FileIO:GetFolders(self._directory)
@@ -22,6 +23,7 @@ function Framework:FindMods()
                 local config = ScriptSerializer:from_custom_xml(file:read("*all"))
                 local directory = config.full_directory or Path:Combine(p, config.directory)
                 AddFilesModule:LoadPackageConfig(directory, config)
+                Framework.add_configs[p] = config
             end
         end
     end
