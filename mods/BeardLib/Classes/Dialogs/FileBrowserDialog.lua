@@ -133,7 +133,7 @@ function FileBrowserDialog:init(params, menu)
 end
 
 function FileBrowserDialog:Browse(where, params)
-    if not FileIO:Exists(where) then
+    if where ~= "" and not FileIO:Exists(where) then
         return
     end
     self._files_menu:ClearItems()
@@ -216,7 +216,6 @@ function FileBrowserDialog:MakeFilesAndFolders(files, folders)
          self._folders_menu:Button({
             name = v,
             text = v,
-            on_double_click = ClassClbk(self, "FolderDoubleClick"),
             on_callback = ClassClbk(self, "FolderClick"), 
             label = "temp2"
         })        
@@ -257,15 +256,9 @@ function FileBrowserDialog:FileDoubleClick(item)
     end
 end
 
-function FileBrowserDialog:FolderDoubleClick(item)
-    if self._folder_browser and self._file_click then
-        self._file_click(self._current_dir .. "/" .. item.text)
-    end
-end
-
 function FileBrowserDialog:FolderClick(item)
     self._old_dir = nil
-    self:Browse(self._current_dir .. "/" .. item.text)
+    self:Browse(Path:Normalize(self._current_dir .. "/" .. item.text))
     if item.press_clbk then
         item.press_clbk()
     end
