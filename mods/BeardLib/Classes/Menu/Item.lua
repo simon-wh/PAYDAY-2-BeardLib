@@ -337,7 +337,9 @@ function Item:DoHighlight(highlight)
 	if self.animate_colors then
 		if self.bg then play_anim(self.bg, {set = {alpha = highlight and self.highlight_bg and self.highlight_bg:visible() and 0 or 1}}) end
 		if self.highlight_bg then play_anim(self.highlight_bg, {set = {alpha = highlight and 1 or 0}}) end
-		if self.title then play_color(self.title, foreground) end
+		if not self.range_color then
+			if self.title then play_color(self.title, foreground) end
+		end
 		if self.border_highlight_color then
 			for _, v in pairs({"left", "top", "right", "bottom"}) do
 				local side = self.panel:child(v)
@@ -349,7 +351,9 @@ function Item:DoHighlight(highlight)
 	else
 		if self.bg then self.bg:set_alpha(highlight and self.highlight_bg and self.highlight_bg:visible() and 0 or 1) end
 		if self.highlight_bg then self.highlight_bg:set_alpha(highlight and 1 or 0) end
-		if self.title then self.title:set_color(foreground) end
+		if not self.range_color then
+			if self.title then self.title:set_color(foreground) end
+		end
 		if self.border_highlight_color then
 			for _, v in pairs({"left", "top", "right", "bottom"}) do
 				local side = self.panel:child(v)
@@ -923,7 +927,16 @@ function Item:_SetText(text)
 	if self:alive() and self:title_alive() then
 		local title = self.title
         self.text = text
-        title:set_text(self.localized and text and managers.localization:text(text) or text)
+		title:set_text(self.localized and text and managers.localization:text(text) or text)
+		if self.range_color then
+			for _, setting in pairs(self.range_color) do
+				if #setting == 2 then
+					self.title:set_range_color(setting[1], text:len(), setting[2])
+				else
+					self.title:set_range_color(setting[1], setting[2], setting[3])
+				end
+			end
+		end
         local offset_x = math.max(self.border_left and self.border_width or 0, self.text_offset[1])
 		local offset_y = math.max(self.border_top and self.border_size or 0, self.text_offset[2])
 		local offset_w = offset_x * 2
