@@ -63,6 +63,7 @@
 			<hook source_file="lib/managers/weaponfactorymanager" file="Fixes.lua"/>
 			<hook source_file="lib/managers/blackmarketmanager" file="Fixes.lua"/>
 			<hook source_file="lib/managers/dialogmanager" file="Fixes.lua"/>
+			<hook source_file="lib/managers/dlcmanager" file="Fixes.lua"/>
 			<hook source_file="lib/network/base/networkpeer" file="Fixes.lua"/>
 			<hook source_file="lib/states/ingamewaitingforplayers" file="Fixes.lua"/>
 
