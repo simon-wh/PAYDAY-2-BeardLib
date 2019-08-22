@@ -20,6 +20,7 @@ function GlobalValueModule:RegisterHook()
             color = Color.white,
             dlc = false,
             chance = 1,
+            custom = true,
             value_multiplier = 1,
             track = false,
             sort_number = 0,
