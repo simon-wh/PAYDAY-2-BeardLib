@@ -408,7 +408,10 @@ elseif F == "dlcmanager" then
     --Fixes parts receiving global value doing a check here using global values and disregarding if the global value is not a DLC. https://github.com/simon-wh/PAYDAY-2-BeardLib/issues/237
     function GenericDLCManager:is_dlc_unlocked(dlc)
         if not tweak_data.dlc[dlc] then
-            return tweak_data.lootdrop.global_values[dlc] and tweak_data.lootdrop.global_values[dlc].dlc == false
+            local global_value = tweak_data.lootdrop.global_values[dlc]
+            if global_value and global_value.custom then
+                return tweak_data.lootdrop.global_values[dlc].dlc == false
+            end
         end
         return tweak_data.dlc[dlc] and tweak_data.dlc[dlc].free or self:has_dlc(dlc)
     end
