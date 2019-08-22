@@ -106,6 +106,14 @@ function FileIO:WriteScriptData(path, data, typ, clean)
 	return self:WriteTo(path, self:ConvertToScriptData(data, typ, clean), typ == "binary" and "wb")
 end
 
+function FileIO:FileExists(path)
+	return file.FileExists(path)
+end
+
+function FileIO:DirectoryExists(path)
+	return file.DirectoryExists(path)
+end
+
 function FileIO:Exists(path)
 	if not path then
 		return false
@@ -113,11 +121,7 @@ function FileIO:Exists(path)
 	if SystemFS and SystemFS.exists then
 		return SystemFS:exists(path)
 	else
-		if self:Open(path, "r") or file.GetFiles(path) then
-			return true
-		else
-			return false
-		end
+		return FileIO:DirectoryExists(path) or FileIO:FileExists(path)
 	end
 end
 
