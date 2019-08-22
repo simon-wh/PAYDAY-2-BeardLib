@@ -404,4 +404,12 @@ elseif F == "playerdamage" then
             self:set_mission_damage_blockers("invulnerable", true)
         end
     end)
+elseif F == "dlcmanager" then
+    --Fixes parts receiving global value doing a check here using global values and disregarding if the global value is not a DLC. https://github.com/simon-wh/PAYDAY-2-BeardLib/issues/237
+    function GenericDLCManager:is_dlc_unlocked(dlc)
+        if not tweak_data.dlc[dlc] then
+            return tweak_data.lootdrop.global_values[dlc] and tweak_data.lootdrop.global_values[dlc].dlc == false
+        end
+        return tweak_data.dlc[dlc] and tweak_data.dlc[dlc].free or self:has_dlc(dlc)
+    end
 end
