@@ -75,8 +75,8 @@
     "beardlib_log_sounds_help" : "Logs each incoming sound ID. Helpful when you want to replace existing sounds and don't know what's the ID.",
     "beardlib_found_errors" : "One or more BeardLib mods have hit an error",
     "beardlib_errors_tip" : "It's your duty to release your mods clean of errors.\nIf you're not a mod developer you can report these issues to the mod creators. Of course, making sure everything is updated.",
-    "beardlib_no_error_alert" : "Don't alert me about mod errors",
-    "beardlib_no_error_alert_help" : "If a mod hits an error while loading, it will usually inform you about it.\nSo you can either update the mod or remove it.\nNote: You should keep this on when using developer mode.",
+    "beardlib_no_error_alert" : "Don't alert me about mod errors at all",
+    "beardlib_no_error_alert_help" : "If a mod hits a critical error (e.g. Outdated BeardLib) while loading, it will usually inform you about it.\nSo you can either update the mod or remove it.\nNote: You should keep this on when using developer mode.",
     "beardlib_optimized_music_load" : "Optimized music load",
     "beardlib_optimized_music_load_help" : "Loads custom music only when played. May cause a slight lag when switching songs but overall should make it so you won't crash because of reaching 32bit ram limit.",
     "beardlib_errors_dialog" : "Show errors dialog"
