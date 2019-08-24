@@ -77,7 +77,7 @@
     "beardlib_errors_tip" : "Es ist deine Aufgabe deine mods sauber und fehlerfrei zu veröffentlichen.\nWenn du kein modder bist, kannst du diese Probleme  dem modersteller berichten. Natürlich solltest du sicher gehen das alles aktuell ist.",
     "beardlib_no_error_alert" : "Mir mod Fehler nicht berichten",
     "beardlib_no_error_alert_help" : "Wenn eine mod während des ladens einen Fehler hat, wirst du normalerweise darüber benachrichtigt\ndamit du den mod entweder updaten oder entfernen kannst.\nHinweis: Du solltest dies aktiviert lassen, wenn du den Entwickler Modus verwendest.",
-    "beardlib_optimized_music_load" : "Optimisierter Musik Ladevorgang",
-    "beardlib_optimized_music_load_help" : "Läd custom Musik nur, wenn sie abgespielt wird. Könnte lags verursachen wärend Lieder gewechselt werden sollte aber insgesamt dafür sorgen, dass du keine Abstürze mehr bekommst, wenn das 32bit RAM Limit erreicht wird.",
+    "beardlib_optimized_music_load" : "Optimierter Musik Ladevorgang",
+    "beardlib_optimized_music_load_help" : "Lädt custom Musik nur, wenn sie abgespielt wird. Könnte lags verursachen während Lieder gewechselt werden sollte aber insgesamt dafür sorgen, dass du keine Abstürze mehr bekommst wenn das 32bit RAM Limit erreicht wird.",
     "beardlib_errors_dialog" : "Fehler Dialog anzeigen."
 }
