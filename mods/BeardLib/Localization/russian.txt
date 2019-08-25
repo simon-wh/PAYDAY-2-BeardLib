@@ -54,8 +54,6 @@
     "beardlib_dev_mode_help" : "Режим разработчика добавляет большее количество ошибок, которые должны отмечаться в диалоговом окне ошибок (например, если файл не загрузился). Рекомендуется использовать данный режим при разработке любого мода, который опирается на BeardLib, для решения данных проблем. В стандартной ситуации, это отмечается в логах BLT.",
     "beardlib_important_notice_help" : "Должен ли BeardLib уведомлять вас, когда есть обновление для важного мода?",
     "beardlib_write_failed" : "Не удалось записать путь :/",
-    "beardlib_no_error_alert" : "Не предупреждать меня об ошибках в модах никогда",
-    "beardlib_no_error_alert_help" : "Если в моде будут какие-либо критические ошибки при загрузке (например, из-за устаревшей версии BeardLib), он проинформирует вас об этом, чтобы вы могли или обновить мод, или удалить его.\nПримечание: не выключайте данную опцию, если вы используете режим разрабочика.",
     "beardlib_errors_dialog" : "Показать диалоговое окно ошибок"
     "beardlib_achieves_title" : "Пользовательские достижения",
     "beardlib_achieves_desc" : "Просмотреть установленные на текущий момент пользовательские достижения.",
@@ -77,5 +75,17 @@
     "beardlib_no_error_alert_help" : "Если в моде будут какие-либо критические ошибки при загрузке (например, из-за устаревшей версии BeardLib), он проинформирует вас об этом, чтобы вы могли или обновить мод, или удалить его.\nПримечание: не выключайте данную опцию, если вы используете режим разрабочика.",
     "beardlib_optimized_music_load" : "Оптимизированная загрузка музыки",
     "beardlib_optimized_music_load_help" : "Загружать музыку только когда необходимо начать её проигрывать. Может вызвать небольшие лаги при смене музыки, но в целом должно избавить вас от крашей по причине достижения предела оперативной памяти из-за 32-битной структуры игры.",
-    "beardlib_errors_dialog" : "Показать диалоговое окно ошибок"
+    "beardlib_errors_dialog" : "Показать диалоговое окно ошибок",
+    "beardlib_update" : "Update",
+    "beardlib_waiting_updates" : "Update(s) available ",
+    "beardlib_mod_enabled" : "Enabled",
+    "beardlib_mod_enabled_help" : "Determines whether the mod is enabled. If a mod is disabled it will not run any code. BLT mods cannot be disabled by BeardLib. You can disable them through BLT itself",
+    "beardlib_mod_ignore_updates" : "Ignore updates",
+    "beardlib_mod_ignore_updates_help" : "Should BeardLib ignore any incoming updates of this mod?",
+    "beardlib_mod_settings" : "Mod settings - $mod",
+    "beardlib_mod_by" : "By $author",
+    "beardlib_updates_download_now" : "Download",
+    "beardlib_mod_type_add" : "Addon",
+    "beardlib_mod_type_map" : "Map",
+    "beardlib_waiting_update" : "Update available"
 }
