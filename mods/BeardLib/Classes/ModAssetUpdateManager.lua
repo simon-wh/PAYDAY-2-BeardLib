@@ -1,5 +1,4 @@
 ModAssetUpdateManager = ModAssetUpdateManager or class()
-ModAssetUpdateManager.save_path = SavePath .. "mod_assets_manager.txt"
 ModAssetUpdateManager._registered_updates = {}
 ModAssetUpdateManager._ready_for_update = true
 function ModAssetUpdateManager:init()
@@ -7,38 +6,31 @@ function ModAssetUpdateManager:init()
     self:load_manager_file()
 end
 
-function ModAssetUpdateManager:CheckUpdateStatus(mod_id)
-    if self._data[mod_id] ~= nil then
-        return self._data[mod_id]
+function ModAssetUpdateManager:SetUpdatesIgnored(mod, ignored)
+    local ignored_updates = BeardLib.Options:GetValue("IgnoredUpdates")
+    ignored_updates[mod.ModPath] = ignored
+    BeardLib.Options:Save()
+end
+
+function ModAssetUpdateManager:UpdatesIgnored(mod)
+    local ignored_updates = BeardLib.Options:GetValue("IgnoredUpdates")
+    if ignored_updates[mod.ModPath] ~= nil then
+        return ignored_updates[mod.ModPath]
     else
-        return true
-    end
-end
-
-function ModAssetUpdateManager:SetUpdateStatus(mod_id, status)
-    self._data[mod_id] = status
-    self:save_manager_file()
-end
-
-function ModAssetUpdateManager:save_manager_file()
-    local file = io.open(self.save_path, "w+")
-    local data_str = json.encode(self._data)
-	file:write(data_str == "[]" and "{}" or data_str)
-	file:close()
-end
-
-function ModAssetUpdateManager:load_manager_file()
-    local file = io.open(self.save_path, 'r')
-    if file then
-        local ret, data = pcall(function() return json.decode(file:read("*all")) end)
-        if ret then
-            self._data = data
-        end
+        return false
     end
 end
 
 function ModAssetUpdateManager:RegisterUpdate(func)
     table.insert(self._registered_updates, func)
+end
+
+function ModAssetUpdateManager:IsReadyForUpdate()
+    return self._ready_for_update
+end
+
+function ModAssetUpdateManager:PrepareForUpdate()
+    self._ready_for_update = true
 end
 
 function ModAssetUpdateManager:Update(t, dt)
@@ -47,5 +39,11 @@ function ModAssetUpdateManager:Update(t, dt)
         table.remove(self._registered_updates, 1)()
     end
 end
+
+--Unused
+function ModAssetUpdateManager:CheckUpdateStatus() end
+function ModAssetUpdateManager:SetUpdateStatus() end
+function ModAssetUpdateManager:save_manager_file() end
+function ModAssetUpdateManager:load_manager_file() end
 
 return ModAssetUpdateManager

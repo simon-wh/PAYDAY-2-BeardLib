@@ -310,7 +310,7 @@ function Item:WorkParams(params)
 	if not self.initialized then
 		if self.parent ~= self.menu then
 			if self.w ~= "half" and (not self.w or self.fit_width) then
-				self.w = (self.w or self.parent_panel:w()) - ((self.size_by_text or self.type_name == "ImageButton") and 0 or self.offset[1] * 2)
+				self.w = (self.w or self.parent_panel:w()) - ((self.size_by_text or self.type_name == "ImageButton") and 0 or (self.offset[1] * 2))
 			end
 		else
 			self.w = self.w or self.parent_panel:w()
@@ -622,9 +622,11 @@ function Item:RecreateItem(item, align_items)
 end
 
 function Item:RecreateItems()
-    for _, item in pairs(self._my_items) do
-        self:RecreateItem(item)
-    end
+	if self.menu_type then
+		for _, item in pairs(self._my_items) do
+			self:RecreateItem(item)
+		end
+	end
     self:_AlignItems()
 end
 
@@ -682,76 +684,86 @@ end
 
 function Item:GetMenus(match, deep, menus)
 	menus = menus or {}
-    for _, menu in pairs(self._my_items) do
-        if menu.menu_type then
-            if not match or menu.name:find(match) then
-                table.insert(menus, menu)
-            elseif deep then
-                local item = menu:GetMenus(name, true, menus)
-                if item and item.name then
-                    return item
-                end
-            end
-        end
-    end
+	if self.menu_type then
+		for _, menu in pairs(self._my_items) do
+			if menu.menu_type then
+				if not match or menu.name:find(match) then
+					table.insert(menus, menu)
+				elseif deep then
+					local item = menu:GetMenus(name, true, menus)
+					if item and item.name then
+						return item
+					end
+				end
+			end
+		end
+	end
     return menus
 end
 
 function Item:GetMenu(name, shallow)
-    for _, menu in pairs(self._my_items) do
-        if menu.menu_type then
-            if menu.name == name then
-                return menu
-            elseif not shallow then
-                local item = menu:GetMenu(name)
-                if item and item.name then
-                    return item
-                end
-            end
-        end
-    end
+	if self.menu_type then
+		for _, menu in pairs(self._my_items) do
+			if menu.menu_type then
+				if menu.name == name then
+					return menu
+				elseif not shallow then
+					local item = menu:GetMenu(name)
+					if item and item.name then
+						return item
+					end
+				end
+			end
+		end
+	end
     return false
 end
 
 function Item:GetItem(name, shallow)
-    for _, item in pairs(self._my_items) do
-        if item.name == name then
-            return item
-        elseif item.menu_type and not shallow then
-            local i = item:GetItem(name)
-            if i then
-                return i
-            end
-        end
-    end
+	if self.menu_type then
+		for _, item in pairs(self._my_items) do
+			if item.name == name then
+				return item
+			elseif item.menu_type and not shallow then
+				local i = item:GetItem(name)
+				if i then
+					return i
+				end
+			end
+		end
+	end
     return nil
 end
 
 function Item:GetItemWithType(name, type, shallow)
-    for _, item in pairs(self._my_items) do
-        if item.type_name == type and item.name == name then
-            return item
-        elseif item.menu_type and not shallow then
-            local i = item:GetItem(name)
-            if i then
-                return i
-            end
-        end
-    end
+	if self.menu_type then
+		for _, item in pairs(self._my_items) do
+			if item.type_name == type and item.name == name then
+				return item
+			elseif item.menu_type and not shallow then
+				local i = item:GetItem(name)
+				if i then
+					return i
+				end
+			end
+		end
+	end
     return nil
 end
 
 function Item:GetItemByLabel(label, shallow)
-    for _, item in pairs(self._my_items) do
-        if item.label == label then
-            return item
-        elseif item.menu_type and not shallow then
-            local i = item:GetItemByLabel(label)
-            if i then
-                return i
-            end
-        end
-    end
+	if self.menu_type then
+		for _, item in pairs(self._my_items) do
+			if item.label == label then
+				return item
+			elseif item.menu_type and not shallow then
+				local i = item:GetItemByLabel(label)
+				if i then
+					return i
+				end
+			end
+		end
+	end
     return nil
 end
 
@@ -979,6 +991,11 @@ end
 function Item:SetTextLight(text)
 	self.text = text
 	self.title:set_text(self.localized and text and managers.localization:text(text) or text)
+	if self.size_by_text then
+		local _,_,w,h = self.title:text_rect()
+		self.title:set_size(w,h)
+		self.title:set_size(w,h)
+	end
 end
 
 function Item:SetText(text)

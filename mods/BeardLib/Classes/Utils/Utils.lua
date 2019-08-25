@@ -76,7 +76,13 @@ function Utils:GetJobString()
     local level = tweak_data.levels[level_id]
     local level_name = managers.localization:to_upper_text(level and level.name_id or "")
     local mod = BeardLib.managers.MapFramework:GetMapByJobId(job_id)
-    local update = mod and mod.update_module_data or {}
+    local update = {}
+    if mod then
+        local mod_assets = mod:GetModule(ModAssetsModule.type_name)
+		if mod_assets then
+            update = mod_assets._data
+        end
+    end
     local cat = table.concat({job_id, level_id, Global.game_settings.difficulty, level_name, update.id or "null", update.provider or "null", update.download_url or "null"}, "|")
     return cat
 end

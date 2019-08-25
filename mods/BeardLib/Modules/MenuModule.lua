@@ -16,7 +16,7 @@ function MenuModule:BuildNodeItems(node, data)
     for i, sub_item in ipairs(data) do
         if sub_item._meta == "sub_menu" or sub_item._meta == "menu" then
             if sub_item.key then
-                if self._mod[sub_item.key] then
+                if self._mod[sub_item.key] and self._mod[sub_item.key].BuildMenu then
                     self._mod[sub_item.key]:BuildMenu(node)
                 else
                     self:Err("Cannot find module of id '%s' in mod", sub_item.key)
@@ -26,7 +26,7 @@ function MenuModule:BuildNodeItems(node, data)
             end
         elseif sub_item._meta == "item_group" then
             if sub_item.key then
-                if self._mod[sub_item.key] then
+                if self._mod[sub_item.key] and self._mod[sub_item.key].InitializeNode then
                     self._mod[sub_item.key]:InitializeNode(node)
                 else
                     self:Err("Cannot find module of id '%s' in mod", sub_item.key)

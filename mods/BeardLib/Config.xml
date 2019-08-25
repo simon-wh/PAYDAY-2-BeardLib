@@ -41,6 +41,10 @@
 				<option name="DisabledMods" type="table">
 					<default_value/>
 				</option>
+
+				<option name="IgnoredUpdates" type="table">
+					<default_value/>
+				</option>
 			</options>
 		</Options>	
 		<Hooks directory="Hooks">

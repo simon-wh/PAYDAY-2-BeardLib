@@ -11,7 +11,8 @@ function ModCore:init(config_path, load_modules)
 	self.ModPath = ModPath
     self.Priority = 1
 	self.SavePath = SavePath
-	
+    self._modules = {}
+    
     local disabled_mods = BeardLib.Options:GetValue("DisabledMods")
     self._blt_mod = config_path:find(FrameworkBase._format) == 1
 
@@ -145,8 +146,6 @@ function ModCore:InitModules()
             self._core_class:PreModuleInit()
         end
 	end
-
-	self._modules = {}
 	
 	local order = self._config.load_first or load_first
 	
@@ -294,6 +293,41 @@ function ModCore:ForceDisable()
     self._disabled = true
 end
 
+function ModCore:Modules()
+    return self._modules
+end
+
+function ModCore:GetModule(type_name)
+    for _, module in pairs(self._modules) do
+        if module.type_name == type_name then
+            return module
+        end
+    end
+    return nil
+end
+
+function ModCore:GetModuleIndex(m)
+    local bigget_i = 0
+    for i, module in pairs(self._modules) do
+        if module == m then
+            return i
+        elseif module.type_name == m.type_name then
+            bigget_i = i
+        end
+    end
+    return bigget_i+1
+end
+
+function ModCore:GetModules(type_name)
+    local modules = {}
+    for _, module in pairs(self._modules) do
+        if module.type_name == type_name then
+            table.insert(modules, module)
+        end
+    end
+    return modules
+end
+
 function ModCore:PreInit() end
 function ModCore:Init() end
 function ModCore:GetPath() return self.ModPath end
@@ -313,3 +347,17 @@ ModCore.log = ModCore.Log
 ModCore.post_init = ModCore.PostInit
 ModCore.init_modules = ModCore.InitModules
 ModCore.StringToTable = ModCore.StringToValue
+
+--Add some functions to BeardLib class
+BeardLib.Log = ModCore.Log
+BeardLib.LogErr = ModCore.LogErr
+BeardLib.Err = ModCore.Err
+BeardLib.Warn = ModCore.Warn
+BeardLib.GetPath = ModCore.GetPath
+BeardLib.GetRealFilePath = ModCore.GetRealFilePath
+BeardLib.RegisterHook = ModCore.RegisterHook
+BeardLib.Modules = ModCore.Modules
+BeardLib.GetModule = ModCore.GetModule
+BeardLib.GetModules = ModCore.GetModules
+BeardLib.GetModuleIndex = ModCore.GetModuleIndex
+BeardLib.log = ModCore.Log

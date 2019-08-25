@@ -20,6 +20,7 @@ self._call_next_update = {}
 self._paused_updaters = {}
 self._updaters = {}
 self._errors = {}
+self._modules = {}
 
 function self:Init()
 	Global.beardlib_checked_updates = Global.beardlib_checked_updates or {}
@@ -38,6 +39,7 @@ function self:Init()
 		if BeardLib.modules[name] then
 			local module = BeardLib.modules[name]:new(self, config)
 			self[module._name] = module
+			table.insert(self._modules, module)
 			module:PostInit()
 		end
 	end
@@ -226,16 +228,6 @@ function self:ShowErrorsDialog()
 		end
 	})
 end
-
-function self:Log(...) ModCore.Log(self, ...) end
-function self:LogErr(str, ...) ModCore.LogErr(self, ...) end
-function self:Err(...) ModCore.Err(self, ...) end
-function self:Warn(...) ModCore.Warn(self, ...) end
-function self:GetPath() return ModCore.GetPath(self) end
-function self:GetRealFilePath(...) return ModCore.GetRealFilePath(self, ...) end
-function self:RegisterHook(...) return ModCore.RegisterHook(self, ...) end
-
-self.log = self.Log
 
 Hooks:Register("BeardLibAddCustomWeaponModsToWeapons")
 Hooks:Register("BeardLibCreateCustomNodesAndButtons")

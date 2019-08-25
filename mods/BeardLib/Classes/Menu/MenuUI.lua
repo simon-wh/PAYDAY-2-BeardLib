@@ -1,7 +1,8 @@
 MenuUI = MenuUI or class()
 function MenuUI:init(params)
+    local UniqueID = tostring(self)
     if not managers.gui_data then
-        Hooks:Add("SetupInitManagers", "CreateMenuUI"..tostring(self), function()
+        Hooks:Add("SetupInitManagers", "CreateMenuUI"..UniqueID, function()
             self:init(params)
         end)
         return
@@ -57,7 +58,7 @@ function MenuUI:init(params)
 
 	if self.visible == true and managers.mouse_pointer then self:enable() end
 
-    BeardLib:AddUpdater("MenuUIUpdate"..tostring(self), ClassClbk(self, "Update"), true)
+    BeardLib:AddUpdater("MenuUIUpdate"..UniqueID, ClassClbk(self, "Update"), true)
     if self.create_items then self:create_items() end
     BeardLib.managers.menu_ui:add_menu(self)
     
@@ -69,6 +70,10 @@ function MenuUI:init(params)
     
     if self.use_default_close_key then
         self.close_key = Idstring("esc")
+    end
+
+    if self.enabled then
+        self:SetEnabled(self.enabled)
     end
 end
 
@@ -593,9 +598,11 @@ end
 function MenuUI:Destroy()
     if alive(self._ws) then
         self:Disable()
+        local UniqueID = tostring(self)
         managers.gui_data:destroy_workspace(self._ws)
-        BeardLib:RemoveUpdater("MenuUIUpdate"..tostring(self))
+        BeardLib:RemoveUpdater("MenuUIUpdate"..UniqueID)
         BeardLib.managers.menu_ui:remove_menu(self)
+        Hooks:Remove("CreateMenuUI"..UniqueID)
     end
 end
 

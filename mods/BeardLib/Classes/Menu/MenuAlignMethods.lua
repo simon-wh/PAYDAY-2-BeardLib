@@ -181,13 +181,17 @@ function Item:AlignItemsCenteredGrid(reversed)
             local panel = item:Panel()
             if not item.ignore_align then
                 local offset = item:Offset()
-                if (panel:w() + (max_right + offset[1]) - items_w) > 0.001 then
+                if (prev_item and prev_item.alone_in_row) or (panel:w() + (max_right + offset[1]) - items_w) > 0.001 then
                     centerify()
                     current_row = {}
                     max_y = max_h
                     max_right = 0
                 end
-                panel:set_position(max_right + offset[1], max_y + offset[2])
+                if #current_row == 0 then
+                    panel:set_position(max_right, max_y + offset[2])
+                else
+                    panel:set_position(max_right + offset[1], max_y + offset[2])
+                end
             end
             local repos = item:Reposition(last_positioned_item, prev_item)
             if repos then
@@ -221,7 +225,7 @@ function Item:AlignItemsCenteredGrid(reversed)
 end
 
 function Item:AlignItemsReversedCenteredGrid()
-    self:AlignItemCenteredGrid(true)
+    self:AlignItemsCenteredGrid(true)
 end
 
 function Item:AlignItemsGridFromRight(reversed, dbg)

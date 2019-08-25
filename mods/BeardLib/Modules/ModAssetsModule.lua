@@ -2,6 +2,8 @@ ModAssetsModule = ModAssetsModule or class(ModuleBase)
 ModAssetsModule.type_name = "AssetUpdates"
 ModAssetsModule._default_version_file = "version.txt"
 ModAssetsModule._providers = {}
+ModAssetsModule._loose = true
+
 --Load the providers
 local providers_dir = BeardLib.config.classes_dir.."/Providers/"
 local providers = FileIO:GetFiles(providers_dir)
@@ -56,10 +58,10 @@ function ModAssetsModule:Load()
 
     self.version = 0
     
+    self._update_manager_id = self._mod.ModPath .."-".. self._name
     
-    self._update_manager_id = self._mod.Name .. self._name
     local download_url = self._config.download_url or (self._config.custom_provider and self._config.custom_provider.download_url) or nil
-    self._mod.update_module_data = {
+    self._data = {
         id = (self._config.is_standalone ~= false) and self.id,
         module = self,
         provider = not download_url and self._config.provider,
@@ -78,7 +80,8 @@ function ModAssetsModule:GetMainInstallDir()
 end
 
 function ModAssetsModule:RegisterAutoUpdateCheckHook()
-    Hooks:Add("MenuManagerOnOpenMenu", self._mod.Name .. self._name .. "UpdateCheck", function( self_menu, menu, index )
+    self._module_index = self._mod:GetModuleIndex(self)
+    Hooks:Add("MenuManagerOnOpenMenu", self._update_manager_id .. "UpdateCheck"..self._module_index, function(self_menu, menu, index)
         if menu == "menu_main" and not LuaNetworking:IsMultiplayer() then
             self:CheckVersion()
         end
@@ -100,7 +103,7 @@ function ModAssetsModule:RetrieveCurrentVersion()
 end
 
 function ModAssetsModule:CheckVersion(force)
-    if not force and not BeardLib.managers.asset_update:CheckUpdateStatus(self._update_manager_id) then
+    if not force and BeardLib.managers.asset_update:UpdatesIgnored(self._mod) then
         return
     end
 
@@ -115,7 +118,7 @@ function ModAssetsModule:PrepareForUpdate()
     if not self._mod then
         return
     end
-    BeardLib.managers.mods_menu:SetModNeedsUpdate(self._mod, self._new_version)
+    BeardLib.managers.mods_menu:SetModNeedsUpdate(self, self._new_version)
     if self._config.important and BeardLib.Options:GetValue("ImportantNotice") then
         local loc = managers.localization
         QuickMenuPlus:new(loc:text("beardlib_mods_manager_important_title", {mod = self._mod.Name}), loc:text("beardlib_mods_manager_important_help"), {{text = loc:text("dialog_yes"), callback = function()
@@ -131,7 +134,6 @@ function ModAssetsModule:_CheckVersion(force)
     local version_url = ModCore:GetRealFilePath(self.provider.version_api_url, self)
     local loc = managers.localization
     dohttpreq(version_url, function(data, id)
-        self:log("Received version '%s' from the server(local is %s)", tostring(data), tostring(self.version))
         if data and (not self.provider.version_is_number or tonumber(data)) then
             self._new_version = data
             if self._new_version and tostring(self._new_version) ~= tostring(self.version) then
@@ -158,7 +160,7 @@ function ModAssetsModule:ShowNoChangePrompt()
 end
 
 function ModAssetsModule:SetReady()
-    BeardLib.managers.asset_update._ready_for_update = true
+    BeardLib.managers.asset_update:PrepareForUpdate()
 end
 
 function ModAssetsModule:DownloadAssets()
@@ -187,7 +189,7 @@ end
 function ModAssetsModule:_DownloadAssets(data)
     local download_url = ModCore:GetRealFilePath(self.provider.download_url, data or self)
     self:log("Downloading assets from url: %s", download_url)
-    dohttpreq(download_url, ClassClbk(self, "StoreDownloadedAssets"), self._mod and ClassClbk(BeardLib.managers.mods_menu, "SetModProgress", self._mod) or nil)
+    dohttpreq(download_url, ClassClbk(self, "StoreDownloadedAssets"), self._mod and ClassClbk(BeardLib.managers.mods_menu, "SetModProgress", self) or nil)
 end
 
 function ModAssetsModule:StoreDownloadedAssets(data, id)
@@ -199,7 +201,7 @@ function ModAssetsModule:StoreDownloadedAssets(data, id)
         if config.install then
             config.install()
         elseif self._mod then
-            mods_menu:SetModInstallingUpdate(self._mod)
+            mods_menu:SetModInstallingUpdate(self)
         end
         wait(1)
         
@@ -210,7 +212,7 @@ function ModAssetsModule:StoreDownloadedAssets(data, id)
             if config.failed then
                 config.failed()
             elseif self._mod then
-                mods_menu:SetModFailedUpdate(self._mod)
+                mods_menu:SetModFailedUpdate(self)
             end
             return
         end
@@ -236,7 +238,7 @@ function ModAssetsModule:StoreDownloadedAssets(data, id)
                     elseif config.failed then
                         config.failed()
                     elseif self._mod then
-                        mods_menu:SetModFailedWrite(self._mod)
+                        mods_menu:SetModFailedWrite(self)
                     end
                     return
                 end
@@ -256,60 +258,12 @@ function ModAssetsModule:StoreDownloadedAssets(data, id)
         if config.finish then
             config.finish()
         elseif self._mod then
-            mods_menu:SetModNormal(self._mod)
+            mods_menu:SetModNormal(self)
         end
         if alive(coroutine) then
             coroutine:parnet():remove(coroutine)
         end
     end)
-end
-
-function ModAssetsModule:BuildMenu(node)
-    local main_node = MenuHelperPlus:NewNode(nil, {
-        name = self._mod.Name .. self._name .. "Node"
-    })
-
-    self:InitializeNode(node)
-
-    MenuHelperPlus:AddButton({
-        id = "ModAssetsManagementButton",
-        title = "ModAssetsManagementTextID",
-        desc = "ModAssetsManagementDescID",
-        node = node,
-        next_node = menu_name
-    })
-
-    managers.menu:add_back_button(main_node)
-end
-
-function ModAssetsModule:InitializeNode(node)
-    MenuCallbackHandler.ModAssetsToggleAutoUpdates_Changed = function(this, item)
-        BeardLib.managers.asset_update:SetUpdateStatus(item._parameters.mod_key, item:value() == "on")
-    end
-
-    MenuHelperPlus:AddToggle({
-        id = "ModAssetsToggleAutoUpdates",
-        title = "ModAssetsToggleAutoUpdatesTextID",
-        desc = "ModAssetsToggleAutoUpdatesDescID",
-        node = node,
-        callback = "ModAssetsToggleAutoUpdates_Changed",
-        value = BeardLib.managers.asset_update:CheckUpdateStatus(self._update_manager_id),
-        merge_data = {mod_key = self._update_manager_id}
-    })
-
-    MenuCallbackHandler.ModAssetsCheckForUpdates = function(this, item)
-        self:CheckVersion(true)
-    end
-
-    MenuHelperPlus:AddButton({
-        id = "ModAssetsCheckUpdates",
-        title = "ModAssetsCheckUpdatesTextID",
-        desc = "ModAssetsCheckUpdatesDescID",
-        node = node,
-        callback = "ModAssetsCheckForUpdates",
-        enabled = not not managers.menu._is_start_menu,
-        merge_data = {mod_key = self._mod.GlobalKey}
-    })
 end
 
 DownloadCustomMap = DownloadCustomMap or class(ModAssetsModule)

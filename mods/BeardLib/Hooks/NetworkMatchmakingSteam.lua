@@ -101,16 +101,19 @@ Hooks:Add(seta_hook, "BeardLibCorrectCustomHeist", function(self, new_data, sett
 	local level_id = (_level_id and tweak_data.levels[_level_id] and tweak_data.levels[_level_id].custom) and _level_id or nil
 	local job_key = (_job_key and tweak_data.narrative.jobs[_job_key] and tweak_data.narrative.jobs[_job_key].custom) and _job_key or nil
 	local mod = BeardLib.managers.MapFramework:GetMapByJobId(_job_key)
-	if mod and (level_id or job_key) and mod.update_module_data then
-		local update = mod.update_module_data
-		--Localization might be an issue..
-		table.merge(new_data, {
-			custom_level_name = managers.localization:to_upper_text(tweak_data.levels[level_id].name_id),
-			level_id = level_id, 
-			job_key = job_key,
-			level_update_key = update.id,
-			level_update_provider = update.provider,
-			level_update_download_url = update.download_url,
-		})
+	if mod and (level_id or job_key) then
+		local mod_assets = mod:GetModule(ModAssetsModule.type_name)
+		if mod_assets then
+			local update = mod_assets._data
+			--Localization might be an issue..
+			table.merge(new_data, {
+				custom_level_name = managers.localization:to_upper_text(tweak_data.levels[level_id].name_id),
+				level_id = level_id, 
+				job_key = job_key,
+				level_update_key = update.id,
+				level_update_provider = update.provider,
+				level_update_download_url = update.download_url,
+			})
+		end
 	end
 end)
