@@ -36,7 +36,6 @@ end
 
 function WeaponModule:RegisterHook()
     local dlc = self._config.dlc or self.defaults.dlc
-    self._config.unlock_level = self._config.unlock_level or 1
 
     --Old eh? lets convert it!
     if not self._config.weapon and not self._config.factory and self._config.fac_id then
@@ -170,6 +169,7 @@ function WeaponModule:RegisterHook()
     end)
 
     Hooks:PostHook(UpgradesTweakData, "init", self._config.weapon.id .. "AddWeaponUpgradesData", function(u_self)
+        local unlock_level = self._config.weapon.unlock_level or self._config.unlock_level or 1
 
         --Stance mod stuff. We can't do this in weapon factory hook since upgrade tweakdata isn't ready yet (and we use it to find the factory ids)
         local fac_id = self._config.factory.id
@@ -197,10 +197,8 @@ function WeaponModule:RegisterHook()
             factory_id = self._config.factory.id,
             dlc = dlc
         }
-        if self._config.unlock_level then
-            u_self.level_tree[self._config.unlock_level] = u_self.level_tree[self._config.unlock_level] or {upgrades={}, name_id="weapons"}
-            table.insert(u_self.level_tree[self._config.unlock_level].upgrades, self._config.weapon.id)
-        end
+        u_self.level_tree[unlock_level] = u_self.level_tree[unlock_level] or {upgrades={}, name_id="weapons"}
+        table.insert(u_self.level_tree[unlock_level].upgrades, self._config.weapon.id)
     end)
 
     Hooks:PostHook(PlayerTweakData, "_init_new_stances", self._config.weapon.id .. "AddWeaponStancesData", function(p_self)
