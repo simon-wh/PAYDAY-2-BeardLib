@@ -133,6 +133,32 @@ elseif F == "blackmarketmanager" then
         return texture_path, rarity_path
     end
 
+    --Places custom melees at the end of the menu instead of shuffled.
+    BlackMarketManager.beardlib_orig_get_sorted_melee_weapons = BlackMarketManager.beardlib_orig_get_sorted_melee_weapons or BlackMarketManager.get_sorted_melee_weapons
+    function BlackMarketManager:get_sorted_melee_weapons(...)
+        local sorted_categories, item_categories = self:beardlib_orig_get_sorted_melee_weapons(...)
+        local m_tweak_data = tweak_data.blackmarket.melee_weapons
+
+        local items = {}
+        for _, cat in pairs(item_categories) do
+            for _, item in pairs(cat) do
+                table.insert(items, item)
+            end
+        end
+        table.sort(items, function(x,y)
+            xd = x[2]
+            yd = y[2]
+            x_td = m_tweak_data[x[1]]
+            y_td = m_tweak_data[y[1]]
+            return not x_td.custom and y_td.custom
+        end)
+        for i, item in ipairs(items) do
+            category = math.max(1, math.ceil(i / 16))
+            item_categories[category] = item_categories[category] or {}
+            table.insert(item_categories[category], item)
+        end
+        return sorted_categories, item_categories
+    end
 elseif F == "crewmanagementgui" then
     local orig = CrewManagementGui.populate_primaries
     --Blocks out custom weapons that don't have support for AI.
