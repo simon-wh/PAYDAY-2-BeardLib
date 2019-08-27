@@ -21,61 +21,76 @@ function MeleeModule:GetBasedOn(melees, based_on)
     end
 end
 
+local unit_ids = Idstring("unit")
 function MeleeModule:RegisterHook()
     local dlc
-    self._config.unlock_level = self._config.unlock_level or 1
-    Hooks:PostHook(BlackMarketTweakData, "_init_melee_weapons", self._config.id .. "AddMeleeData", function(bm_self)
-        if bm_self.melee_weapons[self._config.id] then
-            self:Err("Melee weapon with id '%s' already exists!", self._config.id)
+    local config = self._config
+    config.unlock_level = config.unlock_level or 1
+    Hooks:PostHook(BlackMarketTweakData, "_init_melee_weapons", config.id .. "AddMeleeData", function(bm_self)
+        if bm_self.melee_weapons[config] then
+            self:Err("Melee weapon with id '%s' already exists!", config)
             return
         end
+
+        if config.guess_unit ~= false then
+            config.unit = config.unit or "units/mods/weapons/wpn_fps_mel_"..config.id.."/wpn_fps_mel_"..config.id
+            config.third_unit = config.third_unit or "units/mods/weapons/wpn_fps_mel_"..config.id.."/wpn_third_mel_"..config.id
+            if not DB:has(unit_ids, config.unit:id()) then
+                self:Err("Unit %s of melee %s is not loaded.", tostring(config.unit), tostring(config.id))
+                config.unit = nil
+            end
+            if not DB:has(unit_ids, config.third_unit:id()) then
+                self:Err("Third unit %s of melee %s is not loaded.", tostring(config.third_unit), tostring(config.id))
+                config.third_unit = nil
+            end
+        end
+
         local data = table.merge(deep_clone(bm_self.melee_weapons[self:GetBasedOn(bm_self.melee_weapons)]), table.merge({
-            name_id = "bm_melee_" .. self._config.id,
+            name_id = "bm_melee_" .. config.id,
             dlc = self.defaults.dlc,
             texture_bundle_folder = "mods",
             mod_path = self._mod.ModPath,
             custom = true,
-            free = not self._config.unlock_level
-        }, self._config.item or self._config))
+            free = not config.unlock_level
+        }, config.item or config))
         dlc = data.dlc
-        data.unit = data.unit or "units/mods/weapons/wpn_fps_mel_"..self._id.."/wpn_fps_mel_"..self._id
-        data.third_unit = data.third_unit or "units/mods/weapons/wpn_fps_mel_"..self._id.."/wpn_third_mel_"..self._id
 
-        bm_self.melee_weapons[self._config.id] = data
+        bm_self.melee_weapons[config.id] = data
 
         if dlc then
-            TweakDataHelper:ModifyTweak({self._config.id}, "dlc", dlc, "content", "upgrades")
+            TweakDataHelper:ModifyTweak({config.id}, "dlc", dlc, "content", "upgrades")
         end
     end)
 
     Hooks:PostHook(TweakDataVR , "init", self._config.id .. "AddVRMeleeTweakData", function(vrself)
-        local config = self._config.vr or {}
-
+        local vr_config = self._config.vr or {}
         local id = self._config.id
-        if config.locked then
+        
+        if vr_config.locked then
             vrself.locked.melee_weapons[id] = true
             return
         end
 
         local tweak_offsets = vrself.melee_offsets.weapons
-        local offsets = tweak_offsets[self:GetBasedOn(tweak_offsets, config.based_on)]
+        local offsets = tweak_offsets[self:GetBasedOn(tweak_offsets, vr_config.based_on)]
 
-        tweak_offsets[id] = offsets and table.merge(offsets, config.offsets) or config.offsets or nil
+        tweak_offsets[id] = offsets and table.merge(offsets, vr_config.offsets) or vr_config.offsets or nil
 
         local tweak_offsets_npc = vrself.melee_offsets.weapons_npc
-        local npc_offsets = tweak_offsets_npc[self:GetBasedOn(tweak_offsets_npc, config.based_on)]
+        local npc_offsets = tweak_offsets_npc[self:GetBasedOn(tweak_offsets_npc, vr_config.based_on)]
 
-        tweak_offsets_npc[id] = npc_offsets and table.merge(npc_offsets, config.npc_offsets) or config.npc_offsets or nil
+        tweak_offsets_npc[id] = npc_offsets and table.merge(npc_offsets, vr_config.npc_offsets) or vr_config.npc_offsets or nil
     end)
 
+
     Hooks:PostHook(UpgradesTweakData, "init", self._config.id .. "AddMeleeUpgradesData", function(u_self)
-        u_self.definitions[self._config.id] = {
+        u_self.definitions[config.id] = {
             category = "melee_weapon",
             dlc = dlc
         }
-        if self._config.unlock_level then
-            u_self.level_tree[self._config.unlock_level] = u_self.level_tree[self._config.unlock_level] or {upgrades={}, name_id="weapons"}
-            table.insert(u_self.level_tree[self._config.unlock_level].upgrades, self._config.id)
+        if config.unlock_level then
+            u_self.level_tree[config.unlock_level] = u_self.level_tree[config.unlock_level] or {upgrades={}, name_id="weapons"}
+            table.insert(u_self.level_tree[config.unlock_level].upgrades, config.id)
         end
     end)
 end

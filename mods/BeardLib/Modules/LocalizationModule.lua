@@ -19,7 +19,7 @@ function LocalizationModule:Load()
     if managers.localization then
         self:LoadLocalization()
     else
-        Hooks:Add("LocalizationManagerPostInit", self._mod.Name .. "_Localization", function(loc)
+        Hooks:Add("LocalizationManagerPostInit", self._mod.ModPath .. "_Localization", function(loc)
             self:LoadLocalization()
     	end)
     end
