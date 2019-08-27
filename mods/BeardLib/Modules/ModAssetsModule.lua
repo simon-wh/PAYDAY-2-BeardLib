@@ -68,6 +68,8 @@ function ModAssetsModule:Load()
         download_url = download_url
     }
 
+    self._mod.update_module_data = self._data --OLD DO NOT USE!
+
     self:RetrieveCurrentVersion()
 
     if not self._config.manual_check then
