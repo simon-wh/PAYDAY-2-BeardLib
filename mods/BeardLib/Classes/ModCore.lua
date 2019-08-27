@@ -45,16 +45,8 @@ function ModCore:PostInit(ignored_modules)
 
 	if not self._disabled and self._core_class then
 		self._core_class:PreInit()
-	end
-
-    
-    local path = Path:Combine(self.ModPath, "icon.png")
-    if FileIO:Exists(path) then
-        local ingame_path = Path:Combine("icons", self.Name)
-        FileManager:AddFile(TEXTURE, Idstring(ingame_path), path)
-        self._config.image = ingame_path
     end
-
+    
     ignored_modules = ignored_modules or self._config.ignored_post_init_modules
     for _, module in pairs(self._modules) do
         if (not ignored_modules or not table.contains(ignored_modules, module._name)) then
@@ -110,6 +102,14 @@ function ModCore:LoadConfigFile(path)
                 rawset( _G, self.global, self)
             end
         end
+    end
+
+        
+    local path = Path:Combine(self.ModPath, "icon.png")
+    if FileIO:Exists(path) then
+        local ingame_path = Path:Combine("icons", self.ModPath:key())
+        FileManager:AddFile(TEXTURE, Idstring(ingame_path), path)
+        config.image = ingame_path
     end
 
     self._clean_config = deep_clone(config)
@@ -186,11 +186,9 @@ function ModCore:AddModule(module_tbl)
                     if valid == false then
                         self:log("Module with name %s does not contain a valid config. See above for details", node_obj._name)
                     else
-                        if not node_obj._loose or node_obj._name ~= node_obj.type_name then
-                            if self[node_obj._name] then
-                                self:log("The name of module: %s (%s) already exists in the mod table, please make sure this is a unique name!", node_obj._name, node_obj.type_name)
-                            end
-
+                        if not node_obj._loose and self[node_obj._name] then
+                            self:log("The name of module: %s (%s) already exists in the mod table, please make sure this is a unique name!", node_obj._name, node_obj.type_name)
+                        else
                             self[node_obj._name] = node_obj
                         end
                         table.insert(self._modules, node_obj)
