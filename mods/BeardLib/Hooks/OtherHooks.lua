@@ -48,6 +48,17 @@ elseif F == "tweakdatapd2" then
 		Hooks:Call("BeardLibCreateCustomProjectiles", self, tweak_data)
 	end)
 
+	--Big brain.
+	Hooks:PostHook(BlackMarketTweakData, "_init_weapon_mods", "FixGlobalValueWeaponMods", function(self, tweak_data)
+		local parts = tweak_data.weapon.factory.parts
+		for id, mod in pairs(self.weapon_mods) do
+			local gv = parts[id] and parts[id].global_value
+			if gv then
+				mod.global_value = gv
+			end
+		end
+	end)
+
 	Hooks:PreHook(WeaponTweakData, "init", "BeardLibWeaponTweakDataPreInit", function(self, tweak_data)
 		_tweakdata = tweak_data
 	end)
@@ -57,7 +68,6 @@ elseif F == "tweakdatapd2" then
 	end)
 
 	for _, framework in pairs(BeardLib.Frameworks) do framework:RegisterHooks() end
-	
 	--Makes sure that rect can be returned as a null if it's a custom icon
 	local get_icon = HudIconsTweakData.get_icon_data
 	function HudIconsTweakData:get_icon_data(id, rect, ...)
