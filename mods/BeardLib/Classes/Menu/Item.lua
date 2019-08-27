@@ -994,7 +994,7 @@ function Item:SetTextLight(text)
 	if self.size_by_text then
 		local _,_,w,h = self.title:text_rect()
 		self.title:set_size(w,h)
-		self.title:set_size(w,h)
+		self.panel:set_size(w,h)
 	end
 end
 
