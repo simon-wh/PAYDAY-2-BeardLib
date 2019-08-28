@@ -6,6 +6,32 @@ if F == "huskplayermovement" then
     Hooks:PostHook(HuskPlayerMovement, "save", "BeardLib.Save", function(self, data)
         data.movement.outfit = BeardLib.Utils:CleanOutfitString(data.movement.outfit)        
     end)
+
+    --Removes the need of thq material config for custom melee
+    local mtr_no_cubemap = Idstring("mtr_no_cubemap")
+    Hooks:PostHook(HuskPlayerMovement, "anim_cbk_spawn_melee_item", "BeardLibForceMeleeTHQ", function(self, unit, graphic_object)
+        if alive(self._melee_item_unit) then
+            local peer = managers.network:session():peer_by_unit(self._unit)
+            local id = peer:melee_id()
+            local tweak = tweak_data.blackmarket.melee_weapons[id]
+            if tweak.custom then
+                if tweak.auto_thq ~= false then
+                    for _, material in ipairs(self._melee_item_unit:get_objects_by_type(Idstring("material"))) do
+                        if material:id() == mtr_no_cubemap then
+                            material:set_render_template(Idstring("generic:DIFFUSE_TEXTURE:NORMALMAP"))                    
+                        else
+                            material:set_render_template(Idstring("generic:CUBE_ENVIRONMENT_MAPPING:DIFFUSE_TEXTURE:NORMALMAP"))
+                        end
+                    end
+                else
+                    local new_material_config = Idstring(tweak.unit .. "_thq")
+                    if DB:has(Idstring("material_config"), new_material_config) then
+                        self._melee_item_unit:set_material_config(new_material_config, true)
+                    end
+                end
+            end
+        end
+    end)
     Hooks:PostHook(TradeManager, "save", "BeardLib.Save", function(self, save_data)
         if save_data and save_data.trade and save_data.trade.outfits then
             for i, data in pairs(save_data.trade.outfits) do

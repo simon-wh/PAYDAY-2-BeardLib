@@ -441,4 +441,65 @@ elseif F == "dlcmanager" then
         end
         return tweak_data.dlc[dlc] and tweak_data.dlc[dlc].free or self:has_dlc(dlc)
     end
+elseif F == "playerhandstatemelee" then
+    --Removes the need of having a thq material config for custom melee in VR.
+    local mtr_no_cubemap = Idstring("mtr_no_cubemap")
+    Hooks:PostHook(PlayerHandStateMelee, "_spawn_melee_unit", "VRBeardLibForceMeleeTHQ", function(self)
+        if alive(self._melee_unit) then
+            local tweak = tweak_data.blackmarket.melee_weapons[self._melee_entry]
+            if tweak.custom then
+                if tweak.auto_thq ~= false then
+                    for _, material in ipairs(self._melee_unit:get_objects_by_type(Idstring("material"))) do
+                        if material:name() == mtr_no_cubemap then
+                            material:set_render_template(Idstring("generic:DIFFUSE_TEXTURE:NORMALMAP"))                    
+                        else
+                            material:set_render_template(Idstring("generic:CUBE_ENVIRONMENT_MAPPING:DIFFUSE_TEXTURE:NORMALMAP"))
+                        end
+                    end
+                end
+            end
+        end
+    end)
+elseif F == "hudbelt" then
+    local function scale_by_aspect(gui_obj, max_size)
+        local w = gui_obj:texture_width()
+        local h = gui_obj:texture_height()
+    
+        if h < w then
+            gui_obj:set_size(max_size, max_size / w * h)
+        else
+            gui_obj:set_size(max_size / h * w, max_size)
+        end
+    end
+    
+    --Fixes melees in VR having no fallback and to make them use based_on when the files are missing.
+    local tex_ids = Idstring("texture")
+    Hooks:PostHook(HUDBeltInteraction, "update_icon", "BeardLibFixCustomMelee", function(self)
+        if self._id == "melee" then
+            local tweak = tweak_data.blackmarket.melee_weapons[managers.blackmarket:equipped_melee_weapon()]
+            local id = tweak.based_on
+            if id then
+                if self._texture then
+                    if not DB:has(tex_ids, self._texture) then
+                        local prefix = "guis"
+                        local texture = "/textures/pd2/blackmarket/icons/melee_weapons/outline/" .. id
+                
+                        if not DB:has(tex_ids, Idstring(prefix .. texture)) then
+                            prefix = "guis/dlcs/" .. tweak_data.blackmarket.melee_weapons[id].texture_bundle_folder
+                        end
+                
+                        if DB:has(tex_ids, Idstring(prefix .. texture)) then
+                            self._texture = prefix .. texture
+                        else
+                            self._texture = "guis/textures/pd2/blackmarket/icons/melee_weapons/outline/weapon"
+                        end
+
+                        self._icon:set_image(self._texture)
+                        scale_by_aspect(self._icon, math.min(self._w, self._h))
+                        self._icon:set_center(self._panel:w() / 2, self._panel:h() / 2)				
+                    end
+                end
+            end
+        end
+    end)
 end

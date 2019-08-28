@@ -54,22 +54,24 @@
 			<hook source_file="lib/units/weapons/newraycastweaponbase" file="NetworkHooks.lua"/>
 			<hook source_file="lib/network/handlers/unitnetworkhandler" file="NetworkHooks.lua"/>
 			
+			<hook source_file="lib/units/beings/player/states/vr/hand/playerhandstatemelee" file="Fixes.lua"/>
 			<hook source_file="lib/network/base/handlers/connectionnetworkhandler" file="Fixes.lua"/>
 			<hook source_file="core/lib/managers/menu/items/coremenuitemslider" file="Fixes.lua"/>
 			<hook source_file="core/lib/managers/coresoundenvironmentmanager" file="Fixes.lua"/>
+			<hook source_file="core/lib/managers/mission/coreelementinstance" file="Fixes.lua"/>
 			<hook source_file="lib/managers/mission/elementvehiclespawner" file="Fixes.lua"/>
 			<hook source_file="lib/managers/mission/elementinteraction" file="Fixes.lua"/>
-			<hook source_file="core/lib/managers/mission/coreelementinstance" file="Fixes.lua"/>
 			<hook source_file="lib/units/beings/player/playermovement" file="Fixes.lua"/>
 			<hook source_file="lib/units/beings/player/playerdamage" file="Fixes.lua"/>
 			<hook source_file="lib/units/weapons/raycastweaponbase" file="Fixes.lua"/>
 			<hook source_file="lib/managers/menu/crewmanagementgui" file="Fixes.lua"/>
+			<hook source_file="lib/states/ingamewaitingforplayers" file="Fixes.lua"/>
 			<hook source_file="lib/managers/weaponfactorymanager" file="Fixes.lua"/>
 			<hook source_file="lib/managers/blackmarketmanager" file="Fixes.lua"/>
+			<hook source_file="lib/network/base/networkpeer" file="Fixes.lua"/>
+			<hook source_file="lib/managers/hud/vr/hudbelt" file="Fixes.lua"/>
 			<hook source_file="lib/managers/dialogmanager" file="Fixes.lua"/>
 			<hook source_file="lib/managers/dlcmanager" file="Fixes.lua"/>
-			<hook source_file="lib/network/base/networkpeer" file="Fixes.lua"/>
-			<hook source_file="lib/states/ingamewaitingforplayers" file="Fixes.lua"/>
 
 			<hook source_file="lib/setups/setup" file="OtherHooks.lua"/>
 			<hook source_file="lib/setups/gamesetup" file="OtherHooks.lua"/>
