@@ -150,8 +150,12 @@ elseif F == "blackmarketmanager" then
             yd = y[2]
             x_td = m_tweak_data[x[1]]
             y_td = m_tweak_data[y[1]]
+            if xd.unlocked ~= yd.unlocked then
+                return xd.unlocked
+            end
             return not x_td.custom and y_td.custom
         end)
+        item_categories = {}
         for i, item in ipairs(items) do
             category = math.max(1, math.ceil(i / 16))
             item_categories[category] = item_categories[category] or {}
