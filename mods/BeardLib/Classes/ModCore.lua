@@ -184,20 +184,20 @@ function ModCore:AddModule(module_tbl)
                 local success, node_obj, valid = pcall(function() return node_class:new(self, module_tbl) end)
                 if success then
                     if valid == false then
-                        self:log("Module with name %s does not contain a valid config. See above for details", node_obj._name)
+                        self:Log("Module with name %s does not contain a valid config. See above for details", node_obj._name)
                     else
                         if not node_obj._loose and self[node_obj._name] then
-                            self:log("The name of module: %s (%s) already exists in the mod table, please make sure this is a unique name!", node_obj._name, node_obj.type_name)
+                            self:Log("The name of module: %s (%s) already exists in the mod table, please make sure this is a unique name!", node_obj._name, node_obj.type_name)
                         else
                             self[node_obj._name] = node_obj
                         end
                         table.insert(self._modules, node_obj)
                     end
                 else
-                    self:error("An error occurred on initilization of module: %s. Error:\n%s", meta, tostring(node_obj))
+                    self:Err("An error occurred on initilization of module: %s. Error:\n%s", meta, tostring(node_obj))
                 end
             elseif not self._config.ignore_errors then
-                self:error("Unable to find module with key %s", meta)
+                self:Err("Unable to find module with key %s", meta)
             end
         end
     end

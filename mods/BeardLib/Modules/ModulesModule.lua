@@ -6,7 +6,7 @@ function ModulesModule:Load(config, prev_dir)
 	local dir = self:GetPath(config.directory, prev_dir)
 	for _, moodule in ipairs(config) do
 		if moodule._meta == "module" then
-			if module.file then
+			if moodule.file then
 				dofile(Path:Combine(dir, moodule.file))
 				local type_name = moodule.type_name
 				local object_name = moodule.name or type_name.."Module"
