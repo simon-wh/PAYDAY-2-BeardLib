@@ -347,15 +347,8 @@ ModCore.init_modules = ModCore.InitModules
 ModCore.StringToTable = ModCore.StringToValue
 
 --Add some functions to BeardLib class
-BeardLib.Log = ModCore.Log
-BeardLib.LogErr = ModCore.LogErr
-BeardLib.Err = ModCore.Err
-BeardLib.Warn = ModCore.Warn
-BeardLib.GetPath = ModCore.GetPath
-BeardLib.GetRealFilePath = ModCore.GetRealFilePath
-BeardLib.RegisterHook = ModCore.RegisterHook
-BeardLib.Modules = ModCore.Modules
-BeardLib.GetModule = ModCore.GetModule
-BeardLib.GetModules = ModCore.GetModules
-BeardLib.GetModuleIndex = ModCore.GetModuleIndex
-BeardLib.log = ModCore.Log
+for n, func in pairs(ModCore) do
+    if not BeardLib[n] then
+        BeardLib[n] = func
+    end
+end

@@ -116,7 +116,7 @@ local SEQ_MANAGER_IDS = SEQ_MANAGER:id()
 local COOKED_PHYSICS_IDS = COOKED_PHYSICS:id()
 
 local CP_DEFAULT = BeardLib:GetPath() .. "Assets/units/default_cp.cooked_physics"
-function C:LoadPackageConfig(directory, config, temp)
+function C:LoadPackageConfig(directory, config, temp, skip_use_clbk)
     if not (SystemFS and SystemFS.exists) then
         self:Err("SystemFS does not exist! Custom Packages cannot function without this! Do you have an outdated game version?")
         return
@@ -127,14 +127,13 @@ function C:LoadPackageConfig(directory, config, temp)
 		return
 	end
 
-	if self._mod then
-		local use_clbk = config.use_clbk and self._mod:StringToCallback(config.use_clbk) or nil
-		if use_clbk and not use_clbk(config) then
-			return
-		end
-	end
-	
-    if config.load_clbk and not config.load_clbk(config) then
+    if not skip_use_clbk then
+        local use_clbk = config.use_clbk or config.load_clbk
+        if use_clbk and self._mod then
+            use_clbk = self._mod:StringToCallback(use_clbk) or nil
+        end
+    end
+    if use_clbk and not use_clbk(config) then
         return
 	end
 	
@@ -143,10 +142,13 @@ function C:LoadPackageConfig(directory, config, temp)
         if type(child) == "table" then
             local typ = child._meta
             local path = child.path
-            local load_clbk = child.load_clbk
-            if not load_clbk or load_clbk(path, typ) then
+            local use_clbk = child.use_clbk or child.load_clbk
+            if use_clbk and self._mod then
+                use_clbk = self._mod:StringToCallback(use_clbk) or nil
+            end
+            if not use_clbk or use_clbk(path, typ) then
                 if typ == UNIT_LOAD or typ == ADD then
-                    self:LoadPackageConfig(directory, child)
+                    self:LoadPackageConfig(directory, child, nil, true)
                 elseif C.UNIT_SHORTCUTS[typ] then
                     local ids_path = Idstring(path)
                     local file_path = child.full_path or Path:Combine(directory, config.file_path or path)
