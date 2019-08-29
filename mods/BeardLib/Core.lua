@@ -209,7 +209,7 @@ function self:ShowErrorsDialog()
 				local list = menu:GetItem("MessageScroll")
 				for _, group in pairs(list:Items()) do
 					local search = item:Value()
-					local visible = search == "" or group.text:find(search) ~= nil
+					local visible = search == "" or group.text:lower():find(search:lower()) ~= nil
 					group:SetVisible(visible)
 				end
 			end})
