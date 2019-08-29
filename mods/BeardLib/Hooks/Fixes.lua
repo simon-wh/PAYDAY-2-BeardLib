@@ -447,17 +447,17 @@ elseif F == "dlcmanager" then
     end
 elseif F == "playerhandstatemelee" then
     --Removes the need of having a thq material config for custom melee in VR.
-    local mtr_no_cubemap = Idstring("mtr_no_cubemap")
+    local mtr_cubemap = Idstring("mtr_cubemap")
     Hooks:PostHook(PlayerHandStateMelee, "_spawn_melee_unit", "VRBeardLibForceMeleeTHQ", function(self)
         if alive(self._melee_unit) then
             local tweak = tweak_data.blackmarket.melee_weapons[self._melee_entry]
             if tweak.custom then
                 if tweak.auto_thq ~= false then
                     for _, material in ipairs(self._melee_unit:get_objects_by_type(Idstring("material"))) do
-                        if material:name() == mtr_no_cubemap then
-                            material:set_render_template(Idstring("generic:DIFFUSE_TEXTURE:NORMALMAP"))                    
-                        else
+                        if material:name() == mtr_cubemap then
                             material:set_render_template(Idstring("generic:CUBE_ENVIRONMENT_MAPPING:DIFFUSE_TEXTURE:NORMALMAP"))
+                        else
+                            material:set_render_template(Idstring("generic:DIFFUSE_TEXTURE:NORMALMAP"))                    
                         end
                     end
                 end

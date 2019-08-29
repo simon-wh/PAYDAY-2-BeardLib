@@ -8,7 +8,7 @@ if F == "huskplayermovement" then
     end)
 
     --Removes the need of thq material config for custom melee
-    local mtr_no_cubemap = Idstring("mtr_no_cubemap")
+    local mtr_cubemap = Idstring("mtr_cubemap")
     Hooks:PostHook(HuskPlayerMovement, "anim_cbk_spawn_melee_item", "BeardLibForceMeleeTHQ", function(self, unit, graphic_object)
         if alive(self._melee_item_unit) then
             local peer = managers.network:session():peer_by_unit(self._unit)
@@ -17,10 +17,10 @@ if F == "huskplayermovement" then
             if tweak.custom then
                 if tweak.auto_thq ~= false then
                     for _, material in ipairs(self._melee_item_unit:get_objects_by_type(Idstring("material"))) do
-                        if material:id() == mtr_no_cubemap then
-                            material:set_render_template(Idstring("generic:DIFFUSE_TEXTURE:NORMALMAP"))                    
-                        else
+                        if material:id() == mtr_cubemap then
                             material:set_render_template(Idstring("generic:CUBE_ENVIRONMENT_MAPPING:DIFFUSE_TEXTURE:NORMALMAP"))
+                        else
+                            material:set_render_template(Idstring("generic:DIFFUSE_TEXTURE:NORMALMAP"))                    
                         end
                     end
                 else
