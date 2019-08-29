@@ -1,5 +1,6 @@
 LocalizationModule = LocalizationModule or class(ModuleBase)
 LocalizationModule.type_name = "Localization"
+LocalizationModule.forced_language = nil
 
 function LocalizationModule:Load()
 	self.LocalizationDirectory = self._config.directory and Path:Combine(self._mod.ModPath, self._config.directory) or self._mod.ModPath
@@ -27,8 +28,9 @@ end
 
 function LocalizationModule:LoadLocalization()
     local path
-    if self.Localizations[SystemInfo:language():key()] then
-        path = Path:Combine(self.LocalizationDirectory, self.Localizations[SystemInfo:language():key()])
+    local lang_key = (LocalizationModule.forced_language or SystemInfo:language()):key()
+    if self.Localizations[lang_key] then
+        path = Path:Combine(self.LocalizationDirectory, self.Localizations[lang_key)
     else
         path = Path:Combine(self.LocalizationDirectory, self.DefaultLocalization)
     end
