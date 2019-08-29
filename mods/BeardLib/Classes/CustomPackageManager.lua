@@ -186,7 +186,8 @@ function C:LoadPackageConfig(directory, config, temp, skip_use_clbk)
                     local file_path_ext = file_path.."."..typ
                     local auto_cp = NotNil(child.auto_cp, config.auto_cp, false)
                     local force = NotNil(child.force, config.force, true)
-                    local reload = NotNil(child.reload, config.reload, true)
+                    local reload = NotNil(child.reload, config.reload, false)
+                    child.unload = NotNil(child.unload, config.unload, true)
                     local dyn_load = NotNil(child.load, config.load, false)
 
                     if FileIO:Exists(file_path_ext) then
