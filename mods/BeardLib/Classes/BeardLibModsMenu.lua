@@ -377,10 +377,10 @@ function BeardLibModsMenu:OpenSettings()
                 on_callback = ClassClbk(self, "SetOption")
             })
             holder:Toggle({
-                name = "NoErrorAlert",
-                text = "beardlib_no_error_alert",
-                help = "beardlib_no_error_alert_help",
-                value = BeardLib.Options:GetValue("NoErrorAlert"),
+                name = "ShowErrorsDialog",
+                text = "beardlib_show_errors_dialog",
+                help = "beardlib_show_errors_dialog_help",
+                value = BeardLib.Options:GetValue("ShowErrorsDialog"),
                 on_callback = ClassClbk(self, "SetOption")
             })
             holder:Toggle({
@@ -404,11 +404,13 @@ function BeardLibModsMenu:OpenSettings()
                 value = BeardLib.Options:GetValue("LogSounds"),
                 on_callback = ClassClbk(self, "SetOption")
             })
-            holder:Button({
-                name = "ErrorsDialog",
-                text = "beardlib_errors_dialog",
-                on_callback = ClassClbk(BeardLib, "ShowErrorsDialog")
-            })
+            if BeardLib.DevMode then
+                holder:Button({
+                    name = "ErrorsDialog",
+                    text = "beardlib_errors_dialog",
+                    on_callback = ClassClbk(BeardLib, "ShowErrorsDialog")
+                })
+            end
             holder:Button({
                 name = "ResetSettings",
                 text = "beardlib_reset_settings",
