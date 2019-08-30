@@ -18,7 +18,7 @@ You can download a stable release from modworkshop: https://modworkshop.net/mydo
 * [SuperBLT](https://superblt.znix.xyz) or [BLT](https://github.com/JamesWilko/Payday-2-BLT/releases)
 
 ## Templates
-You can find them here: https://github.com/Luffyyy/BeardLib-Templates
+You can find them here: https://github.com/ModWorkshop/BeardLib-Templates
 
 ## A few mods that make use of BeardLib
 * PD:TH Hud: [GitHub](https://github.com/GreatBigBushyBeard/PAYDAY-2-PDTH-Hud/) [ModWorkshop](http://lastbullet.net/mydownloads.php?action=view_down&did=682)
