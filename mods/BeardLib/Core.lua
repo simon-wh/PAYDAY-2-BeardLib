@@ -271,7 +271,7 @@ end)
 
 Hooks:Add("MenuManagerOnOpenMenu", "BeardLibShowErrors", function(mself, menu)
 	if menu == "menu_main" and not LuaNetworking:IsMultiplayer() then
-		if BeardLib.Options:GetValue("NoErrorAlert") then
+		if not BeardLib.Options:GetValue("ShowErrorsDialog") then
 			return
 		end
 		if table.size(BeardLib._errors) > 0 then

@@ -33,7 +33,7 @@
 				<option name="ShowImages" type="boolean" default_value="true"/>
 				<option name="MenuColor" type="color" default_value="Color(0, 0.25, 1)"/>
 				<option name="ImportantNotice" type="boolean" default_value="true"/>
-				<option name="NoErrorAlert" type="boolean" default_value="false"/>
+				<option name="ShowErrorsDialog" type="boolean" default_value="true"/>
 				<option name="DevMode" type="boolean" default_value="false"/>
 				<option name="LogSounds" type="boolean" default_value="false"/>
 				<option name="OptimizedMusicLoad" type="boolean" default_value="true"/>

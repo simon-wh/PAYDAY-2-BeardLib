@@ -30,7 +30,7 @@ function LocalizationModule:LoadLocalization()
     local path
     local lang_key = (LocalizationModule.forced_language or SystemInfo:language()):key()
     if self.Localizations[lang_key] then
-        path = Path:Combine(self.LocalizationDirectory, self.Localizations[lang_key)
+        path = Path:Combine(self.LocalizationDirectory, self.Localizations[lang_key])
     else
         path = Path:Combine(self.LocalizationDirectory, self.DefaultLocalization)
     end
