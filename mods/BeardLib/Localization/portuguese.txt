@@ -71,8 +71,6 @@
     "beardlib_log_sounds_help" : "Mostra cada ID de som. Isso ajuda quando você quer substituí algum som que existe e não sabe a ID.",
     "beardlib_found_errors" : "Um ou mais Mods do BeardLib bateram de frente com um erro",
     "beardlib_errors_tip" : "Seu mod, conserta os bugs aí.\n Se você não for um desenvolvedor de um mod, então você pode alerta sobre os bugs para os criadores do mod e claro, mantendo tudo atualizado.",
-    "beardlib_no_error_alert" : "Não avisa o Luffy sobre o bug do mod, nem ele fez o mod",
-    "beardlib_no_error_alert_help" : "Se o mod ter um erro bem violento (por exemplo, o BeardLib desatualizado) quando ta carregando, isso vai te informar.\n E pode atualizar o mod ou remove-lo.\nNota: Você deveria manter isso só quando estiver em modo de desenvolvedor.",
     "beardlib_optimized_music_load" : "Carregar música otimizada",
     "beardlib_optimized_music_load_help" : "Carregar música customizada quando tocadas. Pode causar um lagzinho quando troca de música mas deve dá certo, isso conserta o erro do crash por causa do limite de ram de 32bit.",
     "beardlib_errors_dialog" : "Mostra diálogo de erros",
@@ -87,5 +85,7 @@
     "beardlib_updates_download_now" : "Baixar",
     "beardlib_mod_type_add" : "Addon",
     "beardlib_mod_type_map" : "Mapa",
-    "beardlib_waiting_update" : "Atualização Disponível"
+    "beardlib_waiting_update" : "Atualização Disponível",
+    "beardlib_show_errors_dialog" : "Show errors dialog when entering main menu"",
+    "beardlib_show_errors_dialog_help" : "Se o mod ter um erro bem violento (por exemplo, o BeardLib desatualizado) quando ta carregando, isso vai te informar.\n E pode atualizar o mod ou remove-lo.\nNota: Você deveria manter isso só quando estiver em modo de desenvolvedor."
 }

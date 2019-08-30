@@ -71,8 +71,6 @@
     "beardlib_log_sounds_help" : "Inscrit chaque ID de son arrivant. Cela est utile quand vous voulez remplacer les sons existant mais vous ne savez pas l'ID",
     "beardlib_found_errors" : "Un ou plusieurs mods Beardlib ont atteint une erreur",
     "beardlib_errors_tip" : "C'est votre devoir de sortir vos mods vide d'erreurs \nSi vous n'êtes pas un développeur vous pouvez les signaler aux créateurs. Bien sur, veillez à ce que tout soit à jour.",
-    "beardlib_no_error_alert" : "Ne m'alertez en aucun cas des erreurs",
-    "beardlib_no_error_alert_help" : "Si le mod atteint une erreur fatale (e.g. BeardLib obsolète) en chargeant, normalement cela vous en informera \nDonc vous pouvez soit la mettre à jour ou la supprimer \nNote : Vous devriez faire ça avec le mode développeur",
     "beardlib_optimized_music_load" : "Chargement de musique optimisée",
     "beardlib_optimized_music_load_help" : "Charge la musique personnalisée uniquement si jouée. Peut provoquer un léger ralentissement en changeant de chanson mais cela aidera pour les crashs dû à la limite de ram de 32bit.",
     "beardlib_errors_dialog" : "Montrer la boîte de dialogue",
@@ -87,5 +85,7 @@
     "beardlib_updates_download_now" : "Téléchargement",
     "beardlib_mod_type_add" : "Ajout",
     "beardlib_mod_type_map" : "Carte",
-    "beardlib_waiting_update" : "Mise à jour disponible"
+    "beardlib_waiting_update" : "Mise à jour disponible",
+    "beardlib_show_errors_dialog" : "Show errors dialog when entering main menu"",
+    "beardlib_show_errors_dialog_help" : "Si le mod atteint une erreur fatale (e.g. BeardLib obsolète) en chargeant, normalement cela vous en informera \nDonc vous pouvez soit la mettre à jour ou la supprimer \nNote : Vous devriez faire ça avec le mode développeur"
 }
