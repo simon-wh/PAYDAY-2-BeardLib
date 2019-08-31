@@ -80,12 +80,12 @@
     "beardlib_mod_enabled_help" : "Определяет, включен ли данный мод. Если данный мод выключен, его код не будет исполняться игрой. BLT-моды нельзя выключить через BeardLib, однако вы можете их выключить через сам BLT",
     "beardlib_mod_ignore_updates" : "Игнорировать обновления",
     "beardlib_mod_ignore_updates_help" : "Стоит ли BeardLib игнорировать дальнейшие обновления этого мода?",
-    "beardlib_mod_settings" : "Настройки - $mod",
+    "beardlib_mod_settings" : "Настройки мода - $mod",
     "beardlib_mod_by" : "От $author",
     "beardlib_updates_download_now" : "Загрузить",
     "beardlib_mod_type_add" : "Аддон",
     "beardlib_mod_type_map" : "Карта",
     "beardlib_waiting_update" : "Доступно обновление",
-    "beardlib_show_errors_dialog" : "Не предупреждать меня об ошибках в модах никогда",
+    "beardlib_show_errors_dialog" : "Показывать диалоговое окно ошибок при входе в главное меню",
     "beardlib_show_errors_dialog_help" : "Если в моде будут какие-либо критические ошибки при загрузке (например, из-за устаревшей версии BeardLib), он проинформирует вас об этом, чтобы вы могли или обновить мод, или удалить его.\nПримечание: не выключайте данную опцию, если вы используете режим разрабочика."
 }
