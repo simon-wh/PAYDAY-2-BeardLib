@@ -86,6 +86,6 @@
     "beardlib_mod_type_add" : "Ajout",
     "beardlib_mod_type_map" : "Carte",
     "beardlib_waiting_update" : "Mise à jour disponible",
-    "beardlib_show_errors_dialog" : "Show errors dialog when entering main menu"",
+    "beardlib_show_errors_dialog" : "Montrer les dialogues d'erreur en entrant dans le menu principal",
     "beardlib_show_errors_dialog_help" : "Si le mod atteint une erreur fatale (e.g. BeardLib obsolète) en chargeant, normalement cela vous en informera \nDonc vous pouvez soit la mettre à jour ou la supprimer \nNote : Vous devriez faire ça avec le mode développeur"
 }
