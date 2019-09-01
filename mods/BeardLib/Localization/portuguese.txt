@@ -86,6 +86,6 @@
     "beardlib_mod_type_add" : "Addon",
     "beardlib_mod_type_map" : "Mapa",
     "beardlib_waiting_update" : "Atualização Disponível",
-    "beardlib_show_errors_dialog" : "Show errors dialog when entering main menu"",
+    "beardlib_show_errors_dialog" : "Mostra diálogos de erros quando entra no menu principal",
     "beardlib_show_errors_dialog_help" : "Se o mod ter um erro bem violento (por exemplo, o BeardLib desatualizado) quando ta carregando, isso vai te informar.\n E pode atualizar o mod ou remove-lo.\nNota: Você deveria manter isso só quando estiver em modo de desenvolvedor."
 }
