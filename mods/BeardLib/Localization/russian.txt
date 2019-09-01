@@ -30,7 +30,7 @@
     "beardlib_downloading" : "Скачивание ",
     "beardlib_done" : "Завершено!",
     "beardlib_close" : "Закрыть",
-    "beardlib_mods_manager_important_title" : "Доступна последняя версия мода $mod!",
+    "beardlib_mods_manager_important_title" : "Доступна новая версия мода $mod!",
     "beardlib_mods_manager_important_help" : "Перейти в менеджер модов Beardlib для обновления?",
     "beardlib_search" : "Поиск",
     "beardlib_important_notice" : "Показывать уведомление об обновлении",
