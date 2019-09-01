@@ -1,12 +1,5 @@
 {
-    "ModAssetsManagementTextID" : "Менеджер Обновлений Активов",
-    "ModAssetsManagementDescID" : "",
-    "ModAssetsToggleAutoUpdatesTextID" : "Проверка Обновлений Активов",
-    "ModAssetsToggleAutoUpdatesDescID" : "",
-    "ModAssetsCheckUpdatesTextID" : "Проверить обновление активов сейчас!",
-    "ModAssetsCheckUpdatesDescID" : "",
     "mod_assets_error" : "ОШИБКА!",
-    "mod_assets_error_desc" : "Произошла ошибка при попытке получить номер версии активов с сервера",
     "menu_ok" : "OK",
     "bm_global_value_mod" : "МОДЫ",
     "menu_l_global_value_mod" : "Это часть моддинга сообщества!",

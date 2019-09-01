@@ -1,12 +1,5 @@
 {
-    "ModAssetsManagementTextID" : "Assets Update Manager",
-    "ModAssetsManagementDescID" : "",
-    "ModAssetsToggleAutoUpdatesTextID" : "Assets Update Check Ein-/Ausschalten",
-    "ModAssetsToggleAutoUpdatesDescID" : "",
-    "ModAssetsCheckUpdatesTextID" : "Nach Assets Updates suchen!",
-    "ModAssetsCheckUpdatesDescID" : "",
     "mod_assets_error" : "FEHLER!",
-    "mod_assets_error_desc" : "Ein Fehler ist aufgetreten beim Versuch die Server Version zu erhalten.",
     "menu_ok" : "OK",
     "bm_global_value_mod" : "MODS",
     "menu_l_global_value_mod" : "Das ist in Modding Community Item!",

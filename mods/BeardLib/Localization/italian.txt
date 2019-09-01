@@ -1,12 +1,5 @@
 {
-    "ModAssetsManagementTextID" : "Gestore aggiornamenti degli assets",
-    "ModAssetsManagementDescID" : "",
-    "ModAssetsToggleAutoUpdatesTextID" : "Attiva o disattiva il controllo degli aggiornamenti",
-    "ModAssetsToggleAutoUpdatesDescID" : "",
-    "ModAssetsCheckUpdatesTextID" : "Controlla aggiornamenti per gli assets adesso!",
-    "ModAssetsCheckUpdatesDescID" : "",
     "mod_assets_error" : "ERRORE!",
-    "mod_assets_error_desc" : "Si è verificato un errore durante la richiesta al server della versione degli assets",
     "menu_ok" : "OK",
     "bm_global_value_mod" : "MOD",
     "menu_l_global_value_mod" : "Oggetto della comunità del modding!",

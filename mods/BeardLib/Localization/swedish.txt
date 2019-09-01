@@ -1,12 +1,5 @@
 {
-	"ModAssetsManagementTextID" : "Tillgångsuppdateringshanteraren",
-	"ModAssetsManagementDescID" : "",
-	"ModAssetsToggleAutoUpdatesTextID" : "Växla uppdateringskoll får tillgångar",
-	"ModAssetsToggleAutoUpdatesDescID" : "",
-	"ModAssetsCheckUpdatesTextID" : "Sök efter tillgångsuppdateringar nu!",
-	"ModAssetsCheckUpdatesDescID" : "",
 	"mod_assets_error" : "ERROR!",
-	"mod_assets_error_desc" : "Ett fel uppstod under försöket att hitta serverversionsnumret för tillgångarna",
 	"menu_ok" : "OK",
 	"bm_global_value_mod" : "MODDAR",
 	"menu_l_global_value_mod" : "Detta är ett modgemenskapsföremål!",

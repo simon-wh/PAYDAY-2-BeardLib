@@ -1,12 +1,5 @@
 {
-    "ModAssetsManagementTextID" : "에셋 업데이트 매니저",
-    "ModAssetsManagementDescID" : "",
-    "ModAssetsToggleAutoUpdatesTextID" : "항상 에셋 업데이트 체크",
-    "ModAssetsToggleAutoUpdatesDescID" : "",
-    "ModAssetsCheckUpdatesTextID" : "에셋 업데이트 지금 확인하기!",
-    "ModAssetsCheckUpdatesDescID" : "",
     "mod_assets_error" : "오류!",
-    "mod_assets_error_desc" : "에셋을 위한 서버 버전 넘버를 가져오는 시도를 하는 도중 오류가 났습니다.",
     "menu_ok" : "확인",
     "bm_global_value_mod" : "모드",
     "menu_l_global_value_mod" : "이 아이템은 모딩 커뮤니티 아이템입니다!",
