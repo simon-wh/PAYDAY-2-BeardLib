@@ -22,7 +22,7 @@
     "beardlib_updated" : "Обновлено!",
     "beardlib_waiting" : "Ожидание ответа..",
     "beardlib_download_complete" : "Загрузка завершена, идет установка..",
-    "beardlib_download_failed" : "Что-то пошло не так :(",
+    "beardlib_download_failed" : "Не удалось завершить загрузку",
     "beardlib_no_change" : "Последняя версия установлена!",
     "beardlib_no_change_desc" : "У вас уже установлена последняя версия мода!",
     "beardlib_mod_type" : "Тип: %type",
