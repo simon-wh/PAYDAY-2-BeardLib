@@ -22,7 +22,11 @@ function mws:check_func()
     dohttpreq(check_url, function(data, id)
         if data then
             data = string.sub(data, 0, #data - 1)
-            if data ~= "false" and data ~= "true" and string.len(data) > 0 then
+            local not_bool = (data ~= "false" and data ~= "true")
+            local length_acceptable = (string.len(data) > 0 and string.len(data) <= 64)
+            local version_check = not self._config.version_is_number or ((tonumber(self.version) and tonumber(data)) and tonumber(self.version) < tonumber(data))
+
+            if not_bool and length_acceptable and version_check then
                 self._new_version = data
                 Global.beardlib_checked_updates[self.id] = data
                 self:PrepareForUpdate()

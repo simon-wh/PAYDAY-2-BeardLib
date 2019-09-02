@@ -136,12 +136,15 @@ function ModAssetsModule:_CheckVersion(force)
     local version_url = ModCore:GetRealFilePath(self.provider.version_api_url, self)
     local loc = managers.localization
     dohttpreq(version_url, function(data, id)
-        if data and (not self.provider.version_is_number or tonumber(data)) then
-            self._new_version = data
-            if self._new_version and tostring(self._new_version) ~= tostring(self.version) then
-                self:PrepareForUpdate()
-            elseif force then
-                self:ShowNoChangePrompt()
+        if data and (not self.provider.version_is_number or tonumber(data)) and tostring(data):len() <= 64 then --Limiting versions to 64 characters so errors won't show as versions
+            local version_check = not self._config.version_is_number or ((tonumber(self.version) and tonumber(data)) and tonumber(self.version) < tonumber(data))
+            if version_check then
+                self._new_version = data
+                if self._new_version and tostring(self._new_version) ~= tostring(self.version) then
+                    self:PrepareForUpdate()
+                elseif force then
+                    self:ShowNoChangePrompt()
+                end
             end
         else
             self:Err("Unable to parse string '%s' as a version number", data)
