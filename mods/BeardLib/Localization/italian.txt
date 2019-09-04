@@ -79,6 +79,6 @@
     "beardlib_mod_type_add" : "Addon",
     "beardlib_mod_type_map" : "Map",
     "beardlib_waiting_update" : "Update available",
-    "beardlib_show_errors_dialog" : "Show errors dialog when entering main menu"",
+    "beardlib_show_errors_dialog" : "Show errors dialog when entering main menu",
     "beardlib_show_errors_dialog_help" : "If a mod hits a critical error (e.g. Outdated BeardLib) while loading, it will usually inform you about it.\nSo you can either update the mod or remove it.\nNote: You should keep this on when using developer mode."
 }
