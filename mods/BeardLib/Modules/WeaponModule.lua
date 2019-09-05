@@ -158,12 +158,13 @@ function WeaponModule:RegisterHook()
         config.mod_path = self._mod.ModPath
 
         if config.based_on then
-            f_self[config.id] = table.merge(deep_clone(self:GetBasedOn(f_self, config.based_on)), config)
+            local based_on = self:GetBasedOn(f_self, config.based_on)
+            f_self[config.id] = based_on and table.merge(deep_clone(f_self[based_on]), config) or config
         else
             f_self[config.id] = config
         end
         
-        local npc_data = clone(config)
+        local npc_data = clone(f_self[config.id])
         npc_data.unit = npc_data.unit.."_npc"
         f_self[config.id .. "_npc"] = npc_data
     end)
@@ -173,7 +174,7 @@ function WeaponModule:RegisterHook()
 
         --Stance mod stuff. We can't do this in weapon factory hook since upgrade tweakdata isn't ready yet (and we use it to find the factory ids)
         local fac_id = self._config.factory.id
-        local based_on_fac = u_self.definitions[self:GetBasedOn(u_self.definitions, self._config.factory.based_on)].factory_id
+        local based_on_fac = self._config.factory.based_on or u_self.definitions[self:GetBasedOn(u_self.definitions)].factory_id
         local factory = _tweakdata.weapon.factory
         local fac_weapon = factory[fac_id]
         local sight_adds = self._config.factory.sight_adds

@@ -11,7 +11,7 @@
 	auto_image_color="true"
 	mod_override_dir="assets/mod_overrides/">
 	<load_modules>
-		<AssetUpdates id="14924" version="3.39" provider="modworkshop" important="true" version_is_number="true"/>
+		<AssetUpdates id="14924" version="3.40" provider="modworkshop" important="true" version_is_number="true"/>
 		<AddFiles directory="Assets">
 			<unit path="core/units/run_sequence_dummy/run_sequence_dummy" force_if_not_loaded="true"/>
 			<object path="core/units/run_sequence_dummy/run_sequence_dummy" force_if_not_loaded="true"/>
