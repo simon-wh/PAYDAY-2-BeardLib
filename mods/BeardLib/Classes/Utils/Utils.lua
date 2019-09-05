@@ -79,7 +79,7 @@ function Utils:GetJobString()
     local update = {}
     if mod then
         local mod_assets = mod:GetModule(ModAssetsModule.type_name)
-		if mod_assets then
+		if mod_assets and mod_assets._data then
             update = mod_assets._data
         end
     end

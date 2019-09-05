@@ -220,7 +220,7 @@ function BeardLibModsMenu:AddMod(mod, framework)
     
     local updates = mod:GetModules(ModAssetsModule.type_name)
     local main_update = updates[1]
-    if main_update and main_update._data.provider and main_update._data.provider.page_url then
+    if main_update and main_update._data and main_update._data.provider and main_update._data.provider.page_url then
         mod_item:Button({
             name = "View",
             on_callback = ClassClbk(self, "ViewMod", mod),
