@@ -138,6 +138,7 @@ elseif F == "blackmarketmanager" then
     function BlackMarketManager:get_sorted_melee_weapons(...)
         local sorted_categories, item_categories = self:beardlib_orig_get_sorted_melee_weapons(...)
         local m_tweak_data = tweak_data.blackmarket.melee_weapons
+        local l_tweak_data = tweak_data.lootdrop.global_values
 
         local items = {}
         for _, cat in pairs(item_categories) do
@@ -150,10 +151,28 @@ elseif F == "blackmarketmanager" then
             yd = y[2]
             x_td = m_tweak_data[x[1]]
             y_td = m_tweak_data[y[1]]
-            if xd.unlocked ~= yd.unlocked then
-                return xd.unlocked
+    
+            if _G.IS_VR and xd.vr_locked ~= yd.vr_locked then return not xd.vr_locked end
+            if xd.unlocked ~= yd.unlocked then return xd.unlocked end
+            if not xd.unlocked and xd.level ~= yd.level then return xd.level < yd.level end
+            if x_td.custom ~= y_td.custom then
+                return x_td.custom == nil
             end
-            return not x_td.custom and y_td.custom
+            if x_td.instant ~= y_td.instant then return x_td.instant end
+            if xd.skill_based ~= yd.skill_based then  return xd.skill_basedend end
+            if x_td.free ~= y_td.free then return x_td.free end
+    
+            x_gv = x_td.global_value or x_td.dlc or "normal"
+            y_gv = y_td.global_value or y_td.dlc or "normal"
+            x_sn = l_tweak_data[x_gv]
+            y_sn = l_tweak_data[y_gv]
+            x_sn = x_sn and x_sn.sort_number or 1
+            y_sn = y_sn and y_sn.sort_number or 1
+    
+            if x_sn ~= y_sn then return x_sn < y_sn end
+            if xd.level ~= yd.level then return xd.level < yd.level end
+
+            return x[1] < y[1]
         end)
         item_categories = {}
         for i, item in ipairs(items) do
