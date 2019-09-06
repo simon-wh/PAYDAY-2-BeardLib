@@ -158,8 +158,11 @@ function WeaponModule:RegisterHook()
         config.mod_path = self._mod.ModPath
 
         if config.based_on then
-            local based_on = self:GetBasedOn(f_self, config.based_on)
+            local based_on = f_self[config.based_on] and config.based_on or nil
             f_self[config.id] = based_on and table.merge(deep_clone(f_self[based_on]), config) or config
+            if not based_on then
+                self:Err("Factory data has an invalid based on! %s", tostring(config.based_on))
+            end
         else
             f_self[config.id] = config
         end
