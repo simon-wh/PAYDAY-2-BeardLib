@@ -56,10 +56,7 @@ function MenuUI:init(params)
     self._callbacks = {}
     self._align_items_funcs = {}
 
-	if self.visible == true and managers.mouse_pointer then self:enable() end
-
     BeardLib:AddUpdater("MenuUIUpdate"..UniqueID, ClassClbk(self, "Update"), true)
-    if self.create_items then self:create_items() end
     BeardLib.managers.menu_ui:add_menu(self)
     
     --Deprecated values
@@ -71,9 +68,18 @@ function MenuUI:init(params)
     if self.use_default_close_key then
         self.close_key = Idstring("esc")
     end
+    
+    if self.create_items then self:create_items() end
 
-    if self.enabled then
-        self:SetEnabled(self.enabled)
+    local enabled = self.enabled or self.visible
+    if enabled then
+        if managers.mouse_pointer then
+            self:SetEnabled(enabled)
+        else
+            Hooks:Add("SetupInitManagers", "SetEnabledMenuUI"..UniqueID, function()
+                self:SetEnabled(enabled)
+            end)
+        end
     end
 end
 
