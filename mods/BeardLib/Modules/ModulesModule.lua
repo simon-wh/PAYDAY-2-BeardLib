@@ -12,15 +12,15 @@ function ModulesModule:Load(config, prev_dir)
 				local object_name = moodule.name or type_name.."Module"
 	
 				if object_name then
-					if hook_type_name then
+					if type_name then
 						if _G[object_name] then
 							_G[object_name].type_name = type_name
 							BeardLib:RegisterModule(type_name, _G[object_name])
 						else
-							self:Err("'%s' tried to create module '%s' with a global class that doesn't exist!", self._mod.Name, hook_type_name)
+							self:Err("'%s' tried to create module '%s' with a global class that doesn't exist!", self._mod.Name, type_name)
 						end
 					else
-						self:Err("'%s' tried to create module '%s' without a 'type_name'!", self._mod.Name, hook_type_name)
+						self:Err("'%s' tried to create module '%s' without a 'type_name'!", self._mod.Name, type_name)
 					end
 				else
 					self:Err("'%s' tried to create module with no 'name' specified!", self._mod.Name)
