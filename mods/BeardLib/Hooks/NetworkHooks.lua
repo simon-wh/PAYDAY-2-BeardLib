@@ -17,7 +17,7 @@ if F == "huskplayermovement" then
             if tweak.custom then
                 if tweak.auto_thq ~= false then
                     for _, material in ipairs(self._melee_item_unit:get_objects_by_type(Idstring("material"))) do
-                        if material:id() == mtr_cubemap then
+                        if material.id and material:id() == mtr_cubemap then
                             material:set_render_template(Idstring("generic:CUBE_ENVIRONMENT_MAPPING:DIFFUSE_TEXTURE:NORMALMAP"))
                         else
                             material:set_render_template(Idstring("generic:DIFFUSE_TEXTURE:NORMALMAP"))                    
