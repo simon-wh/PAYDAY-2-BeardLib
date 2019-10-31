@@ -14,6 +14,13 @@ function ElementBLCustomAchievement:client_on_executed(...)
 end
 
 function ElementBLCustomAchievement:on_executed(instigator)
+    if not self._values.enabled then
+	return
+    end
+    if self._values.package_id == nil or self._values.achievement_id == nil then
+	    log("BLCustomAchievement Element is missing data!")
+	return
+    end
     if self._values.amount_increase == 0 then
         local award_achievement = true
 
