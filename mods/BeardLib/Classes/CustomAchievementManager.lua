@@ -110,7 +110,7 @@ function CustomAchievementManager:FetchPackages()
 
     local packages = {}
 
-    for id, _ in ipairs(tweak_data.achievement.custom_achievements_packages) do
+    for id, _ in pairs(tweak_data.achievement.custom_achievements_packages) do
         table.insert(packages, id)
     end
 
