@@ -110,8 +110,8 @@ function CustomAchievementManager:FetchPackages()
 
     local packages = {}
 
-    for _, package in ipairs(FileIO:GetFolders(self._achievements_folder)) do
-        table.insert(packages, package)
+    for id, _ in ipairs(tweak_data.achievement.custom_achievements_packages) do
+        table.insert(packages, id)
     end
 
     return packages
@@ -201,17 +201,13 @@ end
 CustomAchievementPackage = CustomAchievementPackage or class()
 
 function CustomAchievementPackage:init(package_id)
-    self._package_id = package_id
     local tweak = tweak_data.achievement.custom_achievements_packages[self._package_id]
-    if tweak then
-        self._achievements = tweak_data.achievement.custom_achievements[self._package_id]
-        self._name_id = tweak_data.achievement.custom_achievements_packages[self._package_id].name or self._package_id .. "_name"
-        self._desc_id = tweak_data.achievement.custom_achievements_packages[self._package_id].desc
-        self._icon = tweak_data.achievement.custom_achievements_packages[self._package_id].icon or "guis/textures/achievement_package_default"
-        self._banner = tweak_data.achievement.custom_achievements_packages[self._package_id].banner
-    else
-        BeardLib:Err("[CustomAchievementPackage] Achievement with ID '%s' was not found in the tweakdata! Did you setup the achievement properly?", package_id)
-    end
+    self._package_id = package_id
+    self._achievements = tweak_data.achievement.custom_achievements[self._package_id]
+    self._name_id = tweak_data.achievement.custom_achievements_packages[self._package_id].name or self._package_id .. "_name"
+    self._desc_id = tweak_data.achievement.custom_achievements_packages[self._package_id].desc
+    self._icon = tweak_data.achievement.custom_achievements_packages[self._package_id].icon or "guis/textures/achievement_package_default"
+    self._banner = tweak_data.achievement.custom_achievements_packages[self._package_id].banner
 end
 
 function CustomAchievementPackage:GetName()
