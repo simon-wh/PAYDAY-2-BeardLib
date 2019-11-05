@@ -18,7 +18,7 @@ function ElementBLCustomAchievement:on_executed(instigator)
 	return
     end
     if self._values.package_id == nil or self._values.achievement_id == nil then
-	    log("BLCustomAchievement Element is missing data!")
+	log("BLCustomAchievement Element is missing data!")
 	return
     end
     if self._values.amount_increase == 0 then
