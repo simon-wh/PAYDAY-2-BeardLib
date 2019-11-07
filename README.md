@@ -15,7 +15,7 @@ The main documentation can be found on the [wiki](https://github.com/GreatBigBus
 You can download a stable release from modworkshop: https://modworkshop.net/mydownloads.php?action=view_down&did=14924
 
 ## Dependencies
-* [SuperBLT](https://superblt.znix.xyz) or [BLT](https://github.com/JamesWilko/Payday-2-BLT/releases)
+* [SuperBLT](https://superblt.znix.xyz)
 
 ## Templates
 You can find them here: https://github.com/ModWorkshop/BeardLib-Templates
