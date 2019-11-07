@@ -133,36 +133,63 @@ elseif F == "blackmarketmanager" then
         return texture_path, rarity_path
     end
 
-    --Places custom melees at the end of the menu instead of shuffled.
-    BlackMarketManager.beardlib_orig_get_sorted_melee_weapons = BlackMarketManager.beardlib_orig_get_sorted_melee_weapons or BlackMarketManager.get_sorted_melee_weapons
-    function BlackMarketManager:get_sorted_melee_weapons(hide_locked, id_list_only, ...)
-        local sorted_categories, item_categories, override_slots = self:beardlib_orig_get_sorted_melee_weapons(hide_locked, id_list_only, ...)
-        local m_tweak_data = tweak_data.blackmarket.melee_weapons
-        local l_tweak_data = tweak_data.lootdrop.global_values
-
+    --WARNING: this function has been completely replaced. If anything fucks up, please removed it.
+    --Fixes sorting for custom melee.
+    function BlackMarketManager:get_sorted_melee_weapons(hide_locked, id_list_only)
         local items = {}
-        if item_categories then
-            for _, cat in pairs(item_categories) do
-                for _, item in pairs(cat) do
-                    table.insert(items, item)
-                end
+        local global_value, td, category = nil
+    
+        for id, item in pairs(Global.blackmarket_manager.melee_weapons) do
+            td = tweak_data.blackmarket.melee_weapons[id]
+            global_value = td.dlc or td.global_value or "normal"
+            category = td.type or "unknown"
+            local add_item = item.unlocked or item.equipped or not hide_locked and not tweak_data:get_raw_value("lootdrop", "global_values", global_value, "hide_unavailable")
+    
+            if add_item then
+                table.insert(items, {
+                    id,
+                    item
+                })
             end
         end
-        table.sort(items, function(x,y)
+    
+        local xd, yd, x_td, y_td, x_sn, y_sn, x_gv, y_gv = nil
+        local m_tweak_data = tweak_data.blackmarket.melee_weapons
+        local l_tweak_data = tweak_data.lootdrop.global_values
+    
+        local function sort_func(x, y)
             xd = x[2]
             yd = y[2]
             x_td = m_tweak_data[x[1]]
             y_td = m_tweak_data[y[1]]
-    
-            if _G.IS_VR and xd.vr_locked ~= yd.vr_locked then return not xd.vr_locked end
-            if xd.unlocked ~= yd.unlocked then return xd.unlocked end
-            if not xd.unlocked and xd.level ~= yd.level then return xd.level < yd.level end
+
             if x_td.custom ~= y_td.custom then
                 return x_td.custom == nil
             end
-            if x_td.instant ~= y_td.instant then return x_td.instant end
-            if xd.skill_based ~= yd.skill_based then  return xd.skill_basedend end
-            if x_td.free ~= y_td.free then return x_td.free end
+
+            if _G.IS_VR and xd.vr_locked ~= yd.vr_locked then
+                return not xd.vr_locked
+            end
+    
+            if xd.unlocked ~= yd.unlocked then
+                return xd.unlocked
+            end
+    
+            if xd.level ~= yd.level then
+                return xd.level < yd.level
+            end
+    
+            if x_td.instant ~= y_td.instant then
+                return x_td.instant
+            end
+    
+            if xd.skill_based ~= yd.skill_based then
+                return xd.skill_based
+            end
+    
+            if x_td.free ~= y_td.free then
+                return x_td.free
+            end
     
             x_gv = x_td.global_value or x_td.dlc or "normal"
             y_gv = y_td.global_value or y_td.dlc or "normal"
@@ -171,30 +198,52 @@ elseif F == "blackmarketmanager" then
             x_sn = x_sn and x_sn.sort_number or 1
             y_sn = y_sn and y_sn.sort_number or 1
     
-            if x_sn ~= y_sn then return x_sn < y_sn end
-            if xd.level ~= yd.level then return xd.level < yd.level end
+            if x_sn ~= y_sn then
+                return x_sn < y_sn
+            end
+    
+            if xd.level ~= yd.level then
+                return xd.level < yd.level
+            end
 
             return x[1] < y[1]
-        end)
-        item_categories = {}
-
+        end
+    
+        table.sort(items, sort_func)
+    
         if id_list_only then
             local id_list = {}
-
+    
             for _, data in ipairs(items) do
                 table.insert(id_list, data[1])
             end
-
+    
             return id_list
         end
-
-        for i, item in ipairs(items) do
-            category = math.max(1, math.ceil(i / (override_slots[1] * override_slots[2])))
+    
+        local override_slots = {
+            4,
+            4
+        }
+        local num_slots_per_category = override_slots[1] * override_slots[2]
+        local sorted_categories = {}
+        local item_categories = {}
+        local category = nil
+    
+        for index, item in ipairs(items) do
+            category = math.max(1, math.ceil(index / num_slots_per_category))
             item_categories[category] = item_categories[category] or {}
+    
             table.insert(item_categories[category], item)
         end
+    
+        for i = 1, #item_categories, 1 do
+            table.insert(sorted_categories, i)
+        end
+    
         return sorted_categories, item_categories, override_slots
     end
+    
 elseif F == "crewmanagementgui" then
     local orig = CrewManagementGui.populate_primaries
     --Blocks out custom weapons that don't have support for AI.
