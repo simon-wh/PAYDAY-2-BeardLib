@@ -11,7 +11,9 @@ local STRING_TO_INDEX = {
 	secondary_blueprint = 9,
 	melee_weapon = 10,
 	primary_cosmetics = 11,
-	secondary_cosmetics = 12
+	secondary_cosmetics = 12,
+	player_style = 13,
+	suit_variation = 14
 }
 
 function BlackMarketManager:unpack_compact_outfit(outfit_string)
@@ -34,7 +36,9 @@ function BlackMarketManager:unpack_compact_outfit(outfit_string)
 		armor_skin = get("armor_skin") or "none",
 		primary = {factory_id = get("primary") or "wpn_fps_ass_amcar"},
 		secondary = {factory_id = get("secondary") or "wpn_fps_pis_g17"},
-		melee_weapon = get("melee_weapon") or self._defaults.melee_weapon
+		melee_weapon = get("melee_weapon") or self._defaults.melee_weapon,
+		player_style = get("player_style") or "none",
+		suit_variation = get("suit_variation") or "none"
 	}
 
 	for i=1,2 do
@@ -98,6 +102,9 @@ function BlackMarketManager:compact_outfit_string()
 			s = s .. " " .. "!-1-0"
 		end
 	end
+
+	s = s .. " " .. tostring(self:equipped_player_style())
+	s = s .. " " .. tostring(self:equipped_suit_variation())
 
 	return s
 end
