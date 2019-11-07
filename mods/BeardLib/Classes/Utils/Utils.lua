@@ -118,10 +118,7 @@ end
 function Utils:OutfitStringFromList(outfit, is_henchman)
     local bm = managers.blackmarket
     is_henchman = is_henchman and bm.henchman_loadout_string_from_loadout
-    local str = is_henchman and bm:henchman_loadout_string_from_loadout(outfit) or bm:outfit_string_from_list(outfit)
-     --Remove when overkill decides to add armor_skin to BlackMarketManager:outfit_string_from_list
-     --Still missing :)))
-    return is_henchman and str or str:gsub(outfit.armor.."%-"..outfit.armor_current.."%-"..outfit.armor_current_state, outfit.armor.."-"..outfit.armor_current.."-"..outfit.armor_current_state.."-"..outfit.armor_skin)
+    return is_henchman and bm:henchman_loadout_string_from_loadout(outfit) or bm:outfit_string_from_list(outfit)
 end
 
 function Utils:GetCleanedBlueprint(blueprint, factory_id)

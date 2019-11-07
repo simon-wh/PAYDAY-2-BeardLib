@@ -135,15 +135,17 @@ elseif F == "blackmarketmanager" then
 
     --Places custom melees at the end of the menu instead of shuffled.
     BlackMarketManager.beardlib_orig_get_sorted_melee_weapons = BlackMarketManager.beardlib_orig_get_sorted_melee_weapons or BlackMarketManager.get_sorted_melee_weapons
-    function BlackMarketManager:get_sorted_melee_weapons(...)
-        local sorted_categories, item_categories = self:beardlib_orig_get_sorted_melee_weapons(...)
+    function BlackMarketManager:get_sorted_melee_weapons(hide_locked, id_list_only, ...)
+        local sorted_categories, item_categories, override_slots = self:beardlib_orig_get_sorted_melee_weapons(hide_locked, id_list_only, ...)
         local m_tweak_data = tweak_data.blackmarket.melee_weapons
         local l_tweak_data = tweak_data.lootdrop.global_values
 
         local items = {}
-        for _, cat in pairs(item_categories) do
-            for _, item in pairs(cat) do
-                table.insert(items, item)
+        if item_categories then
+            for _, cat in pairs(item_categories) do
+                for _, item in pairs(cat) do
+                    table.insert(items, item)
+                end
             end
         end
         table.sort(items, function(x,y)
@@ -175,12 +177,23 @@ elseif F == "blackmarketmanager" then
             return x[1] < y[1]
         end)
         item_categories = {}
+
+        if id_list_only then
+            local id_list = {}
+
+            for _, data in ipairs(items) do
+                table.insert(id_list, data[1])
+            end
+
+            return id_list
+        end
+
         for i, item in ipairs(items) do
-            category = math.max(1, math.ceil(i / 16))
+            category = math.max(1, math.ceil(i / (override_slots[1] * override_slots[2])))
             item_categories[category] = item_categories[category] or {}
             table.insert(item_categories[category], item)
         end
-        return sorted_categories, item_categories
+        return sorted_categories, item_categories, override_slots
     end
 elseif F == "crewmanagementgui" then
     local orig = CrewManagementGui.populate_primaries
