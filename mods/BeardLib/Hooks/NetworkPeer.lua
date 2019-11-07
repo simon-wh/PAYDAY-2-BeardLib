@@ -264,7 +264,7 @@ function NetworkPeer:set_outfit_string_beardlib(outfit_string, outfit_version)
     local new_outfit = managers.blackmarket:unpack_compact_outfit(outfit_string)
     local bm = tweak_data.blackmarket
 
-    local mask =new_outfit.mask 
+    local mask = new_outfit.mask 
     if bm.masks[mask.mask_id] and bm.masks[mask.mask_id].custom then
         old_outfit.mask.mask_id = new_outfit.mask.mask_id
     end
@@ -304,6 +304,19 @@ function NetworkPeer:set_outfit_string_beardlib(outfit_string, outfit_version)
             end
         end
     end--]]
+
+    if bm.player_styles[new_outfit.player_style] and bm.player_styles[new_outfit.player_style].custom then
+        old_outfit.player_style = new_outfit.player_style
+    end
+
+    -- First check if the outfit we are trying to find the variant for exists and has variants.
+    if bm.player_styles[old_outfit.player_style] and bm.player_styles[old_outfit.player_style].material_variations then
+        local suit_variation_td = bm.player_styles[old_outfit.player_style].material_variations[new_outfit.suit_variation]
+        --Now check that the variant we are looking for exists and is custom.
+        if suit_variation_td and suit_variation_td.custom then
+            old_outfit.suit_variation = new_outfit.suit_variation
+        end
+    end
 
     self._profile.outfit_string = BeardLib.Utils:OutfitStringFromList(old_outfit)
     
