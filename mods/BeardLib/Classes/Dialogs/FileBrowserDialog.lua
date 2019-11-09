@@ -235,7 +235,11 @@ function FileBrowserDialog:FileClick(item)
     self._file_name:SetValue(item.text)
 end 
 
-function FileBrowserDialog:FileDoubleClick(item)
+function FileBrowserDialog:FileDoubleClick(item, key)
+    if key == Idstring("esc") then
+        return
+    end
+
     if self._file_click then
         if self._folder_browser then
             self._file_click(self._current_dir)
