@@ -131,7 +131,7 @@ Hooks:Add("NetworkReceivedData", sync_game_settings_id, function(sender, id, dat
                 local job_index = tweak_data.narrative:get_index_from_job_id(job_id)
                 local level_index = tweak_data.levels:get_index_from_level_id(split_data[2])
                 local difficulty_index = tweak_data:difficulty_to_index(split_data[3])
-                managers.network._handlers.connection:sync_game_settings(job_index, level_index, difficulty_index, Global.game_settings.one_down, rpc)
+                managers.network._handlers.connection:sync_game_settings(job_index, level_index, difficulty_index, Global.game_settings.one_down, Global.game_settings.weekly_skirmish, rpc)
             end
         end
         local function disconnect()
