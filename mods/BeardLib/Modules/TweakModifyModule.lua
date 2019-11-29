@@ -10,7 +10,7 @@ function TweakModifyModule:RegisterHook()
 
 	for _, tweak in ipairs(self._config) do
 		if type(tweak) == "table" and tweak._meta == "tweak" then
-			local use_clbk = config.use_clbk and self._mod:StringToCallback(config.use_clbk) or nil
+			local use_clbk = self._config.use_clbk and self._mod:StringToCallback(self._config.use_clbk) or nil
 			if not use_clbk or use_clbk(tweak) then
 				local path = tweak.path
 				if type(path) == "string" then
