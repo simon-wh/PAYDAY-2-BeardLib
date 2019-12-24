@@ -15,7 +15,7 @@ function TextBox:Init()
 		focus_mode = self.focus_mode,
 		auto_focus = self.auto_focus,
         line_color = self.line_color or self.highlight_color,
-        w = self.panel:w() * (self.text == false and 1 or self.control_slice),
+        w = self.panel:w() * (not self.text and 1 or self.control_slice),
         value = self.value,
 	})
 	self.auto_focus = nil
