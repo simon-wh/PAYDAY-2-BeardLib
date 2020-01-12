@@ -11,20 +11,16 @@ Item.align_methods = {
     grid_from_right_reversed = "AlignItemsGridFromRightReversed",
 }
 
-function Item:_AlignItems(...)
+function Item:_AlignItems(menus, no_parent)
     if self.delay_align_items then
         local key = self:Key()
-        for _, tbl in pairs(self.menu._align_items_funcs) do
-            if tbl.key == key then
-                return
-            end
-        end
-        if alive(self.panel) then
-            self:ItemsPanel():set_visible(false)
-        end
-        table.insert(self.menu._align_items_funcs, {key = key, menu = self, clbk = ClassClbk(self, "AlignItems", ...)})
+        self.panel:stop()
+        self.panel:animate(function()
+            wait(0.000001)
+            self:AlignItems(menus, no_parent)
+        end)
     else
-        self:AlignItems(...)
+        self:AlignItems(menus, no_parent)
     end
 end
 
@@ -50,13 +46,6 @@ function Item:AlignItems(menus, no_parent)
 		self.parent:AlignItems()
     end
     self:CheckItems()
-    if self.delay_align_items then
-        table.insert(self.menu._callbacks, function()
-            if alive(self.panel) then
-                self:ItemsPanel():set_visible(self.visible)
-            end
-        end)
-    end
 end
 
 function Item:AlignItemsPost(max_h, prev_item)
@@ -81,6 +70,11 @@ function Item:RepositionItem(item, last_positioned_item, prev_item, max_h, max_r
 	end
 	if max_h and count or item.count_height then
 		max_h = math.max(max_h, panel:bottom())
+    end
+
+    if item._hidden_by_delay then
+        item._hidden_by_delay = false
+        item:TryRendering()
     end
 
 	return last_positioned_item, prev_item, max_h, max_right
@@ -203,7 +197,13 @@ function Item:AlignItemsCenteredGrid(reversed)
                     panel:set_position(max_right + offset[1], max_y + offset[2])
                 end
             end
+
             local repos = item:Reposition(last_positioned_item, prev_item)
+            if item._hidden_by_delay then
+                item._hidden_by_delay = false
+                item:TryRendering()
+            end
+
             if repos then
                 last_positioned_item = item
             end

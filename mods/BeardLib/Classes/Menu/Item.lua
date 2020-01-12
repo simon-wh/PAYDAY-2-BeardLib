@@ -23,10 +23,12 @@ function Item:Init(params)
 
 	self:WorkParams(params)
 
+	self._hidden_by_delay = self.parent.delay_align_items
+
 	self.panel = self.parent_panel:panel({
 		name = self.name,
 		layer = self.layer or 1,
-		visible = self.visible,
+		visible = not self._hidden_by_delay and self.visible or false,
 		alpha = self.enabled and self.enabled_alpha or self.disabled_alpha,
 		w = self.w,
 		h = self.h or self.size,
@@ -73,11 +75,13 @@ function Item:InitBasicItem()
 end
 
 function Item:InitBasicMenu()
-    self.panel = self.parent_panel:panel({
+	self._hidden_by_delay = self.parent.delay_align_items
+
+	self.panel = self.parent_panel:panel({
         name = self.name .. "_panel",
         w = self.w,
         h = self.h,
-        visible = self.visible == true,
+		visible = not self._hidden_by_delay and self.visible or false,
         layer = self.layer or 1,
 	})
 
@@ -1122,6 +1126,11 @@ function Item:SetVisible(visible, animate, no_align)
 
 	self._hidden_by_menu = nil
 	self.visible = visible == true
+
+	if self._hidden_by_delay then
+		return
+	end
+
 	local function setvisible()
 		self.panel:set_visible(self.visible)
 		if not self.visible then
@@ -1192,7 +1201,7 @@ function Item:Reposition(last_positioned_item, prev_item)
 end
 
 function Item:TryRendering()
-	if not self.visible then
+	if not self.visible or self._hidden_by_delay then
 		return false
 	end
 

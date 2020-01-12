@@ -56,7 +56,6 @@ function MenuUI:init(params)
     self._callbacks = {}
     self._align_items_funcs = {}
 
-    --BeardLib:AddUpdater("MenuUIUpdate"..UniqueID, ClassClbk(self, "Update"), true)
     Hooks:Add("SetupPreUpdate", "MenuUIUpdate"..UniqueID, ClassClbk(self, "Update"))
     Hooks:Add("GameSetupPrePausedUpdate", "MenuUIUpdate"..UniqueID, ClassClbk(self, "Update"))
 
@@ -609,9 +608,8 @@ function MenuUI:Destroy()
         self:Disable()
         local UniqueID = tostring(self)
         managers.gui_data:destroy_workspace(self._ws)
-        Hooks:Remove("MenuUIUpdate"..UniqueID)
-        BeardLib:RemoveUpdater("MenuUIUpdate"..UniqueID)
         BeardLib.managers.menu_ui:remove_menu(self)
+        Hooks:Remove("MenuUIUpdate"..UniqueID)
         Hooks:Remove("CreateMenuUI"..UniqueID)
     end
 end
