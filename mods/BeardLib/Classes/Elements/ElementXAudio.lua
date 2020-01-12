@@ -207,7 +207,7 @@ function ElementXAudioOperator:on_executed(instigator)
 			elseif self._values.operation == "set_relative" then
 				element:SetRelative(self._values.state, id)
 			elseif self._values.operation == "set_volume" then
-				element:SetLooping(self._values.volume_override, id)
+				element:SetVolume(self._values.volume_override, id)
 			end
 		end
 	end

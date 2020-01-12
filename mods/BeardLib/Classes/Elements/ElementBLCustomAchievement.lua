@@ -15,11 +15,15 @@ end
 
 function ElementBLCustomAchievement:on_executed(instigator)
     if not self._values.enabled then
-	return
+	    return
     end
     if self._values.package_id == nil or self._values.achievement_id == nil then
-	log("BLCustomAchievement Element is missing data!")
-	return
+        BeardLib:log("BLCustomAchievement Element is missing data!")
+        return
+    end
+    if not BeardLib.managers.custom_achievement:HasPackage(self._values.package_id) then
+        BeardLib:log("Package %s does not exist.", self._values.package_id)
+        return
     end
     if self._values.amount_increase == 0 then
         local award_achievement = true
@@ -73,7 +77,9 @@ function ElementBLCustomAchievement:on_executed(instigator)
         if increase_achievement_amount then
             local package = CustomAchievementPackage:new(self._values.package_id)
             local achievement = package:Achievement(self._values.achievement_id)
-            achievement:IncreaseAmount(self._values.amount_increase)
+            if achievement then
+                achievement:IncreaseAmount(self._values.amount_increase or 1)
+            end
         end
     end
 end
