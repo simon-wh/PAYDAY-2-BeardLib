@@ -79,10 +79,17 @@ elseif F == "tweakdatapd2" then
 		return icon, texture_rect
 	end
 elseif F == "gamesetup" then
+	Hooks:PreHook(GameSetup, "paused_update", "GameSetupPausedUpdateBase", function(self, t, dt)
+        Hooks:Call("GameSetupPrePausedUpdate", t, dt)
+	end)
 	Hooks:PostHook(GameSetup, "paused_update", "GameSetupPausedUpdateBase", function(self, t, dt)
         Hooks:Call("GameSetupPauseUpdate", t, dt)
 	end)
 elseif F == "setup" then
+	Hooks:PreHook(Setup, "update", "BeardLibSetupPreUpdate", function(self, t, dt)
+        Hooks:Call("SetupPreUpdate", t, dt)
+	end)
+
 	Hooks:PostHook(Setup, "init_managers", "BeardLibAddMissingDLCPackages", function(self)
 		if managers.dlc.give_missing_package then
 			managers.dlc:give_missing_package()

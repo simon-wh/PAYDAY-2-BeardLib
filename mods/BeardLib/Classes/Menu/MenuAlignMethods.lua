@@ -19,7 +19,10 @@ function Item:_AlignItems(...)
                 return
             end
         end
-        table.insert(self.menu._align_items_funcs, {key = key, clbk = ClassClbk(self, "AlignItems", ...)})
+        if alive(self.panel) then
+            self:ItemsPanel():set_visible(false)
+        end
+        table.insert(self.menu._align_items_funcs, {key = key, menu = self, clbk = ClassClbk(self, "AlignItems", ...)})
     else
         self:AlignItems(...)
     end
@@ -27,7 +30,7 @@ end
 
 function Item:AlignItems(menus, no_parent)
     if self.align_method == "none" then self:CheckItems() return end
-    if not self.menu_type then return end 
+    if not self.menu_type then return end
 	if menus then
 		for _, item in pairs(self._my_items) do
 			if item.menu_type then
@@ -46,7 +49,14 @@ function Item:AlignItems(menus, no_parent)
     if self.parent.AlignItems and not no_parent then
 		self.parent:AlignItems()
     end
-	self:CheckItems()
+    self:CheckItems()
+    if self.delay_align_items then
+        table.insert(self.menu._callbacks, function()
+            if alive(self.panel) then
+                self:ItemsPanel():set_visible(self.visible)
+            end
+        end)
+    end
 end
 
 function Item:AlignItemsPost(max_h, prev_item)
