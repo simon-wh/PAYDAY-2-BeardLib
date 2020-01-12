@@ -79,7 +79,8 @@ function Item:InitBasicMenu()
         h = self.h,
         visible = self.visible == true,
         layer = self.layer or 1,
-    })
+	})
+
     self.panel:script().menuui_item = self
     self.menubg = self.panel:bitmap({
         name = "background",
@@ -196,7 +197,7 @@ function Item:WorkParams(params)
 	self:WorkParam("context_background_color", self.background_color, Color.black)	
 	self:WorkParam("background_color", Color.transparent)
 	self:WorkParam("full_bg_color")
-	
+
 	local bg, bgh
 	self:WorkParam("auto_foreground")
 
@@ -217,7 +218,7 @@ function Item:WorkParams(params)
 	--Bad/Old names
 	self:WorkParam("items_size", 18)
 	--
-	
+
 	self:WorkParam("size", self.items_size)
 	self:WorkParam("enabled_alpha", 1)
 	self:WorkParam("disabled_alpha", 0.5)
@@ -243,13 +244,13 @@ function Item:WorkParams(params)
 
 	self:WorkParam("font_size")
 	self:WorkParam("text_shrink", 0)
-	
+
 	self:WorkParam("context_text_offset")
 	self:WorkParam("delay_align_items")
-	
+
 	self:WorkParam("click_btn", ids_0)
 	self:WorkParam("fit_text")
-	
+
 	--Specific items
 	self:WorkParam("wheel_control")
 	self:WorkParam("floats")
@@ -264,7 +265,7 @@ function Item:WorkParams(params)
 	self:WorkParam("items_pretty")
 	self:WorkParam("bg_callbacks")
 	self:WorkParam("no_slide")
-	
+
     if not self.MENU then
         self:WorkParam("align_method", "grid_from_right")
     end
@@ -304,9 +305,9 @@ function Item:WorkParams(params)
 		end
 		if self.inherit_values.text_offset then
 			self.inherit_values.text_offset = self:ConvertOffset(self.inherit_values.text_offset)
-		end	
+		end
 	end
-	
+
 	if not self.initialized then
 		if self.parent ~= self.menu then
 			if self.w ~= "half" and (not self.w or self.fit_width) then
@@ -327,7 +328,7 @@ function Item:WorkParams(params)
 		self.w = math.clamp(self.w, self.min_width or 0, self.max_width or self.w)
 		self.orig_h = self.h
 	end
-	
+
 	self.should_render = true
 end
 
@@ -1136,7 +1137,7 @@ function Item:SetVisible(visible, animate, no_align)
 		end
 	end
 	self.menu:CheckOpenedList()
-	
+
 	if animate and visible ~= was_visible then
 		if visible then
 			panel:set_alpha(0)
@@ -1194,14 +1195,14 @@ function Item:TryRendering()
 	if not self.visible then
 		return false
 	end
-	
+
 	local p = self.parent
 
 	local visible = false
 	if alive(self.panel) then		
 		local y = self.panel:world_y()
 		local b = self.panel:world_bottom()
-	
+
 		while p ~= nil do
 			--local pan = p._scroll and p._scroll:scroll_panel() or self.parent_panel
 			local pan = self.parent_panel
