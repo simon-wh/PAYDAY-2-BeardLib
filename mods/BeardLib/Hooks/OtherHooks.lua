@@ -42,7 +42,7 @@ elseif F == "tweakdatapd2" then
 		Hooks:Call("BeardLibCreateCustomWeapons", self)
 		Hooks:Call("BeardLibCreateCustomWeaponMods", self)
 	end)
-	
+
 	Hooks:PostHook(BlackMarketTweakData, "init", "CallAddCustomWeaponModsToWeapons", function(self, tweak_data)
 		Hooks:Call("BeardLibAddCustomWeaponModsToWeapons", tweak_data.weapon.factory, tweak_data)
 		Hooks:Call("BeardLibCreateCustomProjectiles", self, tweak_data)
@@ -89,12 +89,12 @@ elseif F == "setup" then
 		end
 		Hooks:Call("SetupInitManagers", self)
 	end)
-	
+
 	Hooks:PostHook(Setup, "init_finalize", "BeardLibInitFinalize", function(self)
 		CustomSoundManager:Open()
 		Hooks:Call("BeardLibSetupInitFinalize", self)
 	end)
-	
+
 	Hooks:PostHook(Setup, "unload_packages", "BeardLibUnloadPackages", function(self)
 		CustomSoundManager:Close()
 		CustomPackageManager:Unload()
@@ -104,7 +104,7 @@ elseif F == "missionmanager" then
 	for _, name in ipairs(BeardLib.config.mission_elements) do 
 		dofile(BeardLib.config.classes_dir .. "Elements/Element" .. name .. ".lua") 
 	end
-	
+
 	local add_script = MissionManager._add_script
 	function MissionManager:_add_script(data, ...)
 		if self._scripts[data.name] then

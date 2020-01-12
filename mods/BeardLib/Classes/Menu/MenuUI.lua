@@ -58,17 +58,17 @@ function MenuUI:init(params)
 
     BeardLib:AddUpdater("MenuUIUpdate"..UniqueID, ClassClbk(self, "Update"), true)
     BeardLib.managers.menu_ui:add_menu(self)
-    
+
     --Deprecated values
     self.pre_key_press = self.pre_key_press or self.always_key_press
     self.pre_key_release = self.pre_key_release or self.always_key_released
     self.pre_mouse_press = self.pre_mouse_press or self.always_mouse_press
     self.pre_mouse_move = self.pre_mouse_move or self.always_mouse_move
-    
+
     if self.use_default_close_key then
         self.close_key = Idstring("esc")
     end
-    
+
     if self.create_items then self:create_items() end
 
     local enabled = self.enabled or self.visible

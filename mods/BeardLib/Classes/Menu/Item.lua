@@ -32,7 +32,7 @@ function Item:Init(params)
 		h = self.h or self.size,
 	})
 	self.panel:script().menuui_item = self
-		
+
 	self:InitBasicItem()
 	if self.divider_type and alive(self.title) then
 		self.title:set_world_center_y(self.panel:world_center_y())
@@ -526,7 +526,7 @@ function Item:NewItem(item)
     if not alive(self) then
         return
     end
-    
+
 	if self.override_panel then
 		self.override_panel:Create(self.type_name, item)
 		self.override_panel = nil
@@ -540,12 +540,12 @@ function Item:NewItem(item)
     else
         table.insert(self._my_items, item)
 	end
-	
+
     local index = #self._my_items
     if item.reachable then
         table.insert(self._reachable_items, item)
 	end
-	
+
     item.indx = item.indx or index
     if self.auto_align then self:_AlignItems() end
 	if managers.mouse_pointer then
@@ -586,11 +586,11 @@ function Item:RemoveItem(item)
     if item._list then
         item._list:Destroy()
 	end
-	
+
 	if item == self.menu._highlighted then
 		self.menu:UnHighlight()
 	end
-	
+
     table.delete(self._reachable_items, item)
     table.delete(self._my_items, item)
     local panel = item:Panel()
