@@ -6,11 +6,9 @@ LevelModule.levels_folder = "levels/mods/"
 function LevelModule:init(...)
     self.clean_table = table.add(clone(self.clean_table), {
         {param = "preplanning", action = function(tbl)
-            for i, v in ipairs(tbl) do
-                if v._meta == "default_plans" or v._meta == "start_location" then
-                    table.remove(tbl, i)
-                end
-            end
+            table.remove_condition(tbl, function(v)
+                return v._meta == "default_plans" or v._meta == "start_location"
+            end)
         end}
     })
 
