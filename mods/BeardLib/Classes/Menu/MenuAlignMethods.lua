@@ -72,12 +72,16 @@ function Item:RepositionItem(item, last_positioned_item, prev_item, max_h, max_r
 		max_h = math.max(max_h, panel:bottom())
     end
 
-    if item._hidden_by_delay then
-        item._hidden_by_delay = false
-        item:TryRendering()
-    end
+    item:DelayLifted()
 
 	return last_positioned_item, prev_item, max_h, max_right
+end
+
+function Item:DelayLifted()
+    if self._hidden_by_delay then
+        self._hidden_by_delay = false
+        self:TryRendering()
+    end
 end
 
 function Item:AlignItemsNormal(reversed)
@@ -199,10 +203,7 @@ function Item:AlignItemsCenteredGrid(reversed)
             end
 
             local repos = item:Reposition(last_positioned_item, prev_item)
-            if item._hidden_by_delay then
-                item._hidden_by_delay = false
-                item:TryRendering()
-            end
+            item:DelayLifted()
 
             if repos then
                 last_positioned_item = item
@@ -262,7 +263,8 @@ function Item:AlignItemsGridFromRight(reversed, dbg)
             end
             local count = (not repos and not item.ignore_align) or item.count_as_aligned
             local panel = item:Panel()
-        
+            item:DelayLifted()
+
             if count then
                 prev_item = item
                 max_right = math.min(max_right, panel:left())
@@ -283,7 +285,7 @@ function Item:AlignItemsGridFromRight(reversed, dbg)
             align(items[i])
         end
     end
-    
+
     self:AlignItemsPost(max_h, prev_item)
 end
 
