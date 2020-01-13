@@ -332,8 +332,8 @@ function TextBoxBase:update_caret()
     end
     local old_h = self.panel:h()
     if not self.owner.h and (not self.lines or (self.lines > 1 and self.lines ~= lines)) then
-        self.panel:set_h(h)
-        self.panel:parent():set_h(h)
+        self.panel:set_h(h+2)
+        self.panel:parent():set_h(self.panel:h())
         text:set_h(h)
         self.owner:_SetText(self.owner.text)
         if not self.owner.SetScrollPanelSize then
