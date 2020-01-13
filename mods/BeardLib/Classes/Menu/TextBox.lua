@@ -116,5 +116,5 @@ function TextBox:SetValueByMouseXPos(x)
             end
         end
         self:SetValue(self.value + move, true, true)
-	end      
+	end
 end

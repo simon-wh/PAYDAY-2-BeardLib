@@ -57,7 +57,7 @@ function Slider:Init()
         color = fgcolor
     })
     self.sfg:set_center_y(self._slider:h() / 2)
-        
+
     self.sbg = self._slider:rect({
         name = "bg",
         x = ch / 2,        

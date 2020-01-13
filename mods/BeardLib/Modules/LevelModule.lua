@@ -2,6 +2,7 @@ LevelModule = LevelModule or class(ItemModuleBase)
 
 LevelModule.type_name = "level"
 LevelModule.levels_folder = "levels/mods/"
+
 function LevelModule:init(...)
     self.clean_table = table.add(clone(self.clean_table), {
         {param = "preplanning", action = function(tbl)
@@ -12,13 +13,13 @@ function LevelModule:init(...)
             end
         end}
     })
-    
+
     if not LevelModule.super.init(self, ...) then
         return false
     end
 
     self._config.id = tostring(self._config.id)
- 
+
     if Global.level_data and Global.level_data.level_id == self._config.id then
         BeardLib.current_level = self
         self._currently_loaded = true

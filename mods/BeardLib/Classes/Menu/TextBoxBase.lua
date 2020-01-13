@@ -40,7 +40,6 @@ function TextBoxBase:init(parent, params)
     self.text = self.panel:text({
         name = "text",
         text = tostring(value),
-        align = params.align,
         wrap = not params.lines or params.lines > 1,
         word_wrap = not params.lines or params.lines > 1,
         color = color,
@@ -57,7 +56,7 @@ function TextBoxBase:init(parent, params)
     end
     local len = self:Value():len()
     self.text:set_selection(len, len)
-    local caret = self.panel:rect({
+    self.panel:rect({
         name = "caret",
         w = 1,
         visible = false,
@@ -65,7 +64,7 @@ function TextBoxBase:init(parent, params)
         h = self.text:font_size() - (line:h() * 2),
         layer = 3,
     })
-    
+
     self.focus_mode = params.focus_mode
     if self.focus_mode and not self.owner.menu:Typing() and params.auto_focus then
         self:set_active(true)
@@ -297,7 +296,7 @@ function TextBoxBase:KeyPressed(o, k)
     if not alive(self.panel) then
         return
     end
-    
+
 	local text = self.panel:child("text")
 
     if k == Idstring("enter") or k == Idstring("esc") then
