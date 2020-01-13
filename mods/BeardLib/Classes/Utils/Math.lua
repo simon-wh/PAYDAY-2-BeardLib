@@ -211,10 +211,16 @@ function play_anim_thread(params, o)
 end
 
 function playing_anim(o)
+    if not alive(o) then
+        return false
+    end
     return o:script().animating
 end
 
 function stop_anim(o)
+    if not alive(o) then
+        return
+    end
     o:stop()
     o:script().animating = nil
 end
