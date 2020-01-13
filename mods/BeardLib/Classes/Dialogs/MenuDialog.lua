@@ -160,7 +160,7 @@ end
 
 function MenuDialog:hide(yes, item)
     BeardLib.managers.dialog:CloseDialog(self)
-    local clbk = yes == true and self._callback or yes ~= false and self._no_callback
+    local clbk = (yes == true and self._callback) or (not yes and self._no_callback)
     if not self._no_clearing_menu then
         self._menu:ClearItems()
     end
