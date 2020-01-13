@@ -153,7 +153,9 @@ end
 function MenuUI:HideHelp()
     if self._showing_help then
         stop_anim(self._help)
-        self._help:set_alpha(0)
+        if alive(self._help) then
+            self._help:set_alpha(0)
+        end
     end
 end
 
