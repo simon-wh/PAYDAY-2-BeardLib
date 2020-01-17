@@ -182,6 +182,13 @@ function InstanceModule:LoadPackage(package)
     end
 end
 
+function InstanceModule:RegisterHook()
+    if self._config.interactions then
+        local interactions = InteractionsModule:new(self._mod, self._config.interactions)
+        interactions:RegisterHook()
+    end
+end
+
 function InstanceModule:Load()
     for _, package in pairs(self._config.packages or self._config.custom_packages) do
         self:LoadPackage(package)
@@ -200,7 +207,6 @@ function InstanceModule:Unload()
         self._loaded_addfiles:Unload()
         self._loaded_addfiles = nil
     end
-    InstanceModule.super.Load(self)
 end
 
 BeardLib:RegisterModule(InstanceModule.type_name, InstanceModule)
