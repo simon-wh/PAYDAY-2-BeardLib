@@ -102,6 +102,8 @@ function Item:AlignItemsNormal(reversed)
                 end
             end
             last_positioned_item, prev_item, max_h = self:RepositionItem(item, last_positioned_item, prev_item, max_h)
+        else
+            item:DelayLifted()
         end
     end
 
@@ -143,6 +145,8 @@ function Item:AlignItemsGrid(reversed)
                 panel:set_position(max_right + offset[1], max_y + offset[2])            
             end
             last_positioned_item, prev_item, max_h, max_right = self:RepositionItem(item, last_positioned_item, prev_item, max_h, max_right)
+        else
+            item:DelayLifted()
         end
     end
 
@@ -217,6 +221,8 @@ function Item:AlignItemsCenteredGrid(reversed)
                 table.insert(current_row, {panel = panel, repos = repos})
                 max_h = math.max(max_h, panel:bottom())
             end
+        else
+            item:DelayLifted()
         end
     end
 
@@ -272,6 +278,8 @@ function Item:AlignItemsGridFromRight(reversed, dbg)
             if count or item.count_height then
                 max_h = math.max(max_h, panel:bottom())
             end
+        else
+            item:DelayLifted()
         end
     end
 
