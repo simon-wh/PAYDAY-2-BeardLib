@@ -96,7 +96,7 @@ elseif F == "blackmarketmanager" then
         local data = use_cosmetics and tweak_data.blackmarket.weapon_skins or tweak_data.weapon
         local id = use_cosmetics and cosmetics.id or weapon_id
         local path = use_cosmetics and "weapon_skins/" or "textures/pd2/blackmarket/icons/weapons/"
-    
+
         if use_cosmetics and data[id] then
             if data[id].weapon_ids then
                 if not table.contains(data[id].weapon_ids, weapon_id) then
@@ -106,20 +106,20 @@ elseif F == "blackmarketmanager" then
                 return self:get_weapon_icon_path(weapon_id, nil)
             end
         end
-    
+
         local texture_path, rarity_path = nil
-    
+
         if data and id and data[id] then
             local guis_catalog = "guis/"
             local bundle_folder = data[id].texture_bundle_folder
-    
+
             if bundle_folder then
                 guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
             end
-    
+
             local texture_name = data[id].texture_name or tostring(id)
             texture_path = guis_catalog .. path .. texture_name
-    
+
             if use_cosmetics then
                 if data[id].universal then
                     texture_path = guis_catalog .. path .. data[id].universal_id
@@ -129,7 +129,7 @@ elseif F == "blackmarketmanager" then
                 rarity_path = tweak_data.economy.rarities[rarity] and tweak_data.economy.rarities[rarity].bg_texture
             end
         end
-    
+
         return texture_path, rarity_path
     end
 
@@ -138,13 +138,13 @@ elseif F == "blackmarketmanager" then
     function BlackMarketManager:get_sorted_melee_weapons(hide_locked, id_list_only)
         local items = {}
         local global_value, td, category = nil
-    
+
         for id, item in pairs(Global.blackmarket_manager.melee_weapons) do
             td = tweak_data.blackmarket.melee_weapons[id]
             global_value = td.dlc or td.global_value or "normal"
             category = td.type or "unknown"
             local add_item = item.unlocked or item.equipped or not hide_locked and not tweak_data:get_raw_value("lootdrop", "global_values", global_value, "hide_unavailable")
-    
+
             if add_item then
                 table.insert(items, {
                     id,
@@ -152,11 +152,11 @@ elseif F == "blackmarketmanager" then
                 })
             end
         end
-    
+
         local xd, yd, x_td, y_td, x_sn, y_sn, x_gv, y_gv = nil
         local m_tweak_data = tweak_data.blackmarket.melee_weapons
         local l_tweak_data = tweak_data.lootdrop.global_values
-    
+
         local function sort_func(x, y)
             xd = x[2]
             yd = y[2]
@@ -170,57 +170,57 @@ elseif F == "blackmarketmanager" then
             if _G.IS_VR and xd.vr_locked ~= yd.vr_locked then
                 return not xd.vr_locked
             end
-    
+
             if xd.unlocked ~= yd.unlocked then
                 return xd.unlocked
             end
-    
+
             if xd.level ~= yd.level then
                 return xd.level < yd.level
             end
-    
+
             if x_td.instant ~= y_td.instant then
                 return x_td.instant
             end
-    
+
             if xd.skill_based ~= yd.skill_based then
                 return xd.skill_based
             end
-    
+
             if x_td.free ~= y_td.free then
                 return x_td.free
             end
-    
+
             x_gv = x_td.global_value or x_td.dlc or "normal"
             y_gv = y_td.global_value or y_td.dlc or "normal"
             x_sn = l_tweak_data[x_gv]
             y_sn = l_tweak_data[y_gv]
             x_sn = x_sn and x_sn.sort_number or 1
             y_sn = y_sn and y_sn.sort_number or 1
-    
+
             if x_sn ~= y_sn then
                 return x_sn < y_sn
             end
-    
+
             if xd.level ~= yd.level then
                 return xd.level < yd.level
             end
 
             return x[1] < y[1]
         end
-    
+
         table.sort(items, sort_func)
-    
+
         if id_list_only then
             local id_list = {}
-    
+
             for _, data in ipairs(items) do
                 table.insert(id_list, data[1])
             end
-    
+
             return id_list
         end
-    
+
         local override_slots = {
             4,
             4
@@ -229,21 +229,20 @@ elseif F == "blackmarketmanager" then
         local sorted_categories = {}
         local item_categories = {}
         local category = nil
-    
+
         for index, item in ipairs(items) do
             category = math.max(1, math.ceil(index / num_slots_per_category))
             item_categories[category] = item_categories[category] or {}
-    
+
             table.insert(item_categories[category], item)
         end
-    
+
         for i = 1, #item_categories, 1 do
             table.insert(sorted_categories, i)
         end
-    
+
         return sorted_categories, item_categories, override_slots
     end
-    
 elseif F == "crewmanagementgui" then
     local orig = CrewManagementGui.populate_primaries
     --Blocks out custom weapons that don't have support for AI.
@@ -269,14 +268,14 @@ elseif F == "connectionnetworkhandler" then
         self:sync_stage_settings(...)
         self._ignore_stage_settings_once = true
     end
-    
+
     --Sets the correct data out of NetworkPeer instead of straight from the parameters
     Hooks:PostHook(ConnectionNetworkHandler, "sync_outfit", "BeardLibSyncOutfitProperly", function(self, outfit_string, outfit_version, outfit_signature, sender)
         local peer = self._verify_sender(sender)
         if not peer then
             return
         end
-    
+
         peer:beardlib_reload_outfit()
     end)
 
@@ -288,12 +287,12 @@ elseif F == "connectionnetworkhandler" then
         end
         return orig_sync_stage_settings(self, level_id_index, ...)
     end
-    
+
     function ConnectionNetworkHandler:lobby_sync_update_level_id_ignore_once(...)
         self:lobby_sync_update_level_id(...)
         self._ignore_update_level_id_once = true
     end
-    
+
     local orig_lobby_sync_update_level_id = ConnectionNetworkHandler.lobby_sync_update_level_id
     function ConnectionNetworkHandler:lobby_sync_update_level_id(level_id_index, ...)
         if self._ignore_update_level_id_once then
@@ -381,21 +380,20 @@ elseif F == "raycastweaponbase" then
     if RaycastWeaponBase._soundfix_should_play_normal then
         return --Don't run if fix installed.
     end
-    
+
     function RaycastWeaponBase:use_soundfix()
         local sounds = tweak_data.weapon[self:get_name_id()].sounds
         return sounds and sounds.use_fix == true
     end
-    
+
     --Based of https://modworkshop.net/mydownloads.php?action=view_down&did=20403
-    
     local fire_sound = RaycastWeaponBase._fire_sound
     function RaycastWeaponBase:_fire_sound(...)
         if not self:use_soundfix() then
             return fire_sound(self, ...)
         end
     end
-    
+
     local fire = RaycastWeaponBase.fire
     function RaycastWeaponBase:fire(...)
         local result = fire(self, ...)
@@ -404,13 +402,13 @@ elseif F == "raycastweaponbase" then
         end
         return result
     end
-    
+
     Hooks:PreHook(RaycastWeaponBase, "update_next_shooting_time", "BeardLibUpdateNextShootingTime", function(self)
         if self:use_soundfix() then
             self:_fire_sound()
         end
     end)
-    
+
     Hooks:PreHook(RaycastWeaponBase, "trigger_held", "BeardLibTriggerHeld", function(self)
         if not self:start_shooting_allowed() and self:use_soundfix() then
             self:play_tweak_data_sound("stop_fire")
@@ -429,25 +427,25 @@ elseif F == "playermovement" then
             if _G.IS_VR then
                 self:_update_vr(unit, t, dt)
             end
-        
+
             self:_calculate_m_pose()
-        
+
             if self:_check_out_of_world(t) then
                 return
             end
-            
+
             if self._vr_has_teleported then
                 managers.player:warp_to(self._vr_has_teleported.position or Vector3(), self._vr_has_teleported.rotation or Rotation())
                 self._vr_has_teleported = nil
                 return
             end
-        
+
             self:_upd_underdog_skill(t)
-        
+
             if self._current_state then
                 self._current_state:update(t, dt)
             end
-        
+
             self:update_stamina(t, dt)
             self:update_teleport(t, dt)
         end
@@ -478,7 +476,7 @@ elseif F == "networkpeer" then
     local tradable_item_verif = NetworkPeer.tradable_verify_outfit
     function NetworkPeer:tradable_verify_outfit(signature)
         local outfit = self:blackmarket_outfit()
-        
+
         if outfit.primary and outfit.primary.cosmetics then
             if tweak_data.blackmarket.weapon_skins[outfit.primary.cosmetics.id].is_a_unlockable  then
                 return
@@ -509,7 +507,7 @@ elseif F == 'ingamewaitingforplayers' then
 elseif F == "playerdamage" then
     Hooks:PostHook(PlayerDamage, "init", "BeardLibPlyDmgInit", function(self)
         local level_tweak = tweak_data.levels[managers.job:current_level_id()]
-    
+
         if level_tweak and level_tweak.player_invulnerable then
             self:set_mission_damage_blockers("damage_fall_disabled", true)
             self:set_mission_damage_blockers("invulnerable", true)
@@ -549,14 +547,14 @@ elseif F == "hudbelt" then
     local function scale_by_aspect(gui_obj, max_size)
         local w = gui_obj:texture_width()
         local h = gui_obj:texture_height()
-    
+
         if h < w then
             gui_obj:set_size(max_size, max_size / w * h)
         else
             gui_obj:set_size(max_size / h * w, max_size)
         end
     end
-    
+
     --Fixes melees in VR having no fallback and to make them use based_on when the files are missing.
     local tex_ids = Idstring("texture")
     Hooks:PostHook(HUDBeltInteraction, "update_icon", "BeardLibFixCustomMelee", function(self)
@@ -568,11 +566,11 @@ elseif F == "hudbelt" then
                     if not DB:has(tex_ids, self._texture) then
                         local prefix = "guis"
                         local texture = "/textures/pd2/blackmarket/icons/melee_weapons/outline/" .. id
-                
+
                         if not DB:has(tex_ids, Idstring(prefix .. texture)) then
                             prefix = "guis/dlcs/" .. tweak_data.blackmarket.melee_weapons[id].texture_bundle_folder
                         end
-                
+
                         if DB:has(tex_ids, Idstring(prefix .. texture)) then
                             self._texture = prefix .. texture
                         else

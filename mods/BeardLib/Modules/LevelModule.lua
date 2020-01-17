@@ -121,7 +121,7 @@ function LevelModule:AddPrePlanningDataToTweak(pp_self)
 end
 
 function LevelModule:RegisterHook()
-    if tweak_data and tweak_data.levels then    
+    if tweak_data and tweak_data.levels then
         self:AddLevelDataToTweak(tweak_data.levels)
     else
         Hooks:PostHook(LevelsTweakData, "init", self._config.id .. "AddLevelData", ClassClbk(self, "AddLevelDataToTweak"))
@@ -132,7 +132,7 @@ function LevelModule:RegisterHook()
             local interactions = InteractionsModule:new(self._mod, self._config.interactions)
             interactions:RegisterHook()
         end
-    
+
         if self._config.assets then
             if tweak_data and tweak_data.assets then
                 self:AddAssetsDataToTweak(tweak_data.assets)
@@ -140,7 +140,7 @@ function LevelModule:RegisterHook()
                 Hooks:PostHook(AssetsTweakData, "init", self._config.id .. "AddAssetsData", ClassClbk(self, "AddAssetsDataToTweak"))
             end
         end
-    
+
         if self._config.preplanning then
             if tweak_data and tweak_data.preplanning then
                 self:AddPrePlanningDataToTweak(tweak_data.preplanning)
