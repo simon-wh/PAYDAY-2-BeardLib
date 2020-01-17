@@ -82,6 +82,8 @@ function ElementBLCustomAchievement:on_executed(instigator)
             end
         end
     end
+
+    ElementBLCustomAchievement.super.on_executed(self, instigator)
 end
 
 function ElementBLCustomAchievement:save(data)
