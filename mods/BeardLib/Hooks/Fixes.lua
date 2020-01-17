@@ -585,4 +585,26 @@ elseif F == "hudbelt" then
             end
         end
     end)
+elseif F == "coreworldinstancemanager" then
+    --Fixes #252
+    local prepare = CoreWorldInstanceManager.prepare_mission_data
+    function CoreWorldInstanceManager:prepare_mission_data(instance, ...)
+        local instance_data = prepare(self, instance, ...)
+        for _, script_data in pairs(instance_data) do
+            for _, element in ipairs(script_data.elements) do
+                local vals = element.values
+                if element.class == "ElementMoveUnit" then
+                    if vals.start_pos then
+                        vals.start_pos = instance.position + element.values.start_pos:rotate_with(instance.rotation)
+                    end
+                    if vals.end_pos then
+                        vals.end_pos = instance.position + element.values.end_pos:rotate_with(instance.rotation)
+                    end
+                elseif element.class == "ElementRotateUnit" then
+                    vals.end_rot = instance.rotation * vals.end_rot
+                end
+            end
+        end
+        return instance_data
+    end
 end
