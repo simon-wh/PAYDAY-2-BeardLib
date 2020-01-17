@@ -60,9 +60,14 @@ function KeyBindItem:SetCanEdit(CanEdit)
                         end
                     end
                 end
+
                 return key, additional_key
             end
-            local key, additional_key = self.supports_keyboard and get(Input:keyboard())
+            local key, additional_key
+            if self.supports_keyboard then
+                key, additional_key = get(Input:keyboard())
+            end
+
             local is_mouse
             if not key and self.supports_mouse and not self._ignore_mouse then
                 key = get(Input:mouse())
