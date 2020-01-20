@@ -1013,6 +1013,7 @@ end
 
 function Item:WorkParam(param, ...)
 	if self[param] == nil then
+		local v
 		if self.private[param] ~= nil then
 			v = self.private[param]
 		elseif self.inherit.inherit_values and self.inherit.inherit_values[param] ~= nil then

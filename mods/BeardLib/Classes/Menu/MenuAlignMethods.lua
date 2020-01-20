@@ -12,6 +12,9 @@ Item.align_methods = {
 }
 
 function Item:_AlignItems(menus, no_parent)
+    if not alive(self) then
+        return
+    end
     if self.delay_align_items then
         local key = self:Key()
         self.panel:stop()

@@ -43,14 +43,13 @@ function FileBrowserDialog:init(params, menu)
         on_callback = ClassClbk(self, "FolderBack"),  
         label = "temp"
     })    
-    enabled = self._old_dir and self._old_dir ~= self._current_dir or false
     self._menu:Button({
         name = "Forward",
         w = 30,
         text = ">",
         on_callback = function()
             self:Browse(self._old_dir)
-        end,  
+        end,
         label = "temp"
     })    
     self._menu:TextBox({

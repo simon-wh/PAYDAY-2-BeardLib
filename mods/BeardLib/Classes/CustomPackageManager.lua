@@ -121,7 +121,7 @@ function C:LoadPackageConfig(directory, config, temp, skip_use_clbk)
         self:Err("SystemFS does not exist! Custom Packages cannot function without this! Do you have an outdated game version?")
         return
 	end
-	
+
 	if not DB.create_entry then
 		self:Err("Create entry function does not exist, cannot add files.")
 		return
@@ -136,7 +136,7 @@ function C:LoadPackageConfig(directory, config, temp, skip_use_clbk)
     if use_clbk and not use_clbk(config) then
         return
 	end
-	
+
     local loading = {}
     for i, child in ipairs(config) do
         if type(child) == "table" then

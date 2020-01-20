@@ -54,7 +54,7 @@ end
 
 local isWin32 = not BLT.GetOS or (BLT.GetOS and BLT:GetOS() == "windows") --No need to convert in Windows.
 
-function FileIO:ConvertScriptData(data, typ, clean) 
+function FileIO:ConvertScriptData(data, typ, clean)
 	local new_data
     if typ == "json" then
         new_data = json.custom_decode(data)

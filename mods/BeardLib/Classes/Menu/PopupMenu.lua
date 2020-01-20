@@ -35,7 +35,7 @@ function PopupMenu:WorkParams(params)
     self.auto_height = NotNil(self.auto_height, true)
     self:WorkParam("offset", 0)
     self:WorkParam("keep_menu_open", false)
-    
+
     PopupMenu.super.WorkParams(self, params)
 end
 
@@ -60,7 +60,6 @@ function PopupMenu:RepositionPopupMenu()
 		normal_pos = false
 		best_h = top_h
 	end
-    
     self._scroll:set_size(self._popup_menu:w(), best_h)
 	self._popup_menu:set_world_x(self.panel:world_x())
 

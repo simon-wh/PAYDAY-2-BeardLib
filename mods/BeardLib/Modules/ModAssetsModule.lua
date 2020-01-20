@@ -286,7 +286,7 @@ end
 function DownloadCustomMap:_DownloadAssets(data)
     local download_url = ModCore:GetRealFilePath(self.provider.download_url, data or self)
     local dialog = BeardLib.managers.dialog.download
-    dialog:Show({title = managers.localization:text("beardlib_downloading")..self.level_name or "No Map Name", force = true})
+    dialog:Show({title = (managers.localization:text("beardlib_downloading")..self.level_name) or "No Map Name", force = true})
     table.merge(self._config, {
         done_callback = self.done_map_download,
         install = ClassClbk(dialog, "SetInstalling"),

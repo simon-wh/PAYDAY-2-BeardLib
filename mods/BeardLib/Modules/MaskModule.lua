@@ -32,7 +32,7 @@ function MaskModule:RegisterHook()
             custom = true
         }, self._config.item or self._config)
         if self._config.guess_unit ~= false then
-            data.unit = data.unit or "units/mods/masks/msk_"..self._config.id.."/msk_"..self._config.id
+            data.unit = data.unit or ("units/mods/masks/msk_"..self._config.id.."/msk_"..self._config.id)
         end
         bm_self.masks[self._config.id] = data
         if data.drop ~= false and data.dlc then

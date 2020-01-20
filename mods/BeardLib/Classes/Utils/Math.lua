@@ -159,7 +159,7 @@ end
 
 function play_anim_thread(params, o)
 	o:script().animating = true
-	
+
     local easing = Easing[params.easing or "linear"]
     local time = params.time or 0.25
     local clbk = params.callback
@@ -171,7 +171,7 @@ function play_anim_thread(params, o)
         time = time + wait_time
         anim_wait(wait_time)
     end
-    
+
     for param, value in pairs(set) do
         if type(value) ~= "table" then
             set[param] = {value = value}

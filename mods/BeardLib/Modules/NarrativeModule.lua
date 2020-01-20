@@ -38,8 +38,8 @@ function NarrativeModule:AddNarrativeData(narr_self, tweak_data)
 
     local data = clone(self._config)
     table.merge(data, {
-        name_id = data.name_id or "heist_" .. data.id .. "_name",
-        briefing_id = data.brief_id or "heist_" .. data.id .. "_brief",
+        name_id = data.name_id or ("heist_" .. data.id .. "_name"),
+        briefing_id = data.brief_id or ("heist_" .. data.id .. "_brief"),
         contact = data.contact or "custom",
         jc = data.jc or 50,
         payout = data.payout or {0.001,0.001,0.001,0.001,0.001},

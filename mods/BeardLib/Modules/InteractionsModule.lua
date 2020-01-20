@@ -7,7 +7,7 @@ function InteractionsModule:AddInteractionsDataToTweak(i_self)
             if i_self[data.id] then
                 self:Err("Interaction with id '%s' already exists!", data.id)
             else
-                data.text_id = data.text_id or "hud_"..data.id
+                data.text_id = data.text_id or ("hud_"..data.id)
                 i_self[data.id] = table.merge(data.based_on and deep_clone(i_self[data.based_on] or {}) or {}, data.item or data)
             end
         end

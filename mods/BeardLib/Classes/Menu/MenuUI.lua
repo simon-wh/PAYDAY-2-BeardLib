@@ -123,7 +123,7 @@ function MenuUI:ShowDelayedHelp(item)
         end
         if self._highlighted == item and not self:Typing() then
             self._help:set_layer(item:Panel():parent():layer() + 50000)
-            help_text = self._help:child("text")
+            local help_text = self._help:child("text")
             help_text:set_w(300)
             help_text:set_text(item.help_localized and managers.localization:text(item.help) or item.help)
             local _,_,w,h  = help_text:text_rect()

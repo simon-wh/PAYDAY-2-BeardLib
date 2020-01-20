@@ -67,7 +67,6 @@ function SoundsModule:ReadSounds(data, prev_dir)
 				prefixes_strict = prefixes_strict,
 				dont_store_float = dont_store_float,
 				auto_pause = auto_pause,
-				prefixes_strict = prefixes_strict,
 				stop_id = stop_id,
 				relative = relative,
 				wait = wait,

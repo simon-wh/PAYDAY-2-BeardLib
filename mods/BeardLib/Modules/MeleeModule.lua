@@ -33,7 +33,7 @@ function MeleeModule:RegisterHook()
         end
 
         if config.guess_unit ~= false then
-            config.unit = config.unit or "units/mods/weapons/wpn_fps_mel_"..config.id.."/wpn_fps_mel_"..config.id
+            config.unit = config.unit or ("units/mods/weapons/wpn_fps_mel_"..config.id.."/wpn_fps_mel_"..config.id)
             config.third_unit = config.unit
             if not DB:has(unit_ids, config.unit:id()) then
                 self:Err("Unit %s of melee %s is not loaded.", tostring(config.unit), tostring(config.id))

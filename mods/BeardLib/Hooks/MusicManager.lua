@@ -46,7 +46,7 @@ function MusicManager:post_event(name, ...)
 	if name and Global.music_manager.current_event ~= name then
 		if not self._skip_play then
 			if not self:attempt_play(nil, name, true) then
-				return orig_post(self, name, ...) 
+				return orig_post(self, name, ...)
 			end
 		end
 		Global.music_manager.current_event = name

@@ -64,7 +64,7 @@ function WeaponModModule:RegisterHook()
             config.perks = {config.perks}
         end
         local based_on = self:GetBasedOn(f_self.parts)
-        
+
         local ver2 = config.ver == 2
         if ver2 then
             config.pcs = {}
@@ -72,9 +72,9 @@ function WeaponModModule:RegisterHook()
         local guess_unit = NotNil(config.guess_unit, ver2)
 
         if config.wpn_pts then
-            config.unit = config.unit or "units/mods/weapons/"..config.wpn_pts.."_pts/"..id
+            config.unit = config.unit or ("units/mods/weapons/"..config.wpn_pts.."_pts/"..id)
         elseif guess_unit then
-            config.unit = config.unit or "units/mods/weapons/"..id.."/"..id
+            config.unit = config.unit or ("units/mods/weapons/"..id.."/"..id)
         end
 
         if config.unit then
@@ -85,7 +85,7 @@ function WeaponModModule:RegisterHook()
         end
 
         local data = table.merge(deep_clone(based_on and f_self.parts[based_on] or {}), table.merge({
-            name_id = config.name_id or "bm_wp_" .. id,
+            name_id = config.name_id or ("bm_wp_" .. id),
             unit = config.unit,
             stance_mod = config.stance_mod or {},
             third_unit = config.third_unit,
