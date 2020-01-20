@@ -47,7 +47,7 @@ function HeistMusic:RegisterHook()
 		self:Err("Music with the id '%s' already exists!", self._config.id)
 		return
 	end
-	
+
 	local dir = self._config.directory
 	if dir then
 		dir = Path:Combine(self._mod.ModPath, dir)
@@ -70,7 +70,7 @@ function HeistMusic:RegisterHook()
 			end
 			if v.source then
 				v.source = Path:Combine(dir, v.source)
-			else
+			elseif not v.start_source then
 				self:log("[Warning] Event named %s in heist music %s has no defined source", tostring(self._config.id), tostring(v.name))
 			end
 			music.events[v.name] = {source = self:MakeBuffer(v.source), start_source = self:MakeBuffer(v.start_source), alt_source = self:MakeBuffer(v.alt_source), alt_start_source = self:MakeBuffer(v.alt_start_source), alt_chance = v.alt_chance, allow_switch = v.allow_switch}
