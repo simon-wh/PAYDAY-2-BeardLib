@@ -116,6 +116,8 @@ function MusicManager:attempt_play(track, event, stop)
 					next_music = music
 					next_event = event_tbl
 					self._current_custom_track = id
+				else
+					return true
 				end
 			end
 		end
