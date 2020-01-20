@@ -43,7 +43,8 @@ function PopupMenu:RepositionPopupMenu()
 	local size = (self.font_size or self.size)
 	local offset_y = self.context_screen_offset_y or 32
     local bottom_h = (self.menu._panel:world_bottom() - self.panel:world_bottom()) - offset_y 
-    local top_h = (self.panel:world_y() - self.panel:world_y()) - offset_y
+    local top_h = (self.menu._panel:world_y() - self.panel:world_y()) - offset_y
+
     self:AlignItems()
 	local items_h = self.items_panel:h()
 	local normal_pos
@@ -60,8 +61,15 @@ function PopupMenu:RepositionPopupMenu()
 		normal_pos = false
 		best_h = top_h
 	end
+
     self._scroll:set_size(self._popup_menu:w(), best_h)
-	self._popup_menu:set_world_x(self.panel:world_x())
+
+    local x_pos = self.panel:world_x()
+    if (x_pos + self._popup_menu:w()) < self.menu._panel:w() then
+        self._popup_menu:set_world_x(x_pos)
+    else
+        self._popup_menu:set_world_right(x_pos)
+    end
 
     if normal_pos then
         self._popup_menu:set_world_y(self.panel:world_bottom())
