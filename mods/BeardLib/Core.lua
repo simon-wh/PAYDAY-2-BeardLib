@@ -30,11 +30,11 @@ function self:Init()
 	self.config = self._config
 
 	FileIO:MakeDir(self._config.maps_dir)
-
+	
 	self:LoadClasses()
 	self:LoadModules()
 	self:LoadLocalization()
-
+	
 	for name, config in pairs(self._config.load_modules) do
 		if BeardLib.modules[name] then
 			local module = BeardLib.modules[name]:new(self, config)
@@ -56,7 +56,7 @@ function self:Init()
 			self.managers[k] = manager
 		end
 	end
-
+	
 	self:RegisterTweak()
 end
 
@@ -236,15 +236,15 @@ Hooks:Register("BeardLibCreateCustomProjectiles")
 Hooks:Register("BeardLibCreateCustomWeaponMods")
 Hooks:Register("BeardLibPreProcessScriptData")
 Hooks:Register("BeardLibCreateCustomWeapons")
+Hooks:Register("BeardLibCreateCustomPlayerStyles")
+Hooks:Register("BeardLibCreateCustomPlayerStyleVariants")
 Hooks:Register("BeardLibSetupUnloadPackages")
-Hooks:Register("GameSetupPrePausedUpdate")
 Hooks:Register("BeardLibRequireHook")
 Hooks:Register("BeardLibCreateCustomMenus")
 Hooks:Register("BeardLibProcessScriptData")
 Hooks:Register("BeardLibSetupInitFinalize")
 Hooks:Register("GameSetupPauseUpdate")
 Hooks:Register("SetupInitManagers")
-Hooks:Register("SetupPreUpdate")
 
 --Wish I didn't have to do this. But sadly I don't think there's a hook for this.
 local OrigRequire = require
@@ -267,7 +267,7 @@ Hooks:Add("MenuManagerInitialize", "BeardLibCreateMenuHooks", function(mself)
     Hooks:Call("BeardLibCreateCustomMenus", mself)
     Hooks:Call("BeardLibMenuHelperPlusInitMenus", mself)
 	Hooks:Call("BeardLibCreateCustomNodesAndButtons", mself)
-
+	
     self.managers.dialog:Init()
 end)
 
@@ -281,3 +281,4 @@ Hooks:Add("MenuManagerOnOpenMenu", "BeardLibShowErrors", function(mself, menu)
 		end
 	end
 end)
+
