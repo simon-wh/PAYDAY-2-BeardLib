@@ -78,6 +78,11 @@ elseif F == "tweakdatapd2" then
 		end
 		return icon, texture_rect
 	end
+
+	Hooks:PostHook(BlackMarketTweakData, "_init_player_styles", "CallPlayerStyleAdditionHooks", function(self)
+		Hooks:Call("BeardLibCreateCustomPlayerStyles", self.player_styles)
+		Hooks:Call("BeardLibCreateCustomPlayerStyleVariants", self.player_styles)
+	end)
 elseif F == "gamesetup" then
 	Hooks:PreHook(GameSetup, "paused_update", "GameSetupPausedUpdateBase", function(self, t, dt)
         Hooks:Call("GameSetupPrePausedUpdate", t, dt)
