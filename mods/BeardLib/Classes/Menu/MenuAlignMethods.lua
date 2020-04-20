@@ -93,20 +93,22 @@ function Item:AlignItemsNormal(reversed)
     end
     local max_h, prev_item, last_positioned_item = 0, nil, nil
     local function align(item)
-        if item and item:_Visible() then
-            if not item.ignore_align then
-                local offset = item:Offset()
-                local panel = item:Panel()
-                panel:set_x(offset[1])
-                if alive(prev_item) then
-                    panel:set_world_y(prev_item:Panel():world_bottom() + offset[2])
-                else
-                    panel:set_y(offset[2])
+        if item then
+            if item:_Visible() then
+                if not item.ignore_align then
+                    local offset = item:Offset()
+                    local panel = item:Panel()
+                    panel:set_x(offset[1])
+                    if alive(prev_item) then
+                        panel:set_world_y(prev_item:Panel():world_bottom() + offset[2])
+                    else
+                        panel:set_y(offset[2])
+                    end
                 end
+                last_positioned_item, prev_item, max_h = self:RepositionItem(item, last_positioned_item, prev_item, max_h)
+            else
+                item:DelayLifted()
             end
-            last_positioned_item, prev_item, max_h = self:RepositionItem(item, last_positioned_item, prev_item, max_h)
-        else
-            item:DelayLifted()
         end
     end
 
@@ -137,19 +139,21 @@ function Item:AlignItemsGrid(reversed)
     local max_h, max_right, max_y = 0, 0, 0
 
     local function align(item)
-        if item and item:_Visible() then
-            if not item.ignore_align then
-                local panel = item:Panel()
-                local offset = item:Offset()
-                if (panel:w() + (max_right + offset[1]) - items_w) > 0.001 then
-                    max_y = max_h
-                    max_right = 0
+        if item then
+            if item:_Visible() then
+                if not item.ignore_align then
+                    local panel = item:Panel()
+                    local offset = item:Offset()
+                    if (panel:w() + (max_right + offset[1]) - items_w) > 0.001 then
+                        max_y = max_h
+                        max_right = 0
+                    end
+                    panel:set_position(max_right + offset[1], max_y + offset[2])            
                 end
-                panel:set_position(max_right + offset[1], max_y + offset[2])            
+                last_positioned_item, prev_item, max_h, max_right = self:RepositionItem(item, last_positioned_item, prev_item, max_h, max_right)
+            else
+                item:DelayLifted()
             end
-            last_positioned_item, prev_item, max_h, max_right = self:RepositionItem(item, last_positioned_item, prev_item, max_h, max_right)
-        else
-            item:DelayLifted()
         end
     end
 
@@ -192,40 +196,42 @@ function Item:AlignItemsCenteredGrid(reversed)
     end
 
     local function align(item)
-        if item and item:_Visible() then
-            local panel = item:Panel()
-            if not item.ignore_align then
-                local offset = item:Offset()
-                if (prev_item and prev_item.alone_in_row) or (panel:w() + (max_right + offset[1]) - items_w) > 0.001 then
-                    centerify()
-                    current_row = {}
-                    max_y = max_h
-                    max_right = 0
+        if item then
+            if item:_Visible() then
+                local panel = item:Panel()
+                if not item.ignore_align then
+                    local offset = item:Offset()
+                    if (prev_item and prev_item.alone_in_row) or (panel:w() + (max_right + offset[1]) - items_w) > 0.001 then
+                        centerify()
+                        current_row = {}
+                        max_y = max_h
+                        max_right = 0
+                    end
+                    if #current_row == 0 then
+                        panel:set_position(max_right, max_y + offset[2])
+                    else
+                        panel:set_position(max_right + offset[1], max_y + offset[2])
+                    end
                 end
-                if #current_row == 0 then
-                    panel:set_position(max_right, max_y + offset[2])
-                else
-                    panel:set_position(max_right + offset[1], max_y + offset[2])
-                end
-            end
 
-            local repos = item:Reposition(last_positioned_item, prev_item)
-            item:DelayLifted()
+                local repos = item:Reposition(last_positioned_item, prev_item)
+                item:DelayLifted()
 
-            if repos then
-                last_positioned_item = item
-            end
-            local was_aligned = (not repos and not item.ignore_align) or item.count_as_aligned 
-            if was_aligned or item.count_height then
-                if was_aligned then
-                    prev_item = item
-                    max_right = math.max(max_right, panel:right())
+                if repos then
+                    last_positioned_item = item
                 end
-                table.insert(current_row, {panel = panel, repos = repos})
-                max_h = math.max(max_h, panel:bottom())
+                local was_aligned = (not repos and not item.ignore_align) or item.count_as_aligned 
+                if was_aligned or item.count_height then
+                    if was_aligned then
+                        prev_item = item
+                        max_right = math.max(max_right, panel:right())
+                    end
+                    table.insert(current_row, {panel = panel, repos = repos})
+                    max_h = math.max(max_h, panel:bottom())
+                end
+            else
+                item:DelayLifted()
             end
-        else
-            item:DelayLifted()
         end
     end
 
@@ -257,32 +263,34 @@ function Item:AlignItemsGridFromRight(reversed, dbg)
     local max_h, max_right, max_y = 0, items_w, 0
 
     local function align(item)
-        if item and item:_Visible() then
-            if not item.ignore_align then
-                local panel = item:Panel()
-                local offset = item:Offset()
-                if ((max_right - offset[1]) - panel:w()) < -0.001 then
-                   max_y = max_h
-                   max_right = items_w
+        if item then
+            if item:_Visible() then
+                if not item.ignore_align then
+                    local panel = item:Panel()
+                    local offset = item:Offset()
+                    if ((max_right - offset[1]) - panel:w()) < -0.001 then
+                       max_y = max_h
+                       max_right = items_w
+                    end
+                    panel:set_righttop(max_right - offset[1], max_y + offset[2])            end
+
+                if repos then
+                    last_positioned_item = item
                 end
-                panel:set_righttop(max_right - offset[1], max_y + offset[2])            end
+                local count = (not repos and not item.ignore_align) or item.count_as_aligned
+                local panel = item:Panel()
+                item:DelayLifted()
 
-            if repos then
-                last_positioned_item = item
+                if count then
+                    prev_item = item
+                    max_right = math.min(max_right, panel:left())
+                end
+                if count or item.count_height then
+                    max_h = math.max(max_h, panel:bottom())
+                end
+            else
+                item:DelayLifted()
             end
-            local count = (not repos and not item.ignore_align) or item.count_as_aligned
-            local panel = item:Panel()
-            item:DelayLifted()
-
-            if count then
-                prev_item = item
-                max_right = math.min(max_right, panel:left())
-            end
-            if count or item.count_height then
-                max_h = math.max(max_h, panel:bottom())
-            end
-        else
-            item:DelayLifted()
         end
     end
 
