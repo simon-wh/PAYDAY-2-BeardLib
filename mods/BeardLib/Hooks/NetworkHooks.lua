@@ -105,4 +105,10 @@ elseif F == "unitnetworkhandler" then
             set_equipped_weapon(self, unit, item_index, blueprint_string, cosmetics_string, sender)
         end
     end
+elseif F == "teamaibase" then
+    Hooks:PostHook(TeamAIBase, "save", "BeardLib.Save", function(self, data)
+        if data.base and data.base.loadout then
+            data.base.loadout = BeardLib.Utils:CleanOutfitString(data.base.loadout, true)
+        end
+    end)
 end

@@ -245,35 +245,34 @@ function Utils:CleanOutfitString(str, is_henchman)
 			end
 		end
 
-		local player_style = tweak_data.blackmarket.player_styles[list.player_style]
-		if player_style then
-			-- Got to do the checks individually, otherwise we can't have custom variations on non custom outfits. 
-			if player_style.custom then
-				local based_on = player_style.based_on
-				local dlc = player_style.global_value and managers.dlc:global_value_to_dlc(player_style.global_value)
+        --list.grenade = self:GetSpoofedGrenade(list.grenade)
+    end
+
+	local player_style = tweak_data.blackmarket.player_styles[list.player_style]
+	if player_style then
+		-- Got to do the checks individually, otherwise we can't have custom variations on non custom outfits. 
+		if player_style.custom then
+			local based_on = player_style.based_on
+			local dlc = player_style.global_value and managers.dlc:global_value_to_dlc(player_style.global_value)
+			if dlc and not managers.dlc:is_dlc_unlocked(dlc) then
+				based_on = nil
+			end
+			list.player_style = based_on or "none"
+		end
+
+		if player_style.material_variations then
+			local suit_variation = player_style.material_variations[list.suit_variation]
+			if suit_variation and suit_variation.custom then
+				local based_on = suit_variation.based_on
+				local dlc = suit_variation.global_value and managers.dlc:global_value_to_dlc(suit_variation.global_value)
 				if dlc and not managers.dlc:is_dlc_unlocked(dlc) then
 					based_on = nil
 				end
-				list.player_style = based_on or "none"
-			end
-
-			if player_style.material_variations then
-				local suit_variation = player_style.material_variations[list.suit_variation]
-				if suit_variation and suit_variation.custom then
-					local based_on = suit_variation.based_on
-					local dlc = suit_variation.global_value and managers.dlc:global_value_to_dlc(suit_variation.global_value)
-					if dlc and not managers.dlc:is_dlc_unlocked(dlc) then
-						based_on = nil
-					end
-					list.suit_variation = based_on or "none"
-				end
+				list.suit_variation = based_on or "default"
 			end
 		end
-
-
-
-		--list.grenade = self:GetSpoofedGrenade(list.grenade)
 	end
+
 	return self:OutfitStringFromList(list, is_henchman)
 end
 
