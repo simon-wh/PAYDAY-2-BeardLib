@@ -53,7 +53,7 @@
 			
 			<hook source_file="lib/units/weapons/newraycastweaponbase" file="NetworkHooks.lua"/>
 			<hook source_file="lib/network/handlers/unitnetworkhandler" file="NetworkHooks.lua"/>
-			
+			<hook source_file="lib/units/player_team/teamaibase" file="NetworkHooks.lua"/>
 
 			<hook source_file="lib/units/beings/player/states/vr/hand/playerhandstatemelee" file="Fixes.lua"/>
 			<hook source_file="lib/network/base/handlers/connectionnetworkhandler" file="Fixes.lua"/>
