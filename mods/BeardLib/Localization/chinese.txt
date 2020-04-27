@@ -44,7 +44,7 @@
     "beardlib_show_images" : "显示 Mod 图片",
     "beardlib_reset_settings" : "重置设置",
     "beardlib_dev_mode" : "开发者模式",
-    "beardlib_dev_mode_help" : "开发者模式将在错误对话框内显示更多的错误代码 (如文件加载失败)。在开发开发任何类型的 BeardLib mod 时使用该模式会帮你解决这些问题。通常情况下会记录到 BLT 日志中。",
+    "beardlib_dev_mode_help" : "开发者模式将在错误对话框内显示更多的错误代码 (如文件加载失败)。在开发任何类型的 BeardLib mod 时使用该模式会帮你解决这些问题。通常情况下会记录到 BLT 日志中。",
     "beardlib_important_notice_help" : "是否在 Mod 有可用的重要更新时提示您？",
     "beardlib_write_failed" : "写入路径失败 :/",
     "beardlib_achieves_title" : "自定义成就",
