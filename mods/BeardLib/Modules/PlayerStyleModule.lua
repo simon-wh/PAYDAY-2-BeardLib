@@ -14,7 +14,7 @@ function PlayerStyleModule:RegisterHook()
         return
     end
 
-    self._config.name_id = self._config.name_id or "bm_suit_" .. self._config.id
+    self._config.name_id = self._config.name_id or ("bm_suit_" .. self._config.id)
     self._config.desc_id = self._config.desc_id or self._config.name_id .. "_desc"
 
     -- Make sure that any variants added through this are set to be custom.

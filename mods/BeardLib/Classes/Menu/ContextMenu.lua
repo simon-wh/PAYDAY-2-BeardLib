@@ -33,7 +33,7 @@ function ContextMenu:init(owner, layer)
         })
     end
     self._scroll = ScrollablePanelModified:new(self.panel, "ItemsPanel", {
-        layer = 4, 
+        layer = 4,
         padding = 0.0001,
         count_invisible = true,
         scroll_width = owner.context_scroll_width or 10,
@@ -122,7 +122,7 @@ function ContextMenu:CreateItems()
 				layer = 0
             })
             self._widest_boi = math.max(self._widest_boi, w + offset_sides)
-            
+
 			table.insert(self._item_panels, panel)
 		end
     end
@@ -148,7 +148,7 @@ function ContextMenu:reposition()
     local bottom_h = (self.menu._panel:world_bottom() - self.owner.panel:world_bottom()) - offset_y 
 	local top_h = (self.owner.panel:world_y() - self.menu._panel:world_y()) - offset_y
 	local items_h = (#self._my_items * size) + (self.owner.searchbox and self.owner.size or 0)
-	
+
 	local normal_pos
 	local best_h = items_h
 
@@ -172,7 +172,7 @@ function ContextMenu:reposition()
     else
         self.panel:set_world_bottom(self.owner.panel:world_y())
 	end
-	
+
     self._scroll:panel():set_y(self.owner.searchbox and self.owner.size or 0) 
     self._scroll:set_size(self.panel:w(), self.panel:h() - (self.owner.searchbox and self.owner.size or 0))
 
@@ -183,19 +183,19 @@ function ContextMenu:showing()
     return self.panel:visible()
 end
 
-function ContextMenu:show()   
+function ContextMenu:show()
     if self.menu._openlist == self then
         self:hide()
         return
     end
     self:reposition()
     self.panel:show()
-	self:update_search()
+	self:Update(nil, nil, true)
 	self.menu:CloseLastList()
     self.menu._openlist = self
 end
 
-function ContextMenu:MousePressed(button, x, y)        
+function ContextMenu:MousePressed(button, x, y)
     if self:textbox() then
         if self:textbox():MousePressed(button, x, y) then
             return true
@@ -221,7 +221,7 @@ function ContextMenu:MousePressed(button, x, y)
                         self.owner:ContextMenuCallback(item)
                     else
                         if item.on_callback then self.owner:RunCallback(item.on_callback, item) end            
-                    end        
+                    end
                     self:hide()
                     return true
                 end
@@ -248,14 +248,12 @@ function ContextMenu:textbox()
     return t and alive(t) and t or nil
 end
 
-function ContextMenu:Update(t, dt)
+function ContextMenu:Update(t, dt, force)
 	if not self:alive() then
 		BeardLib:RemoveUpdater(self._update_id)
 		return
 	end
-
-	if self._do_search and self._do_search <= t then
-		
+	if force or self._do_search and self._do_search <= t then
 		local search = self:textbox() and self:textbox():Value() or ""
         search = search:escape_special()
 		self._my_items = {}
@@ -304,7 +302,7 @@ function ContextMenu:update_search(force_show)
 	if #self._my_items == 0 then
 		self._do_search = 0
 	else
-		self._do_search = Application:time() + 0.5
+		self._do_search = Application:time() + 0.25
 	end
 end
 
