@@ -28,6 +28,7 @@ if F == "weaponfactorymanager" then
 
         return orig_has(self, perk_name, factory_id, blueprint, ...)
     end
+
     --https://github.com/simon-wh/PAYDAY-2-BeardLib/issues/112
     Hooks:PreHook(WeaponFactoryManager, "_read_factory_data", "BeardLibFixMissingParts", function(self)
         local tweak = tweak_data.weapon.factory
@@ -242,6 +243,23 @@ elseif F == "blackmarketmanager" then
         end
 
         return sorted_categories, item_categories, override_slots
+    end
+
+    --No clue how but sometimes the first function (get_silencer_concealment_modifiers) fails to remove the weapon so this comes as a backup.
+    local orig_weapons_unlocked = BlackMarketManager.weapon_unlocked_by_crafted
+    function BlackMarketManager:weapon_unlocked_by_crafted(category, slot, ...)
+        local crafted = self._global and self._global.crafted_items[category][slot]
+
+        if not crafted then
+            return false
+        end
+        local data = Global.blackmarket_manager.weapons[crafted.weapon_id]
+        if data then
+            return orig_weapons_unlocked(self, category, slot, ...)
+        else
+            BeardLib:log("[Fixes][Warning #2] Weapon with the ID '%s' was found in the save but was missing, the weapon will be deleted from the save", tostring(weapon_id))
+            return false
+        end
     end
 elseif F == "crewmanagementgui" then
     local orig = CrewManagementGui.populate_primaries
