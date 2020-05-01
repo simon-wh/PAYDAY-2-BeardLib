@@ -3,10 +3,10 @@ MusicModule.type_name = "Music"
 
 function MusicModule:RegisterHook()
 	self._config.id = self._config.id or "Err"
-	
+
 	local dir = self._config.directory
 	dir = (dir and dir .. "/") or ""
-	
+
 	if self._config.source then
 		self._config.source = dir .. self._config.source
 	end

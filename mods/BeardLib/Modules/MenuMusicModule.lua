@@ -41,7 +41,7 @@ function MenuMusicModule:RegisterHook()
 	if BeardLib.MusicMods[self._config.id] and not self._config.force then
 		self:Err("Music with the id '%s' already exists!", self._config.id)
 		return
-	end	
+	end
 
 	if self._config.source then
 		self._config.source = Path:Combine(self._mod.ModPath, self._config.source)

@@ -73,7 +73,15 @@ function HeistMusic:RegisterHook()
 			elseif not v.start_source then
 				self:log("[Warning] Event named %s in heist music %s has no defined source", tostring(self._config.id), tostring(v.name))
 			end
-			music.events[v.name] = {source = self:MakeBuffer(v.source), start_source = self:MakeBuffer(v.start_source), alt_source = self:MakeBuffer(v.alt_source), alt_start_source = self:MakeBuffer(v.alt_start_source), alt_chance = v.alt_chance, allow_switch = v.allow_switch}
+			music.events[v.name] = {
+				source = self:MakeBuffer(v.source),
+				start_source = self:MakeBuffer(v.start_source),
+				alt_source = self:MakeBuffer(v.alt_source),
+				alt_start_source = self:MakeBuffer(v.alt_start_source),
+				alt_chance = v.alt_chance,
+				volume = v.volume or music.volume,
+				allow_switch = v.allow_switch
+			}
 		end
 	end
 
@@ -83,7 +91,7 @@ function HeistMusic:RegisterHook()
 		music.source = event.source
 		music.start_source = event.source
 	end
-	
+
 	BeardLib.MusicMods[self._config.id] = music
 end
 

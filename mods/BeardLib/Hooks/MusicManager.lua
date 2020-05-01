@@ -189,7 +189,7 @@ function MusicManager:play(src, use_xaudio, custom_volume)
 			visible = false,
 			loop = not self._switch_at_end,
 		})
-		self._player:set_volume_gain(Global.music_manager.volume)
+		self._player:set_volume_gain(custom_volume or Global.music_manager.volume)
 	end
 end
 
