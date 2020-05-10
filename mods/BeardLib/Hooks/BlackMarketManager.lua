@@ -147,7 +147,7 @@ function BlackMarketManager:unpack_beardlib_weapon_string(outfit_string)
 	end
 
 	return {
-		id = get(1) or "wpn_fps_ass_amcar",
+		id = get(1),
 		blueprint = string.split(get(2), "_"),
 		cosmetics = get(3)
 	}

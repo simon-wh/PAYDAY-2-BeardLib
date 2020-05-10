@@ -214,14 +214,14 @@ function NetworkPeer:set_equipped_weapon_beardlib(weapon_string, outfit_version)
         return false
     end
 
+    self._last_beardlib_weapon_string = weapon_string
+
 	local weapon = managers.blackmarket:unpack_beardlib_weapon_string(weapon_string)
     if self._unit and weapon.id then
-        local inv = self._unit:inventory()
         local id = weapon.id.."_npc"
         local fac = tweak_data.weapon.factory
         local npc_weapon = fac[id]
         if npc_weapon and DB:has(Idstring("unit"), npc_weapon.unit:id()) then
-            self._last_beardlib_weapon_string = weapon_string
             local blueprint = clone(npc_weapon.default_blueprint)
 
             --Goes through each part and checks if the part can be added
@@ -232,6 +232,7 @@ function NetworkPeer:set_equipped_weapon_beardlib(weapon_string, outfit_version)
                         local tweak = tweak_data.weapon.factory.parts[uses_part]
                         if tweak.custom and not tweak.supports_sync then
                             BeardLib:log("Part %s does not support synching", tostring(uses_part))
+                            self._last_beardlib_weapon_string = nil
                             return --This waapon has problematic parts!
                         end
                         for i, blueprint_part in pairs(blueprint) do
@@ -251,13 +252,14 @@ function NetworkPeer:set_equipped_weapon_beardlib(weapon_string, outfit_version)
             end
 
             managers.weapon_factory:set_use_thq_weapon_parts(true) -- Force THQ if we are dealing with custom weapons.
+            local inv = self._unit:inventory()
             inv:add_unit_by_factory_name(id, true, true, managers.weapon_factory:blueprint_to_string(id, blueprint), weapon.cosmetics or inv:cosmetics_string_from_peer(peer, weapon.id) or "")
             return true
         else
+            self._last_beardlib_weapon_string = nil
             return false
         end
     else
-        self._last_beardlib_weapon_string = nil
         return false
     end
 end
