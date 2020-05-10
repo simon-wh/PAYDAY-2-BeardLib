@@ -34,6 +34,17 @@ function WeaponModule:GetBasedOn(w_self, based_on)
     end
 end
 
+local default_weap_crew = "glock_18_crew"
+function WeaponModule:GetCrewBasedOn(w_self, based_on)
+    w_self = w_self or tweak_data.weapon
+    based_on = based_on or self._config.weapon.based_on
+    local suffix = "_crew"
+    if based_on and w_self[based_on..suffix] then
+        return based_on..suffix
+    else
+        return default_weap_crew
+    end
+end
 function WeaponModule:RegisterHook()
     local dlc = self._config.dlc or self.defaults.dlc
 
@@ -99,9 +110,12 @@ function WeaponModule:RegisterHook()
             data = table.merge(data, config.override)
         end
 
-	    w_self[config.id] = data
+	    w_self[config.id] = data    
+    end)
 
-        --w_self[config.id .. "_crew"] = npc_data
+    Hooks:PostHook(WeaponTweakData, "_precalculate_values", self._config.weapon.id .. "AddCrewWeaponTweakData", function(w_self)
+        local config = self._config.weapon
+        w_self[config.id .. "_crew"] = table.merge(deep_clone(w_self[self:GetCrewBasedOn(w_self)]), table.merge({custom = true}, config.crew))
     end)
 
     Hooks:PostHook(TweakDataVR , "init", self._config.weapon.id .. "AddVRWeaponTweakData", function(vrself)
