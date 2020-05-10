@@ -75,9 +75,9 @@ Hooks:Add(peer_send_hook, "BeardLibCustomWeaponFix", function(self, func_name, p
 						end
 					end
                 end
-                if type(factory_id) == "string" then
+                --[[if type(factory_id) == "string" then
                     SendMessage(self, set_equipped_weapon, "")
-                end
+                end]]
             end
 
 		--[[
