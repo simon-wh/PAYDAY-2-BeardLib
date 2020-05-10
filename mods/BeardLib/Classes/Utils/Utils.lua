@@ -96,7 +96,7 @@ function Utils:GetBasedOnFactoryId(id, wep)
         based_on = wep.based_on and tweak_data.upgrades.definitions[wep.based_on]
         if based_on then
             local based_on_wep = tweak_data.weapon[wep.based_on]
-            if not based_on_wep or (based_on_wep.use_data.selection_index ~= wep.use_data.selection_index) then
+            if not based_on_wep then
                 based_on = nil --Unsupported!
             end
         end
