@@ -84,22 +84,22 @@ function WeaponModModule:RegisterHook()
         local cc_thq
 
         if config.unit then
-            if not DB:has(ids_unit, config.unit:id()) then
-                self:Err("Unit %s of part %s is not loaded.", tostring(config.unit), tostring(config.id))
-                config.unit = nil
-            end
-
-            if config.unit == dummy_unit then
-                supports_sync = true
-            else
-                local thq = Idstring(config.unit.."_thq")
-                if DB:has(ids_mat_config, thq) then
+            if DB:has(ids_unit, config.unit:id()) then
+                if config.unit == dummy_unit or string.ends(config.unit, "_dummy") then
                     supports_sync = true
-                    cc_thq = Idstring(config.unit.."cc_thq")
-                    if not DB:has(ids_mat_config, cc_thq) then
-                        cc_thq = thq
+                else
+                    local thq = Idstring(config.unit.."_thq")
+                    if DB:has(ids_mat_config, thq) then
+                        supports_sync = true
+                        cc_thq = Idstring(config.unit.."cc_thq")
+                        if not DB:has(ids_mat_config, cc_thq) then
+                            cc_thq = thq
+                        end
                     end
                 end
+            else
+                self:Err("Unit %s of part %s is not loaded.", tostring(config.unit), tostring(config.id))
+                config.unit = nil
             end
         else
             supports_sync = true
