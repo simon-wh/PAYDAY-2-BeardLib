@@ -148,9 +148,9 @@ function Utils:GetCleanedBlueprint(blueprint, factory_id)
             else
                 table.insert(new_blueprint, part_id)
             end
-        end    
+        end
     end
-    
+
     return new_blueprint
 end
 
@@ -172,7 +172,7 @@ function Utils:CleanOutfitString(str, is_henchman)
     local mask = list.mask and tweak_data.blackmarket.masks[is_henchman and list.mask or list.mask.mask_id]
     if mask and mask.custom then
         local based_on = mask.based_on
-        local mask_tweak = tweak_data.blackmarket.masks[based_on] 
+        local mask_tweak = tweak_data.blackmarket.masks[based_on]
         if not mask_tweak or (mask.dlc and not managers.dlc:is_dlc_unlocked(mask_tweak.dlc)) then
             based_on = nil
         end
@@ -233,8 +233,8 @@ function Utils:CleanOutfitString(str, is_henchman)
 			local melee = tweak_data.blackmarket.melee_weapons[list.melee_weapon]
 			if melee and melee.custom then
 				local based_on = melee.based_on
-				local melee = tweak_data.upgrades.definitions[based_on] 
-				if not melee or (melee.dlc and not managers.dlc:is_dlc_unlocked(melee.dlc)) then
+				local melee_tweak = tweak_data.upgrades.definitions[based_on] 
+				if not melee_tweak or (melee_tweak.dlc and not managers.dlc:is_dlc_unlocked(melee_tweak.dlc)) then
 					based_on = nil
 				end
 				list.melee_weapon = based_on or "weapon"
