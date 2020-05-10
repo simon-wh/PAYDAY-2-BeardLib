@@ -554,7 +554,7 @@ elseif F == "playerhandstatemelee" then
                         if material:name() == mtr_cubemap then
                             material:set_render_template(Idstring("generic:CUBE_ENVIRONMENT_MAPPING:DIFFUSE_TEXTURE:NORMALMAP"))
                         else
-                            material:set_render_template(Idstring("generic:DIFFUSE_TEXTURE:NORMALMAP"))                    
+                            material:set_render_template(Idstring("generic:DIFFUSE_TEXTURE:NORMALMAP"))
                         end
                     end
                 end

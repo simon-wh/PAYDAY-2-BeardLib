@@ -24,7 +24,7 @@ function WeaponModModule:init(...)
             end
         end},
 	})
-	
+
     return WeaponModule.super.init(self, ...)
 end
 
@@ -120,16 +120,16 @@ function WeaponModModule:RegisterHook()
             }}, "dlc", data.dlc or self.defaults.dlc, "content", "loot_drops")
         end
 	end)
-	
+
 	--Due to some parts getting inserted to uses_parts in blackmarket tweakdata I had to push this event to a different point.
     Hooks:Add("BeardLibAddCustomWeaponModsToWeapons", id .. "AddWeaponModToWeapons", function(f_self)
         if config.droppable == false and config.is_a_unlockable == false then
             return
         end
-        
+
         config.weapons = config.weapons or {}
         local based_on = self:GetBasedOn(f_self.parts)
-        
+
         --Inheritance
         local inherit = config.inherit
         config.inherit_weapons = NotNil(config.inherit_weapons, inherit)
@@ -179,11 +179,11 @@ function WeaponModModule:RegisterHook()
 
         local function merge(tbl, what, tweak)
             if tbl then
-                for wpn_or_prt_id, merge in ipairs(tbl) do
+                for wpn_or_prt_id, to_merge in ipairs(tbl) do
                     local weap = (tweak or f_self)[wpn_or_prt_id]
                     if weap then
                         weap[what] = weap[what] or {}
-                        weap[what][id] = table.merge(weap[what][id], merge)
+                        weap[what][id] = table.merge(weap[what][id], to_merge)
                     end
                 end
             end
@@ -222,7 +222,7 @@ function WeaponModModule:RegisterHook()
                 else
                     self:log("[Warning] Mod with ID %s does not exist. Cannot add part to forbids")
                 end
-            end    
+            end
         end
 	end)
 end

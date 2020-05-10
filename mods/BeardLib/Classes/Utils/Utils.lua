@@ -172,8 +172,8 @@ function Utils:CleanOutfitString(str, is_henchman)
     local mask = list.mask and tweak_data.blackmarket.masks[is_henchman and list.mask or list.mask.mask_id]
     if mask and mask.custom then
         local based_on = mask.based_on
-        local mask = tweak_data.blackmarket.masks[based_on] 
-        if not mask or (mask.dlc and not managers.dlc:is_dlc_unlocked(mask.dlc)) then
+        local mask_tweak = tweak_data.blackmarket.masks[based_on] 
+        if not mask_tweak or (mask.dlc and not managers.dlc:is_dlc_unlocked(mask_tweak.dlc)) then
             based_on = nil
         end
 
@@ -194,7 +194,7 @@ function Utils:CleanOutfitString(str, is_henchman)
 	if material and tweak_data.blackmarket.materials[material.id].custom then
 		material.id = "plastic"
     end
-    
+
     if list.primary and list.primary.cosmetics then
         local cosmetic_primary = tweak_data.blackmarket.weapon_skins[list.primary.cosmetics.id]
         if cosmetic_primary and cosmetic_primary.custom then

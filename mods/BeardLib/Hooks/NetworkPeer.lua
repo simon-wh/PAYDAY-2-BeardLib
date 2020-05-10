@@ -49,7 +49,7 @@ Hooks:Add(peer_send_hook, "BeardLibCustomWeaponFix", function(self, func_name, p
             params[1] = BeardLib.Utils:CleanOutfitString(params[1])
         elseif string.ends(func_name, "set_unit") then
 			params[3] = BeardLib.Utils:CleanOutfitString(params[3], params[4] == 0)
-        elseif func_name == "set_equipped_weapon" then            
+        elseif func_name == "set_equipped_weapon" then
             if params[2] == -1 then
                 local index, data, selection_index = BeardLib.Utils:GetCleanedWeaponData()
                 params[2] = index
@@ -59,9 +59,9 @@ Hooks:Add(peer_send_hook, "BeardLibCustomWeaponFix", function(self, func_name, p
 				local factory_id = PlayerInventory._get_weapon_name_from_sync_index(params[2])
 				local blueprint = managers.weapon_factory:unpack_blueprint_from_string(factory_id, params[3])
 				local wep = tweak_data.weapon[managers.weapon_factory:get_weapon_id_by_factory_id(factory_id)]
-                
+
 				params[3] = managers.weapon_factory:blueprint_to_string(factory_id, BeardLib.Utils:GetCleanedBlueprint(blueprint, factory_id))
-				
+
 				if wep then
 					local index = wep.use_data.selection_index
 					local wep_data = managers.blackmarket:beardlib_get_weapon(index)
@@ -155,7 +155,7 @@ Hooks:Add("NetworkReceivedData", sync_game_settings_id, function(sender, id, dat
                         end
                     else
                         disconnect()
-                    end               
+                    end
                 end)
             else
                 disconnect()
@@ -255,7 +255,7 @@ function NetworkPeer:set_outfit_string_beardlib(outfit_string, outfit_version)
     if outfit_version ~= current_outfit_version then --Avoid sync to avoid issues.
         return
     end
-    
+
     self._last_beardlib_outfit = outfit_string
 
     local old_outfit_string = self._profile.outfit_string
@@ -319,7 +319,7 @@ function NetworkPeer:set_outfit_string_beardlib(outfit_string, outfit_version)
     end
 
     self._profile.outfit_string = BeardLib.Utils:OutfitStringFromList(old_outfit)
-    
+
     if old_outfit_string ~= self._profile.outfit_string then
         self:_reload_outfit()
     end
@@ -340,7 +340,7 @@ function NetworkPeer:beardlib_reload_outfit()
     if kit_menu then
 		kit_menu.renderer:set_slot_outfit(self:id(), self:character(), self._profile.outfit_string)
     end
-    
+
 	if managers.menu_component then
 		managers.menu_component:peer_outfit_updated(self:id())
     end

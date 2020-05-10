@@ -55,7 +55,7 @@ elseif F == "playerinventory" then
     function PlayerInventory._get_weapon_sync_index(wanted_weap_name)
         return get_weapon_index(wanted_weap_name) or -1
     end
-    
+
     Hooks:PostHook(PlayerInventory, "save", "BeardLib.Save", function(self, data)
         if self._equipped_selection then
             if data.equipped_weapon_index == -1 then
@@ -91,13 +91,13 @@ elseif F == "unitnetworkhandler" then
         if not self._verify_character(unit) then
             return
         end
-    
+
         local peer = self._verify_sender(sender)
-    
+
         if not peer then
             return
         end
-        
+
         if peer._last_beardlib_weapon_string then
             peer:set_equipped_weapon_beardlib(peer._last_beardlib_weapon_string, "1.0")
             peer._last_beardlib_weapon_string = nil

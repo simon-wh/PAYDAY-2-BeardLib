@@ -19,7 +19,7 @@ function WeaponModule:init(...)
         {param = "stance.crouched.shoulders.rotation", action = "normalize"},
         {param = "stance.bipod.shoulders.rotation", action = "normalize"},
 	})
-	
+
     return WeaponModule.super.init(self, ...)
 end
 
@@ -98,9 +98,9 @@ function WeaponModule:RegisterHook()
         if config.override then
             data = table.merge(data, config.override)
         end
-	
+
 	    w_self[config.id] = data
-			
+
         --w_self[config.id .. "_crew"] = npc_data
     end)
 
@@ -166,7 +166,7 @@ function WeaponModule:RegisterHook()
         else
             f_self[config.id] = config
         end
-        
+
         local npc_data = clone(f_self[config.id])
         npc_data.unit = npc_data.unit.."_npc"
         f_self[config.id .. "_npc"] = npc_data
@@ -187,7 +187,7 @@ function WeaponModule:RegisterHook()
                 if not part.stance_mod[fac_id] and part.stance_mod[based_on_fac] then
                     part.stance_mod[fac_id] = deep_clone(part.stance_mod[based_on_fac])
                 end
-                
+
                 if sight_adds then
                     fac_weapon.adds[fac_id] = table.merge(fac_weapon.adds[fac_id], sight_adds)
                 end
