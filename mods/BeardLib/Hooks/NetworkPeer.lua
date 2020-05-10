@@ -211,7 +211,7 @@ end)
 
 function NetworkPeer:set_equipped_weapon_beardlib(weapon_string, outfit_version)
     if outfit_version ~= current_weapon_version then
-        return
+        return false
     end
 
 	local weapon = managers.blackmarket:unpack_beardlib_weapon_string(weapon_string)
@@ -252,9 +252,13 @@ function NetworkPeer:set_equipped_weapon_beardlib(weapon_string, outfit_version)
 
             managers.weapon_factory:set_use_thq_weapon_parts(true) -- Force THQ if we are dealing with custom weapons.
             inv:add_unit_by_factory_name(id, true, true, managers.weapon_factory:blueprint_to_string(id, blueprint), weapon.cosmetics or inv:cosmetics_string_from_peer(peer, weapon.id) or "")
+            return true
+        else
+            return false
         end
     else
         self._last_beardlib_weapon_string = nil
+        return false
     end
 end
 

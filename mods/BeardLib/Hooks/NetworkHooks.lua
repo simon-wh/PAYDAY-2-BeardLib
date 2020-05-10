@@ -98,8 +98,7 @@ elseif F == "unitnetworkhandler" then
             return
         end
 
-        if peer._last_beardlib_weapon_string then
-            peer:set_equipped_weapon_beardlib(peer._last_beardlib_weapon_string, "2.0")
+        if peer._last_beardlib_weapon_string and peer:set_equipped_weapon_beardlib(peer._last_beardlib_weapon_string, "2.0") then
             peer._last_beardlib_weapon_string = nil
         else
             set_equipped_weapon(self, unit, item_index, blueprint_string, cosmetics_string, sender)
