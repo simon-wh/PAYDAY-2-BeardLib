@@ -1,5 +1,8 @@
 WeaponModModule = WeaponModModule or class(ItemModuleBase)
 WeaponModModule.type_name = "WeaponMod"
+local ids_mat_config = Idstring("material_config")
+local ids_unit = Idstring("unit")
+local dummy_unit = "units/payday2/weapons/wpn_upg_dummy/wpn_upg_dummy"
 function WeaponModModule:init(...)
     self.required_params = {}
     self.clean_table = table.add(clone(self.clean_table), {
@@ -42,7 +45,7 @@ function WeaponModModule:RegisterHook()
     local config = self._config
 
     config.default_amount = config.default_amount and tonumber(config.default_amount) or 1
-    config.global_value =config.global_value or self.defaults.global_value
+    config.global_value = config.global_value or self.defaults.global_value
     local available = true
     --A FUCKING MESS
     if config.hidden then
@@ -77,11 +80,29 @@ function WeaponModModule:RegisterHook()
             config.unit = config.unit or ("units/mods/weapons/"..id.."/"..id)
         end
 
+        local supports_sync = false
+        local cc_thq
+
         if config.unit then
-            if not DB:has(Idstring("unit"), config.unit:id()) then
+            if not DB:has(ids_unit, config.unit:id()) then
                 self:Err("Unit %s of part %s is not loaded.", tostring(config.unit), tostring(config.id))
                 config.unit = nil
             end
+
+            if config.unit == dummy_unit then
+                supports_sync = true
+            else
+                local thq = Idstring(config.unit.."_thq")
+                if DB:has(ids_mat_config, thq) then
+                    supports_sync = true
+                    cc_thq = Idstring(config.unit.."cc_thq")
+                    if not DB:has(ids_mat_config, cc_thq) then
+                        cc_thq = thq
+                    end
+                end
+            end
+        else
+            supports_sync = true
         end
 
         local data = table.merge(deep_clone(based_on and f_self.parts[based_on] or {}), table.merge({
@@ -90,6 +111,8 @@ function WeaponModModule:RegisterHook()
             stance_mod = config.stance_mod or {},
             third_unit = config.third_unit,
             a_obj = config.a_obj,
+            supports_sync = supports_sync,
+            cc_thq_material_config = cc_thq,
             dlc = config.droppable and (config.dlc or self.defaults.dlc),
             texture_bundle_folder = config.texture_bundle_folder or "mods",
             pcs = config.pcs and BeardLib.Utils:RemoveNonNumberIndexes(config.pcs),

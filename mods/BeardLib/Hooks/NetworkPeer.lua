@@ -4,6 +4,7 @@ local lobby_sync_update_level_id = "BeardLib_lobby_sync_update_level_id"
 local send_outfit_id = "BCO" --BeardLib compact outfit
 local set_equipped_weapon = "BSEW" --BeardLib set equipped weapon
 local current_outfit_version = "1.0"
+local current_weapon_version = "2.0"
 
 local NetworkPeerSend = NetworkPeer.send
 
@@ -54,8 +55,8 @@ Hooks:Add(peer_send_hook, "BeardLibCustomWeaponFix", function(self, func_name, p
                 local index, data, selection_index = BeardLib.Utils:GetCleanedWeaponData()
                 params[2] = index
                 params[3] = data
-                SendMessage(self, set_equipped_weapon, managers.blackmarket:beardlib_weapon_string(selection_index) .. "|" .. current_outfit_version)
-            else              
+                SendMessage(self, set_equipped_weapon, managers.blackmarket:beardlib_weapon_string(selection_index) .. "|" .. current_weapon_version)
+            else
 				local factory_id = PlayerInventory._get_weapon_name_from_sync_index(params[2])
 				local blueprint = managers.weapon_factory:unpack_blueprint_from_string(factory_id, params[3])
 				local wep = tweak_data.weapon[managers.weapon_factory:get_weapon_id_by_factory_id(factory_id)]
@@ -195,7 +196,7 @@ Hooks:Add("NetworkReceivedData", send_outfit_id, function(sender, id, data)
 end)
 
 Hooks:Add("NetworkReceivedData", set_equipped_weapon, function(sender, id, data)
-    --[[if id == set_equipped_weapon then
+    if id == set_equipped_weapon then
         local peer = managers.network:session():peer(sender)
         if peer then
             if data == "" or not data then
@@ -205,11 +206,11 @@ Hooks:Add("NetworkReceivedData", set_equipped_weapon, function(sender, id, data)
                 peer:set_equipped_weapon_beardlib(str[1], str[2])
             end
         end
-    end--]]
+    end
 end)
 
 function NetworkPeer:set_equipped_weapon_beardlib(weapon_string, outfit_version)
-    if outfit_version ~= current_outfit_version then
+    if outfit_version ~= current_weapon_version then
         return
     end
 
@@ -226,11 +227,16 @@ function NetworkPeer:set_equipped_weapon_beardlib(weapon_string, outfit_version)
             --Goes through each part and checks if the part can be added
             for _, part in pairs(weapon.blueprint) do
                 for _, uses_part in pairs(npc_weapon.uses_parts) do
-                    if string.key(uses_part) == part then
+                    if CRC32Hash(uses_part) == tonumber(part) then
                         local ins = true
+                        local tweak = tweak_data.weapon.factory.parts[uses_part]
+                        if tweak.custom and not tweak.supports_sync then
+                            BeardLib:log("Part %s does not support synching", tostring(uses_part))
+                            return --This waapon has problematic parts!
+                        end
                         for i, blueprint_part in pairs(blueprint) do
-                            if blueprint_part == uses_part then 
-                                ins = false 
+                            if blueprint_part == uses_part then
+                                ins = false
 							elseif (fac.parts[blueprint_part] and fac.parts[uses_part]) and fac.parts[blueprint_part].type == fac.parts[uses_part].type then
                                 blueprint[i] = uses_part
                                 ins = false
@@ -243,8 +249,9 @@ function NetworkPeer:set_equipped_weapon_beardlib(weapon_string, outfit_version)
                     end
                 end
             end
-        
-            inv:add_unit_by_factory_name(id, true, true, managers.weapon_factory:blueprint_to_string(id, blueprint), weapon.cosmetics or self:cosmetics_string_from_peer(peer, weapon.id))
+
+            managers.weapon_factory:set_use_thq_weapon_parts(true) -- Force THQ if we are dealing with custom weapons.
+            inv:add_unit_by_factory_name(id, true, true, managers.weapon_factory:blueprint_to_string(id, blueprint), weapon.cosmetics or inv:cosmetics_string_from_peer(peer, weapon.id) or "")
         end
     else
         self._last_beardlib_weapon_string = nil

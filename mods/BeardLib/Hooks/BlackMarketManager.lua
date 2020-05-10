@@ -119,7 +119,7 @@ function BlackMarketManager:beardlib_weapon_string(selection_index)
 	if equipped then
 		local blueprint = {}
 		for _, part in pairs(equipped.blueprint) do
-			table.insert(blueprint, string.key(part))
+			table.insert(blueprint, CRC32Hash(part))
 		end
 		s = s .. " " .. equipped.factory_id .. " " .. table.concat(blueprint, "_")
 	else
