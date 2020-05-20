@@ -10,7 +10,7 @@ function ModulesModule:Load(config, prev_dir)
 				dofile(Path:Combine(dir, moodule.file))
 				local type_name = moodule.type_name
 				local object_name = moodule.name or type_name.."Module"
-	
+
 				if object_name then
 					if type_name then
 						if _G[object_name] then

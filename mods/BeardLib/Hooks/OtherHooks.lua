@@ -114,7 +114,7 @@ elseif F == "setup" then
 	end)
 elseif F == "missionmanager" then
 	for _, name in ipairs(BeardLib.config.mission_elements) do 
-		dofile(BeardLib.config.classes_dir .. "Elements/Element" .. name .. ".lua") 
+		dofile(Path:Combine(BeardLib.config.classes_dir, "Elements", "Element"..name..".lua"))
 	end
 
 	local add_script = MissionManager._add_script

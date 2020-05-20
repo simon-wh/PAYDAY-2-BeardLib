@@ -4,11 +4,10 @@
 	"author" : "GREAT BIG BUSHY BEARD & Luffy",
 	"contact" : "simon@modworkshop.net",
 	"priority" : 500,
-	"version" : "3.0x",
-	"blt_version" : 2.0,
+	"version" : "4.X",
 	"undisablable" : true,
 	"color" : "0 0.44 1",
-	"image" : "Assets/guis/textures/beardlib_logo.texture",
+	"image" : "Assets/guis/textures/beardlib_logo.png",
 	"hooks" : [
 		{"hook_id" : "core/lib/system/coresystem", "script_path" : "Core.lua"},
 		{"hook_id" : "core/lib/system/coresystem", "script_path" : "Hooks/CoreSystem.lua"}

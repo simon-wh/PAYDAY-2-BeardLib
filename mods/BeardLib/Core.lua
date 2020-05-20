@@ -2,31 +2,32 @@ if BeardLib then
 	return
 end
 
-BeardLib = {}
-local self = BeardLib
+BeardLib = {
+	Name = "BeardLib",
+	ModPath = ModPath,
+	SavePath = SavePath
+}
 
-self.Name = "BeardLib"
-self.ModPath = ModPath
-self.SavePath = SavePath
-self.sequence_mods = {}	
-self.Frameworks = {}
-self.MusicMods = {}
-self.managers = {}	
-self.modules = {}
-self.Items = {}
-self.Mods = {}
-
-self._call_next_update = {}
-self._paused_updaters = {}
-self._updaters = {}
-self._errors = {}
-self._modules = {}
-
-function self:Init()
+function BeardLib:Init()
 	Global.beardlib_checked_updates = Global.beardlib_checked_updates or {}
 
+	self._call_next_update = {}
+	self._paused_updaters = {}
+	self._updaters = {}
+	self._errors = {}
+	self._modules = {}
+	self.sequence_mods = {}
+	self.Frameworks = {}
+	self.MusicMods = {}
+	self.managers = {}
+	self.modules = {}
+	self.Items = {}
+	self.Mods = {}
+
 	dofile(ModPath.."Classes/Utils/FileIO.lua")
-	self._config = FileIO:ReadConfig(ModPath.."Config.xml", self)
+	dofile(ModPath.."Classes/Utils/Utils.lua")
+	dofile(ModPath.."Classes/Utils/Path.lua")
+	self._config = FileIO:ReadConfig(ModPath.."main.xml", self)
 	self.config = self._config
 
 	FileIO:MakeDir(self._config.maps_dir)
@@ -60,56 +61,67 @@ function self:Init()
 	self:RegisterTweak()
 end
 
-function self:LoadClasses()
-	for _, clss in ipairs(self._config.classes) do
-		local p = self._config.classes_dir .. clss.file
-		self:DevLog("Loading class", tostring(p))
-		local obj = loadstring("--"..p.. "\n" .. io.open(p):read("*all"))()
-		if clss.manager and obj then
-			self.managers[clss.manager] = obj
-		end
-	end
+function BeardLib:LoadClasses(config, prev_dir)
+	config = config or self._config.classes
+	local dir = Path:CombineDir(prev_dir or self._config.classes_dir, config.directory)
+    for _, c in ipairs(config) do
+		if c._meta == "class" then
+			self:DevLog("Loading class", tostring(p))
+			dofile(Path:Combine(dir, c.file))
+		elseif c._meta == "classes" then
+			self:LoadClasses(c, dir)
+        end
+    end
 end
 
-function self:LoadModules()
-	local modules = FileIO:GetFiles(self._config.modules_dir)
+function BeardLib:LoadModules(dir)
+	dir = dir or self._config.modules_dir
+	local modules = FileIO:GetFiles(dir)
 	if modules then
 		for _, mdle in pairs(modules) do
-			dofile(self._config.modules_dir .. mdle)
+			dofile(Path:Combine(dir, mdle))
+		end
+		local folders = FileIO:GetFolders(dir)
+		for _, cat in pairs(folders) do
+			self:LoadModules(Path:CombineDir(dir, cat))
 		end
 	end
 end
 
-function self:LoadLocalization()
+function BeardLib:LoadLocalization()
 	local languages = {}
-	for i, file in pairs(FileIO:GetFiles(self._config.localization_dir)) do
+	for _, file in pairs(FileIO:GetFiles(self._config.localization_dir)) do
 		table.insert(languages, {_meta = "localization", file = file, language = Path:GetFileNameWithoutExtension(file)})
 	end
 	languages.directory = Path:GetFileNameWithoutExtension(self._config.localization_dir)
 	LocalizationModule:new(self, languages)
 end
 
-function self:AddUpdater(id, clbk, paused)
+function BeardLib:AddUpdater(id, clbk, paused)
 	self._updaters[id] = clbk
 	if paused then
 		self._paused_updaters[id] = clbk
 	end
 end
 
-function self:RemoveUpdater(id)
+function BeardLib:RemoveUpdater(id)
 	self._updaters[id] = nil
 	self._paused_updaters[id] = nil
 end
 
-function self:CallOnNextUpdate(func, only_unpaused, only_paused)
+function BeardLib:CallOnNextUpdate(func, only_unpaused, only_paused)
 	table.insert(self._call_next_update, {func = func, only_unpaused = only_unpaused, only_paused = only_paused})
 end
 
-function self:RegisterFramework(name, clss)
+function BeardLib:RegisterFramework(name, clss)
 	self.Frameworks[name] = clss
 end
 
-function self:RegisterModule(key, module)
+function BeardLib:RegisterManager(key, manager)
+	self.managers[key] = manager
+end
+
+function BeardLib:RegisterModule(key, module)
 	if not key or type(key) ~= "string" then
 		self:log("[ERROR] BeardLib:RegisterModule parameter #1, string expected got %s", key and type(key) or "nil")
 	end
@@ -122,7 +134,7 @@ function self:RegisterModule(key, module)
 	end
 end
 
-function self:RegisterTweak()
+function BeardLib:RegisterTweak()
 	TweakDataHelper:ModifyTweak({
 		name_id = "bm_global_value_mod",
 		desc_id = "menu_l_global_value_mod",
@@ -139,26 +151,23 @@ function self:RegisterTweak()
 
 	TweakDataHelper:ModifyTweak({
 		free = true,
-		content = {
-			loot_drops = {},
-			upgrades = {}
-		}
+		content = {loot_drops = {}, upgrades = {}}
 	}, "dlc", "mod")
 end
 
 -- kept for compatibility with mods designed for older BeardLib versions --
-function self:ReplaceScriptData(replacement, replacement_type, target_path, target_ext, options)
+function BeardLib:ReplaceScriptData(replacement, replacement_type, target_path, target_ext, options)
 	options = type(options) == "table" and options or {}
 	FileManager:ScriptReplaceFile(target_ext, target_path, replacement, table.merge(options, { type = replacement_type, mode = options.merge_mode }))
 end
 
-function self:Update(t, dt)
+function BeardLib:Update(t, dt)
 	for _, manager in pairs(self.managers) do
 		if manager.Update then
 			manager:Update(t, dt)
 		end
 	end
-	for id, beardlib_update in pairs(self._updaters) do
+	for _, beardlib_update in pairs(self._updaters) do
 		beardlib_update(t, dt)
 	end
 	for _, call in pairs(self._call_next_update) do
@@ -169,13 +178,13 @@ function self:Update(t, dt)
 	self._call_next_update = {}
 end
 
-function self:PausedUpdate(t, dt)
+function BeardLib:PausedUpdate(t, dt)
 	for _, manager in pairs(self.managers) do
 		if manager.Update then
 			manager:Update(t, dt, true)
 		end
 	end
-	for id, beardlib_paused_update in pairs(self._paused_updaters) do
+	for _, beardlib_paused_update in pairs(self._paused_updaters) do
 		beardlib_paused_update(t, dt)
 	end
 	for _, call in pairs(self._call_next_update) do
@@ -186,18 +195,18 @@ function self:PausedUpdate(t, dt)
 	self._call_next_update = {}
 end
 
-function self:DevLog(str, ...)
+function BeardLib:DevLog(str, ...)
 	if false then
 		self:log(str, ...)
 	end
 end
 
-function self:ModError(mod, str, ...)
+function BeardLib:ModError(mod, str, ...)
 	self._errors[mod.ModPath] = self._errors[mod.ModPath] or {}
 	table.insert(self._errors[mod.ModPath], string.format(str, ...))
 end
 
-function self:ShowErrorsDialog()
+function BeardLib:ShowErrorsDialog()
 	local loc = managers.localization
 	BeardLib.managers.dialog:Simple():Show({
 		force = true,
@@ -258,22 +267,22 @@ function require(...)
 	return res
 end
 
-self:Init()
+BeardLib:Init()
 
-Hooks:Add("GameSetupPauseUpdate", "BeardLibGameSetupPausedUpdate", ClassClbk(self, "PausedUpdate"))
-Hooks:Add("GameSetupUpdate", "BeardLibGameSetupUpdate", ClassClbk(self, "Update"))
-Hooks:Add("MenuUpdate", "BeardLibMenuUpdate", ClassClbk(self, "Update"))
+Hooks:Add("GameSetupPauseUpdate", "BeardLibGameSetupPausedUpdate", ClassClbk(BeardLib, "PausedUpdate"))
+Hooks:Add("GameSetupUpdate", "BeardLibGameSetupUpdate", ClassClbk(BeardLib, "Update"))
+Hooks:Add("MenuUpdate", "BeardLibMenuUpdate", ClassClbk(BeardLib, "Update"))
 
-Hooks:Add("MenuManagerInitialize", "BeardLibCreateMenuHooks", function(mself)
-    managers.menu = managers.menu or mself
-    Hooks:Call("BeardLibCreateCustomMenus", mself)
-    Hooks:Call("BeardLibMenuHelperPlusInitMenus", mself)
-	Hooks:Call("BeardLibCreateCustomNodesAndButtons", mself)
+Hooks:Add("MenuManagerInitialize", "BeardLibCreateMenuHooks", function(self)
+    managers.menu = managers.menu or self
+    Hooks:Call("BeardLibCreateCustomMenus", self)
+    Hooks:Call("BeardLibMenuHelperPlusInitMenus", self)
+	Hooks:Call("BeardLibCreateCustomNodesAndButtons", self)
 
-    self.managers.dialog:Init()
+    BeardLib.managers.dialog:Init()
 end)
 
-Hooks:Add("MenuManagerOnOpenMenu", "BeardLibShowErrors", function(mself, menu)
+Hooks:Add("MenuManagerOnOpenMenu", "BeardLibShowErrors", function(self, menu)
 	if menu == "menu_main" and not LuaNetworking:IsMultiplayer() then
 		if not BeardLib.Options:GetValue("ShowErrorsDialog") then
 			return

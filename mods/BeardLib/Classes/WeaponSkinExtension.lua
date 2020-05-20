@@ -4,7 +4,6 @@ WeaponSkinExtension = WeaponSkinExtension or class()
 WeaponSkinExtension.TEXTURE_FILE_TYPE = "texture"
 
 function WeaponSkinExtension:init(asset_path, skin_id)
-
     if not asset_path or not SystemFS:exists(asset_path) then
         log("WeaponSkinExtension - [ERROR] Asset directory at '" .. tostring(asset_path) .. "' do not exist.")
         return

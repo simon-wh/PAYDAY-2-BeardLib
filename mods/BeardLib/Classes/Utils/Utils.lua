@@ -484,7 +484,7 @@ function Utils:ModLoaded(name)
     local mod = self:FindMod(name)
     return mod and mod:IsEnabled() or false
 end
- 
+
 function Utils:FindMod(name)
     for _, mod in pairs(BeardLib.Mods) do
         if mod.Name == name then

@@ -1,0 +1,190 @@
+<table
+	main_menu="BeardLibMainMenu"
+	localization_dir="$ModPath$Localization"
+	maps_dir="Maps"
+	hooks_dir="$ModPath$Hooks/"
+	modules_dir="$ModPath$Modules/"
+	classes_dir="$ModPath$Classes/"
+	assets_dir="$ModPath$Assets/"
+	image="guis/textures/beardlib_logo"
+	color="Color(0.8,0.8,0.8)"
+	auto_image_color="true"
+	mod_override_dir="assets/mod_overrides/">
+	<load_modules>
+		<AssetUpdates id="14924" version="4.0" provider="modworkshop" important="true" version_is_number="true"/>
+		<AddFiles directory="Assets">
+			<unit path="core/units/run_sequence_dummy/run_sequence_dummy" force_if_not_loaded="true"/>
+			<object path="core/units/run_sequence_dummy/run_sequence_dummy" force_if_not_loaded="true"/>
+			<sequence_manager path="core/units/run_sequence_dummy/run_sequence_dummy" force_if_not_loaded="true"/>
+			<physic_effect path="physic_effects/push_sphere" force_if_not_loaded="true"/>
+			<unit path="core/units/cubemap_gizmo/cubemap_gizmo" force_if_not_loaded="true"/>
+			<object path="core/units/cubemap_gizmo/cubemap_gizmo" force_if_not_loaded="true"/>
+			<model path="core/units/cubemap_gizmo/cubemap_gizmo" force_if_not_loaded="true"/>
+			<cooked_physics path="core/units/cubemap_gizmo/cubemap_gizmo" force_if_not_loaded="true"/>
+			<png path="guis/textures/menu_ui_icons"/>
+			<png path="guis/textures/beardlib_logo"/>
+			<png path="guis/textures/achievement_trophy_white"/>
+			<png path="guis/textures/achievement_package_default"/>
+			<png path="guis/textures/checkmark"/>
+		</AddFiles>
+		<Options build_menu="false" auto_load="true">
+			<options>
+				<option name="ShowImages" type="boolean" default_value="true"/>
+				<option name="MenuColor" type="color" default_value="Color('007af3')"/>
+				<option name="ImportantNotice" type="boolean" default_value="true"/>
+				<option name="ShowErrorsDialog" type="boolean" default_value="true"/>
+				<option name="DevMode" type="boolean" default_value="false"/>
+				<option name="LogSounds" type="boolean" default_value="false"/>
+				<option name="OptimizedMusicLoad" type="boolean" default_value="true"/>
+				<option name="DisabledMods" type="table">
+					<default_value/>
+				</option>
+				<option name="IgnoredUpdates" type="table">
+					<default_value/>
+				</option>
+			</options>
+		</Options>	
+		<Hooks directory="Hooks">
+			<hook source_file="lib/units/beings/player/states/vr/hand/playerhandstatemelee" file="Fixes.lua"/>
+			<hook source_file="lib/network/base/handlers/connectionnetworkhandler" file="Fixes.lua"/>
+			<hook source_file="core/lib/managers/menu/items/coremenuitemslider" file="Fixes.lua"/>
+			<hook source_file="core/lib/managers/coresoundenvironmentmanager" file="Fixes.lua"/>
+			<hook source_file="core/lib/managers/mission/coreelementinstance" file="Fixes.lua"/>
+			<hook source_file="core/lib/managers/coreworldinstancemanager" file="Fixes.lua"/>
+			<hook source_file="lib/managers/mission/elementvehiclespawner" file="Fixes.lua"/>
+			<hook source_file="lib/managers/mission/elementinteraction" file="Fixes.lua"/>
+			<hook source_file="lib/units/beings/player/playermovement" file="Fixes.lua"/>
+			<hook source_file="lib/units/beings/player/playerdamage" file="Fixes.lua"/>
+			<hook source_file="lib/units/weapons/raycastweaponbase" file="Fixes.lua"/>
+			<hook source_file="lib/managers/menu/crewmanagementgui" file="Fixes.lua"/>
+			<hook source_file="lib/states/ingamewaitingforplayers" file="Fixes.lua"/>
+			<hook source_file="lib/managers/weaponfactorymanager" file="Fixes.lua"/>
+			<hook source_file="lib/managers/blackmarketmanager" file="Fixes.lua"/>
+			<hook source_file="lib/network/base/networkpeer" file="Fixes.lua"/>
+			<hook source_file="lib/managers/hud/vr/hudbelt" file="Fixes.lua"/>
+			<hook source_file="lib/managers/dialogmanager" file="Fixes.lua"/>
+			<hook source_file="lib/managers/dlcmanager" file="Fixes.lua"/>
+
+			<hook source_file="lib/setups/setup" file="OtherHooks.lua"/>
+			<hook source_file="lib/setups/gamesetup" file="OtherHooks.lua"/>
+			<hook source_file="lib/tweak_data/tweakdata" file="OtherHooks.lua"/>
+			<hook source_file="lib/tweak_data/tweakdatapd2" file="OtherHooks.lua"/>
+			<hook source_file="lib/managers/missionmanager" file="OtherHooks.lua"/>
+
+			<hook source_file="lib/managers/musicmanager" file="MusicManager.lua"/>
+			<hook source_file="lib/managers/menu/menuinput" file="MenuInput.lua"/>
+
+			<hooks directory="Network">
+				<hook source_file="lib/units/beings/player/huskplayermovement" file="NetworkHooks.lua"/>
+				<hook source_file="lib/units/beings/player/playerinventory" file="NetworkHooks.lua"/>
+				<hook source_file="lib/units/weapons/newraycastweaponbase" file="NetworkHooks.lua"/>
+				<hook source_file="lib/network/handlers/unitnetworkhandler" file="NetworkHooks.lua"/>
+				<hook source_file="lib/units/player_team/teamaibase" file="NetworkHooks.lua"/>
+				<hook source_file="lib/network/matchmaking/networkmatchmakingsteam" file="NetworkMatchmakingSteam.lua"/>
+				<hook source_file="lib/network/base/clientnetworksession" file="ClientNetworkSession.lua"/>
+				<hook source_file="lib/managers/crimenetmanager" file="CrimeNetManager.lua"/>
+				<hook source_file="lib/network/base/networkpeer" file="NetworkPeer.lua"/>
+				<hook source_file="lib/managers/blackmarketmanager" file="BlackMarketManager.lua"/>
+			</hooks>
+
+			<hooks directory="World">
+				<hook source_file="core/lib/managers/viewport/environment/coreenvironmentmanager" file="EnvironmentManager.lua"/>
+				<hook source_file="core/lib/utils/dev/editor/coreworlddefinition" file="CoreWorldDefinition.lua"/>
+				<hook source_file="lib/managers/gameplaycentralmanager" file="GamePlayCentralManager.lua"/>
+				<hook source_file="core/lib/managers/coresequencemanager" file="CoreSequenceManager.lua"/>
+				<hook source_file="lib/managers/killzonemanager" file="KillzoneManager.lua"/>
+			</hooks>
+
+			<hooks directory="UI">
+				<hook source_file="lib/managers/menu/menucomponentmanager" file="BeardLibModsMenuButton.lua"/>
+				<hook source_file="lib/managers/menu/scrollablepanel" file="ScrollablePanel.lua"/>
+				<hook source_file="lib/managers/systemmenumanager" file="SystemMenuManager.lua"/>
+				<hook source_file="lib/managers/menumanager" file="MenuManager.lua"/>
+			</hooks>
+		</Hooks>
+	</load_modules>
+	<classes>
+		<class file="ModCore.lua"/>
+		<class file="MixedSoundSource.lua"/>
+		<class file="ModuleBase.lua"/>
+		<class file="WeaponSkinExtension.lua"/>
+		<class file="Deprecated.lua"/>
+
+		<classes directory="Utils">
+			<class file="TweakDataHelper.lua"/>
+			<class file="CRC32.lua"/>
+			<class file="Table.lua"/>
+			<class file="String.lua"/>
+			<class file="Math.lua"/>
+			<class file="Input.lua"/>
+			<class file="Hooks.lua"/>
+			<class file="MenuHelperPlus.lua"/>
+			<class file="JSON.lua"/>
+			<class file="XML.lua"/>
+			<class file="Builders.lua"/>
+		</classes>
+
+		<classes directory="UI">
+			<class file="CustomAchievementMenu.lua"/>
+			<class file="BeardLibModsMenu.lua"/>
+
+			<classes directory="Dialogs">
+				<class file="MenuDialog.lua"/>
+				<class file="FileBrowserDialog.lua"/>
+				<class file="ColorDialog.lua"/>
+				<class file="ListDialog.lua"/>
+				<class file="InputDialog.lua"/>
+				<class file="SelectListDialog.lua"/>
+				<class file="SimpleListDialog.lua"/>
+				<class file="DownloadDialog.lua"/>
+				<class file="SimpleSelectListDialog.lua"/>
+			</classes>
+			<classes directory="MenuUI">
+				<class file="MenuUI.lua"/>
+				<class file="TextBoxBase.lua"/>
+				<class file="ContextMenu.lua"/>
+				<class file="Item.lua"/>
+				<class file="Menu.lua"/>
+				<class file="Holder.lua"/>
+				<class file="MenuAlignMethods.lua"/>
+				<class file="KeyBind.lua"/>
+				<class file="Group.lua"/>
+				<class file="NoteBook.lua"/>
+				<class file="PopupMenu.lua"/>
+				<class file="ImageButton.lua"/>
+				<class file="Toggle.lua"/>
+				<class file="ComboBox.lua"/>
+				<class file="Slider.lua"/>
+				<class file="TextBox.lua"/>
+				<class file="ColorTextBox.lua"/>
+			</classes>
+		</classes>
+
+		<classes directory="Frameworks">
+			<class file="FrameworkBase.lua"/>
+			<class file="MapFramework.lua"/>
+			<class file="AddFramework.lua"/>
+		</classes>
+
+		<classes directory="Managers">
+			<class file="CustomAchievementManager.lua"/>
+			<class file="MenuUIManager.lua"/>
+			<class file="MenuDialogManager.lua"/>
+			<class file="CustomPackageManager.lua"/>
+			<class file="CustomSoundManager.lua"/>
+			<class file="FileManager.lua"/>
+			<class file="ModAssetUpdateManager.lua"/>
+		</classes>
+	</classes>
+	<mission_elements>
+		<value_node value="MoveUnit"/>
+		<value_node value="RotateUnit"/>
+		<value_node value="Environment"/>
+		<value_node value="PushInstigator"/>
+		<value_node value="CustomSound"/>
+		<value_node value="ExecuteWithCode"/>
+		<value_node value="OverrideInstigator"/>
+		<value_node value="XAudio"/>
+		<value_node value="BLCustomAchievement"/>
+	</mission_elements>
+</table>

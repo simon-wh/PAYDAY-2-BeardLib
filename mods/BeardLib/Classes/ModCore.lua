@@ -12,7 +12,7 @@ function ModCore:init(config_path, load_modules)
     self.Priority = 1
 	self.SavePath = SavePath
     self._modules = {}
-    
+
     local disabled_mods = BeardLib.Options:GetValue("DisabledMods")
     self._blt_mod = config_path:find(FrameworkBase._format) == 1
 
@@ -28,7 +28,7 @@ function ModCore:init(config_path, load_modules)
 			return
 		end
 	end
-	
+
 	self:LoadConfigFile(config_path)
     table.insert(BeardLib.Mods, self)
     if load_modules == nil or load_modules then
@@ -46,20 +46,20 @@ function ModCore:PostInit(ignored_modules)
 	if not self._disabled and self._core_class then
 		self._core_class:PreInit()
     end
-    
+
     ignored_modules = ignored_modules or self._config.ignored_post_init_modules
     for _, module in pairs(self._modules) do
         if (not ignored_modules or not table.contains(ignored_modules, module._name)) then
             if module._config.auto_post_init ~= false then
                 local success, err = pcall(function() module:PostInit() end)
-                
+
                 if not success then
                     self:Err("An error occurred on the post initialization of %s. Error:\n%s", module._name, tostring(err))
                 end
             end
         end
     end
-    
+
     if self._disabled then
         return
     end
@@ -67,7 +67,7 @@ function ModCore:PostInit(ignored_modules)
 	if self._core_class then
 		self._core_class:Init()
 	end
-	
+
 	local post_init = self._config.post_init_clbk or self._config.post_init
     if post_init then
         local clbk = self:StringToCallback(post_init)
@@ -84,7 +84,7 @@ function ModCore:LoadConfigFile(path)
 
     self.Name = config.name or tostring(table.remove(string.split(self.ModPath, "/")))
     self.Priority = tonumber(config.priority) or self.Priority
-    
+
     if config.min_lib_ver then
         local ver = math.round_with_precision(tonumber(config.min_lib_ver), 4)
         if ver > BeardLib.Version then
@@ -104,7 +104,7 @@ function ModCore:LoadConfigFile(path)
         end
     end
 
-        
+
     local path = Path:Combine(self.ModPath, "icon.png")
     if FileIO:Exists(path) then
         local ingame_path = Path:Combine("icons", self.ModPath:key())
@@ -127,11 +127,7 @@ function ModCore:PreInitModules()
 	end
 end
 
-local load_first = {
-	["Hooks"] = true,
-	["Classes"] = true
-}
-
+local load_first = {Hooks = true, Classes = true}
 local updates = "AssetUpdates"
 
 function ModCore:InitModules()
@@ -146,9 +142,9 @@ function ModCore:InitModules()
             self._core_class:PreModuleInit()
         end
 	end
-	
+
 	local order = self._config.load_first or load_first
-	
+
 	table.sort(self._config, function(a,b)
 		local a_ok = type(a) == "table" and order[a._meta] or false
 		local b_ok = type(b) == "table" and order[b._meta] or false
@@ -162,7 +158,7 @@ function ModCore:InitModules()
 	if self._auto_post_init then
 		self:PostInit()
     end
-    
+
     if self._disabled and self.global and _G[self.global] then
         rawset( _G, self.global, nil)
     end

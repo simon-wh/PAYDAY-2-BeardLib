@@ -13,7 +13,7 @@ function ModuleBase:init(mod, config)
     else
         self._config = config
     end
-    
+
     self.Priority = tonumber(self._config.priority) or 1
 
 	if self._config.init_clbk then
@@ -37,9 +37,7 @@ function ModuleBase:init(mod, config)
     return true
 end
 
-function ModuleBase:Load()
-
-end
+function ModuleBase:Load() end
 
 function ModuleBase:PostInit()
 	local post_init = self._config.post_init_clbk or self._config.post_init
