@@ -9,8 +9,6 @@ function AddFilesModule:Load()
     self:LoadPackageConfig(self._directory, self._config)
 end
 
-local IGNORED_FILES = {ogg = true, mtl = true, obj = true, fbx = true}
-
 local SORT_TABLE = {
     texture = 1,
     cooked_physics = 2,
@@ -28,7 +26,6 @@ function AddFilesModule:GenerateConfig()
         config = {}
     end
     local directory = config.full_directory or (config.config and Path:CombineDir(self._mod.ModPath, config.directory)) or self._directory
-
     local data
     local gen_add = Path:Combine(self._mod.ModPath, config.file or "gen_add.xml")
     if not config.dev and FileIO:Exists(gen_add) then
