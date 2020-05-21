@@ -31,7 +31,7 @@ function AddFilesModule:GenerateConfig()
     local data
     local gen_add = Path:Combine(self._mod.ModPath, config.file or "gen_add.xml")
     if not config.dev and FileIO:Exists(gen_add) then
-        data = FileIO:ReadScriptData(file_path, "custom_xml")
+        data = FileIO:ReadScriptData(gen_add, "custom_xml")
     else
         data = self:LoopFiles(directory)
         table.sort(data, function(a, b)
