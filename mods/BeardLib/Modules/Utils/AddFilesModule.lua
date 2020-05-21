@@ -24,6 +24,7 @@ local SORT_TABLE = {
 function AddFilesModule:GenerateConfig()
     local config = self._config.auto_generate
     if type(config) ~= "table" then
+        self._config.auto_generate = {}
         config = {}
     end
     local directory = config.full_directory or (config.config and Path:CombineDir(self._mod.ModPath, config.directory)) or self._directory
