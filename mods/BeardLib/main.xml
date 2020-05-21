@@ -21,11 +21,11 @@
 			<object path="core/units/cubemap_gizmo/cubemap_gizmo" force_if_not_loaded="true"/>
 			<model path="core/units/cubemap_gizmo/cubemap_gizmo" force_if_not_loaded="true"/>
 			<cooked_physics path="core/units/cubemap_gizmo/cubemap_gizmo" force_if_not_loaded="true"/>
-			<png path="guis/textures/menu_ui_icons"/>
-			<png path="guis/textures/beardlib_logo"/>
-			<png path="guis/textures/achievement_trophy_white"/>
-			<png path="guis/textures/achievement_package_default"/>
-			<png path="guis/textures/checkmark"/>
+			<texture path="guis/textures/menu_ui_icons"/>
+			<texture path="guis/textures/beardlib_logo"/>
+			<texture path="guis/textures/achievement_trophy_white"/>
+			<texture path="guis/textures/achievement_package_default"/>
+			<texture path="guis/textures/checkmark"/>
 		</AddFiles>
 		<Options build_menu="false" auto_load="true">
 			<options>
@@ -104,6 +104,7 @@
 		</Hooks>
 	</load_modules>
 	<classes>
+		<class file="Constants.lua"/>
 		<class file="ModCore.lua"/>
 		<class file="MixedSoundSource.lua"/>
 		<class file="ModuleBase.lua"/>

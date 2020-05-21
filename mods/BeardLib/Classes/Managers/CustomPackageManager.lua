@@ -223,9 +223,9 @@ function C:LoadPackageConfig(directory, config, temp, skip_use_clbk)
                     else
                         self:Err("File does not exist! %s", tostring(file_path_ext))
                     end
-                else
+                elseif typ ~= "auto_generate" then
                     self:Err("Node in %s does not contain a definition for both type and path", tostring(directory))
-                end                
+                end
             end
         end
     end
