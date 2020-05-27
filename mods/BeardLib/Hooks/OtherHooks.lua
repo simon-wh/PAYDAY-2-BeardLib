@@ -5,7 +5,7 @@ if F == "tweakdata" then
 	TweakDataHelper:Apply()
 	local function icon_and_unit_check(list, folder, friendly_name, uses_texture_val, only_check_units)
 		for id, thing in pairs(list) do
-			if thing.custom and not id:ends("_npc") then
+			if thing.custom and not id:ends("_npc") and not id:ends("_crew") then
 				if not only_check_units and not thing.hidden then
 					if folder ~= "mods" or thing.pcs then
 						local guis_catalog = "guis/"
