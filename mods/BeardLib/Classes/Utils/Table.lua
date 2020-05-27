@@ -110,9 +110,9 @@ function table.search(tbl, search_term, ignore)
                 local term_split = string.split(meta_part, "=")
                 search_meta.vars[term_split[1]] = assert(loadstring("return " .. term_split[2]))()
                 if search_meta.vars[term_split[1]] == nil then
-                    BeardLib:log(string.format("[ERROR] An error occurred while trying to parse the value %s", term_split[2]))
+                    BeardLib:Err("An error occurred while trying to parse the value %s", term_split[2])
                 end
-            elseif not search_meta._meta and meta_part ~= "table" then --<table> has no meta so leave it empty.
+            elseif not search_meta._meta and meta_part ~= "*" then -- '*' will match all tables regardless of meta.
                 search_meta._meta = meta_part
             end
         end
@@ -124,10 +124,16 @@ function table.search(tbl, search_term, ignore)
             if type(sub) == "table" and (not ignore or not ignore[sub]) then
 				local valid = true
 				
-				-- Let's check that this search has a meta and one that equals to what we are searching for.
-                if search_meta._meta and sub._meta ~= search_meta._meta then
-                    valid = false
-                end
+				--Check if metas match
+                if search_meta._meta then
+                    if search_meta._meta == "table" then --If the meta is table then make sure the table has no meta.
+                        if sub._meta then
+                            valid = false
+                        end
+                    elseif search_meta._meta ~= sub._meta then --Otherwise, just check if the metas are equal or else it's not valid.
+                        valid = false
+                    end
+				end
 
 				--Let's check our variables. If one isn't equals then it's not a match.
                 for k, v in pairs(search_meta.vars) do
@@ -150,7 +156,7 @@ function table.search(tbl, search_term, ignore)
             end
 		end
 		--If nothing was found then there's no match. Return null.
-        if not found_tbl then
+		if not found_tbl then
             return nil
         end
 	end
