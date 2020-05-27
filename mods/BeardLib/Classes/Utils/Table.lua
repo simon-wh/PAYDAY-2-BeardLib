@@ -67,57 +67,79 @@ function table.add(t, items)
     return t
 end
 
+
 --[[
     Does a dynamic search on the table. Table being an XML table containing _meta values.
     To navigate through the table you'd write the `search_term` like this: "meta1/meta2/meta3".
     If you want to find a specific meta with value set to something you can do: "meta1/meta2;param1=true"
-    The function returns you first the index of the result, then the table itself and then the table it's contained in.
+	The function returns you first the index of the result, then the table itself and then the table it's contained in.
+	ignore table used to ignore results so you can find more matches.
 ]]
+function table.search(tbl, search_term, ignore)
+    local parent_tbl, index
 
-function table.search(tbl, search_term)
-    local search_terms = {search_term}
-    local parent_tbl
-
+    --metas_to_find is a table that split the "search_term" parameter into metas we want to find.
+    --the metas are separated by a slash.
+    --If we are searching for just one meta we don't need to do a split.
+    local metas_to_find
     if string.find(search_term, "/") then
-        search_terms = string.split(search_term, "/")
+        metas_to_find = string.split(search_term, "/")
+    else
+        metas_to_find = {search_term}
     end
 
-    local index
-    for _, term in pairs(search_terms) do
-        local term_parts = {term}
-        if string.find(term, ";") then
-            term_parts = string.split(term, ";")
+    --Now let's loop through the metas we want to find
+    for _, meta in pairs(metas_to_find) do
+        local search_meta = {vars = {}}
+        local meta_parts
+
+		--Now let's say you want to find a meta WITH a specific variable or variables?
+		--That's where the semicolon variables come in play. You write meta1/meta2;var=x
+		--And like that you can find meta2 inside meta1 that has a variable called "var" set to x.
+        if string.find(meta, ";") then
+            meta_parts = string.split(meta, ";")
+        else
+            meta_parts = {meta}
         end
-        local search_keys = {
-            params = {}
-        }
-        for _, term in pairs(term_parts) do
-            if string.find(term, "=") then
-                local term_split = string.split(term, "=")
-                search_keys.params[term_split[1]] = assert(loadstring("return " .. term_split[2]))()
-                if search_keys.params[term_split[1]] == nil then
+
+		--This is where we turn this "meta2;value1=x" into something lua can understand
+		--We store the variables inside a vars table that will be later used to chekc against tables.
+		--We also store a meta if it's not a variable.
+        for _, meta_part in pairs(meta_parts) do
+            if string.find(meta_part, "=") then
+                local term_split = string.split(meta_part, "=")
+                search_meta.vars[term_split[1]] = assert(loadstring("return " .. term_split[2]))()
+                if search_meta.vars[term_split[1]] == nil then
                     BeardLib:log(string.format("[ERROR] An error occurred while trying to parse the value %s", term_split[2]))
                 end
-            elseif not search_keys._meta then
-                search_keys._meta = term
+            elseif not search_meta._meta and meta_part ~= "table" then --<table> has no meta so leave it empty.
+                search_meta._meta = meta_part
             end
         end
 
+		--Now let's actually find the table we want.
         local found_tbl = false
-        for i, sub in ipairs(tbl) do
-            if type(sub) == "table" then
-                local valid = true
-                if search_keys._meta and sub._meta ~= search_keys._meta then
+		for i, sub in ipairs(tbl) do
+			--This has to be a table and one not in the ignore table (used in script_merge to be able to modify all of the results)
+            if type(sub) == "table" and (not ignore or not ignore[sub]) then
+				local valid = true
+				
+				-- Let's check that this search has a meta and one that equals to what we are searching for.
+                if search_meta._meta and sub._meta ~= search_meta._meta then
                     valid = false
                 end
 
-                for k, v in pairs(search_keys.params) do
+				--Let's check our variables. If one isn't equals then it's not a match.
+                for k, v in pairs(search_meta.vars) do
                     if sub[k] == nil or (sub[k] and sub[k] ~= v) then
                         valid = false
                         break
                     end
                 end
 
+				--If all goes well we found ourselves a reuslt. We may not be done yet though.
+				--The first loop stil has to through all metas we are searching for until it's done.
+				--It will loop through again the found table.
                 if valid then
                     parent_tbl = tbl
                     tbl = sub
@@ -126,11 +148,13 @@ function table.search(tbl, search_term)
                     break
                 end
             end
-        end
+		end
+		--If nothing was found then there's no match. Return null.
         if not found_tbl then
             return nil
         end
-    end
+	end
+	--Finally, return the result. This means we found a match!
     return index, tbl, parent_tbl
 end
 
@@ -177,26 +201,26 @@ local special_params = {
     "index"
 }
 
-function table.script_merge(base_tbl, new_tbl)
+function table.script_merge(base_tbl, new_tbl, ignore)
     for i, sub in pairs(new_tbl) do
         if type(sub) == "table" then
             if tonumber(i) then
                 if sub.search then
                     local mode = sub.mode
-                    local index, found_tbl, parent_tbl = table.search(base_tbl, sub.search)
+                    local index, found_tbl, parent_tbl = table.search(base_tbl, sub.search, ignore)
                     if found_tbl then
                         if not mode then
                             table.script_merge(found_tbl, sub)
                         elseif mode == "merge" then
-                            for i, tbl in pairs(sub) do
-                                if type(tbl) == "table" and tonumber(i) then
+                            for ii, tbl in pairs(sub) do
+                                if type(tbl) == "table" and tonumber(ii) then
                                     table.merge(found_tbl, tbl)
                                     break
                                 end
                             end
                         elseif mode == "replace" then
-                            for i, tbl in pairs(sub) do
-                                if type(tbl) == "table" and tonumber(i) then
+                            for ii, tbl in pairs(sub) do
+                                if type(tbl) == "table" and tonumber(ii) then
                                     parent_tbl[index] = tbl
                                     break
                                 end
@@ -208,13 +232,27 @@ function table.script_merge(base_tbl, new_tbl)
                                 parent_tbl[index] = nil
                             end
                         elseif mode == "insert" then
-                            for i, tbl in pairs(sub) do
-                                if type(tbl) == "table" and tonumber(i) then
+                            for ii, tbl in pairs(sub) do
+                                if type(tbl) == "table" and tonumber(ii) then
                                     table.insert(found_tbl, tbl)
                                     break
                                 end
-                            end
-                        end
+							end
+						elseif mode == "set_values" and type(sub[1]) == "table" then
+							for k, v in pairs(sub[1]) do
+								if tostring(v) == "null" then
+									found_tbl[k] = nil
+								else
+									found_tbl[k] = v
+								end
+							end
+						end
+						
+						if sub.repeat_search then
+							ignore = ignore or {}
+							ignore[found_tbl] = true
+							table.script_merge(base_tbl, new_tbl, ignore)
+						end
                     end
                 elseif sub.insert then --Same as below just fixes inconsistency with the stuff above. Basically, inserts the first table instead of the whole table.
                     for i, tbl in pairs(sub) do
