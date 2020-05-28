@@ -4,11 +4,12 @@ AddFilesModule.type_name = "AddFiles"
 function AddFilesModule:Load()
     self._directory = self._config.full_directory or Path:CombineDir(self._mod.ModPath, self._config.directory)
     if self._config.auto_generate then
-        self:GenerateConfig()
+        self:CheckAutoGenerateConfig(self._config.auto_generate)
     end
     self:LoadPackageConfig(self._directory, self._config)
 end
 
+--This sorting is important. Units usually depend on other files and so they must be last.
 local SORT_TABLE = {
     texture = 1,
     cooked_physics = 2,
@@ -18,8 +19,9 @@ local SORT_TABLE = {
     unit = 10
 }
 
---Goes through directory given and generates an add.xml for it.
-function AddFilesModule:GenerateConfig()
+---Checks a given auto_generate config and either loads it or generates it.
+--- @param config table
+function AddFilesModule:CheckAutoGenerateConfig(config)
     local config = self._config.auto_generate
     if type(config) ~= "table" then
         self._config.auto_generate = {}
@@ -28,7 +30,7 @@ function AddFilesModule:GenerateConfig()
     local directory = config.full_directory or (config.config and Path:CombineDir(self._mod.ModPath, config.directory)) or self._directory
     local data
     local gen_add = Path:Combine(self._mod.ModPath, config.file or "gen_add.xml")
-    if not config.dev and FileIO:Exists(gen_add) then
+    if not self._mod:GetSetting("DevelopMode") and FileIO:Exists(gen_add) then
         data = FileIO:ReadScriptData(gen_add, "custom_xml")
     else
         data = self:LoopFiles(directory)
@@ -36,36 +38,111 @@ function AddFilesModule:GenerateConfig()
             return (SORT_TABLE[a._meta] or 1) < (SORT_TABLE[b._meta] or 1)
         end)
 
-        data.directory = self._config.full_directory or self._config.directory
+        local function set_param(key)
+            data[key] = config[key] or self._config[key]
+        end
+        set_param("directory")
+        set_param("full_directory")
+        set_param("auto_cp")
+        set_param("force")
+        set_param("reload")
+        set_param("unload")
+        set_param("load")
+
         FileIO:WriteScriptData(gen_add, data, "custom_xml")
     end
     self:LoadPackageConfig(self._directory, data)
 end
 
+---Loops through all files of a path and adds them to the files table.
+---Uses the module's config to set or ignore files.
+--- @param path string
+--- @param files table
 function AddFilesModule:LoopFiles(path, files)
     files = files or {}
 
     local config = self._config.auto_generate
-    local ignore_types = config.ignore_types
-    local ignore_paths = config.ignore_paths
-    local ignore_patterns = config.ignore_patterns
+    local ignore = config.ignore
+    local set = config.set
 
     local inner_path = string.gsub(path, string.escape_special(self._directory), "")
 
     for _, file in pairs(FileIO:GetFiles(path)) do
         local splt = string.split(Path:Combine(inner_path, file), "%.")
         local file_path, typ = splt[1], splt[2]
+        local file_path_ext = file_path.."."..typ
 
-        local ignore = (ignore_types and ignore_types[typ]) or (ignore_files and ignore_files[file_path])
-        if ignore_patterns then
-            for _, pattern in pairs(ignore_patterns) do
-                if file_path:find(pattern) then
-                    ignore = true
+        if BeardLib.Constants.FileTypes[typ] == true then
+            local ignore_file = false
+            --[[
+                <ignore>
+                    <unit/> <!--Ignores type unit-->
+                    <unit path="path/to/file"/> <!--Ignores path + unit -->
+                    <table path="path/to/file"/> <!--Ignores path -->
+                    <match pattern="path/to/file"/> <!--Ignores all files matching the pattern -->
+                </ignore>
+            ]]
+            --Check ignore table. If it matches, we must ignore this file.
+            if type(ignore) == "table" then
+                for _, tbl in ipairs(ignore) do
+                    if type(tbl) == "table" then
+                        --Either a type or path + type
+                        local meta = tbl._meta
+                        if meta == "match" then
+                            if file_path_ext:find(tbl.pattern) then
+                                ignore_file = true
+                            end
+                        else
+                            if (not tbl._meta or tbl._meta == typ) and (not tbl.path or tbl.path == file_path) then
+                                ignore_file = true
+                            end
+                        end
+                    end
                 end
             end
-        end
-        if not ignore and BeardLib.Constants.FileTypes[typ] == true then
-            table.insert(files, {_meta = typ, path = file_path})
+            if not ignore_file then
+                --[[
+                    <set>
+                        <unit val="a"/> <!--Set any unit-->
+                        <unit path="path/to/file" val="b"/> <!--Set unit with path-->
+                        <table path="path/to/file" val="b"/> <!--Set any file equal to that path-->
+                        <table val="b"/> <!--Set any file-->
+                        <match pattern="path/to/file" val="c"/> <!--Set any file matching the pattern-->
+                    </set>
+                ]]
+                local data = {_meta = typ, path = file_path} --Prepare data.
+                --If we don't need to ignore this file, check if there's anything to set.
+                if type(set) == "table" then
+                    for _, tbl in ipairs(set) do
+                        if type(tbl) == "table" then
+                            --Either a type or path + type
+                            local meta = tbl._meta
+                            local merge = false
+                            if meta == "match" then
+                                if file_path_ext:find(tbl.pattern) then
+                                    merge = true
+                                end
+                            else
+                                if (not tbl._meta or tbl._meta == typ) and (not tbl.path or tbl.path == file_path) then
+                                    merge = true
+                                end
+                            end
+                            --We got a match? Alright, let's merge the data.
+                            if merge then
+                                --Just to be safe, let's clone this.
+                                local data_to_merge = clone(tbl)
+                                --Remove these as they are not allowed.
+                                data_to_merge.path = nil
+                                data_to_merge._meta = nil
+                                data_to_merge.pattern = nil
+                                table.merge(data, tbl)
+                            end
+                        end
+                    end
+                end
+
+                table.insert(files, data)
+            end
         end
     end
     for _, folder in pairs(FileIO:GetFolders(path)) do
