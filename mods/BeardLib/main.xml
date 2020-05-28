@@ -70,7 +70,6 @@
 			<hook source_file="lib/managers/missionmanager" file="OtherHooks.lua"/>
 
 			<hook source_file="lib/managers/musicmanager" file="MusicManager.lua"/>
-			<hook source_file="lib/managers/menu/menuinput" file="MenuInput.lua"/>
 
 			<hooks directory="Network">
 				<hook source_file="lib/units/beings/player/huskplayermovement" file="NetworkHooks.lua"/>
@@ -98,6 +97,7 @@
 				<hook source_file="lib/managers/menu/scrollablepanel" file="ScrollablePanel.lua"/>
 				<hook source_file="lib/managers/systemmenumanager" file="SystemMenuManager.lua"/>
 				<hook source_file="lib/managers/menumanager" file="MenuManager.lua"/>
+				<hook source_file="lib/managers/menu/menuinput" file="MenuInput.lua"/>
 			</hooks>
 		</Hooks>
 	</load_modules>
