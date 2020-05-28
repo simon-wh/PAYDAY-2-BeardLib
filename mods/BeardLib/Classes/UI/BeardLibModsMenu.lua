@@ -326,7 +326,12 @@ function BeardLibModsMenu:OpenModSettings(mod, blt_mod)
                 on_callback = ClassClbk(self, "SetModSetting", mod)
             })
             holder:Toggle({
-                name = "ShowImages",
+                name = "DevelopMode",
+                text = "beardlib_mod_develop_mode",
+                help = "beardlib_mod_develop_mode_help",
+                value = mod_settings.DevelopMode,
+                on_callback = ClassClbk(self, "SetModSetting", mod)
+            })
             holder:Toggle({
                 name = "IgnoreUpdates",
                 text = "beardlib_mod_ignore_updates",
