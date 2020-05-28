@@ -196,18 +196,20 @@ function BeardLibModsMenu:AddMod(mod, framework)
         on_callback = ClassClbk(self, "OpenModSettings", mod, blt_mod),
         position = "TopRightOffset-xy"
     })
-    
-    local txt = "beardlib_mod_type_" .. type	
+
+    local txt = "beardlib_mod_type_" .. type
+
     if not mod:Enabled() then
         text("Disabled", "[Disabled]")
     end
+
     if loc._custom_localizations[txt] then
 		text("Type", "["..loc:text("beardlib_mod_type_" .. type).."]")
 	else
 		text("Type", "["..cap(type).."]")
     end
 
-    local t = text("Title", tostring(name))
+    text("Title", tostring(name))
 
     if mod._config.author then
         text("Author", loc:text("beardlib_mod_by", {author = mod._config.author}))
@@ -220,7 +222,7 @@ function BeardLibModsMenu:AddMod(mod, framework)
         color = color:contrast():with_alpha(0.3),
         w = 0,
     })
-    
+
     local updates = mod:GetModules(ModAssetsModule.type_name)
     local main_update = updates[1]
     if main_update and main_update._data and main_update._data.provider and main_update._data.provider.page_url then
@@ -275,7 +277,7 @@ function BeardLibModsMenu:AddMod(mod, framework)
             text = "beardlib_updates_download_now"
         })
     end
-    
+
     if mod.NeedsUpdate then
         self:SetModNeedsUpdate(mod)
     else

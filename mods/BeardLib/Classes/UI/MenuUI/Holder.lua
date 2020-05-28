@@ -29,7 +29,7 @@ function Holder:_SetSize(w, h)
     if not self:alive() then
         return
 	end
-	
+
 	w = w or self.w
 	h = h or self.orig_h or self.h
 	h = math.clamp(h, self.min_height or 0, self.max_height or h)
