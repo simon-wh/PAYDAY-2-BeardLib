@@ -48,6 +48,9 @@ function AddFilesModule:CheckAutoGenerateConfig(config)
         set_param("reload")
         set_param("unload")
         set_param("load")
+        set_param("unload_on_restart")
+        set_param("force_if_not_loaded")
+        set_param("use_clbk")
 
         FileIO:WriteScriptData(gen_add, data, "custom_xml")
     end
@@ -79,7 +82,7 @@ function AddFilesModule:LoopFiles(path, files)
                     <unit/> <!--Ignores type unit-->
                     <unit path="path/to/file"/> <!--Ignores path + unit -->
                     <table path="path/to/file"/> <!--Ignores path -->
-                    <match pattern="path/to/file"/> <!--Ignores all files matching the pattern -->
+                    <table pattern="path/to/file"/> <!--Ignores all files matching the pattern -->
                 </ignore>
             ]]
             --Check ignore table. If it matches, we must ignore this file.
@@ -87,15 +90,8 @@ function AddFilesModule:LoopFiles(path, files)
                 for _, tbl in ipairs(ignore) do
                     if type(tbl) == "table" then
                         --Either a type or path + type
-                        local meta = tbl._meta
-                        if meta == "match" then
-                            if file_path_ext:find(tbl.pattern) then
-                                ignore_file = true
-                            end
-                        else
-                            if (not tbl._meta or tbl._meta == typ) and (not tbl.path or tbl.path == file_path) then
-                                ignore_file = true
-                            end
+                        if (not tbl._meta or tbl._meta == typ) and (not tbl.path or tbl.path == file_path) and (not tbl.pattern or file_path_ext:find(tbl.pattern)) then
+                            ignore_file = true
                         end
                     end
                 end
@@ -107,7 +103,7 @@ function AddFilesModule:LoopFiles(path, files)
                         <unit path="path/to/file" val="b"/> <!--Set unit with path-->
                         <table path="path/to/file" val="b"/> <!--Set any file equal to that path-->
                         <table val="b"/> <!--Set any file-->
-                        <match pattern="path/to/file" val="c"/> <!--Set any file matching the pattern-->
+                        <table pattern="path/to/file" val="c"/> <!--Set any file matching the pattern-->
                     </set>
                 ]]
                 local data = {_meta = typ, path = file_path} --Prepare data.
@@ -116,19 +112,8 @@ function AddFilesModule:LoopFiles(path, files)
                     for _, tbl in ipairs(set) do
                         if type(tbl) == "table" then
                             --Either a type or path + type
-                            local meta = tbl._meta
-                            local merge = false
-                            if meta == "match" then
-                                if file_path_ext:find(tbl.pattern) then
-                                    merge = true
-                                end
-                            else
-                                if (not tbl._meta or tbl._meta == typ) and (not tbl.path or tbl.path == file_path) then
-                                    merge = true
-                                end
-                            end
-                            --We got a match? Alright, let's merge the data.
-                            if merge then
+                            if (not tbl._meta or tbl._meta == typ) and (not tbl.path or tbl.path == file_path) and (not tbl.pattern or file_path_ext:find(tbl.pattern)) then
+                                --We got a match? Alright, let's merge the data.
                                 --Just to be safe, let's clone this.
                                 local data_to_merge = clone(tbl)
                                 --Remove these as they are not allowed.
