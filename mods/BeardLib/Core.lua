@@ -50,6 +50,8 @@ function BeardLib:Init()
 	self.LogSounds = self.Options:GetValue("LogSounds")
 	self.OptimizedMusicLoad = BeardLib.Options:GetValue("OptimizedMusicLoad")
 
+	self:MigrateModSettings()
+
 	for k, manager in pairs(self.managers) do
 		if manager.new then
 			self.managers[k] = manager:new()
@@ -236,6 +238,43 @@ function BeardLib:ShowErrorsDialog()
 			end
 		end
 	})
+end
+
+--Migrate old data (<4.0) to BeardLib 4.0'S ModSettings.
+function BeardLib:MigrateModSettings()
+    local disabled_mods = self.Options:GetValue("DisabledMods")
+	local ignored_updates = self.Options:GetValue("IgnoredUpdates")
+	local mod_settings = self.Options:GetValue("ModSettings")
+
+	local migrated = false
+	if disabled_mods and table.size(disabled_mods) > 0 then
+		for mod_path, value in pairs(disabled_mods) do
+			if mod_path ~= "_meta" then
+				if type(mod_settings[mod_path]) ~= "table" then
+					mod_settings[mod_path] = {}
+				end
+				mod_settings[mod_path].Enabled = not value
+				migrated = true
+			end
+		end
+		self.Options:SetValue("DisabledMods", {})
+	end
+	if ignored_updates and table.size(ignored_updates) > 0 then
+		for mod_path, value in pairs(ignored_updates) do
+			if mod_path ~= "_meta" then
+				if type(mod_settings[mod_path]) ~= "table" then
+					mod_settings[mod_path] = {}
+				end
+				mod_settings[mod_path].IgnoreUpdates = value
+				migrated = true
+			end
+		end
+		self.Options:SetValue("IgnoredUpdates", {})
+	end
+	if migrated then
+		self.Options:SetValue("ModSettings", mod_settings)
+		self.Options:Save()
+	end
 end
 
 Hooks:Register("BeardLibAddCustomWeaponModsToWeapons")

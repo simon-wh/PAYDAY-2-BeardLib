@@ -6,19 +6,8 @@ function ModAssetUpdateManager:init()
     self:load_manager_file()
 end
 
-function ModAssetUpdateManager:SetUpdatesIgnored(mod, ignored)
-    local ignored_updates = BeardLib.Options:GetValue("IgnoredUpdates")
-    ignored_updates[mod.ModPath] = ignored
-    BeardLib.Options:Save()
-end
-
 function ModAssetUpdateManager:UpdatesIgnored(mod)
-    local ignored_updates = BeardLib.Options:GetValue("IgnoredUpdates")
-    if ignored_updates[mod.ModPath] ~= nil then
-        return ignored_updates[mod.ModPath]
-    else
-        return false
-    end
+    return mod:GetSetting("IgnoreUpdates") == true
 end
 
 function ModAssetUpdateManager:RegisterUpdate(func)
@@ -41,6 +30,7 @@ function ModAssetUpdateManager:Update(t, dt)
 end
 
 --Unused
+function ModAssetUpdateManager:SetUpdatesIgnored() end
 function ModAssetUpdateManager:CheckUpdateStatus() end
 function ModAssetUpdateManager:SetUpdateStatus() end
 function ModAssetUpdateManager:save_manager_file() end

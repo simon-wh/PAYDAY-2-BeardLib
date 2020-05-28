@@ -27,7 +27,7 @@
 			<texture path="guis/textures/achievement_package_default"/>
 			<texture path="guis/textures/checkmark"/>
 		</AddFiles>
-		<Options build_menu="false" auto_load="true">
+		<Options build_menu="false">
 			<options>
 				<option name="ShowImages" type="boolean" default_value="true"/>
 				<option name="MenuColor" type="color" default_value="Color('007af3')"/>
@@ -36,12 +36,10 @@
 				<option name="DevMode" type="boolean" default_value="false"/>
 				<option name="LogSounds" type="boolean" default_value="false"/>
 				<option name="OptimizedMusicLoad" type="boolean" default_value="true"/>
-				<option name="DisabledMods" type="table">
-					<default_value/>
-				</option>
-				<option name="IgnoredUpdates" type="table">
-					<default_value/>
-				</option>
+				<option name="ModSettings" type="table"/>
+				<!-- These are not used anymore. All settings are in ModSettings now. Any data inside these will be moved to there. -->
+				<option name="DisabledMods" type="table"/>
+				<option name="IgnoredUpdates" type="table"/>
 			</options>
 		</Options>	
 		<Hooks directory="Hooks">

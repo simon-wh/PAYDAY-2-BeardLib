@@ -288,21 +288,6 @@ function BeardLibModsMenu:UpdateTitle(mod)
     end
 end
 
-function BeardLibModsMenu:SetModEnabled(mod, item)
-    local disabled_mods = BeardLib.Options:GetValue("DisabledMods")
-    local path = mod.ModPath
-    if item:Value() then
-        disabled_mods[path] = nil
-    else
-        disabled_mods[path] = true
-    end
-    BeardLib.Options:Save()
-end
-
-function BeardLibModsMenu:SetModIgnoredUpdates(mod, item)
-    BeardLib.managers.asset_update:SetUpdatesIgnored(mod, item:Value())
-end
-
 function BeardLibModsMenu:SearchMods(item)
     for _, mod_item in pairs(self._list:Items()) do
         local search = tostring(item:Value()):lower()
@@ -330,26 +315,31 @@ function BeardLibModsMenu:OpenModSettings(mod, blt_mod)
     BeardLib.managers.dialog:Simple():Show({
         title = managers.localization:text("beardlib_mod_settings", {mod = mod.Name or "Missing name"}),
         create_items = function(menu)
-            local disabled_mods = BeardLib.Options:GetValue("DisabledMods")
-            local ignored_updates = BeardLib.Options:GetValue("IgnoredUpdates")            
+            local mod_settings = mod:GetSettings()
             local holder = menu:Menu({name = "settings_holder", auto_height = true, localized = true})
             holder:Toggle({
                 name = "Enabled",
                 enabled = not blt_mod,
                 text = "beardlib_mod_enabled",
                 help = "beardlib_mod_enabled_help",
-                value = disabled_mods[mod.ModPath] ~= true,
-                on_callback = ClassClbk(self, "SetModEnabled", mod)
+                value = mod_settings.Enabled ~= false,
+                on_callback = ClassClbk(self, "SetModSetting", mod)
             })
             holder:Toggle({
                 name = "ShowImages",
+            holder:Toggle({
+                name = "IgnoreUpdates",
                 text = "beardlib_mod_ignore_updates",
                 help = "beardlib_mod_ignore_updates_help",
-                value = ignored_updates[mod.ModPath] == true,
-                on_callback = ClassClbk(self, "SetModIgnoredUpdates", mod)
+                value = mod_settings.IgnoreUpdates,
+                on_callback = ClassClbk(self, "SetModSetting", mod)
             })
         end
     })
+end
+
+function BeardLibModsMenu:SetModSetting(mod, item)
+    mod:SetSetting(item:Name(), item:Value())
 end
 
 function BeardLibModsMenu:OpenSettings()

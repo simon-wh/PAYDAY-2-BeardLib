@@ -20,7 +20,7 @@ function OptionModule:init(...)
     if self._config.build_menu ~= nil then
         self._config.auto_build_menu = self._config.build_menu
     end
-    
+
     if self._config.auto_build_menu == nil or self._config.auto_build_menu then
         self:BuildMenuHook()
     end
@@ -119,10 +119,10 @@ function OptionModule:ApplyValues(tbl, value_tbl)
                 if sub_tbl.type == "multichoice" then
                     if sub_tbl.save_value then
                         local index = table.index_of(sub_tbl.values, value)
-                        value = index ~= -1 and index or sub_tbl.default_value
+                        value = index ~= -1 and index or self:GetOptionDefaultValue(sub_tbl)
                     else
                         if value > #sub_tbl.values then
-                            value = sub_tbl.default_value
+                            value = self:GetOptionDefaultValue(sub_tbl)
                         end
                     end
                 end
@@ -153,9 +153,9 @@ function OptionModule:InitOptions(tbl, option_tbl)
                 if sub_tbl.enabled_callback then
                     sub_tbl.enabled_callback = self._mod:StringToCallback(sub_tbl.enabled_callback)
                 end
-                sub_tbl.default_value = type(sub_tbl.default_value) == "string" and BeardLib.Utils:normalize_string_value(sub_tbl.default_value) or sub_tbl.default_value
+                local default_value = self:GetOptionDefaultValue(sub_tbl)
                 option_tbl[sub_tbl.name] = sub_tbl
-                option_tbl[sub_tbl.name].value = sub_tbl.default_value
+                option_tbl[sub_tbl.name].value = default_value
             elseif sub_tbl._meta == "option_group" then
                 option_tbl[sub_tbl.name] = BeardLib.Utils:RemoveAllSubTables(clone(sub_tbl))
                 self:InitOptions(sub_tbl, option_tbl[sub_tbl.name])
@@ -281,13 +281,26 @@ end
 function OptionModule:_LoadDefaultValues(option_tbl)
     for i, sub_tbl in pairs(option_tbl) do
         if sub_tbl._meta then
-            if sub_tbl._meta == "option" and sub_tbl.default_value ~= nil then
-                option_tbl[sub_tbl.name].value = sub_tbl.default_value
+            if sub_tbl._meta == "option" then
+                option_tbl[sub_tbl.name].value = self:GetOptionDefaultValue(sub_tbl)
             elseif sub_tbl._meta == "option_group" or sub_tbl._meta == "option_set" then
                 self:_LoadDefaultValues(option_tbl[sub_tbl.name])
             end
         end
     end
+end
+
+function OptionModule:GetOptionDefaultValue(option)
+    local default_value = option.default_value
+    if option.type == "table" and default_value == nil then
+        return {}
+    elseif type(default_value) == "table" then
+        default_value._meta = nil
+    end
+
+    default_value = type(default_value) == "string" and BeardLib.Utils:normalize_string_value(default_value) or default_value
+
+    return default_value
 end
 
 function OptionModule:ResetToDefaultValues(path, shallow, no_save)
@@ -296,9 +309,13 @@ function OptionModule:ResetToDefaultValues(path, shallow, no_save)
         local next_path = path == "" and "" or path .. "/"
         for i, sub_tbl in pairs(option_tbl) do
             if sub_tbl._meta then
-                if sub_tbl._meta == "option" and sub_tbl.default_value ~= nil then
+                if sub_tbl._meta == "option" then
+                    local default_value = self:GetOptionDefaultValue(sub_tbl)
                     local sub_tbl_path = next_path..sub_tbl.name
-                    self:SetValue(sub_tbl_path, sub_tbl.default_value)
+                    if type(sub_tbl.default_value) == "table" then
+                        sub_tbl.default_value._meta = nil
+                    end
+                    self:SetValue(sub_tbl_path, default_value)
                     local item = self._menu_items[sub_tbl_path]
                     if item then
                         local value = self:GetValue(sub_tbl_path)
@@ -677,7 +694,7 @@ Hooks:Add("BeardLibCreateCustomNodesAndButtons", "BeardLibOptionModuleCreateCall
             params.module:ResetToDefaultValues(params.option_path, params.shallow_reset)
         end
     end
-    
+
     function MenuCallbackHandler:OptionModuleGeneric_ValueChanged(item)
         local value = item:value()
         if item.TYPE == "toggle" then value = value == "on" end

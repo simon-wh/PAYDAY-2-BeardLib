@@ -13,10 +13,9 @@ function ModCore:init(config_path, load_modules)
 	self.SavePath = SavePath
     self._modules = {}
 
-    local disabled_mods = BeardLib.Options:GetValue("DisabledMods")
     self._blt_mod = config_path:find(FrameworkBase._format) == 1
 
-    if disabled_mods[ModPath] and not self._blt_mod then
+    if self:GetSetting("Enabled") == false and not self._blt_mod then
         BeardLib:log("[Info] Mod at path '%s' is disabled!", tostring(ModPath))
         self:ForceDisable()
 	end
@@ -320,6 +319,22 @@ function ModCore:GetModules(type_name)
         end
     end
     return modules
+end
+
+function ModCore:GetSettings()
+    return BeardLib.Options:GetValue("ModSettings")[self.ModPath] or {}
+end
+
+function ModCore:SetSetting(setting, value)
+    local mod_settings = BeardLib.Options:GetValue("ModSettings")
+    mod_settings[self.ModPath] = mod_settings[self.ModPath] or {}
+    mod_settings[self.ModPath][setting] = value
+    BeardLib.Options:Save()
+end
+
+function ModCore:GetSetting(setting)
+    local settings = self:GetSettings()
+    return settings[setting]
 end
 
 function ModCore:PreInit() end
