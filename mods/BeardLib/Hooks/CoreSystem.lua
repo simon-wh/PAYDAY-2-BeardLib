@@ -13,16 +13,17 @@ end
 
 local ids_unit = Idstring("unit")
 local key_unit = ids_unit:key()
+local Managers = BeardLib.Managers
 
 overwrite_meta_function(World, "spawn_unit", function(self, unit_name, ...)
 	if unit_name then
 		local ukey = unit_name:key()
 		if ukey == "0d8ea9bdcebaaf64" then
-			FileManager:LoadAsset(ids_unit, unit_name)
+			Managers.File:LoadAsset(ids_unit, unit_name)
 		elseif Global.fm.added_files[key_unit] then
 			local file = Global.fm.added_files[key_unit][ukey]
 			if file then
-				FileManager:LoadAsset(ids_unit, unit_name, file)
+				Managers.File:LoadAsset(ids_unit, unit_name, file)
 			end
 		end
 	end
@@ -36,7 +37,7 @@ overwrite_meta_function(World:effect_manager(), "spawn", function(self, data, ..
 	if Global.fm.added_files[key_effect] then
 		local file = Global.fm.added_files[key_effect][data.effect:key()]
 		if file then
-			FileManager:LoadAsset(ids_effect, data.effect, file)
+			Managers.File:LoadAsset(ids_effect, data.effect, file)
 		end
 	end
 	return self:_spawn(data, ...)
@@ -48,7 +49,7 @@ overwrite_meta_function(MassUnitManager, "load", function(self, path, ...)
 	if Global.fm.added_files[key_massunit] then
 		local file = Global.fm.added_files[key_massunit][path:key()]
 		if file then
-			FileManager:LoadAsset(ids_massunit, path, file)
+			Managers.File:LoadAsset(ids_massunit, path, file)
 		end
 	end
 	return self:_load(path, ...)
@@ -58,18 +59,18 @@ overwrite_meta_function(PackageManager, "unit_data", function(self, unit_name, .
 	if unit_name and Global.fm.added_files[key_unit] then
 		local file = Global.fm.added_files[key_unit][tostring(unit_name:key())]
 		if file then
-			FileManager:LoadAsset(ids_unit, unit_name, file)
+			Managers.File:LoadAsset(ids_unit, unit_name, file)
 		end
 	end
 	return self:_unit_data(unit_name, ...)
 end)
 
 overwrite_meta_function(PackageManager, "script_data", function(self, ext, path, name_mt)
-	return FileManager:Process(ext, path, name_mt)
+	return Managers.File:Process(ext, path, name_mt)
 end)
 
 overwrite_meta_function(PackageManager, "has", function(self, ext, path)
-    if FileManager:Has(ext, path) or FileManager:HasScriptMod(ext, path) then
+    if Managers.File:Has(ext, path) or Managers.File:HasScriptMod(ext, path) then
         return true
     end
 
@@ -77,7 +78,7 @@ overwrite_meta_function(PackageManager, "has", function(self, ext, path)
 end)
 
 overwrite_meta_function(DB, "has", function(self, ext, path)
-    if FileManager:HasScriptMod(ext, path) then
+    if Managers.File:HasScriptMod(ext, path) then
         return true
     end
 
@@ -91,7 +92,7 @@ overwrite_meta_function(PackageManager, "load", function(self, pck, ...)
 
 	BeardLib:DevLog("Load package: " .. tostring(pck))
 
-	if CustomPackageManager:LoadPackage(pck) then
+	if Managers.Package:LoadPackage(pck) then
 		return
 	end
 
@@ -103,8 +104,8 @@ overwrite_meta_function(PackageManager, "unload", function(self, pck)
 		return
 	end
 
-	if CustomPackageManager:HasPackage(pck) then
-		CustomPackageManager:UnloadPackage(pck)
+	if Managers.Package:HasPackage(pck) then
+		Managers.Package:UnloadPackage(pck)
 		return
 	end
 
@@ -116,8 +117,8 @@ overwrite_meta_function(PackageManager, "loaded", function(self, pck)
 		return false
 	end
 
-	if CustomPackageManager:HasPackage(pck) then
-		return CustomPackageManager:PackageLoaded(pck)
+	if Managers.Package:HasPackage(pck) then
+		return Managers.Package:PackageLoaded(pck)
 	end
 
 	return self:_loaded(pck)
@@ -128,7 +129,7 @@ overwrite_meta_function(PackageManager, "package_exists", function(self, pck)
 		return false
 	end
 
-	if CustomPackageManager:HasPackage(pck) then
+	if Managers.Package:HasPackage(pck) then
 		return true
 	end
 

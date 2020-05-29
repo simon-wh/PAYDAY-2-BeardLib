@@ -1,5 +1,4 @@
-MenuMusicModule = MenuMusicModule or class(ItemModuleBase)
-MenuMusicModule.type_name = "MenuMusic"
+MenuMusicModule = MenuMusicModule or BeardLib:ModuleClass("MenuMusic", ItemModuleBase)
 
 function MenuMusicModule:LoadBuffers()
 	for _, source in pairs(BeardLib.MusicMods[self._config.id]) do
@@ -59,5 +58,3 @@ function MenuMusicModule:RegisterHook()
 	music.start_source = self:MakeBuffer(self._config.start_source)
 	BeardLib.MusicMods[self._config.id] = music
 end
-
-BeardLib:RegisterModule(MenuMusicModule.type_name, MenuMusicModule)

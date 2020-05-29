@@ -103,13 +103,13 @@ elseif F == "setup" then
 	end)
 
 	Hooks:PostHook(Setup, "init_finalize", "BeardLibInitFinalize", function(self)
-		CustomSoundManager:Open()
+		BeardLib.Managers.Sound:Open()
 		Hooks:Call("BeardLibSetupInitFinalize", self)
 	end)
 
 	Hooks:PostHook(Setup, "unload_packages", "BeardLibUnloadPackages", function(self)
-		CustomSoundManager:Close()
-		CustomPackageManager:Unload()
+		BeardLib.Managers.Sound:Close()
+		BeardLib.Managers.Package:Unload()
 		Hooks:Call("BeardLibSetupUnloadPackages", self)
 	end)
 elseif F == "missionmanager" then

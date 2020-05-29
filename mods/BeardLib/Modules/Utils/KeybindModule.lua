@@ -1,5 +1,4 @@
-KeybindModule = KeybindModule or class(ModuleBase)
-KeybindModule.type_name = "Keybind"
+KeybindModule = KeybindModule or BeardLib:ModuleClass("Keybind", ModuleBase)
 
 function KeybindModule:Load()
 	if not self._config.keybind_id and not self._config.id then
@@ -16,5 +15,3 @@ function KeybindModule:Load()
 		LuaModManager:AddJsonKeybinding(config, self._mod.ModPath .. "/")
 	end
 end
-
-BeardLib:RegisterModule(KeybindModule.type_name, KeybindModule)

@@ -1,4 +1,4 @@
-ClassesModule = ClassesModule or class(ModuleBase)
+ClassesModule = ClassesModule or BeardLib:ModuleClass("Classes", ModuleBase)
 ClassesModule.type_name = "Classes"
 
 function ClassesModule:Load(config, prev_dir)
@@ -18,5 +18,3 @@ function ClassesModule:Load(config, prev_dir)
         end
     end
 end
-
-BeardLib:RegisterModule(ClassesModule.type_name, ClassesModule)

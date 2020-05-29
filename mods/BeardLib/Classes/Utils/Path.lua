@@ -63,13 +63,16 @@ end
 
 function Path:CombineDir(...)
 	local s = self:Combine(...)
-	return s .. "/"
+	if string.ends(s) ~= "/" then
+		s = s .. "/"
+	end
+	return s
 end
 
 function Path:Combine(start, ...)
 	local paths = {...}
 	local final_string = start
-    for i, path_part in pairs(paths) do
+    for _, path_part in pairs(paths) do
         path_part = tostring(path_part)
 		if string.begins(path_part, ".") then
 			path_part = string.sub(path_part, 2, #path_part)

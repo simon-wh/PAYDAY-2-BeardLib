@@ -1,7 +1,10 @@
-MenuUIManager = MenuUIManager or BeardLib:CreateManager("menu_ui")
+MenuUIManager = MenuUIManager or BeardLib:ManagerClass("MenuUI")
 
 function MenuUIManager:init()
     self._menus = {}
+
+    -- Deprecated, try not to use.
+    BeardLib.managers.menu_ui = self
 end
 
 function MenuUIManager:AddMenu(menu)
@@ -34,7 +37,7 @@ function MenuUIManager:EnableInput()
 	self._enable_input_t = nil
 end
 
-function MenuUIManager:EnableINput()
+function MenuUIManager:InputEnabled()
     return not self._input_disabled
 end
 
@@ -43,21 +46,21 @@ function MenuUIManager:InputDisabled()
 end
 
 function MenuUIManager:InputAllowed(...)
-    if self:input_disabled() then
+    if self:InputDisabled() then
         return false
     end
-    local menu = self:get_active_menu()
+    local menu = self:GetActiveMenu()
     return not menu or menu.allow_full_input == true
 end
 
 function MenuUIManager:CloseMenuEvent()
-	self:disable_input()
+	self:DisableInput()
 	self._enable_input_t = Application:time() + 0.01
 end
 
 function MenuUIManager:Update(t, dt)
-	if self._input_disabled and self._enable_input_t and self._enable_input_t <= t then
-        self:enable_input()
+    if self._input_disabled and self._enable_input_t and self._enable_input_t <= t then
+        self:EnableInput()
     end
 end
 
@@ -66,7 +69,7 @@ MenuUIManager.add_menu = MenuUIManager.AddMenu
 MenuUIManager.remove_menu = MenuUIManager.RemoveMenu
 MenuUIManager.get_active_menu = MenuUIManager.GetActiveMenu
 MenuUIManager.disable_input = MenuUIManager.DisableInput
-MenuUIManager.enable_input = MenuUIManager.EnableINput
+MenuUIManager.enable_input = MenuUIManager.EnableInput
 MenuUIManager.input_enabled = MenuUIManager.InputEnabled
 MenuUIManager.input_disabled = MenuUIManager.InputDisabled
 MenuUIManager.input_allowed = MenuUIManager.InputAllowed

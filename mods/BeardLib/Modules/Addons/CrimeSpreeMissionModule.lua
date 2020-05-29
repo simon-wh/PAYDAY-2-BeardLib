@@ -1,5 +1,4 @@
-CrimeSpreeMissionModule = CrimeSpreeMissionModule or class(ItemModuleBase)
-CrimeSpreeMissionModule.type_name = "CrimeSpreeMission"
+CrimeSpreeMissionModule = CrimeSpreeMissionModule or BeardLib:ModuleClass("CrimeSpreeMission", ItemModuleBase)
 
 function CrimeSpreeMissionModule:AddMissionDataToTweak(c_self, tweak_data)
     local icon = self._config.icon and "mods_"..Path:GetFileNameWithoutExtension(self._config.icon)
@@ -28,5 +27,3 @@ function CrimeSpreeMissionModule:RegisterHook()
         Hooks:PostHook(CrimeSpreeTweakData, "init_missions", self._config.id .. "AddMissionData", ClassClbk(self, "AddMissionDataToTweak"))
     end
 end
-
-BeardLib:RegisterModule(CrimeSpreeMissionModule.type_name, CrimeSpreeMissionModule)

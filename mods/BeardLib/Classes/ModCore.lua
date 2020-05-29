@@ -107,7 +107,7 @@ function ModCore:LoadConfigFile(path)
     local path = Path:Combine(self.ModPath, "icon.png")
     if FileIO:Exists(path) then
         local ingame_path = Path:Combine("icons", self.ModPath:key())
-        FileManager:AddFile(TEXTURE, Idstring(ingame_path), path)
+        BeardLib.Managers.File:AddFile(TEXTURE, Idstring(ingame_path), path)
         config.image = ingame_path
     end
 

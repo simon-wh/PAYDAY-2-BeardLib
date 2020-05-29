@@ -5,8 +5,7 @@
 
 ]]
 
-WeaponSkinModule = WeaponSkinModule or class(ItemModuleBase)
-WeaponSkinModule.type_name = "WeaponSkin"
+WeaponSkinModule = WeaponSkinModule or BeardLib:ModuleClass("WeaponSkin", ItemModuleBase)
 
 function WeaponSkinModule:RegisterHook()
     self._config.id = self._config.id or self:Err("Cannot add a weapon skin : No ID specified.")
@@ -142,5 +141,3 @@ function WeaponSkinModule:RegisterHook()
         end
     end)
 end
-
-BeardLib:RegisterModule(WeaponSkinModule.type_name, WeaponSkinModule)

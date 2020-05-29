@@ -1,5 +1,4 @@
-ContactModule = ContactModule or class(ItemModuleBase)
-ContactModule.type_name = "contact"
+ContactModule = ContactModule or BeardLib:ModuleClass("contact", ItemModuleBase)
 ContactModule._loose = true
 
 function ContactModule:AddContactData(narr_self)
@@ -30,5 +29,3 @@ function ContactModule:RegisterHook()
         Hooks:PostHook(NarrativeTweakData, "init", self._config.id .. "AddContactData", ClassClbk(self, "AddContactData"))
     end
 end
-
-BeardLib:RegisterModule(ContactModule.type_name, ContactModule)

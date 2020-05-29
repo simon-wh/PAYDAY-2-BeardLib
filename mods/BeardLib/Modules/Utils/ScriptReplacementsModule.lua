@@ -1,5 +1,4 @@
-ScriptReplacementsModule = ScriptReplacementsModule or class(ModuleBase)
-ScriptReplacementsModule.type_name = "ScriptMods"
+ScriptReplacementsModule = ScriptReplacementsModule or BeardLib:ModuleClass("ScriptMods", ModuleBase)
 ScriptReplacementsModule.auto_load = false
 
 function ScriptReplacementsModule:PostInit()
@@ -22,12 +21,10 @@ function ScriptReplacementsModule:PostInit()
             if file then
                 local file = Path:Combine(self.ScriptDirectory, file)
                 local file_type = options.type or options.replacement_type
-                FileManager:ScriptReplaceFile(ext, target, file, table.merge(opt, {type = file_type}))
+                BeardLib.Managers.File:ScriptReplaceFile(ext, target, file, table.merge(opt, {type = file_type}))
             elseif v.tbl then
-                FileManager:ScriptReplace(ext, target, options.tbl, opt)
+                BeardLib.Managers.File:ScriptReplace(ext, target, options.tbl, opt)
             end
         end
     end
 end
-
-BeardLib:RegisterModule(ScriptReplacementsModule.type_name, ScriptReplacementsModule)

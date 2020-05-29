@@ -1,4 +1,4 @@
-TweakModifyModule = TweakModifyModule or class(ItemModuleBase)
+TweakModifyModule = TweakModifyModule or BeardLib:ModuleClass("TweakModify", ItemModuleBase)
 TweakModifyModule.type_name = "TweakModify"
 TweakModifyModule.required_params = {}
 
@@ -28,5 +28,3 @@ function TweakModifyModule:RegisterHook()
 		end
 	end
 end
-
-BeardLib:RegisterModule(TweakModifyModule.type_name, TweakModifyModule)

@@ -5,8 +5,7 @@
 
 ]]
 
-PlayerStyleVariantModule = PlayerStyleVariantModule or class(ItemModuleBase)
-PlayerStyleVariantModule.type_name = "PlayerStyleVariant"
+PlayerStyleVariantModule = PlayerStyleVariantModule or BeardLib:ModuleClass("PlayerStyleVariant", ItemModuleBase)
 
 function PlayerStyleVariantModule:RegisterHook()
 	if not self._config.id then
@@ -44,5 +43,3 @@ function PlayerStyleVariantModule:RegisterHook()
         }, config)
     end)
 end
-
-BeardLib:RegisterModule(PlayerStyleVariantModule.type_name, PlayerStyleVariantModule)

@@ -1,5 +1,4 @@
-DLCModule = DLCModule or class(ModuleBase)
-DLCModule.type_name = "DLC"
+DLCModule = DLCModule or BeardLib:ModuleClass("DLC", ModuleBase)
 
 function DLCModule:init(...)
     self.required_params = table.add(clone(self.required_params), {"id"})
@@ -12,5 +11,3 @@ function DLCModule:Load()
         content = {loot_drops = {}, upgrades = {}}
     }, self._config), "dlc", self._config.id)
 end
-
-BeardLib:RegisterModule(DLCModule.type_name, DLCModule)

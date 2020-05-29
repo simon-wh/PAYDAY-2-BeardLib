@@ -1,5 +1,4 @@
-MaskMaterialModule = MaskMaterialModule or class(ItemModuleBase)
-MaskMaterialModule.type_name = "MaskMaterial"
+MaskMaterialModule = MaskMaterialModule or BeardLib:ModuleClass("MaskMaterial", ItemModuleBase)
 
 function MaskMaterialModule:init(...)
     self.clean_table = table.add(clone(self.clean_table), {{param = "pcs", action = "no_number_indexes"}})
@@ -35,5 +34,3 @@ function MaskMaterialModule:RegisterHook()
         end
     end)
 end
-
-BeardLib:RegisterModule(MaskMaterialModule.type_name, MaskMaterialModule)

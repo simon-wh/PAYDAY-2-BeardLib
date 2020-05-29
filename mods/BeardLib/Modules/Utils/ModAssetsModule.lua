@@ -1,5 +1,4 @@
-ModAssetsModule = ModAssetsModule or class(ModuleBase)
-ModAssetsModule.type_name = "AssetUpdates"
+ModAssetsModule = ModAssetsModule or BeardLib:ModuleClass("AssetUpdates", ModuleBase)
 ModAssetsModule._default_version_file = "version.txt"
 ModAssetsModule._providers = {}
 ModAssetsModule._loose = true
@@ -300,5 +299,3 @@ function DownloadCustomMap:_DownloadAssets(data)
     })
     dohttpreq(download_url, ClassClbk(self, "StoreDownloadedAssets"), ClassClbk(dialog, "SetProgress"))
 end
-
-BeardLib:RegisterModule(ModAssetsModule.type_name, ModAssetsModule)

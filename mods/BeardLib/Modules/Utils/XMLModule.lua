@@ -1,5 +1,4 @@
-XMLModule = XMLModule or class(ModuleBase)
-XMLModule.type_name = "XML"
+XMLModule = XMLModule or BeardLib:ModuleClass("XML", ModuleBase)
 XMLModule.required_params = {"path"}
 
 local load_first = {Hooks = true, Classes = true}
@@ -22,5 +21,3 @@ function XMLModule:Load()
         end
     end
 end
-
-BeardLib:RegisterModule(XMLModule.type_name, XMLModule)

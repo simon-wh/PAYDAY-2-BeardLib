@@ -1,9 +1,19 @@
-AddFramework = AddFramework or BeardLib:CreateManager("AddFramework", FrameworkBase)
+AddFramework = AddFramework or BeardLib:Class(FrameworkBase)
 AddFramework.add_file = "add.xml"
-AddFramework.type_name = "add"
+AddFramework.type_name = "Add"
 AddFramework._directory = BeardLib.config.mod_override_dir
 AddFramework.menu_color = Color(0, 0.25, 1)
 AddFramework.add_configs = {}
+
+function AddFramework:init()
+    -- Deprecated, try not to use.
+    if self.type_name == AddFramework.type_name then
+        BeardLib.Frameworks.add = self
+        BeardLib.managers.AddFramework = self
+    end
+
+    AddFramework.super.init(self)
+end
 
 function AddFramework:FindMods()
     local dirs = FileIO:GetFolders(self._directory)
@@ -21,7 +31,7 @@ function AddFramework:FindMods()
                 local file = io.open(add_file, "r")
                 local config = ScriptSerializer:from_custom_xml(file:read("*all"))
                 local directory = config.full_directory or Path:Combine(p, config.directory)
-                CustomPackageManager:LoadPackageConfig(directory, config)
+                BeardLib.Managers.Package:LoadPackageConfig(directory, config)
                 self.add_configs[p] = config
             end
         end

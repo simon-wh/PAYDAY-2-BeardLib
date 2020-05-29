@@ -1,6 +1,6 @@
-CustomAchievementManager = CustomAchievementManager or BeardLib:CreateManager("custom_achievement")
+BeardLibAchievementManager = BeardLibAchievementManager or BeardLib:ManagerClass("Achievement")
 
-function CustomAchievementManager:init()
+function BeardLibAchievementManager:init()
     -- Support multiple user on same PC, tracking each progress
     self._achievements_folder = SavePath .. "CustomAchievements/" ..tostring(Steam:userid()).."/"
     self._achievement_icons_spoofer = {}
@@ -12,27 +12,22 @@ function CustomAchievementManager:init()
         [0] = {name = "Hidden Rank", color = "000000"} -- Don't define the rank 0 yourself, that's used by me.
     }
 
-    if not tweak_data then
-        Hooks:Add("SetupInitManagers", "PostInitTweakData_CustomAchievementManager", function()
-            self:init()
-        end)
+    -- Deprecated, try not to use.
+    BeardLib.managers.custom_achievement = self
+    CustomAchievementManager = self
 
-        return
-    end
-
-    self._tweak_data = tweak_data.achievement.custom_achievements or {}
-    self:SetupAchievements()
+    Hooks:Add("SetupInitManagers", "PostInitTweakData_BeardLibAchievementManager", ClassClbk(self, "SetupAchievements"))
 end
 
-function CustomAchievementManager:GetRankDetails(rank_id)
+function BeardLibAchievementManager:GetRankDetails(rank_id)
     return self._ranks[rank_id]
 end
 
-function CustomAchievementManager:AddToIconSpoofer(params)
+function BeardLibAchievementManager:AddToIconSpoofer(params)
     table.insert(self._achievement_icons_spoofer, params)
 end
 
-function CustomAchievementManager:HasPackage(package_id)
+function BeardLibAchievementManager:HasPackage(package_id)
     if self._tweak_data[package_id] then
         return true
     end
@@ -40,7 +35,7 @@ function CustomAchievementManager:HasPackage(package_id)
     return false
 end
 
-function CustomAchievementManager:HasAnyPackage()
+function BeardLibAchievementManager:HasAnyPackage()
     if self:NumberOfPackages() > 0 then
         return true
     end
@@ -49,7 +44,7 @@ function CustomAchievementManager:HasAnyPackage()
 end
 
 -- Use CustomAchievementPackage when possible.
-function CustomAchievementManager:HasAchievement(package_id, achievement_id)
+function BeardLibAchievementManager:HasAchievement(package_id, achievement_id)
     if self._tweak_data[package_id][achievement_id] then
         return true
     end
@@ -57,13 +52,15 @@ function CustomAchievementManager:HasAchievement(package_id, achievement_id)
     return false
 end
 
-function CustomAchievementManager:SetupAchievements()
+function BeardLibAchievementManager:SetupAchievements()
+    self._tweak_data = tweak_data.achievement.custom_achievements or {}
+
     -- I --     Make the base directory.
-    FileIO:MakeDir(CustomAchievementManager._achievements_folder)
+    FileIO:MakeDir(self._achievements_folder)
 
     -- II --    Read Packages, create folders.
     for package_id, _ in pairs(self._tweak_data) do
-        local package_path = CustomAchievementManager._achievements_folder .. "/" .. tostring(package_id)
+        local package_path = self._achievements_folder .. "/" .. tostring(package_id)
 
         FileIO:MakeDir(package_path)
 
@@ -89,7 +86,7 @@ function CustomAchievementManager:SetupAchievements()
     end
 end
 
-function CustomAchievementManager:FetchPackages()
+function BeardLibAchievementManager:FetchPackages()
     if not self:HasAnyPackage() then
         return {}
     end
@@ -103,7 +100,7 @@ function CustomAchievementManager:FetchPackages()
     return packages
 end
 
-function CustomAchievementManager:NumberOfPackages()
+function BeardLibAchievementManager:NumberOfPackages()
     local nb = 0
     local tweak = tweak_data.achievement.custom_achievements or {}
 
@@ -114,7 +111,7 @@ function CustomAchievementManager:NumberOfPackages()
     return nb
 end
 
-function CustomAchievementManager:NumberOfAchievements()
+function BeardLibAchievementManager:NumberOfAchievements()
     local nb = 0
     local tweak = tweak_data.achievement.custom_achievements or {}
 
@@ -129,7 +126,7 @@ function CustomAchievementManager:NumberOfAchievements()
     return nb
 end
 
-function CustomAchievementManager:CompletedAchievementsTotal()
+function BeardLibAchievementManager:CompletedAchievementsTotal()
     local nb = 0
 
     if not self._tweak_data then -- i hate this game
@@ -155,7 +152,7 @@ function CustomAchievementManager:CompletedAchievementsTotal()
     return nb
 end
 
-function CustomAchievementManager:GetAllCompletedRanks()
+function BeardLibAchievementManager:GetAllCompletedRanks()
     local t = {
         [1] = 0,
         [2] = 0,
@@ -326,7 +323,7 @@ function CustomAchievement:init(config, package)
         return
     end
 
-    self._progress_file = CustomAchievementManager._achievements_folder .. "/" .. tostring(package) .. "/" .. tostring(config.id) .. ".json"
+    self._progress_file = self._achievements_folder .. "/" .. tostring(package) .. "/" .. tostring(config.id) .. ".json"
 
     self._package_id = package
     self._id = config.id
@@ -386,14 +383,14 @@ end
 function CustomAchievement:GetRankName()
     local rank_id = self:IsHidden() and 0 or self._rank
 
-    local rank = CustomAchievementManager:GetRankDetails(rank_id)
+    local rank = BeardLibAchievementManager:GetRankDetails(rank_id)
     return rank.name
 end
 
 function CustomAchievement:GetRankColor()
     local rank_id = self:IsHidden() and 0 or self._rank
 
-    local rank = CustomAchievementManager:GetRankDetails(rank_id)
+    local rank = BeardLibAchievementManager:GetRankDetails(rank_id)
     return rank.color
 end
 

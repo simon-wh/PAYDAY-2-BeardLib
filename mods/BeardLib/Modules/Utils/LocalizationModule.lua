@@ -1,5 +1,4 @@
-LocalizationModule = LocalizationModule or class(ModuleBase)
-LocalizationModule.type_name = "Localization"
+LocalizationModule = LocalizationModule or BeardLib:ModuleClass("Localization", ModuleBase)
 LocalizationModule.forced_language = nil
 
 function LocalizationModule:Load()
@@ -42,5 +41,3 @@ function LocalizationModule:LoadLocalization()
         self:Err("Language file has errors and cannot be loaded! Path %s", path)
     end
 end
-
-BeardLib:RegisterModule(LocalizationModule.type_name, LocalizationModule)

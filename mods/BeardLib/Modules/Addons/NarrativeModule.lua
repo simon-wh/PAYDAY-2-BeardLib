@@ -1,5 +1,4 @@
-NarrativeModule = NarrativeModule or class(ItemModuleBase)
-NarrativeModule.type_name = "narrative"
+NarrativeModule = NarrativeModule or BeardLib:ModuleClass("Narrative", ItemModuleBase)
 NarrativeModule._loose = true
 
 function NarrativeModule:init(...)
@@ -85,5 +84,3 @@ function NarrativeModule:RegisterHook()
         Hooks:PostHook(NarrativeTweakData, "init", self._config.id .. "AddNarrativeData", ClassClbk(self, "AddNarrativeData"))
     end
 end
-
-BeardLib:RegisterModule(NarrativeModule.type_name, NarrativeModule)

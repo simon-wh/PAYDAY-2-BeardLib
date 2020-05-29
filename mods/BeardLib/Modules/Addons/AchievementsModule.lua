@@ -2,8 +2,7 @@
     Maintenance by Sora [Sora#5529 Discord]
 --]]
 
-AchievementsModule = AchievementsModule or class(ItemModuleBase)
-AchievementsModule.type_name = "Achievements"
+AchievementsModule = AchievementsModule or BeardLib:ModuleClass("Achievements", ItemModuleBase)
 
 function AchievementsModule:RegisterHook()
     self._package_id = self._config.id
@@ -13,7 +12,7 @@ function AchievementsModule:RegisterHook()
     self._package_desc = self._config.desc
 
     Hooks:PostHook(AchievementsTweakData, "init", self._package_id .. "_custom_achievement_data", function(a_self, tweak_data)
-        if not a_self.custom_achievements then 
+        if not a_self.custom_achievements then
             a_self.custom_achievements = {}
             a_self.custom_achievements_packages = {}
         end
@@ -59,9 +58,7 @@ function AchievementsModule:RegisterHook()
                 a_self.custom_achievements[self._package_id][achievement_data.id] = achievement_data
 
                 if achievement.icon then
-                    CustomAchievementManager:AddToIconSpoofer({
-                        achievement_data.icon
-                    })
+                    BeardLib.Managers.Achievement:AddToIconSpoofer({achievement_data.icon})
                 end
             end
         end
@@ -70,7 +67,7 @@ function AchievementsModule:RegisterHook()
     -- Very ugly workaround. But it seems HudIconsTweakData is loaded before AchievementTweakData. bah. It works as it is, all that matter.
     Hooks:PostHook(HudIconsTweakData, "init", "custom_achievement_icon_data", function(i_self)
         DelayedCalls:Add("custom_icons_wait_initialization", 2, function()
-            for _, icon_tables in ipairs(CustomAchievementManager._achievement_icons_spoofer) do
+            for _, icon_tables in ipairs(BeardLib.Managers.Achievement._achievement_icons_spoofer) do
                 for _, icon_path in pairs(icon_tables) do
                     if i_self[icon_path] then
                         return
@@ -90,5 +87,3 @@ function AchievementsModule:RegisterHook()
         end)
     end)
 end
-
-BeardLib:RegisterModule(AchievementsModule.type_name, AchievementsModule)

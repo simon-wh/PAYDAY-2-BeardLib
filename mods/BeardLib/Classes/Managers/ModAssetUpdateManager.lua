@@ -1,9 +1,12 @@
-ModAssetUpdateManager = ModAssetUpdateManager or BeardLib:CreateManager("asset_update")
+ModAssetUpdateManager = ModAssetUpdateManager or BeardLib:ManagerClass("Updates")
 
 function ModAssetUpdateManager:init()
     self._registered_updates = {}
     self._ready_for_update = {}
     self._data = {}
+
+    -- Deprecated, try not to use.
+    BeardLib.managers.asset_update = self
 end
 
 function ModAssetUpdateManager:UpdatesIgnored(mod)

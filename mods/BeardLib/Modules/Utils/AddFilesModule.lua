@@ -1,5 +1,4 @@
-AddFilesModule = AddFilesModule or class(ModuleBase)
-AddFilesModule.type_name = "AddFiles"
+AddFilesModule = AddFilesModule or BeardLib:ModuleClass("AddFiles", ModuleBase)
 
 function AddFilesModule:Load()
     self._directory = self._config.full_directory or Path:CombineDir(self._mod.ModPath, self._config.directory)
@@ -140,8 +139,6 @@ function AddFilesModule:Unload()
     self:UnloadPackageConfig(self._config)
 end
 
-AddFilesModule.LoadPackageConfig = CustomPackageManager.LoadPackageConfig
-AddFilesModule.UnloadPackageConfig = CustomPackageManager.UnloadPackageConfig
-AddFilesModule.AddFileWithCheck = CustomPackageManager.AddFileWithCheck
-
-BeardLib:RegisterModule(AddFilesModule.type_name, AddFilesModule)
+AddFilesModule.LoadPackageConfig = BeardLibPackageManager.LoadPackageConfig
+AddFilesModule.UnloadPackageConfig = BeardLibPackageManager.UnloadPackageConfig
+AddFilesModule.AddFileWithCheck = BeardLibPackageManager.AddFileWithCheck

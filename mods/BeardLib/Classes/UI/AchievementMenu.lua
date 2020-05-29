@@ -9,21 +9,13 @@ local cash_icon = "guis/textures/pd2/blackmarket/cash_drop"
 local cc_icon = "guis/textures/pd2/ccoin"
 local xp_icon = "guis/textures/pd2/blackmarket/xp_drop"
 
-CustomAchievementMenu = CustomAchievementMenu or BeardLib:CreateManager("custom_achievement_menu")
+BeardLibAchievementMenu = BeardLibAchievementMenu or BeardLib:MenuClass("Achievement")
 
-function CustomAchievementMenu:init()
-	if not MenuCallbackHandler then
-		Hooks:Add("SetupInitManagers", "PostInitTweakData_CustomAchievementManagerMenu", function()
-			self:init()
-		end)
-
-		return
-	end
-
+function BeardLibAchievementMenu:init()
 	local accent_color = BeardLib.Options:GetValue("MenuColor")
 
 	self._menu = MenuUI:new({
-		name = "CustomAchievementMenu",
+		name = "BeardLibAchievementMenu",
 		animate_colors = true,
 		layer = 1500,
 		use_default_close_key = true,
@@ -38,9 +30,11 @@ function CustomAchievementMenu:init()
 	})
 
 	self._initialized = false
+	-- Deprecated, try not to use.
+	BeardLib.managers.custom_achievement_menu = self
 end
 
-function CustomAchievementMenu:InitPanels(parent)
+function BeardLibAchievementMenu:InitPanels(parent)
 	self._header = parent:Grid({background_color = self._menu.accent_color, auto_foreground = true, h = 32})
 	self._account_progression = parent:Grid({
 		background_color = Color.black:with_alpha(0.75), 
@@ -116,7 +110,7 @@ function CustomAchievementMenu:InitPanels(parent)
 	})
 end
 
-function CustomAchievementMenu:InitHeader()
+function BeardLibAchievementMenu:InitHeader()
 	self._header:Image({texture = "guis/textures/achievement_trophy_white", h = 30, w = 30, highlight_color = Color.transparent})
 
 	self._header:Divider({
@@ -138,7 +132,7 @@ function CustomAchievementMenu:InitHeader()
 	})
 end
 
-function CustomAchievementMenu:InitAccount()
+function BeardLibAchievementMenu:InitAccount()
 	local panel = self._account_progression
 	local steam_avatar = panel:Image({texture = "guis/texture/pd2/none_icon", img_color = Color.white, w = 64, h = 64})
 	local stats = panel:Grid({
@@ -162,38 +156,39 @@ function CustomAchievementMenu:InitAccount()
 		end)
 	end)
 
-	local steam_name_text = stats:Divider({
+	stats:Divider({
 		name = "SteamName",
 		text = steam_name,
 		size = 22
 	})
 
 	local percent_total = "--"
+	local manager = BeardLib.Managers.Achievement
 
-	if CustomAchievementManager:NumberOfAchievements() > 0 then
-		percent_total = math.floor(CustomAchievementManager:CompletedAchievementsTotal() * 100 / CustomAchievementManager:NumberOfAchievements())
+	if manager:NumberOfAchievements() > 0 then
+		percent_total = math.floor(manager:CompletedAchievementsTotal() * 100 / manager:NumberOfAchievements())
 	end
 
-	local total_achievements = stats:QuickText(managers.localization:text("beardlib_achieves_completed_achievements", {
-		completed = CustomAchievementManager:CompletedAchievementsTotal(), total = CustomAchievementManager:NumberOfAchievements(), percent = percent_total
+	stats:QuickText(managers.localization:text("beardlib_achieves_completed_achievements", {
+		completed = manager:CompletedAchievementsTotal(), total = manager:NumberOfAchievements(), percent = percent_total
 	}))
 
-	local total_packages = stats:QuickText(managers.localization:text("beardlib_achieves_packages_installed", {
-		nbpackages = CustomAchievementManager:NumberOfPackages()
+	stats:QuickText(managers.localization:text("beardlib_achieves_packages_installed", {
+		nbpackages = manager:NumberOfPackages()
 	}))
 
 	local rank_texture = "guis/textures/achievement_trophy_white"
-	for idx, nb in ipairs(CustomAchievementManager:GetAllCompletedRanks()) do
+	for idx, nb in ipairs(manager:GetAllCompletedRanks()) do
 		local rank_icon = stats:Image({
 			name = "rank_icon_".. idx,
 			texture = rank_texture,
 			w = 24,
 			h = 24,
 			layer = 5,
-			img_color = Color(CustomAchievementManager._ranks[idx].color)
+			img_color = Color(manager._ranks[idx].color)
 		})
 
-		local rank_amount = stats:Divider({
+		stats:Divider({
 			text = "x".. tostring(nb),
 			size_by_text = true,
 			count_as_aligned = true,
@@ -206,11 +201,11 @@ function CustomAchievementMenu:InitAccount()
 	end
 end
 
-function CustomAchievementMenu:InitPackages()
+function BeardLibAchievementMenu:InitPackages()
 	local panel = self._package_list
 	local sorted_packages = {}
 
-	for i, package_id in ipairs(CustomAchievementManager:FetchPackages()) do
+	for i, package_id in ipairs(BeardLib.Managers.Achievement:FetchPackages()) do
 		local pck = CustomAchievementPackage:new(package_id)
 		sorted_packages[i] = {id = package_id, name = pck:GetName()}
 	end
@@ -230,12 +225,12 @@ function CustomAchievementMenu:InitPackages()
 			highlight_color = Color.transparent
 		})
 
-		local package_name = panel:Button({
+		panel:Button({
 			text = package:GetName(),
 			h = 32,
 			w = panel:Panel():w() - package_icon:Panel():w() - 100,
 			foreground = Color("eeeeee"),
-			on_callback = ClassClbk(self, "DisplayAchievementsFromPackage", package) 
+			on_callback = ClassClbk(self, "DisplayAchievementsFromPackage", package)
 		})
 
 		panel:Divider({
@@ -248,7 +243,7 @@ function CustomAchievementMenu:InitPackages()
 	end
 end
 
-function CustomAchievementMenu:DisplayAchievementsFromPackage(package)
+function BeardLibAchievementMenu:DisplayAchievementsFromPackage(package)
 	local panel = self._achievement_list
 	panel:ClearItems()
 	panel:SetVisible(true)
@@ -328,7 +323,7 @@ function CustomAchievementMenu:DisplayAchievementsFromPackage(package)
 	self:DisplayPackageHeader(package)
 end
 
-function CustomAchievementMenu:DisplayPackageHeader(package)
+function BeardLibAchievementMenu:DisplayPackageHeader(package)
 	local panel = self._achievement_list_header
 	local name = package:GetName()
 	local desc = package:GetDesc()
@@ -402,7 +397,7 @@ function CustomAchievementMenu:DisplayPackageHeader(package)
 	})
 end
 
-function CustomAchievementMenu:DisplayAchievementDetails(achievement)
+function BeardLibAchievementMenu:DisplayAchievementDetails(achievement)
 	local panel = self._achievement_details
 	panel:SetVisible(true)
 	panel:ClearItems()
@@ -538,11 +533,11 @@ function CustomAchievementMenu:DisplayAchievementDetails(achievement)
 	end
 end
 
-function CustomAchievementMenu:Close()
+function BeardLibAchievementMenu:Close()
 	self._menu:SetEnabled(false)
 end
 
-function CustomAchievementMenu:SetEnabled(state)
+function BeardLibAchievementMenu:SetEnabled(state)
 	self._menu:SetEnabled(state)
 
 	if not self._initialized then

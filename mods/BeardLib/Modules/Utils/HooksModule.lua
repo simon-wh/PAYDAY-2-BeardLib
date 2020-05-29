@@ -1,5 +1,4 @@
-HooksModule = HooksModule or class(ModuleBase)
-HooksModule.type_name = "Hooks"
+HooksModule = HooksModule or BeardLib:ModuleClass("Hooks", ModuleBase)
 
 local PRE = "pre"
 local POST = "post"
@@ -25,5 +24,3 @@ function HooksModule:GetPath(directory, prev_dir)
 		return directory
 	end
 end
-
-BeardLib:RegisterModule(HooksModule.type_name, HooksModule)

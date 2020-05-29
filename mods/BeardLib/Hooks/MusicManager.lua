@@ -2,7 +2,7 @@ if not MusicManager.playlist then
 	return
 end
 
-CustomSoundManager:CreateSourceHook("BeardLibCustomMenuTrackFix", function(name, source)
+BeardLib.Managers.Sound:CreateSourceHook("BeardLibCustomMenuTrackFix", function(name, source)
 	if name == "HUDLootScreen" or name == "cleanup" then
 		source:pre_hook("FixCustomTrack", function(event)
 			managers.music:attempt_play(nil, event)

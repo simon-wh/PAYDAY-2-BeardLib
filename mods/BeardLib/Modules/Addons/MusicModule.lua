@@ -1,5 +1,4 @@
-MusicModule = MusicModule or class(ItemModuleBase)
-MusicModule.type_name = "Music"
+MusicModule = MusicModule or BeardLib:ModuleClass("Music", ItemModuleBase)
 
 function MusicModule:RegisterHook()
 	self._config.id = self._config.id or "Err"
@@ -66,5 +65,3 @@ function MusicModule:RegisterHook()
 
 	BeardLib.MusicMods[self._config.id] = music
 end
-
-BeardLib:RegisterModule(MusicModule.type_name, MusicModule)

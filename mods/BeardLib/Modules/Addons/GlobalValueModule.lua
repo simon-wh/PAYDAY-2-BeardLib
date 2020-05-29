@@ -1,5 +1,4 @@
-GlobalValueModule = GlobalValueModule or class(ItemModuleBase)
-GlobalValueModule.type_name = "GlobalValue"
+GlobalValueModule = GlobalValueModule or BeardLib:ModuleClass("GlobalValue", ItemModuleBase)
 
 function GlobalValueModule:init(...)
     self.clean_table = table.add(clone(self.clean_table), {{param = "color", action = "normalize"}})
@@ -30,5 +29,3 @@ function GlobalValueModule:RegisterHook()
         loot_self.global_value_list_map[self._config.id] = #loot_self.global_value_list_index
     end)
 end
-
-BeardLib:RegisterModule(GlobalValueModule.type_name, GlobalValueModule)

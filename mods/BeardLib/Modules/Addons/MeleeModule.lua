@@ -1,5 +1,4 @@
-MeleeModule = MeleeModule or class(ItemModuleBase)
-MeleeModule.type_name = "Melee"
+MeleeModule = MeleeModule or BeardLib:ModuleClass("Melee", ItemModuleBase)
 
 function MeleeModule:init(...)
     self.clean_table = table.add(clone(self.clean_table), {
@@ -90,5 +89,3 @@ function MeleeModule:RegisterHook()
         end
     end)
 end
-
-BeardLib:RegisterModule(MeleeModule.type_name, MeleeModule)

@@ -8,7 +8,11 @@ BeardLib = {
 	SavePath = SavePath
 }
 
+Hooks:Register("BeardLibPreInit")
+Hooks:Register("BeardLibPostInit")
+
 function BeardLib:Init()
+	Hooks:Call("BeardLibPreInit")
 	Global.beardlib_checked_updates = Global.beardlib_checked_updates or {}
 
 	self._call_next_update = {}
@@ -17,13 +21,16 @@ function BeardLib:Init()
 	self._errors = {}
 	self._modules = {}
 	self.sequence_mods = {}
+
 	self.Frameworks = {}
-	self.MusicMods = {}
-	self.managers = {}
-	self._init_managers = {}
-	self.modules = {}
+	self.Managers = {}
+	self.Menus = {}
+	self.Modules = {}
 	self.Items = {}
 	self.Mods = {}
+	self.MusicMods = {}
+
+	self._classes_to_init = {}
 
 	dofile(ModPath.."Classes/Utils/FileIO.lua")
 	dofile(ModPath.."Classes/Utils/Utils.lua")
@@ -37,9 +44,20 @@ function BeardLib:Init()
 	self:LoadModules()
 	self:LoadLocalization()
 
+	for _, init in pairs(self._classes_to_init) do
+		if not init.done and init.type == self.Constants.ClassTypes.Manager then
+			local obj = init.class:new()
+			if obj.type_name then
+				self:RegisterClass(obj.type_name, obj, init.type)
+			end
+			init.done = true
+		end
+	end
+
 	for name, config in pairs(self._config.load_modules) do
 		if BeardLib.modules[name] then
-			local module = BeardLib.modules[name]:new(self, config)
+			local module = BeardLib.Modules[name]:new(self, config)
+			log(tostring(module._name))
 			self[module._name] = module
 			table.insert(self._modules, module)
 			module:PostInit()
@@ -53,18 +71,26 @@ function BeardLib:Init()
 
 	self:MigrateModSettings()
 
-	for _, manager in pairs(self._init_managers) do
-		if manager.init then
-			manager:init()
+	for _, init in pairs(self._classes_to_init) do
+		if not init.done then
+			local obj = init.class:new()
+			if obj.type_name then
+				self:RegisterClass(obj.type_name, obj, init.type)
+			end
+			init.done = true
 		end
 	end
 
+	self._classes_to_init = nil
+
 	self:RegisterTweak()
+
+	Hooks:Call("BeardLibPostInit")
 end
 
 function BeardLib:LoadClasses(config, prev_dir)
 	config = config or self._config.classes
-	local dir = Path:CombineDir(prev_dir or self._config.classes_dir, config.directory)
+	local dir = Path:Combine(prev_dir or self._config.classes_dir, config.directory)
     for _, c in ipairs(config) do
 		if c._meta == "class" then
 			self:DevLog("Loading class", tostring(p))
@@ -118,15 +144,40 @@ function BeardLib:RegisterFramework(name, clss)
 	self.Frameworks[name] = clss
 end
 
-function BeardLib:CreateManager(name, inherit)
-	local manager = inherit and class(inherit) or class()
-	self:RegisterManager(name, manager)
-	return manager
+function BeardLib:MenuClass(name, inherit)
+	return self:Class(inherit, name, self.Constants.ClassTypes.Menu)
 end
 
-function BeardLib:RegisterManager(name, manager)
-	self.managers[name] = manager
-	table.insert(self._init_managers, manager)
+function BeardLib:ManagerClass(name, inherit)
+	return self:Class(inherit, name, self.Constants.ClassTypes.Manager)
+end
+
+function BeardLib:ModuleClass(name, inherit)
+	return self:Class(inherit, name, self.Constants.ClassTypes.Module, true)
+end
+
+function BeardLib:Class(inherit, type_name, typ, no_init)
+	local clss = inherit and class(inherit) or class()
+	clss.type_name = type_name
+	if no_init then
+		self:RegisterClass(type_name, clss, typ)
+	else
+		table.insert(self._classes_to_init, {class = clss, type = typ})
+	end
+	return clss
+end
+
+function BeardLib:RegisterClass(name, obj, typ)
+	local types = self.Constants.ClassTypes
+	if typ == types.Manager then
+		self.Managers[name] = obj
+	elseif typ == types.Framework then
+		self:RegisterFramework(name, obj)
+	elseif typ == types.Module then
+		self:RegisterModule(name, obj)
+	elseif typ == types.Menu then
+		self.Menus[name] = obj
+	end
 end
 
 function BeardLib:RegisterModule(key, module)
@@ -134,11 +185,9 @@ function BeardLib:RegisterModule(key, module)
 		self:log("[ERROR] BeardLib:RegisterModule parameter #1, string expected got %s", key and type(key) or "nil")
 	end
 
-	if not self.modules[key] then
+	if not self.Modules[key] then
 		self:DevLog("Registered module with key %s", key)
-		self.modules[key] = module
-	else
-		self:log("[ERROR] Module with key %s already exists", key)
+		self.Modules[key] = module
 	end
 end
 
@@ -163,14 +212,8 @@ function BeardLib:RegisterTweak()
 	}, "dlc", "mod")
 end
 
--- kept for compatibility with mods designed for older BeardLib versions --
-function BeardLib:ReplaceScriptData(replacement, replacement_type, target_path, target_ext, options)
-	options = type(options) == "table" and options or {}
-	FileManager:ScriptReplaceFile(target_ext, target_path, replacement, table.merge(options, { type = replacement_type, mode = options.merge_mode }))
-end
-
 function BeardLib:Update(t, dt)
-	for _, manager in pairs(self.managers) do
+	for _, manager in pairs(self.Managers) do
 		if manager.Update then
 			manager:Update(t, dt)
 		end
@@ -187,7 +230,7 @@ function BeardLib:Update(t, dt)
 end
 
 function BeardLib:PausedUpdate(t, dt)
-	for _, manager in pairs(self.managers) do
+	for _, manager in pairs(self.Managers) do
 		if manager.Update then
 			manager:Update(t, dt, true)
 		end
@@ -323,8 +366,6 @@ Hooks:Add("MenuManagerInitialize", "BeardLibCreateMenuHooks", function(self)
     Hooks:Call("BeardLibCreateCustomMenus", self)
     Hooks:Call("BeardLibMenuHelperPlusInitMenus", self)
 	Hooks:Call("BeardLibCreateCustomNodesAndButtons", self)
-
-	BeardLib.managers.dialog:Init()
 end)
 
 Hooks:Add("MenuManagerOnOpenMenu", "BeardLibShowErrors", function(self, menu)

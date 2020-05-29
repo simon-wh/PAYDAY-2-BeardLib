@@ -1,5 +1,4 @@
-WeaponModModule = WeaponModModule or class(ItemModuleBase)
-WeaponModModule.type_name = "WeaponMod"
+WeaponModModule = WeaponModModule or BeardLib:ModuleClass("WeaponMod", ItemModuleBase)
 local ids_mat_config = Idstring("material_config")
 local ids_unit = Idstring("unit")
 local dummy_unit = "units/payday2/weapons/wpn_upg_dummy/wpn_upg_dummy"
@@ -249,5 +248,3 @@ function WeaponModModule:RegisterHook()
         end
 	end)
 end
-
-BeardLib:RegisterModule(WeaponModModule.type_name, WeaponModModule)

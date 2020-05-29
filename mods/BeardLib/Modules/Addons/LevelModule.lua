@@ -1,6 +1,4 @@
-LevelModule = LevelModule or class(ItemModuleBase)
-
-LevelModule.type_name = "level"
+LevelModule = LevelModule or BeardLib:ModuleClass("level", ItemModuleBase)
 LevelModule.levels_folder = "levels/mods/"
 
 function LevelModule:init(...)
@@ -35,11 +33,11 @@ function LevelModule:Load()
                 local new_path = Path:Combine(self.levels_folder, self._config.id, file_split[1])
                 if FileIO:Exists(complete_path) then
                     if include_data.type then
-                        BeardLib:ReplaceScriptData(complete_path, include_data.type, new_path, file_split[2], {add = true})
+                        BeardLib.Managers.File:ScriptReplaceFile(file_split[2], new_path, complete_path, {type = include_data.type, add = true})
 					else
 						local ext_id = file_split[2]:id()
 						local path_id = new_path:id()
-						FileManager:AddFile(ext_id, path_id, complete_path)
+						BeardLib.Managers.File:AddFile(ext_id, path_id, complete_path)
 						if include_data.reload then
 							PackageManager:reload(ext_id, path_id)
 						end
@@ -151,10 +149,7 @@ function LevelModule:RegisterHook()
     end
 end
 
-BeardLib:RegisterModule(LevelModule.type_name, LevelModule)
-
-InstanceModule = InstanceModule or class(LevelModule)
-InstanceModule.type_name = "instance"
+InstanceModule = InstanceModule or BeardLib:ModuleClass("instance", LevelModule)
 InstanceModule.levels_folder = "levels/instances/mods/"
 InstanceModule._loaded_packages = {}
 
@@ -208,5 +203,3 @@ function InstanceModule:Unload()
         self._loaded_addfiles = nil
     end
 end
-
-BeardLib:RegisterModule(InstanceModule.type_name, InstanceModule)

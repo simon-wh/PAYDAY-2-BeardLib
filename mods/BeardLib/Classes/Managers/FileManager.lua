@@ -1,7 +1,7 @@
-FileManager = FileManager or BeardLib:CreateManager("file")
+BeardLibFileManager = BeardLibFileManager or BeardLib:ManagerClass("File")
 Global.fm = Global.fm or {added_files = {}}
 
-function FileManager:init()
+function BeardLibFileManager:init()
 	self.const = {h_preprocessSF = "BeardLibPreProcessScriptData", h_postprocessSF = "BeardLibProcessScriptData"}
 	self.process_modes = {
 		merge = function(a1, a2) return table.merge(a1, a2) end,
@@ -13,11 +13,15 @@ function FileManager:init()
 	self._files_to_load = {}
 	self._files_to_unload = {}
 
-	Hooks:Register(FileManager.const.h_preprocessSF)
-	Hooks:Register(FileManager.const.h_postprocessSF)
+	Hooks:Register(self.const.h_preprocessSF)
+	Hooks:Register(self.const.h_postprocessSF)
+
+	-- Deprecated, try not to use.
+	FileManager = self
+	BeardLib.managers.file = self
 end
 
-function FileManager:Process(ids_ext, ids_path, name_mt)
+function BeardLibFileManager:Process(ids_ext, ids_path, name_mt)
 	local data = {}
 	if DB:_has(ids_ext, ids_path) then
         if name_mt ~= nil then
@@ -59,7 +63,7 @@ function FileManager:Process(ids_ext, ids_path, name_mt)
 						if to_replace then
 							data = new_data
 						else
-							FileManager.process_modes[mdata.mode](data, new_data)
+							self.process_modes[mdata.mode](data, new_data)
 						end
 					elseif FileIO:Exists(mdata.file) then
 						BeardLib:Err("Failed reading file '%s', are you trying to load a file with different format?", mdata.file)
@@ -77,7 +81,7 @@ function FileManager:Process(ids_ext, ids_path, name_mt)
 end
 
 local texture_key = "8c5b5ab050e16853"
-function FileManager:AddFile(ext, path, file)
+function BeardLibFileManager:AddFile(ext, path, file)
 	if not DB.create_entry then
 		return
 	end
@@ -97,7 +101,7 @@ function FileManager:AddFile(ext, path, file)
 	end
 end
 
-function FileManager:AddFileWithCheck(ext, path, file)
+function BeardLibFileManager:AddFileWithCheck(ext, path, file)
 	if FileIO:Exists(file) then
 		self:AddFile(ext, path, file)
 	else
@@ -105,7 +109,7 @@ function FileManager:AddFileWithCheck(ext, path, file)
 	end
 end
 
-function FileManager:RemoveFile(ext, path)
+function BeardLibFileManager:RemoveFile(ext, path)
 	ext = ext:id()
 	path = path:id()
 	local k_ext = ext:key()
@@ -119,11 +123,11 @@ function FileManager:RemoveFile(ext, path)
 	end
 end
 
-function FileManager:ScriptAddFile(path, ext, file, options)
+function BeardLibFileManager:ScriptAddFile(path, ext, file, options)
 	self:ScriptReplaceFile(path, ext, file, options)
 end
 
-function FileManager:ScriptReplaceFile(ext, path, file, options)
+function BeardLibFileManager:ScriptReplaceFile(ext, path, file, options)
     if not FileIO:Exists(file) then
         BeardLib:Err("Failed reading scriptdata at path '%s'!", file)
         return
@@ -138,7 +142,7 @@ function FileManager:ScriptReplaceFile(ext, path, file, options)
 	table.insert(self.modded_files[k_ext][k_path], table.merge(options, {file = file}))
 end
 
-function FileManager:ScriptReplace(ext, path, tbl, options)
+function BeardLibFileManager:ScriptReplace(ext, path, tbl, options)
     options = options or {}
 	local k_ext = ext:key()
 	local k_path = path:key()
@@ -147,17 +151,17 @@ function FileManager:ScriptReplace(ext, path, tbl, options)
 	table.insert(self.modded_files[k_ext][k_path], table.merge(options, {tbl = tbl}))
 end
 
-function FileManager:Has(ext, path)
+function BeardLibFileManager:Has(ext, path)
 	local k_ext = ext:key()
 	return Global.fm.added_files[k_ext] and Global.fm.added_files[k_ext][path:key()]
 end
 
-function FileManager:HasScriptMod(ext, path)
+function BeardLibFileManager:HasScriptMod(ext, path)
 	local k_ext = ext:key()
 	return self.modded_files[k_ext] and self.modded_files[k_ext][path:key()]
 end
 
-function FileManager:_LoadAsset(load)
+function BeardLibFileManager:_LoadAsset(load)
 	local path = load.path
 	local ext = load.ext
 	if not managers.dyn_resource:has_resource(ext, path, managers.dyn_resource.DYN_RESOURCES_PACKAGE) then
@@ -172,7 +176,7 @@ function FileManager:_LoadAsset(load)
     end
 end
 
-function FileManager:_UnloadAsset(unload)
+function BeardLibFileManager:_UnloadAsset(unload)
 	local path = unload.path
 	local ext = unload.ext
 	if managers.dyn_resource:has_resource(ext, path, managers.dyn_resource.DYN_RESOURCES_PACKAGE) then
@@ -187,7 +191,7 @@ function FileManager:_UnloadAsset(unload)
     end
 end
 
-function FileManager:LoadAsset(ids_ext, ids_path, file_path)
+function BeardLibFileManager:LoadAsset(ids_ext, ids_path, file_path)
 	local load = {ext = ids_ext:id(), path = ids_path:id(), file_path = file_path}
 	if managers.dyn_resource then
 		self:_LoadAsset(load)
@@ -196,7 +200,7 @@ function FileManager:LoadAsset(ids_ext, ids_path, file_path)
     end
 end
 
-function FileManager:UnloadAsset(ids_ext, ids_path, file_path)
+function BeardLibFileManager:UnloadAsset(ids_ext, ids_path, file_path)
 	local unload = {ext = ids_ext:id(), path = ids_path:id(), file_path = file_path}
 	if managers.dyn_resource then
 		self:_UnloadAsset(unload)
@@ -205,9 +209,9 @@ function FileManager:UnloadAsset(ids_ext, ids_path, file_path)
     end
 end
 
-FileManager.UnLoadAsset = FileManager.UnloadAsset
+BeardLibFileManager.UnLoadAsset = BeardLibFileManager.UnloadAsset
 
-function FileManager:Update(t, dt)
+function BeardLibFileManager:Update(t, dt)
 	if not managers.dyn_resource then
 		return
 	end

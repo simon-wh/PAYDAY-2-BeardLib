@@ -1,5 +1,4 @@
-MenuModule = MenuModule or class(ModuleBase)
-MenuModule.type_name = "Menu"
+MenuModule = MenuModule or BeardLib:ModuleClass("Menu", ModuleBase)
 
 function MenuModule:init(...)
     self.required_params = table.add(clone(self.required_params), {"menu"})
@@ -73,5 +72,3 @@ function MenuModule:BuildNode(node_data, parent_node)
 
     managers.menu:add_back_button(main_node)
 end
-
-BeardLib:RegisterModule(MenuModule.type_name, MenuModule)

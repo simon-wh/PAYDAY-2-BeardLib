@@ -1,5 +1,4 @@
-HeistMusic = HeistMusic or class(ItemModuleBase)
-HeistMusic.type_name = "HeistMusic"
+HeistMusic = HeistMusic or BeardLib:ModuleClass("HeistMusic", ItemModuleBase)
 
 function HeistMusic:LoadBuffers()
     for _, event in pairs(BeardLib.MusicMods[self._config.id].events) do
@@ -93,5 +92,3 @@ function HeistMusic:RegisterHook()
 
 	BeardLib.MusicMods[self._config.id] = music
 end
-
-BeardLib:RegisterModule(HeistMusic.type_name, HeistMusic)

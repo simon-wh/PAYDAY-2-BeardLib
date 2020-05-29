@@ -1,17 +1,24 @@
-MenuDialogManager = MenuDialogManager or BeardLib:CreateManager("dialog")
+MenuDialogManager = MenuDialogManager or BeardLib:ManagerClass("Dialog")
 
-function MenuDialogManager:Init()
+function MenuDialogManager:init()
     self.biggest_id = 0
     self._menu = MenuUI:new({
         name = "BeardLibDialogs",
         layer = 5000,
         background_blur = true,
         bg_callbacks = false,
+        create_items = ClassClbk(self, "CreateDialogs"),
         pre_key_press = ClassClbk(self, "KeyPressed")
     })
     self._dialogs = {}
     self._opened_dialogs = {}
     self._waiting_to_open = {}
+
+    -- Deprecated, try not to use.
+    BeardLib.managers.dialog = self
+end
+
+function MenuDialogManager:CreateDialogs()
     self.simple = MenuDialog:new()
     self.list = ListDialog:new()
     self.select_list = SelectListDialog:new()

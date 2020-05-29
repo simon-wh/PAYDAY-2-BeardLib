@@ -1,6 +1,4 @@
-WeaponModule = WeaponModule or class(ItemModuleBase)
-WeaponModule.type_name = "Weapon"
-
+WeaponModule = WeaponModule or BeardLib:ModuleClass("Weapon", ItemModuleBase)
 function WeaponModule:init(...)
     self.required_params = {}
     self.clean_table = table.add(clone(self.clean_table), {
@@ -321,8 +319,4 @@ function WeaponModule:ConvertOldToNew()
     self._config.adds = nil
 end
 
-WeaponModuleNew = WeaponModuleNew or class(WeaponModule) --Kept for backwards compatibility
-WeaponModuleNew.type_name = "WeaponNew"
-
-BeardLib:RegisterModule(WeaponModule.type_name, WeaponModule)
-BeardLib:RegisterModule(WeaponModuleNew.type_name, WeaponModuleNew)
+WeaponModuleNew = WeaponModuleNew or BeardLib:ModuleClass("WeaponNew", WeaponModule) --Kept for backwards compatibility

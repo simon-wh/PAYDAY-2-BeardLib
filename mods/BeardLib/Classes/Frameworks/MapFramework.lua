@@ -1,10 +1,20 @@
-MapFramework = MapFramework or BeardLib:CreateManager("BaseFramework", MapFramework)
+MapFramework = MapFramework or BeardLib:Class(FrameworkBase)
 MapFramework._loaded_instances = {}
 MapFramework._ignore_detection_errors = false
 MapFramework._ignore_folders = {"backups", "prefabs"}
 MapFramework._directory = BeardLib.config.maps_dir
-MapFramework.type_name = "map"
+MapFramework.type_name = "Map"
 MapFramework.menu_color = Color(0.1, 0.6, 0.1)
+
+function MapFramework:init()
+    -- Deprecated, try not to use.
+    if self.type_name == MapFramework.type_name then
+        BeardLib.Frameworks.map = self
+        BeardLib.managers.MapFramework = self
+    end
+
+    MapFramework.super.init(self)
+end
 
 function MapFramework:RegisterHooks(...)
 	self:AddCustomContact()

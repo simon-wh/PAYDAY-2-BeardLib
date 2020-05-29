@@ -1,6 +1,6 @@
-CustomSoundManager = CustomSoundManager or BeardLib:CreateManager("sound")
+BeardLibSoundManager = BeardLibSoundManager or BeardLib:ManagerClass("Sound")
 
-function CustomSoundManager:init()
+function BeardLibSoundManager:init()
     self.sources = {}
     self.stop_ids = {}
     self.float_ids = {}
@@ -10,9 +10,13 @@ function CustomSoundManager:init()
     self.buffers = {}
     self.redirects = {}
     self.Closed = XAudio == nil
+
+    -- Deprecated, try not to use.
+    CustomSoundManager = self
+    BeardLib.managers.sound = self
 end
 
-function CustomSoundManager:CheckSoundID(sound_id, engine_source, clbk, cookie)
+function BeardLibSoundManager:CheckSoundID(sound_id, engine_source, clbk, cookie)
 	if self.Closed then
         return nil
     end
@@ -55,7 +59,7 @@ function CustomSoundManager:CheckSoundID(sound_id, engine_source, clbk, cookie)
     end
 end
 
-function CustomSoundManager:GetLoadedBuffer(sound_id, prefixes, no_load)
+function BeardLibSoundManager:GetLoadedBuffer(sound_id, prefixes, no_load)
     for i, buffer in pairs(self.buffers) do
         local sound = buffer.load_on_play and buffer or buffer.data
         if self:ComparePrefixes(sound, sound_id, prefixes) then
@@ -75,19 +79,19 @@ function CustomSoundManager:GetLoadedBuffer(sound_id, prefixes, no_load)
     return nil
 end
 
-function CustomSoundManager:StoreFloat(sound_id, stop_id)
+function BeardLibSoundManager:StoreFloat(sound_id, stop_id)
 	self.float_ids[SoundDevice:string_to_id(sound_id)] = sound_id
 	if stop_id then
 		self.float_ids[SoundDevice:string_to_id(stop_id)] = stop_id
 	end
 end
 
-function CustomSoundManager:AddStop(stop_id, sound_id)
+function BeardLibSoundManager:AddStop(stop_id, sound_id)
 	self.stop_ids[stop_id] = self.stop_ids[stop_id] or {}
 	table.insert(self.stop_ids[stop_id], sound_id)
 end
 
-function CustomSoundManager:AddSoundID(data)
+function BeardLibSoundManager:AddSoundID(data)
 	local sound_id, stop_id = data.id, data.stop_id
     if not data.dont_store_float then
 		self:StoreFloat(sound_id, stop_id)
@@ -106,7 +110,7 @@ function CustomSoundManager:AddSoundID(data)
     table.insert(self.sound_ids, data)
 end
 
-function CustomSoundManager:AddBuffer(data, force)
+function BeardLibSoundManager:AddBuffer(data, force)
     if self.Closed then
         return
 	end
@@ -139,13 +143,13 @@ function CustomSoundManager:AddBuffer(data, force)
     return buffer
 end
 
-function CustomSoundManager:CompareSound(data, sound_id, prefixes)
+function BeardLibSoundManager:CompareSound(data, sound_id, prefixes)
     return data.id == sound_id
     and ((prefixes == nil and data.prefixes == nil)
     or (prefixes ~= nil and data.prefixes ~= nil and table.equals(prefixes, data.prefixes)))
 end
 
-function CustomSoundManager:ComparePrefixes(data, sound_id, prefixes)
+function BeardLibSoundManager:ComparePrefixes(data, sound_id, prefixes)
     if data.id == sound_id then
         if data.prefixes and prefixes then
             local match = false
@@ -165,7 +169,7 @@ function CustomSoundManager:ComparePrefixes(data, sound_id, prefixes)
     end
 end
 
-function CustomSoundManager:GetSound(sound_id, prefixes)
+function BeardLibSoundManager:GetSound(sound_id, prefixes)
     for _, sound in pairs(self.sound_ids) do
         if self:ComparePrefixes(sound, sound_id, prefixes) then
             return sound
@@ -173,7 +177,7 @@ function CustomSoundManager:GetSound(sound_id, prefixes)
     end
 end
 
-function CustomSoundManager:AddSource(sound_id, prefixes, engine_source, clbk, cookie)
+function BeardLibSoundManager:AddSource(sound_id, prefixes, engine_source, clbk, cookie)
 	if self.Closed then
 		return
 	end
@@ -211,7 +215,7 @@ function CustomSoundManager:AddSource(sound_id, prefixes, engine_source, clbk, c
 	return nil
 end
 
-function CustomSoundManager:Redirect(id, prefixes)
+function BeardLibSoundManager:Redirect(id, prefixes)
     for _, redirect in pairs(self.redirects) do
         if self:ComparePrefixes(redirect, id, prefixes) then
             return redirect.to
@@ -220,11 +224,11 @@ function CustomSoundManager:Redirect(id, prefixes)
     return id --No need to redirect.
 end
 
-function CustomSoundManager:AddRedirect(data)
+function BeardLibSoundManager:AddRedirect(data)
     table.insert(self.redirects, data)
 end
 
-function CustomSoundManager:CloseBuffer(sound_id, prefixes, soft)
+function BeardLibSoundManager:CloseBuffer(sound_id, prefixes, soft)
     for i, buffer in pairs(self.buffers) do
         local sound = buffer.load_on_play and buffer or buffer.data
         if (buffer.prefixes == nil and prefixes == nil) or (buffer.prefixes ~= nil and prefixes ~= nil and table.equals(buffer.prefixes, prefixes)) then
@@ -239,7 +243,7 @@ function CustomSoundManager:CloseBuffer(sound_id, prefixes, soft)
     end
 end
 
-function CustomSoundManager:Stop(engine_source)
+function BeardLibSoundManager:Stop(engine_source)
     local new_sources = {}
 	for _, source in pairs(self.sources) do
 		if not source:is_closed() then
@@ -253,7 +257,7 @@ function CustomSoundManager:Stop(engine_source)
     self.sources = new_sources
 end
 
-function CustomSoundManager:Close()
+function BeardLibSoundManager:Close()
     if not self:IsClosed() then
         for _, buffer in pairs(self.buffers) do
             if buffer.close then
@@ -266,7 +270,7 @@ function CustomSoundManager:Close()
     end
 end
 
-function CustomSoundManager:Update(t, dt)
+function BeardLibSoundManager:Update(t, dt)
     if self.Closed then
         return
     end
@@ -277,17 +281,17 @@ function CustomSoundManager:Update(t, dt)
     end
 end
 
-function CustomSoundManager:IsClosed() return self.Closed end
-function CustomSoundManager:Queued() return self.queued end
-function CustomSoundManager:Redirects() return self.redirects end
-function CustomSoundManager:Sources() return self.sources end
-function CustomSoundManager:Buffers() return self.buffers end
+function BeardLibSoundManager:IsClosed() return self.Closed end
+function BeardLibSoundManager:Queued() return self.queued end
+function BeardLibSoundManager:Redirects() return self.redirects end
+function BeardLibSoundManager:Sources() return self.sources end
+function BeardLibSoundManager:Buffers() return self.buffers end
 
-function CustomSoundManager:CreateSourceHook(id, func)
+function BeardLibSoundManager:CreateSourceHook(id, func)
     table.insert(self.create_source_hooks, {id = id, func = func})
 end
 
-function CustomSoundManager:RemoveCreateSourceHook(id)
+function BeardLibSoundManager:RemoveCreateSourceHook(id)
     for i, hook in pairs(self.create_source_hooks) do
         if hook.id == id then
             table.remove(self.create_source_hooks, i)
@@ -296,7 +300,7 @@ function CustomSoundManager:RemoveCreateSourceHook(id)
     end
 end
 
-function CustomSoundManager:Open()
+function BeardLibSoundManager:Open()
 	if self.Closed then
 		return
 	end
@@ -305,8 +309,8 @@ function CustomSoundManager:Open()
 		if type(SoundSource) == "userdata" then
 			SoundSource = getmetatable(SoundSource)
 		end
-		local sources = CustomSoundManager.engine_sources
-		local create_source_hooks = CustomSoundManager.create_source_hooks
+		local sources = self.engine_sources
+		local create_source_hooks = self.create_source_hooks
 
 		local Unit = Unit
 		if type(Unit) == "userdata" then
@@ -391,7 +395,7 @@ function CustomSoundManager:Open()
 		end
 
 		Hooks:PostHook(SoundSource, "stop", "BeardLibStopSounds", function(self)
-			CustomSoundManager:Stop(self)
+			BeardLib.Managers.Sound:Stop(self)
 		end)
 
 		Hooks:PostHook(SoundSource, "link", "BeardLibLink", function(self, object)
@@ -424,8 +428,9 @@ function CustomSoundManager:Open()
                     end
                 end
             end
-			event = CustomSoundManager:Redirect(event, self:get_prefixes())
-			local custom_source = CustomSoundManager:CheckSoundID(event, self, clbk, cookie)
+            local manager = BeardLib.Managers.Sound
+			event = manager:Redirect(event, self:get_prefixes())
+			local custom_source = manager:CheckSoundID(event, self, clbk, cookie)
 			if custom_source then
 				return custom_source
 			else

@@ -2,7 +2,7 @@ MenuUI = MenuUI or class()
 function MenuUI:init(params)
     local UniqueID = tostring(self)
     if not managers.gui_data then
-        Hooks:Add("SetupInitManagers", "CreateMenuUI"..UniqueID, function()
+        Hooks:Add("MenuManagerSetupCustomMenus", "CreateMenuUI"..UniqueID, function()
             self:init(params)
         end)
         return
@@ -83,10 +83,6 @@ function MenuUI:init(params)
             end)
         end
     end
-end
-
-function MenuUI:__tostring()
-    return string.format("[%s][MenuUI] %s", self:alive() and "Alive" or "Dead", tostring(self.name))
 end
 
 function MenuUI:ReloadInterface(params, shallow)

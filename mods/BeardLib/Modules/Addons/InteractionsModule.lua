@@ -1,5 +1,4 @@
-InteractionsModule = InteractionsModule or class(ItemModuleBase)
-InteractionsModule.type_name = "Interactions"
+InteractionsModule = InteractionsModule or BeardLib:ModuleClass("Interactions", ItemModuleBase)
 InteractionsModule.required_params = {}
 function InteractionsModule:AddInteractionsDataToTweak(i_self)
     for _, data in ipairs(self._config) do
@@ -23,5 +22,3 @@ function InteractionsModule:RegisterHook()
         end
     end
 end
-
-BeardLib:RegisterModule(InteractionsModule.type_name, InteractionsModule)

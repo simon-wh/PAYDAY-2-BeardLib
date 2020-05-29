@@ -125,11 +125,11 @@
 		</classes>
 
 		<classes directory="Managers">
-			<class file="CustomAchievementManager.lua"/>
+			<class file="AchievementManager.lua"/>
 			<class file="MenuUIManager.lua"/>
 			<class file="MenuDialogManager.lua"/>
-			<class file="CustomPackageManager.lua"/>
-			<class file="CustomSoundManager.lua"/>
+			<class file="PackageManager.lua"/>
+			<class file="SoundManager.lua"/>
 			<class file="FileManager.lua"/>
 			<class file="ModAssetUpdateManager.lua"/>
 		</classes>
@@ -141,8 +141,8 @@
 		</classes>
 
 		<classes directory="UI">
-			<class file="CustomAchievementMenu.lua"/>
-			<class file="BeardLibModsMenu.lua"/>
+			<class file="AchievementMenu.lua"/>
+			<class file="ModsMenu.lua"/>
 
 			<classes directory="Dialogs">
 				<class file="MenuDialog.lua"/>

@@ -1,7 +1,6 @@
-FrameworkBase = FrameworkBase or BeardLib:CreateManager("BaseFramework")
-local BMM = BLTModManager
+FrameworkBase = FrameworkBase or BeardLib:Class()
 
-FrameworkBase._directory = BMM and BMM.Constants and BMM.Constants.mods_directory or "mods/"
+FrameworkBase._directory = BLTModManager.Constants.mods_directory or "mods/"
 FrameworkBase._format = Path:Combine(FrameworkBase._directory, "%s", "main.xml")
 FrameworkBase._mod_core = ModCore
 FrameworkBase._ignore_folders = {["base"] = true, ["BeardLib"] = true, ["downloads"] = true, ["logs"] = true, ["saves"] = true}
@@ -9,11 +8,12 @@ FrameworkBase._ignore_detection_errors = true
 
 FrameworkBase.main_file_name = "main.xml"
 FrameworkBase.auto_init_modules = true
-FrameworkBase.type_name = "base"
+FrameworkBase.type_name = "Base"
 FrameworkBase.menu_color = Color(0.6, 0, 1)
 
 function FrameworkBase:init()
 	BeardLib:RegisterFramework(self.type_name, self)
+
 	self._ignored_configs = {}
 	self._loaded_mods = {}
 	self._sorted_mods = {}
@@ -24,6 +24,12 @@ function FrameworkBase:init()
 	end)
 
 	self:Load()
+
+	-- Deprecated, try not to use.
+    if self.type_name == AddFramework.type_name then
+        BeardLib.Frameworks.base = self
+        BeardLib.managers.BaseFramework = self
+    end
 end
 
 function FrameworkBase:CheckModQueue(post, file)

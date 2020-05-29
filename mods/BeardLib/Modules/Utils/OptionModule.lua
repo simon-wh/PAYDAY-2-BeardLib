@@ -1,5 +1,4 @@
-OptionModule = OptionModule or class(ModuleBase)
-OptionModule.type_name = "Options"
+OptionModule = OptionModule or BeardLib:ModuleClass("Options", ModuleBase)
 OptionModule.auto_load = false
 
 function OptionModule:init(...)
@@ -722,5 +721,3 @@ Hooks:Add("BeardLibCreateCustomNodesAndButtons", "BeardLibOptionModuleCreateCall
         OptionModule.SetValue(item._parameters.module, item._parameters.option_key, cur_val)
     end
 end)
-
-BeardLib:RegisterModule(OptionModule.type_name, OptionModule)

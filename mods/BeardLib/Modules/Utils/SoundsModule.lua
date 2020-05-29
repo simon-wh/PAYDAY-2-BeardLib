@@ -1,6 +1,7 @@
-SoundsModule = SoundsModule or class(ModuleBase)
-SoundsModule.type_name = "Sounds"
+SoundsModule = SoundsModule or BeardLib:ModuleClass("Sounds", ModuleBase)
 SoundsModule.auto_load = false
+
+local Managers = BeardLib.Managers
 
 function SoundsModule:init(...)
     if not SoundsModule.super.init(self, ...) then
@@ -78,10 +79,10 @@ function SoundsModule:ReadSounds(data, prev_dir)
 			end
 
 			if (meta == redirect_s or meta == Redirect_s) then
-				CustomSoundManager:AddRedirect(v)
+				Managers.Sound:AddRedirect(v)
 			elseif (meta == sound_s or meta == Sound_s) and v.id then
 				v.path = v.path or v.id..".ogg"
-				CustomSoundManager:AddBuffer(table.merge({
+				Managers.Sound:AddBuffer(table.merge({
 					full_path = Path:Combine(dir, v.path),
 					load_on_play = load_on_play,
 					stop_id = stop_id or v.id.."_stop",
@@ -104,14 +105,14 @@ function SoundsModule:ReadSounds(data, prev_dir)
 				end
 				v.queue = queue
 				v.is_random = meta == random
-				CustomSoundManager:AddSoundID(v)
+				Managers.Sound:AddSoundID(v)
 			elseif meta == stop or meta == Stop then
 				if v.sound_id then
-					CustomSoundManager:AddStop(v.id, v.sound_id)
+					Managers.Sound:AddStop(v.id, v.sound_id)
 				end
 				for _, sound in ipairs(v) do
 					if type(sound) == "table" and (sound._meta == sound_s or sound._meta == Sound_s) then
-						CustomSoundManager:AddStop(v.id, sound.id)
+						Managers.Sound:AddStop(v.id, sound.id)
 					end
 				end
 			elseif meta == scan then
@@ -121,7 +122,7 @@ function SoundsModule:ReadSounds(data, prev_dir)
 					local id, ext = splt[1], splt[2]
 					if ext == "ogg" then
 						local file_path = id..".ogg"
-						CustomSoundManager:AddBuffer(table.merge({
+						Managers.Sound:AddBuffer(table.merge({
 							id = id,
 							full_path = Path:Combine(scan_dir, file_path),
 							load_on_play = load_on_play,
@@ -134,5 +135,3 @@ function SoundsModule:ReadSounds(data, prev_dir)
 		end
 	end
 end
-
-BeardLib:RegisterModule(SoundsModule.type_name, SoundsModule)
