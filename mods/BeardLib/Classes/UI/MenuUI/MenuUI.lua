@@ -59,7 +59,7 @@ function MenuUI:init(params)
     Hooks:Add("SetupPreUpdate", "MenuUIUpdate"..UniqueID, ClassClbk(self, "Update"))
     Hooks:Add("GameSetupPrePausedUpdate", "MenuUIUpdate"..UniqueID, ClassClbk(self, "Update"))
 
-    BeardLib.managers.menu_ui:add_menu(self)
+    BeardLib.Managers.MenuUI:AddMenu(self)
 
     --Deprecated values
     self.pre_key_press = self.pre_key_press or self.always_key_press
@@ -217,7 +217,7 @@ function MenuUI:Enabled() return self._enabled end
 function MenuUI:Disabled() return not self._enabled end
 
 function MenuUI:IsMouseActive()
-	if BeardLib.managers.menu_ui:input_disabled() then
+	if BeardLib.Managers.MenuUI:InputDisabled() then
         return false
 	end
 	if self:Disabled() then
@@ -277,7 +277,7 @@ function MenuUI:Disable()
     if self._openlist then self._openlist:hide() end
     if self._popupmenu then self._popupmenu:hide() end
     managers.mouse_pointer:remove_mouse(self._mouse_id)
-	BeardLib.managers.menu_ui:close_menu_event()
+	BeardLib.Managers.MenuUI:CloseMenuEvent()
 	self:RunToggleClbk()
 end
 
@@ -610,7 +610,7 @@ function MenuUI:Destroy()
         self:Disable()
         local UniqueID = tostring(self)
         managers.gui_data:destroy_workspace(self._ws)
-        BeardLib.managers.menu_ui:remove_menu(self)
+        BeardLib.Managers.MenuUI:RemoveMenu(self)
         Hooks:Remove("MenuUIUpdate"..UniqueID)
         Hooks:Remove("CreateMenuUI"..UniqueID)
     end

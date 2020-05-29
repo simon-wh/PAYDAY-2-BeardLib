@@ -59,8 +59,8 @@ Hooks:PostHook(BLTNotificationsGui, "close", "BeardLibPanelClose", function(self
 end)
 
 Hooks:PostHook(BLTNotificationsGui, "update", "BeardLibModsManagerUpdate", function(self)
-    if alive(self._beardlib_updates) and BeardLib.managers.mods_menu then
-        local updates = #BeardLib.managers.mods_menu._waiting_for_update
+    if alive(self._beardlib_updates) and BeardLib.Menus.Mods then
+        local updates = #BeardLib.Menus.Mods._waiting_for_update
         if alive(self._beardlib_updates_count) and tonumber(self._beardlib_updates_count:text()) ~= updates then
             self._beardlib_updates_count:set_text(updates)
         end
@@ -90,11 +90,11 @@ function BLTNotificationsGui:mouse_pressed(button, x, y)
         return
     end
     if alive(self._beardlib_updates) and self._beardlib_updates:inside(x,y) then
-        BeardLib.managers.mods_menu:SetEnabled(true)
+        BeardLib.Menus.Mods:SetEnabled(true)
         return true
     end
     if alive(self._beardlib_achievements) and self._beardlib_achievements:inside(x,y) then
-        BeardLib.managers.custom_achievement_menu:SetEnabled(true)
+        BeardLib.Menus.Achievement:SetEnabled(true)
         return true
     end
     return mouse_press(self, button, x, y)

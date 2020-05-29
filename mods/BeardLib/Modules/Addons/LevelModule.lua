@@ -158,7 +158,7 @@ function InstanceModule:init(...)
         return false
     end
     self._world_path = Path:Combine(self.levels_folder, self._config.id, "world")
-    BeardLib.managers.MapFramework._loaded_instances[self._world_path] = self --long ass line
+    BeardLib.Frameworks.Map._loaded_instances[self._world_path] = self --long ass line
 
     --USED ONLY IN EDITOR!
     if Global.editor_loaded_instance then

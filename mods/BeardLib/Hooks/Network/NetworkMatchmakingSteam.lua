@@ -100,7 +100,7 @@ Hooks:Add(seta_hook, "BeardLibCorrectCustomHeist", function(self, new_data, sett
 	local _job_key = tweak_data.narrative._jobs_index[job_index]
 	local level_id = (_level_id and tweak_data.levels[_level_id] and tweak_data.levels[_level_id].custom) and _level_id or nil
 	local job_key = (_job_key and tweak_data.narrative.jobs[_job_key] and tweak_data.narrative.jobs[_job_key].custom) and _job_key or nil
-	local mod = BeardLib.managers.MapFramework:GetMapByJobId(_job_key)
+	local mod = BeardLib.Frameworks.Map:GetMapByJobId(_job_key)
 	if mod and (level_id or job_key) then
 		local mod_assets = mod:GetModule(ModAssetsModule.type_name)
 		if mod_assets and mod_assets._data then

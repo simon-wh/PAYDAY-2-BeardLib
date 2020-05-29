@@ -104,7 +104,7 @@ function ModAssetsModule:RetrieveCurrentVersion()
 end
 
 function ModAssetsModule:CheckVersion(force)
-    if not force and BeardLib.managers.asset_update:UpdatesIgnored(self._mod) then
+    if not force and BeardLib.Managers.Update:UpdatesIgnored(self._mod) then
         return
     end
 
@@ -119,11 +119,11 @@ function ModAssetsModule:PrepareForUpdate()
     if not self._mod then
         return
     end
-    BeardLib.managers.mods_menu:SetModNeedsUpdate(self, self._new_version)
+    BeardLib.Menus.Mods:SetModNeedsUpdate(self, self._new_version)
     if self._config.important and BeardLib.Options:GetValue("ImportantNotice") then
         local loc = managers.localization
         QuickMenuPlus:new(loc:text("beardlib_mods_manager_important_title", {mod = self._mod.Name}), loc:text("beardlib_mods_manager_important_help"), {{text = loc:text("dialog_yes"), callback = function()
-            BeardLib.managers.mods_menu:SetEnabled(true)
+            BeardLib.Menus.Mods:SetEnabled(true)
         end}, {text = loc:text("dialog_no"), is_cancel_button = true}})
     end
 end
@@ -164,7 +164,7 @@ function ModAssetsModule:ShowNoChangePrompt()
 end
 
 function ModAssetsModule:SetReady()
-    BeardLib.managers.asset_update:PrepareForUpdate()
+    BeardLib.Managers.Update:PrepareForUpdate()
 end
 
 function ModAssetsModule:DownloadAssets()
@@ -193,12 +193,12 @@ end
 function ModAssetsModule:_DownloadAssets(data)
     local download_url = ModCore:GetRealFilePath(self.provider.download_url, data or self)
     self:log("Downloading assets from url: %s", download_url)
-    dohttpreq(download_url, ClassClbk(self, "StoreDownloadedAssets"), self._mod and ClassClbk(BeardLib.managers.mods_menu, "SetModProgress", self) or nil)
+    dohttpreq(download_url, ClassClbk(self, "StoreDownloadedAssets"), self._mod and ClassClbk(BeardLib.Menus.Mods, "SetModProgress", self) or nil)
 end
 
 function ModAssetsModule:StoreDownloadedAssets(data, id)
     local config = self._config
-    local mods_menu = BeardLib.managers.mods_menu
+    local mods_menu = BeardLib.Menus.Mods
     local coroutine = mods_menu._menu._ws:panel():panel({})
     coroutine:animate(function()
         wait(0.001)
@@ -284,7 +284,7 @@ end
 
 function DownloadCustomMap:_DownloadAssets(data)
     local download_url = ModCore:GetRealFilePath(self.provider.download_url, data or self)
-    local dialog = BeardLib.managers.dialog.download
+    local dialog = BeardLib.Managers.Dialog:Download()
     dialog:Show({title = (managers.localization:text("beardlib_downloading")..self.level_name) or "No Map Name", force = true})
     table.merge(self._config, {
         done_callback = self.done_map_download,

@@ -90,7 +90,7 @@ function BeardLibModsMenu:CreateItems(menu)
         text = "beardlib_achieves_title",
         help = "beardlib_achieves_desc",
         size_by_text = true,
-        callback = ClassClbk(BeardLib.managers.custom_achievement_menu, "SetEnabled", true)
+        callback = ClassClbk(BeardLib.Menus.Achievement, "SetEnabled", true)
     })
 
     self._top:TextBox({
@@ -316,11 +316,11 @@ function BeardLibModsMenu:UpdateAllMods()
             table.insert(tbl, {name = mod_item.name, value = mod_item})
         end
     end
-    BeardLib.managers.dialog:SimpleSelectList():Show({force = true, list = tbl, selected_list = tbl, callback = ClassClbk(self, "UpdatesModsByList")})
+    BeardLib.Managers.Dialog:SimpleSelectList():Show({force = true, list = tbl, selected_list = tbl, callback = ClassClbk(self, "UpdatesModsByList")})
 end
 
 function BeardLibModsMenu:OpenModSettings(mod, blt_mod)
-    BeardLib.managers.dialog:Simple():Show({
+    BeardLib.Managers.Dialog:Simple():Show({
         title = managers.localization:text("beardlib_mod_settings", {mod = mod.Name or "Missing name"}),
         create_items = function(menu)
             local mod_settings = mod:GetSettings()
@@ -356,7 +356,7 @@ function BeardLibModsMenu:SetModSetting(mod, item)
 end
 
 function BeardLibModsMenu:OpenSettings()
-    BeardLib.managers.dialog:Simple():Show({
+    BeardLib.Managers.Dialog:Simple():Show({
         title = managers.localization:text("beardlib_b_settings"),
         create_items = function(menu)
             local holder = menu:Menu({name = "settings_holder", auto_height = true, localized = true})

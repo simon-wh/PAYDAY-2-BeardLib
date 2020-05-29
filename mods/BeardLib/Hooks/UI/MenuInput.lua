@@ -3,13 +3,13 @@ Hooks:PostHook(MenuInput, "init", "BeardLibMenuInputInit", function(self)
 end)
 
 local back = MenuInput.back
-local menu_ui = BeardLib.managers.menu_ui
+local MenuUIManager = BeardLib.Managers.MenuUI
 function MenuInput:back(...)
     if BeardLib.IgnoreBackOnce then
         BeardLib.IgnoreBackOnce = nil
         return false
     end
-    if not menu_ui:input_allowed() then
+    if not MenuUIManager:InputAllowed() then
         return false
     end
     return back(self, ...)
@@ -17,14 +17,14 @@ end
 
 local mm = MenuInput.mouse_moved
 function MenuInput:mouse_moved(...)
-    if menu_ui:input_allowed() and not self:BeardLibMouseMoved(...) then
+    if MenuUIManager:InputAllowed() and not self:BeardLibMouseMoved(...) then
         return mm(self, ...)
     end
 end
 
 local mp = MenuInput.mouse_pressed
 function MenuInput:mouse_pressed(...)
-    if menu_ui:input_allowed() and not self:BeardLibMousePressed(...) then
+    if MenuUIManager:InputAllowed() and not self:BeardLibMousePressed(...) then
         return mp(self, ...)
     end
 end
@@ -55,7 +55,7 @@ function MenuInput:BeardLibMousePressed(o, button, x, y)
             if (item.TYPE == slider or item._parameters.input) then
                 self._current_item = item
                 local title = item._parameters.text_id
-                BeardLib.managers.dialog:Input():Show({
+                BeardLib.Managers.Dialog:Input():Show({
                     title = item._parameters.override_title or item._parameters.localize ~= false and managers.localization:text(title) or title,
                     text = tostring(item._value) or item._parameters.string_value or "",
                     filter = item._value and "number",
@@ -74,7 +74,7 @@ function MenuInput:BeardLibMousePressed(o, button, x, y)
         elseif button == Idstring("0") and item.TYPE == color_button then
             self._current_item = item
             local title = item._parameters.text_id
-            BeardLib.managers.dialog:Color():Show({
+            BeardLib.Managers.Dialog:Color():Show({
                 title = item._parameters.override_title or item._parameters.localize ~= false and managers.localization:text(title) or title,
                 color = item:value(),
                 force = true,
@@ -117,7 +117,7 @@ end
 
 local up = MenuInput.update
 function MenuInput:update(...)
-    if not menu_ui:input_allowed() then
+    if not MenuUIManager:InputAllowed() then
         return
     end
     up(self, ...)

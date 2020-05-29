@@ -3,15 +3,16 @@ local orig_MenuCallbackHandler_start_job = MenuCallbackHandler.start_job
 
 local sync_game_settings_id = "BeardLib_sync_game_settings"
 local SyncUtils = BeardLib.Utils.Sync
+local MenuUIManager = BeardLib.Managers.MenuUI
+local DialogManager = BeardLib.Managers.Dialog
 
-local menu_ui = BeardLib.managers.menu_ui
 local o_toggle_menu_state = MenuManager.toggle_menu_state
 function MenuManager:toggle_menu_state(...)
-    if BeardLib.managers.dialog:DialogOpened() then
-        BeardLib.managers.dialog:CloseLastDialog()
+    if DialogManager:DialogOpened() then
+        DialogManager:CloseLastDialog()
         return
     end
-    if not menu_ui:input_allowed() then
+    if not MenuUIManager:InputAllowed() then
         return
     end
     return o_toggle_menu_state(self, ...)
@@ -28,14 +29,14 @@ end
 
 local o_resume_game = MenuCallbackHandler.resume_game
 function MenuCallbackHandler:resume_game(...)
-    if not BeardLib.managers.dialog:DialogOpened() then
+    if not DialogManager:DialogOpened() then
         return o_resume_game(self, ...)
     end
 end
 
 core:import("SystemMenuManager")
 Hooks:PostHook(SystemMenuManager.GenericSystemMenuManager, "event_dialog_shown", "BeardLibEventDialogShown", function(self)
-    if BeardLib.managers.dialog:DialogOpened() then
+    if DialogManager:DialogOpened() then
         BeardLib.IgnoreDialogOnce = true
     end
 end)

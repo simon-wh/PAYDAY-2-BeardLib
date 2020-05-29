@@ -1,5 +1,8 @@
 MenuDialog = MenuDialog or class()
 MenuDialog.type_name = "MenuDialog"
+
+local Managers = BeardLib.Managers
+
 function MenuDialog:init(params, menu)
     if self.type_name == MenuDialog.type_name then
         params = params and clone(params) or {}
@@ -7,7 +10,7 @@ function MenuDialog:init(params, menu)
     self._default_width = self._default_width or 420
     self._no_blur = params.no_blur
     self._tbl = {}
-    menu = menu or BeardLib.managers.dialog:Menu()
+    menu = menu or Managers.Dialog:Menu()
     self._menu = menu:Menu(table.merge({
         name = "dialog"..tostring(self),
         position = "Center",
@@ -25,12 +28,12 @@ function MenuDialog:init(params, menu)
         accent_color = BeardLib.Options:GetValue("MenuColor"),
         background_color = Color.black:with_alpha(0.75),
     }, params))
-    BeardLib.managers.dialog:AddDialog(self)
+    Managers.Dialog:AddDialog(self)
 end
 
 function MenuDialog:Destroy()
     self:hide()
-    BeardLib.managers.dialog:RemoveDialog(self)
+    Managers.Dialog:RemoveDialog(self)
     if self._menus then
         for _, menu in pairs(self._menus) do
             menu:Destroy()
@@ -40,7 +43,7 @@ function MenuDialog:Destroy()
 end
 
 function MenuDialog:Show(params)
-    BeardLib.managers.dialog:OpenDialog(self, type_name(params) == "table" and params or nil)
+    Managers.Dialog:OpenDialog(self, type_name(params) == "table" and params or nil)
 end
 
 function MenuDialog:SetCurrentId(id)
@@ -116,7 +119,7 @@ end
 
 function MenuDialog:basic_show(params, force)
     self._no_blur = params.no_blur or false
-    BeardLib.managers.dialog:ShowDialog(self)
+    Managers.Dialog:ShowDialog(self)
     self._tbl = {}
     self._params = params
     params = type_name(params) == "table" and params or {}
@@ -125,7 +128,7 @@ function MenuDialog:basic_show(params, force)
     if not self._no_clearing_menu then
         self._menu:ClearItems()
     end
-    self._menu:SetLayer(BeardLib.managers.dialog:GetMyIndex(self) * 50)
+    self._menu:SetLayer(Managers.Dialog:GetMyIndex(self) * 50)
     if self.type_name == MenuDialog.type_name then
         self._menu.auto_height = NotNil(params.auto_height, true)
     end
@@ -135,7 +138,7 @@ function MenuDialog:basic_show(params, force)
     end
     if self._menus then
         for _, menu in pairs(self._menus) do
-            menu:SetLayer(BeardLib.managers.dialog:GetMyIndex(self) * 50)
+            menu:SetLayer(Managers.Dialog:GetMyIndex(self) * 50)
             if not self._no_clearing_menu then
                 menu:ClearItems()
             end
@@ -159,7 +162,7 @@ function MenuDialog:should_close()
 end
 
 function MenuDialog:hide(yes, item)
-    BeardLib.managers.dialog:CloseDialog(self)
+    Managers.Dialog:CloseDialog(self)
     local clbk = (yes == true and self._callback) or (not yes and self._no_callback)
     if not self._no_clearing_menu then
         self._menu:ClearItems()
@@ -190,7 +193,7 @@ end
 
 function QuickDialog(opt, items)
     opt = opt or {}
-    local dialog = opt.dialog or BeardLib.managers.dialog.simple
+    local dialog = opt.dialog or Managers.Dialog:Simple()
     opt.dialog = nil
     opt.title = opt.title or "Info"
     dialog:Show(table.merge({no = "Close", yes = false, create_items = function(menu)

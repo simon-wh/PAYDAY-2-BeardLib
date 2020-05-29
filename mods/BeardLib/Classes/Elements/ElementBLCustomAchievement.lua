@@ -21,7 +21,7 @@ function ElementBLCustomAchievement:on_executed(instigator)
         BeardLib:log("BLCustomAchievement Element is missing data!")
         return
     end
-    if not BeardLib.managers.custom_achievement:HasPackage(self._values.package_id) then
+    if not BeardLib.Managers.Achievement:HasPackage(self._values.package_id) then
         BeardLib:log("Package %s does not exist.", self._values.package_id)
         return
     end

@@ -57,7 +57,6 @@ function BeardLib:Init()
 	for name, config in pairs(self._config.load_modules) do
 		if BeardLib.modules[name] then
 			local module = BeardLib.Modules[name]:new(self, config)
-			log(tostring(module._name))
 			self[module._name] = module
 			table.insert(self._modules, module)
 			module:PostInit()
@@ -259,7 +258,7 @@ end
 
 function BeardLib:ShowErrorsDialog()
 	local loc = managers.localization
-	BeardLib.managers.dialog:Simple():Show({
+	BeardLib.Managers.Dialog:Simple():Show({
 		force = true,
 		w = 1100,
 		full_bg_color = Color.black:with_alpha(0.9),

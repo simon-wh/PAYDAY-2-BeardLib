@@ -1,5 +1,5 @@
 local BeardLib = BeardLib
-local Framework = BeardLib.managers.MapFramework
+local Framework = BeardLib.Frameworks.Map
 local Hooks = Hooks
 
 core:module("CoreWorldDefinition")

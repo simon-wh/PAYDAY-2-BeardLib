@@ -23,7 +23,7 @@ function FileBrowserDialog:init(params, menu)
         params = params and clone(params) or {}
     end
 
-    menu = menu or BeardLib.managers.dialog:Menu()
+    menu = menu or BeardLib.Managers.Dialog:Menu()
     FileBrowserDialog.super.init(self, table.merge(params, {
         w = 900,
         h = 624,

@@ -19,7 +19,6 @@ function Sync:DownloadMap(level_name, job_id, udata, done_callback)
     local msg = managers.localization:text("custom_map_needs_download", {url = udata.download_url or ""})
     QuickMenuPlus:new(managers.localization:text("custom_map_alert"), msg, {{text = "Yes", callback = function()
         local provider = ModAssetsModule._providers[udata.provider or (not udata.download_url and "modworkshop") or nil]
-        local dialog = BeardLib.managers.dialog.download
         local map = DownloadCustomMap:new()
         map.provider = provider or {download_url = udata.download_url}
         map.id = udata.id
@@ -27,8 +26,8 @@ function Sync:DownloadMap(level_name, job_id, udata, done_callback)
         map.level_name = level_name
         map.failed_map_downloaed = SimpleClbk(done_callback, false)
         map.done_map_download = function()
-            BeardLib.managers.MapFramework:Load()
-            BeardLib.managers.MapFramework:RegisterHooks()
+            BeardLib.Frameworks.Map:Load()
+            BeardLib.Frameworks.Map:RegisterHooks()
             managers.job:_check_add_heat_to_jobs()
             managers.crimenet:find_online_games(Global.game_settings.search_friends_only)
             if done_callback then
@@ -57,7 +56,7 @@ function Sync:GetJobString()
     local job_id = managers.job:current_job_id()
     local level = tweak_data.levels[level_id]
     local level_name = managers.localization:to_upper_text(level and level.name_id or "")
-    local mod = BeardLib.managers.MapFramework:GetMapByJobId(job_id)
+    local mod = BeardLib.Frameworks.Map:GetMapByJobId(job_id)
     local update = {}
     if mod then
         local mod_assets = mod:GetModule(ModAssetsModule.type_name)

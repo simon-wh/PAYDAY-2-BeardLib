@@ -222,7 +222,7 @@ end
 function CustomAchievementPackage:ManualAchievementAddition(achievement_id, config)
     if tweak_data and tweak_data.achievement then
         tweak_data.achievement.custom_achievements[self._package_id][achievement_id] = config
-        BeardLib.managers.custom_achievement:SetupAchievements()
+        BeardLib.Managers.Achievement:SetupAchievements()
     end
 end
 

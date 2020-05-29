@@ -1,4 +1,4 @@
-ModAssetUpdateManager = ModAssetUpdateManager or BeardLib:ManagerClass("Updates")
+ModAssetUpdateManager = ModAssetUpdateManager or BeardLib:ManagerClass("Update")
 
 function ModAssetUpdateManager:init()
     self._registered_updates = {}

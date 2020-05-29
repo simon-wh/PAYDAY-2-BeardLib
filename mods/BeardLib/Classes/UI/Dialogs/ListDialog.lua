@@ -8,7 +8,7 @@ function ListDialog:init(params, menu)
         params = params and clone(params) or {}
     end
 
-    menu = menu or BeardLib.managers.dialog:Menu()
+    menu = menu or BeardLib.Managers.Dialog:Menu()
 
     local h = params.h
     params.h = nil
