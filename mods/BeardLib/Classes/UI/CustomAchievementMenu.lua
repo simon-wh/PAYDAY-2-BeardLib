@@ -375,7 +375,6 @@ function CustomAchievementMenu:DisplayPackageHeader(package)
 		})
 
 		local banner_top = banner_panel:Panel():bitmap({
-			texture = "guis/textures/achievement_banner_topper",
 			w = banner_panel:Panel():w(),
 			h = banner_panel:Panel():h(),
 			color = Color.black,
