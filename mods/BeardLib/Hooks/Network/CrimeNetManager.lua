@@ -1,9 +1,9 @@
 local orig = CrimeNetGui.check_job_pressed
 function CrimeNetGui:check_job_pressed(x,y, ...)
-    for id, job in pairs(self._jobs) do
+    for _, job in pairs(self._jobs) do
         if job.mouse_over == 1 and job.update_data then
             self:disable_crimenet()
-            BeardLib.Utils:DownloadMap(job.level_name, job.job_key, job.update_data, function(success)
+            BeardLib.Utils.Sync:DownloadMap(job.level_name, job.job_key, job.update_data, function(success)
                 self:enable_crimenet()
                 self._grabbed_map = false
             end)
@@ -56,9 +56,6 @@ function CrimeNetGui:change_to_custom_job_gui(job)
 		x = x + 11
 		num_stars = num_stars + 1
 	end
-	local job_num = #tweak_data.narrative:job_chain(job.job_id)
-	local total_payout, base_payout, risk_payout = managers.money:get_contract_money_by_stars(0, difficulty_stars, job_num, job.job_id)
-	local job_cash = managers.experience:cash_string(math.round(total_payout))
 	local difficulty_string = managers.localization:to_upper_text(tweak_data.difficulty_name_ids[tweak_data.difficulties[job.difficulty_id]])
 	local difficulty_name = panel:child("difficulty_name")
 	difficulty_name:set_text(difficulty_string)

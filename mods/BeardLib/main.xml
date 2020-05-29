@@ -81,7 +81,6 @@
 				<hook source_file="lib/network/base/clientnetworksession" file="ClientNetworkSession.lua"/>
 				<hook source_file="lib/managers/crimenetmanager" file="CrimeNetManager.lua"/>
 				<hook source_file="lib/network/base/networkpeer" file="NetworkPeer.lua"/>
-				<hook source_file="lib/managers/blackmarketmanager" file="BlackMarketManager.lua"/>
 			</hooks>
 
 			<hooks directory="World">
@@ -122,6 +121,7 @@
 			<class file="YAML.lua"/>
 			<class file="XML.lua"/>
 			<class file="Builders.lua"/>
+			<class file="Sync.lua"/>
 		</classes>
 
 		<classes directory="Managers">

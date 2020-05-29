@@ -44,10 +44,10 @@ Hooks:PreHook(ClientNetworkSession, "on_join_request_reply", "BeardLib_on_join_r
                 if tweak_data.narrative.jobs[job_id] then
                     continue_load({...}, true)
                 else
-                    local update_data = BeardLib.Utils:GetUpdateData(split_data)
+                    local update_data = BeardLib.Utils.Sync:GetUpdateData(split_data)
                     if level_name and update_data then
                         self._ignore_load = true
-                        BeardLib.Utils:DownloadMap(level_name, job_id, update_data, SimpleClbk(continue_load, {...}))
+                        BeardLib.Utils.Sync:DownloadMap(level_name, job_id, update_data, SimpleClbk(continue_load, {...}))
                     elseif not level_name then
                         QuickMenuPlus:new(managers.localization:text("mod_assets_error"), managers.localization:text("custom_map_host_old_version"))
                         orig_cb("CANCELLED")

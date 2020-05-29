@@ -5,37 +5,26 @@ local send_outfit_id = "BCO" --BeardLib compact outfit
 local set_equipped_weapon = "BSEW" --BeardLib set equipped weapon
 local current_outfit_version = "1.0"
 local current_weapon_version = "2.0"
+local peer_send_hook = "NetworkPeerSend"
 
 local NetworkPeerSend = NetworkPeer.send
+local SyncUtils = BeardLib.Utils
 
-local is_custom = function()
-    return managers.job:has_active_job() and (managers.job:current_level_data() and managers.job:current_level_data().custom or managers.job:current_job_data().custom)
-end
-
-local parse_as_lnetwork_string = function(type_prm, data)
-	local dataString = LuaNetworking.AllPeersString:gsub("{1}", LuaNetworking.AllPeers):gsub("{2}", type_prm):gsub("{3}", data)
-	return dataString
-end
-
-local function SendMessage(peer, name, msg)
-    NetworkPeerSend(peer, "send_chat_message", LuaNetworking.HiddenChannel, parse_as_lnetwork_string(name, msg))
-end
-
-local peer_send_hook = "NetworkPeerSend"
 Hooks:Register(peer_send_hook)
 
 Hooks:Add(peer_send_hook, "BeardLibCustomHeistFix", function(self, func_name, params)
-    if self ~= managers.network:session():local_peer() and is_custom() then
+    if self ~= managers.network:session():local_peer() and SyncUtils:IsCurrentJobCustom() then
         if func_name == "sync_game_settings" or func_name == "sync_lobby_data" then
-            SendMessage(self, sync_game_settings_id, BeardLib.Utils:GetJobString())
+            SyncUtils:Send(self, sync_game_settings_id, SyncUtils:GetJobString())
         elseif func_name == "lobby_sync_update_level_id" then
-            SendMessage(self, lobby_sync_update_level_id, Global.game_settings.level_id)
+            SyncUtils:Send(self, lobby_sync_update_level_id, Global.game_settings.level_id)
         elseif func_name == "sync_stage_settings" then
             local glbl = managers.job._global
-            SendMessage(self, lobby_sync_update_level_id, string.format("%s|%s|%s|%s", sync_stage_settings_id, tostring(glbl.current_job.current_stage), tostring(glbl.alternative_stage or 0), tostring(glbl.interupt_stage)))
+            local msg = string.format("%s|%s|%s|%s", sync_stage_settings_id, tostring(glbl.current_job.current_stage), tostring(glbl.alternative_stage or 0), tostring(glbl.interupt_stage))
+            SyncUtils:Send(self, lobby_sync_update_level_id, msg)
         elseif string.ends(func_name,"join_request_reply") then
             if params[1] == 1 then
-                params[15] = BeardLib.Utils:GetJobString()
+                params[15] = SyncUtils:GetJobString()
             end
         end
     end
@@ -44,33 +33,33 @@ end)
 Hooks:Add(peer_send_hook, "BeardLibCustomWeaponFix", function(self, func_name, params)
     if self ~= managers.network:session():local_peer() then
         if func_name == "sync_outfit" or string.ends(func_name, "set_unit") then
-            SendMessage(self, send_outfit_id, managers.blackmarket:compact_outfit_string() .. "|" .. current_outfit_version)
+            SyncUtils:Send(self, send_outfit_id, SyncUtils:CompactOutfit() .. "|" .. current_outfit_version)
         end
         if func_name == "sync_outfit" then
-            params[1] = BeardLib.Utils:CleanOutfitString(params[1])
+            params[1] = SyncUtils:CleanOutfitString(params[1])
         elseif string.ends(func_name, "set_unit") then
-			params[3] = BeardLib.Utils:CleanOutfitString(params[3], params[4] == 0)
+			params[3] = SyncUtils:CleanOutfitString(params[3], params[4] == 0)
         elseif func_name == "set_equipped_weapon" then
             if params[2] == -1 then
-                local index, data, selection_index = BeardLib.Utils:GetCleanedWeaponData()
+                local index, data, selection_index = SyncUtils:GetCleanedWeaponData()
                 params[2] = index
                 params[3] = data
-                SendMessage(self, set_equipped_weapon, managers.blackmarket:beardlib_weapon_string(selection_index) .. "|" .. current_weapon_version)
+                SyncUtils:Send(self, set_equipped_weapon, SyncUtils:BeardLibWeaponString(selection_index) .. "|" .. current_weapon_version)
             else
 				local factory_id = PlayerInventory._get_weapon_name_from_sync_index(params[2])
 				local blueprint = managers.weapon_factory:unpack_blueprint_from_string(factory_id, params[3])
 				local wep = tweak_data.weapon[managers.weapon_factory:get_weapon_id_by_factory_id(factory_id)]
 
-				params[3] = managers.weapon_factory:blueprint_to_string(factory_id, BeardLib.Utils:GetCleanedBlueprint(blueprint, factory_id))
+				params[3] = managers.weapon_factory:blueprint_to_string(factory_id, SyncUtils:GetCleanedBlueprint(blueprint, factory_id))
 
 				if wep then
 					local index = wep.use_data.selection_index
-					local wep_data = managers.blackmarket:beardlib_get_weapon(index)
+					local wep_data = SyncUtils:GetEquippedWeapon(index)
 					for _, part_id in pairs(wep_data.blueprint) do
 						local part = tweak_data.weapon.factory.parts[part_id]
 						if part and part.custom then
                             --If the weapon has custom parts, treat it as a custom weapon.
-							SendMessage(self, set_equipped_weapon, managers.blackmarket:beardlib_weapon_string(index) .. "|" .. current_outfit_version)
+							SyncUtils:Send(self, set_equipped_weapon, SyncUtils:BeardLibWeaponString(index) .. "|" .. current_outfit_version)
 							return
 						end
 					end
@@ -104,7 +93,7 @@ Hooks:Add("NetworkReceivedData", sync_game_settings_id, function(sender, id, dat
         local split_data = string.split(data, "|")
         local level_name = split_data[4]
         local job_id = split_data[1]
-        local update_data = BeardLib.Utils:GetUpdateData(split_data)
+        local update_data = BeardLib.Utils.Sync:GetUpdateData(split_data)
         local session = managers.network:session()
         local function continue_sync()
             local peer = session:peer(sender)
@@ -128,7 +117,7 @@ Hooks:Add("NetworkReceivedData", sync_game_settings_id, function(sender, id, dat
         if tweak_data.narrative.jobs[job_id] == nil then
             if update_data then
                 session._ignore_load = true
-                BeardLib.Utils:DownloadMap(level_name, job_id, update_data, function(success)
+                BeardLib.Utils.Sync:DownloadMap(level_name, job_id, update_data, function(success)
                     if success then
                         continue_sync()
                         session._ignore_load = nil
@@ -197,7 +186,7 @@ function NetworkPeer:set_equipped_weapon_beardlib(weapon_string, outfit_version)
 
     self._last_beardlib_weapon_string = weapon_string
 
-	local weapon = managers.blackmarket:unpack_beardlib_weapon_string(weapon_string)
+	local weapon = SyncUtils:UnpackBeardLibWeaponString(weapon_string)
     if self._unit and weapon.id then
         local id = weapon.id.."_npc"
         local fac = tweak_data.weapon.factory
@@ -255,10 +244,10 @@ function NetworkPeer:set_outfit_string_beardlib(outfit_string, outfit_version)
     local old_outfit_string = self._profile.outfit_string
 
     local old_outfit = managers.blackmarket:unpack_outfit_from_string(old_outfit_string)
-    local new_outfit = managers.blackmarket:unpack_compact_outfit(outfit_string)
+    local new_outfit = SyncUtils:UnpackCompactOutfit(outfit_string)
     local bm = tweak_data.blackmarket
 
-    local mask = new_outfit.mask 
+    local mask = new_outfit.mask
     if bm.masks[mask.mask_id] and bm.masks[mask.mask_id].custom then
         old_outfit.mask.mask_id = new_outfit.mask.mask_id
     end
@@ -288,7 +277,7 @@ function NetworkPeer:set_outfit_string_beardlib(outfit_string, outfit_version)
         end
     end
 
-    self._profile.outfit_string = BeardLib.Utils:OutfitStringFromList(old_outfit)
+    self._profile.outfit_string = SyncUtils:OutfitStringFromList(old_outfit)
 
     if old_outfit_string ~= self._profile.outfit_string then
         self:_reload_outfit()
@@ -319,7 +308,6 @@ end
 local set_outfit_string = NetworkPeer.set_outfit_string
 function NetworkPeer:set_outfit_string(...)
     local a,b,c,d,e = set_outfit_string(self, ...)
-    local local_peer = managers.network:session() and managers.network:session():local_peer()
 
     if self._last_beardlib_outfit then
         self:set_outfit_string_beardlib(self._last_beardlib_outfit, current_outfit_version)

@@ -1,10 +1,11 @@
 local F = table.remove(RequiredScript:split("/"))
+local SyncUtils = BeardLib.Utils.SyncUtils
 if F == "huskplayermovement" then
     Hooks:PostHook(PlayerMovement, "save", "BeardLib.Save", function(self, data)
-        data.movement.outfit = BeardLib.Utils:CleanOutfitString(data.movement.outfit)
+        data.movement.outfit = SyncUtils:CleanOutfitString(data.movement.outfit)
     end)
     Hooks:PostHook(HuskPlayerMovement, "save", "BeardLib.Save", function(self, data)
-        data.movement.outfit = BeardLib.Utils:CleanOutfitString(data.movement.outfit)
+        data.movement.outfit = SyncUtils:CleanOutfitString(data.movement.outfit)
     end)
 
     --Removes the need of thq material config for custom melee
@@ -35,7 +36,7 @@ if F == "huskplayermovement" then
     Hooks:PostHook(TradeManager, "save", "BeardLib.Save", function(self, save_data)
         if save_data and save_data.trade and save_data.trade.outfits then
             for i, data in pairs(save_data.trade.outfits) do
-                data.outfit = BeardLib.Utils:CleanOutfitString(data.outfit)
+                data.outfit = SyncUtils:CleanOutfitString(data.outfit)
             end
         end
     end)
@@ -59,8 +60,8 @@ elseif F == "playerinventory" then
     Hooks:PostHook(PlayerInventory, "save", "BeardLib.Save", function(self, data)
         if self._equipped_selection then
             if data.equipped_weapon_index == -1 then
-                local new_index, blueprint = BeardLib.Utils:GetCleanedWeaponData(self._unit)
-                data.equipped_weapon_index = index
+                local new_index, blueprint = SyncUtils:GetCleanedWeaponData(self._unit)
+                data.equipped_weapon_index = new_index
                 data.blueprint_string = blueprint
             end
         end
@@ -68,7 +69,7 @@ elseif F == "playerinventory" then
 elseif F == "newraycastweaponbase" then
     --Gotta replace it all sadly.
     function NewRaycastWeaponBase:blueprint_to_string()
-        local new_blueprint = BeardLib.Utils:GetCleanedBlueprint(self._blueprint, self._factory_id)
+        local new_blueprint = SyncUtils:GetCleanedBlueprint(self._blueprint, self._factory_id)
         return managers.weapon_factory:blueprint_to_string(self._factory_id, new_blueprint)
     end
 elseif F == "unitnetworkhandler" then
@@ -93,7 +94,7 @@ elseif F == "unitnetworkhandler" then
 elseif F == "teamaibase" then
     Hooks:PostHook(TeamAIBase, "save", "BeardLib.Save", function(self, data)
         if data.base and data.base.loadout then
-            data.base.loadout = BeardLib.Utils:CleanOutfitString(data.base.loadout, true)
+            data.base.loadout = SyncUtils:CleanOutfitString(data.base.loadout, true)
         end
     end)
 end

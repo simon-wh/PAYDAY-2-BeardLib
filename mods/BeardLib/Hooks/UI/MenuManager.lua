@@ -2,17 +2,7 @@ dofile(Path:Combine(BeardLib.config.classes_dir, "UI/MenuItemColorButton.lua"))
 local orig_MenuCallbackHandler_start_job = MenuCallbackHandler.start_job
 
 local sync_game_settings_id = "BeardLib_sync_game_settings"
-BeardLib.Networking = BeardLib.Networking or {}
-function BeardLib.Networking:SyncGameSettings(peer_id)
-    if Network:is_server() and managers.job:current_job_id() and Global.game_settings.level_id and Global.game_settings.difficulty and (managers.job:current_level_data().custom or managers.job:current_job_data().custom) then
-        local data = BeardLib.Utils:GetJobString()
-        if peer_id then
-            LuaNetworking:SendToPeer(peer_id, sync_game_settings_id, data)
-        else
-            LuaNetworking:SendToPeers(sync_game_settings_id, data)
-        end
-    end
-end
+local SyncUtils = BeardLib.Utils.Sync
 
 local menu_ui = BeardLib.managers.menu_ui
 local o_toggle_menu_state = MenuManager.toggle_menu_state
@@ -66,7 +56,7 @@ function MenuCallbackHandler:start_job(job_data)
         Global.game_settings.one_down = job_data.one_down
     	local matchmake_attributes = self:get_matchmake_attributes()
     	if Network:is_server() then
-            BeardLib.Networking:SyncGameSettings()
+            SyncUtils:SyncGameSettings()
     		managers.network.matchmake:set_server_attributes(matchmake_attributes)
     		managers.menu_component:on_job_updated()
     		managers.menu:active_menu().logic:navigate_back(true)
@@ -92,11 +82,11 @@ Hooks:Add("NetworkReceivedData", sync_game_settings_id, function(sender, id, dat
 end)
 
 Hooks:Add("BaseNetworkSessionOnPeerEnteredLobby", "BaseNetworkSessionOnPeerEnteredLobby_sync_game_settings", function(peer, peer_id)
-    BeardLib.Networking:SyncGameSettings(peer_id)
+    SyncUtils:SyncGameSettings(peer_id)
 end)
 
 Hooks:Add("NetworkManagerOnPeerAdded", "NetworkManagerOnPeerAdded_sync_game_settings", function(peer, peer_id)
-    BeardLib.Networking:SyncGameSettings(peer_id)
+    SyncUtils:SyncGameSettings(peer_id)
 end)
 
 QuickMenuPlus = QuickMenuPlus or class(QuickMenu)
