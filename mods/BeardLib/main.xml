@@ -131,7 +131,6 @@
 			<class file="PackageManager.lua"/>
 			<class file="SoundManager.lua"/>
 			<class file="FileManager.lua"/>
-			<class file="ModAssetUpdateManager.lua"/>
 		</classes>
 
 		<classes directory="Frameworks">

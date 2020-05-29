@@ -104,7 +104,7 @@ function ModAssetsModule:RetrieveCurrentVersion()
 end
 
 function ModAssetsModule:CheckVersion(force)
-    if not force and BeardLib.Managers.Update:UpdatesIgnored(self._mod) then
+    if not force and self._mod:GetSettings("IgnoreUpdates") == true then
         return
     end
 
@@ -161,10 +161,6 @@ function ModAssetsModule:ShowNoChangePrompt()
         }},
         true
     )
-end
-
-function ModAssetsModule:SetReady()
-    BeardLib.Managers.Update:PrepareForUpdate()
 end
 
 function ModAssetsModule:DownloadAssets()
@@ -254,7 +250,6 @@ function ModAssetsModule:StoreDownloadedAssets(data, id)
         unzip(temp_zip_path, config.custom_install_directory or self.install_directory)
         FileIO:Delete(temp_zip_path)
 
-        ModAssetsModule:SetReady()
         if config.done_callback then
             config.done_callback()
         end

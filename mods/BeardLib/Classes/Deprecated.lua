@@ -18,3 +18,17 @@ function BeardLib:ReplaceScriptData(replacement, replacement_type, target_path, 
 	options = type(options) == "table" and options or {}
 	BeardLib.Managers.File:ScriptReplaceFile(target_ext, target_path, replacement, table.merge(options, { type = replacement_type, mode = options.merge_mode }))
 end
+
+ModAssetUpdateManager = {
+    UpdatesIgnored = Deprected,
+    RegisterUpdate = Deprected,
+    IsReadyForUpdate = Deprected,
+    SetUpdatesIgnored = Deprected,
+    CheckUpdateStatus = Deprected,
+    save_manager_file = Deprected,
+    load_manager_file = Deprected,
+    SetUpdateStatus = Deprected,
+    Update = Deprected
+}
+
+BeardLib.managers.asset_update  = ModAssetUpdateManager
