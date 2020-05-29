@@ -85,6 +85,10 @@ function MenuUI:init(params)
     end
 end
 
+function MenuUI:__tostring()
+    return string.format("[%s][MenuUI] %s", self:alive() and "Alive" or "Dead", tostring(self.name))
+end
+
 function MenuUI:ReloadInterface(params, shallow)
     table.merge(self, params or {})
     self._panel:child("bg"):configure({
@@ -614,6 +618,10 @@ function MenuUI:Destroy()
         Hooks:Remove("MenuUIUpdate"..UniqueID)
         Hooks:Remove("CreateMenuUI"..UniqueID)
     end
+end
+
+function MenuUI:alive()
+    return alive(self._panel)
 end
 
 function MenuUI:RemoveItem(item)
