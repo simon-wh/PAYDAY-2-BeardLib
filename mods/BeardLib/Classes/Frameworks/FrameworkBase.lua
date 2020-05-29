@@ -1,19 +1,18 @@
-FrameworkBase = FrameworkBase or class()
-local Framework = FrameworkBase
+FrameworkBase = FrameworkBase or BeardLib:CreateManager("BaseFramework")
 local BMM = BLTModManager
 
-Framework._directory = BMM and BMM.Constants and BMM.Constants.mods_directory or "mods/"
-Framework._format = Path:Combine(Framework._directory, "%s", "main.xml")
-Framework._mod_core = ModCore
-Framework.main_file_name = "main.xml"
-Framework.auto_init_modules = true
-Framework.type_name = "base"
-Framework.menu_color = Color(0.6, 0, 1)
+FrameworkBase._directory = BMM and BMM.Constants and BMM.Constants.mods_directory or "mods/"
+FrameworkBase._format = Path:Combine(FrameworkBase._directory, "%s", "main.xml")
+FrameworkBase._mod_core = ModCore
+FrameworkBase._ignore_folders = {["base"] = true, ["BeardLib"] = true, ["downloads"] = true, ["logs"] = true, ["saves"] = true}
+FrameworkBase._ignore_detection_errors = true
 
-Framework._ignore_folders = {["base"] = true, ["BeardLib"] = true, ["downloads"] = true, ["logs"] = true, ["saves"] = true}
-Framework._ignore_detection_errors = true
+FrameworkBase.main_file_name = "main.xml"
+FrameworkBase.auto_init_modules = true
+FrameworkBase.type_name = "base"
+FrameworkBase.menu_color = Color(0.6, 0, 1)
 
-function Framework:init()
+function FrameworkBase:init()
 	BeardLib:RegisterFramework(self.type_name, self)
 	self._ignored_configs = {}
 	self._loaded_mods = {}
@@ -27,7 +26,7 @@ function Framework:init()
 	self:Load()
 end
 
-function Framework:CheckModQueue(post, file)
+function FrameworkBase:CheckModQueue(post, file)
 	if #self._waiting_to_load == 0 or post == nil or file == nil then
 		return
 	end
@@ -56,13 +55,13 @@ function Framework:CheckModQueue(post, file)
 	self._waiting_to_load = next_queue
 end
 
-function Framework:Load()
+function FrameworkBase:Load()
 	self:FindMods()
 	self:SortMods()
 	self:InitMods()
 end
 
-function Framework:FindMods()
+function FrameworkBase:FindMods()
 	local dirs = FileIO:GetFolders(self._directory)
     if dirs then
         for _, folder_name in pairs(dirs) do
@@ -82,7 +81,7 @@ function Framework:FindMods()
 	end
 end
 
-function Framework:SortMods()
+function FrameworkBase:SortMods()
 	table.sort(self._sorted_mods, function(a,b)
         return a.Priority > b.Priority
 	end)
@@ -91,7 +90,7 @@ function Framework:SortMods()
 	end)
 end
 
-function Framework:InitMods()
+function FrameworkBase:InitMods()
 	for _, mod in pairs(self._sorted_mods) do
 		local config = mod._config
 		if not config.post_hook and not config.pre_hook then
@@ -101,7 +100,7 @@ function Framework:InitMods()
 	end
 end
 
-function Framework:RegisterHooks()
+function FrameworkBase:RegisterHooks()
 	self:SortMods()
     for _, mod in pairs(self._sorted_mods) do
         if not mod._disabled and mod._modules then
@@ -119,29 +118,29 @@ function Framework:RegisterHooks()
 end
 
 local cap = string.capitalize
-function Framework:Log(s, ...)
+function FrameworkBase:Log(s, ...)
 	BeardLib:Log("["..cap(self.type_name).." Framework] " .. s, ...)
 end
 
-Framework.log = Framework.Log
+FrameworkBase.log = FrameworkBase.Log
 
-function Framework:LogErr(s, ...)
+function FrameworkBase:LogErr(s, ...)
 	BeardLib:LogErr("["..cap(self.type_name).." Framework] " .. s, ...)
 end
 
-function Framework:Warn(s, ...)
+function FrameworkBase:Warn(s, ...)
 	BeardLib:Warn("["..cap(self.type_name).." Framework] " .. s, ...)
 end
 
-function Framework:DevLog(s, ...)
+function FrameworkBase:DevLog(s, ...)
 	BeardLib:DevLog("["..cap(self.type_name).." Framework] " .. s, ...)
 end
 
-function Framework:GetModByDir(dir)
+function FrameworkBase:GetModByDir(dir)
     return self._loaded_mods[dir]
 end
 
-function Framework:GetModByName(name)
+function FrameworkBase:GetModByName(name)
 	if self._loaded_mods then
 		for _, mod in pairs(self._loaded_mods) do
 			if mod.Name == name then
@@ -152,12 +151,12 @@ function Framework:GetModByName(name)
     return nil
 end
 
-function Framework:IsModedLoaded(name)
+function FrameworkBase:IsModedLoaded(name)
 	local mod = self:GetModByName(name)
 	return mod and mod:IsEnabled() or false
 end
 
-function Framework:LoadMod(folder_name, directory, main_file)
+function FrameworkBase:LoadMod(folder_name, directory, main_file)
 	rawset(_G, "ModPath", directory)
 	local success, mod = pcall(function() return self._mod_core:new(main_file, false) end)
 	if success then
@@ -171,7 +170,7 @@ function Framework:LoadMod(folder_name, directory, main_file)
 	end
 end
 
-function Framework:AddMod(folder_name, mod)
+function FrameworkBase:AddMod(folder_name, mod)
 	self._loaded_mods[folder_name] = mod
 	table.insert(self._sorted_mods, mod)
 	mod._framework = self
@@ -181,8 +180,8 @@ function Framework:AddMod(folder_name, mod)
 	end
 end
 
-function Framework:RemoveMod(folder_name)
-	local mod = self._loaded_mods[folder_name] 
+function FrameworkBase:RemoveMod(folder_name)
+	local mod = self._loaded_mods[folder_name]
 	if mod then
 		table.delete(self._sorted_mods, mod)
 		table.delete(self._waiting_to_load, mod)
@@ -190,6 +189,3 @@ function Framework:RemoveMod(folder_name)
 		mod._framework = nil
 	end
 end
-
---This shouldn't be used but I'm keeping it.
-BeardLib:RegisterManager("BaseFramework", Framework)

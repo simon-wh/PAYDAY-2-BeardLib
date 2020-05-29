@@ -1,4 +1,5 @@
-MenuDialogManager = MenuDialogManager or class()
+MenuDialogManager = MenuDialogManager or BeardLib:CreateManager("dialog")
+
 function MenuDialogManager:Init()
     self.biggest_id = 0
     self._menu = MenuUI:new({
@@ -6,7 +7,7 @@ function MenuDialogManager:Init()
         layer = 5000,
         background_blur = true,
         bg_callbacks = false,
-        pre_key_press = ClassClbk(self, "KeyPressed"),
+        pre_key_press = ClassClbk(self, "KeyPressed")
     })
     self._dialogs = {}
     self._opened_dialogs = {}
@@ -93,7 +94,7 @@ end
 function MenuDialogManager:CloseLastDialog()
     if BeardLib.IgnoreDialogOnce then
         BeardLib.IgnoreDialogOnce = false
-        return false 
+        return false
     end
     local dialog = self._opened_dialogs[1]
     if not dialog then
@@ -142,6 +143,7 @@ function MenuDialogManager:Update()
         end
     end
 end
+
 function MenuDialogManager:Simple() return self.simple end
 function MenuDialogManager:List() return self.list end
 function MenuDialogManager:SelectList() return self.select_list end
@@ -156,5 +158,3 @@ function MenuDialogManager:Hide() self._menu:disable() end
 function MenuDialogManager:GetMyIndex(dialog) return ((#self._opened_dialogs + 1) - tonumber(table.get_key(self._opened_dialogs, dialog))) or 0 end
 function MenuDialogManager:AddDialog(dialog) table.insert(self._dialogs, dialog) end
 function MenuDialogManager:RemoveDialog(dialog) table.delete(self._dialogs, dialog) end
-
-BeardLib:RegisterManager("dialog", MenuDialogManager)

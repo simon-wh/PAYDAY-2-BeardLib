@@ -1,19 +1,22 @@
-MenuUIManager = MenuUIManager or class()
-local Manager = MenuUIManager
+MenuUIManager = MenuUIManager or BeardLib:CreateManager("menu_ui")
 
-function Manager:init()
+function MenuUIManager:init()
     self._menus = {}
 end
 
-function Manager:add_menu(menu)
+function MenuUIManager:AddMenu(menu)
     table.insert(self._menus, menu)
 end
 
-function Manager:remove_menu(menu)
+function MenuUIManager:RemoveMenu(menu)
     table.delete(self._menus, menu)
 end
 
-function Manager:get_active_menu()
+function MenuUIManager:Menus()
+    return self._menus
+end
+
+function MenuUIManager:GetActiveMenu()
     local mc = managers.mouse_pointer._mouse_callbacks
     local last = mc[#mc]
     if last and last.menu_ui_object then
@@ -22,24 +25,24 @@ function Manager:get_active_menu()
     return nil
 end
 
-function Manager:disable_input()
+function MenuUIManager:DisableInput()
 	self._input_disabled = true
 end
 
-function Manager:enable_input()
+function MenuUIManager:EnableInput()
     self._input_disabled = nil
 	self._enable_input_t = nil
 end
 
-function Manager:input_enabled()
+function MenuUIManager:EnableINput()
     return not self._input_disabled
 end
 
-function Manager:input_disabled()
+function MenuUIManager:InputDisabled()
     return self._input_disabled
 end
 
-function Manager:input_allowed(...)
+function MenuUIManager:InputAllowed(...)
     if self:input_disabled() then
         return false
     end
@@ -47,15 +50,24 @@ function Manager:input_allowed(...)
     return not menu or menu.allow_full_input == true
 end
 
-function Manager:close_menu_event()
+function MenuUIManager:CloseMenuEvent()
 	self:disable_input()
 	self._enable_input_t = Application:time() + 0.01
 end
 
-function Manager:Update(t, dt)
+function MenuUIManager:Update(t, dt)
 	if self._input_disabled and self._enable_input_t and self._enable_input_t <= t then
         self:enable_input()
     end
 end
 
-BeardLib:RegisterManager("menu_ui", Manager)
+--Part of making BeardLib a little more consistent. Function names are PascalCase.
+MenuUIManager.add_menu = MenuUIManager.AddMenu
+MenuUIManager.remove_menu = MenuUIManager.RemoveMenu
+MenuUIManager.get_active_menu = MenuUIManager.GetActiveMenu
+MenuUIManager.disable_input = MenuUIManager.DisableInput
+MenuUIManager.enable_input = MenuUIManager.EnableINput
+MenuUIManager.input_enabled = MenuUIManager.InputEnabled
+MenuUIManager.input_disabled = MenuUIManager.InputDisabled
+MenuUIManager.input_allowed = MenuUIManager.InputAllowed
+MenuUIManager.close_menu_event = MenuUIManager.CloseMenuEvent

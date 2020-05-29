@@ -1,29 +1,23 @@
-FileManager = FileManager or {}
-local fm = FileManager
+FileManager = FileManager or BeardLib:CreateManager("file")
+Global.fm = Global.fm or {added_files = {}}
 
-fm.const = {
-	h_preprocessSF = "BeardLibPreProcessScriptData",
-	h_postprocessSF = "BeardLibProcessScriptData"
-}
+function FileManager:init()
+	self.const = {h_preprocessSF = "BeardLibPreProcessScriptData", h_postprocessSF = "BeardLibProcessScriptData"}
+	self.process_modes = {
+		merge = function(a1, a2) return table.merge(a1, a2) end,
+		script_merge = function(a1, a2) return table.script_merge(a1, a2) end,
+		add = function(a1, a2) return table.add(a1, a2) end,
+		replace = ""
+	}
+	self.modded_files = {}
+	self._files_to_load = {}
+	self._files_to_unload = {}
 
-fm.process_modes = {
-	merge = function(a1, a2) return table.merge(a1, a2) end,
-	script_merge = function(a1, a2) return table.script_merge(a1, a2) end,
-	add = function(a1, a2) return table.add(a1, a2) end,
-	replace = ""
-}
+	Hooks:Register(FileManager.const.h_preprocessSF)
+	Hooks:Register(FileManager.const.h_postprocessSF)
+end
 
-Global.fm = Global.fm or {}
-Global.fm.added_files = Global.fm.added_files or {}
-fm.modded_files = {}
-
-fm._files_to_load = {}
-fm._files_to_unload = {}
-
-Hooks:Register(fm.const.h_preprocessSF)
-Hooks:Register(fm.const.h_postprocessSF)
-
-function fm:Process(ids_ext, ids_path, name_mt)
+function FileManager:Process(ids_ext, ids_path, name_mt)
 	local data = {}
 	if DB:_has(ids_ext, ids_path) then
         if name_mt ~= nil then
@@ -51,7 +45,7 @@ function fm:Process(ids_ext, ids_path, name_mt)
 						if mdata.file then
 							BeardLib:Warn("Script Mod with ID: '%s', Path:'%s' may potentially overwrite changes from other mods! Continuing...", id, mdata.file)
 						else
-							BeardLib:Warn("Script Mod with ID: '%s', Path:'%s.%s' may potentially overwrite changes from other mods! Continuing...", id, k_path, k_ext)							
+							BeardLib:Warn("Script Mod with ID: '%s', Path:'%s.%s' may potentially overwrite changes from other mods! Continuing...", id, k_path, k_ext)
 						end
 					end
 					local new_data = mdata.tbl or FileIO:ReadScriptData(mdata.file, mdata.type)
@@ -65,7 +59,7 @@ function fm:Process(ids_ext, ids_path, name_mt)
 						if to_replace then
 							data = new_data
 						else
-							fm.process_modes[mdata.mode](data, new_data)
+							FileManager.process_modes[mdata.mode](data, new_data)
 						end
 					elseif FileIO:Exists(mdata.file) then
 						BeardLib:Err("Failed reading file '%s', are you trying to load a file with different format?", mdata.file)
@@ -82,8 +76,8 @@ function fm:Process(ids_ext, ids_path, name_mt)
 	return data
 end
 
-local texture_key = "8c5b5ab050e16853" 
-function fm:AddFile(ext, path, file)
+local texture_key = "8c5b5ab050e16853"
+function FileManager:AddFile(ext, path, file)
 	if not DB.create_entry then
 		return
 	end
@@ -91,7 +85,6 @@ function fm:AddFile(ext, path, file)
 	ext = ext:id()
 	path = path:id()
 	local k_ext = ext:key()
-	local loaded
 	if BLT.AssetManager then
 		BLT.AssetManager:CreateEntry(path, ext, file)
 	else
@@ -104,7 +97,7 @@ function fm:AddFile(ext, path, file)
 	end
 end
 
-function fm:AddFileWithCheck(ext, path, file)
+function FileManager:AddFileWithCheck(ext, path, file)
 	if FileIO:Exists(file) then
 		self:AddFile(ext, path, file)
 	else
@@ -112,7 +105,7 @@ function fm:AddFileWithCheck(ext, path, file)
 	end
 end
 
-function fm:RemoveFile(ext, path)
+function FileManager:RemoveFile(ext, path)
 	ext = ext:id()
 	path = path:id()
 	local k_ext = ext:key()
@@ -126,11 +119,11 @@ function fm:RemoveFile(ext, path)
 	end
 end
 
-function fm:ScriptAddFile(path, ext, file, options)
+function FileManager:ScriptAddFile(path, ext, file, options)
 	self:ScriptReplaceFile(path, ext, file, options)
 end
 
-function fm:ScriptReplaceFile(ext, path, file, options)
+function FileManager:ScriptReplaceFile(ext, path, file, options)
     if not FileIO:Exists(file) then
         BeardLib:Err("Failed reading scriptdata at path '%s'!", file)
         return
@@ -140,32 +133,31 @@ function fm:ScriptReplaceFile(ext, path, file, options)
 	options.type = options.type or "custom_xml"
 	local k_ext = ext:key()
 	local k_path = path:key()
-	fm.modded_files[k_ext] = fm.modded_files[k_ext] or {}
-	fm.modded_files[k_ext][k_path] = fm.modded_files[k_ext][k_path] or {}
-	--Potentially move to [id] = options
-	table.insert(fm.modded_files[k_ext][k_path], table.merge(options, {file = file}))
+	self.modded_files[k_ext] = self.modded_files[k_ext] or {}
+	self.modded_files[k_ext][k_path] = self.modded_files[k_ext][k_path] or {}
+	table.insert(self.modded_files[k_ext][k_path], table.merge(options, {file = file}))
 end
 
-function fm:ScriptReplace(ext, path, tbl, options)
+function FileManager:ScriptReplace(ext, path, tbl, options)
     options = options or {}
 	local k_ext = ext:key()
 	local k_path = path:key()
-	fm.modded_files[k_ext] = fm.modded_files[k_ext] or {}
-	fm.modded_files[k_ext][k_path] = fm.modded_files[k_ext][k_path] or {}
-	table.insert(fm.modded_files[k_ext][k_path], table.merge(options, {tbl = tbl}))
+	self.modded_files[k_ext] = self.modded_files[k_ext] or {}
+	self.modded_files[k_ext][k_path] = self.modded_files[k_ext][k_path] or {}
+	table.insert(self.modded_files[k_ext][k_path], table.merge(options, {tbl = tbl}))
 end
 
-function fm:Has(ext, path)
+function FileManager:Has(ext, path)
 	local k_ext = ext:key()
 	return Global.fm.added_files[k_ext] and Global.fm.added_files[k_ext][path:key()]
 end
 
-function fm:HasScriptMod(ext, path)
+function FileManager:HasScriptMod(ext, path)
 	local k_ext = ext:key()
 	return self.modded_files[k_ext] and self.modded_files[k_ext][path:key()]
 end
 
-local _LoadAsset = function(load)
+function FileManager:_LoadAsset(load)
 	local path = load.path
 	local ext = load.ext
 	if not managers.dyn_resource:has_resource(ext, path, managers.dyn_resource.DYN_RESOURCES_PACKAGE) then
@@ -180,7 +172,7 @@ local _LoadAsset = function(load)
     end
 end
 
-local _UnloadAsset = function(unload)
+function FileManager:_UnloadAsset(unload)
 	local path = unload.path
 	local ext = unload.ext
 	if managers.dyn_resource:has_resource(ext, path, managers.dyn_resource.DYN_RESOURCES_PACKAGE) then
@@ -195,41 +187,39 @@ local _UnloadAsset = function(unload)
     end
 end
 
-function fm:LoadAsset(ids_ext, ids_path, file_path)
+function FileManager:LoadAsset(ids_ext, ids_path, file_path)
 	local load = {ext = ids_ext:id(), path = ids_path:id(), file_path = file_path}
 	if managers.dyn_resource then
-		_LoadAsset(load)
+		self:_LoadAsset(load)
 	else
         table.insert(self._files_to_load, load)
     end
 end
 
-function fm:UnloadAsset(ids_ext, ids_path, file_path)
+function FileManager:UnloadAsset(ids_ext, ids_path, file_path)
 	local unload = {ext = ids_ext:id(), path = ids_path:id(), file_path = file_path}
 	if managers.dyn_resource then
-		_UnloadAsset(unload)
+		self:_UnloadAsset(unload)
 	else
         table.insert(self._files_to_unload, unload)
     end
 end
 
-fm.UnLoadAsset = fm.UnloadAsset
+FileManager.UnLoadAsset = FileManager.UnloadAsset
 
-function fm:Update(t, dt)
+function FileManager:Update(t, dt)
 	if not managers.dyn_resource then
 		return
 	end
 
 	for _, load in pairs(self._files_to_load) do
-		_LoadAsset(load)
+		self:_LoadAsset(load)
 	end
 
 	for _, unload in pairs(self._files_to_unload) do
-		_LoadAsset(unload)
+		self:_LoadAsset(unload)
 	end
 
 	self._files_to_load = {}
 	self._files_to_unload = {}
 end
-
-BeardLib:RegisterManager("file", fm)

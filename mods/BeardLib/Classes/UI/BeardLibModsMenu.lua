@@ -1,4 +1,4 @@
-BeardLibModsMenu = BeardLibModsMenu or class() 
+BeardLibModsMenu = BeardLibModsMenu or BeardLib:CreateManager("mods_menu")
 function BeardLibModsMenu:init(data)
     data = data or {}
     local accent_color = BeardLib.Options:GetValue("MenuColor")
@@ -31,8 +31,8 @@ end
 
 function BeardLibModsMenu:CreateItems(menu)
     self._menu = menu
-    self._downloading_string = managers.localization:text("beardlib_downloading")    
-    
+    self._downloading_string = managers.localization:text("beardlib_downloading")
+
     self._holder = menu:Holder({
         name = "Main",
         background_color = Color(0.8, 0.2, 0.2, 0.2),
@@ -176,7 +176,7 @@ function BeardLibModsMenu:AddMod(mod, framework)
 			auto_color = true
 		end
         img = img and DB:has(texutre_ids, img:id()) and img or nil
-        local image = mod_item:Image({
+        mod_item:Image({
             name = "Image",
             w = 90,
 			h = 90,
@@ -430,7 +430,7 @@ function BeardLibModsMenu:UpdatesModsByList(list)
                         download:SetEnabled(false)
                         download:RunCallback()
                     end
-                end        
+                end
             end
         else
             local download = item.value:GetItem("Download")
@@ -443,7 +443,7 @@ function BeardLibModsMenu:UpdatesModsByList(list)
 end
 
 function BeardLibModsMenu:SetOption(item)
-    BeardLib.Options:SetValue(item:Name(), item:Value())    
+    BeardLib.Options:SetValue(item:Name(), item:Value())
 end
 
 function BeardLibModsMenu:ResetOptions(item)
@@ -486,7 +486,7 @@ function BeardLibModsMenu:SetModProgressBar(module, progress, disable_button)
                 local downbtn = item:GetItem("Download")
                 if disable_button then
                     downbtn:SetEnabled(false)
-                end        
+                end
             end
         end
     else
@@ -569,5 +569,3 @@ function BeardLibModsMenu:SetModNeedsUpdate(module, new_version)
     end
     self._notif_id = self._notif_id or BLT.Notifications:add_notification({title = loc:text("beardlib_updates_available"), text = loc:text("beardlib_updates_available_desc"), priority = 1})
 end
-
-BeardLib:RegisterManager("mods_menu", BeardLibModsMenu)

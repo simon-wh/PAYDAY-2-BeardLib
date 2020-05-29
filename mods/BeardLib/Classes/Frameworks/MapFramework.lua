@@ -1,19 +1,18 @@
-MapFramework = MapFramework or class(FrameworkBase)
-local Framework = MapFramework
-Framework._loaded_instances = {}
-Framework._ignore_detection_errors = false
-Framework._ignore_folders = {"backups", "prefabs"}
-Framework._directory = BeardLib.config.maps_dir
-Framework.type_name = "map"
-Framework.menu_color = Color(0.1, 0.6, 0.1)
+MapFramework = MapFramework or BeardLib:CreateManager("BaseFramework", MapFramework)
+MapFramework._loaded_instances = {}
+MapFramework._ignore_detection_errors = false
+MapFramework._ignore_folders = {"backups", "prefabs"}
+MapFramework._directory = BeardLib.config.maps_dir
+MapFramework.type_name = "map"
+MapFramework.menu_color = Color(0.1, 0.6, 0.1)
 
-function Framework:RegisterHooks(...)
+function MapFramework:RegisterHooks(...)
 	self:AddCustomContact()
     MapFramework.super.RegisterHooks(self, ...)
     Hooks:PostHook(NarrativeTweakData, "init", "MapFrameworkAddFinalNarrativeData", SimpleClbk(NarrativeTweakData.set_job_wrappers))
 end
 
-function Framework:GetMapByJobId(job_id)
+function MapFramework:GetMapByJobId(job_id)
     for _, map in pairs(self._loaded_mods) do
         if map._modules then
             for _, module in pairs(map._modules) do
@@ -26,7 +25,7 @@ function Framework:GetMapByJobId(job_id)
     return nil
 end
 
-function Framework:AddCustomContact()
+function MapFramework:AddCustomContact()
     ContactModule:new(BeardLib, {
         id = "custom",
         name_id = "heist_contact_custom",
@@ -35,6 +34,3 @@ function Framework:AddCustomContact()
         assets_gui = "guis/mission_briefing/preload_contact_bain"
     }):RegisterHook()
 end
-
---This shouldn't be used but I'm keeping it.
-BeardLib:RegisterManager("MapFramework", Framework)

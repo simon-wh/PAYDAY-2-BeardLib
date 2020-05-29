@@ -41,7 +41,7 @@
 				<option name="DisabledMods" type="table"/>
 				<option name="IgnoredUpdates" type="table"/>
 			</options>
-		</Options>	
+		</Options>
 		<Hooks directory="Hooks">
 			<hook source_file="lib/units/beings/player/states/vr/hand/playerhandstatemelee" file="Fixes.lua"/>
 			<hook source_file="lib/network/base/handlers/connectionnetworkhandler" file="Fixes.lua"/>
@@ -124,6 +124,22 @@
 			<class file="Builders.lua"/>
 		</classes>
 
+		<classes directory="Managers">
+			<class file="CustomAchievementManager.lua"/>
+			<class file="MenuUIManager.lua"/>
+			<class file="MenuDialogManager.lua"/>
+			<class file="CustomPackageManager.lua"/>
+			<class file="CustomSoundManager.lua"/>
+			<class file="FileManager.lua"/>
+			<class file="ModAssetUpdateManager.lua"/>
+		</classes>
+
+		<classes directory="Frameworks">
+			<class file="FrameworkBase.lua"/>
+			<class file="MapFramework.lua"/>
+			<class file="AddFramework.lua"/>
+		</classes>
+
 		<classes directory="UI">
 			<class file="CustomAchievementMenu.lua"/>
 			<class file="BeardLibModsMenu.lua"/>
@@ -158,22 +174,6 @@
 				<class file="TextBox.lua"/>
 				<class file="ColorTextBox.lua"/>
 			</classes>
-		</classes>
-
-		<classes directory="Frameworks">
-			<class file="FrameworkBase.lua"/>
-			<class file="MapFramework.lua"/>
-			<class file="AddFramework.lua"/>
-		</classes>
-
-		<classes directory="Managers">
-			<class file="CustomAchievementManager.lua"/>
-			<class file="MenuUIManager.lua"/>
-			<class file="MenuDialogManager.lua"/>
-			<class file="CustomPackageManager.lua"/>
-			<class file="CustomSoundManager.lua"/>
-			<class file="FileManager.lua"/>
-			<class file="ModAssetUpdateManager.lua"/>
 		</classes>
 	</classes>
 	<mission_elements>

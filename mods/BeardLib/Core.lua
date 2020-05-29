@@ -20,6 +20,7 @@ function BeardLib:Init()
 	self.Frameworks = {}
 	self.MusicMods = {}
 	self.managers = {}
+	self._init_managers = {}
 	self.modules = {}
 	self.Items = {}
 	self.Mods = {}
@@ -52,11 +53,9 @@ function BeardLib:Init()
 
 	self:MigrateModSettings()
 
-	for k, manager in pairs(self.managers) do
-		if manager.new then
-			self.managers[k] = manager:new()
-		else
-			self.managers[k] = manager
+	for _, manager in pairs(self._init_managers) do
+		if manager.init then
+			manager:init()
 		end
 	end
 
@@ -119,8 +118,15 @@ function BeardLib:RegisterFramework(name, clss)
 	self.Frameworks[name] = clss
 end
 
-function BeardLib:RegisterManager(key, manager)
-	self.managers[key] = manager
+function BeardLib:CreateManager(name, inherit)
+	local manager = inherit and class(inherit) or class()
+	self:RegisterManager(name, manager)
+	return manager
+end
+
+function BeardLib:RegisterManager(name, manager)
+	self.managers[name] = manager
+	table.insert(self._init_managers, manager)
 end
 
 function BeardLib:RegisterModule(key, module)
@@ -318,7 +324,7 @@ Hooks:Add("MenuManagerInitialize", "BeardLibCreateMenuHooks", function(self)
     Hooks:Call("BeardLibMenuHelperPlusInitMenus", self)
 	Hooks:Call("BeardLibCreateCustomNodesAndButtons", self)
 
-    BeardLib.managers.dialog:Init()
+	BeardLib.managers.dialog:Init()
 end)
 
 Hooks:Add("MenuManagerOnOpenMenu", "BeardLibShowErrors", function(self, menu)

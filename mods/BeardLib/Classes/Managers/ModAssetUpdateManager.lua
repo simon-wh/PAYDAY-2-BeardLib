@@ -1,9 +1,9 @@
-ModAssetUpdateManager = ModAssetUpdateManager or class()
-ModAssetUpdateManager._registered_updates = {}
-ModAssetUpdateManager._ready_for_update = true
+ModAssetUpdateManager = ModAssetUpdateManager or BeardLib:CreateManager("asset_update")
+
 function ModAssetUpdateManager:init()
+    self._registered_updates = {}
+    self._ready_for_update = {}
     self._data = {}
-    self:load_manager_file()
 end
 
 function ModAssetUpdateManager:UpdatesIgnored(mod)
@@ -30,10 +30,8 @@ function ModAssetUpdateManager:Update(t, dt)
 end
 
 --Unused
-function ModAssetUpdateManager:SetUpdatesIgnored() end
-function ModAssetUpdateManager:CheckUpdateStatus() end
-function ModAssetUpdateManager:SetUpdateStatus() end
-function ModAssetUpdateManager:save_manager_file() end
-function ModAssetUpdateManager:load_manager_file() end
-
-BeardLib:RegisterManager("asset_update", ModAssetUpdateManager)
+ModAssetUpdateManager.SetUpdatesIgnored = Deprected
+ModAssetUpdateManager.CheckUpdateStatus = Deprected
+ModAssetUpdateManager.SetUpdateStatus = Deprected
+ModAssetUpdateManager.save_manager_file = Deprected
+ModAssetUpdateManager.load_manager_file = Deprected

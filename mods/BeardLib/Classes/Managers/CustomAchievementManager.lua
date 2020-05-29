@@ -1,31 +1,17 @@
-CustomAchievementManager = CustomAchievementManager or class()
--- Support multiple user on same PC, tracking each progress
-CustomAchievementManager._achievements_folder = SavePath .. "CustomAchievements/" ..tostring(Steam:userid()).."/"
-CustomAchievementManager._achievement_icons_spoofer = {}
-CustomAchievementManager._ranks = {
-    [1] = {
-        name = "Bronze",
-        color = "CD7F32"
-    },
-    [2] = {
-        name = "Silver",
-        color = "C0C0C0"
-    },
-    [3] = {
-        name = "Gold",
-        color = "FFD700"
-    },
-    [4] = {
-        name = "Platinum",
-        color = "42d9f4"
-    },
-    [0] = {
-        name = "Hidden Rank",    -- Don't define the rank 0 yourself, that's used by me.
-        color = "000000"
-    }
-}
+CustomAchievementManager = CustomAchievementManager or BeardLib:CreateManager("custom_achievement")
 
 function CustomAchievementManager:init()
+    -- Support multiple user on same PC, tracking each progress
+    self._achievements_folder = SavePath .. "CustomAchievements/" ..tostring(Steam:userid()).."/"
+    self._achievement_icons_spoofer = {}
+    self._ranks = {
+        [1] = {name = "Bronze", color = "CD7F32"},
+        [2] = {name = "Silver", color = "C0C0C0"},
+        [3] = {name = "Gold", color = "FFD700"},
+        [4] = {name = "Platinum", color = "42d9f4"},
+        [0] = {name = "Hidden Rank", color = "000000"} -- Don't define the rank 0 yourself, that's used by me.
+    }
+
     if not tweak_data then
         Hooks:Add("SetupInitManagers", "PostInitTweakData_CustomAchievementManager", function()
             self:init()
@@ -149,7 +135,7 @@ function CustomAchievementManager:CompletedAchievementsTotal()
     if not self._tweak_data then -- i hate this game
         self._tweak_data = tweak_data and tweak_data.achievement and tweak_data.achievement.custom_achievements or {}
     end
-    
+
     for package_id, _ in pairs(self._tweak_data or {}) do
         local package = CustomAchievementPackage:new(package_id)
 
@@ -184,7 +170,7 @@ function CustomAchievementManager:GetAllCompletedRanks()
 
         for achievement_id, _ in pairs(package:FetchAchievements()) do
             local config = package:GetConfigOf(achievement_id)
-            
+
             if type(config) == "table" then
                 local achievement = CustomAchievement:new(config, package_id)
 
@@ -276,7 +262,7 @@ function CustomAchievementPackage:GetCompletedAchievements()
 
     for achievement_id, _ in pairs(self:FetchAchievements()) do
         local config = self:GetConfigOf(achievement_id)
-        
+
         if type(config) == "table" then
             local achievement = CustomAchievement:new(config, self._package_id)
 
@@ -305,7 +291,7 @@ function CustomAchievementPackage:GetTotalAchievements()
 
     for achievement_id, _ in pairs(self:FetchAchievements()) do
         local config = self:GetConfigOf(achievement_id)
-        
+
         if type(config) == "table" then
             nb = nb + 1
         end
@@ -429,7 +415,7 @@ end
 
 function CustomAchievement:LoadProgress()
     local progress_data = json.custom_decode(FileIO:ReadFrom(self._progress_file))
-    
+
     self._saved_amount = progress_data.amount
     self._unlocked = progress_data.completed
     self._timestamp_unlocked = progress_data.date_unlocked
@@ -487,8 +473,8 @@ function CustomAchievement:Unlock()
 
     if HudChallengeNotification then
         HudChallengeNotification.queue(
-            managers.localization:to_upper_text("hud_achieved_popup"), 
-            managers.localization:to_upper_text(self._name_id), 
+            managers.localization:to_upper_text("hud_achieved_popup"),
+            managers.localization:to_upper_text(self._name_id),
             self._icon_path or "placeholder_circle"
         )
     end
@@ -518,7 +504,7 @@ function CustomAchievement:GiveReward()
     end
 
     local continue = false
-    
+
     -- Sanity checks
     for _, v in pairs(CustomAchievement.valid_rewards) do
         if self._reward_type == v then
@@ -605,5 +591,3 @@ function CustomAchievement:GetRankID()
 
     return self._rank
 end
-
-BeardLib:RegisterManager("custom_achievement", CustomAchievementManager)

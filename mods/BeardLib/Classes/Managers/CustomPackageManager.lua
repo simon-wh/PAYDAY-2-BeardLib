@@ -1,13 +1,12 @@
-Global.cmp = Global.cmp or {}
-Global.cmp.custom_loaded_packages = Global.cmp.custom_loaded_packages or {}
-CustomPackageManager = CustomPackageManager or {}
+CustomPackageManager = CustomPackageManager or BeardLib:CreateManager("package")
+Global.cmp = Global.cmp or {custom_loaded_packages = {}}
 
-local C = CustomPackageManager
-C.custom_packages = {}
-C.unload_on_restart = {}
-C.EXT_CONVERT = {dds = "texture", png = "texture", tga = "texture", jpg = "texture", bik = "movie"}
+function CustomPackageManager:init()
+    self.custom_packages = {}
+    self.unload_on_restart = {}
+end
 
-function C:RegisterPackage(id, directory, config)
+function CustomPackageManager:RegisterPackage(id, directory, config)
     if (not BeardLib.Utils:CheckParamsValidity({id, directory, config},
         {
             func_name = "CustomPackageManager:RegisterPackage",
@@ -30,7 +29,7 @@ function C:RegisterPackage(id, directory, config)
     return true
 end
 
-function C:LoadPackage(id)
+function CustomPackageManager:LoadPackage(id)
     id = id:key()
     if self.custom_packages[id] then
         local pck = self.custom_packages[id]
@@ -41,7 +40,7 @@ function C:LoadPackage(id)
     return false
 end
 
-function C:UnloadPackage(id)
+function CustomPackageManager:UnloadPackage(id)
     id = id:key()
     if self.custom_packages[id] then
         local pck = self.custom_packages[id]
@@ -52,11 +51,11 @@ function C:UnloadPackage(id)
     return false
 end
 
-function C:PackageLoaded(id)
+function CustomPackageManager:PackageLoaded(id)
     return Global.cmp.custom_loaded_packages[id:key()]
 end
 
-function C:HasPackage(id)
+function CustomPackageManager:HasPackage(id)
     return not not self.custom_packages[id:key()]
 end
 
@@ -71,9 +70,17 @@ local MAT_CONFIG = "material_config"
 local SEQ_MANAGER = "sequence_manager"
 local COOKED_PHYSICS = "cooked_physics"
 
+local UNIT_IDS = UNIT:id()
+local MODEL_IDS = MODEL:id()
+local OBJECT_IDS = OBJECT:id()
+local TEXTURE_IDS = TEXTURE:id()
+local MAT_CONFIG_IDS = MAT_CONFIG:id()
+local SEQ_MANAGER_IDS = SEQ_MANAGER:id()
+local COOKED_PHYSICS_IDS = COOKED_PHYSICS:id()
+
 --Default: unit, cooked phyiscs, model, object.
 
---tex: Adds material_config and textures. 
+--tex: Adds material_config and textures.
 --mat: Adds material_config.
 --mat_seq: Adds material_config and sequence_manager.
 --seq: Adds material_config, textures and sequence_manager.
@@ -86,7 +93,7 @@ local COOKED_PHYSICS = "cooked_physics"
 --cc: Adds _thq, _cc, _cc_thq material_config, textures and cc texture.
 --mat_cc: Adds _thq, _cc, _cc_thq and material_config.
 
-C.UNIT_SHORTCUTS = {
+CustomPackageManager.UNIT_SHORTCUTS = {
     unit_obj = {},
     unit_tex = {texture = {"_df", "_nm"}, material_config = true},
     unit_mat = {material_config = true},
@@ -100,23 +107,17 @@ C.UNIT_SHORTCUTS = {
     unit_obj_seq = {sequence_manager = true}
 }
 
-C.TEXTURE_SHORTCUTS = {
+CustomPackageManager.TEXTURE_SHORTCUTS = {
     df_nm = {"_df", "_nm"},
     df_nm_cc = {"_df", "_nm", "_df_cc"},
     df_nm_cc_gsma = {"_df", "_nm", "_df_cc", "_gsma"},
     df_nm_gsma = {"_df", "_nm", "_gsma"},
 }
 
-local UNIT_IDS = UNIT:id()
-local MODEL_IDS = MODEL:id()
-local OBJECT_IDS = OBJECT:id()
-local TEXTURE_IDS = TEXTURE:id()
-local MAT_CONFIG_IDS = MAT_CONFIG:id()
-local SEQ_MANAGER_IDS = SEQ_MANAGER:id()
-local COOKED_PHYSICS_IDS = COOKED_PHYSICS:id()
+CustomPackageManager.EXT_CONVERT = {dds = "texture", png = "texture", tga = "texture", jpg = "texture", bik = "movie"}
 
 local CP_DEFAULT = BeardLib:GetPath() .. "Assets/units/default_cp.cooked_physics"
-function C:LoadPackageConfig(directory, config, temp, skip_use_clbk)
+function CustomPackageManager:LoadPackageConfig(directory, config, temp, skip_use_clbk)
     if not (SystemFS and SystemFS.exists) then
         self:Err("SystemFS does not exist! Custom Packages cannot function without this! Do you have an outdated game version?")
         return
@@ -138,7 +139,7 @@ function C:LoadPackageConfig(directory, config, temp, skip_use_clbk)
 	end
 
     local loading = {}
-    for i, child in ipairs(config) do
+    for _, child in ipairs(config) do
         if type(child) == "table" then
             local typ = child._meta
             local path = child.path
@@ -149,9 +150,9 @@ function C:LoadPackageConfig(directory, config, temp, skip_use_clbk)
             if not use_clbk or use_clbk(path, typ) then
                 if typ == UNIT_LOAD or typ == ADD then
                     self:LoadPackageConfig(directory, child, nil, true)
-                elseif C.UNIT_SHORTCUTS[typ] then
+                elseif CustomPackageManager.UNIT_SHORTCUTS[typ] then
                     local ids_path = Idstring(path)
-                    local file_path = child.full_path or Path:Combine(directory, config.file_path or path)
+                    local file_path = child.full_path or Path:Combine(directory, child.file_path or path)
                     local auto_cp = NotNil(child.auto_cp, config.auto_cp, true)
                     self:AddFileWithCheck(UNIT_IDS, ids_path, file_path.."."..UNIT)
                     if auto_cp then
@@ -161,7 +162,7 @@ function C:LoadPackageConfig(directory, config, temp, skip_use_clbk)
                     self:AddFileWithCheck(MODEL_IDS, ids_path, file_path.."."..MODEL)
                     self:AddFileWithCheck(OBJECT_IDS, ids_path, file_path.."."..OBJECT)
 
-                    for load_type, load in pairs(C.UNIT_SHORTCUTS[typ]) do
+                    for load_type, load in pairs(CustomPackageManager.UNIT_SHORTCUTS[typ]) do
                         local type_ids = load_type:id()
                         if load_type ~= TEXTURE then
                             self:AddFileWithCheck(type_ids, Idstring(path), file_path.."."..load_type)
@@ -172,15 +173,15 @@ function C:LoadPackageConfig(directory, config, temp, skip_use_clbk)
                             end
                         end
                     end
-                elseif C.TEXTURE_SHORTCUTS[typ] then
+                elseif CustomPackageManager.TEXTURE_SHORTCUTS[typ] then
                     path = Path:Normalize(path)
                     local file_path = child.full_path or Path:Combine(directory, config.file_path or path)
-                    for _, suffix in pairs(C.TEXTURE_SHORTCUTS[typ]) do
+                    for _, suffix in pairs(CustomPackageManager.TEXTURE_SHORTCUTS[typ]) do
                         FileManager:AddFileWithCheck(TEXTURE_IDS, Idstring(path..suffix), file_path..suffix.."."..TEXTURE)
                     end
                 elseif typ and path then
                     path = Path:Normalize(path)
-                    local ids_ext = Idstring(C.EXT_CONVERT[typ] or typ)
+                    local ids_ext = Idstring(CustomPackageManager.EXT_CONVERT[typ] or typ)
 					local ids_path = Idstring(path)
 					local file_path = child.full_path or Path:Combine(directory, config.file_path or path)
                     local file_path_ext = file_path.."."..typ
@@ -231,20 +232,21 @@ function C:LoadPackageConfig(directory, config, temp, skip_use_clbk)
     end
 
     if config.unload_on_restart or temp then
-        table.insert(C.unload_on_restart, config)
+        table.insert(self.unload_on_restart, config)
     end
 
-    --For some reason this needs to be here, instead of loading in the main loop or the game will go into a hissy fit 
+    --Simon: For some reason this needs to be here, instead of loading in the main loop or the game will go into a hissy fit
+    --Luffy: Most likely the reason behind this is that some assets are not added yet.
     for _, file in pairs(loading) do
         FileManager:LoadAsset(unpack(file))
     end
 end
 
-function C:Err(...)
+function CustomPackageManager:Err(...)
     BeardLib:Err(...)
 end
 
-function C:AddFileWithCheck(ext, path, file)
+function CustomPackageManager:AddFileWithCheck(ext, path, file)
 	if FileIO:Exists(file) then
 		FileManager:AddFile(ext, path, file)
 	else
@@ -252,14 +254,14 @@ function C:AddFileWithCheck(ext, path, file)
 	end
 end
 
-function C:UnloadPackageConfig(config)
+function CustomPackageManager:UnloadPackageConfig(config)
     for i, child in ipairs(config) do
         if type(child) == "table" then
             local typ = child._meta
             local path = child.path
             if typ and path then
                 path = Path:Normalize(path)
-                local ids_ext = Idstring(C.EXT_CONVERT[typ] or typ)
+                local ids_ext = Idstring(self.EXT_CONVERT[typ] or typ)
                 local ids_path = Idstring(path)
                 if DB:has(ids_ext, ids_path) then
                     if child.unload ~= false then
@@ -276,10 +278,8 @@ function C:UnloadPackageConfig(config)
     end
 end
 
-function C:Unload()
+function CustomPackageManager:Unload()
     for _, v in pairs(self.unload_on_restart) do
         self:UnloadPackageConfig(v)
     end
 end
-
-BeardLib:RegisterManager("package", CustomPackageManager)

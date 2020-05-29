@@ -1,16 +1,18 @@
-CustomSoundManager = CustomSoundManager or {}
-local C = CustomSoundManager
-C.sources = {}
-C.stop_ids = {}
-C.float_ids = {}
-C.engine_sources = {}
-C.create_source_hooks = {}
-C.sound_ids = {}
-C.buffers = {}
-C.redirects = {}
-C.Closed = XAudio == nil
+CustomSoundManager = CustomSoundManager or BeardLib:CreateManager("sound")
 
-function C:CheckSoundID(sound_id, engine_source, clbk, cookie)
+function CustomSoundManager:init()
+    self.sources = {}
+    self.stop_ids = {}
+    self.float_ids = {}
+    self.engine_sources = {}
+    self.create_source_hooks = {}
+    self.sound_ids = {}
+    self.buffers = {}
+    self.redirects = {}
+    self.Closed = XAudio == nil
+end
+
+function CustomSoundManager:CheckSoundID(sound_id, engine_source, clbk, cookie)
 	if self.Closed then
         return nil
     end
@@ -53,7 +55,7 @@ function C:CheckSoundID(sound_id, engine_source, clbk, cookie)
     end
 end
 
-function C:GetLoadedBuffer(sound_id, prefixes, no_load)
+function CustomSoundManager:GetLoadedBuffer(sound_id, prefixes, no_load)
     for i, buffer in pairs(self.buffers) do
         local sound = buffer.load_on_play and buffer or buffer.data
         if self:ComparePrefixes(sound, sound_id, prefixes) then
@@ -73,19 +75,19 @@ function C:GetLoadedBuffer(sound_id, prefixes, no_load)
     return nil
 end
 
-function C:StoreFloat(sound_id, stop_id)
+function CustomSoundManager:StoreFloat(sound_id, stop_id)
 	self.float_ids[SoundDevice:string_to_id(sound_id)] = sound_id
 	if stop_id then
 		self.float_ids[SoundDevice:string_to_id(stop_id)] = stop_id
 	end
 end
 
-function C:AddStop(stop_id, sound_id)
+function CustomSoundManager:AddStop(stop_id, sound_id)
 	self.stop_ids[stop_id] = self.stop_ids[stop_id] or {}
 	table.insert(self.stop_ids[stop_id], sound_id)
 end
 
-function C:AddSoundID(data)
+function CustomSoundManager:AddSoundID(data)
 	local sound_id, stop_id = data.id, data.stop_id
     if not data.dont_store_float then
 		self:StoreFloat(sound_id, stop_id)
@@ -104,11 +106,11 @@ function C:AddSoundID(data)
     table.insert(self.sound_ids, data)
 end
 
-function C:AddBuffer(data, force)
+function CustomSoundManager:AddBuffer(data, force)
     if self.Closed then
         return
 	end
-	
+
     local close_previous = data.close_previous
 	local sound_id = data.id
     local buffer
@@ -129,7 +131,7 @@ function C:AddBuffer(data, force)
         end
     end
     table.insert(self.buffers, buffer or data)
-    
+
     if buffer then
         self:AddSoundID(table.merge({queue = {{id = sound_id}}}, data))
     end
@@ -137,13 +139,13 @@ function C:AddBuffer(data, force)
     return buffer
 end
 
-function C:CompareSound(data, sound_id, prefixes)
-    return data.id == sound_id 
-    and ((prefixes == nil and data.prefixes == nil) 
+function CustomSoundManager:CompareSound(data, sound_id, prefixes)
+    return data.id == sound_id
+    and ((prefixes == nil and data.prefixes == nil)
     or (prefixes ~= nil and data.prefixes ~= nil and table.equals(prefixes, data.prefixes)))
 end
 
-function C:ComparePrefixes(data, sound_id, prefixes)
+function CustomSoundManager:ComparePrefixes(data, sound_id, prefixes)
     if data.id == sound_id then
         if data.prefixes and prefixes then
             local match = false
@@ -163,7 +165,7 @@ function C:ComparePrefixes(data, sound_id, prefixes)
     end
 end
 
-function C:GetSound(sound_id, prefixes)
+function CustomSoundManager:GetSound(sound_id, prefixes)
     for _, sound in pairs(self.sound_ids) do
         if self:ComparePrefixes(sound, sound_id, prefixes) then
             return sound
@@ -171,16 +173,16 @@ function C:GetSound(sound_id, prefixes)
     end
 end
 
-function C:AddSource(sound_id, prefixes, engine_source, clbk, cookie) 
+function CustomSoundManager:AddSource(sound_id, prefixes, engine_source, clbk, cookie)
 	if self.Closed then
 		return
 	end
-	
+
 	local sound = self:GetSound(sound_id, prefixes)
 
 	if sound then
 		local queue = {}
-        --if not buffer, assume it's a vanilla sound. 
+        --if not buffer, assume it's a vanilla sound.
 
         if sound.is_random then
             local data = table.random(sound.queue)
@@ -205,11 +207,11 @@ function C:AddSource(sound_id, prefixes, engine_source, clbk, cookie)
 			return source
 		end
 	end
-	
+
 	return nil
 end
 
-function C:Redirect(id, prefixes)
+function CustomSoundManager:Redirect(id, prefixes)
     for _, redirect in pairs(self.redirects) do
         if self:ComparePrefixes(redirect, id, prefixes) then
             return redirect.to
@@ -218,11 +220,11 @@ function C:Redirect(id, prefixes)
     return id --No need to redirect.
 end
 
-function C:AddRedirect(data)
+function CustomSoundManager:AddRedirect(data)
     table.insert(self.redirects, data)
 end
 
-function C:CloseBuffer(sound_id, prefixes, soft)
+function CustomSoundManager:CloseBuffer(sound_id, prefixes, soft)
     for i, buffer in pairs(self.buffers) do
         local sound = buffer.load_on_play and buffer or buffer.data
         if (buffer.prefixes == nil and prefixes == nil) or (buffer.prefixes ~= nil and prefixes ~= nil and table.equals(buffer.prefixes, prefixes)) then
@@ -237,7 +239,7 @@ function C:CloseBuffer(sound_id, prefixes, soft)
     end
 end
 
-function C:Stop(engine_source)
+function CustomSoundManager:Stop(engine_source)
     local new_sources = {}
 	for _, source in pairs(self.sources) do
 		if not source:is_closed() then
@@ -251,7 +253,7 @@ function C:Stop(engine_source)
     self.sources = new_sources
 end
 
-function C:Close()
+function CustomSoundManager:Close()
     if not self:IsClosed() then
         for _, buffer in pairs(self.buffers) do
             if buffer.close then
@@ -264,7 +266,7 @@ function C:Close()
     end
 end
 
-function C:Update(t, dt)
+function CustomSoundManager:Update(t, dt)
     if self.Closed then
         return
     end
@@ -275,17 +277,17 @@ function C:Update(t, dt)
     end
 end
 
-function C:IsClosed() return self.Closed end
-function C:Queued() return self.queued end
-function C:Redirects() return self.redirects end
-function C:Sources() return self.sources end
-function C:Buffers() return self.buffers end
+function CustomSoundManager:IsClosed() return self.Closed end
+function CustomSoundManager:Queued() return self.queued end
+function CustomSoundManager:Redirects() return self.redirects end
+function CustomSoundManager:Sources() return self.sources end
+function CustomSoundManager:Buffers() return self.buffers end
 
-function C:CreateSourceHook(id, func)
+function CustomSoundManager:CreateSourceHook(id, func)
     table.insert(self.create_source_hooks, {id = id, func = func})
 end
 
-function C:RemoveCreateSourceHook(id)
+function CustomSoundManager:RemoveCreateSourceHook(id)
     for i, hook in pairs(self.create_source_hooks) do
         if hook.id == id then
             table.remove(self.create_source_hooks, i)
@@ -294,7 +296,7 @@ function C:RemoveCreateSourceHook(id)
     end
 end
 
-function C:Open()
+function CustomSoundManager:Open()
 	if self.Closed then
 		return
 	end
@@ -318,7 +320,7 @@ function C:Open()
 
         local create_source = SoundDevice.create_source
         function SoundDevice:create_source(name, ...)
-            local source = create_source(self, name, ...)  
+            local source = create_source(self, name, ...)
             if source then
                 source:get_data().name = name
                 for _, hook in pairs(create_source_hooks) do
@@ -341,7 +343,7 @@ function C:Open()
 			--:(
 			local key = self:key()
 			local data = sources[key] or {}
-			sources[key] = data 
+			sources[key] = data
 			return data
 		end
 
@@ -355,7 +357,7 @@ function C:Open()
             local data = self:get_data()
             data.pre_hooks = data.pre_hooks or {}
             table.insert(data.pre_hooks, {func = func, id = id})
-        end 
+        end
 		--Thanks for not making get functions ovk :)
 		function SoundSource:get_link()
 			return self:get_data().linking
@@ -369,7 +371,7 @@ function C:Open()
 		function SoundSource:get_position()
 			local data = self:get_data()
 			if data.position then
-				return data.position 
+				return data.position
 			else
 				local link = self:get_link()
 				return alive(link) and link:position() or nil
@@ -441,5 +443,3 @@ function C:Open()
 		BeardLib:log("Something went wrong when trying to initialize the custom sound manager hook")
 	end
 end
-
-BeardLib:RegisterManager("sound", C)
