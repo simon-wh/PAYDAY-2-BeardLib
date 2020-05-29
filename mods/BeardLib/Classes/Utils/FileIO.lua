@@ -263,7 +263,11 @@ function FileIO:LoadLocalization(path, overwrite)
 		file:close()
 		local contents
 		local passed = pcall(function()
-			contents = json10.decode(data)
+			if Path:GetFileExtension(path) == "yaml" then
+				contents = YAML.eval(data)
+			else
+				contents = json10.decode(data)
+			end
 		end)
 		if not passed then
 			return false

@@ -119,6 +119,7 @@
 			<class file="Hooks.lua"/>
 			<class file="MenuHelperPlus.lua"/>
 			<class file="JSON.lua"/>
+			<class file="YAML.lua"/>
 			<class file="XML.lua"/>
 			<class file="Builders.lua"/>
 		</classes>

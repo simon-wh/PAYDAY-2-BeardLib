@@ -1,0 +1,97 @@
+mod_assets_error: "ERROR!"
+menu_ok: OK
+bm_global_value_mod: MODS
+menu_l_global_value_mod: "This is a modding community item!"
+custom_map_title: "Custom Heist: $map"
+custom_map_download_available: "Download available"
+custom_map_alert: "Custom Heist Alert"
+custom_map_needs_download: "You need to download the heist before continuing, begin download?\n$url"
+custom_map_host_old_version: "Cannot begin download of custom heist because the host is running an old version of BeardLib!"
+custom_map_failed_download: "Failed to download custom heist"
+custom_map_missing_updater: "Cannot begin download of custom heist because the map does not have an updater!"
+heist_contact_custom: "Custom Heists"
+heist_contact_custom_description: "Custom heists are completely new heists added to the game and are made by the community"
+custom_map_cant_download: "The heist that the host has set cannot be downloaded, disconnecting."
+custom_map_failed: "Something went wrong while downloading the heist."
+beardlib_mods_manager: "BeardLib Mods Manager"
+beardlib_updates_available: "BeardLib Mods Manager: Updates available!"
+beardlib_updates_available_desc: "Visit the BeardLib Mods Manager to update them"
+beardlib_visit_page: "Visit page"
+beardlib_update_all: "Update all"
+beardlib_updated: "Updated!"
+beardlib_waiting: "Waiting for a response.."
+beardlib_download_complete: "Download complete, installing.."
+beardlib_download_failed: "Download has failed."
+beardlib_no_change: "Latest version installed!"
+beardlib_no_change_desc: "You already have the latest version of the update installed!"
+beardlib_mod_type: "Type: %type"
+beardlib_mod_type_base: BLT
+beardlib_downloading: "Downloading "
+beardlib_done: "Done!"
+beardlib_close: Close
+beardlib_mods_manager_important_title: "$mod has a new version!"
+beardlib_mods_manager_important_help: "Go to BeardLib Mods Manager to update?"
+beardlib_search: Search
+beardlib_important_notice: "Show update notice"
+beardlib_match_case: "Match case"
+beardlib_limit_results: "Limit results"
+beardlib_tick_all: "Tick all present items"
+beardlib_untick_all: "Untick all present items"
+beardlib_settings: Settings
+beardlib_b_settings: "BeardLib Settings"
+beardlib_menu_color: "Menu color"
+beardlib_show_images: "Show mod images"
+beardlib_reset_settings: "Reset settings"
+beardlib_dev_mode: "Developer mode"
+beardlib_dev_mode_help: |
+  Developer mode adds more errors to show in the errors dialog (Like if a file failed to load).
+  You should use this mode when developing any type of BeardLib mod so you can resolve the issues.
+  Normally, this is logged into the BLT log.
+beardlib_important_notice_help: "Should BeardLib notify you when there's an update for an important mod?"
+beardlib_write_failed: "Failed writing to path :/"
+beardlib_achieves_title: "Custom Achievements"
+beardlib_achieves_desc: "Track and view the custom achievements currently installed."
+beardlib_achieves_packages_installed: "$nbpackages packages installed"
+beardlib_achieves_completed_achievements: "$completed / $total completed achievements ($percent%)"
+beardlib_achieves_unlocked: "Unlocked: $time"
+beardlib_achieves_header_objectives: Objectives
+beardlib_achieves_header_rewards: Rewards
+beardlib_achieves_header_unlocked: Unlocked
+beardlib_achieves_header_unlocked_date: "Date: $time"
+beardlib_achieves_reward_exp: Experience
+beardlib_achieves_reward_cash: "Spendable Cash"
+beardlib_achieves_reward_offshore: "Offshore Cash"
+beardlib_achieves_reward_cc: "Continental Coins"
+beardlib_log_sounds: "Log sound IDs"
+beardlib_log_sounds_help: "Logs each incoming sound ID. Helpful when you want to replace existing sounds and don't know what's the ID."
+beardlib_found_errors: "One or more BeardLib mods have hit an error"
+beardlib_errors_tip: |
+  It's your duty to release your mods clean of errors.
+  If you're not a mod developer you can report these issues to the mod creators. Of course, making sure everything is updated.
+beardlib_optimized_music_load: "Optimized music load"
+beardlib_optimized_music_load_help: |
+  Loads custom music only when played. May cause a slight lag when switching songs.
+  However, should make it so you won't crash because of reaching 32bit ram limit.
+beardlib_errors_dialog: "Show errors dialog"
+beardlib_update: Update
+beardlib_waiting_updates: "Update(s) available "
+beardlib_mod_enabled: Enabled
+beardlib_mod_enabled_help: |
+  Determines whether or not the mod is enabled.
+  If a mod is disabled, it will not run any code.
+  BLT mods cannot be disabled by BeardLib. You can disable them through BLT itself
+beardlib_mod_ignore_updates: "Ignore updates"
+beardlib_mod_ignore_updates_help: "Should BeardLib ignore any incoming updates of this mod?"
+beardlib_mod_settings: "Mod settings - $mod"
+beardlib_mod_by: "By $author"
+beardlib_updates_download_now: Download
+beardlib_mod_type_add: Addon
+beardlib_mod_type_map: Map
+beardlib_waiting_update: "Update available"
+beardlib_show_errors_dialog: "Show errors dialog when entering main menu"
+beardlib_show_errors_dialog_help: |
+  If a mod hits a critical error (e.g. Outdated BeardLib) while loading, it will usually inform you about it.
+  So you can either update the mod or remove it.
+  Note: You should keep this on when using developer mode.
+beardlib_mod_develop_mode: "Develop Mode"
+beardlib_mod_developer_mode: "By activating develop mode for the mod, auto uppdates will be disabled and things such as auto generated addfiles will refresh each reload."
