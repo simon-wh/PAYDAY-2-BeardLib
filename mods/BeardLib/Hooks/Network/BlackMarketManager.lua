@@ -27,8 +27,8 @@ function BlackMarketManager:unpack_compact_outfit(outfit_string)
 		mask = {
 			mask_id = get("mask") or self._defaults.mask,
 			blueprint = {
-				color = {id = get("mask_color") or "nothing"}, 
-				pattern = {id = get("mask_pattern") or "no_color_no_material"}, 
+				color = {id = get("mask_color") or "nothing"},
+				pattern = {id = get("mask_pattern") or "no_color_no_material"},
 				material = {id = get("mask_material") or "plastic"}
 			}
 		},

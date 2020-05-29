@@ -57,7 +57,7 @@ local orig_check = MusicManager.check_music_switch
 function MusicManager:check_music_switch(...)
 	local switches = tweak_data.levels:get_music_switches()
 	if switches and #switches > 0 then
-		Global.music_manager.current_track = switches[math.random(#switches)]		
+		Global.music_manager.current_track = switches[math.random(#switches)]
 		if not self:attempt_play(Global.music_manager.current_track) then
 			return orig_check(self, ...)
 		end
@@ -246,7 +246,7 @@ Hooks:PostHook(MusicManager, "set_volume", "BeardLibMusicManagerSetVolume", func
 	--xaudio sets its own volume
 	if alive(self._player) then
 		self._player:set_volume_gain(volume)
-	end	
+	end
 end)
 
 Hooks:Add("MenuUpdate", "BeardLibMusicMenuUpdate", function(t, dt)

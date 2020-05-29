@@ -67,7 +67,7 @@ function SelectListDialog:ShowItem(t, selected)
             return true
         end
     end
-    return false    
+    return false
 end
 
 function SelectListDialog:MakeListItems(params)

@@ -37,7 +37,7 @@ function ContextMenu:init(owner, layer)
         padding = 0.0001,
         count_invisible = true,
         scroll_width = owner.context_scroll_width or 10,
-        hide_shade = true, 
+        hide_shade = true,
         color = owner.scroll_color or owner.highlight_color,
         scroll_speed = owner.scroll_speed or 48
     })
@@ -145,7 +145,7 @@ end
 function ContextMenu:reposition()
 	local size = self.owner.context_font_size or self.owner.font_size or self.owner.size
 	local offset_y = self.owner.context_screen_offset_y or 32
-    local bottom_h = (self.menu._panel:world_bottom() - self.owner.panel:world_bottom()) - offset_y 
+    local bottom_h = (self.menu._panel:world_bottom() - self.owner.panel:world_bottom()) - offset_y
 	local top_h = (self.owner.panel:world_y() - self.menu._panel:world_y()) - offset_y
 	local items_h = (#self._my_items * size) + (self.owner.searchbox and self.owner.size or 0)
 
@@ -173,7 +173,7 @@ function ContextMenu:reposition()
         self.panel:set_world_bottom(self.owner.panel:world_y())
 	end
 
-    self._scroll:panel():set_y(self.owner.searchbox and self.owner.size or 0) 
+    self._scroll:panel():set_y(self.owner.searchbox and self.owner.size or 0)
     self._scroll:set_size(self.panel:w(), self.panel:h() - (self.owner.searchbox and self.owner.size or 0))
 
     self._scroll:update_canvas_size()
@@ -220,7 +220,7 @@ function ContextMenu:MousePressed(button, x, y)
                     if self.owner.ContextMenuCallback then
                         self.owner:ContextMenuCallback(item)
                     else
-                        if item.on_callback then self.owner:RunCallback(item.on_callback, item) end            
+                        if item.on_callback then self.owner:RunCallback(item.on_callback, item) end
                     end
                     self:hide()
                     return true
@@ -323,7 +323,7 @@ function ContextMenu:MouseMoved(x, y)
     if self:textbox() then
         self:textbox():MouseMoved(x, y)
     end
-    local _, pointer = self._scroll:mouse_moved(nil, x, y) 
+    local _, pointer = self._scroll:mouse_moved(nil, x, y)
     if pointer then
         managers.mouse_pointer:set_pointer_image(pointer)
         self:CheckItems()

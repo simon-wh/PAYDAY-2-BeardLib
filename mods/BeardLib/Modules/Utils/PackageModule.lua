@@ -8,7 +8,7 @@ function PackageModule:init(...)
     if not PackageModule.super.init(self, ...) then
         return false
 	end
-	
+
     self._id = self._config.id:id()
     local directory = self._config.full_directory or Path:Combine(self._mod.ModPath, self._config.directory)
     if not CustomPackageManager:RegisterPackage(self._config.id, directory, self._config) then

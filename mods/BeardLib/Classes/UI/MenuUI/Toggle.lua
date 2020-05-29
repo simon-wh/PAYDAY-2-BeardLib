@@ -1,7 +1,7 @@
 BeardLib.Items.Toggle = BeardLib.Items.Toggle or class(BeardLib.Items.Item)
 local Toggle = BeardLib.Items.Toggle
 Toggle.type_name = "Toggle"
-function Toggle:Init()    
+function Toggle:Init()
 	Toggle.super.Init(self)
 	local s = self.size - 4
 	local fgcolor = self:GetForeground()

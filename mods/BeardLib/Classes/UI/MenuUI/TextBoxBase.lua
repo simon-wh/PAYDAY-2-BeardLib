@@ -98,7 +98,7 @@ function TextBoxBase:DoHighlight(highlight)
             caret:set_color(color:with_alpha(1))
             self.panel:child("line"):set_color(self.line_color or color)
             self.panel:child("text"):set_color(color)
-            self.panel:child("text"):set_selection_color(color:with_alpha(0.5))    
+            self.panel:child("text"):set_selection_color(color:with_alpha(0.5))
         end
     end
 end
@@ -122,7 +122,7 @@ function TextBoxBase:CheckText(text, no_clbk)
         self.update_text(self:Value(), not no_clbk, true)
     end
 end
- 
+
 function TextBoxBase:tonumber(text)
     text = text or 0
     if self.owner.floats then
@@ -180,7 +180,7 @@ function TextBoxBase:key_hold(text, k)
                 if KB:Down(Idstring("left")) then text:set_selection(s - 1, e)
                 elseif KB:Down(Idstring("right")) then text:set_selection(s, e + 1) end
             else
-                local z = KB:Down("z") 
+                local z = KB:Down("z")
                 local y = KB:Down("y")
                 if z or y then
                     local point = self.history_point or not y and #self.history
@@ -219,7 +219,7 @@ function TextBoxBase:key_hold(text, k)
     end
 end
 
-function TextBoxBase:one_point_back(text)
+function TextBoxBase:one_point_back()
     return self.history[#self.history - 1]
 end
 
@@ -227,9 +227,9 @@ function TextBoxBase:add_history_point(text)
     if self.history_point then
         local temp_history = clone(self.history)
         self.history = {}
-        for point, text in pairs(temp_history) do
+        for point, point_text in pairs(temp_history) do
             if point <= self.history_point then
-                table.insert(self.history, text)
+                table.insert(self.history, point_text)
             end
         end
         self.history_point = nil
@@ -239,7 +239,7 @@ end
 
 function TextBoxBase:fixed_text(text)
 	if self.owner.filter == "number" then
-		local num = tonumber(text) 
+		local num = tonumber(text)
         if num then
             local clamp = math.clamp(num, self.owner.min or num, self.owner.max or num)
             if self.owner.floats then
@@ -264,7 +264,7 @@ function TextBoxBase:enter_text(text, s)
         end
     end
     if self.menu.active_textbox == self and self.cantype and not ctrl() then
-        text:replace_text(s)       
+        text:replace_text(s)
         self:add_history_point(number and (tonumber(self:Value()) or self:one_point_back()) or self:Value())
         self:update_caret()
         if self:fixed_text(self:Value()) == self:Value() then
@@ -364,14 +364,11 @@ function TextBoxBase:alive()
     return alive(self.panel) and alive(self.panel:child("text"))
 end
 
-local scroll_up = Idstring("mouse wheel up")
-local scroll_down = Idstring("mouse wheel down")
-
 function TextBoxBase:MousePressed(button, x, y)
     if not self:alive() then
         return false
     end
-    
+
     local text = self.panel:child("text")
     local active = text:inside(x,y) and button == Idstring(self.btn)
 
@@ -405,7 +402,6 @@ function TextBoxBase:MouseMoved(x, y)
     if self._start_select then
         local i = text:point_to_index(x, y)
         local s, e = text:selection()
-        local old = self._select_neg
         if self._select_neg == nil or (s == e) then
             self._select_neg = (x - self.menu._old_x) < 0
         end

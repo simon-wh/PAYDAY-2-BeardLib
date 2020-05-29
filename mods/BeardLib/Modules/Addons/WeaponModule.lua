@@ -237,7 +237,7 @@ function WeaponModule:ConvertOldToNew()
         damage_melee = self._config.damage_melee,
         damage_melee_effect_mul = self._config.damage_melee_effect_mul,
         global_value = self._config.global_value,
-        override = self._config.merge_data,          
+        override = self._config.merge_data,
         muzzleflash = self._config.muzzleflash,
         shell_ejection = self._config.shell_ejection,
         use_data = self._config.use_data,
@@ -262,7 +262,7 @@ function WeaponModule:ConvertOldToNew()
         texture_bundle_folder = self._config.texture_bundle_folder,
         panic_suppression_chance = self._config.panic_suppression_chance,
         kick = self._config.kick and BeardLib.Utils:RemoveMetas(self._config.kick),
-        crosshair = self._config.crosshair and BeardLib.Utils:RemoveMetas(self._config.crosshair),            
+        crosshair = self._config.crosshair and BeardLib.Utils:RemoveMetas(self._config.crosshair),
         stats = self._config.stats and BeardLib.Utils:RemoveMetas(self._config.stats),
     }
     self._config.factory = {
@@ -282,9 +282,9 @@ function WeaponModule:ConvertOldToNew()
     self._config.autohit  = nil
     self._config.aim_assist = nil
     self._config.damage_melee  = nil
-    self._config.damage_melee_effect_mul = nil 
+    self._config.damage_melee_effect_mul = nil
     self._config.global_value = nil
-    self._config.merge_data,          
+    self._config.merge_data,
     self._config.muzzleflash = nil
     self._config.shell_ejection = nil
     self._config.use_data = nil

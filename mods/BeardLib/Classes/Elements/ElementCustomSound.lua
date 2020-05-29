@@ -11,7 +11,7 @@ ElementCustomSound = ElementCustomSound or class(CoreMissionScriptElement.Missio
 -- SECONDARY CHANNEL :		Used for voice over lines. Cannot be interrupted by the primary or third channel. Cannot loop. The current sound playing can be overwritten by
 --							an other secondary channel sound. The current line playing will just stop.
 -- THIRD CHANNEL     : 		Used for background noises such as environment sound. Cannot be interrupted by the primary and secondary channel. Can be looped. Can be stacked
---							with other third channel sounds.							
+--							with other third channel sounds.
 
 function ElementCustomSound:init(...)
 	ElementCustomSound.super.init(self, ...)
@@ -27,7 +27,7 @@ function ElementCustomSound:_check_and_create_panels()
 	if not managers.menu_component._secondary_panel then
 		managers.menu_component._secondary_panel = managers.menu_component._ws:panel():panel()
 	end
-	
+
 	if not managers.menu_component._third_panel then
 		managers.menu_component._third_panel = managers.menu_component._ws:panel():panel()
 	end
@@ -37,22 +37,22 @@ function ElementCustomSound:_check_volume_choice()
 	if self._values.volume_choice == "sfx" then
 		local volume = managers.user:get_setting("sfx_volume")
 		local percentage = (volume - tweak_data.menu.MIN_SFX_VOLUME) / (tweak_data.menu.MAX_SFX_VOLUME - tweak_data.menu.MIN_SFX_VOLUME)
-		
+
 		self._volume_based = percentage
 	else
 		self._volume_based = Global.music_manager.volume
 	end
-	
+
 	--Volume overriding
 	if self._values.volume_override and self._values.volume_override >= 0 then
 		self._volume_based = self._volume_based * self._values.volume_override
 	end
-	
+
 	return self._volume_based
 end
 
 function ElementCustomSound:stop_secondary()
-	
+
 	--Removes the secondary panel from the menu component manager
 	if managers.menu_component._secondary_panel and managers.menu_component._ws then
 		managers.menu_component._ws:panel():remove(managers.menu_component._secondary_panel)
@@ -68,9 +68,9 @@ function ElementCustomSound:play(src)
 		video = src,
 		visible = false,
 		loop = self._values.loop or false
-	})   
+	})
 	managers.music._player:set_volume_gain(self:_check_volume_choice())
-end 
+end
 
 function ElementCustomSound:play_secondary(src)
 	--Removes the secondary panel, terminating all video files contained in it automatically
@@ -139,10 +139,10 @@ function ElementCustomSound:on_executed(instigator)
 	if self._values.instigator_only and instigator ~= managers.player:player_unit() then
 		return
 	end
-	
+
 	--Check panels and create if required
 	self:_check_and_create_panels()
-	
+
 	if not self._values.use_as_secondary and not self._values.use_as_third then
 		-- Primary Channel
 		self:play(self._values.sound_path)

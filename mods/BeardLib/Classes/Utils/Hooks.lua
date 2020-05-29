@@ -9,13 +9,13 @@ function Hooks:RemovePostHookWithObject(object, id)
         BeardLib:log("[Error] No post hooks for object '%s' while trying to remove id '%s'", tostring(object), tostring(id))
         return
     end
-    for func_i, func in pairs(hooks) do
+    for _, func in pairs(hooks) do
         for override_i, override in ipairs(func.overrides) do
             if override and override.id == id then
                 table.remove(func.overrides, override_i)
             end
         end
-    end         
+    end
 end
 
 --Same as RemovePostHookWithObject but for pre hooks.
@@ -32,7 +32,7 @@ function Hooks:RemovePreHookWithObject(object, id)
                 table.remove(func.overrides, override_i)
             end
         end
-    end         
+    end
 end
 
 --Returns a quick class to create post/pre hooks with a predefined name so you don't have to retype it.

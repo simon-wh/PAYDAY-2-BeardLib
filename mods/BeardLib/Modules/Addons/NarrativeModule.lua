@@ -4,7 +4,7 @@ NarrativeModule._loose = true
 
 function NarrativeModule:init(...)
     self.clean_table = table.add(clone(self.clean_table), {
-        {param = "chain", action = {"number_indexes", "remove_metas"}},        
+        {param = "chain", action = {"number_indexes", "remove_metas"}},
         {
             param = "chain",
             action = function(tbl)
@@ -17,7 +17,7 @@ function NarrativeModule:init(...)
                         end
                     end
                 end
-            end},        
+            end},
         {param = "crimenet_callouts", action = "number_indexes"},
         {param = "crimenet_videos", action = "number_indexes"},
         {param = "payout", action = "number_indexes"},
@@ -72,7 +72,7 @@ function NarrativeModule:AddNarrativeData(narr_self, tweak_data)
     narr_self.jobs[tostring(self._config.id)] = data
 
     local id = tostring(self._config.id)
-    if not data.hide_from_crimenet and ((data.job_wrapper and #data.job_wrapper > 0) or #data.chain > 0) and not table.contains(narr_self._jobs_index, id) then 
+    if not data.hide_from_crimenet and ((data.job_wrapper and #data.job_wrapper > 0) or #data.chain > 0) and not table.contains(narr_self._jobs_index, id) then
         table.insert(narr_self._jobs_index, id)
     end
 end

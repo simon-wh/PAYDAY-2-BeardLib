@@ -45,7 +45,7 @@ Hooks:PostHook(BLTNotificationsGui, "_setup", "BeardLibModsManagerSetup", functi
     self._beardlib_updates_count:set_center(icon:center())
     self._beardlib_achievements = self._beardlib_panel:bitmap({
         name = "CustomAchievments",
-        texture = "guis/textures/achievement_trophy_white",        
+        texture = "guis/textures/achievement_trophy_white",
         w = 28,
         h = 28,
         y = 8,

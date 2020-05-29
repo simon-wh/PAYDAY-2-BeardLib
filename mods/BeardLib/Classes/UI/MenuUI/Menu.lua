@@ -8,8 +8,8 @@ function Menu:Init(params)
     self:InitBasicMenu()
     self._scroll = ScrollablePanelModified:new(self.panel, "ItemsPanel", {
         layer = 4,
-        padding = 0, 
-        scroll_width = self.scrollbar == false and 0 or self.scroll_width, 
+        padding = 0,
+        scroll_width = self.scrollbar == false and 0 or self.scroll_width,
 		hide_shade = true,
 		debug = self.debug,
         color = self.scroll_color or self.highlight_color,
@@ -25,7 +25,7 @@ function Menu:Init(params)
     self:SetVisible(self.visible)
 end
 
-function Menu:GrowHeight(speed)
+function Menu:GrowHeight()
     self:_AlignItems()
 end
 
@@ -40,7 +40,7 @@ function Menu:ReloadInterface() --Unused
        --render_template = self.background_blur and "VertexColorTexturedBlur3D" or "VertexColorTextured",
        --texture = self.background_blur and "guis/textures/test_blur_df" or "units/white_df",
         color = self.background_color,
-        alpha = self.background_alpha,        
+        alpha = self.background_alpha,
     })
     self._scroll:set_scroll_color(self.scroll_color or self.highlight_color)
     self:RecreateItems()
@@ -105,7 +105,7 @@ function Menu:UpdateCanvas(h)
 	if not self.auto_height and h < self._scroll:scroll_panel():h() then
 		h = self._scroll:scroll_panel():h()
 	end
-	
+
 	self._scroll:set_canvas_size(nil, h)
 	self:_SetSize(nil, self.auto_height and self.items_panel:h() + self:TextHeight() or nil)
 end

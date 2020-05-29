@@ -95,8 +95,8 @@ function Group:OpenGroup()
     self:UpdateGroup()
 end
 
-function Group:MouseInside(x, y) 
-    return self.highlight_bg:inside(x,y) 
+function Group:MouseInside(x, y)
+    return self.highlight_bg:inside(x,y)
 end
 
 function Group:MousePressed(button, x, y)

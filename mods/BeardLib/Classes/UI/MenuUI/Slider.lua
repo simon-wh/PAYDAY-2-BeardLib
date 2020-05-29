@@ -10,7 +10,7 @@ function Slider:Init()
     self.min = self.min or self.value
     self.max = self.max or self.value
     if self.max or self.min then
-        self.value = math.clamp(self.value, self.min, self.max)    
+        self.value = math.clamp(self.value, self.min, self.max)
     end
     self:WorkParam("floats", 3)
     self.filter = "number"
@@ -60,7 +60,7 @@ function Slider:Init()
 
     self.sbg = self._slider:rect({
         name = "bg",
-        x = ch / 2,        
+        x = ch / 2,
         w = self._slider:w() - ch,
         h = 2,
         layer = 1,
@@ -78,10 +78,10 @@ function Slider:SetStep(step)
     self.step = step
 end
 
-function Slider:TextBoxSetValue(value, run_callback, reset_selection, no_format)  
-    value = tonumber(value) or 0 
+function Slider:TextBoxSetValue(value, run_callback, reset_selection, no_format)
+    value = tonumber(value) or 0
     if self.max or self.min then
-        value = math.clamp(value, self.min, self.max)    
+        value = math.clamp(value, self.min, self.max)
     end
     value = tonumber(not no_format and format or value)
     local final_number = self.floats and string.format("%." .. self.floats .. "f", value) or tostring(value)
@@ -165,7 +165,6 @@ function Slider:MousePressed(button, x, y)
 	return result, state
 end
 
-local abs = math.abs
 function Slider:SetValueByMouseXPos(x)
     if not alive(self.panel) then
         return

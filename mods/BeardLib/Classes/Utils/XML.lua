@@ -39,7 +39,7 @@ end
 --Finds a node and replaces it with 'new_node'
 function XML:SetNode(tbl, node, new_node)
     if not tbl then return nil end
-    
+
     for i, v in pairs(tbl) do
         if type(v) == "table" and v == node then
             tbl[i] = new_node
@@ -49,7 +49,7 @@ end
 
 function XML:SetNodeMeta(tbl, meta, new_node)
     if not tbl then return nil end
-    
+
     for i, v in pairs(tbl) do
         if type(v) == "table" and v._meta == meta then
             tbl[i] = new_node
@@ -186,7 +186,7 @@ function XML:Clean(tbl, shallow)
     for k, v in pairs(multi_nodes) do
         tbl[k] = nil
     end
-    
+
     local i = 1
     for k, v in pairs(multi_nodes) do
         tbl[i] = v

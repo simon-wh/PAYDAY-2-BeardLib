@@ -18,7 +18,7 @@ function WorldDefinition:do_package_load(pkg)
         PackageManager:load(pkg)
         BeardLib:DevLog("Loaded package: "..pkg)
         table.insert(self._custom_loaded_packages, pkg)
-    end    
+    end
 end
 
 local WorldDefinition_load_world_package = WorldDefinition._load_world_package
@@ -54,13 +54,7 @@ function WorldDefinition:unload_packages(...)
                 instance:Unload()
             end
         end
---[[
-        if self._custom_loaded_packages then
-            for _, pck in pairs(self._custom_loaded_packages) do
-                self:_unload_package(pck)
-            end
-        end
-]]
+
         if not self._has_package then
             return
         end
@@ -138,7 +132,7 @@ function WorldDefinition:try_loading_custom_instance(instance)
             module:Load()
             self._custom_instances[instance] = module
         end
-    end   
+    end
 end
 
 function WorldDefinition:load_custom_instances()
@@ -160,14 +154,14 @@ function WorldDefinition:add_trigger_sequence(unit, triggers, ...)
 	if not triggers then
 		return
     end
-    
+
     local fixed_triggers = {}
     for _, trigger in pairs(triggers) do
         if trigger.notify_unit_id then
             table.insert(fixed_triggers, trigger)
         end
     end
-    
+
     return add_trigger_sequence(self, unit, fixed_triggers, ...)
 end
 
@@ -184,7 +178,7 @@ function WorldDefinition:_setup_cubemaps(unit, data)
 
 	local texture_name = (self._cube_lights_path or self:world_dir()) .. "cubemaps/" .. unit:unit_data().unit_id
 	if not DB:has(Idstring("texture"), Idstring(texture_name)) then
-		log("Cubemap texture doesn't exist, probably needs to be generated: " .. tostring(texture_name))	
+		log("Cubemap texture doesn't exist, probably needs to be generated: " .. tostring(texture_name))
 		return
 	end
 	-- This is needed to get the cubemap texture to show up

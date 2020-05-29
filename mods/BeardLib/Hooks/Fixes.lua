@@ -39,7 +39,7 @@ if F == "weaponfactorymanager" then
                     if tweak.parts[part_id] then
                         table.insert(new_uses_parts, part_id)
                     elseif not factory_id:ends("_npc") then
-                        BeardLib:log("[Fixes][Warning] Weapon with the factory ID %s has the part %s defined but the part does not exist", tostring(factory_id), tostring(part_id))                        
+                        BeardLib:log("[Fixes][Warning] Weapon with the factory ID %s has the part %s defined but the part does not exist", tostring(factory_id), tostring(part_id))
                     end
                 end
                 data.uses_parts = new_uses_parts
@@ -53,7 +53,7 @@ elseif F == "blackmarketmanager" then
         if tweak_data.weapon[weapon_id] then
             return orig_get(self, weapon, ...)
         else
-            BeardLib:log("[Fixes][Warning] Weapon with the ID '%s' was found in the save but was missing, the weapon will be deleted from the save", tostring(weapon_id))		
+            BeardLib:log("[Fixes][Warning] Weapon with the ID '%s' was found in the save but was missing, the weapon will be deleted from the save", tostring(weapon_id))
             return 0
         end
     end
@@ -61,7 +61,7 @@ elseif F == "blackmarketmanager" then
     local orig_string_mask = BlackMarketManager._outfit_string_mask
     function BlackMarketManager:_outfit_string_mask(...)
         if not managers.blackmarket:equipped_mask() then
-            BeardLib:log("[Fixes][Warning] Mask is null, returning default.")		
+            BeardLib:log("[Fixes][Warning] Mask is null, returning default.")
             return "character_locked"
         end
         return orig_string_mask(self, ...)
@@ -271,7 +271,7 @@ elseif F == "crewmanagementgui" then
             if fac_id then
                 local factory = tweak_data.weapon.factory[fac_id.."_npc"]
                 if factory and factory.custom and not DB:has(Idstring("unit"), factory.unit:id()) then
-                    v.buttons = {} 
+                    v.buttons = {}
                     v.unlocked = false
                     v.lock_texture = "guis/textures/pd2/lock_incompatible"
                     v.lock_text = managers.localization:text("menu_data_crew_not_allowed")
@@ -597,7 +597,7 @@ elseif F == "hudbelt" then
 
                         self._icon:set_image(self._texture)
                         scale_by_aspect(self._icon, math.min(self._w, self._h))
-                        self._icon:set_center(self._panel:w() / 2, self._panel:h() / 2)				
+                        self._icon:set_center(self._panel:w() / 2, self._panel:h() / 2)
                     end
                 end
             end

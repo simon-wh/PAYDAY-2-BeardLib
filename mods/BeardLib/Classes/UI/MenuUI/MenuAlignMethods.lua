@@ -148,7 +148,7 @@ function Item:AlignItemsGrid(reversed)
                         max_y = max_h
                         max_right = 0
                     end
-                    panel:set_position(max_right + offset[1], max_y + offset[2])            
+                    panel:set_position(max_right + offset[1], max_y + offset[2])
                 end
                 last_positioned_item, prev_item, max_h, max_right = self:RepositionItem(item, last_positioned_item, prev_item, max_h, max_right)
             else
@@ -220,7 +220,7 @@ function Item:AlignItemsCenteredGrid(reversed)
                 if repos then
                     last_positioned_item = item
                 end
-                local was_aligned = (not repos and not item.ignore_align) or item.count_as_aligned 
+                local was_aligned = (not repos and not item.ignore_align) or item.count_as_aligned
                 if was_aligned or item.count_height then
                     if was_aligned then
                         prev_item = item
@@ -272,8 +272,8 @@ function Item:AlignItemsGridFromRight(reversed, dbg)
                        max_y = max_h
                        max_right = items_w
                     end
-                    panel:set_righttop(max_right - offset[1], max_y + offset[2])            end
-
+                    panel:set_righttop(max_right - offset[1], max_y + offset[2])
+                end
                 if repos then
                     last_positioned_item = item
                 end

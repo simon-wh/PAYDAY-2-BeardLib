@@ -7,11 +7,11 @@ ElementOverrideInstigator = ElementOverrideInstigator or class(CoreMissionScript
 function ElementOverrideInstigator:on_script_activated()
     self._mission_script:add_save_state_cb(self._id)
 end
- 
+
 function ElementOverrideInstigator:client_on_executed(...)
     self:on_executed(...)
 end
- 
+
 function ElementOverrideInstigator:on_executed(instigator)
     if not self._values.enabled then
         return
@@ -19,7 +19,7 @@ function ElementOverrideInstigator:on_executed(instigator)
 
     local override = self._values.unit_id and managers.worlddefinition:get_unit(self._values.unit_id)
     instigator = override or instigator
-    
+
     ElementOverrideInstigator.super.on_executed(self, instigator)
 end
 

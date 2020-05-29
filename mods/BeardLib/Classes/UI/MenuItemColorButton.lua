@@ -76,7 +76,7 @@ function MenuItemColorButton:update_key_down(row_item, o, k)
     if not row_item or not alive(row_item.gui_text) then
 		return
     end
-    
+
     local first
     local text = row_item.gui_text
   	while self._key_pressed == k do
@@ -158,7 +158,7 @@ function MenuItemColorButton:_update_caret()
 	local text = self._text
     local caret = self._caret
     self:update_color_preview()
-    
+
     text:set_align("left")
     caret:set_size(2, text:font_size())
 
@@ -216,7 +216,7 @@ function MenuItemColorButton:key_press(row_item, o, k)
 	elseif self._key_pressed == Idstring("home") then
 		text:set_selection(0, 0)
 	end
-	
+
 	self:_layout(row_item)
 end
 

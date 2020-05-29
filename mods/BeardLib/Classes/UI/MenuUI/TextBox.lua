@@ -27,7 +27,7 @@ function TextBox:TextBoxSetValue(value, run_callback, reset_selection)
 	local text = self._textbox.panel:child("text")
 
 	if self.filter == "number" then
-		value = tonumber(value) or 0		
+		value = tonumber(value) or 0
 		if self.max then
 			value = math.min(self.max, value)
 		end
@@ -35,7 +35,7 @@ function TextBox:TextBoxSetValue(value, run_callback, reset_selection)
 			value = math.max(self.min, value)
 		end
 	    local final_number = self.floats and string.format("%." .. self.floats .. "f", value) or tostring(value)
-	    value = tonumber(final_number)    
+	    value = tonumber(final_number)
 	    text:set_text(final_number)
 	else
 		text:set_text(value)
@@ -44,7 +44,7 @@ function TextBox:TextBoxSetValue(value, run_callback, reset_selection)
 		local len = text:text():len()
 		text:set_selection(len, len)
 	end
-	self._textbox:update_caret()	
+	self._textbox:update_caret()
 	TextBox.super.SetValue(self, value, run_callback)
 end
 
@@ -74,7 +74,7 @@ function TextBox:MousePressed(button, x, y)
 		self._last_mouse_position = {managers.mouse_pointer._mouse:world_position()}
 		return true
 	end
-	
+
 	self._textbox:MousePressed(button, x, y)
 	return self._textbox.cantype, not self._textbox.cantype and state or nil
 end

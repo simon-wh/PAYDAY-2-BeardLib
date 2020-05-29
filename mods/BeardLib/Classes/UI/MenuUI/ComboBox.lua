@@ -28,7 +28,7 @@ function ComboBox:Init()
         value = self:GetValueText(),
     })
     self._textbox:PostInit()
-     
+
     combo_bg:set_right(self.panel:w())
     self.icon = self.panel:bitmap({
         name = "icon_arrow",
@@ -90,7 +90,7 @@ function ComboBox:SetValue(value, run_callback, no_items_clbk)
     if not self:alive() then
 		return false
     end
-    
+
     local v = self.items[value]
     if run_callback and not no_items_clbk and v and type(v) == "table" and v.on_callback then
         self:RunCallback(v.on_callback)
@@ -116,7 +116,7 @@ function ComboBox:GetValueText()
 	local is_pretty = self.items_pretty
     return (is_upper and text:upper()) or (is_lower and text:lower()) or (is_pretty and text:pretty(true)) or text
 end
-    
+
 function ComboBox:UpdateValueText()
     if alive(self.panel) then
         self._textbox:Text():set_text(self:GetValueText())

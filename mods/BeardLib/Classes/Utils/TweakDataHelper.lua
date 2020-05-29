@@ -13,7 +13,7 @@ function tdh:ModifyTweak(data, ...)
         dest_tbl[k] = dest_tbl[k] or {}
         dest_tbl = dest_tbl[k]
 	end
-	
+
     if type(dest_tbl[key]) == "table" then
         table.add_merge(dest_tbl[key], data)
     else

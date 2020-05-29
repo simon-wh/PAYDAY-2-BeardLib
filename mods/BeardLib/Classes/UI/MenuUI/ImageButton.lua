@@ -1,23 +1,23 @@
 BeardLib.Items.ImageButton = BeardLib.Items.ImageButton or class(BeardLib.Items.Item)
-local ImageButton = BeardLib.Items.ImageButton 
+local ImageButton = BeardLib.Items.ImageButton
 ImageButton.type_name = "ImageButton"
 ImageButton.IMG = true
 function ImageButton:InitBasicItem()
     self.h = self.h or self.w
-    self.panel = self.parent_panel:panel({ 
+    self.panel = self.parent_panel:panel({
         name = self.name,
         w = self.w,
         h = self.h,
 	})
     self:InitBGs()
     self.img = self.panel:bitmap({
-        name = "img", 
+        name = "img",
         texture = self.texture,
         texture_rect = self.texture_rect,
         color = self.img_color or self.foreground,
         w = self.icon_w or self.w - (self.img_offset[1] * 2),
         h = self.icon_h or self.h - (self.img_offset[2] * 2),
-        halign = "center", 
+        halign = "center",
         valign = "center",
         layer = 5
     })
@@ -39,7 +39,7 @@ function ImageButton:DoHighlight(highlight)
         if self.animate_colors then
             play_color(self.img, self:GetForeground(highlight))
         else
-            self.img:set_color(self:GetForeground(highlight))            
+            self.img:set_color(self:GetForeground(highlight))
         end
     end
 end

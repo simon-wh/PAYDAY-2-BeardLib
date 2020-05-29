@@ -14,7 +14,7 @@ function MenuUI:init(params)
 	self._ws:connect_keyboard(Input:keyboard())
     tweak_data.gui.MOUSE_LAYER = 9999999999 --nothing should have a layer that is bigger than mouse tbh
     self._panel = self._ws:panel():panel({
-        name = self.name or self.type_name, 
+        name = self.name or self.type_name,
         alpha = 0, layer = self.layer
     })
     self._panel:key_press(ClassClbk(self, "KeyPressed"))
@@ -39,7 +39,7 @@ function MenuUI:init(params)
         halign ="grow",
         valign ="grow",
         color = self.help_background_color,
-    })    
+    })
     self._help:text({
         name = "text",
         font = self.help_font or "fonts/font_large_mf",
@@ -94,16 +94,16 @@ function MenuUI:ReloadInterface(params, shallow)
         w = self.background_blur and self._panel:w(),
         h = self.background_blur and self._panel:h(),
         color = self.background_color,
-        alpha = self.background_alpha,       
+        alpha = self.background_alpha,
     })
     self._help:child("bg"):configure({
         color = self.help_background_color or self.background_color,
-        alpha = self.help_background_alpha or self.background_alpha,       
+        alpha = self.help_background_alpha or self.background_alpha,
     })
     self._help:child("text"):configure({
         font = self.help_font or "fonts/font_large_mf",
-        font_size = self.help_font_size or 16,       
-        color = self.help_color or Color.black       
+        font_size = self.help_font_size or 16,
+        color = self.help_color or Color.black
     })
     if not shallow then
         for _, menu in pairs(self._menus) do
@@ -133,8 +133,8 @@ function MenuUI:ShowDelayedHelp(item)
 
             local mouse = managers.mouse_pointer:mouse()
             local mouse_p = mouse:parent()
-            local bottom_h = (mouse_p:world_bottom() - mouse:world_bottom()) 
-            local top_h = (mouse:world_y() - mouse_p:world_y()) 
+            local bottom_h = (mouse_p:world_bottom() - mouse:world_bottom())
+            local top_h = (mouse:world_y() - mouse_p:world_y())
             local normal_pos = h <= bottom_h or bottom_h >= top_h
             self._help:set_world_left(mouse:world_left() + 7)
             if normal_pos then
@@ -174,18 +174,18 @@ function MenuUI:Menu(params)
 end
 
 function MenuUI:Holder(params)
-    return self:AddMenu(BeardLib.Items.Holder:new(self:ConfigureMenu(params, true))) 
+    return self:AddMenu(BeardLib.Items.Holder:new(self:ConfigureMenu(params, true)))
 end
 
 function MenuUI:Holder(params)
-    return self:AddMenu(BeardLib.Items.Holder:new(self:ConfigureMenu(params, true))) 
+    return self:AddMenu(BeardLib.Items.Holder:new(self:ConfigureMenu(params, true)))
 end
 
-function MenuUI:NoteBook(params) 
+function MenuUI:NoteBook(params)
     return self:AddMenu(BeardLib.Items.NoteBook:new(self:ConfigureMenu(params, true)))
 end
 
-function MenuUI:PopupMenu(params) 
+function MenuUI:PopupMenu(params)
     return self:AddMenu(BeardLib.Items.PopupMenu:new(self:ConfigureMenu(params, true)))
 end
 
@@ -240,7 +240,7 @@ function MenuUI:Enable()
         return
     end
     if self.animate_toggle then
-        play_anim(self._panel, {set = {alpha = 1}, time = 0.2})       
+        play_anim(self._panel, {set = {alpha = 1}, time = 0.2})
     else
         self._panel:set_alpha(1)
     end
@@ -284,7 +284,7 @@ end
 function MenuUI:RunToggleClbk()
     if self.toggle_clbk then
         self.toggle_clbk(self, self:Enabled())
-    end           
+    end
 end
 
 function MenuUI:CloseLastList()
@@ -348,13 +348,13 @@ function MenuUI:SetPointer(state)
 end
 
 function MenuUI:KeyReleased(o, k)
-    if self.pre_key_released then 
+    if self.pre_key_released then
         if self.pre_key_released(o, k) == false then
             return
         end
     end
     self._scroll_hold = nil
-    self._key_pressed = nil   
+    self._key_pressed = nil
     if not self:Enabled() then
         return
     end
@@ -391,9 +391,9 @@ function MenuUI:KeyPressed(o, k)
         if alive(self._popupmenu) then
 			self._popupmenu:KeyPressed(o, k)
         end
-        
+
         if self._highlighted and self._highlighted.parent:Enabled() and self._highlighted:KeyPressed(o, k) then
-            return 
+            return
         end
         if self.close_key and k == self.close_key:id() then
             self:Disable()
@@ -416,7 +416,7 @@ function MenuUI:SetParam(param, value)
 end
 
 function MenuUI:MouseReleased(o, button, x, y)
-    if self.pre_mouse_release then 
+    if self.pre_mouse_release then
         if self.pre_mouse_release(button, x, y) == false then
             return
         end
@@ -434,7 +434,7 @@ function MenuUI:MouseReleased(o, button, x, y)
 end
 
 function MenuUI:MouseDoubleClick(o, button, x, y)
-    if self.pre_mouse_double_click then 
+    if self.pre_mouse_double_click then
         if self.pre_mouse_double_click(button, x, y) == false then
             return
         end
@@ -451,7 +451,7 @@ local scroll_up = Idstring("mouse wheel up")
 local scroll_down = Idstring("mouse wheel down")
 
 function MenuUI:MousePressed(o, button, x, y)
-    if self.pre_mouse_press then 
+    if self.pre_mouse_press then
         if self.pre_mouse_press(button, x, y) == false then
             return
         end
@@ -503,7 +503,7 @@ function MenuUI:ShouldClose()
 end
 
 function MenuUI:MouseMoved(o, x, y)
-    if self.pre_mouse_move then 
+    if self.pre_mouse_move then
         if self.pre_mouse_move(x, y) == false then
             return
         end
@@ -537,7 +537,7 @@ function MenuUI:MouseMoved(o, x, y)
                     return
                 end
             end
-        end        
+        end
     end
     if self.mouse_move then self.mouse_move(x, y) end
 end
@@ -627,14 +627,14 @@ function MenuUI:RemoveItem(item)
     if item._list then
         item._list:Destroy()
 	end
-	
+
 	if item == self._highlighted then
 		self:UnHighlight()
 	end
-	
+
     table.delete(self._menus, item)
     local panel = item:Panel()
-	if alive(panel) then		
+	if alive(panel) then
         panel:parent():remove(panel)
     end
 end

@@ -100,7 +100,7 @@ function WeaponSkinModule:RegisterHook()
 
                 for _, weapon_id in pairs(all_weapons_id) do
                     if weapon_id ~= config.weapon_id then
-                        
+
                         tweak_self.blackmarket.weapon_skins[config.id .. "_universal_" .. weapon_id] = table.merge({
                             name_id = config.name,
                             desc_id = config.desc,

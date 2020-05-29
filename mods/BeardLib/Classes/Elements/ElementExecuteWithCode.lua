@@ -7,11 +7,11 @@ ElementExecuteWithCode = ElementExecuteWithCode or class(CoreMissionScriptElemen
 function ElementExecuteWithCode:on_script_activated()
     self._mission_script:add_save_state_cb(self._id)
 end
- 
+
 function ElementExecuteWithCode:client_on_executed(...)
     self:on_executed(...)
 end
- 
+
 function ElementExecuteWithCode:on_executed(instigator)
     if not self._values.enabled then
         return

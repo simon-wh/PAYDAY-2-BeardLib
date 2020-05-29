@@ -130,6 +130,7 @@ function KeyBindItem:SetCanEdit(CanEdit)
         BeardLib:RemoveUpdater("MenuUIKeyBindUpdate"..tostring(self))
     end
 end
+
 function KeyBindItem:KeyPressed(o, k)
     if k == Idstring("enter") then
         self:SetCanEdit(true)

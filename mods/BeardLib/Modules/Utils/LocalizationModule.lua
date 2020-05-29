@@ -37,9 +37,9 @@ function LocalizationModule:LoadLocalization()
 
     --if it fails, just force the author to fix their errors.
     if not FileIO:Exists(path) then
-        self:Err("JSON file not found! Path %s", path)
+        self:Err("Language file not found! Path %s", path)
     elseif not FileIO:LoadLocalization(path) then
-        self:Err("JSON file has errors and cannot be loaded! Path %s", path)
+        self:Err("Language file has errors and cannot be loaded! Path %s", path)
     end
 end
 

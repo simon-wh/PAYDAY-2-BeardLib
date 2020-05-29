@@ -4,7 +4,7 @@ if F == "huskplayermovement" then
         data.movement.outfit = BeardLib.Utils:CleanOutfitString(data.movement.outfit)
     end)
     Hooks:PostHook(HuskPlayerMovement, "save", "BeardLib.Save", function(self, data)
-        data.movement.outfit = BeardLib.Utils:CleanOutfitString(data.movement.outfit)        
+        data.movement.outfit = BeardLib.Utils:CleanOutfitString(data.movement.outfit)
     end)
 
     --Removes the need of thq material config for custom melee
@@ -20,7 +20,7 @@ if F == "huskplayermovement" then
                         if material.id and material:id() == mtr_cubemap then
                             material:set_render_template(Idstring("generic:CUBE_ENVIRONMENT_MAPPING:DIFFUSE_TEXTURE:NORMALMAP"))
                         else
-                            material:set_render_template(Idstring("generic:DIFFUSE_TEXTURE:NORMALMAP"))                    
+                            material:set_render_template(Idstring("generic:DIFFUSE_TEXTURE:NORMALMAP"))
                         end
                     end
                 else

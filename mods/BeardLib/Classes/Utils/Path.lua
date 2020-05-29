@@ -55,7 +55,6 @@ function Path:Normalize(str)
 	--Clean seperators
 	str = string.gsub(str, ".", {
 		["\\"] = self._separator_char,
-		--["/"] = self._separator_char,
 	})
 
 	str = string.gsub(str, "([%w+]/%.%.)", "")

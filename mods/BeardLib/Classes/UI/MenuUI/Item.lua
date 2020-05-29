@@ -9,7 +9,7 @@ function Item:init(params)
 	self.private = self.private or {}
 	local mitem = getmetatable(self)
 	function mitem:__tostring() --STOP FUCKING RESETING
-		return string.format("[%s][%s] %s", self:alive() and "Alive" or "Dead", tostring(self.type_name), tostring(self.name)) 
+		return string.format("[%s][%s] %s", self:alive() and "Alive" or "Dead", tostring(self.type_name), tostring(self.name))
 	end
 	self:Init()
 	self:PostInit()
@@ -41,7 +41,7 @@ function Item:Init(params)
 	end
 	self:Reposition()
     if self.items then
-		self._list = BeardLib.Items.ContextMenu:new(self, self.parent_panel:layer() + 1000) 
+		self._list = BeardLib.Items.ContextMenu:new(self, self.parent_panel:layer() + 1000)
     end
 end
 
@@ -114,7 +114,7 @@ function Item:InitBGs()
 	self.highlight_bg = self.panel:rect({
 		name = "highlight",
 		color = self.highlight_color,
-		visible = self.highlight_color ~= false, 
+		visible = self.highlight_color ~= false,
 		alpha = self.highlight and 1 or 0,
 		h = self.HYBRID and self.size,
 		halign = "grow",
@@ -127,7 +127,7 @@ function Item:MakeBorder()
 	if not self:alive() then
 		return
 	end
-	
+
 	for _, v in pairs({"left", "top", "right", "bottom"}) do
 		local side = self.panel:child(v)
 		if alive(side) then
@@ -173,14 +173,14 @@ function Item:MakeBorder()
     right:set_visible(vis or self.border_right)
     top:set_visible(vis or self.border_top)
 
-	right:set_rightbottom(self.panel:size())    
+	right:set_rightbottom(self.panel:size())
 	top:set_right(self.panel:w())
 	bottom:set_bottom(self.panel:h())
 
 	if self.title then
 		if self.border_center_as_title then
 			left:set_center_y(self.title:center_y())
-			right:set_center_y(self.title:center_y())	
+			right:set_center_y(self.title:center_y())
 			top:set_center_x(self.title:center_x())
 			bottom:set_center_x(self.title:center_x())
 		end
@@ -198,7 +198,7 @@ function Item:WorkParams(params)
 	self.visible = NotNil(self.visible, true)
 	self:WorkParam("unhighlight_color")
 	self:WorkParam("highlight_color", Color.white:with_alpha(0.1))
-	self:WorkParam("context_background_color", self.background_color, Color.black)	
+	self:WorkParam("context_background_color", self.background_color, Color.black)
 	self:WorkParam("background_color", Color.transparent)
 	self:WorkParam("full_bg_color")
 
@@ -213,7 +213,7 @@ function Item:WorkParams(params)
 	self:WorkParam("foreground", foreground)
 	if self.auto_foreground and self.foreground ~= false then
 		self.foreground = bg:contrast()
-	end	
+	end
 	self:WorkParam("foreground_highlight")
 	if self.auto_foreground and self.foreground_highlight ~= false then
 		self.foreground_highlight = bgh:contrast()
@@ -393,9 +393,9 @@ function Item:UnHighlight()
 		end
 		self.menu._highlighted = nil
 	end
-	self.highlight = false	
+	self.highlight = false
 	if not self:alive() then
-		return 
+		return
 	end
 	self:DoHighlight(false)
 end
@@ -438,7 +438,7 @@ function Item:ImageButton(params)
     return self:NewItem(BeardLib.Items.ImageButton:new(_params))
 end
 
-function Item:Button(params) 
+function Item:Button(params)
 	local _params = self:ConfigureItem(params)
 	_params.button_type = true
 	return self:NewItem(BeardLib.Items.Item:new(_params))
@@ -479,7 +479,7 @@ function Item:ToolBar(params)
     params.text = params.text or ""
     local _params = self:ConfigureItem(params)
 	_params.align_method = _params.align_method or "grid"
-	
+
     return self:NewItem(BeardLib.Items.Holder:new(_params))
 end
 
@@ -507,7 +507,7 @@ function Item:ConfigureItem(item, menu)
     item.parent_panel = item.use_main_panel and self.panel or self:ItemsPanel()
     if type(item.index) == "string" then
         local split = string.split(item.index, "|")
-        local wanted_item = self:GetItem(split[2] or split[1]) 
+        local wanted_item = self:GetItem(split[2] or split[1])
         if wanted_item then
             item.index = wanted_item:Index() + (split[1] == "After" and 1 or split[1] == "Before" and -1 or 0)
         else
@@ -599,7 +599,7 @@ function Item:RemoveItem(item)
     table.delete(self._reachable_items, item)
     table.delete(self._my_items, item)
     local panel = item:Panel()
-	if alive(panel) then		
+	if alive(panel) then
         panel:parent():remove(panel)
     end
     if self.auto_align then
@@ -791,7 +791,7 @@ end
 
 function Item:BestAlpha(...)
 	local big
-	
+
 	for _, c in pairs({...}) do
 		if c and c.a and (not big or c.a > big.a) then
 			big = c
@@ -957,7 +957,7 @@ function Item:_SetText(text)
         local offset_x = math.max(self.border_left and self.border_width or 0, self.text_offset[1])
 		local offset_y = math.max(self.border_top and self.border_size or 0, self.text_offset[2])
 		local offset_w = offset_x * 2
-		local offset_h = offset_y * 2		
+		local offset_h = offset_y * 2
 		title:set_position(offset_x, offset_y)
 		title:set_w(self.panel:w() - offset_w)
         local _,_,w,h = title:text_rect()
@@ -986,7 +986,7 @@ function Item:_SetText(text)
 			end
             title:set_size(self.panel:w() - offset_w, self.panel:h() - offset_h)
         end
-		
+
         return true
     end
     return false
@@ -1141,7 +1141,7 @@ function Item:SetVisible(visible, animate, no_align)
 			end
 		elseif self._was_enabled then
 			self:SetEnabled(true)
-		end	
+		end
 		if not no_align and self.parent.auto_align then
 			self.parent:_AlignItems()
 		end
@@ -1178,7 +1178,7 @@ function Item:RunCallback(clbk, ...)
 
 	if final then
 		if self.bg_callbacks then
-			table.insert(self.menu._callbacks, final)		
+			table.insert(self.menu._callbacks, final)
 		else
 			final()
 		end
@@ -1209,7 +1209,7 @@ function Item:TryRendering()
 	local p = self.parent
 
 	local visible = false
-	if alive(self.panel) then		
+	if alive(self.panel) then
 		local y = self.panel:world_y()
 		local b = self.panel:world_bottom()
 
@@ -1318,7 +1318,7 @@ function Item:MousePressedSelfEvent(button, x, y)
 				return true
 			end
 		end
-	
+
 		if self.on_right_click and (not self._list or self.open_list_key ~= mouse_1) then
 			self:RunCallback(self.on_right_click)
 		end
@@ -1348,7 +1348,7 @@ function Item:MousePressedMenuEvent(button, x, y)
                     if self._scroll:scroll(x, y, -1) then
                         if menu._highlighted and menu._highlighted.parent == self then
                             menu._highlighted:MouseMoved(x,y)
-                        end 
+                        end
                         self:CheckItems()
                         return true
                     end
@@ -1356,7 +1356,7 @@ function Item:MousePressedMenuEvent(button, x, y)
                     if self._scroll:scroll(x, y, 1) then
                         if menu._highlighted and menu._highlighted.parent == self then
                             menu._highlighted:MouseMoved(x,y)
-                        end 
+                        end
                         self:CheckItems()
                         return true
                     end
@@ -1409,7 +1409,7 @@ function Item:MouseMovedMenuEvent(x, y)
     return false
 end
 
-function Item:MouseDoubleClick(button, x, y)	
+function Item:MouseDoubleClick(button, x, y)
 	if self:Enabled() then
 		if self.menu_type then
 			for _, item in pairs(self._visible_items) do
@@ -1418,11 +1418,11 @@ function Item:MouseDoubleClick(button, x, y)
 				end
 			end
 		end
-		
+
 		if not self:MouseCheck(true) then
 			return false
 		end
-		
+
 		if self:MouseInside(x,y) and self.on_double_click then
 			self.on_double_click(self, button, x, y)
 			return true

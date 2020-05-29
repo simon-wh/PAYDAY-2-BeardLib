@@ -108,7 +108,7 @@ Hooks:Add(seta_hook, "BeardLibCorrectCustomHeist", function(self, new_data, sett
 			--Localization might be an issue..
 			table.merge(new_data, {
 				custom_level_name = managers.localization:to_upper_text(tweak_data.levels[level_id].name_id),
-				level_id = level_id, 
+				level_id = level_id,
 				job_key = job_key,
 				level_update_key = update.id,
 				level_update_provider = update.provider,

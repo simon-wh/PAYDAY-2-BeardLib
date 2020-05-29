@@ -21,10 +21,10 @@ end
 -- @param string: string to insert
 -- @see StringBuilder
 function StringBuilder:insert(offset, string)
-    self.string = string.sub(self.string, 1, offset - 1) 
+    self.string = string.sub(self.string, 1, offset - 1)
         .. tostring(string)
-        .. string.sub(self.string, offset + 1) 
-    
+        .. string.sub(self.string, offset + 1)
+
     return self
 end
 

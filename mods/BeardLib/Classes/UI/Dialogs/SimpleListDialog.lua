@@ -8,7 +8,7 @@ function SimpleListDialog:init(params, menu)
     params.w = 400
     params.h = 500
     params.size = 24
-    
+
     SimpleListDialog.super.init(self, params, menu)
 end
 
@@ -18,13 +18,13 @@ function SimpleListDialog:_Show(params)
     end
 
     params = params or {}
-    
+
     if self.type_name == SimpleSelectListDialog.type_name then
         self._single_select = params.single_select or false
         self._allow_multi_insert = params.allow_multi_insert or false
         if params.selected_list then
             params.selected_list = clone(params.selected_list)
-        end    
+        end
         self._selected_list = params.selected_list or {}
     end
 
@@ -36,13 +36,13 @@ function SimpleListDialog:_Show(params)
     local s = self._menu.size
     local bs = s + self._menu:OffsetX()
     local tw = self._menu.w - (bs * 2)
-    
+
     self._menu:TextBox({
         name = "Search",
         w = tw,
         control_slice = 0.98,
         text = false,
-        on_callback = ClassClbk(self, "Search"),  
+        on_callback = ClassClbk(self, "Search"),
         label = "temp"
     })
 
@@ -54,7 +54,7 @@ function SimpleListDialog:_Show(params)
         position = "CenterRight",
         texture = "guis/textures/menu_ui_icons",
         texture_rect = {84, 89, 36, 36},
-        on_callback = ClassClbk(self, "hide", false),  
+        on_callback = ClassClbk(self, "hide", false),
         label = "temp"
     })
 
@@ -68,12 +68,12 @@ function SimpleListDialog:_Show(params)
         end,
         texture = "guis/textures/menu_ui_icons",
         texture_rect = {82, 50, 36, 36},
-        on_callback = ClassClbk(self, "hide", true),  
+        on_callback = ClassClbk(self, "hide", true),
         label = "temp"
     })
     if params.sort ~= false then
-        table.sort(params.list, function(a, b) 
-            return (type(a) == "table" and a.name or a) < (type(b) == "table" and b.name or b) 
+        table.sort(params.list, function(a, b)
+            return (type(a) == "table" and a.name or a) < (type(b) == "table" and b.name or b)
         end)
     end
     self:MakeListItems(params)

@@ -35,7 +35,7 @@ function XAudioInitializer:PlaySound(data)
     end
 
     local directory = self:GetRootAssetsPath() .. data.custom_dir .. "/"
-	
+
     self._sound_buffers[data.name] = XAudio.Buffer:new(directory .. data.file_name)
     self._sound_sources[data.name] = XAudio.Source:new(self._sound_buffers[data.name])
 

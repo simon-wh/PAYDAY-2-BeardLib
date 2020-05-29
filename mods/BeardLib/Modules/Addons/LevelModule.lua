@@ -96,12 +96,12 @@ function LevelModule:AddAssetsDataToTweak(a_self)
     for _, value in ipairs(self._config.assets) do
 		if value._meta == "asset" then
 			local exclude = value.exclude
-			local asset = a_self[value.name] 
+			local asset = a_self[value.name]
 			if asset ~= nil then
 				if (exclude and asset.exclude_stages ~= "all") or (not exclude and asset.stages ~= "all") then
 					asset.exclude_stages = asset.exclude_stages or {}
 					asset.stages = asset.stages or {}
-					table.insert(exclude and asset.exclude_stages or asset.stages, self._config.id)	
+					table.insert(exclude and asset.exclude_stages or asset.stages, self._config.id)
 				end
             else
                 self:Err("Asset %s does not exist! (Map: %s)", value.name, name)

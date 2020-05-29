@@ -123,7 +123,7 @@ function table.search(tbl, search_term, ignore)
 			--This has to be a table and one not in the ignore table (used in script_merge to be able to modify all of the results)
             if type(sub) == "table" and (not ignore or not ignore[sub]) then
 				local valid = true
-				
+
 				--Check if metas match
                 if search_meta._meta then
                     if search_meta._meta == "table" then --If the meta is table then make sure the table has no meta.
@@ -253,7 +253,7 @@ function table.script_merge(base_tbl, new_tbl, ignore)
 								end
 							end
 						end
-						
+
 						if sub.repeat_search then
 							ignore = ignore or {}
 							ignore[found_tbl] = true
@@ -266,7 +266,7 @@ function table.script_merge(base_tbl, new_tbl, ignore)
                             local parent_tbl = table.custom_insert(base_tbl, tbl, sub.insert)
                             if not parent_tbl[tbl._meta] then
                                 parent_tbl[tbl._meta] = tbl
-                            end     
+                            end
                             break
                         end
                     end

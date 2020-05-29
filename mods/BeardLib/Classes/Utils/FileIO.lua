@@ -171,7 +171,7 @@ function FileIO:CopyFilesToAsync(copy_data, callback)
 		else
 			BeardLib:log("[FileIO] Something went wrong when files")
 		end
-	end)	
+	end)
 end
 
 function FileIO:CopyToAsync(path, to_path, callback)
@@ -228,6 +228,7 @@ function FileIO:MakeDir(path)
         os.execute(string.format("mkdir \"%s\"", path))
     end
 end
+
 --Changed to SystemFS because blt's one sometimes fucks up the strings.
 function FileIO:GetFiles(path)
 	if SystemFS and SystemFS.list then
@@ -247,9 +248,8 @@ function FileIO:GetFolders(path)
 	end
 end
 
-function FileIO:ReadScriptDataFrom(...) return self:ReadScriptData(...) end
-function FileIO:WriteScriptDataTo(...) return self:WriteScriptData(...) end
-
+FileIO.ReadScriptDataFrom = FileIO.ReadScriptData
+FileIO.WriteScriptDataTo = FileIO.WriteScriptData
 
 function FileIO:LoadLocalization(path, overwrite)
 	-- Should we overwrite existing localization strings

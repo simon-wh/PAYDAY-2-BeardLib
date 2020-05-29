@@ -6,11 +6,11 @@ ElementPushInstigator = ElementPushInstigator or class(CoreMissionScriptElement.
 function ElementPushInstigator:on_script_activated()
     self._mission_script:add_save_state_cb(self._id)
 end
- 
+
 function ElementPushInstigator:client_on_executed(...)
     self:on_executed(...)
 end
- 
+
 function ElementPushInstigator:on_executed(instigator)
     if not self._values.enabled then
         return

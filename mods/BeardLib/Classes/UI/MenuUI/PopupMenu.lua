@@ -7,8 +7,8 @@ function PopupMenu:InitBasicItem()
 
     self._scroll = ScrollablePanelModified:new(self.menu._panel, "ItemsPanel", {
         layer = self.parent._popup_menu and self.parent._popup_menu:layer() + 100 or 100,
-        padding = 0, 
-        scroll_width = self.scrollbar == false and 0 or self.scroll_width, 
+        padding = 0,
+        scroll_width = self.scrollbar == false and 0 or self.scroll_width,
 		hide_shade = true,
         debug = self.debug,
         change_width = true,
@@ -42,7 +42,7 @@ end
 function PopupMenu:RepositionPopupMenu()
 	local size = (self.font_size or self.size)
 	local offset_y = self.context_screen_offset_y or 32
-    local bottom_h = (self.menu._panel:world_bottom() - self.panel:world_bottom()) - offset_y 
+    local bottom_h = (self.menu._panel:world_bottom() - self.panel:world_bottom()) - offset_y
     local top_h = (self.menu._panel:world_y() - self.panel:world_y()) - offset_y
 
     self:AlignItems()
@@ -86,7 +86,7 @@ function PopupMenu:UpdateCanvas(h)
 	if not self.auto_height and h < self._scroll:scroll_panel():h() then
 		h = self._scroll:scroll_panel():h()
     end
-    
+
     local max_w = 0
     for i, panel in pairs(self.items_panel:children()) do
 		local item = panel:script().menuui_item
@@ -97,7 +97,7 @@ function PopupMenu:UpdateCanvas(h)
 			end
 		end
     end
-    
+
     self._scroll:set_size(max_w + self._scroll._scroll_bar:w(), self._popup_menu:h())
 	self._scroll:set_canvas_size(nil, h)
 end
@@ -141,7 +141,7 @@ function PopupMenu:MousePressedSelfEvent(button, x, y)
     if self.opened and self._popup_menu:inside(x,y) then
         return true
     end
-    
+
     if not self:MouseCheck(true) then
         self:Close()
         return false, self.UNCLICKABLE

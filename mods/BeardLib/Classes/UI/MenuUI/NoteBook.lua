@@ -55,7 +55,7 @@ function NoteBook:RePositionPageCtrls()
             self.bg:set_h(self:TextHeight())
             self.highlight_bg:set_h(self:TextHeight())
         end
-     
+
         if alive(self.arrow_right) then
             local center_y = self.title:center_y()
 
@@ -184,10 +184,10 @@ function NoteBook:UpdatePage()
             item._hidden_by_menu = not visible
         end
     end
-    
+
     self:_AlignItems()
 end
- 
+
 function NoteBook:MousePressed(button, x, y)
     if button == Idstring("0") then
         if self.page < #self._pages and self.arrow_right:inside(x,y) then
@@ -201,8 +201,8 @@ function NoteBook:MousePressed(button, x, y)
     return NoteBook.super.MousePressed(self, button, x, y)
 end
 
-function NoteBook:MouseInside(x, y) 
-    return self.highlight_bg:inside(x,y) 
+function NoteBook:MouseInside(x, y)
+    return self.highlight_bg:inside(x,y)
 end
 
 function NoteBook:MouseMoved(x, y)

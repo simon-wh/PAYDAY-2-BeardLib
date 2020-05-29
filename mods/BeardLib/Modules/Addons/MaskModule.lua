@@ -3,7 +3,7 @@ MaskModule.type_name = "Mask"
 
 function MaskModule:init(...)
     self.clean_table = table.add(clone(self.clean_table), {
-        {param = "pcs", action = "no_number_indexes"}, 
+        {param = "pcs", action = "no_number_indexes"},
         {param = "offsets", action = function(tbl)
             for _, v in pairs(tbl) do
                 v[2] = BeardLib.Utils:normalize_string_value(v[2])

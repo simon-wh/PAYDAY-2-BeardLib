@@ -2,7 +2,7 @@
 Hooks:PreHook(ClientNetworkSession, "on_join_request_reply", "BeardLib_on_join_request_reply_fix_levels", function(self, r, pid, char, lix, dix, od, si, sc, uid, ms, jix, js, alt_js, int_js, xuid, at, s)
     if r == 1 then
         local cb = self._cb_find_game
-        
+
         self._cb_find_game = function(state, ...)
             local function orig_cb(state, ...)
                 if cb then

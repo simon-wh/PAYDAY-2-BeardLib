@@ -40,7 +40,7 @@ function ModAssetsModule:Load()
 		local folder = self._config.folder_name
 		self.folder_names = (type(folder) == "string" and {folder} or BeardLib.Utils:RemoveNonNumberIndexes(folder))
 	else
-		self.folder_names = {table.remove(string.split(path, "/"))} 
+		self.folder_names = {table.remove(string.split(path, "/"))}
 	end
 
 	if self._config.install_directory and self._config.use_local_path ~= true then
@@ -57,9 +57,9 @@ function ModAssetsModule:Load()
 	end
 
     self.version = 0
-    
+
     self._update_manager_id = self._mod.ModPath .."-".. self._name
-    
+
     local download_url = self._config.download_url or (self._config.custom_provider and self._config.custom_provider.download_url) or nil
     self._data = {
         id = (self._config.is_standalone ~= false) and self.id,
@@ -131,7 +131,7 @@ end
 
 function ModAssetsModule:_CheckVersion(force)
     if not self.provider.version_api_url then
-        return 
+        return
     end
     local version_url = ModCore:GetRealFilePath(self.provider.version_api_url, self)
     local loc = managers.localization
@@ -178,7 +178,7 @@ end
 
 function ModAssetsModule:DownloadFailed()
     if self.provider.download_failed_func then
-        self.provider.download_failed_func(self)        
+        self.provider.download_failed_func(self)
     end
 end
 
@@ -209,7 +209,7 @@ function ModAssetsModule:StoreDownloadedAssets(data, id)
             mods_menu:SetModInstallingUpdate(self)
         end
         wait(1)
-        
+
         BeardLib:log("[INFO] Finished downloading assets")
 
         if string.is_nil_or_empty(data) then
@@ -221,9 +221,9 @@ function ModAssetsModule:StoreDownloadedAssets(data, id)
             end
             return
         end
-        
+
         --Without the "nice path" some games have trouble saving the temp file.
-        local temp_zip_path = Application:nice_path(os.tmpname() .. ".zip") 
+        local temp_zip_path = Application:nice_path(os.tmpname() .. ".zip")
         local file = io.open(temp_zip_path, "wb+")
 
         if file then
@@ -233,7 +233,7 @@ function ModAssetsModule:StoreDownloadedAssets(data, id)
             self:log("[ERROR] An error occurred while trying to store the downloaded asset data")
             return
         end
-        
+
         if self._config and not self._config.dont_delete then
             for _, dir in pairs(self.folder_names) do
                 local path = Path:Combine(self.install_directory, dir)
@@ -259,7 +259,7 @@ function ModAssetsModule:StoreDownloadedAssets(data, id)
         if config.done_callback then
             config.done_callback()
         end
-        self.version = self._new_version        
+        self.version = self._new_version
         if config.finish then
             config.finish()
         elseif self._mod then

@@ -41,17 +41,17 @@ function MenuHelperPlus:NewMenu(params)
 	}
 	BeardLib.ScriptExceptions[Idstring(params.fake_path):key()] = BeardLib.ScriptExceptions[Idstring(params.fake_path):key()] or {}
 	BeardLib.ScriptExceptions[Idstring(params.fake_path):key()][Idstring("menu"):key()] = true
-	
+
 	if params.init_node.legends then
-		for i, legend in pairs(params.init_node.legends) do
+		for _, legend in pairs(params.init_node.legends) do
 			self:CreateAndInsertLegendData(self.Menus[params.id].menu_data[1][2], legend)
 		end
 	end
-	
+
 	if params.init_node.merge_data then
 		table.merge(self.Menus[params.id].menu_data[1][2], params.init_node.merge_data)
 	end
-	
+
 	if params.merge_data then
 		table.merge(self.Menus[params.id].menu_data, params.merge_data)
 	end
@@ -99,7 +99,7 @@ function MenuHelperPlus:AddLegend(Menuid, nodename, params)
     if not node then
         return
     end
-    
+
     table.insert(node._legends, {
 		string_id = params.name,
 		pc = params.pc or false,
@@ -146,19 +146,19 @@ function MenuHelperPlus:AddButton(params)
 	if params.merge_data then
 		table.merge(item_params, params.merge_data)
 	end
-    
+
 	local item = node:create_item(data, item_params)
 
 	if params.enabled ~= nil then
 		item:set_enabled( params.enabled )
 	end
-    
+
     if params.position then
         node:insert_item(item, params.position)
     else
         node:add_item(item)
     end
-    
+
     return item
 end
 
@@ -168,7 +168,7 @@ function MenuHelperPlus:AddDivider(params)
         (params.mod or BeardLib):Err("Unable to find node " .. params.node_name)
         return
     end
-    
+
 	local data = {
 		type = "MenuItemDivider",
 		size = params.size or 8,
@@ -178,11 +178,11 @@ function MenuHelperPlus:AddDivider(params)
 	local item_params = {
 		name = params.id,
 	}
-	
+
 	if params.merge_data then
 		table.merge(item_params, params.merge_data)
 	end
-	
+
 	local item = node:create_item( data, item_params )
 	if params.position then
         node:insert_item(item, params.position)
@@ -198,7 +198,7 @@ function MenuHelperPlus:AddToggle(params)
         (params.mod or BeardLib):Err("Unable to find node " .. params.node_name)
         return
     end
-	
+
 	local data = {
 		type = "CoreMenuItemToggle.ItemToggle",
 		{
@@ -241,24 +241,24 @@ function MenuHelperPlus:AddToggle(params)
 		localize = params.localized,
 		localize_help = params.localized_help,
 	}
-	
+
 	if params.merge_data then
 		table.merge(item_params, params.merge_data)
 	end
-	
+
 	local item = node:create_item(data, item_params)
 	item:set_value(params.value and "on" or "off")
 
 	if params.enabled ~= nil then
 		item:set_enabled(params.enabled)
 	end
-	
+
 	if params.position then
         node:insert_item(item, params.position)
     else
         node:add_item(item)
     end
-    
+
     return item
 end
 
@@ -268,7 +268,7 @@ function MenuHelperPlus:AddSlider(params)
         (params.mod or BeardLib):Err("Unable to find node " .. params.node_name)
         return
     end
-	
+
 	local data = {
 		type = "CoreMenuItemSlider.ItemSlider",
 		min = params.min or math.min(params.value, 0),
@@ -290,10 +290,10 @@ function MenuHelperPlus:AddSlider(params)
 	if params.merge_data then
 		table.merge(item_params, params.merge_data)
 	end
-	
+
 	local item = node:create_item(data, item_params)
 	item:set_value(math.clamp(params.value, data.min, data.max) or data.min)
-	
+
 	if params.enabled ~= nil then
 		item:set_enabled( params.enabled )
 	end
@@ -301,13 +301,13 @@ function MenuHelperPlus:AddSlider(params)
 	if params.decimal_count then
 		item:set_decimal_count(params.decimal_count)
 	end
-	
+
 	if params.position then
         node:insert_item(item, params.position)
     else
         node:add_item(item)
 	end
-	
+
     return item
 end
 
@@ -337,11 +337,11 @@ function MenuHelperPlus:AddMultipleChoice(params)
 		localize = params.localized,
         localize_help = params.localized_help,
 	}
-	
+
 	if params.merge_data then
 		table.merge(item_params, params.merge_data)
 	end
-	
+
 	local item = node:create_item(data, item_params)
 	item:set_value( params.value or 1 )
 
@@ -354,7 +354,7 @@ function MenuHelperPlus:AddMultipleChoice(params)
     else
         node:add_item(item)
     end
-    
+
     return item
 end
 
@@ -364,7 +364,7 @@ function MenuHelperPlus:AddKeybinding(params)
         (params.mod or BeardLib):Err("Unable to find node " .. params.node_name)
         return
     end
-	
+
 	local item_params = {
 		name = params.id,
 		text_id = params.title,
@@ -381,7 +381,7 @@ function MenuHelperPlus:AddKeybinding(params)
 	if params.merge_data then
 		table.merge(item_params, params.merge_data)
 	end
-	
+
 	local item = node:create_item({type = "MenuItemCustomizeController"}, item_params)
 
 	if params.position then
@@ -389,7 +389,7 @@ function MenuHelperPlus:AddKeybinding(params)
     else
         node:add_item(item)
     end
-    
+
     return item
 end
 
@@ -399,7 +399,7 @@ function MenuHelperPlus:AddColorButton(params)
         (params.mod or BeardLib):Err("Unable to find node " .. params.node_name)
         return
     end
-	
+
 	local item = node:create_item({type = "MenuItemColorButton"}, table.merge({
 		name = params.id,
 		text_id = params.title,
@@ -422,7 +422,7 @@ function MenuHelperPlus:AddColorButton(params)
     else
         node:add_item(item)
     end
-    
+
     return item
 end
 
@@ -452,7 +452,7 @@ end
 
 Hooks:Register("BeardLibMenuHelperPlusInitMenus")
 
-Hooks:Add("BeardLibMenuHelperPlusInitMenus", "MenuHelperPlusCreateMenus", function(menu_manager) 
+Hooks:Add("BeardLibMenuHelperPlusInitMenus", "MenuHelperPlusCreateMenus", function(menu_manager)
 	for id, Menu in pairs(MenuHelperPlus:GetMenus()) do
 		menu_manager:register_menu(Menu.register_data)
 	end

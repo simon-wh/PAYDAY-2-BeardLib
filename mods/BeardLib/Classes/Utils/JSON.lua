@@ -22,7 +22,7 @@ local function init_token_table (tt)
         return struct
     end
     function struct:to(chars)
-        for i=1,#chars do 
+        for i=1,#chars do
             tt[chars:byte(i)] = value
         end
         return struct
@@ -156,7 +156,7 @@ end
 -- @return boolean True if the object should be JSON encoded, false if it should be ignored.
 function isEncodable(o)
   local t = CoreClass.type_name(o)
-  return (t=='string' or t=='boolean' or t=='number' or t=='nil' or t=='table' or t=='Vector3' or t=='Rotation' or t=='Color' or t=='callback') or (t=='function' and o==null) 
+  return (t=='string' or t=='boolean' or t=='number' or t=='nil' or t=='table' or t=='Vector3' or t=='Rotation' or t=='Color' or t=='callback') or (t=='function' and o==null)
 end
 
 -- keep "named" byte values at hands
@@ -171,7 +171,7 @@ local c_esc,
     c_slash = ("\\elrufas/"):byte(1,9)
 
 -- token tables - tt_doublequote_string = strDoubleQuot, tt_singlequote_string = strSingleQuot
-local 
+local
     tt_object_key,
     tt_object_colon,
     tt_object_value,
@@ -191,14 +191,14 @@ local
 local strchars = "" -- all valid string characters (all except newlines)
 local allchars = "" -- all characters that are valid in comments
 --local escapechar = {}
-for i=0,0xff do 
+for i=0,0xff do
     local c = string.char(i)
     if c~="\n" and c~="\r" then strchars = strchars .. c end
     allchars = allchars .. c
     --escapechar[i] = "\\" .. string.char(i)
 end
 
---[[	
+--[[
 charstounescape = "\"\'\\bfnrt/";
 unescapechars = "\"'\\\b\f\n\r\t\/";
 for i=1,#charstounescape do
@@ -207,7 +207,7 @@ end
 ]]--
 
 -- obj key reader, expects the end of the object or a quoted string as key
-init_token_table (tt_object_key) "object (' or \" or } or , expected)" 
+init_token_table (tt_object_key) "object (' or \" or } or , expected)"
     :link(tt_singlequote_string) :to "'"
     :link(tt_doublequote_string) :to '"'
     :link(true)                  :to "}"
@@ -217,61 +217,61 @@ init_token_table (tt_object_key) "object (' or \" or } or , expected)"
 
 
 -- after the key, a colon is expected (or comment)
-init_token_table (tt_object_colon) "object (: expected)" 
-    :link(tt_object_value)       :to ":"  
-    :link(tt_comment_start)      :to "/" 
+init_token_table (tt_object_colon) "object (: expected)"
+    :link(tt_object_value)       :to ":"
+    :link(tt_comment_start)      :to "/"
     :link(tt_ignore)             :to" \t\r\n"
-    
+
 -- as values, anything is possible, numbers, arrays, objects, boolean, null, strings
 init_token_table (tt_object_value) "object ({ or [ or ' or \" or number or boolean or null expected)"
-    :link(tt_object_key)         :to "{" 
-    :link(tt_array_seperator)    :to "[" 
-    :link(tt_singlequote_string) :to "'" 
-    :link(tt_doublequote_string) :to '"' 
-    :link(tt_numeric)            :to "0123456789.-" 
-    :link(tt_boolean)            :to "tf" 
-    :link(tt_null)               :to "n" 
-    :link(tt_comment_start)      :to "/" 
+    :link(tt_object_key)         :to "{"
+    :link(tt_array_seperator)    :to "["
+    :link(tt_singlequote_string) :to "'"
+    :link(tt_doublequote_string) :to '"'
+    :link(tt_numeric)            :to "0123456789.-"
+    :link(tt_boolean)            :to "tf"
+    :link(tt_null)               :to "n"
+    :link(tt_comment_start)      :to "/"
     :link(tt_ignore)             :to " \t\r\n"
-    
+
 -- token tables for reading strings
 init_token_table (tt_doublequote_string) "double quoted string"
     :link(tt_ignore)             :to (strchars)
     :link(c_esc)                 :to "\\"
     :link(true)                  :to '"'
-    
+
 init_token_table (tt_singlequote_string) "single quoted string"
     :link(tt_ignore)             :to (strchars)
-    :link(c_esc)                 :to "\\" 
+    :link(c_esc)                 :to "\\"
     :link(true)                  :to "'"
-    
+
 -- array reader that expects termination of the array or a comma that indicates the next value
 init_token_table (tt_array_value) "array (, or ] expected)"
-    :link(tt_array_seperator)    :to "," 
+    :link(tt_array_seperator)    :to ","
     :link(true)                  :to "]"
-    :link(tt_comment_start)      :to "/" 
+    :link(tt_comment_start)      :to "/"
     :link(tt_ignore)             :to " \t\r\n"
 
 -- a value, pretty similar to tt_object_value
 init_token_table (tt_array_seperator) "array ({ or [ or ' or \" or number or boolean or null expected)"
-    :link(tt_object_key)         :to "{" 
-    :link(tt_array_seperator)    :to "[" 
-    :link(tt_singlequote_string) :to "'" 
-    :link(tt_doublequote_string) :to '"'  
-    :link(tt_comment_start)      :to "/" 
-    :link(tt_numeric)            :to "0123456789.-" 
-    :link(tt_boolean)            :to "tf" 
-    :link(tt_null)               :to "n" 
+    :link(tt_object_key)         :to "{"
+    :link(tt_array_seperator)    :to "["
+    :link(tt_singlequote_string) :to "'"
+    :link(tt_doublequote_string) :to '"'
+    :link(tt_comment_start)      :to "/"
+    :link(tt_numeric)            :to "0123456789.-"
+    :link(tt_boolean)            :to "tf"
+    :link(tt_null)               :to "n"
     :link(tt_ignore)             :to " \t\r\n"
 
 -- valid number tokens
 init_token_table (tt_numeric) "number"
     :link(tt_ignore)             :to "0123456789.-Ee"
-    
+
 -- once a comment has been started with /, a * is expected
 init_token_table (tt_comment_start) "comment start (* expected)"
     :link(tt_comment_middle)     :to "*"
-    
+
 -- now everything is allowed, watch out for * though. The next char is then checked manually
 init_token_table (tt_comment_middle) "comment end"
     :link(tt_ignore)             :to (allchars)
@@ -279,15 +279,15 @@ init_token_table (tt_comment_middle) "comment end"
 
 function json.custom_decode (js_string)
     local pos = 1 -- position in the string
-    
+
     -- read the next byte value
     local function next_byte () pos = pos + 1 return js_string:byte(pos-1) end
-    
+
     -- in case of error, report the location using line numbers
-    local function location () 
+    local function location ()
         local n = ("\n"):byte()
         local line,lpos = 1,0
-        for i=1,pos do 
+        for i=1,pos do
             if js_string:byte(i) == n then
                 line,lpos = line + 1,1
             else
@@ -296,18 +296,18 @@ function json.custom_decode (js_string)
         end
         return "Line "..line.." character "..lpos
     end
-    
+
     -- debug func
     --local function status (str)
     --	print(str.." ("..s:sub(math.max(1,p-10),p+10)..")")
     --end
-    
+
     -- read the next token, according to the passed token table
     local function next_token (tok)
         while pos <= #js_string do
-            local b = js_string:byte(pos) 
+            local b = js_string:byte(pos)
             local t = tok[b]
-            if not t then 
+            if not t then
                 error("Unexpected character at "..location()..": "..
                     string.char(b).." ("..b..") when reading "..tok.name.."\nContext: \n"..
                     js_string:sub(math.max(1,pos-30),pos+30).."\n"..(" "):rep(pos+math.min(-1,30-pos)).."^")
@@ -317,14 +317,14 @@ function json.custom_decode (js_string)
         end
         error("unexpected termination of JSON while looking for "..tok.name)
     end
-    
+
     -- read a string, double and single quoted ones
     local function read_string (tok)
         local start = pos
         --local returnString = {}
         repeat
             local t = next_token(tok)
-            if t == c_esc then 
+            if t == c_esc then
                 --table.insert(returnString, js_string:sub(start, pos-2))
                 --table.insert(returnString, escapechar[ js_string:byte(pos) ])
                 pos = pos + 1
@@ -335,7 +335,7 @@ function json.custom_decode (js_string)
 
         -- We consider the situation where no escaped chars were encountered separately,
         -- and use the fastest possible return in this case.
-        
+
         --if 0 == #returnString then
         --	return js_string:sub(start,pos-2)
         --else
@@ -344,7 +344,7 @@ function json.custom_decode (js_string)
         --end
         --return js_string:sub(start,pos-2)
     end
-    
+
     local function read_num ()
         local start = pos
         while pos <= #js_string do
@@ -354,22 +354,22 @@ function json.custom_decode (js_string)
         end
         return tonumber(js_string:sub(start-1,pos-1))
     end
-    
+
     -- read_bool and read_null are both making an assumption that I have not tested:
-    -- I would expect that the string extraction is more expensive than actually 
+    -- I would expect that the string extraction is more expensive than actually
     -- making manual comparision of the byte values
-    local function read_bool () 
+    local function read_bool ()
         pos = pos + 3
         local a,b,c,d = js_string:byte(pos-3,pos)
         if a == c_r and b == c_u and c == c_e then return true end
         pos = pos + 1
-        if a ~= c_a or b ~= c_l or c ~= c_s or d ~= c_e then 
-            error("Invalid boolean: "..js_string:sub(math.max(1,pos-5),pos+5)) 
+        if a ~= c_a or b ~= c_l or c ~= c_s or d ~= c_e then
+            error("Invalid boolean: "..js_string:sub(math.max(1,pos-5),pos+5))
         end
         return false
     end
-    
-    -- same as read_bool: only last 
+
+    -- same as read_bool: only last
     local function read_null ()
         pos = pos + 3
         local u,l1,l2 = js_string:byte(pos-3,pos-1)
@@ -377,23 +377,23 @@ function json.custom_decode (js_string)
         error("Invalid value (expected null):"..js_string:sub(pos-4,pos-1)..
             " ("..js_string:byte(pos-1).."="..js_string:sub(pos-1,pos-1).." / "..c_l..")")
     end
-    
+
     local read_object_value,read_object_key,read_array,read_value,read_comment
 
     -- read a value depending on what token was returned, might require info what was used (in case of comments)
     function read_value (t,fromt)
         if t == tt_object_key         then return read_object_key({}) end
         if t == tt_array_seperator    then return read_array({}) end
-        if t == tt_singlequote_string or 
+        if t == tt_singlequote_string or
            t == tt_doublequote_string then return read_string(t) end
         if t == tt_numeric            then return read_num() end
-        if t == tt_boolean            then return read_bool() end	
+        if t == tt_boolean            then return read_bool() end
         if t == tt_null               then return read_null() end
         if t == tt_comment_start      then return read_value(read_comment(fromt)) end
         error("unexpected termination - "..js_string:sub(math.max(1,pos-10),pos+10))
     end
-    
-    -- read comments until something noncomment like surfaces, using the token reader which was 
+
+    -- read comments until something noncomment like surfaces, using the token reader which was
     -- used when stumbling over this comment
     function read_comment (fromt)
         while true do
@@ -408,7 +408,7 @@ function json.custom_decode (js_string)
             end
         end
     end
-    
+
     -- read arrays, empty array expected as o arg
     function read_array (o,i)
         --if not i then status "arr open" end

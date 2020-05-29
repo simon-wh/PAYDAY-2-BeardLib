@@ -102,16 +102,16 @@ function Color:contrast(white, black)
     local col = {r = self.r, g = self.g, b = self.b}
 
     for k, c in pairs(col) do
-        if c <= 0.03928 then 
-            col[k] = c/12.92 
-        else 
-            col[k] = ((c+0.055)/1.055) ^ 2.4 
+        if c <= 0.03928 then
+            col[k] = c/12.92
+        else
+            col[k] = ((c+0.055)/1.055) ^ 2.4
         end
     end
     local L = 0.2126 * col.r + 0.7152 * col.g + 0.0722 * col.b
     local color = white or Color.white
     if L > 0.179 and self.a > 0.5 then
-        color = black or Color.black 
+        color = black or Color.black
     end
     return color
 end
@@ -195,7 +195,7 @@ function play_anim_thread(params, o)
     --last loop
     for param, anim in pairs(set) do
         local v = anim.value
-        local typ = type_name(v)        
+        local typ = type_name(v)
         if typ == "Color" then
             o:set_color(v)
         else
@@ -204,7 +204,7 @@ function play_anim_thread(params, o)
         if after then after() end
     end
 
-    o:script().animating = nil    
+    o:script().animating = nil
     if clbk then
         clbk()
     end
@@ -251,7 +251,7 @@ function play_color(o, color, params)
     local ov = o:color()
     if color then
         o:animate(function()
-            o:script().animating = true        
+            o:script().animating = true
             if wait_time then
                 time = time + wait_time
                 anim_wait(wait_time)
@@ -260,7 +260,7 @@ function play_color(o, color, params)
                 o:set_color(Color(easing(ov.a, color.a, t), easing(ov.r, color.r, t), easing(ov.g, color.g, t), easing(ov.b, color.b, t)))
             end)
             o:set_color(color)
-            o:script().animating = nil            
+            o:script().animating = nil
             if clbk then clbk() end
         end)
     end
@@ -270,7 +270,7 @@ function play_value(o, value_name, value, params)
     if not alive(o) then
         return
     end
-    params = params or {}    
+    params = params or {}
     if playing_anim(o) and params.stop ~= false then
         stop_anim(o)
     end

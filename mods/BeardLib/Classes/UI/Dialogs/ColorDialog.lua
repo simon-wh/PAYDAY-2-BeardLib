@@ -53,7 +53,7 @@ function ColorDialog:_Show(params)
             max = 255,
             on_callback = ClassClbk(self, "update_color"),
             value = self._color[ctrl:lower()] * 255
-        })   
+        })
     end
     self._menu:Slider({
         name = "Alpha",
@@ -67,13 +67,13 @@ function ColorDialog:_Show(params)
     self._menu:Button({
         name = "Apply",
         text = "Apply",
-        on_callback = ClassClbk(self, "hide", true),  
+        on_callback = ClassClbk(self, "hide", true),
         label = "temp"
     })
     self._menu:Button({
         name = "Close",
         text = "Cancel",
-        on_callback = ClassClbk(self, "hide"),  
+        on_callback = ClassClbk(self, "hide"),
         label = "temp"
     })
     self:update_color(self._menu)

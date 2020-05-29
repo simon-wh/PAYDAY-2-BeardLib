@@ -46,8 +46,8 @@ local slider = "slider"
 function MenuInput:BeardLibMousePressed(o, button, x, y)
     local item = self._logic:selected_item()
 
-    if self._current_input_item then 
-        return self._current_input_item:mouse_pressed(button, self:_modified_mouse_pos(x, y)) 
+    if self._current_input_item then
+        return self._current_input_item:mouse_pressed(button, self:_modified_mouse_pos(x, y))
     end
 
     if item then
@@ -56,7 +56,7 @@ function MenuInput:BeardLibMousePressed(o, button, x, y)
                 self._current_item = item
                 local title = item._parameters.text_id
                 BeardLib.managers.dialog:Input():Show({
-                    title = item._parameters.override_title or item._parameters.localize ~= false and managers.localization:text(title) or title, 
+                    title = item._parameters.override_title or item._parameters.localize ~= false and managers.localization:text(title) or title,
                     text = tostring(item._value) or item._parameters.string_value or "",
                     filter = item._value and "number",
                     floats = item._decimal_count ~= 2 and item._decimal_count or nil,
@@ -68,14 +68,14 @@ function MenuInput:BeardLibMousePressed(o, button, x, y)
             elseif item.TYPE == color_button then
                 item:set_editing(true)
                 self._current_input_item = item
-                item:mouse_pressed(button, self:_modified_mouse_pos(x, y)) 
+                item:mouse_pressed(button, self:_modified_mouse_pos(x, y))
                 return true
             end
         elseif button == Idstring("0") and item.TYPE == color_button then
             self._current_item = item
             local title = item._parameters.text_id
             BeardLib.managers.dialog:Color():Show({
-                title = item._parameters.override_title or item._parameters.localize ~= false and managers.localization:text(title) or title, 
+                title = item._parameters.override_title or item._parameters.localize ~= false and managers.localization:text(title) or title,
                 color = item:value(),
                 force = true,
                 no_blur = true,

@@ -1,7 +1,7 @@
 ListDialog = ListDialog or class(MenuDialog)
 ListDialog.type_name = "ListDialog"
 ListDialog._no_reshaping_menu = true
-ListDialog.MAX_ITEMS = 500 
+ListDialog.MAX_ITEMS = 500
 
 function ListDialog:init(params, menu)
     if self.type_name == ListDialog.type_name then
@@ -9,8 +9,8 @@ function ListDialog:init(params, menu)
     end
 
     menu = menu or BeardLib.managers.dialog:Menu()
-    
-    local w,h = params.w, params.h
+
+    local h = params.h
     params.h = nil
 
     ListDialog.super.init(self, table.merge({
@@ -31,7 +31,7 @@ function ListDialog:init(params, menu)
     params.h = h
 
     self._list_menu = menu:Menu(table.merge({
-        name = "List",        
+        name = "List",
         w = 900,
         h = params.h and params.h - self._menu.h or 600,
         size = 18,
@@ -42,7 +42,7 @@ function ListDialog:init(params, menu)
         position = params.position or "Center",
         visible = false,
     }, params))
-    
+
     self._menus = {self._list_menu}
 end
 
@@ -60,9 +60,10 @@ function ListDialog:CreateShortcuts(params)
         on_callback = function(item)
             self._limit = item:Value()
             self:MakeListItems()
-        end,  
+        end,
         label = "temp"
     }):Width()
+
     self._menu:Toggle({
         name = "CaseSensitive",
         w = bw,
@@ -74,9 +75,10 @@ function ListDialog:CreateShortcuts(params)
         on_callback = function(item)
             self._case_sensitive = item:Value()
             self:MakeListItems()
-        end,  
+        end,
         label = "temp"
     })
+
     return offset, bw
 end
 
@@ -92,12 +94,12 @@ function ListDialog:_Show(params)
     self._limit = NotNil(params.limit, true)
     self._list = params.list
     self._max_items = params.max_items or self.MAX_ITEMS
-    
+
     self._params = params
     self:CreateTopMenu(params)
     if params.sort ~= false then
-        table.sort(params.list, function(a, b) 
-            return (type(a) == "table" and a.name or a) < (type(b) == "table" and b.name or b) 
+        table.sort(params.list, function(a, b)
+            return (type(a) == "table" and a.name or a) < (type(b) == "table" and b.name or b)
         end)
     end
     self:MakeListItems(params)
@@ -115,7 +117,7 @@ function ListDialog:CreateTopMenu()
         icon_h = 14,
         texture = "guis/textures/menu_ui_icons",
         texture_rect = {84, 89, 36, 36},
-        on_callback = ClassClbk(self, "hide"),  
+        on_callback = ClassClbk(self, "hide"),
         label = "temp"
     })
     self._menu:TextBox({
@@ -128,7 +130,7 @@ function ListDialog:CreateTopMenu()
         value = self._search,
         text = "beardlib_search",
         localized = true,
-        on_callback = ClassClbk(self, "Search"),  
+        on_callback = ClassClbk(self, "Search"),
         label = "temp"
     })
 end
@@ -143,7 +145,7 @@ function ListDialog:SearchCheck(t)
     end
     local match
     for _, s in pairs(self._filter) do
-        match = (self._case_sensitive and string.find(t, s) or not self._case_sensitive and string.find(t:lower(), s:lower())) 
+        match = (self._case_sensitive and string.find(t, s) or not self._case_sensitive and string.find(t:lower(), s:lower()))
     end
     return match
 end
@@ -162,13 +164,13 @@ function ListDialog:MakeListItems(params)
                 break
             end
             local menu = self._list_menu
-            if type(v) == "table" and v.create_group then 
+            if type(v) == "table" and v.create_group then
                 menu = groups[v.create_group] or self._list_menu:Group({
                     auto_align = false,
                     name = v.create_group,
                     text = v.create_group,
                     label = "list_items"
-                }) 
+                })
                 groups[v.create_group] = menu
             end
             menu:Button(table.merge(type(v) == "table" and v or {}, {
@@ -183,13 +185,13 @@ function ListDialog:MakeListItems(params)
             }))
         end
     end
-    
+
     self:show_dialog()
     self._list_menu:AlignItems(true)
 end
 
 function ListDialog:ReloadInterface()
-    self._list_menu:AlignItems(true)    
+    self._list_menu:AlignItems(true)
 end
 
 function ListDialog:Search(item)

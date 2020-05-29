@@ -233,7 +233,7 @@ function Utils:CleanOutfitString(str, is_henchman)
 			local melee = tweak_data.blackmarket.melee_weapons[list.melee_weapon]
 			if melee and melee.custom then
 				local based_on = melee.based_on
-				local melee_tweak = tweak_data.upgrades.definitions[based_on] 
+				local melee_tweak = tweak_data.upgrades.definitions[based_on]
 				if not melee_tweak or (melee_tweak.dlc and not managers.dlc:is_dlc_unlocked(melee_tweak.dlc)) then
 					based_on = nil
 				end
@@ -250,7 +250,7 @@ function Utils:CleanOutfitString(str, is_henchman)
 
 	local player_style = tweak_data.blackmarket.player_styles[list.player_style]
 	if player_style then
-		-- Got to do the checks individually, otherwise we can't have custom variations on non custom outfits. 
+		-- Got to do the checks individually, otherwise we can't have custom variations on non custom outfits.
 		if player_style.custom then
 			local based_on = player_style.based_on
 			local dlc = player_style.global_value and managers.dlc:global_value_to_dlc(player_style.global_value)
@@ -317,7 +317,7 @@ function Utils:StringToValue(str, global_tbl, silent)
     local global_tbl = global_tbl or _G
     if string.find(str, "%.") then
         local global_tbl_split = string.split(str, "[.]")
-        
+
         for _, str in pairs(global_tbl_split) do
             global_tbl = rawget(global_tbl, str)
             if not global_tbl then
@@ -336,7 +336,7 @@ function Utils:StringToValue(str, global_tbl, silent)
             return nil
         end
     end
-    
+
     return global_tbl
 end
 

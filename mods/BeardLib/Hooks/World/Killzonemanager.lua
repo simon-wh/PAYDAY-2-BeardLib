@@ -27,7 +27,7 @@ function KillzoneManager:update(t, dt)
 					self:_deal_fire_damage(data.unit)
 				end
 			elseif data.type == "kill" then
-				self:_deal_kill_damage(data.unit)		
+				self:_deal_kill_damage(data.unit)
 			end
 		end
 	end

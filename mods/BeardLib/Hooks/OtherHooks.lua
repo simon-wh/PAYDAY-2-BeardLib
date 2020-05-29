@@ -113,7 +113,7 @@ elseif F == "setup" then
 		Hooks:Call("BeardLibSetupUnloadPackages", self)
 	end)
 elseif F == "missionmanager" then
-	for _, name in ipairs(BeardLib.config.mission_elements) do 
+	for _, name in ipairs(BeardLib.config.mission_elements) do
 		dofile(Path:Combine(BeardLib.config.classes_dir, "Elements", "Element"..name..".lua"))
 	end
 
