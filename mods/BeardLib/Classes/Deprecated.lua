@@ -1,17 +1,16 @@
-function Deprected()
+function Deprecated()
     BeardLib:log("%s is a deprecated function and does nothing anymore.",debug.getinfo(2).name)
 end
 
 --Same thing
 BeardLib.Utils.Math = {}
-BeardLib.managers = {}
 BeardLib.modules = BeardLib.Modules
 
 function BeardLib.Utils.Math:Round(val, dp) return math.round_with_precision(val, dp) end
-QuickAnim = {Play = Deprected, Work = Deprected, Stop = Deprected, Working = Deprected, WorkColor = Deprected}
-ModManager = {RegisterHook = Deprected, RegisterKeybind = Deprected, RegisterLibrary = Deprected}
-math.QuaternionToEuler = Deprected
-math.EulerToQuarternion = Deprected
+QuickAnim = {Play = Deprecated, Work = Deprecated, Stop = Deprecated, Working = Deprecated, WorkColor = Deprecated}
+ModManager = {RegisterHook = Deprecated, RegisterKeybind = Deprecated, RegisterLibrary = Deprecated}
+math.QuaternionToEuler = Deprecated
+math.EulerToQuarternion = Deprecated
 
 -- kept for compatibility with mods designed for older BeardLib versions --
 function BeardLib:ReplaceScriptData(replacement, replacement_type, target_path, target_ext, options)
@@ -20,15 +19,17 @@ function BeardLib:ReplaceScriptData(replacement, replacement_type, target_path, 
 end
 
 ModAssetUpdateManager = {
-    UpdatesIgnored = Deprected,
-    RegisterUpdate = Deprected,
-    IsReadyForUpdate = Deprected,
-    SetUpdatesIgnored = Deprected,
-    CheckUpdateStatus = Deprected,
-    save_manager_file = Deprected,
-    load_manager_file = Deprected,
-    SetUpdateStatus = Deprected,
-    Update = Deprected
+    UpdatesIgnored = Deprecated,
+    RegisterUpdate = Deprecated,
+    IsReadyForUpdate = Deprecated,
+    SetUpdatesIgnored = Deprecated,
+    CheckUpdateStatus = Deprecated,
+    save_manager_file = Deprecated,
+    load_manager_file = Deprecated,
+    SetUpdateStatus = Deprecated,
+    Update = Deprecated
 }
 
-BeardLib.managers.asset_update  = ModAssetUpdateManager
+BeardLib.managers = {
+    asset_update = ModAssetUpdateManager
+}
