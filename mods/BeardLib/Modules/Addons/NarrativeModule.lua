@@ -1,4 +1,4 @@
-NarrativeModule = NarrativeModule or BeardLib:ModuleClass("Narrative", ItemModuleBase)
+NarrativeModule = NarrativeModule or BeardLib:ModuleClass("narrative", ItemModuleBase)
 NarrativeModule._loose = true
 
 function NarrativeModule:init(...)
