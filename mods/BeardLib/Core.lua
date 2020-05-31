@@ -168,19 +168,26 @@ function BeardLib:Class(inherit, type_name, typ, no_init)
 	return clss
 end
 
-function BeardLib:RegisterClass(name, obj, typ)
+function BeardLib:RegisterClass(name, clss, typ)
 	local types = self.Constants.ClassTypes
 	if typ == types.Manager then
-		self.Managers[name] = obj
+		self:RegisterManager(name, clss)
 	elseif typ == types.Framework then
-		self:RegisterFramework(name, obj)
+		self:RegisterFramework(name, clss)
 	elseif typ == types.Module then
-		self:RegisterModule(name, obj)
+		self:RegisterModule(name, clss)
 	elseif typ == types.Menu then
-		self.Menus[name] = obj
+		self:RegisterMenu(name, clss)
 	end
 end
 
+function BeardLib:RegisterManager(name, clss)
+	self.Managers[name] = clss
+end
+
+function BeardLib:RegisterMenu(name, clss)
+	self.Menus[name] = clss
+end
 function BeardLib:RegisterModule(key, module)
 	if not key or type(key) ~= "string" then
 		self:log("[ERROR] BeardLib:RegisterModule parameter #1, string expected got %s", key and type(key) or "nil")
