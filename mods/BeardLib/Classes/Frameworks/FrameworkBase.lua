@@ -19,17 +19,17 @@ function FrameworkBase:init()
 	self._sorted_mods = {}
 	self._waiting_to_load = {}
 
+	-- Deprecated, try not to use.
+	if self.type_name == AddFramework.type_name then
+		BeardLib.Frameworks.base = self
+		BeardLib.managers.BaseFramework = self
+	end
+
 	Hooks:Add("BeardLibRequireHook", self.type_name.."_framework_require", function(post, file)
 		self:CheckModQueue(post, file)
 	end)
 
 	self:Load()
-
-	-- Deprecated, try not to use.
-    if self.type_name == AddFramework.type_name then
-        BeardLib.Frameworks.base = self
-        BeardLib.managers.BaseFramework = self
-    end
 end
 
 function FrameworkBase:CheckModQueue(post, file)
