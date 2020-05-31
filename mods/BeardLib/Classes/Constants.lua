@@ -68,6 +68,7 @@ BeardLib.Constants = BeardLib.Constants or {
         world_sounds = true,
         xbox_live = true,
         xml = true,
+        blacklist = true
     },
     ClassTypes = {Manager = 1, Framework = 2, Module = 3, Menu = 4}
 }
