@@ -1,7 +1,7 @@
 local peer_send_hook = "NetworkPeerSend"
 
 local NetworkPeerSend = NetworkPeer.send
-local SyncUtils = BeardLib.Utils
+local SyncUtils = BeardLib.Utils.Sync
 local SyncConsts = BeardLib.Constants.Sync
 
 Hooks:Register(peer_send_hook)

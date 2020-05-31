@@ -265,7 +265,7 @@ end
 
 function Sync:Send(peer, name, msg)
     local data_string = LuaNetworking.AllPeersString:gsub("{1}", LuaNetworking.AllPeers):gsub("{2}", name):gsub("{3}", msg)
-    NetworkPeerSend(peer, "send_chat_message", LuaNetworking.HiddenChannel, data_string)
+    peer:send("send_chat_message", LuaNetworking.HiddenChannel, data_string)
 end
 
 local STRING_TO_INDEX = {

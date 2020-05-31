@@ -1,5 +1,6 @@
 local F = table.remove(RequiredScript:split("/"))
 local SyncUtils = BeardLib.Utils.Sync
+local SyncConsts = BeardLib.Constants.Sync
 
 if F == "huskplayermovement" then
     Hooks:PostHook(PlayerMovement, "save", "BeardLib.Save", function(self, data)
