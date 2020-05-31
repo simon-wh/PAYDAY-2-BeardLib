@@ -5,6 +5,7 @@ end
 BeardLib = {
 	Name = "BeardLib",
 	ModPath = ModPath,
+	SavePath = SavePath
 }
 
 function BeardLib:Init()
