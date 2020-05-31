@@ -68,7 +68,7 @@ function Sync:GetJobString()
     return cat
 end
 
-Utils.WeapConv = {"wpn_fps_pis_g17", "wpn_fps_ass_amcar"}
+Sync.WeapConv = {"wpn_fps_pis_g17", "wpn_fps_ass_amcar"}
 
 function Sync:GetBasedOnFactoryId(id, wep)
     wep = wep or tweak_data.weapon[managers.weapon_factory:get_weapon_id_by_factory_id(id)]
