@@ -10,7 +10,7 @@ Hooks:Add(peer_send_hook, "BeardLibCustomHeistFix", function(self, func_name, pa
     if self ~= managers.network:session():local_peer() and SyncUtils:IsCurrentJobCustom() then
         if func_name == "sync_game_settings" or func_name == "sync_lobby_data" then
             SyncUtils:Send(self, SyncConsts.GameSettings, SyncUtils:GetJobString())
-        elseif func_name == "SyncConsts.LobbyLevelId" then
+        elseif func_name == "lobby_sync_update_level_id" then
             SyncUtils:Send(self, SyncConsts.LobbyLevelId, Global.game_settings.level_id)
         elseif func_name == "sync_stage_settings" then
             local glbl = managers.job._global
@@ -33,7 +33,7 @@ Hooks:Add(peer_send_hook, "BeardLibCustomWeaponFix", function(self, func_name, p
             params[1] = SyncUtils:CleanOutfitString(params[1])
         elseif string.ends(func_name, "set_unit") then
 			params[3] = SyncUtils:CleanOutfitString(params[3], params[4] == 0)
-        elseif func_name == "SyncConsts.SetEqippedWeapon" then
+        elseif func_name == "set_equipped_weapon" then
             if params[2] == -1 then
                 local index, data, selection_index = SyncUtils:GetCleanedWeaponData()
                 params[2] = index
