@@ -24,7 +24,6 @@ function Sync:DownloadMap(level_name, job_id, udata, done_callback)
         local map = DownloadCustomMap:new()
         map.provider = provider or {download_url = udata.download_url}
         map.id = udata.id
-        map.steamid = Steam:userid()
         map.level_name = level_name
         map.failed_map_downloaed = SimpleClbk(done_callback, false)
         map.done_map_download = function()
