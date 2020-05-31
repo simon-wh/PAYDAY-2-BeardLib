@@ -1,3 +1,6 @@
+--Thanks to https://github.com/exosite/lua-yaml
+--MIT License.
+
 local table_print_value
 table_print_value = function(value, indent, done)
   indent = indent or 0

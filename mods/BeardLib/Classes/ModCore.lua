@@ -242,7 +242,7 @@ function ModCore:StringToValue(str)
     return BeardLib.Utils:StringToValue(str, global_tbl)
 end
 
-function ModCore:StringToCallback(str)	
+function ModCore:StringToCallback(str)
 	local value = BeardLib.Utils:normalize_string_value(str)
 	if type(value) == "function" then
 		return value

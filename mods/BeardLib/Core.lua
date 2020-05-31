@@ -7,9 +7,6 @@ BeardLib = {
 	ModPath = ModPath,
 }
 
-Hooks:Register("BeardLibPreInit")
-Hooks:Register("BeardLibPostInit")
-
 function BeardLib:Init()
 	Hooks:Call("BeardLibPreInit")
 	Global.beardlib_checked_updates = Global.beardlib_checked_updates or {}
@@ -186,6 +183,7 @@ end
 function BeardLib:RegisterMenu(name, clss)
 	self.Menus[name] = clss
 end
+
 function BeardLib:RegisterModule(key, module)
 	if not key or type(key) ~= "string" then
 		self:log("[ERROR] BeardLib:RegisterModule parameter #1, string expected got %s", key and type(key) or "nil")
@@ -332,6 +330,8 @@ function BeardLib:MigrateModSettings()
 	end
 end
 
+Hooks:Register("BeardLibPreInit")
+Hooks:Register("BeardLibPostInit")
 Hooks:Register("BeardLibAddCustomWeaponModsToWeapons")
 Hooks:Register("BeardLibCreateCustomNodesAndButtons")
 Hooks:Register("BeardLibPostCreateCustomProjectiles")
