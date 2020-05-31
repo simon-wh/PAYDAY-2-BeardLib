@@ -5,7 +5,6 @@ end
 BeardLib = {
 	Name = "BeardLib",
 	ModPath = ModPath,
-	SavePath = SavePath
 }
 
 Hooks:Register("BeardLibPreInit")
@@ -20,7 +19,6 @@ function BeardLib:Init()
 	self._updaters = {}
 	self._errors = {}
 	self._modules = {}
-	self.sequence_mods = {}
 
 	self.Frameworks = {}
 	self.Managers = {}
