@@ -143,7 +143,10 @@ function BeardLibPackageManager:LoadPackageConfig(directory, config, temp, skip_
     end
     if use_clbk and not use_clbk(config) then
         return
-	end
+    end
+
+    local ingame = Global.level_data and Global.level_data.level_id ~= nil
+    local inmenu = not ingame
 
     local loading = {}
     for _, child in ipairs(config) do
@@ -196,6 +199,10 @@ function BeardLibPackageManager:LoadPackageConfig(directory, config, temp, skip_
                     local force = NotNil(child.force, config.force, true)
                     local reload = NotNil(child.reload, config.reload, false)
                     child.unload = NotNil(child.unload, config.unload, true)
+
+                    local is_unit = ids_ext == UNIT_IDS
+                    local dyn_load_game = NotNil(child.load_in_game, config.load_in_game, is_unit and string.ends(path, "_husk") or false)
+                    local dyn_load_menu = NotNil(child.load_in_menu, config.load_in_menu, false)
                     local dyn_load = NotNil(child.load, config.load, false)
 
                     if FileIO:Exists(file_path_ext) then
@@ -209,7 +216,7 @@ function BeardLibPackageManager:LoadPackageConfig(directory, config, temp, skip_
                             end
                         end
                         if load then
-                            if ids_ext == UNIT_IDS then
+                            if is_unit then
 								if child.include_default then --Old
 									Managers.File:AddFileWithCheck(MODEL_IDS, ids_path, file_path.."."..MODEL)
 									Managers.File:AddFileWithCheck(OBJECT_IDS, ids_path, file_path.."."..OBJECT)
@@ -224,7 +231,7 @@ function BeardLibPackageManager:LoadPackageConfig(directory, config, temp, skip_
                             if child.reload then
                                 PackageManager:reload(ids_ext, ids_path)
                             end
-                            if dyn_load then
+                            if dyn_load or (dyn_load_game and ingame) or (dyn_load_menu and not inmenu) then
                                 table.insert(loading, {ids_ext, ids_path, file_path_ext})
 							end
                         end
