@@ -1,6 +1,8 @@
 BeardLib.Utils.Sync = BeardLib.Utils.Sync or {}
 local Sync = BeardLib.Utils.Sync
 
+local sync_game_settings_id = "BeardLib_sync_game_settings"
+
 function Sync:SyncGameSettings(peer_id)
     if Network:is_server() and managers.job:current_job_id() and Global.game_settings.level_id and Global.game_settings.difficulty and (managers.job:current_level_data().custom or managers.job:current_job_data().custom) then
         local data = self:GetJobString()
