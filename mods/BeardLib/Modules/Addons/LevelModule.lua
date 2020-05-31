@@ -68,7 +68,7 @@ function LevelModule:Load()
 end
 
 function LevelModule:AddLevelDataToTweak(l_self)
-	local id = tostring(self._config.id)
+    local id = tostring(self._config.id)
 
     l_self[id] = table.merge(clone(self._config), {
         name_id = self._config.name_id or ("heist_" .. id .. "_name"),

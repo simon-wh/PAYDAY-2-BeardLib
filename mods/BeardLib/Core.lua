@@ -157,7 +157,9 @@ end
 
 function BeardLib:Class(inherit, type_name, typ, no_init)
 	local clss = inherit and class(inherit) or class()
-	clss.type_name = type_name
+	if type_name then
+		clss.type_name = type_name
+	end
 	if no_init then
 		self:RegisterClass(type_name, clss, typ)
 	else
