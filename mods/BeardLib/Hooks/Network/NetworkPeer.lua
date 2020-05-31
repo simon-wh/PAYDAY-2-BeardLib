@@ -1,27 +1,21 @@
-local sync_stage_settings_id = "BeardLib_sync_stage_settings"
-local sync_game_settings_id = "BeardLib_sync_game_settings"
-local lobby_sync_update_level_id = "BeardLib_lobby_sync_update_level_id"
-local send_outfit_id = "BCO" --BeardLib compact outfit
-local set_equipped_weapon = "BSEW" --BeardLib set equipped weapon
-local current_outfit_version = "1.0"
-local current_weapon_version = "2.0"
 local peer_send_hook = "NetworkPeerSend"
 
 local NetworkPeerSend = NetworkPeer.send
 local SyncUtils = BeardLib.Utils
+local SyncConsts = BeardLib.Constants.Sync
 
 Hooks:Register(peer_send_hook)
 
 Hooks:Add(peer_send_hook, "BeardLibCustomHeistFix", function(self, func_name, params)
     if self ~= managers.network:session():local_peer() and SyncUtils:IsCurrentJobCustom() then
         if func_name == "sync_game_settings" or func_name == "sync_lobby_data" then
-            SyncUtils:Send(self, sync_game_settings_id, SyncUtils:GetJobString())
-        elseif func_name == "lobby_sync_update_level_id" then
-            SyncUtils:Send(self, lobby_sync_update_level_id, Global.game_settings.level_id)
+            SyncUtils:Send(self, SyncConsts.GameSettings, SyncUtils:GetJobString())
+        elseif func_name == "SyncConsts.LobbyLevelId" then
+            SyncUtils:Send(self, SyncConsts.LobbyLevelId, Global.game_settings.level_id)
         elseif func_name == "sync_stage_settings" then
             local glbl = managers.job._global
-            local msg = string.format("%s|%s|%s|%s", sync_stage_settings_id, tostring(glbl.current_job.current_stage), tostring(glbl.alternative_stage or 0), tostring(glbl.interupt_stage))
-            SyncUtils:Send(self, lobby_sync_update_level_id, msg)
+            local msg = string.format("%s|%s|%s|%s", SyncConsts.StageSettings, tostring(glbl.current_job.current_stage), tostring(glbl.alternative_stage or 0), tostring(glbl.interupt_stage))
+            SyncUtils:Send(self, SyncConsts.LobbyLevelId, msg)
         elseif string.ends(func_name,"join_request_reply") then
             if params[1] == 1 then
                 params[15] = SyncUtils:GetJobString()
@@ -33,18 +27,18 @@ end)
 Hooks:Add(peer_send_hook, "BeardLibCustomWeaponFix", function(self, func_name, params)
     if self ~= managers.network:session():local_peer() then
         if func_name == "sync_outfit" or string.ends(func_name, "set_unit") then
-            SyncUtils:Send(self, send_outfit_id, SyncUtils:CompactOutfit() .. "|" .. current_outfit_version)
+            SyncUtils:Send(self, SyncConsts.SendOutfit, SyncUtils:CompactOutfit() .. "|" .. SyncConsts.OutfitVersion)
         end
         if func_name == "sync_outfit" then
             params[1] = SyncUtils:CleanOutfitString(params[1])
         elseif string.ends(func_name, "set_unit") then
 			params[3] = SyncUtils:CleanOutfitString(params[3], params[4] == 0)
-        elseif func_name == "set_equipped_weapon" then
+        elseif func_name == "SyncConsts.SetEqippedWeapon" then
             if params[2] == -1 then
                 local index, data, selection_index = SyncUtils:GetCleanedWeaponData()
                 params[2] = index
                 params[3] = data
-                SyncUtils:Send(self, set_equipped_weapon, SyncUtils:BeardLibWeaponString(selection_index) .. "|" .. current_weapon_version)
+                SyncUtils:Send(self, SyncConsts.SetEqippedWeapon, SyncUtils:BeardLibWeaponString(selection_index) .. "|" .. SyncConsts.WeaponVersion)
             else
 				local factory_id = PlayerInventory._get_weapon_name_from_sync_index(params[2])
 				local blueprint = managers.weapon_factory:unpack_blueprint_from_string(factory_id, params[3])
@@ -59,7 +53,7 @@ Hooks:Add(peer_send_hook, "BeardLibCustomWeaponFix", function(self, func_name, p
 						local part = tweak_data.weapon.factory.parts[part_id]
 						if part and part.custom then
                             --If the weapon has custom parts, treat it as a custom weapon.
-							SyncUtils:Send(self, set_equipped_weapon, SyncUtils:BeardLibWeaponString(index) .. "|" .. current_outfit_version)
+							SyncUtils:Send(self, SyncConsts.SetEqippedWeapon, SyncUtils:BeardLibWeaponString(index) .. "|" .. SyncConsts.OutfitVersion)
 							return
 						end
 					end
@@ -78,8 +72,8 @@ function NetworkPeer:send(func_name, ...)
     NetworkPeerSend(self, func_name, unpack(params, 1, params.n))
 end
 
-Hooks:Add("NetworkReceivedData", lobby_sync_update_level_id, function(sender, id, data)
-    if id == lobby_sync_update_level_id then
+Hooks:Add("NetworkReceivedData", SyncConsts.LobbyLevelId, function(sender, id, data)
+    if id == SyncConsts.LobbyLevelId then
         local peer = managers.network:session():peer(sender)
         local rpc = peer and peer:rpc()
         if rpc then
@@ -88,8 +82,8 @@ Hooks:Add("NetworkReceivedData", lobby_sync_update_level_id, function(sender, id
     end
 end)
 
-Hooks:Add("NetworkReceivedData", sync_game_settings_id, function(sender, id, data)
-    if id == sync_game_settings_id then
+Hooks:Add("NetworkReceivedData", SyncConsts.GameSettings, function(sender, id, data)
+    if id == SyncConsts.GameSettings then
         local split_data = string.split(data, "|")
         local level_name = split_data[4]
         local job_id = split_data[1]
@@ -138,8 +132,8 @@ Hooks:Add("NetworkReceivedData", sync_game_settings_id, function(sender, id, dat
     end
 end)
 
-Hooks:Add("NetworkReceivedData", sync_stage_settings_id, function(sender, id, data)
-    if id == sync_stage_settings_id then
+Hooks:Add("NetworkReceivedData", SyncConsts.StageSettings, function(sender, id, data)
+    if id == SyncConsts.StageSettings then
         local split_data = string.split(data, "|")
         local peer = managers.network:session():peer(sender)
         local rpc = peer and peer:rpc()
@@ -155,8 +149,8 @@ Hooks:Add("NetworkReceivedData", sync_stage_settings_id, function(sender, id, da
     end
 end)
 
-Hooks:Add("NetworkReceivedData", send_outfit_id, function(sender, id, data)
-    if id == send_outfit_id then
+Hooks:Add("NetworkReceivedData", SyncConsts.SendOutfit, function(sender, id, data)
+    if id == SyncConsts.SendOutfit then
         local peer = managers.network:session():peer(sender)
         if peer then
             local str = string.split(data, "|")
@@ -165,8 +159,8 @@ Hooks:Add("NetworkReceivedData", send_outfit_id, function(sender, id, data)
     end
 end)
 
-Hooks:Add("NetworkReceivedData", set_equipped_weapon, function(sender, id, data)
-    if id == set_equipped_weapon then
+Hooks:Add("NetworkReceivedData", SyncConsts.SetEqippedWeapon, function(sender, id, data)
+    if id == SyncConsts.SetEqippedWeapon then
         local peer = managers.network:session():peer(sender)
         if peer then
             if data == "" or not data then
@@ -180,7 +174,7 @@ Hooks:Add("NetworkReceivedData", set_equipped_weapon, function(sender, id, data)
 end)
 
 function NetworkPeer:set_equipped_weapon_beardlib(weapon_string, outfit_version)
-    if outfit_version ~= current_weapon_version then
+    if outfit_version ~= SyncConsts.WeaponVersion then
         return false
     end
 
@@ -235,7 +229,7 @@ function NetworkPeer:set_equipped_weapon_beardlib(weapon_string, outfit_version)
 end
 
 function NetworkPeer:set_outfit_string_beardlib(outfit_string, outfit_version)
-    if outfit_version ~= current_outfit_version then --Avoid sync to avoid issues.
+    if outfit_version ~= SyncConsts.OutfitVersion then --Avoid sync to avoid issues.
         return
     end
 
@@ -310,7 +304,7 @@ function NetworkPeer:set_outfit_string(...)
     local a,b,c,d,e = set_outfit_string(self, ...)
 
     if self._last_beardlib_outfit then
-        self:set_outfit_string_beardlib(self._last_beardlib_outfit, current_outfit_version)
+        self:set_outfit_string_beardlib(self._last_beardlib_outfit, SyncConsts.OutfitVersion)
     end
 
     return a,b,c,d,e
