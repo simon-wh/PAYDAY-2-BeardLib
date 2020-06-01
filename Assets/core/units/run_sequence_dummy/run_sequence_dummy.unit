@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<unit name="run_sequence_dummy" type="support_unit" slot="1">
+  <object file="core/units/run_sequence_dummy/run_sequence_dummy" />
+  <movers />
+  <dependencies />
+  <extensions>
+    <extension name="damage" class="UnitDamage" />
+  </extensions>
+  <sounds>
+    <default_soundsource />
+  </sounds>
+</unit>
