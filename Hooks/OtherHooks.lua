@@ -125,23 +125,29 @@ elseif F == "missionmanager" then
 		return add_script(self, data, ...)
 	end
 elseif F == "playerstandard" then
-	--Ignores full reload for weapons that have the tweakdata value set to true. Otherwise, continues with the original function.
+	--Ignores full or regular reload for weapons that have the tweakdata value set to true. Otherwise, continues with the original function.
+	--Based on Custom Weapon Animations Fixes by Pawcio
 	local _start_action_reload = PlayerStandard._start_action_reload
-
 	function PlayerStandard:_start_action_reload(t, ...)
 		local weapon = self._equipped_unit:base()
 		if weapon then
 			local weapon_tweak = weapon:weapon_tweak_data()
-			if weapon_tweak.animations.ignore_fullreload and weapon:can_reload() and weapon:clip_empty() then
+			local anims_tweak = weapon_tweak.animations or {}
+			local ignore_fullreload = anims_tweak.ignore_fullreload
+			local ignore_nonemptyreload = anims_tweak.ignore_nonemptyreload
+			local clip_empty = weapon:clip_empty()
+			if ((ignore_fullreload and clip_empty) or (ignore_nonemptyreload and not clip_empty)) and weapon:can_reload() then
 				weapon:tweak_data_anim_stop("fire")
 
 				local speed_multiplier = weapon:reload_speed_multiplier()
-				local reload_anim = "reload_not_empty"
 				local reload_prefix = weapon:reload_prefix() or ""
-				local reload_name_id = weapon_tweak.animations.reload_name_id or weapon.name_id
+				local reload_name_id = anims_tweak.reload_name_id or weapon.name_id
 
-				self._ext_camera:play_redirect(Idstring(reload_prefix .. "reload_not_empty_" .. reload_name_id), speed_multiplier)
-				self._state_data.reload_expire_t = t + (weapon_tweak.timers.reload_not_empty or weapon:reload_expire_t() or 2.2) / speed_multiplier
+				local expire_t = weapon_tweak.timers.reload_not_empty or weapon:reload_expire_t() or (ignore_fullreload and 2.2 or 2.8)
+				local reload_anim = ignore_fullreload and "reload_not_empty" or "reload_"
+
+				self._ext_camera:play_redirect(Idstring(reload_prefix .. reload_anim .. "_" .. reload_name_id), speed_multiplier)
+				self._state_data.reload_expire_t = t + expire_t / speed_multiplier
 
 				weapon:start_reload()
 
@@ -149,11 +155,40 @@ elseif F == "playerstandard" then
 					weapon:tweak_data_anim_play("reload", speed_multiplier)
 				end
 
-				self._ext_network:send("reload_weapon", 0, speed_multiplier)
+				self._ext_network:send("reload_weapon", ignore_fullreload and 0 or 1, speed_multiplier)
 
 				return
 			end
 		end
 		return _start_action_reload(self, t, ...)
+	end
+
+	--Reload shell by shell.
+	--Based on Custom Weapon Animations Fixes by Pawcio
+	local _start_action_reload_enter = PlayerStandard._start_action_reload_enter
+	function PlayerStandard:_start_action_reload_enter(t, ...)
+		if self._equipped_unit:base():can_reload() then
+			local weapon = self._equipped_unit:base()
+			local tweak_data = weapon:weapon_tweak_data()
+			if tweak_data.animations.reload_shell_by_shell and  self._equipped_unit:base():reload_enter_expire_t()  then
+				local speed_multiplier = self._equipped_unit:base():reload_speed_multiplier()
+				self._ext_camera:play_redirect(Idstring("reload_enter_" .. tweak_data.animations.reload_name_id), speed_multiplier)
+				self._state_data.reload_enter_expire_t = t + self._equipped_unit:base():reload_enter_expire_t() / speed_multiplier
+				self._equipped_unit:base():tweak_data_anim_play("reload_enter", speed_multiplier)
+				return
+			end
+		end
+		return _start_action_reload_enter(self, t, ...)
+	end
+elseif F == "newraycastweaponbase" then
+	--Related to top hook ^
+	--Based on Custom Weapon Animations Fixes by Pawcio
+	local started_reload_empty = NewRaycastWeaponBase.started_reload_empty
+	function NewRaycastWeaponBase:started_reload_empty(...)
+		if self:weapon_tweak_data().animations.ignore_fullreload then
+			return self._started_reload_empty
+		else
+			return started_reload_empty(self, ...)
+		end
 	end
 end
