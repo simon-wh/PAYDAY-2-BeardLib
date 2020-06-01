@@ -183,18 +183,23 @@ Hooks:Add("NetworkReceivedData", SyncConsts.SetEqippedWeapon, function(sender, i
                 peer._last_beardlib_weapon_string = nil
             else
                 local str = string.split(data, "|")
-                peer:set_equipped_weapon_beardlib(str[1], str[2])
+                local in_lobby = local_peer and local_peer:in_lobby() and game_state_machine:current_state_name() ~= "ingame_lobby_menu" and not setup:is_unloading()
+                peer:set_equipped_weapon_beardlib(str[1], str[2], in_lobby) --Handled by a different event.
             end
         end
     end
 end)
 
-function NetworkPeer:set_equipped_weapon_beardlib(weapon_string, outfit_version)
+function NetworkPeer:set_equipped_weapon_beardlib(weapon_string, outfit_version, only_verify)
     if outfit_version ~= SyncConsts.WeaponVersion then
         return false
     end
 
     self._last_beardlib_weapon_string = weapon_string
+
+    if only_verify then
+        return
+    end
 
 	local weapon = SyncUtils:UnpackBeardLibWeaponString(weapon_string)
     if weapon.id then
@@ -239,12 +244,12 @@ function NetworkPeer:set_equipped_weapon_beardlib(weapon_string, outfit_version)
                 local unit = scene._lobby_characters[self._id]
                 if alive(unit) then
 					local rank = self:rank()
-					if rank > 0 and math.random(1,2) == 1 then
+                    if rank > 0 and math.random(1,5) == 1 then
 						scene:_delete_character_weapon(unit, "all")
                         scene:set_character_card(i, rank, unit)
-					else
+                    else
 						local guess_id = id:gsub("_npc", "")
-						if fac[guess_id] ~= nil then
+                        if fac[guess_id] ~= nil then
 							scene:_delete_character_weapon(unit, "all")
 							scene:_select_lobby_character_pose(i, unit, {factory_id = id:gsub("_npc", "")})
 							scene:set_character_equipped_weapon(unit, guess_id, blueprint, "primary", weapon.cosmetics)
@@ -253,7 +258,7 @@ function NetworkPeer:set_equipped_weapon_beardlib(weapon_string, outfit_version)
                 end
             elseif alive(self._unit) then
                 local inv = self._unit:inventory()
-                inv:add_unit_by_factory_name(id, true, true, managers.weapon_factory:blueprint_to_string(id, blueprint), weapon.cosmetics or inv:cosmetics_string_from_peer(peer, weapon.id) or "")
+                inv:add_unit_by_factory_name(id, true, true, managers.weapon_factory:blueprint_to_string(id, blueprint), weapon.data_split[3].cosmetics or inv:cosmetics_string_from_peer(peer, weapon.id) or "")
             end
             return true
         else
@@ -322,7 +327,10 @@ function NetworkPeer:beardlib_reload_outfit()
     local in_lobby = local_peer and local_peer:in_lobby() and game_state_machine:current_state_name() ~= "ingame_lobby_menu" and not setup:is_unloading()
 
 	if managers.menu_scene and in_lobby then
-		managers.menu_scene:set_lobby_character_out_fit(self:id(), self._profile.outfit_string, self:rank())
+        managers.menu_scene:set_lobby_character_out_fit(self:id(), self._profile.outfit_string, self:rank())
+        if self._last_beardlib_weapon_string ~= nil then
+            self:set_equipped_weapon_beardlib(self._last_beardlib_weapon_string, SyncConsts.WeaponVersion)
+        end
 	end
 
 	local kit_menu = managers.menu:get_menu("kit_menu")

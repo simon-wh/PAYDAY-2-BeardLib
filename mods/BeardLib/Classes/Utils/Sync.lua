@@ -418,12 +418,13 @@ function Sync:UnpackBeardLibWeaponString(outfit_string)
 		if v == "nil" or v == "" then data[k] = nil end
 	end
 
-	local cosmetics_string = get(3)
-
-	local data = {
+	local tbl = {
 		id = get(1),
 		blueprint = string.split(get(2), "_"),
+		data_split = data
 	}
+
+	local cosmetics_string = get(3)
 
 	if cosmetics_string then
 		local cosmetics_data = string.split(cosmetics_string, "-")
@@ -437,5 +438,5 @@ function Sync:UnpackBeardLibWeaponString(outfit_string)
 		end
 	end
 
-	return data
+	return tbl
 end

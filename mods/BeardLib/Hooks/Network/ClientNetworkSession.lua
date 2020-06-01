@@ -75,18 +75,3 @@ function ClientNetworkSession:ok_to_load_level(...)
         orig_load_level(self, ...)
     end
 end
-
-Hooks:PostHook(ConnectionNetworkHandler, "sync_outfit", "BeardLibFixLobbyCustomWeapons", function(self, a1, a2, a3, sender)
-    local peer = self._verify_sender(sender)
-
-	if not peer then
-		return
-    end
-
-    local local_peer = managers.network:session() and managers.network:session():local_peer()
-	local in_lobby = local_peer and local_peer:in_lobby() and game_state_machine:current_state_name() ~= "ingame_lobby_menu" and not setup:is_unloading()
-
-    if managers.menu_scene and in_lobby and peer._last_beardlib_weapon_string ~= nil then
-		peer:set_equipped_weapon_beardlib(peer._last_beardlib_weapon_string, SyncConsts.WeaponVersion)
-	end
-end)
