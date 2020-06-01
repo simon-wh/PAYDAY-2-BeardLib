@@ -5,7 +5,9 @@ menu_l_global_value_mod: "Das ist in Modding Community Item!"
 custom_map_title: "Custom Heist: $map"
 custom_map_download_available: "Download verfügbar"
 custom_map_alert: "Custom Heist Warnung"
-custom_map_needs_download: "Du musst den Heist downloaden um fortzufahren, Download starten?\n$url"
+custom_map_needs_download: |
+    Du musst den Heist downloaden um fortzufahren, Download starten?
+    $url
 custom_map_host_old_version: "Download kann nicht gestartet werden, da der Host eine veraltete Version von BeardLib nutzt!"
 custom_map_failed_download: "Download des Heists fehlgeschlagen"
 custom_map_missing_updater: "Der Download des Heists kann nicht gestartet werden, da die Map keinen Updater hat!"

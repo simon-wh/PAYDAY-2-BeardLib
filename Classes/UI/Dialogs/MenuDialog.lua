@@ -196,16 +196,19 @@ function QuickDialog(opt, items)
     local dialog = opt.dialog or Managers.Dialog:Simple()
     opt.dialog = nil
     opt.title = opt.title or "Info"
+    items = items or opt.items
     dialog:Show(table.merge({no = "Close", yes = false, create_items = function(menu)
-        for i, item in pairs(items) do
+        for _, item in ipairs(items) do
             if item[3] == true then
                 dialog._no_callback = item[2]
             end
-            menu:Button({highlight = true, reachable = true, name =  type_name(item) == "table" and item[1] or item, on_callback = function() 
+            menu:Button({highlight = true, reachable = true, name =  type_name(item) == "table" and item[1] or item, on_callback = function()
                 if type(item[2]) == "function" then
                     item[2]()
                 end
-                dialog:hide(false)
+                if item[3] ~= false then
+                    dialog:hide(false)
+                end
             end, type_name(item) == "table" and item[2]})
         end
     end}, opt))

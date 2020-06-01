@@ -5,7 +5,9 @@ menu_l_global_value_mod: "Isso é um item da Comunidade!"
 custom_map_title: "Mapa Customizado: $map"
 custom_map_download_available: "Download disponível"
 custom_map_alert: "Alerta de Mapa Customizado"
-custom_map_needs_download: "Você precisa baixar o mapa antes de entrar, deseja começar o download?\n$url"
+custom_map_needs_download: |
+    Você precisa baixar o mapa antes de entrar, deseja começar o download?
+    $url
 custom_map_host_old_version: "Não pode baixar o mapa porque o Host tá com uma versão antiga de BeardLib!"
 custom_map_failed_download: "Ocorreu um erro durante o download do mapa"
 custom_map_missing_updater: "Não pode começar o download do mapa, porque o mapa não tem o Updater!"

@@ -229,7 +229,7 @@ function ModAssetsModule:StoreDownloadedAssets(data, id)
             return
         end
 
-        if self._config and not self._config.dont_delete then
+        if self._config and not self._config.dont_delete and type(self.folder_names) == "table" then
             for _, dir in pairs(self.folder_names) do
                 local path = Path:Combine(self.install_directory, dir)
                 if not FileIO:CanWriteTo(path) then
@@ -247,7 +247,13 @@ function ModAssetsModule:StoreDownloadedAssets(data, id)
                 end
             end
         end
-        unzip(temp_zip_path, config.custom_install_directory or self.install_directory)
+
+        local dir = config.custom_install_directory or self.install_directory
+        if not dir then
+            FileIO:MakeDir(dir)
+        end
+        unzip(temp_zip_path, dir)
+
         FileIO:Delete(temp_zip_path)
 
         if config.done_callback then
@@ -267,7 +273,7 @@ end
 
 DownloadCustomMap = DownloadCustomMap or class(ModAssetsModule)
 function DownloadCustomMap:init()
-    self._config = {custom_install_directory = BeardLib.config.maps_dir}
+    self._config = {custom_install_directory = BeardLib.Frameworks.Map._directory, dont_delete = true}
 end
 
 function DownloadCustomMap:DownloadFailed()

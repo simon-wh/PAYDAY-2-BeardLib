@@ -36,6 +36,7 @@ function BeardLibGenericDialog:init(manager, data, is_title_outside)
     end
     self._panel_script:set_fade(0)
     self._controller = self._data.controller or manager:_get_controller()
+    local ClassClbk = _G.ClassClbk
     self._confirm_func = ClassClbk(self, "button_pressed_callback")
     self._cancel_func = ClassClbk(self, "dialog_cancel_callback")
     self._resolution_changed_callback = ClassClbk(self, "resolution_changed_callback")

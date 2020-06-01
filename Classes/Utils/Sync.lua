@@ -17,38 +17,56 @@ end
 function Sync:DownloadMap(level_name, job_id, udata, done_callback)
     if not udata then
         return
-    end
-    local msg = managers.localization:text("custom_map_needs_download", {url = udata.download_url or ""})
-    QuickMenuPlus:new(managers.localization:text("custom_map_alert"), msg, {{text = "Yes", callback = function()
-        local provider = ModAssetsModule._providers[udata.provider or (not udata.download_url and "modworkshop") or nil]
-        local map = DownloadCustomMap:new()
-        map.provider = provider or {download_url = udata.download_url}
-        map.id = udata.id
-        map.level_name = level_name
-        map.failed_map_downloaed = SimpleClbk(done_callback, false)
-        map.done_map_download = function()
-            BeardLib.Frameworks.Map:Load()
-            BeardLib.Frameworks.Map:RegisterHooks()
-            managers.job:_check_add_heat_to_jobs()
-            managers.crimenet:find_online_games(Global.game_settings.search_friends_only)
-            if done_callback then
-                done_callback(tweak_data.narrative.jobs[job_id] ~= nil)
-            end
-        end
+	end
+	local provider = ModAssetsModule._providers[udata.provider or "modworkshop"]
+	if provider then
+		local download_url = ""
+		if provider.page_url then
+			download_url = ModCore:GetRealFilePath(provider.page_url, {id = udata.id})
+		end
+		QuickDialog({
+			title = managers.localization:text("custom_map_alert"),
+			message = managers.localization:text("custom_map_needs_download", {url = download_url}),
+			no = "No",
+			no_callback = SimpleClbk(done_callback, false),
+			items = {
+				{"Yes", function ()
+					local map = DownloadCustomMap:new()
+					map.provider = provider
+					map.id = udata.id
+					map.level_name = level_name
+					map.failed_map_downloaed = SimpleClbk(done_callback, false)
+					map.done_map_download = function()
+						BeardLib.Frameworks.Map:Load()
+						BeardLib.Frameworks.Map:RegisterHooks()
+						managers.job:_check_add_heat_to_jobs()
+						managers.crimenet:find_online_games(Global.game_settings.search_friends_only)
+						if done_callback then
+							done_callback(tweak_data.narrative.jobs[job_id] ~= nil)
+						end
+					end
 
-        map:DownloadAssets()
-    end},{text = "No", is_cancel_button = true, callback = function()
-        if done_callback then
-            done_callback(false)
-        end
-    end}}, {force = true})
+					map:DownloadAssets()
+				end},
+				string.len(download_url) > 0 and {"Visit Page", function()
+					if Steam:overlay_enabled() then
+						Steam:overlay_activate("url", download_url)
+					else
+						os.execute("cmd /c start " .. download_url)
+					end
+				end, false} or nil
+			}
+		})
+	elseif done_callback then
+		done_callback(false)
+	end
 end
 
 function Sync:GetUpdateData(data)
     local function parse_network_str(s)
         return s ~= "null" and s or nil
     end
-    local res =  {id = parse_network_str(data[5]), provider = parse_network_str(data[6]), download_url = parse_network_str(data[7])}
+    local res =  {id = parse_network_str(data[5]), provider = parse_network_str(data[6])}
     return table.size(res) > 0 and res or false
 end
 
@@ -65,7 +83,7 @@ function Sync:GetJobString()
             update = mod_assets._data
         end
     end
-    local cat = table.concat({job_id, level_id, Global.game_settings.difficulty, level_name, update.id or "null", update.provider or "null", update.download_url or "null"}, "|")
+    local cat = table.concat({job_id, level_id, Global.game_settings.difficulty, level_name, update.id or "null", update.provider or "null"}, "|")
     return cat
 end
 
