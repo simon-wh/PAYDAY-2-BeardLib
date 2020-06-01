@@ -68,6 +68,7 @@
 			<hook source_file="lib/tweak_data/tweakdata" file="OtherHooks.lua"/>
 			<hook source_file="lib/tweak_data/tweakdatapd2" file="OtherHooks.lua"/>
 			<hook source_file="lib/managers/missionmanager" file="OtherHooks.lua"/>
+			<hook source_file="lib/units/beings/player/states/playerstandard" file="OtherHooks.lua"/>
 
 			<hook source_file="lib/managers/musicmanager" file="MusicManager.lua"/>
 
