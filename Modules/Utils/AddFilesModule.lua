@@ -5,7 +5,7 @@ function AddFilesModule:Load()
     if self._config.auto_generate then
         self:CheckAutoGenerateConfig(self._config.auto_generate)
     end
-    self:LoadPackageConfig(self._directory, self._config)
+    BeardLib.Managers.Package:LoadConfig(self._directory, self._config, self._mod)
 end
 
 --This sorting is important. Units usually depend on other files and so they must be last.
@@ -53,7 +53,7 @@ function AddFilesModule:CheckAutoGenerateConfig(config)
 
         FileIO:WriteScriptData(gen_add, data, "custom_xml")
     end
-    self:LoadPackageConfig(self._directory, data)
+    BeardLib.Managers.Package:LoadConfig(self._directory, data, self._mod)
 end
 
 ---Loops through all files of a path and adds them to the files table.
@@ -136,9 +136,5 @@ function AddFilesModule:LoopFiles(path, files)
 end
 
 function AddFilesModule:Unload()
-    self:UnloadPackageConfig(self._config)
+    BeardLib.Managers.Package:UnloadConfig(self._config)
 end
-
-AddFilesModule.LoadPackageConfig = BeardLibPackageManager.LoadPackageConfig
-AddFilesModule.UnloadPackageConfig = BeardLibPackageManager.UnloadPackageConfig
-AddFilesModule.AddFileWithCheck = BeardLibPackageManager.AddFileWithCheck

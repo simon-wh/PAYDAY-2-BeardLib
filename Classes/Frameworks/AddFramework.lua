@@ -31,7 +31,7 @@ function AddFramework:FindMods()
                 local file = io.open(add_file, "r")
                 local config = ScriptSerializer:from_custom_xml(file:read("*all"))
                 local directory = config.full_directory or Path:Combine(p, config.directory)
-                BeardLib.Managers.Package:LoadPackageConfig(directory, config)
+                BeardLib.Managers.Package:LoadConfig(directory, config)
                 self.add_configs[p] = config
             end
         end

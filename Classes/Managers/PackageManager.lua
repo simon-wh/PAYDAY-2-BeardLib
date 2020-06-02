@@ -40,7 +40,7 @@ function BeardLibPackageManager:LoadPackage(id)
     id = id:key()
     if self.custom_packages[id] then
         local pck = self.custom_packages[id]
-        self:LoadPackageConfig(pck.dir, pck.config)
+        self:LoadConfig(pck.dir, pck.config)
         Global.cmp.custom_loaded_packages[id] = true
         return true
     end
@@ -51,7 +51,7 @@ function BeardLibPackageManager:UnloadPackage(id)
     id = id:key()
     if self.custom_packages[id] then
         local pck = self.custom_packages[id]
-        self:UnloadPackageConfig(pck.config)
+        self:UnloadConfig(pck.config)
         Global.cmp.custom_loaded_packages[id] = false
         return true
     end
@@ -124,9 +124,9 @@ BeardLibPackageManager.TEXTURE_SHORTCUTS = {
 BeardLibPackageManager.EXT_CONVERT = {dds = "texture", png = "texture", tga = "texture", jpg = "texture", bik = "movie"}
 
 local CP_DEFAULT = BeardLib:GetPath() .. "Assets/units/default_cp.cooked_physics"
-function BeardLibPackageManager:LoadPackageConfig(directory, config, temp, skip_use_clbk)
+function BeardLibPackageManager:LoadConfig(directory, config, mod, settings)
     if not (SystemFS and SystemFS.exists) then
-        self:Err("SystemFS does not exist! Custom Packages cannot function without this! Do you have an outdated game version?")
+        self:Err("SystemFS does not exist! Custom packages cannot function without this! Do you have an outdated game version?")
         return
 	end
 
@@ -135,10 +135,16 @@ function BeardLibPackageManager:LoadPackageConfig(directory, config, temp, skip_
 		return
 	end
 
+    local skip_use_clbk, temp = false, false
+    if type(settings) == "table" then
+        skip_use_clbk = settings.skip_use_clbk
+        temp = settings.temp
+    end
+
     if not skip_use_clbk then
         local use_clbk = config.use_clbk or config.load_clbk
-        if use_clbk and self._mod then
-            use_clbk = self._mod:StringToCallback(use_clbk) or nil
+        if use_clbk and mod then
+            use_clbk = mod:StringToCallback(use_clbk) or nil
         end
     end
     if use_clbk and not use_clbk(config) then
@@ -154,12 +160,12 @@ function BeardLibPackageManager:LoadPackageConfig(directory, config, temp, skip_
             local typ = child._meta
             local path = child.path
             local use_clbk = child.use_clbk or child.load_clbk
-            if use_clbk and self._mod then
-                use_clbk = self._mod:StringToCallback(use_clbk) or nil
+            if use_clbk and mod then
+                use_clbk = mod:StringToCallback(use_clbk) or nil
             end
             if not use_clbk or use_clbk(path, typ) then
                 if typ == UNIT_LOAD or typ == ADD then
-                    self:LoadPackageConfig(directory, child, nil, true)
+                    self:LoadConfig(directory, child, mod, {skip_use_clbk = true, temp = temp})
                 elseif BeardLibPackageManager.UNIT_SHORTCUTS[typ] then
                     local ids_path = Idstring(path)
                     local file_path = child.full_path or Path:Combine(directory, child.file_path or path)
@@ -256,6 +262,10 @@ function BeardLibPackageManager:LoadPackageConfig(directory, config, temp, skip_
     end
 end
 
+function BeardLibPackageManager:LoadPackageConfig(directory, config, temp, skip_use_clbk)
+    self:LoadConfig(directory, config, nil, {temp = temp, skip_use_clbk = skip_use_clbk})
+end
+
 function BeardLibPackageManager:Err(...)
     BeardLib:Err(...)
 end
@@ -268,8 +278,8 @@ function BeardLibPackageManager:AddFileWithCheck(ext, path, file)
 	end
 end
 
-function BeardLibPackageManager:UnloadPackageConfig(config)
-    for i, child in ipairs(config) do
+function BeardLibPackageManager:UnloadConfig(config)
+    for _, child in ipairs(config) do
         if type(child) == "table" then
             local typ = child._meta
             local path = child.path
@@ -284,7 +294,7 @@ function BeardLibPackageManager:UnloadPackageConfig(config)
                     Managers.File:RemoveFile(ids_ext, ids_path)
                 end
             elseif typ == "unit_load" or typ == "add" then
-                self:UnloadPackageConfig(child)
+                self:UnloadConfig(child)
             else
                 self:Err("Some node does not contain a definition for both type and path")
             end
@@ -292,8 +302,10 @@ function BeardLibPackageManager:UnloadPackageConfig(config)
     end
 end
 
+BeardLibPackageManager.UnloadPackageConfig = BeardLibPackageManager.UnloadConfig
+
 function BeardLibPackageManager:Unload()
     for _, v in pairs(self.unload_on_restart) do
-        self:UnloadPackageConfig(v)
+        self:UnloadConfig(v)
     end
 end
