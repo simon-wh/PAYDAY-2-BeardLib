@@ -432,6 +432,22 @@ elseif F == "raycastweaponbase" then
             self:play_tweak_data_sound("stop_fire")
         end
     end)
+
+    --Checks the name ID of the weapon to ensure it exists. If it doesn't exist, it searches for a factory that holds this unit
+    --and then accesses its weapon_id parameter (because fuck going through shit upgradestweakdata). If that fails, it falls back to amcar.
+    Hooks:PreHook(RaycastWeaponBase, "_create_use_setups", "BeardLibCheckWeaponExistence", function(self)
+        if not tweak_data.weapon[self._name_id] then
+            local unit_name = self._unit:name()
+            for _, fac in pairs(tweak_data.weapon.factory) do
+                self._name_id = nil
+                if fac.weapon_id and fac.unit and fac.unit:id() == unit_name then
+                    self._name_id = fac.weapon_id
+                    break
+                end
+            end
+            self._name_id = self._name_id or "amcar"
+        end
+    end)
 elseif F == "playermovement" then
     --VR teleporation fix
     if _G.IS_VR then

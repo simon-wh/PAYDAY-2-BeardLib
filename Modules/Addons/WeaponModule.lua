@@ -168,7 +168,7 @@ function WeaponModule:RegisterHook()
         end
 
         config.mod_path = self._mod.ModPath
-
+        config.weapon_id = self._config.weapon.id -- Fuck going over upgrades tweakdata.
         if config.based_on then
             local based_on = f_self[config.based_on] and config.based_on or nil
             f_self[config.id] = based_on and table.merge(deep_clone(f_self[based_on]), config) or config
