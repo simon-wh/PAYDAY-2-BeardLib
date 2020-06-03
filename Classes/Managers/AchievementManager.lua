@@ -323,7 +323,8 @@ function CustomAchievement:init(config, package)
         return
     end
 
-    self._progress_file = self._achievements_folder .. "/" .. tostring(package) .. "/" .. tostring(config.id) .. ".json"
+    local folder = BeardLib.Managers.Achievement._achievements_folder
+    self._progress_file = folder .. "/" .. tostring(package) .. "/" .. tostring(config.id) .. ".json"
 
     self._package_id = package
     self._id = config.id
