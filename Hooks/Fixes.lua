@@ -11,6 +11,7 @@ if F == "weaponfactorymanager" then
         end
         return orig_unpack(self, factory_id, ...)
     end
+    
 
     local orig_has = WeaponFactoryManager.has_perk
     function WeaponFactoryManager:has_perk(perk_name, factory_id, blueprint, ...)
@@ -92,46 +93,30 @@ elseif F == "blackmarketmanager" then
     end
 
     -- Add support to universal skin weapon icons.
-    function BlackMarketManager:get_weapon_icon_path(weapon_id, cosmetics)
+    local get_weapon_icon_path = BlackMarketManager.get_weapon_icon_path
+    function BlackMarketManager:get_weapon_icon_path(weapon_id, cosmetics, ...)
         local use_cosmetics = cosmetics and cosmetics.id and cosmetics.id ~= "nil" and true or false
         local data = use_cosmetics and tweak_data.blackmarket.weapon_skins or tweak_data.weapon
         local id = use_cosmetics and cosmetics.id or weapon_id
         local path = use_cosmetics and "weapon_skins/" or "textures/pd2/blackmarket/icons/weapons/"
-
-        if use_cosmetics and data[id] then
-            if data[id].weapon_ids then
-                if not table.contains(data[id].weapon_ids, weapon_id) then
-                    return self:get_weapon_icon_path(weapon_id, nil)
-                end
-            elseif data[id].weapon_id ~= weapon_id then
-                return self:get_weapon_icon_path(weapon_id, nil)
-            end
-        end
-
-        local texture_path, rarity_path = nil
-
-        if data and id and data[id] then
+        local weapon_tweak = data and id and data[id]
+        if weapon_tweak and weapon_tweak.universal then
             local guis_catalog = "guis/"
-            local bundle_folder = data[id].texture_bundle_folder
+            local bundle_folder = weapon_tweak.texture_bundle_folder
 
             if bundle_folder then
                 guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
             end
 
-            local texture_name = data[id].texture_name or tostring(id)
-            texture_path = guis_catalog .. path .. texture_name
-
+            local rarity_path = nil
             if use_cosmetics then
-                if data[id].universal then
-                    texture_path = guis_catalog .. path .. data[id].universal_id
-                end
-
-                local rarity = data[id].rarity or "common"
+                local rarity = weapon_tweak.rarity or "common"
                 rarity_path = tweak_data.economy.rarities[rarity] and tweak_data.economy.rarities[rarity].bg_texture
             end
+            return guis_catalog .. path .. weapon_tweak.universal_id, rarity_path
+        else
+            return get_weapon_icon_path(self, weapon_id, cosmetics, ...)
         end
-
-        return texture_path, rarity_path
     end
 
     --WARNING: this function has been completely replaced. If anything fucks up, please removed it.
