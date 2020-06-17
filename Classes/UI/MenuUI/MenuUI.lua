@@ -279,8 +279,7 @@ function MenuUI:Disable()
     end
 	self._enabled = false
 	if self._highlighted then self._highlighted:UnHighlight() end
-    if self._openlist then self._openlist:hide() end
-    if self._popupmenu then self._popupmenu:hide() end
+    self:CheckOpenedList()
     managers.mouse_pointer:remove_mouse(self._mouse_id)
 	BeardLib.Managers.MenuUI:CloseMenuEvent()
 	self:RunToggleClbk()
