@@ -626,4 +626,14 @@ elseif F == "coreworldinstancemanager" then
         end
         return instance_data
     end
+elseif F == "groupaitweakdata" then
+    --Fixes a weird crash when exiting instance levels or in general the game not having a sanity check for having the level.
+    local _read_mission_preset = GroupAITweakData._read_mission_preset
+
+    function GroupAITweakData:_read_mission_preset(tweak_data, ...)
+        if not Global.game_settings or not Global.game_settings.level_id or not tweak_data.levels[Global.game_settings.level_id] then
+            return
+        end
+        return _read_mission_preset(self, tweak_data, ...)
+    end
 end
