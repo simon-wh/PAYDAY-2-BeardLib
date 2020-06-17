@@ -35,6 +35,9 @@ function PopupMenu:WorkParams(params)
     self.auto_height = NotNil(self.auto_height, true)
     self:WorkParam("offset", 0)
     self:WorkParam("keep_menu_open", false)
+    self:WorkParam("size_by_text", true)
+    self.inherit_values = self.inherit_values or {}
+    self.inherit_values.size_by_text = NotNil(self.inherit_values.size_by_text, true)
 
     PopupMenu.super.WorkParams(self, params)
 end
