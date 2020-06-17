@@ -7,7 +7,9 @@ function LevelModule:init(...)
             table.remove_condition(tbl, function(v)
                 return v._meta == "default_plans" or v._meta == "start_location"
             end)
-        end}
+        end},
+        {param = "teams", action = "no_number_indexes"},
+        {param = "teams", action = "remove_metas"},
     })
 
     if not LevelModule.super.init(self, ...) then
