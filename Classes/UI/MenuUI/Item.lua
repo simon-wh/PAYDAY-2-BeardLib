@@ -196,6 +196,7 @@ function Item:WorkParams(params)
 	params = params or {}
 	self.enabled = NotNil(self.enabled, true)
 	self.visible = NotNil(self.visible, true)
+
 	self:WorkParam("unhighlight_color")
 	self:WorkParam("highlight_color", Color.white:with_alpha(0.1))
 	self:WorkParam("context_background_color", self.background_color, Color.black)
@@ -290,10 +291,10 @@ function Item:WorkParams(params)
 	end
 
 	self:WorkParam("shrink_width")
-	--self:WorkParam("max_height")
-	--self:WorkParam("min_height")
-	--self:WorkParam("max_width")
-	--self:WorkParam("min_width")
+	self:WorkParamLimited("max_height")
+	self:WorkParamLimited("min_height")
+	self:WorkParamLimited("max_width")
+	self:WorkParamLimited("min_width")
 
 	self.offset = self:ConvertOffset(self.offset)
 	self.text_offset = self:ConvertOffset(self.text_offset, true) or {4,2}
@@ -311,6 +312,16 @@ function Item:WorkParams(params)
 			self.inherit_values.text_offset = self:ConvertOffset(self.inherit_values.text_offset)
 		end
 	end
+
+	self:WorkParamLimited("w")
+	self:WorkParamLimited("h")
+	self:WorkParamLimited("border_top")
+	self:WorkParamLimited("border_bottom")
+	self:WorkParamLimited("border_left")
+	self:WorkParamLimited("boder_right")
+	self:WorkParamLimited("border_color")
+	self:WorkParamLimited("border_visible")
+	self:WorkParamLimited("border_size")
 
 	if not self.initialized then
 		if self.parent ~= self.menu then
@@ -931,6 +942,7 @@ function Item:SetBorder(config)
 	self.border_right = NotNil(config.right, self.border_right)
 	self.border_top = NotNil(config.top, self.border_top)
 	self.border_bottom = NotNil(config.bottom, self.border_bottom)
+
 	self:MakeBorder()
 end
 
@@ -1020,6 +1032,24 @@ function Item:WorkParam(param, ...)
 			v = self.inherit.inherit_values[param]
 		elseif self.inherit.private[param] == nil and self.inherit[param] ~= nil then
 			v = self.inherit[param]
+		else
+			v = NotNil(...)
+		end
+		if type(v) == "table" then
+			v = clone(v)
+		end
+		self[param] = v
+	end
+end
+
+--For values that shouldn't directly inherit like width, height, border stuff, etc.
+function Item:WorkParamLimited(param, ...)
+	if self[param] == nil then
+		local v
+		if self.private[param] ~= nil then
+			v = self.private[param]
+		elseif self.inherit.inherit_values and self.inherit.inherit_values[param] ~= nil then
+			v = self.inherit.inherit_values[param]
 		else
 			v = NotNil(...)
 		end
