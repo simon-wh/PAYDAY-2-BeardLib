@@ -112,8 +112,8 @@ function MenuUI:ReloadInterface(params, shallow)
     end
 end
 
-function MenuUI:ShowDelayedHelp(item)
-    DelayedCalls:Add("ShowItemHelp"..tostring(self), self.show_help_time or 1, function()
+function MenuUI:ShowDelayedHelp(item, force)
+    DelayedCalls:Add("ShowItemHelp"..tostring(self), (force and 0 or nil) or self.show_help_time or 1, function()
         if not alive(item) then
             self:HideHelp()
             return
@@ -176,10 +176,6 @@ end
 
 function MenuUI:Menu(params)
     return self:AddMenu(BeardLib.Items.Menu:new(self:ConfigureMenu(params)))
-end
-
-function MenuUI:Holder(params)
-    return self:AddMenu(BeardLib.Items.Holder:new(self:ConfigureMenu(params, true)))
 end
 
 function MenuUI:Holder(params)

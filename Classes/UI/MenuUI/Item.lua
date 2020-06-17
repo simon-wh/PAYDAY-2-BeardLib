@@ -956,6 +956,13 @@ function Item:SetColor(color)
 	self:_SetText(self.text)
 end
 
+function Item:SetHelp(help)
+	self.help = help
+	if self.menu._showing_help == self then
+		self.menu:ShowDelayedHelp(self)
+	end
+end
+
 function Item:_SetText(text)
 	if self:alive() and self:title_alive() then
 		local title = self.title
