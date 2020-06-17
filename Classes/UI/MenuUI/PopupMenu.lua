@@ -68,7 +68,7 @@ function PopupMenu:RepositionPopupMenu()
     if (x_pos + self._popup_menu:w()) < self.menu._panel:w() then
         self._popup_menu:set_world_x(x_pos)
     else
-        self._popup_menu:set_world_right(x_pos)
+        self._popup_menu:set_world_right(self.panel:world_right())
     end
 
     if normal_pos then
