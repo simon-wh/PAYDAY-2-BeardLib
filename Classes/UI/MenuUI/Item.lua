@@ -817,7 +817,8 @@ end
 --Hopefully this reaches the base MenuUI and not cause a stack overflow xd
 function Item:GetBackground(not_me)
 	local bg = (not not_me or not self.HYBRID) and self.background_color or nil
-	return self:BestAlpha(self.full_bg_color, bg, self.parent:GetBackground(true)) or Color.black
+	local context_bg = not_me and self.type_name == BeardLib.Items.PopupMenu.type_name and self.context_background_color or nil
+	return self:BestAlpha(self.full_bg_color, context_bg, bg, self.parent:GetBackground(true)) or Color.black
 end
 
 function Item:ConvertOffset(offset, no_default)
