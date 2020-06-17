@@ -14,7 +14,8 @@ function ContactModule:AddContactData(narr_self)
         name_id = self._config.name_id,
         description_id = self._config.desc_id,
         package = self._config.package,
-        assets_gui = self._config.assets_gui and self._config.assets_gui:id()
+        assets_gui = self._config.assets_gui and self._config.assets_gui:id(),
+        hidden = self._config.hidden
     }
     if self._config.merge_data then
         table.merge(data, BeardLib.Utils:RemoveMetas(self._config.merge_data, true))
