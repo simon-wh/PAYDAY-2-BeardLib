@@ -14,6 +14,9 @@ function Item:init(params)
 	self:Init()
 	self:PostInit()
 	self.initialized = true
+	if self.MENU then --Fixes 0 items menus not being set to 0 height.
+		self:AlignItemsPost(0)
+	end
 end
 
 function Item:Init(params)
