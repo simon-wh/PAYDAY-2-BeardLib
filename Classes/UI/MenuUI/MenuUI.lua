@@ -136,11 +136,16 @@ function MenuUI:ShowDelayedHelp(item)
             local bottom_h = (mouse_p:world_bottom() - mouse:world_bottom())
             local top_h = (mouse:world_y() - mouse_p:world_y())
             local normal_pos = h <= bottom_h or bottom_h >= top_h
-            self._help:set_world_left(mouse:world_left() + 7)
+            local x_pos = mouse:world_x() + 7
             if normal_pos then
                 self._help:set_world_y(mouse:world_bottom() - 5)
             else
                 self._help:set_world_bottom(mouse:world_y() - 5)
+            end
+            if x_pos + self._help:w() < self._panel:w() + 4 then
+                self._help:set_world_x(x_pos)
+            else
+                self._help:set_world_right(x_pos)
             end
             play_anim(self._help, {set = {alpha = 1}})
             self._showing_help = item
