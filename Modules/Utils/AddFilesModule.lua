@@ -34,7 +34,9 @@ function AddFilesModule:CheckAutoGenerateConfig(config)
     else
         data = self:LoopFiles(directory)
         table.sort(data, function(a, b)
-            return (SORT_TABLE[a._meta] or 1) < (SORT_TABLE[b._meta] or 1)
+            local sort_value_a = a.path:ends("_husk") and 20 or SORT_TABLE[a._meta] or 1
+            local sort_value_b = a.path:ends("_husk") and 20 or SORT_TABLE[b._meta] or 1
+            return sort_value_a < sort_value_b
         end)
 
         local function set_param(key)
