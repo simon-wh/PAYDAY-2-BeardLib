@@ -433,50 +433,6 @@ elseif F == "raycastweaponbase" then
             self._name_id = self._name_id or "amcar"
         end
     end)
-elseif F == "playermovement" then
-    --VR teleporation fix
-    if _G.IS_VR then
-        function PlayerMovement:trigger_teleport(data)
-            if game_state_machine and game_state_machine:current_state() then
-                self._vr_has_teleported = data
-            end
-        end
-
-        function PlayerMovement:update(unit, t, dt)
-            if _G.IS_VR then
-                self:_update_vr(unit, t, dt)
-            end
-
-            self:_calculate_m_pose()
-
-            if self:_check_out_of_world(t) then
-                return
-            end
-
-            if self._vr_has_teleported then
-                managers.player:warp_to(self._vr_has_teleported.position or Vector3(), self._vr_has_teleported.rotation or Rotation())
-                self._vr_has_teleported = nil
-                return
-            end
-
-            self:_upd_underdog_skill(t)
-
-            if self._current_state then
-                self._current_state:update(t, dt)
-            end
-
-            self:update_stamina(t, dt)
-            self:update_teleport(t, dt)
-        end
-    else
-        local trigger = PlayerMovement.trigger_teleport
-        function PlayerMovement:trigger_teleport(data, ...)
-            data.fade_in = data.fade_in or 0
-            data.sustain = data.sustain or 0
-            data.fade_out = data.fade_out or 0
-            return trigger(self, data, ...)
-        end
-    end
 elseif F == "dialogmanager" then
 	Hooks:PreHook(DialogManager, "queue_dialog", "BeardLibQueueDialogFixIds", function(self, id)
 		if id and not managers.dialog._dialog_list[id] then
