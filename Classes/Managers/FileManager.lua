@@ -37,7 +37,7 @@ function BeardLibFileManager:Process(ids_ext, ids_path, name_mt)
 
 	local mods = self.modded_files[k_ext] and self.modded_files[k_ext][k_path]
 	if mods then
-		for id, mdata in pairs(mods) do
+		for _, mdata in pairs(mods) do
 			local func = mdata.clbk or mdata.use_clbk
 			if not func or func() then
 				if mdata.mode and not self.process_modes[mdata.mode] then
@@ -82,18 +82,10 @@ end
 
 local texture_key = "8c5b5ab050e16853"
 function BeardLibFileManager:AddFile(ext, path, file)
-	if not DB.create_entry then
-		return
-	end
-
 	ext = ext:id()
 	path = path:id()
 	local k_ext = ext:key()
-	if BLT.AssetManager then
-		BLT.AssetManager:CreateEntry(path, ext, file)
-	else
-		DB:create_entry(ext, path, file)
-	end
+	BLT.AssetManager:CreateEntry(path, ext, file)
     Global.fm.added_files[k_ext] = Global.fm.added_files[k_ext] or {}
 	Global.fm.added_files[k_ext][path:key()] = file
 	if k_ext == texture_key then
@@ -115,7 +107,9 @@ function BeardLibFileManager:RemoveFile(ext, path)
 	local k_ext = ext:key()
 	local k_path = path:key()
 	if Global.fm.added_files[k_ext] and Global.fm.added_files[k_ext][k_path] then
-		DB:remove_entry(ext, path)
+		if DB.remove_entry then
+			DB:remove_entry(ext, path)
+		end
 		Global.fm.added_files[k_ext][k_path] = nil
 		if k_ext == texture_key then
 			Application:reload_textures({path})
