@@ -384,14 +384,14 @@ end
 function CustomAchievement:GetRankName()
     local rank_id = self:IsHidden() and 0 or self._rank
 
-    local rank = BeardLibAchievementManager:GetRankDetails(rank_id)
+    local rank = BeardLib.Managers.Achievement:GetRankDetails(rank_id)
     return rank.name
 end
 
 function CustomAchievement:GetRankColor()
     local rank_id = self:IsHidden() and 0 or self._rank
 
-    local rank = BeardLibAchievementManager:GetRankDetails(rank_id)
+    local rank = BeardLib.Managers.Achievement:GetRankDetails(rank_id)
     return rank.color
 end
 
