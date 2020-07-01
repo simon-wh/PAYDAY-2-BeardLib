@@ -8,7 +8,7 @@
 PlayerStyleVariantModule = PlayerStyleVariantModule or BeardLib:ModuleClass("PlayerStyleVariant", ItemModuleBase)
 
 function PlayerStyleVariantModule:RegisterHook()
-	if not self._config.id then
+    if not self._config.id then
         self:Err("Cannot add a Player Style Variant, no ID specified.")
         return
     end
@@ -22,7 +22,8 @@ function PlayerStyleVariantModule:RegisterHook()
     self._config.desc_id = self._config.desc_id or self._config.name_id .. "_desc"
 
     -- Super simple, just takes XML and shoves it into the player style stuff.
-    Hooks:Add("BeardLibCreateCustomPlayerStyleVariants", self._config.id .. self._config.player_style_id .. "AddPlayerStyleVariantTweakData", function(ps_self)
+    Hooks:Add("BeardLibCreateCustomPlayerStyleVariants", self._config.id .. self._config.player_style_id .. "AddPlayerStyleVariantTweakData", function(bm_self)
+        local ps_self = bm_self.player_styles
         local config = self._config
 
         if not ps_self[config.player_style_id] then
@@ -37,8 +38,7 @@ function PlayerStyleVariantModule:RegisterHook()
 
         ps_self[config.player_style_id].material_variations = ps_self[config.player_style_id].material_variations or {}
         ps_self[config.player_style_id].material_variations[config.id] = table.merge({
-        	unlocked = true,
-            auto_acquire = true,
+            global_value = self.defaults.global_value,
             custom = true
         }, config)
     end)

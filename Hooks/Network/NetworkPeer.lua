@@ -305,13 +305,17 @@ function NetworkPeer:set_outfit_string_beardlib(outfit_string, outfit_version)
     end
 
     -- First check if the outfit we are trying to find the variant for exists and has variants.
-    if bm.player_styles[old_outfit.player_style] and bm.player_styles[old_outfit.player_style].material_variations then
-        local suit_variation_td = bm.player_styles[old_outfit.player_style].material_variations[new_outfit.suit_variation]
+    if bm.player_styles[new_outfit.player_style] and bm.player_styles[new_outfit.player_style].material_variations then
+        local suit_variation_td = bm.player_styles[new_outfit.player_style].material_variations[new_outfit.suit_variation]
         --Now check that the variant we are looking for exists and is custom.
         if suit_variation_td and suit_variation_td.custom then
             old_outfit.suit_variation = new_outfit.suit_variation
         end
     end
+
+    if bm.gloves[new_outfit.glove_id] and bm.gloves[new_outfit.glove_id].custom then
+        old_outfit.glove_id = new_outfit.glove_id
+    end 
 
     self._profile.outfit_string = SyncUtils:OutfitStringFromList(old_outfit)
 
