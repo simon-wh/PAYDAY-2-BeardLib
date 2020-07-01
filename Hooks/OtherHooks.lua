@@ -191,4 +191,25 @@ elseif F == "newraycastweaponbase" then
 			return started_reload_empty(self, ...)
 		end
 	end
+elseif F == "dlctweakdata" then
+	Hooks:PostHook(DLCTweakData, "init", "BeardLibModDLCGlobalValue", function(self, tweak_data)
+		tweak_data.lootdrop.global_values.mod = {
+			name_id = "bm_global_value_mod",
+			desc_id = "menu_l_global_value_mod",
+			color = Color(255, 59, 174, 254) / 255,
+			dlc = false,
+			chance = 1,
+			value_multiplier = 1,
+			durability_multiplier = 1,
+			track = false,
+			sort_number = -10
+		}
+
+		table.insert(tweak_data.lootdrop.global_value_list_index, "mod")
+
+		self.mod = {
+			free = true,
+			content = {loot_drops = {}, upgrades = {}}
+		}
+	end)
 end

@@ -73,6 +73,8 @@
 
 			<hook source_file="lib/units/beings/player/states/playerstandard" file="OtherHooks.lua"/>
 
+			<hook source_file="lib/tweak_data/dlctweakdata" file="OtherHooks.lua"/>
+
 			<hook source_file="lib/managers/musicmanager" file="MusicManager.lua"/>
 
 			<hooks directory="Network">

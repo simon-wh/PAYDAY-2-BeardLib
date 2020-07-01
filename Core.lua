@@ -78,8 +78,6 @@ function BeardLib:Init()
 
 	self._classes_to_init = nil
 
-	self:RegisterTweak()
-
 	Hooks:Call("BeardLibPostInit")
 end
 
@@ -194,27 +192,6 @@ function BeardLib:RegisterModule(key, module)
 		self:DevLog("Registered module with key %s", key)
 		self.Modules[key] = module
 	end
-end
-
-function BeardLib:RegisterTweak()
-	TweakDataHelper:ModifyTweak({
-		name_id = "bm_global_value_mod",
-		desc_id = "menu_l_global_value_mod",
-		color = Color(255, 59, 174, 254) / 255,
-		dlc = false,
-		chance = 1,
-		value_multiplier = 1,
-		durability_multiplier = 1,
-		track = false,
-		sort_number = -10,
-	}, "lootdrop", "global_values", "mod")
-
-	TweakDataHelper:ModifyTweak({"mod"}, "lootdrop", "global_value_list_index")
-
-	TweakDataHelper:ModifyTweak({
-		free = true,
-		content = {loot_drops = {}, upgrades = {}}
-	}, "dlc", "mod")
 end
 
 function BeardLib:Update(t, dt)
