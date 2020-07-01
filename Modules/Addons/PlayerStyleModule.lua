@@ -25,8 +25,9 @@ function PlayerStyleModule:RegisterHook()
         end
     end
 
-    -- Super simple, just takes XML and shoves it into the player style stuff.
-    Hooks:Add("BeardLibCreateCustomPlayerStyles", self._config.id .. "AddPlayerStyleTweakData", function(ps_self)
+    -- Super simple, just takes XML and shoves it into the player style stuff, and then add some extra glove bs because overkill. :)
+    Hooks:Add("BeardLibCreateCustomPlayerStyles", self._config.id .. "AddPlayerStyleTweakData", function(bm_self)
+        local ps_self = bm_self.player_styles
         local config = self._config
 
         if ps_self[config.id] then
@@ -35,9 +36,18 @@ function PlayerStyleModule:RegisterHook()
         end
 
         ps_self[config.id] = table.merge({
+            texture_bundle_folder = "mods",
+            global_value = self.defaults.global_value,
             unlocked = true,
-            auto_acquire = true,
             custom = true
         }, config)
+
+        -- Extra glove stuff.
+        local default_gloves = config.default_gloves or false
+        bm_self.suit_default_gloves[config.id] = default_gloves
+
+        if config.exclude_glove_adapter then
+            table.insert(bm_self.glove_adapter.player_style_exclude_list, config.id)
+        end
     end)
 end

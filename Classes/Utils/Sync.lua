@@ -248,30 +248,25 @@ function Sync:CleanOutfitString(str, is_henchman)
         --list.grenade = self:GetSpoofedGrenade(list.grenade)
     end
 
-	local player_style = tweak_data.blackmarket.player_styles[list.player_style]
-	if player_style then
-		-- Got to do the checks individually, otherwise we can't have custom variations on non custom outfits.
-		if player_style.custom then
-			local based_on = player_style.based_on
-			local dlc = player_style.global_value and managers.dlc:global_value_to_dlc(player_style.global_value)
-			if dlc and not managers.dlc:is_dlc_unlocked(dlc) then
-				based_on = nil
-			end
-			list.player_style = based_on or "none"
-		end
+    local player_style = tweak_data.blackmarket.player_styles[list.player_style]
+    if player_style then
+        -- Got to do the checks individually, otherwise we can't have custom variations on non custom outfits.
+        if player_style.custom then
+            list.player_style = "none"
+        end
 
-		if player_style.material_variations then
-			local suit_variation = player_style.material_variations[list.suit_variation]
-			if suit_variation and suit_variation.custom then
-				local based_on = suit_variation.based_on
-				local dlc = suit_variation.global_value and managers.dlc:global_value_to_dlc(suit_variation.global_value)
-				if dlc and not managers.dlc:is_dlc_unlocked(dlc) then
-					based_on = nil
-				end
-				list.suit_variation = based_on or "default"
-			end
-		end
-	end
+        if player_style.material_variations then
+            local suit_variation = player_style.material_variations[list.suit_variation]
+            if suit_variation and suit_variation.custom then
+            	list.suit_variation = "default"
+            end
+        end
+    end
+
+    local gloves = tweak_data.blackmarket.gloves[list.glove_id]
+    if gloves and gloves.custom then
+        list.glove_id = "default"
+    end
 
 	return self:OutfitStringFromList(list, is_henchman)
 end
@@ -299,7 +294,8 @@ local STRING_TO_INDEX = {
 	primary_cosmetics = 11,
 	secondary_cosmetics = 12,
 	player_style = 13,
-	suit_variation = 14
+	suit_variation = 14,
+	glove_id = 15
 }
 
 function Sync:UnpackCompactOutfit(outfit_string)
@@ -324,7 +320,8 @@ function Sync:UnpackCompactOutfit(outfit_string)
 		secondary = {factory_id = get("secondary") or "wpn_fps_pis_g17"},
 		melee_weapon = get("melee_weapon") or self._defaults.melee_weapon,
 		player_style = get("player_style") or "none",
-		suit_variation = get("suit_variation") or "none"
+		suit_variation = get("suit_variation") or "default",
+		glove_id = get("glove_id") or "default"
 	}
 
 	for i=1,2 do
@@ -393,6 +390,7 @@ function Sync:CompactOutfit()
 
 	s = s .. " " .. tostring(bm:equipped_player_style())
 	s = s .. " " .. tostring(bm:equipped_suit_variation())
+	s = s .. " " .. tostring(bm:equipped_glove_id())
 
 	return s
 end
