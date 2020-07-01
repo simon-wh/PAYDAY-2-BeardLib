@@ -207,7 +207,7 @@ function BeardLibPackageManager:LoadConfig(directory, config, mod, settings)
                     child.unload = NotNil(child.unload, config.unload, true)
 
                     local is_unit = ids_ext == UNIT_IDS
-                    local dyn_load_game = NotNil(child.load_in_game, config.load_in_game, is_unit and string.ends(path, "_husk") or false)
+                    local dyn_load_game = NotNil(child.load_in_game, config.load_in_game, false)
                     local dyn_load_menu = NotNil(child.load_in_menu, config.load_in_menu, false)
                     local dyn_load = NotNil(child.load, config.load, false)
 
