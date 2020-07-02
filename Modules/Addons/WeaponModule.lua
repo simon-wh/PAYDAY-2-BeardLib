@@ -35,7 +35,7 @@ end
 local default_weap_crew = "glock_18_crew"
 function WeaponModule:GetCrewBasedOn(w_self, based_on)
     w_self = w_self or tweak_data.weapon
-    based_on = based_on or self._config.weapon.based_on
+    based_on = based_on or self._config.weapon.crew_based_on or self._config.weapon.based_on
     local suffix = "_crew"
     if based_on and w_self[based_on..suffix] then
         return based_on..suffix
