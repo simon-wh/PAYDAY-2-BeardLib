@@ -79,7 +79,7 @@ beardlib_update: "Обновление"
 beardlib_waiting_updates: "Доступно(ы) обновление(я)"
 beardlib_mod_enabled: "Включен"
 beardlib_mod_enabled_help: |
-    Определяет, включен ли данный мод. 
+    Определяет, включен ли данный мод.
     Если данный мод выключен, его код не будет исполняться игрой.
     BLT-моды нельзя выключить через BeardLib, однако вы можете их выключить через сам BLT
 beardlib_mod_ignore_updates: "Игнорировать обновления"
@@ -97,3 +97,4 @@ beardlib_show_errors_dialog_help: |
     Примечание: не выключайте данную опцию, если вы используете режим разрабочика.
 beardlib_mod_develop_mode: "Develop Mode"
 beardlib_mod_developer_mode: "By activating develop mode for the mod, auto uppdates will be disabled and things such as auto generated addfiles will refresh each reload."
+beardlib_achieves_no_pkg: "Select a package on the left panel to show the achievements related to it."

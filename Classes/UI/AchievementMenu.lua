@@ -37,8 +37,8 @@ end
 function BeardLibAchievementMenu:InitPanels(parent)
 	self._header = parent:Grid({background_color = self._menu.accent_color, auto_foreground = true, h = 32})
 	self._account_progression = parent:Grid({
-		background_color = Color.black:with_alpha(0.75), 
-		h = 120, 
+		background_color = Color.black:with_alpha(0.75),
+		h = 120,
 		w = parent._panel:w() / 3,
 		foreground = Color("808080"),
 		offset = default_margin,
@@ -62,7 +62,7 @@ function BeardLibAchievementMenu:InitPanels(parent)
 
 	self._achievement_list_header = parent:Holder({
 		background_color = Color.black:with_alpha(0.75),
-		h = 90, 
+		h = 90,
 		w = parent._panel:w() - self._account_progression:Panel():w() - (default_margin * 3),
 		offset = default_margin,
 		position = function(item)
@@ -84,7 +84,8 @@ function BeardLibAchievementMenu:InitPanels(parent)
 	})
 
 	self._package_not_selected_label = self._achievement_panel:Divider({
-		text = "Select a package on the left panel to show the achievements related to it.",
+		text = "beardlib_achieves_no_pkg",
+		localized = true,
 		text_vertical = "center",
 		text_align = "center",
 		position = function(item)

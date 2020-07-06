@@ -13,7 +13,7 @@ end
 
 function DownloadDialog:_Show(params)
 	table.merge(params, {
-        no = params.no or "Close",
+        no = params.no or managers.localization:text("beardlib_close"),
         yes = false,
 	})
     if not InputDialog.super._Show(self, params) then

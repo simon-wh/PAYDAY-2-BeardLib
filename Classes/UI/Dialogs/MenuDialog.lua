@@ -81,7 +81,7 @@ function MenuDialog:CreateCustomStuff(params)
     if params.yes ~= false then
         self._menu:Button({
             name = "Yes",
-            text = params.yes or (params.no and "Yes") or "Close",
+            text = params.yes or (params.no and "Yes") or managers.localization:text("beardlib_close"),
             reachable = true,
             highlight = true,
             on_callback = ClassClbk(self, "hide", true)
@@ -197,7 +197,7 @@ function QuickDialog(opt, items)
     opt.dialog = nil
     opt.title = opt.title or "Info"
     items = items or opt.items
-    dialog:Show(table.merge({no = "Close", yes = false, create_items = function(menu)
+    dialog:Show(table.merge({no = managers.localization:text("beardlib_close"), yes = false, create_items = function(menu)
         for _, item in ipairs(items) do
             if item[3] == true then
                 dialog._no_callback = item[2]
