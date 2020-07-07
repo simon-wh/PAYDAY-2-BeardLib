@@ -18,6 +18,7 @@ function FrameworkBase:init()
 	self._loaded_mods = {}
 	self._sorted_mods = {}
 	self._waiting_to_load = {}
+	self._log_init = BeardLib.Options:GetValue("LogInit")
 
 	-- Deprecated, try not to use.
 	if self.type_name == AddFramework.type_name then
@@ -101,7 +102,9 @@ function FrameworkBase:InitMods()
 		local config = mod._config
 		if not config.post_hook and not config.pre_hook then
 			mod:PreInitModules(self.auto_init_modules)
-			self:log("Initialized Mod: %s", mod.ModPath)
+			if self._log_init then
+				self:log("Initialized Mod: %s", mod.ModPath)
+			end
 		end
 	end
 end

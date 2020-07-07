@@ -408,6 +408,14 @@ function BeardLibModsMenu:OpenSettings()
                 value = BeardLib.Options:GetValue("LogSounds"),
                 on_callback = ClassClbk(self, "SetOption")
             })
+            -- Maybe at some point I'll improve this and make something like a log level but for now we have this.
+            holder:Toggle({
+                name = "LogInit",
+                text = "beardlib_log_init",
+                help = "beardlib_log_init_help",
+                value = BeardLib.Options:GetValue("LogInit"),
+                on_callback = ClassClbk(self, "SetOption")
+            })
             if BeardLib.DevMode then
                 holder:Button({
                     name = "ErrorsDialog",
