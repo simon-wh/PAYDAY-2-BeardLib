@@ -115,18 +115,19 @@ function BeardLibModsMenu:CreateItems(menu)
         position = "CenterxBottomOffset-y",
         auto_align = false
 	})
-	local base = BeardLib.Frameworks.base
+	local base = BeardLib.Frameworks.Base
 	self:AddMod(BeardLib, base)
-	local done_mods = {}
-	for _, framework in pairs(BeardLib.Frameworks) do
-		if not framework.hidden then
-			for _, mod in pairs(framework._loaded_mods) do
+    local done_mods = {}
+    local deprecated = {add = true, map = true, base = true}
+	for name, framework in pairs(BeardLib.Frameworks) do
+		if not framework.hidden and not deprecated[name] then
+            for _, mod in pairs(framework._loaded_mods) do
 				self:AddMod(mod, framework)
 				done_mods[mod] = true
 			end
 		end
 	end
-	--Old mods/Lua based
+    --Old mods/Lua based
 	for _, mod in pairs(BeardLib.Mods) do
 		if not done_mods[mod] then
 			self:AddMod(mod, base)
