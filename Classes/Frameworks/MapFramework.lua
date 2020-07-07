@@ -1,7 +1,7 @@
 MapFramework = MapFramework or BeardLib:Class(FrameworkBase)
 MapFramework._loaded_instances = {}
 MapFramework._ignore_detection_errors = false
-MapFramework._ignore_folders = {"backups", "prefabs"}
+MapFramework._ignore_folders = {backups = true, prefabs = true}
 MapFramework._directory = BeardLib.config.maps_dir
 MapFramework.type_name = "Map"
 MapFramework.menu_color = Color(0.1, 0.6, 0.1)
