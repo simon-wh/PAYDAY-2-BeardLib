@@ -16,7 +16,6 @@ function ModCore:init(config_path, load_modules)
     self._blt_mod = config_path:find(FrameworkBase._format) == 1
 
     if self:GetSetting("Enabled") == false and not self._blt_mod then
-        BeardLib:log("[Info] Mod at path '%s' is disabled!", tostring(ModPath))
         self:ForceDisable()
 	end
 
