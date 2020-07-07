@@ -36,6 +36,7 @@
 				<option name="DevMode" type="boolean" default_value="false"/>
 				<option name="LogSounds" type="boolean" default_value="false"/>
 				<option name="OptimizedMusicLoad" type="boolean" default_value="true"/>
+				<option name="LogInit" type="boolean" default_value="false"/>
 				<option name="ModSettings" type="table"/>
 				<!-- These are not used anymore. All settings are in ModSettings now. Any data inside these will be moved to there. -->
 				<option name="DisabledMods" type="table"/>
