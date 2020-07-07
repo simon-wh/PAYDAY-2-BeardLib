@@ -144,7 +144,7 @@ elseif F == "playerstandard" then
 				local reload_name_id = anims_tweak.reload_name_id or weapon.name_id
 
 				local expire_t = weapon_tweak.timers.reload_not_empty or weapon:reload_expire_t() or (ignore_fullreload and 2.2 or 2.8)
-				local reload_anim = ignore_fullreload and "reload_not_empty" or "reload_"
+				local reload_anim = ignore_fullreload and "reload_not_empty" or "reload"
 
 				self._ext_camera:play_redirect(Idstring(reload_prefix .. reload_anim .. "_" .. reload_name_id), speed_multiplier)
 				self._state_data.reload_expire_t = t + expire_t / speed_multiplier
