@@ -96,7 +96,7 @@ beardlib_show_errors_dialog_help: |
     所以您可更新 Mod 或删除它。
     注意: 您需要启用开发者模式才能使用该功能。
 beardlib_mod_develop_mode: "开发模式"
-beardlib_mod_developer_mode: "若要为此 Mod 激活开发模式，则自动更新将被禁用，并且诸如自动生成的附加文件将在每次重载时刷新。"
-beardlib_achieves_no_pkg: "Select a package on the left panel to show the achievements related to it."
-beardlib_log_init: "Log initialization of mods"
-beardlib_log_init_help: "Logs initialization of mods when they are initialized."
+beardlib_mod_develop_mode_help: "若要为此 Mod 激活开发模式，则自动更新将被禁用，并且诸如自动生成的附加文件将在每次重载时刷新。"
+beardlib_achieves_no_pkg: "在左侧面板选择一个成就包以显示其相关的成就。"
+beardlib_log_init: "Mod 日志初始化"
+beardlib_log_init_help: "当 Mod 初始化时初始化 Mod 的日志。"
