@@ -1,3 +1,11 @@
+Hooks:Register("BeardLibFrameworksInit")
+Hooks:Register("BeardLibFrameworksLoad")
+Hooks:Register("BeardLibFrameworksFindMods")
+Hooks:Register("BeardLibFrameworksSortMods")
+Hooks:Register("BeardLibFrameworksInitMods")
+Hooks:Register("BeardLibFrameworksInitMod")
+Hooks:Register("BeardLibFrameworksFoldersLoop")
+
 FrameworkBase = FrameworkBase or BeardLib:Class()
 
 FrameworkBase._directory = BLTModManager.Constants.mods_directory or "mods/"
@@ -12,6 +20,7 @@ FrameworkBase.type_name = "Base"
 FrameworkBase.menu_color = Color(0.6, 0, 1)
 
 function FrameworkBase:init()
+	Hooks:Call("BeardLibFrameworksInit", self)
 	BeardLib:RegisterFramework(self.type_name, self)
 
 	self._ignored_configs = {}
@@ -63,15 +72,19 @@ function FrameworkBase:CheckModQueue(post, file)
 end
 
 function FrameworkBase:Load()
+	Hooks:Call("BeardLibFrameworksLoad", self)
 	self:FindMods()
 	self:SortMods()
 	self:InitMods()
 end
 
 function FrameworkBase:FindMods()
+	Hooks:Call("BeardLibFrameworksFindMods", self)
+
 	local dirs = FileIO:GetFolders(self._directory)
     if dirs then
-        for _, folder_name in pairs(dirs) do
+		for _, folder_name in pairs(dirs) do
+			Hooks:Call("BeardLibFrameworksFoldersLoop", self, folder_name)
             if not self._ignore_folders[folder_name] then
                 local directory = path:CombineDir(self._directory, folder_name)
                 local main_file = path:Combine(directory, self.main_file_name)
@@ -89,6 +102,8 @@ function FrameworkBase:FindMods()
 end
 
 function FrameworkBase:SortMods()
+	Hooks:Call("BeardLibFrameworksSortMods", self)
+
 	table.sort(self._sorted_mods, function(a,b)
         return a.Priority > b.Priority
 	end)
@@ -98,7 +113,11 @@ function FrameworkBase:SortMods()
 end
 
 function FrameworkBase:InitMods()
+	Hooks:Call("BeardLibFrameworksInitMods", self)
+
 	for _, mod in pairs(self._sorted_mods) do
+		Hooks:Call("BeardLibFrameworksInitMod", self, mod)
+
 		local config = mod._config
 		if not config.post_hook and not config.pre_hook then
 			mod:PreInitModules(self.auto_init_modules)
