@@ -192,5 +192,6 @@
 		<value_node value="OverrideInstigator"/>
 		<value_node value="XAudio"/>
 		<value_node value="BLCustomAchievement"/>
+		<value_node value="AIGroupType"/>
 	</mission_elements>
 </table>
