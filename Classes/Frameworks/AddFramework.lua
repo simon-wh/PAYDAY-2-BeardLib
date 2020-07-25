@@ -16,9 +16,12 @@ function AddFramework:init()
 end
 
 function AddFramework:FindMods()
+	Hooks:Call("BeardLibFrameworksFindMods", self)
+
     local dirs = FileIO:GetFolders(self._directory)
     if dirs then
         for _, dir in pairs(dirs) do
+			Hooks:Call("BeardLibFrameworksFoldersLoop", self, dir)
             local p = path:CombineDir(self._directory, dir)
             local main_file = path:Combine(p, self.main_file_name)
             local add_file = path:Combine(p, self.add_file)
