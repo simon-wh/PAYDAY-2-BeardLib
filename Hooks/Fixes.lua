@@ -636,4 +636,12 @@ elseif F == "groupaitweakdata" then
         end
         return _read_mission_preset(self, tweak_data, ...)
     end
+elseif F == "elementfilter" then
+    --Overkill decided not to add a one down check alongside the difficulties, so here's one, because why not.
+
+    Hooks:PostHook(ElementFilter, "_check_difficulty", "BeardLibFilterOneDownCheck", function(self)
+        if self._values.one_down and Global.game_settings.one_down then
+            return true
+        end
+    end)
 end
