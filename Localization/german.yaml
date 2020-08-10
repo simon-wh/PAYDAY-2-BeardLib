@@ -87,8 +87,10 @@ beardlib_mod_ignore_updates_help: "Soll BeardLib kommende updates von dieser Mod
 beardlib_mod_settings: "Mod Einstellungen - $mod"
 beardlib_mod_by: "Von $author"
 beardlib_updates_download_now: Herunterladen
-beardlib_mod_type_add: Addon
-beardlib_mod_type_map: Map
+beardlib_mod_type_Add: Addon
+beardlib_mod_type_Map: Map
+beardlib_mod_type_Base: "Base"
+beardlib_mod_disabled: "Disabled"
 beardlib_waiting_update: "Update verfügbar"
 beardlib_show_errors_dialog: "Fehlerdialog beim betreten des Hauptmenüs anzeigen"
 beardlib_show_errors_dialog_help: |

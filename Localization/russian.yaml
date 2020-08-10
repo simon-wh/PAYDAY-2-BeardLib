@@ -87,8 +87,10 @@ beardlib_mod_ignore_updates_help: "Стоит ли BeardLib игнорирова
 beardlib_mod_settings: "Настройки мода - $mod"
 beardlib_mod_by: "От $author"
 beardlib_updates_download_now: "Загрузить"
-beardlib_mod_type_add: "Аддон"
-beardlib_mod_type_map: "Карта"
+beardlib_mod_type_Add: "Аддон"
+beardlib_mod_type_Map: "Карта"
+beardlib_mod_type_Base: "Base"
+beardlib_mod_disabled: "Disabled"
 beardlib_waiting_update: "Доступно обновление"
 beardlib_show_errors_dialog: "Показывать диалоговое окно ошибок при входе в главное меню"
 beardlib_show_errors_dialog_help: |
