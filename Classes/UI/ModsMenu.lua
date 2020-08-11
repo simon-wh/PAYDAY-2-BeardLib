@@ -204,7 +204,7 @@ function BeardLibModsMenu:AddMod(mod, framework)
     local txt = "beardlib_mod_type_" .. type
 
     if not mod:Enabled() then
-        text("Disabled", "[Disabled]")
+        text("Disabled", "["..managers.localization:text("beardlib_mod_disabled").."]")
     end
 
     if loc._custom_localizations[txt] then

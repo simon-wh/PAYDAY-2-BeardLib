@@ -87,8 +87,10 @@ beardlib_mod_ignore_updates_help: "Doit Beardlib ignorer les mises à jour entra
 beardlib_mod_settings: "Paramètres du mod - $mod"
 beardlib_mod_by: "Par $author"
 beardlib_updates_download_now: "Téléchargement"
-beardlib_mod_type_add: Ajout
-beardlib_mod_type_map: Carte
+beardlib_mod_type_Add: Ajout
+beardlib_mod_type_Map: Carte
+beardlib_mod_type_Base: "Base"
+beardlib_mod_disabled: "Disabled"
 beardlib_waiting_update: "Mise à jour disponible"
 beardlib_show_errors_dialog: "Montrer les dialogues d'erreur en entrant dans le menu principal"
 beardlib_show_errors_dialog_help: |
