@@ -170,6 +170,10 @@ elseif F == "playerstandard" then
 		if self._equipped_unit:base():can_reload() then
 			local weapon = self._equipped_unit:base()
 			local tweak_data = weapon:weapon_tweak_data()
+			self:_interupt_action_steelsight(t)
+			if not self.RUN_AND_RELOAD then
+				self:_interupt_action_running(t)
+			end
 			if tweak_data.animations.reload_shell_by_shell and  self._equipped_unit:base():reload_enter_expire_t()  then
 				local speed_multiplier = self._equipped_unit:base():reload_speed_multiplier()
 				self._ext_camera:play_redirect(Idstring("reload_enter_" .. tweak_data.animations.reload_name_id), speed_multiplier)
