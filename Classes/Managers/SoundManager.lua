@@ -353,7 +353,7 @@ function BeardLibSoundManager:Open()
 
         function SoundSource:hook(id, func)
             local data = self:get_data()
-            data.hooks = data.hoks or {}
+            data.hooks = data.hooks or {}
             table.insert(data.hooks, {func = func, id = id})
         end
 
