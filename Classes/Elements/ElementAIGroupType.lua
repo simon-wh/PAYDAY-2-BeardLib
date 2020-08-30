@@ -26,8 +26,6 @@ function ElementAIGroupType:on_executed(instigator)
 	if self._values.ai_group_type == "default" then
 		tweak_data.levels.get_ai_group_type = classic_get_group_type
 	else
-		log("Setting: " .. self._values.ai_group_type)
-
 		-- Big brain time, override the ai group type.
 		tweak_data.levels.get_ai_group_type = function(td_self)
 			return self._values.ai_group_type
@@ -40,8 +38,6 @@ function ElementAIGroupType:on_executed(instigator)
 	local difficulty = Global.game_settings and Global.game_settings.difficulty
 	if difficulty then
 		local function_name = self.difficulty_function_map[difficulty]
-
-		log("Setting: " .. function_name)
 
 		tweak_data.character[function_name](tweak_data.character)
 	end
