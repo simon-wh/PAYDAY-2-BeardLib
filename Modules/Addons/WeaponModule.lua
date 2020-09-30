@@ -36,13 +36,18 @@ local default_weap_crew = "glock_18_crew"
 function WeaponModule:GetCrewBasedOn(w_self, based_on)
     w_self = w_self or tweak_data.weapon
     based_on = based_on or self._config.weapon.crew_based_on or self._config.weapon.based_on
-    local suffix = "_crew"
-    if based_on and w_self[based_on..suffix] then
-        return based_on..suffix
-    else
-        return default_weap_crew
+    if based_on then
+        local crew = based_on.."_crew"
+        local npc = based_on.."_npc"
+        if w_self[crew] then
+            return crew
+        elseif w_self[npc] then
+            return npc
+        end
     end
+    return default_weap_crew
 end
+
 function WeaponModule:RegisterHook()
     local dlc = self._config.dlc or self.defaults.dlc
 
@@ -114,6 +119,9 @@ function WeaponModule:RegisterHook()
     Hooks:PostHook(WeaponTweakData, "_precalculate_values", self._config.weapon.id .. "AddCrewWeaponTweakData", function(w_self)
         local config = self._config.weapon
         w_self[config.id .. "_crew"] = table.merge(deep_clone(w_self[self:GetCrewBasedOn(w_self)]), table.merge({custom = true}, config.crew))
+        -- Assign NPC variant to be the same as crew if there's any code that relies on the NPC table.
+        -- tbh I'm not sure at this point if this will work the weapon code in this game is absolute mess.
+        w_self[config.id .. "_npc"] = w_self[config.id .. "_crew"]
     end)
 
     Hooks:PostHook(TweakDataVR , "init", self._config.weapon.id .. "AddVRWeaponTweakData", function(vrself)
