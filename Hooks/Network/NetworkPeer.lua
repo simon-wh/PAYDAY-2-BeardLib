@@ -14,8 +14,8 @@ Hooks:Add(peer_send_hook, "BeardLibCustomHeistFix", function(self, func_name, pa
             SyncUtils:Send(self, SyncConsts.LobbyLevelId, Global.game_settings.level_id)
         elseif func_name == "sync_stage_settings" then
             local glbl = managers.job._global
-            local msg = string.format("%s|%s|%s|%s", Global.game_settings.level_id, tostring(glbl.current_job.current_stage), tostring(glbl.alternative_stage or 0), tostring(glbl.interupt_stage))
-            SyncUtils:Send(self, SyncConsts.StageSettings, msg)
+            local msg = string.format("%s|%s|%s|%s", SyncConsts.StageSettings, tostring(glbl.current_job.current_stage), tostring(glbl.alternative_stage or 0), tostring(glbl.interupt_stage))
+            SyncUtils:Send(self, SyncConsts.LobbyLevelId, msg)
         elseif string.ends(func_name,"join_request_reply") then
             if params[1] == 1 then
                 params[15] = SyncUtils:GetJobString()
