@@ -39,6 +39,7 @@ function PlayerStyleVariantModule:RegisterHook()
         ps_self[config.player_style_id].material_variations = ps_self[config.player_style_id].material_variations or {}
         ps_self[config.player_style_id].material_variations[config.id] = table.merge({
             global_value = self.defaults.global_value,
+            auto_aquire = true,
             custom = true
         }, config)
     end)
