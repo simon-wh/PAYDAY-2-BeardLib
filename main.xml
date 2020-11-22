@@ -57,6 +57,8 @@
 			<hook source_file="lib/units/beings/player/playerdamage" file="Fixes.lua"/>
 			<hook source_file="lib/units/weapons/raycastweaponbase" file="Fixes.lua"/>
 			<hook source_file="lib/managers/menu/crewmanagementgui" file="Fixes.lua"/>
+			<hook source_file="lib/managers/menu/blackmarketgui" file="Fixes.lua"/>
+			<hook source_file="lib/managers/menu/renderers/menunodecustomizeweaponcolorgui" file="Fixes.lua"/>
 			<hook source_file="lib/states/ingamewaitingforplayers" file="Fixes.lua"/>
 			<hook source_file="lib/managers/weaponfactorymanager" file="Fixes.lua"/>
 			<hook source_file="lib/managers/blackmarketmanager" file="Fixes.lua"/>

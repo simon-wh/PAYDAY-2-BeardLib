@@ -92,33 +92,6 @@ elseif F == "blackmarketmanager" then
         return droppable_mods
     end
 
-    -- Add support to universal skin weapon icons.
-    local get_weapon_icon_path = BlackMarketManager.get_weapon_icon_path
-    function BlackMarketManager:get_weapon_icon_path(weapon_id, cosmetics, ...)
-        local use_cosmetics = cosmetics and cosmetics.id and cosmetics.id ~= "nil" and true or false
-        local data = use_cosmetics and tweak_data.blackmarket.weapon_skins or tweak_data.weapon
-        local id = use_cosmetics and cosmetics.id or weapon_id
-        local path = use_cosmetics and "weapon_skins/" or "textures/pd2/blackmarket/icons/weapons/"
-        local weapon_tweak = data and id and data[id]
-        if weapon_tweak and weapon_tweak.universal then
-            local guis_catalog = "guis/"
-            local bundle_folder = weapon_tweak.texture_bundle_folder
-
-            if bundle_folder then
-                guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
-            end
-
-            local rarity_path = nil
-            if use_cosmetics then
-                local rarity = weapon_tweak.rarity or "common"
-                rarity_path = tweak_data.economy.rarities[rarity] and tweak_data.economy.rarities[rarity].bg_texture
-            end
-            return guis_catalog .. path .. weapon_tweak.universal_id, rarity_path
-        else
-            return get_weapon_icon_path(self, weapon_id, cosmetics, ...)
-        end
-    end
-
     --WARNING: this function has been completely replaced. If anything fucks up, please removed it.
     --Fixes sorting for custom melee.
     function BlackMarketManager:get_sorted_melee_weapons(hide_locked, id_list_only)
@@ -642,6 +615,65 @@ elseif F == "elementfilter" then
     Hooks:PostHook(ElementFilter, "_check_difficulty", "BeardLibFilterOneDownCheck", function(self)
         if self._values.one_down and Global.game_settings.one_down then
             return true
+        end
+    end)
+elseif F == "blackmarketgui" then
+    -- Universal icon backwards compatibility.
+    Hooks:PostHook(BlackMarketGui, "populate_weapon_category_new", "BeardLibUniversalIconMiniIconFix", function(self, data)
+        local category = data.category
+        local crafted_category = managers.blackmarket:get_crafted_category(category) or {}
+
+        for i, index in pairs(data.on_create_data) do
+            crafted = crafted_category[index]
+
+            if crafted then
+                local equipped_cosmetic_id = crafted and crafted.cosmetics and crafted.cosmetics.id
+                local color_tweak = tweak_data.blackmarket.weapon_skins[equipped_cosmetic_id]
+
+                if color_tweak and color_tweak.universal then
+                    local guis_catalog = "guis/"
+                    local bundle_folder = color_tweak.texture_bundle_folder
+                    if bundle_folder then
+                        guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
+                    end
+
+                    local mini_icons = data[i].mini_icons
+                    mini_icons[#mini_icons].texture = guis_catalog .. "weapon_skins/" .. equipped_cosmetic_id
+                end
+            end
+        end
+    end)
+
+    Hooks:PostHook(BlackMarketGui, "populate_weapon_cosmetics", "BeardLibUniversalIconMiniIconFix2", function(self, data)
+        local crafted = managers.blackmarket:get_crafted_category(data.category)[data.prev_node_data and data.prev_node_data.slot]
+        local equipped_cosmetic_id = crafted and crafted.cosmetics and crafted.cosmetics.id
+        local color_tweak = tweak_data.blackmarket.weapon_skins[equipped_cosmetic_id]
+
+        if color_tweak and color_tweak.universal then
+            local guis_catalog = "guis/"
+            local bundle_folder = color_tweak.texture_bundle_folder
+            if bundle_folder then
+                guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
+            end
+
+            data[1].bitmap_texture = guis_catalog .. "weapon_skins/" .. equipped_cosmetic_id
+        end
+    end)
+elseif F == "menunodecustomizeweaponcolorgui" then
+    -- Universal icon backwards compatibility.
+    Hooks:PreHook(MenuCustomizeWeaponColorInitiator, "create_grid", "BeardLibUniversalIconGridFix", function(self, node, colors_data)
+        for _, color_data in pairs(colors_data) do
+            color_tweak = tweak_data.blackmarket.weapon_skins[color_data.value]
+
+            if color_tweak and color_tweak.universal then
+                local guis_catalog = "guis/"
+                local bundle_folder = color_tweak.texture_bundle_folder
+                if bundle_folder then
+                    guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
+                end
+
+                color_data.texture = guis_catalog .. "weapon_skins/" .. color_data.value
+            end
         end
     end)
 end
