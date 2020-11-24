@@ -64,6 +64,8 @@ beardlib_achieves_reward_exp: "Experiência"
 beardlib_achieves_reward_cash: "Dinheiro pra gastar"
 beardlib_achieves_reward_offshore: "Dinheiro do Offshore"
 beardlib_achieves_reward_cc: Moedas
+beardlib_achieves_hidden: "Hidden Achievement"
+beardlib_achieves_hidden_desc: "Details will be revealed once the achievement is unlocked."
 beardlib_log_sounds: "Log de ID de sons"
 beardlib_log_sounds_help: "Mostra cada ID de som. Isso ajuda quando você quer substituí algum som que existe e não sabe a ID."
 beardlib_found_errors: "Um ou mais Mods do BeardLib bateram de frente com um erro"
