@@ -109,7 +109,7 @@ function BeardLib:LoadModules(dir)
 end
 
 function BeardLib:LoadLocalization()
-	local languages = {}
+	local languages = {default = "english.yaml"}
 	for _, file in pairs(FileIO:GetFiles(self._config.localization_dir)) do
 		table.insert(languages, {_meta = "localization", file = file, language = Path:GetFileNameWithoutExtension(file)})
 	end

@@ -28,6 +28,10 @@ end
 function LocalizationModule:LoadLocalization()
     local path
     local lang_key = (LocalizationModule.forced_language or SystemInfo:language()):key()
+    -- Fallback to Spanish if there is no specific localization for Latin American Spanish
+    if not self.Localizations[latam] then
+        lang_key = string.key("spanish")
+    end
     if self.Localizations[lang_key] then
         path = Path:Combine(self.LocalizationDirectory, self.Localizations[lang_key])
     else
