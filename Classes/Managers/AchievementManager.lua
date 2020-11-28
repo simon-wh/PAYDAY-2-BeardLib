@@ -347,7 +347,7 @@ end
 
 function CustomAchievement:GetName()
     if self:IsHidden() and not self:IsUnlocked() then
-        return "Hidden Achievement"
+        return managers.localization:text("beardlib_achieves_hidden")
     end
 
     return managers.localization:text(self._name_id)
@@ -355,7 +355,7 @@ end
 
 function CustomAchievement:GetDesc()
     if self:IsHidden() and not self:IsUnlocked() then
-        return "Details will be revealed once the achievement is unlocked."
+        return managers.localization:text("beardlib_achieves_hidden_desc")
     end
 
     return managers.localization:text(self._desc_id)

@@ -64,6 +64,8 @@ beardlib_achieves_reward_exp: Experiencia
 beardlib_achieves_reward_cash: "Dinero Disponible"
 beardlib_achieves_reward_offshore: "Dinero en Paraiso Fiscal"
 beardlib_achieves_reward_cc: "Monedas del Continental"
+beardlib_achieves_hidden: "Hidden Achievement"
+beardlib_achieves_hidden_desc: "Details will be revealed once the achievement is unlocked."
 beardlib_log_sounds: "Documentacion de las IDs de Sonido"
 beardlib_log_sounds_help: "Documenta cada Sonido con su ID. Ayudara cuando quieras reemplazar sonidos ya existentes y no sepas sus ID's"
 beardlib_found_errors: "Uno o mas BeardLib Mods se han encontrado con un error"
