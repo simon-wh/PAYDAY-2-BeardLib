@@ -142,8 +142,8 @@ function BeardLibModsMenu:AddMod(mod, framework)
     local show_images = BeardLib.Options:GetValue("ShowImages")
     local loc = managers.localization
 	local name = mod.Name or "Missing name"
-	local type = framework.type_name or "base"
-	local blt_mod = type == "base"
+	local type = framework.type_name or "Base"
+	local blt_mod = type == "Base"
 	local color = framework.menu_color
     local s = math.ceil((self._list:ItemsWidth() / 5) - self._list.offset[1] - 1)
 
