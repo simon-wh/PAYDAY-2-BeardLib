@@ -121,7 +121,9 @@ function WeaponModule:RegisterHook()
         w_self[config.id .. "_crew"] = table.merge(deep_clone(w_self[self:GetCrewBasedOn(w_self)]), table.merge({custom = true}, config.crew))
         -- Assign NPC variant to be the same as crew if there's any code that relies on the NPC table.
         -- tbh I'm not sure at this point if this will work the weapon code in this game is absolute mess.
-        w_self[config.id .. "_npc"] = w_self[config.id .. "_crew"]
+        if not w_self[config.id .. "_npc"] then
+          w_self[config.id .. "_npc"] = w_self[config.id .. "_crew"]
+        end
     end)
 
     Hooks:PostHook(TweakDataVR , "init", self._config.weapon.id .. "AddVRWeaponTweakData", function(vrself)
