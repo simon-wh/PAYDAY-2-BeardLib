@@ -1,6 +1,9 @@
 BeardLibFileManager = BeardLibFileManager or BeardLib:ManagerClass("File")
 Global.fm = Global.fm or {added_files = {}}
 
+local dyn_pkg = "packages/dyn_resources"
+
+
 function BeardLibFileManager:init()
 	self.const = {h_preprocessSF = "BeardLibPreProcessScriptData", h_postprocessSF = "BeardLibProcessScriptData"}
 	self.process_modes = {
@@ -78,6 +81,26 @@ function BeardLibFileManager:Process(ids_ext, ids_path, name_mt)
 	Hooks:Call(self.const.h_postprocessSF, ids_ext, ids_path, data)
 
 	return data
+end
+
+-- For extreme cases you need to load a file very early. Current use case is for adding fonts to the merged font of a font.
+function BeardLibFileManager:ForceEarlyLoad(ids_ext, ids_path, file_path)
+	local path = ids_path
+	local ext = ids_ext
+
+	local k_ext = ext:key()
+	local k_path = path:key()
+	if file_path then
+		BeardLib:DevLog("Loaded file %s", tostring(file_path))
+	else
+		BeardLib:DevLog("Loaded file %s.%s", k_path, k_ext)
+	end
+
+	if not PackageManager:loaded(dyn_pkg) then
+		PackageManager:load(dyn_pkg)
+	end
+
+	PackageManager:package(dyn_pkg):load_temp_resource(ext, path, nil, true)
 end
 
 local texture_key = "8c5b5ab050e16853"

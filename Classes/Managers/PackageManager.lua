@@ -239,7 +239,10 @@ function BeardLibPackageManager:LoadConfig(directory, config, mod, settings)
                             end
                             if dyn_load or (dyn_load_game and ingame) or (dyn_load_menu and not inmenu) then
                                 table.insert(loading, {ids_ext, ids_path, file_path_ext})
-							end
+                            end
+                            if child.early_load then
+                                Managers.File:ForceEarlyLoad(ids_ext, ids_path, file_path_ext)
+                            end
                         end
                     else
                         self:Err("File does not exist! %s", tostring(file_path_ext))
