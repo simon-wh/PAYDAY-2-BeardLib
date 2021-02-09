@@ -374,6 +374,7 @@ elseif F == "raycastweaponbase" then
     function RaycastWeaponBase:fire(...)
         local result = fire(self, ...)
         if self:use_soundfix() and result then
+			self._bullets_fired = 0
             self:play_tweak_data_sound("fire_single", "fire")
         end
         return result
