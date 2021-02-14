@@ -14,6 +14,10 @@ function MixedSoundSource:init(sound_id, queue, engine_source, clbk, cookie)
 	self._queue_is_table = type(self._queue) == "table"
 end
 
+function MixedSoundSource:alive()
+	return alive(self._engine_source)
+end
+
 -- \o\
 function MixedSoundSource:stop()
 	if not self:is_closed() then
