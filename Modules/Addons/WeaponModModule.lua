@@ -90,7 +90,7 @@ function WeaponModModule:RegisterHook()
                     local thq = Idstring(config.unit.."_thq")
                     if DB:has(ids_mat_config, thq) then
                         supports_sync = true
-                        cc_thq = Idstring(config.unit.."cc_thq")
+                        cc_thq = Idstring(config.unit.."_cc_thq")
                         if not DB:has(ids_mat_config, cc_thq) then
                             cc_thq = thq
                         end
