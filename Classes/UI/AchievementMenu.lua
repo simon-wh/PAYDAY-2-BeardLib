@@ -287,7 +287,7 @@ function BeardLibAchievementMenu:DisplayAchievementsFromPackage(package)
 
 		local achievement_button = panel:Button({
 			h = 48,
-			w = 442,
+			w = panel:Panel():w() - 48 - (default_margin * 3),
 			text = false,
 			on_callback = ClassClbk(self, "DisplayAchievementDetails", achievement)
 		})
