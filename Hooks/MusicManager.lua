@@ -64,12 +64,48 @@ function MusicManager:check_music_switch(...)
 	end
 end
 
+local orig_stop_all = MusicManager.stop_listen_all
+function MusicManager:stop_listen_all(...)
+	if self._current_music_ext or self._current_event then
+		self:stop_custom()
+	end
+
+	local success = false
+	if self._current_music_ext and Global.music_manager.current_music_ext then
+		if self:attempt_play(Global.music_manager.current_music_ext) then
+			success = true
+		end
+	end
+
+	if self._current_event and Global.music_manager.current_event then
+		if self:attempt_play(nil, Global.music_manager.current_event) then
+			success = true
+		end
+	end
+
+	if self._current_track and Global.music_manager.current_track then
+		if success then
+			self:attempt_play(Global.music_manager.current_track)
+		end
+	end
+
+	-- If we succeed avoid calling the original function, just stop the tracks
+	if success then
+		Global.music_manager.source:post_event("stop_all_music")
+		self._current_event = nil
+		self._current_track = nil
+		self._skip_play = nil	
+	else
+		return orig_stop_all(self, ...)
+	end
+end
+
 local orig_stop = MusicManager.track_listen_stop
 function MusicManager:track_listen_stop(...)
 	local current_event = self._current_event
 	local current_track = self._current_track
 	orig_stop(self, ...)
-	local success
+	local success = false
 	if current_event then
 		self:stop_custom()
 		if Global.music_manager.current_event then
