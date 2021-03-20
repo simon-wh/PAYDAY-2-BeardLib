@@ -1,4 +1,6 @@
 HeistMusic = HeistMusic or BeardLib:ModuleClass("HeistMusic", ItemModuleBase)
+StealthMusic = StealthMusic or BeardLib:ModuleClass("StealthMusic", HeistMusic)
+StealthMusic.is_stealth = true
 
 function HeistMusic:LoadBuffers()
     for _, event in pairs(BeardLib.MusicMods[self._config.id].events) do
@@ -47,12 +49,13 @@ function HeistMusic:RegisterHook()
 	end
 
 	local dir = self._config.directory
+
 	if dir then
 		dir = Path:Combine(self._mod.ModPath, dir)
 	else
 		dir = self._mod.ModPath
 	end
-	local music = {heist = true, volume = self._config.volume, xaudio = true, events = {}}
+	local music = {[self.is_stealth and "stealth" or "heist"] = true, volume = self._config.volume, xaudio = true, events = {}}
 	BeardLib.Utils:SetupXAudio()
 
 	for k,v in ipairs(self._config) do
@@ -83,8 +86,9 @@ function HeistMusic:RegisterHook()
 		end
 	end
 
-	local preview_event = self._config.preview_event or "assault"
+	local preview_event = self._config.preview_event or (self.is_stealth and "suspense_4" or "assault")
 	local event = music.events[preview_event]
+
 	if event then
 		music.source = event.source
 		music.start_source = event.source
