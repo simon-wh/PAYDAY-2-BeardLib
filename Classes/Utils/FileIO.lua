@@ -52,7 +52,7 @@ function FileIO:ReadConfig(path, tbl)
 	end
 end
 
-local isWin32 = not BLT.GetOS or (BLT.GetOS and BLT:GetOS() == "windows") --No need to convert in Windows.
+local isWin32 = package.config:sub(1,1) == "\\" --No need to convert in Windows.
 
 function FileIO:ConvertScriptData(data, typ, clean)
 	local new_data
@@ -75,7 +75,6 @@ function FileIO:ConvertScriptData(data, typ, clean)
                 })
             end
         end
-
         new_data = ScriptSerializer:from_binary(data)
     end
     return clean and BeardLib.Utils.XML:Clean(new_data) or new_data
