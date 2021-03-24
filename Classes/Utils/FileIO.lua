@@ -52,7 +52,7 @@ function FileIO:ReadConfig(path, tbl)
 	end
 end
 
-local isWin32 = package.config:sub(1,1) == "\\" --No need to convert in Windows.
+local isWin32 = blt.blt_info().platform == "mswindows" --No need to convert in Windows.
 
 function FileIO:ConvertScriptData(data, typ, clean)
 	local new_data
