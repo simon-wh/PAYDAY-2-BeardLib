@@ -83,7 +83,6 @@ function HeistMusic:RegisterHook()
 			end
 			-- Track handling as part of event tag
 			if #tracks == 0 then
-				self:log("Old loading of %s %s", tostring(self._config.id), tostring(v.name))
 				table.insert(tracks, {
 					start_source = v.start_source and self:MakeBuffer(Path:Combine(dir, v.start_source)),
 					source = v.source and self:MakeBuffer(Path:Combine(dir, v.source)),
