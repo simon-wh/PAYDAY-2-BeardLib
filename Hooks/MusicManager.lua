@@ -125,10 +125,7 @@ function MusicManager:track_listen_stop(...)
 end
 
 function MusicManager:pick_track_index(tracks)
-	if not tracks then
-		return 0
-	end
-	if #tracks <= 1 then
+	if not tracks or #tracks <= 1 then
 		return 1
 	end
 	local total_w = 0
@@ -139,7 +136,7 @@ function MusicManager:pick_track_index(tracks)
 	local index = 0
 	while roll > 0 do
 		index = index + 1
-		roll = roll - tracks[index].weight
+		roll = roll - (tracks[index].weight or 1)
 	end
 	return index
 end
@@ -181,7 +178,8 @@ function MusicManager:attempt_play(track, event, stop)
 	if next_music then
 		local next = next_event or next_music
 		local track_index = self:pick_track_index(next.tracks)
-		local source = next.tracks and (next.tracks[track_index].start_source or next.tracks[track_index].source)
+		local next_track = next.tracks and next.tracks[track_index]
+		local source = next_track and (next_track.start_source or next_track.source)
 		if next_music.xaudio then
 			if not source then
 				BeardLib:Err("No buffer found to play for music '%s'", tostring(self._current_custom_track))
@@ -194,9 +192,9 @@ function MusicManager:attempt_play(track, event, stop)
 			end
 		end
 		local volume = next.volume or next_music.volume
-		self._switch_at_end = (next.tracks[track_index].start_source or next.allow_switch) and {
+		self._switch_at_end = (next_track.start_source or next.allow_switch) and {
 			tracks = next.tracks,
-			track_index = next.tracks[track_index].start_source and track_index or self:pick_track_index(next.tracks),
+			track_index = next_track.start_source and track_index or self:pick_track_index(next.tracks),
 			allow_switch = next.allow_switch,
 			xaudio = next_music.xaudio,
 			volume = volume
