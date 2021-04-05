@@ -13,26 +13,50 @@ function MusicModule:RegisterHook()
 		self._config.start_source = dir .. self._config.start_source
 	end
 
-	local music = {menu = self._config.menu, heist = self._config.heist, source = self._config.source, start_source = self._config.start_source, events = {}}
+	local music = {menu = self._config.menu, heist = self._config.heist, volume = self._config.volume, events = {}}
 
 	for k,v in ipairs(self._config) do
 		if type(v) == "table" and v._meta == "event" then
-			if v.start_source then
-				v.start_source = dir .. v.start_source
+			local tracks = {}
+			-- Track handling as part of child track tags
+			for _,t in ipairs(v) do
+				if type(t) == "table" and t._meta == "track" then
+					table.insert(tracks, {
+						start_source = t.start_source and Path:Combine(dir, t.start_source),
+						source = t.source and Path:Combine(dir, t.source),
+						weight = t.weight or 1,
+						volume = t.volume or music.volume
+					})
+				end
 			end
-			if v.alt_source then
-				v.alt_source = Path:Combine(dir, v.alt_source)
-				v.alt_start_source = v.alt_start_source and Path:Combine(dir, v.alt_start_source)
-				v.alt_chance = v.alt_chance and tonumber(v.alt_chance) or 0.1
-				v.allow_switch = NotNil(v.allow_switch, true)
+			-- Track handling as part of event tag
+			if #tracks == 0 then
+				table.insert(tracks, {
+					start_source = v.start_source and Path:Combine(dir, v.start_source),
+					source = v.source and Path:Combine(dir, v.source),
+					weight = v.alt_chance and v.alt_chance * 100 or 1,
+					volume = v.volume or music.volume
+				})
+				if v.alt_source then -- backwards compat for old alternate track system
+					table.insert(tracks, {
+						start_source = v.alt_start_source and Path:Combine(dir, v.alt_start_source),
+						source = v.alt_source and Path:Combine(dir, v.alt_source),
+						weight = v.alt_chance and v.alt_chance * 100 or 1,
+						volume = v.volume or music.volume
+					})
+				end
 			end
-			if v.source then
-				v.source = dir .. v.source
-			else
-				self:Err("Music with the id '%s' has an event that has no source!", self._config.id)
-				return
+			for i,t in ipairs(tracks) do
+				if not t.start_source and not t.source then
+					self:err("Event named %s in heist music %s has no defined source for track %i", tostring(self._config.id), tostring(v.name), i)
+					return
+				end
 			end
-			music.events[v.name] = {source = v.source, start_source = v.start_source, alt_source = v.alt_source, alt_start_source = v.alt_start_source, alt_chance = v.alt_chance, allow_switch = v.allow_switch}
+			music.events[v.name] = {
+				tracks = tracks,
+				volume = v.volume or music.volume,
+				allow_switch = NotNil(v.allow_switch, true)
+			}
 		end
 	end
 
@@ -42,26 +66,18 @@ function MusicModule:RegisterHook()
 		if music.start_source then
 			table.insert(add, {_meta = "movie", path = music.start_source})
 		end
-		if music.alt_source then
-			table.insert(add, {_meta = "movie", path = music.alt_source})
-			if music.alt_start_source then
-				table.insert(add, {_meta = "movie", path = music.alt_start_source})
-			end
-		end
 		for _, event in pairs(music.events) do
-			table.insert(add, {_meta = "movie", path = event.source})
-			if event.start_source then
-				table.insert(add, {_meta = "movie", path = event.start_source})
-			end
-			if event.alt_source then
-				table.insert(add, {_meta = "movie", path = event.alt_source})
-				if event.alt_start_source then
-					table.insert(add, {_meta = "movie", path = event.alt_start_source})
+			for _, track in pairs(event.tracks) do
+				table.insert(add, {_meta = "movie", path = track.source})
+				if track.start_source then
+					table.insert(add, {_meta = "movie", path = track.start_source})
 				end
 			end
 		end
 		self._mod._config.AddFiles = AddFilesModule:new(self._mod, add)
 	end
+
+	music.preview_event = self._config.preview_event or "assault"
 
 	BeardLib.MusicMods[self._config.id] = music
 end
