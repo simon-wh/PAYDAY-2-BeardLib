@@ -78,7 +78,6 @@ function HeistMusic:RegisterHook()
 						weight = t.weight or v.weight or 1,
 						volume = t.volume or v.volume or music.volume
 					})
-					log(tostring(tracks[#tracks].source))
 				end
 			end
 			-- Track handling as part of event tag
