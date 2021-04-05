@@ -124,6 +124,23 @@ function MusicManager:track_listen_stop(...)
 	end
 end
 
+function MusicManager:pick_track_index(tracks)
+	if not tracks or #tracks <= 1 then
+		return 1
+	end
+	local total_w = 0
+	for _,v in pairs(tracks) do
+		total_w = total_w + (v.weight or 1)
+	end
+	local roll = math.random(total_w)
+	local index = 0
+	while roll > 0 do
+		index = index + 1
+		roll = roll - (tracks[index].weight or 1)
+	end
+	return index
+end
+
 local movie_ids = Idstring("movie")
 function MusicManager:attempt_play(track, event, stop)
 	if event == "music_uno_fade_reset" then
@@ -142,14 +159,14 @@ function MusicManager:attempt_play(track, event, stop)
 			break
 		end
 		if event == id or track == id or self._current_custom_track == id then
-			if music.source and (self._current_custom_track ~= id or id == event) then
+			if music.tracks and (self._current_custom_track ~= id or id == event) then
 				next_music = music
 				self._current_custom_track = id
 			end
 			if music.events and event then
 				-- Try finding the right event to play
 				for modded_event, event_tbl in pairs(music.events) do
-					if event == modded_event or event.ends(modded_event) then
+					if event == modded_event or event:ends(modded_event) then
 						next_music = music
 						next_event = event_tbl
 						self._current_custom_track = id
@@ -158,14 +175,15 @@ function MusicManager:attempt_play(track, event, stop)
 			end
 		end
 	end
-
 	if next_music then
 		local next = next_event or next_music
-		local use_alt_source = next.alt_source and math.random() < next.alt_chance
-		local source = use_alt_source and (next.alt_start_source or next.start_source or next.alt_source) or next.start_source or next.source
+		local track_index = self:pick_track_index(next.tracks)
+		local next_track = next.tracks and next.tracks[track_index]
+		local source = next_track and (next_track.start_source or next_track.source)
 		if next_music.xaudio then
 			if not source then
 				BeardLib:Err("No buffer found to play for music '%s'", tostring(self._current_custom_track))
+				return
 			end
 		else
 			if not source or not DB:has(movie_ids, source:id()) then
@@ -174,10 +192,10 @@ function MusicManager:attempt_play(track, event, stop)
 			end
 		end
 		local volume = next.volume or next_music.volume
-		self._switch_at_end = (next.start_source or next.alt_source) and {
-			source = (next.allow_switch or not use_alt_source) and next.source or next.alt_source,
-			alt_source = next.allow_switch and next.alt_source,
-			alt_chance = next.allow_switch and next.alt_chance,
+		self._switch_at_end = (next_track.start_source or next.allow_switch) and {
+			tracks = next.tracks,
+			track_index = next_track.start_source and track_index or self:pick_track_index(next.tracks),
+			allow_switch = next.allow_switch,
 			xaudio = next_music.xaudio,
 			volume = volume
 		}
@@ -244,8 +262,12 @@ function MusicManager:custom_update(t, dt, paused)
 	elseif self._switch_at_end then
 		if (self._xa_source and self._xa_source:is_closed()) or (gui_ply and gui_ply:current_frame() >= gui_ply:frames()) then
 			local switch = self._switch_at_end
-			self._switch_at_end = switch.alt_source and switch or nil
-			local source = switch.alt_source and math.random() < switch.alt_chance and switch.alt_source or switch.source
+			local source = switch.tracks[switch.track_index].source
+			if switch.allow_switch then
+				switch.track_index = self:pick_track_index(switch.tracks)
+			else
+				self._switch_at_end = nil
+			end
 			self:play(source, switch.xaudio, switch.volume)
 		end
 	end
