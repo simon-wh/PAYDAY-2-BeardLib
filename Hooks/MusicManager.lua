@@ -168,11 +168,13 @@ function MusicManager:attempt_play(track, event, stop)
 				self._current_custom_track = id
 			end
 			if music.events and event then
-				local event_tbl = music.events[string.split(event, "_")[3]]
-				if event_tbl then
-					next_music = music
-					next_event = event_tbl
-					self._current_custom_track = id
+				-- Try finding the right event to play
+				for modded_event, event_tbl in pairs(music.events) do
+					if event == modded_event or event.ends(modded_event) then
+						next_music = music
+						next_event = event_tbl
+						self._current_custom_track = id
+					end
 				end
 			end
 		end
