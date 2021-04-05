@@ -5,10 +5,10 @@ StealthMusic.is_stealth = true
 function HeistMusic:LoadBuffers()
 	for _, event in pairs(BeardLib.MusicMods[self._config.id].events) do
 		for _, track in pairs(event.tracks) do
-			if type(track.start_source) == "table" and track.start_source.module then
+			if track.start_source and track.start_source.module then
 					track.start_source.buffer = XAudio.Buffer:new(track.start_source.path)
 			end
-			if type(track.source) == "table" and track.source.module then
+			if track.source and track.source.module then
 				track.source.buffer = XAudio.Buffer:new(track.source.path)
 			end
 		end
@@ -18,13 +18,13 @@ end
 function HeistMusic:UnloadBuffers()
 	for _, event in pairs(BeardLib.MusicMods[self._config.id].events) do
 		for _, track in pairs(event.tracks) do
-			if type(track.start_source) == "table" and track.start_source.module then
+			if track.start_source and track.start_source.module then
 					if track.start_source.buffer then
 						track.start_source.buffer:close(true)
 					end
 					track.start_source.buffer = nil
 			end
-			if type(track.source) == "table" and track.source.module then
+			if track.source and track.source.module then
 				if track.source.buffer then
 					track.source.buffer:close(true)
 				end
@@ -73,10 +73,10 @@ function HeistMusic:RegisterHook()
 			for _,t in ipairs(v) do
 				if type(t) == "table" and t._meta == "track" then
 					table.insert(tracks, {
-						start_source = t.start_source and self:MakeBuffer(Path:Combine(dir, t.start_source)),
-						source = t.source and self:MakeBuffer(Path:Combine(dir, t.source)),
-						weight = t.weight or 1,
-						volume = t.volume or music.volume
+						start_source = (t.start_source or v.start_source) and self:MakeBuffer(Path:Combine(dir, (t.start_source or v.start_source))),
+						source = (t.source or v.source) and self:MakeBuffer(Path:Combine(dir, (t.source or v.source))),
+						weight = t.weight or v.weight or 1,
+						volume = t.volume or v.volume or music.volume
 					})
 					log(tostring(tracks[#tracks].source))
 				end
@@ -91,7 +91,7 @@ function HeistMusic:RegisterHook()
 				})
 				if v.alt_source then -- backwards compat for old alternate track system
 					table.insert(tracks, {
-						start_source = v.alt_start_source and self:MakeBuffer(Path:Combine(dir, v.alt_start_source)),
+						start_source = (v.alt_start_source or v.start_source) and self:MakeBuffer(Path:Combine(dir, (v.alt_start_source or v.start_source))),
 						source = v.alt_source and self:MakeBuffer(Path:Combine(dir, v.alt_source)),
 						weight = v.alt_chance and v.alt_chance * 100 or 1,
 						volume = v.volume or music.volume

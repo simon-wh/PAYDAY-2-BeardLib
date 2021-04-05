@@ -1,20 +1,29 @@
 MenuMusicModule = MenuMusicModule or BeardLib:ModuleClass("MenuMusic", ItemModuleBase)
 
 function MenuMusicModule:LoadBuffers()
-	for _, source in pairs(BeardLib.MusicMods[self._config.id]) do
-		if type(source) == "table" and source.module then
-			source.buffer = XAudio.Buffer:new(source.path)
+	for _, track in pairs(BeardLib.MusicMods[self._config.id].tracks) do
+		if track.source and track.source.module then
+			track.source.buffer = XAudio.Buffer:new(track.source.path)
+		end
+		if track.start_source and track.start_source.module then
+			track.start_source.buffer = XAudio.Buffer:new(track.start_source.path)
 		end
 	end
 end
 
 function MenuMusicModule:UnloadBuffers()
-	for _, source in pairs(BeardLib.MusicMods[self._config.id]) do
-		if type(source) == "table" and source.module then
-			if source.buffer then
-				source.buffer:close(true)
+	for _, track in pairs(BeardLib.MusicMods[self._config.id].tracks) do
+		if track.source and track.source.module then
+			if track.source.buffer then
+				track.source.buffer:close(true)
 			end
-			source.buffer = nil
+			track.source.buffer = nil
+		end
+		if track.start_source and track.start_source.module then
+			if track.start_source.buffer then
+				track.start_source.buffer:close(true)
+			end
+			track.start_source.buffer = nil
 		end
 	end
 end
@@ -54,7 +63,11 @@ function MenuMusicModule:RegisterHook()
 
 	BeardLib.Utils:SetupXAudio()
 	local music = {menu = true, volume = self._config.volume, xaudio = true}
-	music.source = self:MakeBuffer(self._config.source)
-	music.start_source = self:MakeBuffer(self._config.start_source)
+	music.tracks = {
+		{
+			source = self:MakeBuffer(self._config.source),
+			start_source = self:MakeBuffer(self._config.start_source)
+		}
+	}
 	BeardLib.MusicMods[self._config.id] = music
 end

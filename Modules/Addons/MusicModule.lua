@@ -22,10 +22,10 @@ function MusicModule:RegisterHook()
 			for _,t in ipairs(v) do
 				if type(t) == "table" and t._meta == "track" then
 					table.insert(tracks, {
-						start_source = t.start_source and Path:Combine(dir, t.start_source),
-						source = t.source and Path:Combine(dir, t.source),
-						weight = t.weight or 1,
-						volume = t.volume or music.volume
+						start_source = (t.start_source or v.start_source) and Path:Combine(dir, (t.start_source or v.start_source)),
+						source = (t.source or v.source) and Path:Combine(dir, (t.source or v.source)),
+						weight = t.weight or v.weight or 1,
+						volume = t.volume or v.volume or music.volume
 					})
 				end
 			end
@@ -39,7 +39,7 @@ function MusicModule:RegisterHook()
 				})
 				if v.alt_source then -- backwards compat for old alternate track system
 					table.insert(tracks, {
-						start_source = v.alt_start_source and Path:Combine(dir, v.alt_start_source),
+						start_source = (v.alt_start_source or v.start_source) and Path:Combine(dir, (v.alt_start_source or v.start_source)),
 						source = v.alt_source and Path:Combine(dir, v.alt_source),
 						weight = v.alt_chance and v.alt_chance * 100 or 1,
 						volume = v.volume or music.volume
