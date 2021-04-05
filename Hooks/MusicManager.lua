@@ -166,7 +166,7 @@ function MusicManager:attempt_play(track, event, stop)
 			if music.events and event then
 				-- Try finding the right event to play
 				for modded_event, event_tbl in pairs(music.events) do
-					if event == modded_event or event.ends(modded_event) then
+					if event == modded_event or event:ends(modded_event) then
 						next_music = music
 						next_event = event_tbl
 						self._current_custom_track = id
