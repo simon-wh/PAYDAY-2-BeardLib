@@ -162,9 +162,8 @@ function MusicManager:attempt_play(track, event, stop)
 			break
 		end
 		if event == id or track == id or self._current_custom_track == id then
-			if music.preview_event and (self._current_custom_track ~= id or id == event) then
+			if music.tracks and (self._current_custom_track ~= id or id == event) then
 				next_music = music
-				next_event = music.events[music.preview_event]
 				self._current_custom_track = id
 			end
 			if music.events and event then

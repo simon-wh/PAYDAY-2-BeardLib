@@ -77,7 +77,8 @@ function MusicModule:RegisterHook()
 		self._mod._config.AddFiles = AddFilesModule:new(self._mod, add)
 	end
 
-	music.preview_event = self._config.preview_event or "assault"
+	local event = music.events[self._config.preview_event or "assault"]
+	music.tracks = event and event.tracks
 
 	BeardLib.MusicMods[self._config.id] = music
 end
