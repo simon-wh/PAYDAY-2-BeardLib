@@ -459,7 +459,6 @@ elseif F == "dialogmanager" then
 				managers.dialog._dialog_list[id] = {
 					id = id,
 					sound = id,
-					string_id = sound.subtitle_id,
 					priority = sound.priority and tonumber(sound.priority) or tweak_data.dialog.DEFAULT_PRIORITY
 				}
 			end
