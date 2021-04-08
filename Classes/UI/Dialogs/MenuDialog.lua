@@ -103,7 +103,6 @@ function MenuDialog:CreateCustomStuff(params)
         scroll:Divider({
             name = "Message",
             text = params.message,
-            size = self._menu.size + 2,
         })
     end
 end
