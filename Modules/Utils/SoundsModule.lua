@@ -73,6 +73,14 @@ function SoundsModule:ReadSounds(data, prev_dir)
 				volume = volume
 			}, v)
 
+			if v.subtitle_id then
+				v.markers = v.markers or {}
+				table.insert(v.markers, 1, {
+					position = 0,
+					label = v.subtitle_id
+				})
+			end
+
 			if v.prefix == "global" then
 				v.prefix = nil
 				v.prefxies = nil

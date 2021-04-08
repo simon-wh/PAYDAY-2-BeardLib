@@ -339,6 +339,7 @@ function BeardLibSoundManager:Open()
 			local ss = orig(self, ...)
 			if ss then
 				ss:set_link_object(self)
+				ss:set_unit(self) -- Link object can change so keep track of the unit as well.
 			end
 			return ss
 		end
@@ -392,6 +393,14 @@ function BeardLibSoundManager:Open()
 
 		function SoundSource:set_link_object(object)
 			self:get_data().linking = object
+		end
+
+		function SoundSource:get_unit(unit)
+			return self:get_data().unit
+		end
+
+		function SoundSource:set_unit(unit)
+			self:get_data().unit = unit
 		end
 
 		Hooks:PostHook(SoundSource, "stop", "BeardLibStopSounds", function(self)

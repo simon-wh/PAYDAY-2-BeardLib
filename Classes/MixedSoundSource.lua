@@ -12,6 +12,8 @@ function MixedSoundSource:init(sound_id, queue, engine_source, clbk, cookie)
 	self._cookie = cookie
 	self._closed = false
 	self._queue_is_table = type(self._queue) == "table"
+
+	self._marker_status = {}
 end
 
 function MixedSoundSource:alive()
@@ -39,13 +41,22 @@ function MixedSoundSource:post_event(sound_id)
 	end
 end
 
-function MixedSoundSource:callback(event)
+function MixedSoundSource:callback(event_type, label, identifier, position)
 	if self._callback then
 		--EventInstance is used?
 		--Is the order of parameters always like this?
 		--What is marker event and how can we implement it in here?
 		--This shit is confusing aaa
-		self._callback(nil, self._engine_source, event, self._cookie)
+		-- extra_arg_from_:_because_bad_callbacks,	instance,		event_type,		unit,		sound_source,	label,			identifier,		position -- Unit (What the callbacks make it look like.)
+		-- instance,								sound_source,	event_type,		unit,		label,			identifier,		position -- Unit (What it actually is, thanks overkill, very cool.)
+		-- instance, 								sound_source,	event_type,		cookie,		label,			identifier,		position -- No Unit
+
+		-- Based on wwise docs. (These only apply to markers.)
+		-- Label = Generic String (e.g. "dialog_something")
+		-- Identifier = Numerical Identifier (Most of the time this is just some index or something.)
+		-- Position = Sample frame position. (i.e. time / 48000) standard wwise sample rate is 48Khz.
+
+		self._callback(nil, self._engine_source, event_type, self._engine_source:get_unit() or self._cookie, label, identifier, position)
 	end
 end
 
@@ -64,6 +75,7 @@ function MixedSoundSource:next_in_queue()
 	end
 end
 
+local sample_rate = 48000 -- Standard WWise 48k sample rate is used to provide a relatively accurate position value for callbacks. ( Current Sample Frame = Time / Sample Rate )
 function MixedSoundSource:update(t, dt)
 	if self:is_closed() then
 		return
@@ -107,12 +119,15 @@ function MixedSoundSource:update(t, dt)
 		local buffer = sound.buffer
 		local wait = buffer and buffer.wait or sound.data.wait
 		local volume = buffer and buffer.volume or sound.data.volume
+
+		self._play_t = t
 		if wait then
-			self._play_t = t + wait
+			self._play_t = self._play_t + wait
 		end
 
 		self._playing = sound
 		self._initial = true
+		self._marker_status = {}
 		if volume then
 			self._source_volume = self._raw_gain
 			self:set_volume(volume)
@@ -128,7 +143,7 @@ function MixedSoundSource:update(t, dt)
 	end
 
 	local state = self:get_state()
-	local can_play = not self._play_t or self._play_t <= t
+	local can_play = self._play_t and self._play_t <= t
 	if self._playing and not self._playing.buffer then
 		if can_play then
 			self:post_event(self._playing.id)
@@ -137,11 +152,20 @@ function MixedSoundSource:update(t, dt)
 		if self._initial or state == MixedSoundSource.INITIAL then
 			if can_play then
 				self:play()
-				self._play_t = nil
 				self._initial = nil
 			end
 		elseif state == MixedSoundSource.STOPPED then
 			self:next_in_queue()
+		end
+	end
+
+	if self._playing and self._playing.buffer and self._playing.buffer.data.markers then
+		for index, marker_data in ipairs(self._playing.buffer.data.markers) do
+			if not self._marker_status[index] and (t > self._play_t + marker_data.position) then
+				self:callback("marker", marker_data.label, index, math.round(marker_data.position / sample_rate))
+
+				self._marker_status[index] = true
+			end
 		end
 	end
 end
