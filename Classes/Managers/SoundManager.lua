@@ -137,7 +137,7 @@ function BeardLibSoundManager:AddBuffer(data, force)
     table.insert(self.buffers, buffer or data)
 
     if buffer then
-        self:AddSoundID(table.merge({queue = {{id = sound_id}}}, data))
+        self:AddSoundID(data)
     end
 
     return buffer
@@ -177,6 +177,31 @@ function BeardLibSoundManager:GetSound(sound_id, prefixes)
     end
 end
 
+function BeardLibSoundManager:GenerateQueue(sound_id, prefixes, queue, sound_queue_data)
+	queue = queue or {}
+
+	local sound = self:GetSound(sound_id, prefixes)
+
+	if sound then
+		if sound.queue then
+			if sound.is_random then
+				local data = table.random(sound.queue)
+				if data then
+					self:GenerateQueue(data.id, prefixes, queue, data)
+				end
+			else
+				for _, data in pairs(sound.queue) do
+					self:GenerateQueue(data.id, prefixes, queue, data)
+				end
+			end
+		else
+			table.insert(queue, {buffer = self:GetLoadedBuffer(sound.id, prefixes), data = sound_queue_data or {}})
+		end
+	end
+
+	return queue
+end
+
 function BeardLibSoundManager:AddSource(sound_id, prefixes, engine_source, clbk, cookie)
 	if self.Closed then
 		return
@@ -185,19 +210,8 @@ function BeardLibSoundManager:AddSource(sound_id, prefixes, engine_source, clbk,
 	local sound = self:GetSound(sound_id, prefixes)
 
 	if sound then
-		local queue = {}
+		local queue = self:GenerateQueue(sound_id, prefixes)
         --if not buffer, assume it's a vanilla sound.
-
-        if sound.is_random then
-            local data = table.random(sound.queue)
-            if data then
-                table.insert(queue, {buffer = self:GetLoadedBuffer(data.id, prefixes), data = data})
-            end
-        else
-            for _, data in pairs(sound.queue) do
-                table.insert(queue, {buffer = self:GetLoadedBuffer(data.id, prefixes), data = data})
-            end
-        end
 
 		if #queue > 0 then
 			local source = MixedSoundSource:new(sound_id, queue, engine_source, clbk, cookie)
