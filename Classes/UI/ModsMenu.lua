@@ -293,7 +293,10 @@ end
 function BeardLibModsMenu:UpdateTitle(mod)
     local mod_item = self._list:GetItemByLabel(mod)
     if mod_item then
-        mod_item:GetItem("Title"):SetText((mod.Name or "Missing name?"))
+        local title = mod_item:GetItem("Title")
+        if title then
+            mod_item:GetItem("Title"):SetText(mod.Name or "Missing name?")
+        end
     end
 end
 
@@ -541,6 +544,10 @@ function BeardLibModsMenu:SetModNormal(module)
         self:SetModProgressBar(module, 0)
         mod_item:GetItem("Download"):SetEnabled(false)
         self:UpdateTitle(mod)
+        if mod_item._on_finish_download_clbk then
+            mod_item._on_finish_download_clbk()
+            mod_item._on_finish_download_clbk = nil
+        end
     end
     table.delete(self._waiting_for_update, mod)
 end
@@ -580,4 +587,27 @@ function BeardLibModsMenu:SetModNeedsUpdate(module, new_version)
         table.insert(self._waiting_for_update, mod)
     end
     self._notif_id = self._notif_id or BLT.Notifications:add_notification({title = loc:text("beardlib_updates_available"), text = loc:text("beardlib_updates_available_desc"), priority = 1})
+end
+
+-- Allows you to force start a download, please ask the user beforehand.
+function BeardLibModsMenu:ForceDownload(module, clbk)
+    local mod = module._mod
+    local mod_item = self._list:GetItemByLabel(mod)
+    if mod_item then
+        mod_item:SetIndex(mod.Name == "BeardLib" and 1 or 2)
+        if mod_item.multiple then
+            for _, item in pairs(mod_item:GetItem("List"):Items()) do
+                if item.update == module then
+                    item:SetIndex(1)
+                    item:GetItem("Download"):RunCallback()
+                    break
+                end
+            end
+        else
+            mod_item:GetItem("Download"):RunCallback()
+        end
+        if clbk then
+            mod_item._on_finish_download_clbk = clbk
+        end
+    end
 end
