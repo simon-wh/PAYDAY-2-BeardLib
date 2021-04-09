@@ -47,19 +47,20 @@ function NetworkMatchMakingSTEAM:_lobby_to_numbers(lobby, ...)
 	local url = lobby:key_value("level_update_download_url")
 	if is_key_valid(level_name) then
 		BeardLib:DevLog("Received level real name: " .. tostring(level_name))
+		data["level_id"] = lobby:key_value("level_id")
+		data["job_key"] = lobby:key_value("job_key")
+		data["custom_level_name"] = level_name
+		data["custom_map"] = 1
+		data[1] = 1001
 		if is_key_valid(uid) or is_key_valid(provider) or is_key_valid(url) then
 			BeardLib:DevLog("Received custom map data, id: " .. tostring(uid))
 			BeardLib:DevLog("provider: " .. tostring(provider))
 			BeardLib:DevLog("download url: " .. tostring(url))
-			data["level_id"] = lobby:key_value("level_id")
-			data["job_key"] = lobby:key_value("job_key")
 			data["level_update_key"] = uid
 			data["level_update_provider"] = provider
 			data["level_update_download_url"] = url
-			data["custom_level_name"] = level_name
-			data[1] = 1001
-		else
-			data[1] = 0
+		elseif not tweak_data.narrative.jobs[data["job_key"]] then
+			data[1] = 0 -- Ignore this custom heist
 		end
 	end
 	return data
@@ -72,17 +73,25 @@ Hooks:PostHook(NetworkMatchMakingSTEAM, "_call_callback", "BeardLibSearchLobbyFi
 			local numbers = attribute_list[i].numbers
 			local state_string_id = tweak_data:index_to_server_state(numbers[4])
 			local state_name = state_string_id and managers.localization:text("menu_lobby_server_state_" .. state_string_id) or "UNKNOWN"
-			if numbers.level_update_key or numbers.provider or numbers.download_url then
+			if numbers.custom_map == 1 then
 				local comp = managers.menu_component
 				local cmgui = comp and comp._crimenet_gui
 				if cmgui and cmgui._jobs and cmgui._jobs[room.room_id] then
 					local job = cmgui._jobs[room.room_id]
-					local update_data = {id = numbers.level_update_key, provider = numbers.level_update_provider, download_url = numbers.level_update_download_url}
-					job.update_data = table.size(update_data) > 0 and update_data or nil
-					job.level_name = tostring(numbers.custom_level_name)
-					job.job_key = numbers.job_key
-					job.state_name = state_name
-					cmgui:change_to_custom_job_gui(job)
+					if numbers.level_update_key or numbers.provider or numbers.download_url then
+						local update_data = {id = numbers.level_update_key, provider = numbers.level_update_provider, download_url = numbers.level_update_download_url}
+						job.update_data = table.size(update_data) > 0 and update_data or nil
+						job.level_name = tostring(numbers.custom_level_name)
+						job.job_key = numbers.job_key
+						job.state_name = state_name
+						cmgui:change_to_custom_job_gui(job)
+					else
+						local job_tweak = tweak_data.narrative.jobs[numbers.job_key]
+						if job_tweak then
+							job.level_name = managers.localization:to_upper_text(job_tweak.name_id)
+							job.job_key = numbers.job_key
+						end
+					end
 				end
 			end
 		end
@@ -107,6 +116,7 @@ Hooks:Add(seta_hook, "BeardLibCorrectCustomHeist", function(self, new_data, sett
 			local update = mod_assets._data
 			--Localization might be an issue..
 			table.merge(new_data, {
+				custom_map = 1,
 				custom_level_name = managers.localization:to_upper_text(tweak_data.levels[level_id].name_id),
 				level_id = level_id,
 				job_key = job_key,
@@ -114,6 +124,31 @@ Hooks:Add(seta_hook, "BeardLibCorrectCustomHeist", function(self, new_data, sett
 				level_update_provider = update.provider,
 				level_update_download_url = update.download_url,
 			})
+		else
+			table.merge(new_data, {
+				custom_level_name = managers.localization:to_upper_text(tweak_data.levels[level_id].name_id),
+				custom_map = 1,
+				level_id = level_id,
+				job_key = job_key
+			})
 		end
 	end
+end)
+
+-- Custom heists only filter
+LobbyBrowser.beardlib_set_interest_keys = LobbyBrowser.beardlib_set_interest_keys or LobbyBrowser.set_interest_keys
+local last_keys
+function LobbyBrowser:set_interest_keys(keys, ...)
+    last_keys = keys
+    return LobbyBrowser.beardlib_set_interest_keys(self, keys, ...)
+end
+
+Hooks:PostHook(NetworkMatchMakingSTEAM, "search_lobby", "CustomMapFilter", function(self, friends_only, no_filters)
+    if last_keys and self.browser then
+        if Global.game_settings.custom_maps_only then
+            table.insert(last_keys, "custom_map")
+            self.browser:set_interest_keys(last_keys)
+            self.browser:set_lobby_filter("custom_map", 1, "equalto_or_greater_than")
+        end
+    end
 end)

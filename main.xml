@@ -36,6 +36,7 @@
 				<option name="DevMode" type="boolean" default_value="false"/>
 				<option name="LogSounds" type="boolean" default_value="false"/>
 				<option name="OptimizedMusicLoad" type="boolean" default_value="true"/>
+				<option name="CustomMapsOnlyFilter" type="boolean" default_value="false"/>
 				<option name="LogInit" type="boolean" default_value="false"/>
 				<option name="ModSettings" type="table"/>
 				<!-- These are not used anymore. All settings are in ModSettings now. Any data inside these will be moved to there. -->
@@ -64,6 +65,7 @@
 			<hook source_file="lib/managers/blackmarketmanager" file="Fixes.lua"/>
 			<hook source_file="lib/tweak_data/groupaitweakdata" file="Fixes.lua"/>
 			<hook source_file="lib/network/base/networkpeer" file="Fixes.lua"/>
+			<hook source_file="lib/managers/platformmanager" file="Fixes.lua"/>
 			<hook source_file="lib/managers/hud/vr/hudbelt" file="Fixes.lua"/>
 			<hook source_file="lib/managers/dialogmanager" file="Fixes.lua"/>
 			<hook source_file="lib/managers/dlcmanager" file="Fixes.lua"/>

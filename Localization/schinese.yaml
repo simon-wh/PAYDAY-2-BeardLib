@@ -104,3 +104,4 @@ beardlib_mod_develop_mode_help: "若要为此模组激活开发模式，则自�
 beardlib_achieves_no_pkg: "在左侧面板选择一个成就包以显示其相关的成就。"
 beardlib_log_init: "模组日志初始化"
 beardlib_log_init_help: "当模组初始化时初始化模组的日志。"
+beardlib_custom_maps_only: "Custom Maps Only"

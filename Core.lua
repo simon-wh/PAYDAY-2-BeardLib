@@ -381,5 +381,25 @@ Hooks:Add("MenuManagerOnOpenMenu", "BeardLibShowErrors", function(self, menu)
 		if table.size(BeardLib._errors) > 0 then
 			BeardLib:ShowErrorsDialog()
 		end
+
+		-- Add Crime.Net custo maps only button to the filters
+		function MenuCallbackHandler:beardlib_custom_maps_only(item)
+			local val = item:value() == "on"
+			BeardLib.Options:SetValue("CustomMapsOnlyFilter", val)
+			Global.game_settings.custom_maps_only = val
+			managers.network.matchmake:search_lobby(managers.network.matchmake:search_friends_only())
+		end
+
+		Global.game_settings.custom_maps_only = BeardLib.Options:GetValue("CustomMapsOnlyFilter")
+		
+		local node = MenuHelperPlus:GetNode(nil, "crimenet_filters")
+		MenuHelperPlus:AddToggle({
+			id = "beardlib_custom_maps_only",
+			title = "beardlib_custom_maps_only",
+			node = node,
+			value = Global.game_settings.custom_maps_only,
+			position = 13,
+			callback = "beardlib_custom_maps_only",
+		})
 	end
 end)
