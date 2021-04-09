@@ -266,6 +266,10 @@ function Utils:FindModWithPath(path)
     return nil
 end
 
+function Utils:GetNameFromModPath(path)
+    return path:match("mods/(.+)/")
+end
+
 function NotNil(...)
     local args = {...}
     for k, v in pairs(args) do

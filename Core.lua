@@ -17,6 +17,7 @@ function BeardLib:Init()
 	self._updaters = {}
 	self._errors = {}
 	self._modules = {}
+	self._delayed_calls = {}
 
 	self.Frameworks = {}
 	self.Managers = {}
@@ -133,6 +134,14 @@ function BeardLib:CallOnNextUpdate(func, only_unpaused, only_paused)
 	table.insert(self._call_next_update, {func = func, only_unpaused = only_unpaused, only_paused = only_paused})
 end
 
+function BeardLib:AddDelayedCall(id, seconds, func, paused)
+	self._delayed_calls[id] = {func = func, call_t = Application:time() + seconds, paused = paused}
+end
+
+function BeardLib:RemoveDelayedCall(id, func)
+	self._delayed_calls[id] = nil
+end
+
 function BeardLib:RegisterFramework(name, clss)
 	self.Frameworks[name] = clss
 end
@@ -200,6 +209,12 @@ function BeardLib:Update(t, dt)
 			manager:Update(t, dt)
 		end
 	end
+	for id, delayed in pairs(self._delayed_calls) do
+		if delayed.call_t <= t then
+			delayed.func()
+			self._delayed_calls[id] = nil
+		end
+	end
 	for _, beardlib_update in pairs(self._updaters) do
 		beardlib_update(t, dt)
 	end
@@ -215,6 +230,12 @@ function BeardLib:PausedUpdate(t, dt)
 	for _, manager in pairs(self.Managers) do
 		if manager.Update then
 			manager:Update(t, dt, true)
+		end
+	end
+	for id, delayed in pairs(self._delayed_calls) do
+		if delayed.paused and delayed.call_t <= t then
+			delayed.func()
+			self._delayed_calls[id] = nil
 		end
 	end
 	for _, beardlib_paused_update in pairs(self._paused_updaters) do

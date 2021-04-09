@@ -459,11 +459,14 @@ elseif F == "dialogmanager" then
 				managers.dialog._dialog_list[id] = {
 					id = id,
 					sound = id,
-					string_id = sound.subtitle_id,
 					priority = sound.priority and tonumber(sound.priority) or tweak_data.dialog.DEFAULT_PRIORITY
 				}
 			end
 		end
+    end)
+    --fixes the '_current_dialog' (a nil value) crash
+    Hooks:PreHook(DialogManager, "finished", "BeardLibFinishedDialogFix", function(self)
+        self._current_dialog = {}
     end)
 elseif F == "networkpeer" then
     local tradable_item_verif = NetworkPeer.tradable_verify_outfit
@@ -677,4 +680,14 @@ elseif F == "menunodecustomizeweaponcolorgui" then
             end
         end
     end)
+elseif F == "platformmanager" then
+    -- Fixes rich presence to work with custom heists by forcing raw status.
+    Hooks:PostHook(WinPlatformManager, "set_rich_presence", "FixCustomHeistStatus", function(self)
+        if not Global.game_settings.single_player and Global.game_settings.permission ~= "private" and name ~= "Idle" and managers.network.matchmake.lobby_handler  then
+            local job = managers.job:current_job_data()
+            if job.custom then
+                Steam:set_rich_presence("steam_display", "#raw_status")
+            end
+        end
+    end) 
 end
