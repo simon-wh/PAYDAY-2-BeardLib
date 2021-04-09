@@ -7,23 +7,39 @@
 
 PlayerStyleModule = PlayerStyleModule or BeardLib:ModuleClass("PlayerStyle", ItemModuleBase)
 
+function PlayerStyleModule:SetupMaterialVariant(outfit_id, outfit_data, variant_id, variant_data)
+    if outfit_data.material_variations and outfit_data.material_variations[variant_id] then
+        self:Err("Player Style Variant with id '%s' already exists for '%s'!", variant_id, outfit_id)
+        return
+    end
+
+    outfit_data.material_variations = outfit_data.material_variations or {}
+    outfit_data.material_variations[variant_id] = table.merge({
+        name_id = "bm_suit_var_" .. outfit_id .. "_" .. variant_id,
+        desc_id = "bm_suit_var_" .. outfit_id .. "_" .. variant_id .. "_desc",
+        global_value = outfit_data.global_value or self.defaults.global_value,
+        auto_aquire = true,
+        custom = outfit_data.custom
+    }, variant_data)
+
+    -- Setup "default" variant just in case their isn't one.
+    outfit_data.material_variations.default = table.merge({
+    	name_id = "bm_suit_var_" .. outfit_id .. "_default",
+    	desc_id = "bm_suit_var_" .. outfit_id .. "_default_desc",
+    	global_value = outfit_data.global_value,
+    	auto_aquire = true,
+    	custom = outfit_data.custom
+    })
+end
+
 function PlayerStyleModule:RegisterHook()
     if not self._config.id then
         self:Err("Cannot add a Player Style, no ID specified.")
         return
     end
 
-    self._config.name_id = self._config.name_id or ("bm_suit_" .. self._config.id)
+    self._config.name_id = self._config.name_id or "bm_suit_" .. self._config.id
     self._config.desc_id = self._config.desc_id or self._config.name_id .. "_desc"
-
-    -- Make sure that any variants added through this are set to be custom.
-    if self._config.material_variations then
-        for variant_id, variant in pairs(self._config.material_variations) do
-            -- Gotta do this otherwise they can't be overridden by false.
-            if variant.custom == nil then variant.custom = true end
-            if variant.auto_acquire == nil then variant.auto_acquire = true end
-        end
-    end
 
     -- Super simple, just takes XML and shoves it into the player style stuff, and then add some extra glove bs because overkill. :)
     Hooks:Add("BeardLibCreateCustomPlayerStyles", self._config.id .. "AddPlayerStyleTweakData", function(bm_self)
@@ -33,6 +49,18 @@ function PlayerStyleModule:RegisterHook()
         if ps_self[config.id] then
             self:Err("Player Style with id '%s' already exists!", config.id)
             return
+        end
+
+        -- Cleanup any variants added this way.
+        if config.material_variations then
+            local stored_variants = config.material_variations
+            config.material_variations = {}
+
+            for variant_id, variant_data in pairs(stored_variants) do
+                if variant_id ~= "_meta" and type(variant_id) == "string" then
+                    self:SetupMaterialVariant(config.id, config, variant_id, variant_data)
+                end
+            end
         end
 
         ps_self[config.id] = table.merge({
