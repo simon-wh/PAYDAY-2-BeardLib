@@ -195,7 +195,7 @@ function ListDialog:ReloadInterface()
 end
 
 function ListDialog:Search(item)
-    BeardLib:AddDelayedCall("ListSearch", 0.2, function()
+    BeardLib:AddDelayedCall("ListSearch", 0.15, function()
         self._search = item:Value()
         self._filter = {}
         for _, s in pairs(string.split(self._search, ",")) do
@@ -203,7 +203,7 @@ function ListDialog:Search(item)
             table.insert(self._filter, s)
         end
         self:MakeListItems()
-    end)
+    end, true)
 end
 
 function ListDialog:on_escape()
