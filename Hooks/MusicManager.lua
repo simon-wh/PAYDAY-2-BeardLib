@@ -263,12 +263,14 @@ function MusicManager:custom_update(t, dt, paused)
 		if (self._xa_source and self._xa_source:is_closed()) or (gui_ply and gui_ply:current_frame() >= gui_ply:frames()) then
 			local switch = self._switch_at_end
 			local source = switch.tracks[switch.track_index].source
+			local volume = switch.tracks[switch.track_index].volume or switch.volume
 			if switch.allow_switch then
 				switch.track_index = self:pick_track_index(switch.tracks)
+				switch.volume = volume
 			else
 				self._switch_at_end = nil
 			end
-			self:play(source, switch.xaudio, switch.volume)
+			self:play(source, switch.xaudio, volume)
 		end
 	end
 end
