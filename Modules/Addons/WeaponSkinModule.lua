@@ -18,14 +18,15 @@ function WeaponSkinModule:RegisterHook()
     self._config.skin_folder = self._config.skin_folder and self:GetPath(self._config.skin_folder) or not self._config.is_a_color_skin and self:Err("The weapon skin '%s' is not shipped with the skin folder.", self._config.skin_folder)
     self._config.locked = self._config.locked or nil
     self._config.unique_name_id = self._config.unique_name_id or self._config.unique_name and self._config.name or nil
-    self._config.global_value = self._config.global_value or self.defaults.global_value
     self._config.group_id = self._config.global_value_category or self._config.global_value
 
     if (not self._config.is_a_color_skin) or self._config.universal then
         self._config.texture_bundle_folder = self._config.texture_bundle_folder or self._config.id
     else
-        self._config.texture_bundle_folder = self._config.texture_bundle_folder or self._config.global_value
+        self._config.texture_bundle_folder = self._config.texture_bundle_folder or self._config.global_value or "mods"
     end
+
+    self._config.global_value = self._config.global_value or self.defaults.global_value
 
     if self._config.skin_attachments then
         self._skin_attachments = self._config.skin_attachments
