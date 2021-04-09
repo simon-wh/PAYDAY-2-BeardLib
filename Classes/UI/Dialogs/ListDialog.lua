@@ -1,7 +1,7 @@
 ListDialog = ListDialog or class(MenuDialog)
 ListDialog.type_name = "ListDialog"
 ListDialog._no_reshaping_menu = true
-ListDialog.MAX_ITEMS = 500
+ListDialog.MAX_ITEMS = 1000
 
 function ListDialog:init(params, menu)
     if self.type_name == ListDialog.type_name then
@@ -157,12 +157,12 @@ function ListDialog:MakeListItems(params)
     local groups = {}
     local i = 0
     for _, v in pairs(self._list) do
+        if limit and i > self._max_items then
+            break
+        end
         local t = type(v) == "table" and v.name or v
         if self:SearchCheck(t) then
             i = i + 1
-            if limit and i >= self._max_items then
-                break
-            end
             local menu = self._list_menu
             if type(v) == "table" and v.create_group then
                 menu = groups[v.create_group] or self._list_menu:Group({
@@ -195,13 +195,15 @@ function ListDialog:ReloadInterface()
 end
 
 function ListDialog:Search(item)
-    self._search = item:Value()
-    self._filter = {}
-    for _, s in pairs(string.split(self._search, ",")) do
-        s = s:escape_special()
-        table.insert(self._filter, s)
-    end
-    self:MakeListItems()
+    BeardLib:AddDelayedCall("ListSearch", 0.2, function()
+        self._search = item:Value()
+        self._filter = {}
+        for _, s in pairs(string.split(self._search, ",")) do
+            s = s:escape_special()
+            table.insert(self._filter, s)
+        end
+        self:MakeListItems()
+    end)
 end
 
 function ListDialog:on_escape()
