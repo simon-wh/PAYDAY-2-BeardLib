@@ -99,7 +99,7 @@ function HeistMusic:RegisterHook()
 			end
 			for i,t in ipairs(tracks) do
 				if not t.start_source and not t.source then
-					self:err("Event named %s in heist music %s has no defined source for track %i", tostring(self._config.id), tostring(v.name), i)
+					self:Err("Event named %s in heist music %s has no defined source for track %i", tostring(self._config.id), tostring(v.name), i)
 					return
 				end
 			end
