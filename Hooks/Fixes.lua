@@ -681,6 +681,7 @@ elseif F == "menunodecustomizeweaponcolorgui" then
         end
     end)
 elseif F == "platformmanager" then
+    core:module("PlatformManager")
     -- Fixes rich presence to work with custom heists by forcing raw status.
     Hooks:PostHook(WinPlatformManager, "set_rich_presence", "FixCustomHeistStatus", function(self)
         if not Global.game_settings.single_player and Global.game_settings.permission ~= "private" and name ~= "Idle" and managers.network.matchmake.lobby_handler  then
