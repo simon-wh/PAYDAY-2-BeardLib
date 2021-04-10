@@ -136,19 +136,27 @@ Hooks:Add(seta_hook, "BeardLibCorrectCustomHeist", function(self, new_data, sett
 end)
 
 -- Custom heists only filter
-LobbyBrowser.beardlib_set_interest_keys = LobbyBrowser.beardlib_set_interest_keys or LobbyBrowser.set_interest_keys
-local last_keys
-function LobbyBrowser:set_interest_keys(keys, ...)
-    last_keys = keys
-    return LobbyBrowser.beardlib_set_interest_keys(self, keys, ...)
-end
-
+-- If they add any new interest keys, just make sure to update these.
+-- If your mod adds any keys, you can extend this list.
+NetworkMatchMakingSTEAM.DEFAULT_KEYS = {
+	"owner_id",
+	"owner_name",
+	"level",
+	"difficulty",
+	"permission",
+	"state",
+	"num_players",
+	"drop_in",
+	"min_level",
+	"kick_option",
+	"job_class_min",
+	"job_class_max",
+	"allow_mods",
+	"custom_map"
+}
 Hooks:PostHook(NetworkMatchMakingSTEAM, "search_lobby", "CustomMapFilter", function(self, friends_only, no_filters)
-    if last_keys and self.browser then
-        if Global.game_settings.custom_maps_only then
-            table.insert(last_keys, "custom_map")
-            self.browser:set_interest_keys(last_keys)
-            self.browser:set_lobby_filter("custom_map", 1, "equalto_or_greater_than")
-        end
+    if Global.game_settings.custom_maps_only and self.browser then
+		self.browser:set_interest_keys(self.DEFAULT_KEYS)
+		self.browser:set_lobby_filter("custom_map", 1, "equalto_or_greater_than")
     end
 end)

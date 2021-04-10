@@ -371,6 +371,8 @@ Hooks:Add("MenuManagerInitialize", "BeardLibCreateMenuHooks", function(self)
     Hooks:Call("BeardLibCreateCustomMenus", self)
     Hooks:Call("BeardLibMenuHelperPlusInitMenus", self)
 	Hooks:Call("BeardLibCreateCustomNodesAndButtons", self)
+
+	Global.game_settings.custom_maps_only = BeardLib.Options:GetValue("CustomMapsOnlyFilter")
 end)
 
 Hooks:Add("MenuManagerOnOpenMenu", "BeardLibShowErrors", function(self, menu)
@@ -387,8 +389,7 @@ Hooks:Add("MenuManagerOnOpenMenu", "BeardLibShowErrors", function(self, menu)
 			managers.network.matchmake:search_lobby(managers.network.matchmake:search_friends_only())
 		end
 
-		Global.game_settings.custom_maps_only = BeardLib.Options:GetValue("CustomMapsOnlyFilter")
-		
+
 		local node = MenuHelperPlus:GetNode(nil, "crimenet_filters")
 		MenuHelperPlus:AddToggle({
 			id = "beardlib_custom_maps_only",
