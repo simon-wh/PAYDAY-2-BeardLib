@@ -11,7 +11,7 @@ FrameworkBase = FrameworkBase or BeardLib:Class()
 FrameworkBase._directory = BLTModManager.Constants.mods_directory or "mods/"
 FrameworkBase._format = Path:Combine(FrameworkBase._directory, "%s", "main.xml")
 FrameworkBase._mod_core = ModCore
-FrameworkBase._ignore_folders = {["base"] = true, ["BeardLib"] = true, ["downloads"] = true, ["logs"] = true, ["saves"] = true}
+FrameworkBase._ignore_folders = {["base"] = true, ["BeardLib"] = true, ["PAYDAY-2-BeardLib-master"] = true, ["downloads"] = true, ["logs"] = true, ["saves"] = true}
 FrameworkBase._ignore_detection_errors = true
 
 FrameworkBase.main_file_name = "main.xml"
