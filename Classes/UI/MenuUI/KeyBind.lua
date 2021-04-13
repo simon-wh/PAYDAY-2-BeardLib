@@ -1,5 +1,6 @@
 BeardLib.Items.KeyBindItem = BeardLib.Items.KeyBindItem or class(BeardLib.Items.Item)
 local KeyBindItem = BeardLib.Items.KeyBindItem
+local InputUtils = BeardLib.Utils.Input
 KeyBindItem.type_name = "KeyBind"
 function KeyBindItem:Init()
     self.size_by_text = false
@@ -37,6 +38,59 @@ function KeyBindItem:SetKeybindKey()
     self.keybind_key:set_righttop(self.panel:w() - self.text_offset[1], self.text_offset[2])
 end
 
+function KeyBindItem:GetPressedKeys()
+    local keys = {}
+    local input_devices = InputUtils:GetInputDevices(not self.supports_keyboard, not self.supports_mouse or self._ignore_mouse)
+    for device_name, device in pairs(input_devices) do
+        local down_list = device:DownList()
+        for _, key in pairs(down_list) do
+            table.insert(keys, key)
+            if not self.supports_additional then
+                return keys
+            elseif #keys == 4 then
+                break
+            end
+        end
+    end
+
+    local special_keys = {ctrl = 3, shift = 2, alt = 1}
+    table.sort(keys, function(a,b)
+        local actual_a = string.split(a, " ")[2] or ""
+        local actual_b = string.split(b, " ")[2] or ""
+        if special_keys[actual_a] and not special_keys[actual_b] then
+            return true
+        else
+            return false
+        end
+    end)
+
+    return keys
+end
+
+local forbidden_btns = {
+    "esc",
+    "tab",
+    "enter",
+    "num abnt c1",
+    "num abnt c2",
+    "@",
+    "+",
+    "ax",
+    "convert",
+    "left windows",
+    "right windows",
+    "kana",
+    "kanji",
+    "no convert",
+    "oem 102",
+    "stop",
+    "unlabeled",
+    "yen",
+    "mouse 8",
+    "mouse 9",
+    ""
+}
+
 function KeyBindItem:SetCanEdit(CanEdit)
     self.CanEdit = CanEdit
     if not alive(self.panel) then
@@ -44,85 +98,42 @@ function KeyBindItem:SetCanEdit(CanEdit)
     end
     self.keybind_key:set_alpha(CanEdit and 0.5 or 1)
     if CanEdit then
+        local keys
         BeardLib:AddUpdater("MenuUIKeyBindUpdate"..tostring(self), function()
-            local function get(input)
-                local key, additional_key
-                for _,k in pairs(input:down_list()) do
-                    local _key = input:button_name_str(input:button_name(k))
-                    if not additional_key then
-                        if key then
-                            additional_key = _key
-                        else
-                            key = _key
-                            if not self.supports_additional then
+            if keys then
+                local devices = InputUtils:GetInputDevices(not self.supports_keyboard, not self.supports_mouse or self._ignore_mouse)
+                for _, key in pairs(keys) do
+                    for device_name, device in pairs(devices) do
+                        if device_name ~= "mouse" or key:find("mouse") then
+                            if device:Down(key) then
                                 break
+                            else
+                                log("Not held", tostring(key), tostring(device_name))
+                                self:SetCanEdit(false)
+                                return    
                             end
                         end
                     end
                 end
-
-                return key, additional_key
             end
-            local key, additional_key
-            if self.supports_keyboard then
-                key, additional_key = get(Input:keyboard())
-            end
-
-            local is_mouse
-            if not key and self.supports_mouse and not self._ignore_mouse then
-                key = get(Input:mouse())
-                is_mouse = true
-            end
+            keys = self:GetPressedKeys()
             if self._ignore_mouse then
                 self._ignore_mouse = Input:mouse():down("0")
             end
-            if key then
-                local forbidden_btns = {
-                    "esc",
-                    "tab",
-                    "enter",
-                    "num abnt c1",
-                    "num abnt c2",
-                    "@",
-                    "+",
-                    "ax",
-                    "convert",
-                    "kana",
-                    "kanji",
-                    "no convert",
-                    "oem 102",
-                    "stop",
-                    "unlabeled",
-                    "yen",
-                    "mouse 8",
-                    "mouse 9",
-                    ""
-                }
+            if #keys > 0 then
                 for _, btn in pairs(forbidden_btns) do
-                    if key == "backspace" then
-                        self:SetValue(nil, true)
-                        self:SetCanEdit(false)
-                        return
-                    elseif key == btn or additional_key == btn then
-                        self:SetCanEdit(false)
-                        return
+                    for _, key in pairs(keys) do
+                        if key == "backspace" then
+                            self:SetValue(nil, true) 
+                            self:SetCanEdit(false)
+                            return
+                        elseif key == btn then
+                            self:SetCanEdit(false)
+                            return
+                        end
                     end
                 end
-                if additional_key then
-                    if additional_key:find("ctrl") or additional_key:find("alt") or additional_key:find("shift") then
-                        local old_k = key
-                        key = additional_key
-                        additional_key = old_k
-                    end
-                    key = key .. "+" .. additional_key
-                    self:SetCanEdit(false)
-                elseif is_mouse then
-                    self:SetCanEdit(false)
-                end
-                if is_mouse and not key:find("mouse") then
-                    key = "mouse " .. key
-                end
-                self:SetValue(key, true)
+                self:SetValue(table.concat(keys, "+"), true)
                 return
             end
         end, true)

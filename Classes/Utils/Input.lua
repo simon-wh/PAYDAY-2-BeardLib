@@ -8,6 +8,19 @@ function InputUtils:Id(str) return str:id() end
 
 --Keyboard
 function InputUtils:Down(key) return self:Class():down(self:Id(key)) end
+function InputUtils:DownList() 
+    local device = self:Class()
+    local orig_down_list = device:down_list()
+    local down_list = {}
+    for _, key in pairs(orig_down_list) do
+        local _key = device:button_name_str(device:button_name(key))
+        if device_name == "mouse" and not _key:find("mouse") then
+            _key = "mouse " .. _key
+        end
+        table.insert(down_list, _key)
+    end
+    return down_list
+end
 function InputUtils:Released(key) return self:Class():released(self:Id(key)) end
 function InputUtils:Pressed(key) return self:Class():pressed(self:Id(key)) end
 function InputUtils:Trigger(key, clbk) return self:Class():add_trigger(self:Id(key), SafeClbk(clbk)) end
@@ -21,17 +34,54 @@ function MouseInput:Class() return Input:mouse() end
 --For example keyboard has the number 0 which is counted as left mouse button for mouse input, this solves it.
 function MouseInput:Id(str) return str end
 
-function InputUtils:TriggerDataFromString(str, clbk)
-    local additional_key
-    local key = str
-    if string.find(str, "+") then
-        local split = string.split(str, "+")
-        key = split[1]
-        additional_key = split[2]
+
+function InputUtils:GetInputDevices(no_keyboard, no_mouse)
+    local input_devices = {}
+    if not no_keyboard then
+        input_devices.keyboard = self
     end
-    return {key = key, additional_key = additional_key, clbk = clbk}
+    if not no_mouse then
+        input_devices.mouse = MouseInput
+    end
+    return input_devices
 end
 
+function InputUtils:TriggerDataFromString(str, clbk)
+    local data = self:TriggerData(str, clbk)
+    return {key = data.keys[1], additional_key = data.keys[2], clbk = data.clbk}
+end
+
+function InputUtils:GetTriggerData(str, clbk)
+    return {keys = string.split(str, "+"), clbk = clbk}
+end
+
+function InputUtils:IsTriggered(trigger, check_mouse_too)
+    if not trigger.keys or #trigger.keys == 0 then
+        return false
+    end
+    
+    local is_held = false
+    local devices = self:GetInputDevices()
+    if not check_mouse_too then
+        devices.mouse = nil
+    end
+
+    for i, key in pairs(trigger.keys) do
+        for device_name, device in pairs(devices) do
+            if device_name ~= "mouse" or key:find("mouse") then
+                local last = i == #trigger.keys
+                if last and self:Pressed(key) or not last and self:Down(key) then
+                    is_held = true
+                else
+                    return false
+                end
+            end
+        end
+    end
+    return is_held
+end
+
+-- Old version of IsTriggered before keys were merged into a table
 function InputUtils:Triggered(trigger, check_mouse_too)
     if not trigger.key then
         return false
