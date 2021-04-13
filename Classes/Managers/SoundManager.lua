@@ -264,7 +264,7 @@ function BeardLibSoundManager:Stop(engine_source)
             if source._engine_source == engine_source then
                 source:close()
             else
-                table.insert(new_sources, tbl)
+                table.insert(new_sources, source)
             end
         end
     end
