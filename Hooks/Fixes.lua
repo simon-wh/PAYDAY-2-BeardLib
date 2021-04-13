@@ -464,10 +464,6 @@ elseif F == "dialogmanager" then
 			end
 		end
     end)
-    --fixes the '_current_dialog' (a nil value) crash
-    Hooks:PreHook(DialogManager, "finished", "BeardLibFinishedDialogFix", function(self)
-        self._current_dialog = {}
-    end)
 elseif F == "networkpeer" then
     local tradable_item_verif = NetworkPeer.tradable_verify_outfit
     function NetworkPeer:tradable_verify_outfit(signature)
