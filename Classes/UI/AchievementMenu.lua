@@ -148,7 +148,7 @@ function BeardLibAchievementMenu:InitAccount()
 		steam_avatar:SetImage(avatar)
 	end)
 
-	DelayedCalls:Add("BeardLib_Recheck_Account_Avatar", 2, function()
+	BeardLib:AddDelayedCall("BeardLib_Recheck_Account_Avatar", 2, function()
 		Steam:friend_avatar(2, Steam:userid(), function (texture)
 			local avatar = texture or "guis/textures/pd2/none_icon"
 			if alive(steam_avatar) then

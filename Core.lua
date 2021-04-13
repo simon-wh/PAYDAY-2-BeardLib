@@ -135,7 +135,7 @@ function BeardLib:CallOnNextUpdate(func, only_unpaused, only_paused)
 end
 
 function BeardLib:AddDelayedCall(id, seconds, func, paused)
-	self._delayed_calls[id] = {func = func, call_t = Application:time() + seconds, paused = paused}
+	self._delayed_calls[id] = {func = func, call_t = TimerManager:main():time() + seconds, paused = paused}
 end
 
 function BeardLib:RemoveDelayedCall(id, func)
@@ -209,8 +209,9 @@ function BeardLib:Update(t, dt)
 			manager:Update(t, dt)
 		end
 	end
+	local main_t = TimerManager:main():time()
 	for id, delayed in pairs(self._delayed_calls) do
-		if delayed.call_t <= t then
+		if delayed.call_t <= main_t then
 			delayed.func()
 			self._delayed_calls[id] = nil
 		end
@@ -232,6 +233,8 @@ function BeardLib:PausedUpdate(t, dt)
 			manager:Update(t, dt, true)
 		end
 	end
+
+	local main_t = TimerManager:main():time()
 	for id, delayed in pairs(self._delayed_calls) do
 		if delayed.paused and delayed.call_t <= t then
 			delayed.func()

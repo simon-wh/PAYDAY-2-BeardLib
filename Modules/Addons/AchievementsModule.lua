@@ -66,7 +66,7 @@ function AchievementsModule:RegisterHook()
 
     -- Very ugly workaround. But it seems HudIconsTweakData is loaded before AchievementTweakData. bah. It works as it is, all that matter.
     Hooks:PostHook(HudIconsTweakData, "init", "custom_achievement_icon_data", function(i_self)
-        DelayedCalls:Add("custom_icons_wait_initialization", 2, function()
+        BeardLib:AddDelayedCall("custom_icons_wait_initialization", 2, function()
             for _, icon_tables in ipairs(BeardLib.Managers.Achievement._achievement_icons_spoofer) do
                 for _, icon_path in pairs(icon_tables) do
                     if i_self[icon_path] then

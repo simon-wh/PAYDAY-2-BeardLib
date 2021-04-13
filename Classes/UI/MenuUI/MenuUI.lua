@@ -113,7 +113,7 @@ function MenuUI:ReloadInterface(params, shallow)
 end
 
 function MenuUI:ShowDelayedHelp(item, force)
-    DelayedCalls:Add("ShowItemHelp"..tostring(self), (force and 0 or nil) or self.show_help_time or 1, function()
+    BeardLib:AddDelayedCall("ShowItemHelp"..tostring(self), (force and 0 or nil) or self.show_help_time or 0.8, function()
         if not alive(item) then
             self:HideHelp()
             return
@@ -121,7 +121,7 @@ function MenuUI:ShowDelayedHelp(item, force)
         if self._showing_help and self._showing_help ~= item then
             self:HideHelp()
         end
-        if self._highlighted == item and not self:Typing() then
+        if self._highlighted == item then
             self._help:set_layer(item:Panel():parent():layer() + 50000)
             local help_text = self._help:child("text")
             help_text:set_w(300)
@@ -152,7 +152,7 @@ function MenuUI:ShowDelayedHelp(item, force)
             self._saved_help_x = self._old_x
             self._saved_help_y = self._old_y
         end
-    end)
+    end, true)
 end
 
 function MenuUI:HideHelp()
