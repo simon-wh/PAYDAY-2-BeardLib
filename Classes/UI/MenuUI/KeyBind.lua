@@ -32,7 +32,8 @@ function KeyBindItem:SetKeybindKey()
     if not self:alive() then
         return
     end
-    self.keybind_key:set_text(string.upper(self.value or "None"))
+    local value = self.value
+    self.keybind_key:set_text(string.upper((value and tostring(value):len() > 0 and value) or "None"))
     local _,_,w,h = self.keybind_key:text_rect()
     self.keybind_key:set_size(w,h)
     self.keybind_key:set_righttop(self.panel:w() - self.text_offset[1], self.text_offset[2])
@@ -108,7 +109,6 @@ function KeyBindItem:SetCanEdit(CanEdit)
                             if device:Down(key) then
                                 break
                             else
-                                log("Not held", tostring(key), tostring(device_name))
                                 self:SetCanEdit(false)
                                 return    
                             end
