@@ -159,6 +159,7 @@ function BeardLibPackageManager:LoadConfig(directory, config, mod, settings)
         if type(child) == "table" then
             local typ = child._meta
             local path = child.path
+            local script_data_type = NotNil(child.script_data_type, config.script_data_type)
             local use_clbk = child.use_clbk or child.load_clbk
             if use_clbk and mod then
                 use_clbk = mod:StringToCallback(use_clbk) or nil
@@ -233,7 +234,11 @@ function BeardLibPackageManager:LoadConfig(directory, config, mod, settings)
                                     Managers.File:AddFile(COOKED_PHYSICS_IDS, ids_path, CP_DEFAULT)
                                 end
                             end
-                            Managers.File:AddFile(ids_ext, ids_path, file_path_ext)
+                            if script_data_type then
+                                Managers.File:ScriptReplaceFile(ids_ext, ids_path, file_path_ext, {type = script_data_type, add = true})
+                            else
+                                Managers.File:AddFile(ids_ext, ids_path, file_path_ext)
+                            end
                             if child.reload then
                                 PackageManager:reload(ids_ext, ids_path)
                             end
