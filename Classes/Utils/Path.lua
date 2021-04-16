@@ -20,6 +20,15 @@ function Path:GetFileName(str)
 	return table.remove(string.split(str, self._separator_char))
 end
 
+function Path:GetFilePathNoExt(str)
+    if string.find(str, "%.") then
+        local split = string.split(str, "%.")
+        table.remove(split)
+        str = table.concat(split, ".")
+    end
+    return str
+end
+
 function Path:GetFileNameWithoutExtension(str)
     local filename = self:GetFileName(str)
     if not filename then
