@@ -243,7 +243,7 @@ function FileBrowserDialog:FileDoubleClick(item, key)
         if self._folder_browser then
             self._file_click(self._current_dir)
         else
-            local path = (self._current_dir or "") .. "/" .. self._file_name:Value()
+            local path = self._current_dir and Path:Combine(self._current_dir, self._file_name:Value()) or self._file_name:Value()
             if FileIO:Exists(path) then
                 if self._save then
                     QuickDialog({force = true, dialog = BLE.Dialog, title = "Alert", message = "File already exists, replace the file?", no = "No"}, {{"Yes", SimpleClbk(self._file_click, path)}})
@@ -261,7 +261,7 @@ end
 
 function FileBrowserDialog:FolderClick(item)
     self._old_dir = nil
-    self:Browse(Path:Normalize(self._current_dir .. "/" .. item.text))
+    self:Browse(Path:Normalize(Path:CombineDir(self._current_dir, item.text)))
     if item.press_clbk then
         item.press_clbk()
     end
