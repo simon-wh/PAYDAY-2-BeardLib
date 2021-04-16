@@ -62,10 +62,9 @@ function LevelModule:Load()
     self._level_dir = "levels/"..self._config.id
     self._add_path = self._level_dir.."/add.xml"
     if self._config.add or FileIO:Exists(Path:CombineDir(self._mod.ModPath, self._add_path)) then
-            local module = AddFilesModule:new(self._mod, self._config.add or {file = self._add_path, directory = "assets"})
-            self._loaded_addfiles = module
-            table.insert(self._addfiles_modules, module)
-        end
+        local module = AddFilesModule:new(self._mod, self._config.add or {file = self._add_path, directory = "assets"})
+        self._loaded_addfiles = module
+        table.insert(self._addfiles_modules, module)
     end
 
     self._local_add_path = self._level_dir.."/add_local.xml"
