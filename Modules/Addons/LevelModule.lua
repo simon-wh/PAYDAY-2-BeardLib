@@ -17,6 +17,7 @@ function LevelModule:init(...)
     end
 
     self._config.id = tostring(self._config.id)
+    self._addfiles_modules = {}
 
     if Global.level_data and Global.level_data.level_id == self._config.id then
         BeardLib.current_level = self
@@ -27,12 +28,13 @@ function LevelModule:init(...)
 end
 
 function LevelModule:Load()
+    self._inner_dir = Path:Combine(self.levels_folder, self._config.id)
     if self._config.include then
         for i, include_data in ipairs(self._config.include) do
             if include_data.file then
                 local file_split = string.split(include_data.file, "[.]")
                 local complete_path = Path:Combine(self._mod.ModPath, self._config.include.directory, include_data.file)
-                local new_path = Path:Combine(self.levels_folder, self._config.id, file_split[1])
+                local new_path = Path:Combine(self._inner_dir, file_split[1])
                 if FileIO:Exists(complete_path) then
                     if include_data.type then
                         BeardLib.Managers.File:ScriptReplaceFile(file_split[2], new_path, complete_path, {type = include_data.type, add = true})
@@ -55,8 +57,21 @@ function LevelModule:Load()
         SoundsModule:new(self._mod, self._config.sounds)
     end
 
-    if self._config.add then
-        self._loaded_addfiles = AddFilesModule:new(self._mod, self._config.add)
+    self._addfiles_modules = {}
+
+    self._level_dir = "levels/"..self._config.id
+    self._add_path = self._level_dir.."/add.xml"
+    if self._config.add or FileIO:Exists(Path:CombineDir(self._mod.ModPath, self._add_path)) then
+            local module = AddFilesModule:new(self._mod, self._config.add or {file = self._add_path, directory = "assets"})
+            self._loaded_addfiles = module
+            table.insert(self._addfiles_modules, module)
+        end
+    end
+
+    self._local_add_path = self._level_dir.."/add_local.xml"
+    if FileIO:Exists(Path:CombineDir(self._mod.ModPath, self._load_add_path)) then
+        local module = AddFilesModule:new(self._mod, {file = self._local_add_path, directory = self._level_dir, inner_directory = self._inner_dir})
+        table.insert(self._addfiles_modules, module)
     end
 
     if self._config.script_data_mods then
@@ -200,8 +215,8 @@ function InstanceModule:Unload()
         end
     end
     self._loaded_packages = nil
-    if self._loaded_addfiles then
-        self._loaded_addfiles:Unload()
-        self._loaded_addfiles = nil
+    for _, module in pairs(self._addfiles_modules) do
+        module:Unload()
     end
+    self._addfiles_modules = {}
 end
