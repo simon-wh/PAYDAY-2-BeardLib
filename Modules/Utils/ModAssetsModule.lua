@@ -277,7 +277,7 @@ function DownloadCustomMap:init()
 end
 
 function DownloadCustomMap:DownloadFailed()
-    BeardLibEditor.managers.Dialog:Show({title = managers.localization:text("mod_assets_error"), message = managers.localization:text("custom_map_failed_download"), force = true})
+    BeardLib.Managers.Dialog:Simple():Show({title = managers.localization:text("mod_assets_error"), message = managers.localization:text("custom_map_failed_download"), force = true})
     if self.failed_map_downloaed then
         self.failed_map_downloaed()
     end

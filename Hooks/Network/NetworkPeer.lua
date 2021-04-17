@@ -140,7 +140,7 @@ Hooks:Add("NetworkReceivedData", SyncConsts.GameSettings, function(sender, id, d
                 end)
             else
                 disconnect()
-                BeardLibEditor.managers.Dialog:Show({title = managers.localization:text("mod_assets_error"), message = managers.localization:text("custom_map_cant_download"), force = true})
+                BeardLib.Managers.Dialog:Simple():Show({title = managers.localization:text("mod_assets_error"), message = managers.localization:text("custom_map_cant_download"), force = true})
                 return
             end
         end
