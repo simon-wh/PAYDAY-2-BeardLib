@@ -52,6 +52,28 @@ Hooks:PostHook(BLTNotificationsGui, "_setup", "BeardLibModsManagerSetup", functi
         x = self._beardlib_updates:right() + 4,
         color = self._beardlib_accent
     })
+    if BLE then --Editor related buttons
+        self._beardlib_editor_menu = self._beardlib_panel:bitmap({
+            name = "BeardlibEditorMenu",
+            texture = "textures/editor_icons_df",
+            texture_rect = {256, 262, 115, 115},
+            w = 28,
+            h = 28,
+            y = 8,
+            x = self._beardlib_achievements:right() + 4,
+            color = self._beardlib_accent
+        })
+        self._beardlib_editor_startlast = self._beardlib_panel:bitmap({
+            name = "RestartLastEditorHeist",
+            texture = "textures/editor_icons_df",
+            texture_rect = {116, 110, 32, 32},
+            w = 28,
+            h = 28,
+            y = 8,
+            x = self._beardlib_editor_menu:right() + 4,
+            color = self._beardlib_accent
+        })
+    end
 end)
 
 Hooks:PostHook(BLTNotificationsGui, "close", "BeardLibPanelClose", function(self)
@@ -76,8 +98,8 @@ function BLTNotificationsGui:mouse_moved(o, x, y)
         return
     end
 
-    if alive(self._beardlib_updates) and alive(self._beardlib_achievements) then
-        if self._beardlib_achievements:inside(x,y) or self._beardlib_updates:inside(x,y)  then
+    if alive(self._beardlib_updates) and alive(self._beardlib_achievements) and alive(self._beardlib_editor_startlast) and alive(self._beardlib_editor_menu) then
+        if self._beardlib_achievements:inside(x,y) or self._beardlib_updates:inside(x,y) or self._beardlib_editor_startlast:inside(x,y) or self._beardlib_editor_menu:inside(x,y)  then
             return true, "link"
         end
     end
@@ -96,6 +118,25 @@ function BLTNotificationsGui:mouse_pressed(button, x, y)
     if alive(self._beardlib_achievements) and self._beardlib_achievements:inside(x,y) then
         BeardLib.Menus.Achievement:SetEnabled(true)
         return true
+    end
+    if BLE then
+        if alive(self._beardlib_editor_startlast) and self._beardlib_editor_startlast:inside(x,y) then
+            local file = io.open(SavePath .. "BeardLibEditor_LastLoaded.txt", "r")
+            local data = json.decode(file:read("*all"))
+            file:close()
+            if data and data.name then
+                if tweak_data.levels[data.name] then
+                    BLE.LoadLevel:load_level(data)
+                else
+                    BeardLib.Managers.Dialog:Simple():Show({title = managers.localization:text("mod_assets_error"), message = "Heist \"" .. data.name .. "\" not found.", force = true})
+                end
+            end
+            return true
+        end
+        if alive(self._beardlib_editor_menu) and self._beardlib_editor_menu:inside(x,y) then
+            BLE.Menu:set_enabled(true)
+            return true
+        end
     end
     return mouse_press(self, button, x, y)
 end
