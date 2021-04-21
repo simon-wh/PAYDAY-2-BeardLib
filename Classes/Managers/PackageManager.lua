@@ -146,9 +146,9 @@ function BeardLibPackageManager:LoadConfig(directory, config, mod, settings)
         if use_clbk and mod then
             use_clbk = mod:StringToCallback(use_clbk) or nil
         end
-    end
-    if use_clbk and not use_clbk(config) then
-        return
+        if use_clbk and not use_clbk(config) then
+            return
+        end
     end
 
     local ingame = Global.level_data and Global.level_data.level_id ~= nil
@@ -159,6 +159,7 @@ function BeardLibPackageManager:LoadConfig(directory, config, mod, settings)
         if type(child) == "table" then
             local typ = child._meta
             local path = child.path
+            local from_db = NotNil(child.from_db, config.from_db)
             local script_data_type = NotNil(child.script_data_type, config.script_data_type)
             local use_clbk = child.use_clbk or child.load_clbk
             if use_clbk and mod then
@@ -199,7 +200,8 @@ function BeardLibPackageManager:LoadConfig(directory, config, mod, settings)
                 elseif typ and path then
                     path = Path:Normalize(path)
                     local ids_ext = Idstring(BeardLibPackageManager.EXT_CONVERT[typ] or typ)
-					local ids_path = Idstring(path)
+                    local inner_directory = config.inner_directory
+					local ids_path = inner_directory and Idstring(Path:Combine(inner_directory, path)) or Idstring(path)
 					local file_path = child.full_path or Path:Combine(directory, config.file_path or path)
                     local file_path_ext = file_path.."."..typ
                     local auto_cp = NotNil(child.auto_cp, config.auto_cp, false)
@@ -212,7 +214,7 @@ function BeardLibPackageManager:LoadConfig(directory, config, mod, settings)
                     local dyn_load_menu = NotNil(child.load_in_menu, config.load_in_menu, false)
                     local dyn_load = NotNil(child.load, config.load, false)
 
-                    if FileIO:Exists(file_path_ext) then
+                    if (from_db and blt.asset_db.has_file(path, typ)) or (not from_db and FileIO:Exists(file_path_ext)) then
                         local load = force
                         if not load then
                             local force_if_not_loaded = NotNil(child.force_if_not_loaded, config.force_if_not_loaded, false)
@@ -234,7 +236,9 @@ function BeardLibPackageManager:LoadConfig(directory, config, mod, settings)
                                     Managers.File:AddFile(COOKED_PHYSICS_IDS, ids_path, CP_DEFAULT)
                                 end
                             end
-                            if script_data_type then
+                            if from_db then
+                                Managers.File:LoadFileFromDB(typ, path)
+                            elseif script_data_type then
                                 Managers.File:ScriptReplaceFile(ids_ext, ids_path, file_path_ext, {type = script_data_type, add = true})
                             else
                                 Managers.File:AddFile(ids_ext, ids_path, file_path_ext)
@@ -249,6 +253,8 @@ function BeardLibPackageManager:LoadConfig(directory, config, mod, settings)
                                 Managers.File:ForceEarlyLoad(ids_ext, ids_path, file_path_ext)
                             end
                         end
+                    elseif from_db then
+                        self:Err("File does not exist in database! %s", tostring(file_path_ext))
                     else
                         self:Err("File does not exist! %s", tostring(file_path_ext))
                     end

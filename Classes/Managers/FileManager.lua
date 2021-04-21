@@ -116,6 +116,22 @@ function BeardLibFileManager:AddFile(ext, path, file)
 	end
 end
 
+function BeardLibFileManager:LoadFileFromDB(ext, path)
+	if self:Has(ext, path) then
+		return
+	end
+
+	local k_ext = ext:key()
+
+	blt.wren_io.invoke(BeardLib.Utils:GetNameFromModPath(BeardLib.ModPath), "AssetLoader", nil, "load", ext, path)
+    Global.fm.added_files[k_ext] = Global.fm.added_files[k_ext] or {}
+	Global.fm.added_files[k_ext][path:key()] = file
+
+	if k_ext == texture_key then
+		Application:reload_textures({path:id()})
+	end
+end
+
 function BeardLibFileManager:AddFileWithCheck(ext, path, file)
 	if FileIO:Exists(file) then
 		self:AddFile(ext, path, file)
