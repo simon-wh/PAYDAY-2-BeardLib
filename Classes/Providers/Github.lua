@@ -46,9 +46,9 @@ function github:download_file_func(data)
     local download_url
     --Avoid adding the callback if release, hash doesn't need to be updated.
     if self._config.release then
-        download_url = github.download_url
+        download_url = self._github_download_url
     else
-        download_url = ModCore:GetRealFilePath(self._github_download_url, data or self._config)
+        download_url = ModCore:GetRealFilePath(github.download_url, data or self._config)
         table.merge(self._config, {
             done_callback = SimpleClbk(github.done_callback, self)
         })
