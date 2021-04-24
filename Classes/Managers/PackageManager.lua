@@ -146,7 +146,7 @@ function BeardLibPackageManager:LoadConfig(directory, config, mod, settings)
         if use_clbk and mod then
             use_clbk = mod:StringToCallback(use_clbk) or nil
         end
-        if use_clbk and not use_clbk(config) then
+        if use_clbk and type(use_clbk) == "function" and not use_clbk(config) then
             return
         end
     end
