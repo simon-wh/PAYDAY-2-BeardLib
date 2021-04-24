@@ -27,6 +27,13 @@ function github:check_func()
         if data then
             data = json.decode(data)
             self._new_version = data.sha or data.tag_name
+            --if file is empty, assume it's a fresh install of latest release.
+            if self.version_file and not FileIO:Exists(self.version_file) or self.version_file and FileIO:ReadFrom(self.version_file) == "" then
+                FileIO:WriteTo(self.version_file, self._new_version)
+                Global.beardlib_checked_updates[self.id] = true
+                return
+            end
+
             local length_acceptable = (string.len(self._new_version) > 0 and string.len(self._new_version) <= 64)
 
             if length_acceptable and tostring(self._new_version) ~= tostring(self.version) then
