@@ -22,7 +22,7 @@ function WeaponSkinModule:RegisterHook()
     if (not self._config.is_a_color_skin) or self._config.universal then
         self._config.texture_bundle_folder = self._config.texture_bundle_folder or self._config.id
     else
-        self._config.texture_bundle_folder = self._config.texture_bundle_folder or self._config.global_value or "mods"
+        self._config.texture_bundle_folder = self._config.texture_bundle_folder or self._config.global_value or "mod"
     end
 
     self._config.global_value = self._config.global_value or self.defaults.global_value
