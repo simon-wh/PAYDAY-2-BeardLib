@@ -47,7 +47,7 @@ function InputUtils:GetInputDevices(no_keyboard, no_mouse)
 end
 
 function InputUtils:TriggerDataFromString(str, clbk)
-    local data = self:TriggerData(str, clbk)
+    local data = self:GetTriggerData(str, clbk)
     return {key = data.keys[1], additional_key = data.keys[2], clbk = data.clbk}
 end
 
@@ -59,7 +59,7 @@ function InputUtils:IsTriggered(trigger, check_mouse_too)
     if not trigger.keys or #trigger.keys == 0 then
         return false
     end
-    
+
     local is_held = false
     local devices = self:GetInputDevices()
     if not check_mouse_too then
