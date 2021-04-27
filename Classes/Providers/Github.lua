@@ -11,6 +11,11 @@ function github:check_func()
         return
     end
 
+    -- If we cloned the mod ignore this procedure entirely. We are most likely developers/know how to use git.
+    if self._mod and FileIO:Exists(Path:CombineDir(self._mod.ModPath, ".git")) then
+        return
+    end
+
     local check_url = self._config.release and github.check_url_release or github.check_url
     local upd = Global.beardlib_checked_updates[self.id]
 
@@ -26,6 +31,10 @@ function github:check_func()
     dohttpreq(check_url, function(data, id)
         if data then
             data = json.decode(data)
+            if data.message == "Not Found" then
+                self:Err("GitHub provider not setup properly. Check if the branch and ID are correct")
+                return
+            end
             self._new_version = data.sha or data.tag_name
             --if file is empty, assume it's a fresh install of latest release.
             if self.version_file and not FileIO:Exists(self.version_file) or self.version_file and FileIO:ReadFrom(self.version_file) == "" then
