@@ -6,13 +6,6 @@ function MusicModule:RegisterHook()
 	local dir = self._config.directory
 	dir = (dir and dir .. "/") or ""
 
-	if self._config.source then
-		self._config.source = dir .. self._config.source
-	end
-	if self._config.start_source then
-		self._config.start_source = dir .. self._config.start_source
-	end
-
 	local music = {menu = self._config.menu, heist = self._config.heist, volume = self._config.volume, events = {}}
 
 	for k,v in ipairs(self._config) do
@@ -60,12 +53,22 @@ function MusicModule:RegisterHook()
 		end
 	end
 
+	if self._config.source and music.menu then
+		self._config.preview_event = self._config.preview_event or self._config.source
+		if not music.events[self._config.preview_event] then
+			music.events[self._config.preview_event] = {
+				tracks = {
+					start_source = self._config.start_source and Path:Combine(dir, self._config.start_source),
+					source = self._config.source and Path:Combine(dir, self._config.source),
+					volume = music.volume
+				},
+				volume = music.volume
+			}
+		end
+	end
+
 	if not self._mod._config.AddFiles then
 		local add = {directory = self._config.assets_directory or "Assets"}
-		table.insert(add, {_meta = "movie", path = music.source})
-		if music.start_source then
-			table.insert(add, {_meta = "movie", path = music.start_source})
-		end
 		for _, event in pairs(music.events) do
 			for _, track in pairs(event.tracks) do
 				table.insert(add, {_meta = "movie", path = track.source})
