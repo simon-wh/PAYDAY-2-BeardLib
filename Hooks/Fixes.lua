@@ -47,6 +47,65 @@ if F == "weaponfactorymanager" then
             end
         end
     end)
+	
+	
+	--Prevents cheater tag caused by syncing custom weapon attachments/parts. Written by Offyerrocker
+	--For any given custom attachment/part:
+	--		If part data's allow_vanilla_sync = "use_based_on",
+	--and if the weapon can accept the defined based_on part (assuming part is extant),
+	--then tell other clients in the lobby that this based_on part is equipped on this weapon instead of the original part.
+	--		Else, if part data's allow_vanilla_sync = true,
+	--then just don't tell the client that this part is equipped on this weapon at all.
+	WeaponFactoryManager.beardlib_orig_blueprint_to_string = WeaponFactoryManager.blueprint_to_string --not used, but stored in case other mods want to bypass this 
+	function WeaponFactoryManager:blueprint_to_string(factory_id, blueprint)
+		local factory = tweak_data.weapon.factory
+		local index_table = {}
+		
+		local uses_parts = factory[factory_id] and factory[factory_id].uses_parts or {}
+		
+		local function find_spoofed_part(part_id)
+			for i,_part_id in ipairs(uses_parts) do 
+				if part_id == _part_id then 
+					return i
+				end
+			end
+		end
+		
+		for i, part_id in ipairs(uses_parts) do
+			local part_data = factory.parts[part_id] 
+			if part_data then 
+				if part_data.custom then 
+					if part_data.allow_vanilla_sync == "use_based_on" and part_data.based_on and factory.parts[part_data.based_on] then 
+						index_table[part_id] = find_spoofed_part(part_data.based_on)
+						--add the based_on part instead; 
+						--note that this will result in an invalid outfit flag from other clients if you're basing this custom attachment on another custom attachment or an attachment that couldn't normally go there
+					elseif part_data.allow_vanilla_sync == true then 
+						index_table[part_id] = i
+						--register the part index as usual
+					else
+						--do nothing; do not tell other clients that this part is on this weapon
+					end
+				else
+					index_table[part_id] = i
+				end
+			end
+		end
+
+		--the rest below is unchanged
+		local s = ""
+
+		for _, part_id in ipairs(blueprint) do
+			if index_table[part_id] then
+				s = s .. tostring(index_table[part_id]) .. " "
+			else
+				Application:error("[WeaponFactoryManager:blueprint_to_string] Part do not exist in weapon's uses_parts!", "factory_id", factory_id, "part_id", part_id)
+			end
+		end
+
+		return s
+	end
+	
+	
 elseif F == "blackmarketmanager" then
     local orig_get = BlackMarketManager.get_silencer_concealment_modifiers
     function BlackMarketManager:get_silencer_concealment_modifiers(weapon, ...)
