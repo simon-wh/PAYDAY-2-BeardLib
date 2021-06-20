@@ -374,8 +374,6 @@ function NetworkPeer:set_extra_outfit_string_beardlib(extra_outfit_string)
         self._profile.beardlib_extra_outfit_data = SyncUtils:BeardLibJSONToData(extra_outfit_string)
     end
 
-    log(tostring(self._profile.beardlib_extra_outfit_data.glove_variation))
-
     self:beardlib_reload_outfit()
     self:beardlib_reload_extra_outfit()
 end

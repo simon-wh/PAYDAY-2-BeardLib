@@ -122,7 +122,6 @@ end)
 
 Hooks:PostHook(MenuCallbackHandler, "_update_outfit_information", "BeardLibExtraOutfitUpdateLocalOutfit", function(self)
     if managers.network:session() then
-        log("update outfit info")
         local local_peer = managers.network:session():local_peer()
         local_peer:set_extra_outfit_string_beardlib(SyncUtils:ExtraOutfitString())
     end
