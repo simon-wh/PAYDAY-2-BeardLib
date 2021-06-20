@@ -353,6 +353,15 @@ elseif F == "criminalsmanager" then
 			run_sequence_safe(armor_sequence)
 		end
 
+		local mask_data = tweak_data.blackmarket.masks[mask_id]
+		if not is_local_peer and mask_data then
+			if mask_data.skip_mask_on_sequence then
+				run_sequence_safe(managers.blackmarket:character_mask_off_sequence_by_character_name(character_name))
+			else
+				run_sequence_safe(managers.blackmarket:character_mask_on_sequence_by_character_name(character_name))
+			end
+		end
+
 		if unit:spawn_manager() then
 			local spawn_man = unit:spawn_manager()
 
@@ -440,7 +449,6 @@ elseif F == "criminalsmanager" then
 					run_sequence_safe(final_adapter_data.character_sequence[new_character_name], glove_adapter_unit)
 
 					local material_td_name = is_local_peer and "material" or "third_material"
-
 					if final_adapter_data[material_td_name] then
 						glove_adapter_unit:unit_data().original_material_config = glove_adapter_unit:material_config()
 						local material_config = final_adapter_data[material_td_name]
