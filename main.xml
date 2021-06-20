@@ -81,6 +81,19 @@
 
 			<hook source_file="lib/tweak_data/dlctweakdata" file="OtherHooks.lua"/>
 
+			<hook source_file="lib/tweak_data/blackmarket/glovestweakdata" file="PlayerStyleGloveHooks.lua"/>
+			<hook source_file="lib/managers/criminalsmanager" file="PlayerStyleGloveHooks.lua"/>
+			<hook source_file="lib/units/menu/menuarmourbase" file="PlayerStyleGloveHooks.lua"/>
+			<hook source_file="lib/managers/menu/menuscenemanager" file="PlayerStyleGloveHooks.lua"/>
+			<hook source_file="lib/managers/blackmarketmanager" file="PlayerStyleGloveHooks.lua"/>
+			<hook source_file="lib/managers/menu/blackmarketgui" file="PlayerStyleGloveHooks.lua"/>
+			<hook source_file="lib/managers/dlcmanager" file="PlayerStyleGloveHooks.lua"/>
+			<hook source_file="lib/managers/infamymanagernew" file="PlayerStyleGloveHooks.lua"/>
+			<hook source_file="lib/managers/multiprofilemanager" file="PlayerStyleGloveHooks.lua"/>
+			<hook source_file="lib/managers/menu/crewmanagementgui" file="PlayerStyleGloveHooks.lua"/>
+			<hook source_file="lib/network/base/networkpeer" file="PlayerStyleGloveHooks.lua"/>
+			<hook source_file="lib/managers/group_ai_states/groupaistatebase" file="PlayerStyleGloveHooks.lua"/>
+
 			<hook source_file="lib/managers/musicmanager" file="MusicManager.lua"/>
 
 			<hooks directory="Network">
@@ -88,11 +101,14 @@
 				<hook source_file="lib/units/beings/player/playerinventory" file="NetworkHooks.lua"/>
 				<hook source_file="lib/units/weapons/newraycastweaponbase" file="NetworkHooks.lua"/>
 				<hook source_file="lib/network/handlers/unitnetworkhandler" file="NetworkHooks.lua"/>
+				<hook source_file="lib/managers/group_ai_states/groupaistatebase" file="NetworkHooks.lua"/>
 				<hook source_file="lib/units/player_team/teamaibase" file="NetworkHooks.lua"/>
+				<hook source_file="lib/units/player_team/huskteamaibase" file="NetworkHooks.lua"/>
 				<hook source_file="lib/network/matchmaking/networkmatchmakingsteam" file="NetworkMatchmakingSteam.lua"/>
 				<hook source_file="lib/network/base/clientnetworksession" file="ClientNetworkSession.lua"/>
 				<hook source_file="lib/managers/crimenetmanager" file="CrimeNetManager.lua"/>
 				<hook source_file="lib/network/base/networkpeer" file="NetworkPeer.lua"/>
+				<hook source_file="lib/network/base/basenetworksession" file="BaseNetworkSession.lua"/>
 			</hooks>
 
 			<hooks directory="World">

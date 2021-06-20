@@ -219,6 +219,11 @@ elseif F == "blackmarketmanager" then
             return false
         end
     end
+
+    -- This is literally just a check if they exist, even in vanilla this wouldn't mark pirates. 
+    function BlackMarketManager:verfify_recived_crew_loadout(loadout, mark_host_as_cheater)
+        return true
+    end
 elseif F == "crewmanagementgui" then
     local orig = CrewManagementGui.populate_primaries
     --Blocks out custom weapons that don't have support for AI.

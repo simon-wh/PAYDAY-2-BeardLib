@@ -52,8 +52,8 @@ function PlayerStyleModule:RegisterHook()
         end
 
         -- Cleanup any variants added this way.
-        if config.material_variations then
-            local stored_variants = config.material_variations
+        if config.variations or config.material_variations then
+            local stored_variants = config.variations or config.material_variations
             config.material_variations = {}
 
             for variant_id, variant_data in pairs(stored_variants) do
@@ -63,19 +63,16 @@ function PlayerStyleModule:RegisterHook()
             end
         end
 
+        if config.exclude_glove_adapter then
+            config.glove_adapter = false
+        end
+        config.default_glove_id = config.default_glove_id or config.default_gloves
+
         ps_self[config.id] = table.merge({
             texture_bundle_folder = "mods",
             global_value = self.defaults.global_value,
             unlocked = true,
             custom = true
         }, config)
-
-        -- Extra glove stuff.
-        local default_gloves = config.default_gloves or false
-        bm_self.suit_default_gloves[config.id] = default_gloves
-
-        if config.exclude_glove_adapter then
-            table.insert(bm_self.glove_adapter.player_style_exclude_list, config.id)
-        end
     end)
 end

@@ -32,6 +32,20 @@ Hooks:Add(peer_send_hook, "BeardLibCustomWeaponFix", function(self, func_name, p
             if in_lobby then
                 self:beardlib_send_modded_weapon(math.random(1, 2)) --Send a random weapon instead of based on weapon skin rarity.
             end
+
+            local extra_outfit_string = SyncUtils:ExtraOutfitString()
+            local split_number = SyncConsts.ExtraOutfitSplitSize
+            local current_sub_start = 1
+            local data_length = #extra_outfit_string
+            local index = 0
+            while current_sub_start <= data_length do
+                index = index + 1
+                SyncUtils:Send(self, SyncConsts.SendExtraOutfit .. "|" .. tostring(index), extra_outfit_string:sub(current_sub_start, current_sub_start + (split_number - 1)))
+
+                current_sub_start = current_sub_start + split_number
+            end
+
+            SyncUtils:Send(self, SyncConsts.SendExtraOutfitDone, tostring(index))
         end
         if func_name == "sync_outfit" then
             params[1] = SyncUtils:CleanOutfitString(params[1])
@@ -190,6 +204,26 @@ Hooks:Add("NetworkReceivedData", SyncConsts.SetEqippedWeapon, function(sender, i
     end
 end)
 
+Hooks:Add("NetworkReceivedData", SyncConsts.SendExtraOutfit, function(sender, id, data)
+    if SyncConsts.SendExtraOutfit .. "|" == id:sub(1, #SyncConsts.SendExtraOutfit + 1) then
+        local section_number = tonumber(string.split(id, "|")[2])
+        local peer = managers.network:session():peer(sender)
+        if peer then
+            peer:add_extra_outfit_string_beardlib(section_number, data)
+        end
+    end
+end)
+
+Hooks:Add("NetworkReceivedData", SyncConsts.SendExtraOutfitDone, function(sender, id, data)
+    if id == SyncConsts.SendExtraOutfitDone then
+        local section_count = tonumber(data)
+        local peer = managers.network:session():peer(sender)
+        if peer then
+            peer:done_extra_outfit_string_beardlib(section_count)
+        end
+    end
+end)
+
 function NetworkPeer:set_equipped_weapon_beardlib(weapon_string, outfit_version, only_verify)
     if outfit_version ~= SyncConsts.WeaponVersion then
         return false
@@ -270,7 +304,7 @@ function NetworkPeer:set_equipped_weapon_beardlib(weapon_string, outfit_version,
     end
 end
 
-function NetworkPeer:set_outfit_string_beardlib(outfit_string, outfit_version)
+function NetworkPeer:set_outfit_string_beardlib(outfit_string, outfit_version, extra_outfit_string)
     if outfit_version ~= SyncConsts.OutfitVersion then --Avoid sync to avoid issues.
         return
     end
@@ -318,12 +352,62 @@ function NetworkPeer:set_outfit_string_beardlib(outfit_string, outfit_version)
     end 
 
     self._profile.outfit_string = SyncUtils:OutfitStringFromList(old_outfit)
-
-    if old_outfit_string ~= self._profile.outfit_string then
+    if old_outfit_string ~= self._profile.outfit_string or old_extra_outfit_string ~= self._profile.beardlib_extra_outfit_string then
         self:_reload_outfit()
     end
 
     self:beardlib_reload_outfit()
+end
+
+function NetworkPeer:add_extra_outfit_string_beardlib(section_number, extra_outfit_string_section)
+    self._last_beardlib_extra_outfit_sections = self._last_beardlib_extra_outfit_sections or {}
+    self._last_beardlib_extra_outfit_sections[section_number] = extra_outfit_string_section
+
+    self:check_extra_outfit_string_sections()
+end
+
+function NetworkPeer:set_extra_outfit_string_beardlib(extra_outfit_string)
+    self._last_beardlib_extra_outfit = extra_outfit_string
+
+    if extra_outfit_string then
+        self._profile.beardlib_extra_outfit_string = extra_outfit_string
+        self._profile.beardlib_extra_outfit_data = SyncUtils:BeardLibJSONToData(extra_outfit_string)
+    end
+
+    log(tostring(self._profile.beardlib_extra_outfit_data.glove_variation))
+
+    self:beardlib_reload_outfit()
+    self:beardlib_reload_extra_outfit()
+end
+
+function NetworkPeer:done_extra_outfit_string_beardlib(section_count)
+    self._last_beardlib_extra_outfit_section_count = section_count
+    self._last_beardlib_extra_outfit_done_received = true
+
+    self:check_extra_outfit_string_sections()
+end
+
+function NetworkPeer:check_extra_outfit_string_sections()
+    if self._last_beardlib_extra_outfit_done_received then
+        local extra_outfit_string_finished = true
+        local extra_outfit_string = ""
+
+        for index=1, self._last_beardlib_extra_outfit_section_count do
+            local potential_section = self._last_beardlib_extra_outfit_sections[index]
+
+            if potential_section then
+                extra_outfit_string = extra_outfit_string .. potential_section
+            else
+                extra_outfit_string_finished = false
+                break
+            end
+        end
+
+        if extra_outfit_string_finished then
+            self:set_extra_outfit_string_beardlib(extra_outfit_string)
+            self._last_beardlib_extra_outfit_done_received = false
+        end
+    end
 end
 
 function NetworkPeer:beardlib_reload_outfit()
@@ -348,12 +432,24 @@ function NetworkPeer:beardlib_reload_outfit()
     end
 end
 
+function NetworkPeer:beardlib_reload_extra_outfit()
+    Hooks:Call("BeardLibExtraOutfitReload", self._unit, self:character(), self._profile.beardlib_extra_outfit_data)
+end
+
+function NetworkPeer:beardlib_extra_outfit()
+    return self._profile.beardlib_extra_outfit_data or {}
+end
+
 local set_outfit_string = NetworkPeer.set_outfit_string
 function NetworkPeer:set_outfit_string(...)
     local a,b,c,d,e = set_outfit_string(self, ...)
 
     if self._last_beardlib_outfit then
         self:set_outfit_string_beardlib(self._last_beardlib_outfit, SyncConsts.OutfitVersion)
+    end
+
+    if self._last_beardlib_extra_outfit then
+        self:set_extra_outfit_string_beardlib(self._last_beardlib_extra_outfit)
     end
 
     return a,b,c,d,e

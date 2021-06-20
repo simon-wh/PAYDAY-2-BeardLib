@@ -253,7 +253,7 @@ function Sync:CleanOutfitString(str, is_henchman)
     if player_style then
         -- Got to do the checks individually, otherwise we can't have custom variations on non custom outfits.
         if player_style.custom then
-            list.player_style = "none"
+            list.player_style = "continental" -- Sync an actual outfit to stop invisible bodies because of weird object sync.
         end
 
         if player_style.material_variations then
@@ -456,4 +456,32 @@ function Sync:UnpackBeardLibWeaponString(outfit_string)
 	end
 
 	return tbl
+end
+
+function Sync:BeardLibDataToJSON(data)
+	data = deep_clone(data) -- Preserve the original table.
+
+	-- Maybe handle non generic types?
+
+	return json.encode(data)
+end
+
+function Sync:BeardLibJSONToData(json_string)
+	local data = json.decode(json_string)
+
+	-- Maybe handle non generic types?
+
+	return data
+end
+
+function Sync:ExtraOutfit(is_henchman, henchman_index)
+	local data = {}
+
+	Hooks:Call("BeardLibExtraOutfit", data, is_henchman, henchman_index)
+
+	return data
+end
+
+function Sync:ExtraOutfitString(is_henchman, henchman_index)
+	return self:BeardLibDataToJSON(self:ExtraOutfit(is_henchman, henchman_index))
 end
