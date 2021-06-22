@@ -65,7 +65,7 @@ function TextBoxBase:init(parent, params)
         layer = 3,
     })
 
-    self.focus_mode = params.focus_mode
+    self.focus_mode = NotNil(params.focus_mode, true)
     if self.focus_mode and not self.owner.menu:Typing() and params.auto_focus then
         self:set_active(true)
     end
