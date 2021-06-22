@@ -1,5 +1,6 @@
 NarrativeModule = NarrativeModule or BeardLib:ModuleClass("narrative", ItemModuleBase)
 NarrativeModule._loose = true
+local TEXTURE = Idstring("texture")
 
 function NarrativeModule:init(...)
     self.clean_table = table.add(clone(self.clean_table), {
@@ -30,9 +31,29 @@ function NarrativeModule:init(...)
 end
 
 function NarrativeModule:AddNarrativeData(narr_self, tweak_data)
-    local icon = self._config.icon and "mods_"..Path:GetFileNameWithoutExtension(self._config.icon)
-    if icon then
-        tweak_data.hud_icons[icon] = {texture = self._config.icon, texture_rect = self._config.icon_rect or false, custom = true}
+    local id = self._config.id
+    local icon_id = "narr_"..id
+    if self._config.icon and self._config.icon ~= '' then
+        tweak_data.hud_icons[icon_id] = {texture = self._config.icon, texture_rect = self._config.icon_rect or false, custom = true}
+    else
+        local assets_dir = self._mod.AddFiles and self._mod.AddFiles.directory or "assets"
+        local ingame_path = Path:Combine("guis/textures/mods/icons", "narr_"..self._config.id)
+
+        local icon = Path:Combine(self._mod.ModPath, assets_dir, ingame_path)
+        local icon_png = icon..".png"
+        local icon_texture = icon..".texture"
+        local found_icon
+        if FileIO:Exists(icon_png) then
+            found_icon = icon_png
+        elseif FileIO:Exists(icon_texture) then
+            found_icon = icon_texture
+        end
+        if found_icon then
+            BeardLib.Managers.File:AddFile(TEXTURE, Idstring(ingame_path), found_icon)
+            tweak_data.hud_icons[icon_id] = {texture = ingame_path, texture_rect = false, custom = true}
+        else
+            icon_id = nil
+        end
     end
 
     local data = clone(self._config)
@@ -47,12 +68,13 @@ function NarrativeModule:AddNarrativeData(narr_self, tweak_data)
         contract_visuals = data.contract_visuals or {
             min_mission_xp = data.min_mission_xp or {0.001,0.001,0.001,0.001,0.001},
             max_mission_xp = data.max_mission_xp or {0.001,0.001,0.001,0.001,0.001},
-            preview_image = data.preview_image or {icon = icon}
+            preview_image = data.preview_image or {icon = icon_id}
         },
         ignore_heat = true,
         mod_path = self._mod.ModPath,
         custom = true
     })
+
     if data.chain then
         for _, stage in pairs(data.chain) do
             if stage.level_id then

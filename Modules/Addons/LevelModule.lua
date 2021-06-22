@@ -1,6 +1,8 @@
 LevelModule = LevelModule or BeardLib:ModuleClass("level", ItemModuleBase)
 LevelModule.levels_folder = "levels/mods/"
 
+local TEXTURE = Idstring("texture")
+
 function LevelModule:init(...)
     self.clean_table = table.add(clone(self.clean_table), {
         {param = "preplanning", action = function(tbl)
@@ -19,6 +21,26 @@ function LevelModule:init(...)
     self._config.id = tostring(self._config.id)
     self._addfiles_modules = {}
 
+    self._inner_dir = Path:Combine(self.levels_folder, self._config.id)
+    self._level_dir = "levels/"..self._config.id
+
+    if not self._config.load_screen or self._config.load_screen == "" then
+        local icon = Path:Combine(self._mod.ModPath, self._level_dir, "loading")
+        local icon_png = icon..".png"
+        local icon_texture = icon..".texture"
+        local found_icon
+        if FileIO:Exists(icon_png) then
+            found_icon = icon_png
+        elseif FileIO:Exists(icon_texture) then
+            found_icon = icon_texture
+        end
+        if found_icon then
+            local ingame_path = Path:Combine("guis/textures/mods/icons/level_", self._config.id)
+            BeardLib.Managers.File:AddFile(TEXTURE, Idstring(ingame_path), found_icon)
+            self._config.load_screen = ingame_path
+        end
+    end
+
     if Global.level_data and Global.level_data.level_id == self._config.id then
         BeardLib.current_level = self
         self._currently_loaded = true
@@ -28,7 +50,6 @@ function LevelModule:init(...)
 end
 
 function LevelModule:Load()
-    self._inner_dir = Path:Combine(self.levels_folder, self._config.id)
     if self._config.include then
         for i, include_data in ipairs(self._config.include) do
             if include_data.file then
@@ -59,7 +80,6 @@ function LevelModule:Load()
 
     self._addfiles_modules = {}
 
-    self._level_dir = "levels/"..self._config.id
     self._add_path = self._level_dir.."/add.xml"
     if self._config.add or FileIO:Exists(Path:CombineDir(self._mod.ModPath, self._add_path)) then
         local module = AddFilesModule:new(self._mod, self._config.add or {file = self._add_path, directory = "assets"})
