@@ -124,6 +124,12 @@ function FileIO:Exists(path)
 	end
 end
 
+--- Same as CopyFileTo just lets you choose the name of the file
+function FileIO:CopyFile(path, to_path)
+	self:CopyFileTo(path, to_path)
+	self:MoveTo(Path:Combine(Path:GetDirectory(to_path), Path:GetFileName(path)), to_path)
+end
+
 function FileIO:CopyFileTo(path, to_path)
 	local dir = Path:GetDirectory(to_path)
 	if not self:Exists(dir) then
