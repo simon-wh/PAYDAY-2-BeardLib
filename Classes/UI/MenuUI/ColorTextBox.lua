@@ -4,7 +4,7 @@ ColorTextBox.type_name = "ColoredTextBox"
 
 function ColorTextBox:Init(...)
     self.lines = 1
-    self.value = self:HexValue() or "000000"
+    self.value = self:HexValue() or self.allow_empty and "" or "000000"
     ColorTextBox.super.Init(self, ...)
     local panel = self:Panel()
     panel:rect({name = "color_preview", w = self.size, h = self.size})
@@ -14,7 +14,7 @@ end
 function ColorTextBox:UpdateColor()
     local preview = self:Panel():child("color_preview")
 	if preview then
-        preview:set_color(self:ColorValue())
+        preview:set_color(self:ColorValue() or Color.transparent)
         local s = self._textbox.panel:h()
         preview:set_size(s,s)
         preview:set_right(self._textbox.panel:right())
@@ -35,7 +35,9 @@ function ColorTextBox:ColorValue()
 		local col = value:color()
 		self.value = col:to_hex()
 		return col
-	else
+    elseif self.allow_empty and value == "" then
+        return nil
+    else
         return Color:from_hex(value)
     end
 end
