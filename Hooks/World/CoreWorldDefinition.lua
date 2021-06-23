@@ -169,6 +169,16 @@ end
 
 Hooks:PostHook(WorldDefinition, "assign_unit_data", "BeardLibAssignUnitData", function(self, unit, data)
 	self:_setup_cubemaps(unit, data)
+
+    --- This fixes custom XML thinking that "01" is a number therefore converting it to just "1" https://github.com/Luffyyy/BeardLib-Editor/issues/557
+    --- In order for this fix to work, the editor will insert a space after these problematic texts and then BeardLib will remove them.
+
+    if data.editable_gui then
+        local text = unit:editable_gui():text()
+        if type(text) == "string" and data.editable_gui.space_fix and text:ends(" ") then
+            unit:editable_gui():set_text(text:sub(0, text:len()-1))
+        end
+    end
 end)
 
 function WorldDefinition:_setup_cubemaps(unit, data)
