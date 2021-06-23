@@ -22,7 +22,11 @@ function ColorTextBox:UpdateColor()
 end
 
 function ColorTextBox:Value()
-	return self:ColorValue()
+    if self.return_hex then
+        return self:HexValue()
+    else
+        return self:ColorValue()
+    end
 end
 
 function ColorTextBox:ColorValue()
@@ -84,7 +88,7 @@ function ColorTextBox:MousePressed(button, x, y)
             self:RunCallback(self.show_color_dialog)
             return true
         elseif not self.no_color_dialog then
-            BeardLib.Managers.Dialog:Color():Show({color = self:Value(), use_alpha = self.use_alpha, force = true, callback = function(color)
+            BeardLib.Managers.Dialog:Color():Show({color = self:ColorValue(), use_alpha = self.use_alpha, force = true, callback = function(color)
                 self:SetValue(color, true)
             end})
             return true
