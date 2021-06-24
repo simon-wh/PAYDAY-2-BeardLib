@@ -193,6 +193,9 @@ function InstanceModule:init(...)
     if not LevelModule.super.init(self, ...) then
         return false
     end
+
+    self._inner_dir = Path:Combine(self.levels_folder, self._config.id)
+    self._level_dir = "levels/"..self._config.id
     self._world_path = Path:Combine(self.levels_folder, self._config.id, "world")
     BeardLib.Frameworks.Map._loaded_instances[self._world_path] = self --long ass line
 
