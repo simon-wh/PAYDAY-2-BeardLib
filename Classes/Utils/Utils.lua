@@ -294,3 +294,60 @@ function Utils:SetupXAudio()
         blt.xaudio.setup()
     end
 end
+
+--- Makes a pagination (table) in the style of 1 .. 3 [4] 5 .. 7
+--- Page is the page, pages is how many pages and offset_buttons is how many buttons to put on both sides of the current page.
+function Utils:MakePagination(page, pages, offset_buttons)
+    -- If this simply follows a pattern of 1 2 3 ... n don't bother.
+    if page == 1 then
+        local size = offset_buttons*2+3
+        if pages <= size then
+            return pages > 1 and table.range(1, pages) or {1}
+        else
+            local ret = table.range(1, size-1)
+            table.insert(ret, pages)
+            return ret
+        end
+    end
+
+    local pagination = {page}
+
+    -- We have 2 different offsets so we can handle cases when the page is equal to one of the limits.
+    local offset_plus = offset_buttons + (page == pages and 1 or 0)
+    local offset_minus = offset_buttons + (page == 1 and 1 or 0)
+
+    for i = 1, offset_plus do
+        local insert_page = page + i
+        if insert_page >= pages then
+            -- We can't go forward, let's try backward.
+            insert_page = page - offset_minus - ((offset_plus+1)- i)
+        end
+        if insert_page > 0 then
+            table.insert(pagination, insert_page)
+        end
+    end
+
+    for i = 1, offset_minus do
+        local insert_page = page - i
+        if insert_page <= 1 then
+            --We can't go backward, let's try forward.
+            insert_page = page + offset_plus + ((offset_minus+1)- i)
+        end
+        if insert_page < pages then
+            table.insert(pagination, insert_page)
+        end
+    end
+
+    -- If we haven't added the limits then let's add them.
+    if not table.contains(pagination, 1) then
+        table.insert(pagination, 1)
+    end
+    if not table.contains(pagination, pages) then
+        table.insert(pagination, pages)
+    end
+
+    -- We surely have it messy so let's sort it correctly.
+    table.sort(pagination)
+
+    return pagination
+end
