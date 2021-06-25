@@ -112,7 +112,7 @@ function TextBoxBase:Text()
 end
 
 function TextBoxBase:CheckText(text, no_clbk)
-    if self.filter == "number" then
+    if self.owner.filter == "number" then
         if tonumber(self:Value()) ~= nil then
             self.update_text(self:tonumber(self:Value()), not no_clbk, true)
         else
@@ -163,7 +163,7 @@ function TextBoxBase:key_hold(text, k)
                 end
             elseif KB:Down("v") then
                 local copy = tostring(Application:get_clipboard())
-                if (self.filter == "number" and tonumber(copy) == nil) then
+                if (self.owner.filter == "number" and tonumber(copy) == nil) then
                     return
                 end
 
