@@ -112,7 +112,7 @@ function Item:InitBGs()
 		h = self.HYBRID and self.size,
 		halign = "grow",
 		valign = not self.HYBRID and "grow",
-		layer = 0
+		layer = 2
 	})
 	self.highlight_bg = self.panel:rect({
 		name = "highlight",
@@ -214,7 +214,7 @@ function Item:WorkParams(params)
 		bgh = self:BestAlpha(self.highlight_color, bg)
 	end
 
-	self:WorkParam("foreground", foreground)
+	self:WorkParam("foreground")
 	if self.auto_foreground and self.foreground ~= false then
 		self.foreground = bg:contrast()
 	end
@@ -1166,19 +1166,19 @@ function Item:SetVisible(visible, animate, no_align)
     end
 	local was_visible = self.visible
 
-	self._hidden_by_menu = nil
 	self.visible = visible == true
+	visible = visible and not self._hidden_by_menu
 
 	if self._hidden_by_delay then
 		return
 	end
 
 	local function setvisible()
-		self.panel:set_visible(self.visible)
+		self.panel:set_visible(visible)
 		if not self.visible then
 			if self:Enabled() then
 				self._was_enabled = self.enabled
-				self:SetEnabled(self.visible)
+				self:SetEnabled(visible)
 			end
 		elseif self._was_enabled then
 			self:SetEnabled(true)
@@ -1226,7 +1226,6 @@ function Item:RunCallback(clbk, ...)
 	end
 end
 
-
 function Item:Reposition(last_positioned_item, prev_item)
 	if not self:alive() then
 		return false
@@ -1243,7 +1242,7 @@ function Item:Reposition(last_positioned_item, prev_item)
 end
 
 function Item:TryRendering()
-	if not self.visible or self._hidden_by_delay then
+	if not self.visible or self._hidden_by_delay or self._hidden_by_menu then
 		return false
 	end
 

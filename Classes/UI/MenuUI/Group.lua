@@ -12,19 +12,18 @@ end
 
 function Group:InitBasicItem()
     Group.super.InitBasicItem(self)
-    if not self.divider_type then
-	    self.toggle = self.panel:bitmap({
-	        name = "toggle",
-	        w = self.title:h() * 0.78,
-	        h = self.title:h() * 0.78,
-	        texture = "guis/textures/menu_ui_icons",
-	        color = self:GetForeground(highlight),
-	        y = 2,
-	        texture_rect = {self.closed and 42 or 2, self.closed and 2 or 0, 16, 16},
-	        layer = 3,
-	    })
-	    self:RePositionToggle()
-	end
+    self.toggle = self.panel:bitmap({
+        name = "toggle",
+        visible = not self.divider_type,
+        w = self.title:h() * 0.78,
+        h = self.title:h() * 0.78,
+        texture = "guis/textures/menu_ui_icons",
+        color = self:GetForeground(highlight),
+        y = 2,
+        texture_rect = {self.closed and 42 or 2, self.closed and 2 or 0, 16, 16},
+        layer = 3,
+    })
+    self:RePositionToggle()
 end
 
 function Group:RePositionToggle()
@@ -33,7 +32,7 @@ function Group:RePositionToggle()
         if alive(self.toggle) then
             local s = self.title:font_size() * 0.78
             self.toggle:set_size(s, s)
-            self.toggle:set_x(w + 4)
+            self.toggle:set_x(w + 6)
             self.toggle:set_center_y(self.title:center_y())
         end
         if alive(self.bg) and alive(self.highlight_bg) then
@@ -57,10 +56,8 @@ function Group:UpdateGroup()
     if not self.divider_type then
         for i, item in pairs(self._my_items) do
             if item:ParentPanel() == self:ItemsPanel() and (item.visible or item._hidden_by_menu) then --handle only visible items.
-                item:SetVisible(not self.closed)
-                if self.closed then
-                    item._hidden_by_menu = true
-                end
+                item._hidden_by_menu = self.closed
+                item:SetVisible(item.visible)
             end
         end
         if alive(self.toggle) then
@@ -69,7 +66,7 @@ function Group:UpdateGroup()
         self:_SetSize()
     end
     if not self.divider_type or self.auto_align then
-        self:_AlignItems()
+        self:AlignItems(true)
     end
 end
 
@@ -83,16 +80,25 @@ end
 function Group:ToggleGroup()
     self.closed = not self.closed
     self:UpdateGroup()
+    if self.on_group_toggled then
+        self.on_group_toggled(self)
+    end
 end
 
 function Group:CloseGroup()
     self.closed = true
     self:UpdateGroup()
+    if self.on_group_toggled then
+        self.on_group_toggled(self)
+    end
 end
 
 function Group:OpenGroup()
     self.closed = false
     self:UpdateGroup()
+    if self.on_group_toggled then
+        self.on_group_toggled(self)
+    end
 end
 
 function Group:MouseInside(x, y)
@@ -109,11 +115,12 @@ end
 
 Group.MouseMoved = BeardLib.Items.Item.MouseMoved
 
-function Group:GetToolbar()
+function Group:GetToolbar(opt)
     if not alive(self.tb) then
-        self.tb = self:ToolBar({
+        self.tb = self:ToolBar(table.merge({
             name = "Toolbar",
             label = "Toolbar",
+            foreground = self.foreground,
             ignore_align = true,
             position = "RightTop",
             full_bg_color = false,
@@ -121,7 +128,7 @@ function Group:GetToolbar()
             h = self.highlight_bg:h(),
             auto_height = false,
             use_main_panel = true
-        })
+        }, opt or {}))
     end
     return self.tb
 end
