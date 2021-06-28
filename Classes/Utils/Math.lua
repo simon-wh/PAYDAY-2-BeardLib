@@ -3,11 +3,7 @@
 --As dumb as it is, it's the only way I found to make it work.
 function math.rot_to_quat(rot)
 	local t = ScriptSerializer:to_custom_xml({x = rot})
-	local quad = {}
-	for x in string.gmatch(t, "%d[%d.,]*") do
-		table.insert(quad, x)
-	end
-	return quad
+	return t:match('x="(.+)"'):split(" ")
 end
 
 function math.quat_to_rot(x, y, z, w)
