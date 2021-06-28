@@ -135,7 +135,6 @@ end
 
 function Group:NewItem(item, ...)
 	if self.closed then
-		item:SetVisible(false)
 		item._hidden_by_menu = true
 	end
 	return Group.super.NewItem(self, item, ...)
