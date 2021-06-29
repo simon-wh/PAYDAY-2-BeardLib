@@ -201,3 +201,25 @@ function WorldDefinition:_setup_cubemaps(unit, data)
 
 	unit:unit_data().cubemap_fake_light = light
 end
+
+local unit_ids = Idstring("unit")
+local key_unit = unit_ids:key()
+Hooks:PreHook(WorldDefinition, "_create_massunit", "BeardLibForceLoadMassunitUnits", function(self, data)
+    self:preload_massunit_units(data)
+end)
+
+function WorldDefinition:preload_massunit_units(data)
+    -- Units inside massunits don't pass through the regular spawning function and is spawned inside the engine
+    -- Unfortunately the units there don't load through dynamic resources
+    -- In order to deal with this issue, we had to essentially include each unit that is used in the massunit (from the editor) in the world file.
+    if data and data.preload_units then
+        for _, unit in pairs(data.preload_units) do
+            if Global.fm.added_files[key_unit] then
+                local file = Global.fm.added_files[key_unit][unit]
+                if file then
+                    BeardLib.Managers.File:LoadAsset(unit_ids, file.path, file.file)
+                end
+            end
+        end
+    end
+end
