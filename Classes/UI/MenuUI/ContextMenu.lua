@@ -299,10 +299,10 @@ function ContextMenu:update_search(force_show)
 
 	self._last_search = search
 
-	if #self._my_items == 0 then
+	if #self._my_items == 0 or not self._textbox then
 		self._do_search = 0
 	else
-		self._do_search = Application:time() + 0.25
+		self._do_search = Application:time() + 0.05
 	end
 end
 

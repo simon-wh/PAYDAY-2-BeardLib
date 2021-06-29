@@ -1281,14 +1281,14 @@ function Item:MouseReleased(b, x, y)
 			self:SetPointer()
 		end
 		for _, item in pairs(self._my_items) do
-			if item:MouseReleased(button, x, y) then
+			if item:MouseReleased(b, x, y) then
 				return true
 			end
 		end
 	end
 
 	if self._list then
-		self._list:MouseReleased(button, x, y)
+		self._list:MouseReleased(b, x, y)
 	end
 end
 
@@ -1353,8 +1353,8 @@ function Item:MousePressedSelfEvent(button, x, y)
 		local right_click = button == mouse_1
 		if self._list and not self.menu._openlist then
 			if (not self.open_list_key and right_click) or (self.open_list_key and button == self.open_list_key:id()) then
-				self._list:update_search()
 				self._list:show()
+				self._list:update_search()
 				return true
 			end
 		end
