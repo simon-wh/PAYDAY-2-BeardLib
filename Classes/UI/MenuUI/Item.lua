@@ -1396,7 +1396,7 @@ function Item:MousePressedMenuEvent(button, x, y)
         if alive(self._scroll) then
             if button == Idstring("0") then
                 if self._scroll:mouse_pressed(button, x, y) then
-                    menu._scroll_hold = true
+                    menu._scroll_hold = self
                     self:CheckItems()
                     return true
                 end
@@ -1447,16 +1447,6 @@ end
 
 function Item:MouseMovedMenuEvent(x, y)
     if self:Enabled() and self:MouseFocused(x, y) then
-        if alive(self._scroll) then
-            local _, pointer = self._scroll:mouse_moved(nil, x, y)
-            if pointer then
-                self:CheckItems()
-                self:SetPointer(pointer)
-                return true
-            else
-                self:SetPointer()
-            end
-        end
         for _, item in pairs(self._visible_items) do
             if item:MouseMoved(x, y) then
                 return true

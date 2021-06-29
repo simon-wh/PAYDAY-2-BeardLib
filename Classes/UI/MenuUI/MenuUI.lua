@@ -422,6 +422,7 @@ function MenuUI:MouseReleased(o, button, x, y)
         end
     end
 
+    self._scroll_hold = nil
 	self._slider_hold = nil
     for _, menu in pairs(self._menus) do
         if menu:MouseReleased(button, x, y) then
@@ -503,6 +504,18 @@ function MenuUI:ShouldClose()
 end
 
 function MenuUI:MouseMoved(o, x, y)
+    if self._scroll_hold and alive(self._scroll_hold._scroll) then
+        local scroll = self._scroll_hold._scroll
+        local _, pointer = scroll:mouse_moved(nil, x, y)
+        if pointer then
+            self._scroll_hold:CheckItems()
+            self:SetPointer(pointer)
+            return true
+        else
+            self:SetPointer()
+        end
+    end
+
     if self.pre_mouse_move then
         if self.pre_mouse_move(x, y) == false then
             return
