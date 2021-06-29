@@ -151,8 +151,8 @@ function ScrollablePanelModified:set_scroll_state()
 	local show_scrollbar = (self:canvas():h() - self:scroll_panel():h()) > 0.5
 
 	--Weird bug, y and h are basically "nan" if I don't set them here.
-	self._scroll_rect:set_y(0)
-	self._scroll_rect:set_h(self._scroll_bar:h())
+	self._scroll_rect:set_y(4)
+	self._scroll_rect:set_h(self._scroll_bar:h()-8)
 	self._scroll_bar_box_class:hide()
 
 	if not show_scrollbar then
