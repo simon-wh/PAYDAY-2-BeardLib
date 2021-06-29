@@ -215,7 +215,7 @@ function WorldDefinition:preload_massunit_units(data)
     if data and data.preload_units then
         for _, unit in pairs(data.preload_units) do
             if Global.fm.added_files[key_unit] then
-                local file = Global.fm.added_files[key_unit][unit]
+                local file = Global.fm.added_files[key_unit][unit:key()]
                 if file then
                     BeardLib.Managers.File:LoadAsset(unit_ids, file.path, file.file)
                 end
