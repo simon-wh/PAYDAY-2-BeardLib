@@ -314,8 +314,10 @@ function ContextMenu:HightlightItem(item, highlight)
 	local color = highlight and self.owner.highlight_color or self.owner.background_color or Color.white
 	if self.owner.animate_colors then
 		play_color(item:child("bg"), color)
+		play_color(item:child("text"), color:contrast())
 	else
 		item:child("bg"):set_color(color)
+		item:child("text"):set_color(color:contrast())
 	end
 end
 
