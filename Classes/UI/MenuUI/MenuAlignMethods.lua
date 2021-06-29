@@ -55,6 +55,10 @@ function Item:AlignItemsPost(max_h, prev_item)
 	local additional = (self.last_y_offset or (prev_item and prev_item:Offset()[2] or 0))
 	max_h = max_h + additional -- self:TextHeight() + additional
 	self:UpdateCanvas(max_h)
+    if prev_item and not self.auto_height and prev_item.stretch_to_bottom and prev_item.SetSize then
+        prev_item:SetSize(nil, self:Height() - self:TextHeight() - prev_item:Y() - additional)
+        prev_item:AlignItems(false, true)
+    end
 end
 
 function Item:RepositionItem(item, last_positioned_item, prev_item, max_h, max_right)
