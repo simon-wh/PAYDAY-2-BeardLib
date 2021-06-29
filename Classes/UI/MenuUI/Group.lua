@@ -120,7 +120,9 @@ function Group:GetToolbar(opt)
         self.tb = self:ToolBar(table.merge({
             name = "Toolbar",
             label = "Toolbar",
-            foreground = self.foreground,
+            inherit_values = {
+                foreground = self.foreground
+            },
             ignore_align = true,
             position = "RightTop",
             full_bg_color = false,
