@@ -183,6 +183,4 @@ function PopupMenu:MouseMoved(x,y)
 	return (self.menu_type and self.opened and self:MouseMovedMenuEvent(x,y)) or self:MouseMovedSelfEvent(x,y)
 end
 
-function PopupMenu:ItemsWidth() return self.items_panel:w() end
-function PopupMenu:ItemsHeight() return self.items_panel:h() end
 function PopupMenu:ItemsPanel() return self.items_panel end

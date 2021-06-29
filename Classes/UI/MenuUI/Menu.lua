@@ -118,6 +118,4 @@ function Menu:MouseReleased(b,x,y)
     return Menu.super.MouseReleased(self, b, x, y)
 end
 
-function Menu:ItemsWidth() return self.items_panel:w() end
-function Menu:ItemsHeight() return self.items_panel:h() end
 function Menu:ItemsPanel() return self.items_panel end
