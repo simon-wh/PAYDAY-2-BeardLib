@@ -83,7 +83,7 @@ function Slider:TextBoxSetValue(value, run_callback, reset_selection, no_format)
     if self.max or self.min then
         value = math.clamp(value, self.min, self.max)
     end
-    value = tonumber(not no_format and format or value)
+    value = tonumber(value)
     local final_number = self.floats and string.format("%." .. self.floats .. "f", value) or tostring(value)
     local text = self._textbox.panel:child("text")
     self.sfg:set_w(self.sbg:w() * ((value - self.min) / (self.max - self.min)))
@@ -110,7 +110,8 @@ function Slider:SetValue(value, ...)
 end
 
 function Slider:SetValueByPercentage(percent, run_callback)
-    self:SetValue(self.min + (self.max - self.min) * percent, run_callback, true)
+    local val = self.min + (self.max - self.min) * percent
+    self:SetValue((self.round_sliding and val ~= self.min and val ~= self.max) and math.round_with_precision(val, self.round_sliding) or val, run_callback, true)
 end
 
 function Slider:MouseReleased(b, x, y)
@@ -170,5 +171,5 @@ function Slider:SetValueByMouseXPos(x)
         return
     end
     local slider_bg = self._slider:child("bg")
-    self:SetValueByPercentage((x - slider_bg:world_left()) / (slider_bg:world_right() - slider_bg:world_left()), true)
+    self:SetValueByPercentage((x - slider_bg:world_x()) / (slider_bg:w()), true)
 end
