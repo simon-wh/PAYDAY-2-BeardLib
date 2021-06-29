@@ -677,6 +677,9 @@ end
 --Get Funcs
 function Item:ItemsPanel() return self.panel end
 function Item:ItemsWidth(n_items, offset)
+	if not alive(self) then
+		return 0
+	end
 	if n_items then
 		offset = self:ConvertOffset(offset)
 		return (self:ItemsPanel():w() - offset[2] * n_items) / n_items
@@ -686,6 +689,9 @@ function Item:ItemsWidth(n_items, offset)
 end
 
 function Item:ItemsHeight(n_items, offset)
+	if not alive(self) then
+		return 0
+	end
 	if n_items then
 		offset = offset or self.inherit_values and self.inherit_values.offset or not self.private.offset and self.offset or {6, 2}
 		offset = self:ConvertOffset(offset)
