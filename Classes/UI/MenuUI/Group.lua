@@ -143,7 +143,7 @@ function Group:GetToolbar(opt)
 end
 
 function Group:NewItem(item, ...)
-	if self.closed then
+	if self.closed and not item.use_main_panel then
 		item._hidden_by_menu = true
 	end
 	return Group.super.NewItem(self, item, ...)
