@@ -88,7 +88,7 @@ function LevelModule:Load()
     end
 
     self._local_add_path = self._level_dir.."/add_local.xml"
-    if FileIO:Exists(Path:CombineDir(self._mod.ModPath, self._load_add_path)) then
+    if FileIO:Exists(Path:CombineDir(self._mod.ModPath, self._local_add_path)) then
         local module = AddFilesModule:new(self._mod, {file = self._local_add_path, directory = self._level_dir, inner_directory = self._inner_dir})
         table.insert(self._addfiles_modules, module)
     end
@@ -195,7 +195,7 @@ function InstanceModule:init(...)
     end
 
     self._inner_dir = Path:Combine(self.levels_folder, self._config.id)
-    self._level_dir = "levels/"..self._config.id
+    self._level_dir = "levels/instances/"..self._config.id
     self._world_path = Path:Combine(self.levels_folder, self._config.id, "world")
     BeardLib.Frameworks.Map._loaded_instances[self._world_path] = self --long ass line
 
