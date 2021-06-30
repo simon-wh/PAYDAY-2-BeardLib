@@ -881,30 +881,30 @@ end
 function Item:Panel() return self.panel end
 function Item:Parent() return self.parent end
 function Item:ParentPanel() return self.panel:parent() end
-	function Item:X() return self:Panel():x() end
-	function Item:Y() return self:Panel():y() end
-	function Item:W() return self:Panel():w() end
-	function Item:H() return self:Panel():h() end
-	function Item:Right() return self:Panel():right() end
-	function Item:Bottom() return self:Panel():bottom() end
+	function Item:X() return alive(self) and self:Panel():x() or 0 end
+	function Item:Y() return alive(self) and self:Panel():y() or 0 end
+	function Item:W() return alive(self) and self:Panel():w() or 0 end
+	function Item:H() return alive(self) and self:Panel():h() or 0 end
+	function Item:Right() return alive(self) and self:Panel():right() or 0 end
+	function Item:Bottom() return alive(self) and self:Panel():bottom() or 0 end
 function Item:AdoptedItems() return {} end
 function Item:Position() return self.position end
-function Item:Location() return self:Panel():position() end
+function Item:Location() return alive(self) and self:Panel():position() or 0  end
 function Item:XY() return self:Panel():position() end
-function Item:LeftTop() return self:Panel():lefttop() end
-function Item:RightTop() return self:Panel():righttop() end
-function Item:LeftBottom() return self:Panel():leftbottom() end
-function Item:RightBottom() return self:Panel():rightbottom() end
-function Item:CenterX() return self:Panel():center_x() end
-function Item:CenterY() return self:Panel():center_y() end
-function Item:Center() return self:Panel():center() end
+function Item:LeftTop() return alive(self) and self:Panel():lefttop() or 0  end
+function Item:RightTop() return alive(self) and self:Panel():righttop() or 0  end
+function Item:LeftBottom() return alive(self) and self:Panel():leftbottom() or 0  end
+function Item:RightBottom() return alive(self) and self:Panel():rightbottom() or 0  end
+function Item:CenterX() return alive(self) and self:Panel():center_x() or 0  end
+function Item:CenterY() return alive(self) and self:Panel():center_y() or 0 end
+function Item:Center() return alive(self) and self:Panel():center() or 0 end
 function Item:Name() return self.name end
 function Item:Label() return self.label end
 function Item:Text() return type(self.text) == "string" and self.text or "" end
 function Item:TextValue() return self:Text() end
-function Item:Height() return self:Panel():h() end
+function Item:Height() return self:H() end
 function Item:OuterHeight() return self:Height() + self:Offset()[2] end
-function Item:Width() return self:Panel():w() end
+function Item:Width() return self:W() end
 function Item:OuterWidth() return self:Width() + self:Offset()[1]  end
 function Item:Offset() return self.offset end
 function Item:OffsetX() return self.offset[1] end
