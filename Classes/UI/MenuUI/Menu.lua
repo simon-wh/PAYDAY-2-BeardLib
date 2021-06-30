@@ -26,7 +26,9 @@ function Menu:Init(params)
 end
 
 function Menu:GrowHeight()
-    self:_AlignItems()
+    if self.auto_align then
+        self:_AlignItems()
+    end
 end
 
 function Menu:SetScrollSpeed(speed)
