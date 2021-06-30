@@ -53,19 +53,26 @@ function Group:UpdateGroup()
     if self.closed then
         self.panel:set_h(self:TextHeight())
     end
+
     if not self.divider_type then
-        for i, item in pairs(self._my_items) do
-            if item:ParentPanel() == self:ItemsPanel() and (item.visible or item._hidden_by_menu) then --handle only visible items.
+        self:AlignItems(true)
+        for _, item in pairs(self._my_items) do
+            if item:ParentPanel() == self:ItemsPanel() then
                 item._hidden_by_menu = self.closed
-                item:SetVisible(item.visible)
+                item:TryRendering()
+                -- Weird glitch that makes the title invisible. Changing its 'x' position solves it.
+                if item:title_alive() then
+                    local x = item.title:x()
+                    item.title:set_x(0)
+                    item.title:set_x(x)
+                end
             end
         end
+        self:CheckItems()
         if alive(self.toggle) then
             self.toggle:set_texture_rect(self.closed and 42 or 2, self.closed and 2 or 0, 16, 16)
         end
         self:_SetSize()
-    end
-    if not self.divider_type or self.auto_align then
         self:AlignItems(true)
     end
 end

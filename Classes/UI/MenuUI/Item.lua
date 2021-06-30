@@ -67,6 +67,7 @@ function Item:InitBasicItem()
 		word_wrap = not self.size_by_text,
 		text = self.text,
 		layer = 3,
+		x = self:TextOffsetX(),
 		color = self:GetForeground(),
 		font = self.font,
 		font_size = self.font_size or self.size - self.text_shrink,
