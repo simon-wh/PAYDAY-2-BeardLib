@@ -37,7 +37,7 @@ function ComboBox:Init()
         alpha = 0.5,
         texture = "guis/textures/menu_ui_icons",
         texture_rect = {4,0,16,16},
-        color = self:GetForeground(highlight),
+        color = self:GetForeground(),
         layer = 2,
     })
     self.icon:set_right(combo_bg:right() - 2)
