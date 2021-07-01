@@ -303,6 +303,7 @@ function TextBoxBase:KeyPressed(o, k)
         self:set_active(false)
         text:stop()
  		self:CheckText(text)
+        return true
  	end
     if self.cantype then
         text:stop()
