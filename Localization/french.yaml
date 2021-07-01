@@ -105,3 +105,5 @@ beardlib_achieves_no_pkg: "Select a package on the left panel to show the achiev
 beardlib_log_init: "Log initialization of mods"
 beardlib_log_init_help: "Logs initialization of mods when they are initialized."
 beardlib_custom_maps_only: "Custom Maps Only"
+bm_menu_glove_variations: "Customize Gloves"
+bm_menu_btn_customize_gloves: "Customize Gloves"

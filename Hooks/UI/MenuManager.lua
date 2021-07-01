@@ -114,3 +114,15 @@ function QuickMenuPlus:init(title, text, options, dialog_merge)
     managers.system_menu:show_custom(self.dialog_data)
     return self
 end
+
+Hooks:PostHook(MenuManager, "setup_local_lobby_character", "BeardLibExtraOutfitSetupLocalLobby", function(self)
+    local local_peer = managers.network:session():local_peer()
+    local_peer:set_extra_outfit_string_beardlib(SyncUtils:ExtraOutfitString())
+end)
+
+Hooks:PostHook(MenuCallbackHandler, "_update_outfit_information", "BeardLibExtraOutfitUpdateLocalOutfit", function(self)
+    if managers.network:session() then
+        local local_peer = managers.network:session():local_peer()
+        local_peer:set_extra_outfit_string_beardlib(SyncUtils:ExtraOutfitString())
+    end
+end)
