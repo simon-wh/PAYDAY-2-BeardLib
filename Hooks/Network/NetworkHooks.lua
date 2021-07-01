@@ -94,10 +94,50 @@ elseif F == "unitnetworkhandler" then
             set_equipped_weapon(self, unit, item_index, blueprint_string, cosmetics_string, sender)
         end
     end
+elseif F == "groupaistatebase" then
+    Hooks:PreHook(GroupAIStateBase, "set_unit_teamAI", "BeardLibSetUnitTeamAIExtraLoadout", function(self, unit, character_name, team_id, visual_seed, loadout)
+        if unit and alive(unit) then
+            local loadout_index = managers.criminals._loadout_map[character_name] or 1
+            local extra_loadout = unit:base():beardlib_extra_loadout() or SyncUtils:ExtraOutfit(true, loadout_index)
+
+            if extra_loadout then
+                Hooks:Call("BeardLibExtraOutfitReload", unit, character_name, extra_loadout)
+                unit:base():set_beardlib_extra_loadout(extra_loadout)
+            end
+        end
+    end)
 elseif F == "teamaibase" then
-    Hooks:PostHook(TeamAIBase, "save", "BeardLib.Save", function(self, data)
-        if data.base and data.base.loadout then
-            data.base.loadout = SyncUtils:CleanOutfitString(data.base.loadout, true)
+    function TeamAIBase:beardlib_extra_loadout()
+        return self._beardlib_extra_loadout
+    end
+
+    function TeamAIBase:set_beardlib_extra_loadout(extra_loadout)
+        self._beardlib_extra_loadout = extra_loadout
+    end
+
+    Hooks:PostHook(TeamAIBase, "save", "BeardLib.TeamAIBase.Save", function(self, data)
+        if data.base then
+            data.base.beardlib_loadout = data.base.loadout
+            data.base.beardlib_extra_loadout = SyncUtils:BeardLibDataToJSON(self._beardlib_extra_loadout or {})
+
+            if data.base.loadout then
+                data.base.loadout = SyncUtils:CleanOutfitString(data.base.loadout, true)
+            end
+        end
+    end)
+elseif F == "huskteamaibase" then
+    HuskTeamAIBase.beardlib_extra_loadout = TeamAIBase.beardlib_extra_loadout
+    HuskTeamAIBase.set_beardlib_extra_loadout = TeamAIBase.set_beardlib_extra_loadout
+
+    Hooks:PreHook(HuskTeamAIBase, "load", "BeardLib.TeamAIBase.Load", function(self, data)
+        if data.base then
+            if data.base.beardlib_loadout then
+                data.base.loadout = data.base.beardlib_loadout
+            end
+
+            if data.base.beardlib_extra_loadout then
+                self:set_beardlib_extra_loadout(SyncUtils:BeardLibJSONToData(data.base.beardlib_extra_loadout))
+            end
         end
     end)
 end
