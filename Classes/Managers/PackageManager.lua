@@ -254,7 +254,7 @@ function BeardLibPackageManager:LoadConfig(directory, config, mod, settings)
                             end
                         end
                     elseif from_db then
-                        self:Err("File does not exist in database! %s", tostring(file_path_ext))
+                        self:Err("File does not exist in database! %s", tostring(path))
                     else
                         self:Err("File does not exist! %s", tostring(file_path_ext))
                     end
