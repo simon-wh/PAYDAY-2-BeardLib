@@ -682,6 +682,7 @@ function Item:ItemsWidth(n_items, offset)
 		return 0
 	end
 	if n_items then
+		offset = offset or self.inherit_values and self.inherit_values.offset or not self.private.offset and self.offset or {6, 2}
 		offset = self:ConvertOffset(offset)
 		return (self:ItemsPanel():w() - offset[2] * n_items) / n_items
 	else
