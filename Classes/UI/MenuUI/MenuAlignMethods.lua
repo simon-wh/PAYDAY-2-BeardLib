@@ -45,7 +45,7 @@ function Item:AlignItems(menus, no_parent)
         self:AlignItemsNormal()
     end
 
-    if self.parent.AlignItems and not no_parent then
+    if self.parent.AlignItems and self.parent.auto_align and not no_parent then
 		self.parent:AlignItems()
     end
     self:CheckItems()
