@@ -687,9 +687,9 @@ elseif F == "blackmarketmanager" then
 
 		variation = variation or "default"
 
-		local glowobal_bmm = Global.blackmarket_manager.gloves[glove_id].variations[variation]
+		local glowobal_bmm = Global.blackmarket_manager.gloves[glove_id].variations and Global.blackmarket_manager.gloves[glove_id].variations[variation]
 		if variation ~= "default" then
-			local tweak_data = tweak_data.blackmarket.gloves[glove_id].variations[variation]
+			local tweak_data = tweak_data.blackmarket.gloves[glove_id].variations and tweak_data.blackmarket.gloves[glove_id].variations[variation]
 			return (tweak_data and glowobal_bmm) and true or false
 		end
 
@@ -1350,7 +1350,7 @@ elseif F == "multiprofilemanager" then
 		managers.blackmarket:set_glove_variations(profile.glove_variations or {})
 	end)
 elseif F == "crewmanagementgui" then
-	-- I'm sorry, but overkill dumbness means I have too, ;-; 
+	-- I'm sorry, but overkill dumbness means I have to, ;-; 
 	function CrewManagementGui:open_suit_menu(henchman_index)
 		local loadout = managers.blackmarket:henchman_loadout(henchman_index)
 		local new_node_data = {
