@@ -14,9 +14,11 @@ function WorldDefinition:init(...)
 end
 
 function WorldDefinition:do_package_load(pkg)
-    if PackageManager:package_exists(pkg) and not PackageManager:loaded(pkg) then
-        PackageManager:load(pkg)
-        BeardLib:DevLog("Loaded package: "..pkg)
+    if PackageManager:package_exists(pkg) then
+        if not PackageManager:loaded(pkg) then
+            PackageManager:load(pkg)
+            --BeardLib:log("Loaded package: "..pkg)
+        end
         table.insert(self._custom_loaded_packages, pkg)
     end
 end
@@ -28,18 +30,17 @@ function WorldDefinition:_load_world_package(...)
         if level_tweak then
             self._has_package = not not level_tweak.package
             if level_tweak.custom_packages then
-                self._custom_loaded_packages = {}
+                self._custom_loaded_packages = self._custom_loaded_packages or {}
                 for _, package in ipairs(level_tweak.custom_packages) do
                     self:do_package_load(package.."_init")
                     self:do_package_load(package)
                 end
             end
-            if not self._has_package then
-                return
-            end
         end
     end
-    WorldDefinition_load_world_package(self, ...)
+    if not BeardLib.current_level then
+        WorldDefinition_load_world_package(self, ...)
+    end
 end
 
 local WorldDefinitionunload_packages = WorldDefinition.unload_packages
@@ -57,12 +58,17 @@ function WorldDefinition:unload_packages(...)
             end
         end
 
-        if not self._has_package then
-            return
+        if self._custom_loaded_packages then
+            for _, package in pairs(self._custom_loaded_packages) do
+                PackageManager:unload(package)
+                --BeardLib:log("Unloaded package: "..package)
+            end
+            self._custom_loaded_packages = {}
         end
     end
-
-    WorldDefinitionunload_packages(self, ...)
+    if not BeardLib.current_level then
+        WorldDefinitionunload_packages(self, ...)
+    end
 end
 
 local WorldDefinition_load_continent_init_package = WorldDefinition._load_continent_init_package
