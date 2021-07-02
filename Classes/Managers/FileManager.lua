@@ -24,9 +24,17 @@ function BeardLibFileManager:init()
 	BeardLib.managers.file = self
 end
 
+local env_ids = Idstring("environment")
+
 function BeardLibFileManager:Process(ids_ext, ids_path, name_mt)
 	local data = {}
 	if DB:_has(ids_ext, ids_path) then
+		if ids_ext == env_ids then
+			local file = self:Get(ids_ext, ids_path)
+			if file then
+				self:LoadAsset(ids_ext, ids_path, file.file)
+			end
+		end
         if name_mt ~= nil then
             data = PackageManager:_script_data(ids_ext, ids_path, name_mt)
         else
@@ -184,9 +192,13 @@ function BeardLibFileManager:ScriptReplace(ext, path, tbl, options)
 	table.insert(self.modded_files[k_ext][k_path], table.merge(options, {tbl = tbl}))
 end
 
-function BeardLibFileManager:Has(ext, path)
+function BeardLibFileManager:Get(ext, path)
 	local k_ext = ext:key()
-	return Global.fm.added_files[k_ext] and Global.fm.added_files[k_ext][path:key()]
+	return Global.fm.added_files[k_ext] and Global.fm.added_files[k_ext][path:key()] or nil
+end
+
+function BeardLibFileManager:Has(ext, path)
+	return self:Get(ext, path) ~= nil
 end
 
 function BeardLibFileManager:HasScriptMod(ext, path)
