@@ -275,6 +275,7 @@ function Item:WorkParams(params)
 	self:WorkParam("bg_callbacks")
 	self:WorkParam("no_slide")
 	self:WorkParam("round_sliding", 0)
+	self:WorkParam("highlight_image")
 
     if not self.MENU then
         self:WorkParam("align_method", "grid_from_right")
