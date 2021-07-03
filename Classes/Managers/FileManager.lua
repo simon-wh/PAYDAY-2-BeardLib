@@ -25,11 +25,14 @@ function BeardLibFileManager:init()
 end
 
 local env_ids = Idstring("environment")
+local scene_ids = Idstring("scene")
 
 function BeardLibFileManager:Process(ids_ext, ids_path, name_mt)
 	local data = {}
 	if DB:_has(ids_ext, ids_path) then
-		if ids_ext == env_ids then
+		--Auto load environments
+		local is_env = ids_ext == env_ids
+		if is_env then
 			local file = self:Get(ids_ext, ids_path)
 			if file then
 				self:LoadAsset(ids_ext, ids_path, file.file)
@@ -40,6 +43,19 @@ function BeardLibFileManager:Process(ids_ext, ids_path, name_mt)
         else
             data = PackageManager:_script_data(ids_ext, ids_path)
         end
+
+		-- Auto load scenes
+		if is_env and data.data and data.data.others then
+			for _, param in pairs(data.data.others) do
+				if param.key == "underlay" then
+					local ids_scene_path = param.value:id()
+					local file = self:Get(scene_ids, ids_scene_path)
+					if file then
+						self:LoadAsset(scene_ids, ids_scene_path, file.file)
+					end
+				end
+			end
+		end
 	end
 
 	Hooks:Call(self.const.h_preprocessSF, ids_ext, ids_path, data)
