@@ -60,8 +60,12 @@ function WorldDefinition:unload_packages(...)
 
         if self._custom_loaded_packages then
             for _, package in pairs(self._custom_loaded_packages) do
-                PackageManager:unload(package)
                 --BeardLib:log("Unloaded package: "..package)
+                --Disabled for the time being. This will crash certain custom maps after reloading them.
+                --The exact reason is unknown.
+                --[[if PackageManager:loaded(package) then
+                    PackageManager:unload(package)
+                end]]
             end
             self._custom_loaded_packages = {}
         end
@@ -73,7 +77,7 @@ end
 
 local WorldDefinition_load_continent_init_package = WorldDefinition._load_continent_init_package
 function WorldDefinition:_load_continent_init_package(path, ...)
-    if not self._has_package and not PackageManager:package_exists(path) then
+    if not PackageManager:package_exists(path) then
         return
     end
 
@@ -82,7 +86,7 @@ end
 
 local WorldDefinition_load_continent_package =  WorldDefinition._load_continent_package
 function WorldDefinition:_load_continent_package(path, ...)
-    if not self._has_package and not PackageManager:package_exists(path) then
+    if not PackageManager:package_exists(path) then
         return
     end
 
