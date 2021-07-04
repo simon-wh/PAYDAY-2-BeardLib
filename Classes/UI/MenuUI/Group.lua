@@ -15,8 +15,8 @@ function Group:InitBasicItem()
     self.toggle = self.panel:bitmap({
         name = "toggle",
         visible = not self.divider_type,
-        w = self.title:h() * 0.78,
-        h = self.title:h() * 0.78,
+        w = self.size * 0.78,
+        h = self.size * 0.78,
         texture = "guis/textures/menu_ui_icons",
         color = self:GetForeground(),
         y = 2,
@@ -30,9 +30,9 @@ function Group:RePositionToggle()
     if self:title_alive() then
         local _,_,w,_ = self.title:text_rect()
         if alive(self.toggle) then
-            local s = self.title:font_size() * 0.78
+            local s = self.size * 0.78
             self.toggle:set_size(s, s)
-            self.toggle:set_x(w + 6)
+            self.toggle:set_x(w + self.text_offset[1] + 4)
             self.toggle:set_center_y(self.title:center_y())
         end
         if alive(self.bg) and alive(self.highlight_bg) then

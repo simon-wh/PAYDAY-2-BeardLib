@@ -29,7 +29,7 @@ function TextBoxBase:init(parent, params)
 		halign = "grow",
 		visible = params.line,
         h = 2,
-        layer = 2,
+        layer = -1,
         color = self.line_color or color,
     })
     line:set_bottom(self.panel:h())
@@ -51,9 +51,16 @@ function TextBoxBase:init(parent, params)
     })
     if self.fit_text then
         self.text:set_vertical("center")
-    elseif self.owner.text_offset then
-        self.text:set_y(self.owner.text_offset[2])
     end
+    if self.owner.text_offset then
+        self._text_offset = self.owner.text_offset[2]
+        self._text_offset_b = (self.owner.text_offset[4] or self._text_offset)
+    else
+        self._text_offset = 2
+        self._text_offset_b = 2
+    end
+    self._text_offset = math.max(self._text_offset - line:h(), 0)
+    self.text:set_y(self._text_offset)
     local len = self:Value():len()
     self.text:set_selection(len, len)
     self.panel:rect({
@@ -318,6 +325,7 @@ function TextBoxBase:update_caret()
         return
     end
     local text = self.panel:child("text")
+    local line = self.panel:child("line")
 
     local _,_,w,h = text:text_rect()
     if self.fit_text then
@@ -328,21 +336,17 @@ function TextBoxBase:update_caret()
 
     local lines = math.max(1, text:number_of_lines())
     h = math.max(h, text:font_size())
-    if self.owner.text_offset then
-        h = h + self.owner.text_offset[2]
-    end
     local old_h = self.panel:h()
     if not self.owner.h and (not self.lines or (self.lines > 1 and self.lines ~= lines)) then
-        self.panel:set_h(h+2)
-        self.panel:parent():set_h(self.panel:h())
+        self.panel:set_h(h + self._text_offset + self._text_offset_b + line:h())
         text:set_h(h)
         self.owner:_SetText(self.owner.text)
         if not self.owner.SetScrollPanelSize then
             self.panel:set_h(self.panel:parent():h())
         end
-        self.panel:child("line"):set_bottom(self.panel:h())
+        line:set_bottom(self.panel:h())
     end
-    text:set_h(self.panel:h())
+    text:set_h(self.panel:h() - self._text_offset - self._text_offset_b)
     if self.parent and old_h ~= self.panel:h() then
         self.parent:AlignItems()
     end

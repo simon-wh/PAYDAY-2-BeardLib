@@ -303,7 +303,7 @@ function Item:WorkParams(params)
 	self:WorkParamLimited("min_width")
 
 	self.offset = self:ConvertOffset(self.offset)
-	self.text_offset = self:ConvertOffset(self.text_offset, true) or {4,2}
+	self.text_offset = self:ConvertOffset(self.text_offset, true) or {4,4}
 
 	self.text_offset[1] = self.text_offset_x or self.text_offset[1]
 	self.text_offset[2] = self.text_offset_y or self.text_offset[2]
@@ -853,7 +853,7 @@ function Item:ConvertOffset(offset, no_default)
         if t == "number" then
             return {offset, offset}
 		elseif t == "table" then
-            return {offset[1], offset[2]}
+            return {offset[1], offset[2], offset[3], offset[4]}
 		end
 	end
     if not no_default then
@@ -1003,39 +1003,52 @@ function Item:_SetText(text)
 				end
 			end
 		end
-        local offset_x = math.max(self.border_left and self.border_width or 0, self.text_offset[1])
-		local offset_y = math.max(self.border_top and self.border_size or 0, self.text_offset[2])
-		local offset_w = offset_x * 2
-		local offset_h = offset_y * 2
+		local border_x = self.border_left and (self.border_height or self.border_size) or 0
+		local border_y = self.border_top and (self.border_width or self.border_size) or 0
+		local border_r = self.border_right and (self.border_height or self.border_size) or 0
+		local border_b = self.border_bottom and (self.border_width or self.border_size) or 0
+		
+        local offset_x = self.text_offset[1] + border_x
+		local offset_y = self.text_offset[2] + border_y
+		local offset_r = (self.text_offset[3] or self.text_offset[1]) + border_r
+		local offset_b = (self.text_offset[4] or self.text_offset[2]) + border_b
+
 		title:set_position(offset_x, offset_y)
-		title:set_w(self.panel:w() - offset_w)
+		title:set_w(self.panel:w() - offset_r)
         local _,_,w,h = title:text_rect()
-        if self.size_by_text then
-            title:set_h(math.clamp(h, self.min_height and self.min_height - offset_h or h, self.max_height and self.max_height - offset_h or h))
-			local new_w = w + offset_w + (self.type_name == "Toggle" and self.size or 0)
-			local new_h = title:bottom() + offset_y
-            self.panel:set_size(math.clamp(new_w, self.min_width or 0, self.max_width or new_w), math.clamp(new_h, self.min_height or 0, self.max_height or new_h))
-            self.w, self.h = self.panel:size()
-            title:set_w(math.clamp(w, self.min_width and self.min_width - offset_w or w, self.max_width and self.max_width - offset_w or w))
-		end
         if self.SetScrollPanelSize then
-            title:set_size(self.panel:w() - offset_w, math.max(h+offset_h, self.size))
+            title:set_size(self.panel:w() - offset_x - offset_r, h + offset_b)
             self:SetScrollPanelSize()
             if self.HYBRID then
                 self.bg:set_h(title:h())
                 self.highlight_bg:set_h(self.bg:h())
             end
-		elseif not self.size_by_text then
-			local new_h = math.max(h+offset_h, self.size)
-			if self._textbox and alive(self._textbox.panel) then
-				new_h = math.max(new_h, self._textbox.panel:h())
-			end
-			if not self.h then
+		else
+			if self.h and not self.size_by_text then
+				if self.debug then
+					log(tostring(offset_y), tostring(offset_b))
+					
+				end
+				title:set_h(self.panel:h() - offset_y - offset_b)
+			else
+				title:set_h(math.clamp(h, self.min_height or 0, self.max_height or h))
+				local new_h = math.max(title:bottom(), self.size) + offset_b
+				if self._textbox and alive(self._textbox.panel) then
+					new_h = math.max(new_h, self._textbox.panel:h())
+				end
 				self.panel:set_h(math.clamp(new_h, self.min_height or 0, self.max_height or new_h))
+				if self.size_by_text then
+					local new_w = w + offset_x + offset_r + (self.type_name == "Toggle" and self.size or 0)
+					self.panel:set_w(math.clamp(new_w, self.min_width or 0, self.max_width or new_w))
+				end
 			end
-            title:set_size(self.panel:w() - offset_w, self.panel:h() - offset_h)
+			if self.w and not self.size_by_text then
+				title:set_w(self.panel:w() - offset_x - offset_r)
+			else
+				title:set_w(w)
+			end
         end
-
+		
         return true
     end
     return false
