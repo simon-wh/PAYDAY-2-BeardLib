@@ -7,7 +7,7 @@ function ColorTextBox:Init(...)
     self.value = self:HexValue() or self.allow_empty and "" or "000000"
     ColorTextBox.super.Init(self, ...)
     local panel = self:Panel()
-    panel:rect({name = "color_preview", w = self.size, h = self.size})
+    panel:rect({name = "color_preview", w = self.size, h = self.size, layer = 10})
     self:UpdateColor()
 end
 
