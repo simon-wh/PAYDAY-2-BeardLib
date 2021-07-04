@@ -20,7 +20,7 @@ function NoteBook:InitBasicItem()
         texture = "guis/textures/menu_ui_icons",
         color = self:GetForeground(),
         y = 2,
-        texture_rect = {4, 17, 16, 16},
+        texture_rect = {39, 32, 32, 32},
         layer = 3,
     })
     self.arrow_right = self.panel:bitmap({
@@ -31,7 +31,7 @@ function NoteBook:InitBasicItem()
         texture = "guis/textures/menu_ui_icons",
         color = self:GetForeground(),
         y = 2,
-        texture_rect = {42, 2, 16, 16},
+        texture_rect = {67, 32, 32, 32},
         layer = 3,
     })
     self.page_name = self.panel:text({

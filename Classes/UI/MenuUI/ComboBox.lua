@@ -32,15 +32,15 @@ function ComboBox:Init()
     combo_bg:set_right(self.panel:w())
     self.icon = self.panel:bitmap({
         name = "icon_arrow",
-        w = self.size - 6,
-        h = self.size - 6,
+        w = self.size - 4,
+        h = self.size - 4,
         alpha = 0.5,
         texture = "guis/textures/menu_ui_icons",
-        texture_rect = {4,0,16,16},
+        texture_rect = {0,0,32,32},
         color = self:GetForeground(),
         layer = 2,
     })
-    self.icon:set_right(combo_bg:right() - 2)
+    self.icon:set_right(combo_bg:right() - 4)
     self.icon:set_center_y(self._textbox.panel:center_y() - 1)
     self:UpdateValueText()
 end

@@ -20,7 +20,7 @@ function Group:InitBasicItem()
         texture = "guis/textures/menu_ui_icons",
         color = self:GetForeground(),
         y = 2,
-        texture_rect = {self.closed and 42 or 2, self.closed and 2 or 0, 16, 16},
+        texture_rect = {self.closed and 67 or 0, self.closed and 32 or 0, 32, 32},
         layer = 3,
     })
     self:RePositionToggle()
@@ -70,7 +70,7 @@ function Group:UpdateGroup()
         end
         self:CheckItems()
         if alive(self.toggle) then
-            self.toggle:set_texture_rect(self.closed and 42 or 2, self.closed and 2 or 0, 16, 16)
+            self.toggle:set_texture_rect(self.closed and 67 or 0, self.closed and 32 or 1, 32, 32)
         end
         self:_SetSize()
         self:AlignItems(true)
