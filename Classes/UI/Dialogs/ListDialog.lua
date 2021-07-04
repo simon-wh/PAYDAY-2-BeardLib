@@ -145,9 +145,11 @@ function ListDialog:SearchCheck(t)
     end
     local match
     for _, s in pairs(self._filter) do
-        match = (self._case_sensitive and string.find(t, s) or not self._case_sensitive and string.find(t:lower(), s:lower()))
+        if (self._case_sensitive and string.find(t, s) or not self._case_sensitive and string.find(t:lower(), s:lower())) then
+            return true
+        end
     end
-    return match
+    return false
 end
 
 function ListDialog:MakeListItems(params)
