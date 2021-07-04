@@ -212,8 +212,8 @@ function BeardLib:Update(t, dt)
 	local main_t = TimerManager:main():time()
 	for id, delayed in pairs(self._delayed_calls) do
 		if delayed.call_t <= main_t then
-			delayed.func()
 			self._delayed_calls[id] = nil
+			delayed.func()
 		end
 	end
 	for _, beardlib_update in pairs(self._updaters) do
