@@ -55,7 +55,6 @@ function Group:UpdateGroup()
     end
 
     if not self.divider_type then
-        self:AlignItems(true)
         for _, item in pairs(self._my_items) do
             if item:ParentPanel() == self:ItemsPanel() then
                 item._hidden_by_menu = self.closed
@@ -74,6 +73,7 @@ function Group:UpdateGroup()
         end
         self:_SetSize()
         self:AlignItems(true)
+        self.parent:AlignItems()
     end
 end
 
