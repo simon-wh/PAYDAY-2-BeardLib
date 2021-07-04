@@ -276,6 +276,7 @@ function Item:WorkParams(params)
 	self:WorkParam("no_slide")
 	self:WorkParam("round_sliding", 0)
 	self:WorkParam("highlight_image")
+	self:WorkParam("offset_ignore_border", true)
 
     if not self.MENU then
         self:WorkParam("align_method", "grid_from_right")
@@ -1008,6 +1009,10 @@ function Item:_SetText(text)
 		local border_r = self.border_right and (self.border_height or self.border_size) or 0
 		local border_b = self.border_bottom and (self.border_width or self.border_size) or 0
 		
+		if self.offset_ignore_border then
+			border_x, border_y, border_r, border_b = 0,0,0,0
+		end
+
         local offset_x = self.text_offset[1] + border_x
 		local offset_y = self.text_offset[2] + border_y
 		local offset_r = (self.text_offset[3] or self.text_offset[1]) + border_r
@@ -1025,10 +1030,6 @@ function Item:_SetText(text)
             end
 		else
 			if self.h and not self.size_by_text then
-				if self.debug then
-					log(tostring(offset_y), tostring(offset_b))
-					
-				end
 				title:set_h(self.panel:h() - offset_y - offset_b)
 			else
 				title:set_h(math.clamp(h, self.min_height or 0, self.max_height or h))
