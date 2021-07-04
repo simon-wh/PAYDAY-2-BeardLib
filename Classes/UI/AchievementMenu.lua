@@ -35,51 +35,39 @@ function BeardLibAchievementMenu:init()
 end
 
 function BeardLibAchievementMenu:InitPanels(parent)
-	self._header = parent:Grid({background_color = self._menu.accent_color, auto_foreground = true, h = 32})
-	self._account_progression = parent:Grid({
+	self._header = parent:Grid({background_color = self._menu.accent_color, auto_foreground = true, h = 32, offset = 2})
+	self._holder = parent:Holder({auto_foreground = true, auto_height = false, w = parent:ItemsWidth(1), offset = default_margin, h = parent:ItemsHeight(2) - 32, position = {0, self._header:Bottom() + default_margin}})
+	local h = self._holder:ItemsHeight(2, default_margin)
+	local w = self._holder:ItemsWidth(2, default_margin)
+
+	self._account_progression = self._holder:Grid({
 		background_color = Color.black:with_alpha(0.75),
-		h = 120,
-		w = parent._panel:w() / 3,
+		h = h * 1/5,
+		w = w * 1/3,
 		foreground = Color("808080"),
-		offset = default_margin,
-		position = function(item)
-			if alive(self._header) then
-				item:SetXY(default_margin, self._header:Bottom() + default_margin)
-			end
-		end
 	})
-	self._package_list = parent:GridMenu({
+	self._package_list = self._holder:GridMenu({
 		background_color = Color.black:with_alpha(0.75),
-		h = parent._panel:h() - self._account_progression:ItemsHeight() - self._header:ItemsHeight() - (default_margin * 3),
-		w = parent._panel:w() / 3,
-		offset = 2,
+		inherit_values = {offset = 2},
+		h = h * 4/5,
+		w = w * 1/3,
+	})
+
+	self._achievement_list_header = self._holder:Holder({
+		background_color = Color.black:with_alpha(0.75),
+		h = h * 1/7,
+		w = w * 2/3,
 		position = function(item)
-			if alive(self._account_progression) then
-				item:SetXY(default_margin, self._account_progression:Bottom() + default_margin)
-			end
+			item:SetXY(self._account_progression:Right() + default_margin, default_margin)
 		end
 	})
 
-	self._achievement_list_header = parent:Holder({
+	self._achievement_panel = self._holder:Grid({
 		background_color = Color.black:with_alpha(0.75),
-		h = 90,
-		w = parent._panel:w() - self._account_progression:Panel():w() - (default_margin * 3),
-		offset = default_margin,
+		h = h * 6/7,
+		w = w * 2/3,
 		position = function(item)
-			if alive(self._account_progression) then
-				item:SetXY(self._account_progression:Right() + default_margin, self._header:Bottom() + default_margin)
-			end
-		end
-	})
-
-	self._achievement_panel = parent:Grid({
-		background_color = Color.black:with_alpha(0.75),
-		h = parent._panel:h() - self._achievement_list_header:Panel():h() - self._header:Panel():h() - (default_margin * 3),
-		w = self._achievement_list_header:Panel():w(),
-		position = function(item)
-			if alive(self._achievement_list_header) then
-				item:SetXY(self._achievement_list_header:X(), self._achievement_list_header:Bottom() + default_margin)
-			end
+			item:SetXY(self._achievement_list_header:X(), self._achievement_list_header:Bottom() + default_margin)
 		end
 	})
 
@@ -93,21 +81,17 @@ function BeardLibAchievementMenu:InitPanels(parent)
 		end
 	})
 
+	local ach_w = self._achievement_panel:ItemsWidth(2)
 	self._achievement_list = self._achievement_panel:GridMenu({
 		h = self._achievement_panel:Panel():h(),
-		w = self._achievement_panel:Panel():w() / 1.6,
+		w = ach_w * 3/5,
 		visible = false
 	})
 
-	self._achievement_details = parent:Grid({
+	self._achievement_details = self._achievement_panel:Grid({
 		h = self._achievement_panel:Panel():h(),
-		w = self._achievement_panel:Panel():w() - self._achievement_list:Panel():w() - 15,
-		visible = false,
-		position = function(item)
-			if alive(self._achievement_panel)then
-				item:SetRightTop(self._achievement_panel:Right() - 5, self._achievement_panel:Y() + 5)
-			end
-		end
+		w = ach_w * 2/5,
+		visible = false
 	})
 end
 
@@ -376,9 +360,7 @@ function BeardLibAchievementMenu:DisplayPackageHeader(package)
 		name = "current_progress",
 		text = managers.localization:to_upper_text("beardlib_achieves_completed_achievements", {completed = completed_achievements, total = total_achievements, percent = percent_display}),
 		position = function(item)
-			if alive(package_name) then
-				item:SetXY(package_name:LeftBottom())
-			end
+			item:SetXY(package_name:X(), 30)
 		end,
 		font_size = 18,
 		foreground = Color(0.3, 0.3, 0.3),
@@ -416,8 +398,7 @@ function BeardLibAchievementMenu:DisplayAchievementDetails(achievement)
 	panel:Divider({
 		text = achiev_details.name,
 		background_color = Color(achiev_details.rank_color):with_alpha(0.5),
-		offset = 0,
-		size = 20,
+		size = 24,
 		text_align = "center"
 	})
 
@@ -425,7 +406,6 @@ function BeardLibAchievementMenu:DisplayAchievementDetails(achievement)
 		texture = achiev_details.icon,
 		w = 64,
 		h = 64,
-		offset = 10,
 		foreground = achievement:IsDefaultIcon() and not achievement:IsHidden() and Color(achiev_details.rank_color) or nil,
 		highlight_color = Color.transparent
 	})
@@ -434,35 +414,30 @@ function BeardLibAchievementMenu:DisplayAchievementDetails(achievement)
 		text = achiev_details.desc,
 		size = 14,
 		w = 207,
-		offset = 10,
 		highlight_color = Color.transparent
 	})
 
 	local achiev_objective_header = panel:Divider({
 		text = managers.localization:to_upper_text("beardlib_achieves_header_objectives"),
 		text_align = "center",
-		background_color = Color(achiev_details.rank_color):with_alpha(0.5),
-		offset = 5
+		background_color = Color(achiev_details.rank_color):with_alpha(0.5)
 	})
 
 	panel:Divider({
-		text = achiev_details.obj,
-		offset = 10
+		text = achiev_details.obj
 	})
 
 	if not achievement:IsUnlocked() and achievement:HasAmountValue() then
 		panel:Divider({
 			text = utf8.to_upper("Progress"),
 			text_align = "center",
-			background_color = Color(achiev_details.rank_color):with_alpha(0.5),
-			offset = 5
+			background_color = Color(achiev_details.rank_color):with_alpha(0.5)
 		})
 
 		local progress = achievement:CurrentAmountValue() * 100 / achievement:AmountValue()
 
 		panel:Divider({
-			text = tostring(achievement:CurrentAmountValue()) .. " / " .. tostring(achievement:AmountValue()) .. " ( " .. math.floor(progress) .. " %)",
-			offset = 10
+			text = tostring(achievement:CurrentAmountValue()) .. " / " .. tostring(achievement:AmountValue()) .. " ( " .. math.floor(progress) .. " %)"
 		})
 	end
 
@@ -470,58 +445,36 @@ function BeardLibAchievementMenu:DisplayAchievementDetails(achievement)
 		panel:Divider({
 			text = managers.localization:to_upper_text("beardlib_achieves_header_rewards"),
 			text_align = "center",
-			background_color = Color(achiev_details.rank_color):with_alpha(0.5),
-			offset = 5
+			background_color = Color(achiev_details.rank_color):with_alpha(0.5)
 		})
 
 		local achiev_reward_panel = panel:Grid({h = 68, w = panel:Panel():w() - 10})
+		local rewards = thousand_sep(achievement:SanitizeMaxRewards(achievement:GetRewardAmount()))
+		local reward_loc
+		local reward_icon
 
 		if achievement:GetRewardType() == "xp" then
-			achiev_reward_panel:Image({
-				texture = xp_icon,
-				h = 64,
-				w = 64
-			})
-
-			local reward_title = achiev_reward_panel:Divider({text = managers.localization:to_upper_text("beardlib_achieves_reward_exp"), size_by_text = true})
-			achiev_reward_panel:Divider({text = "+ ".. thousand_sep(achievement:SanitizeMaxRewards(achievement:GetRewardAmount())), size_by_text = true, position = function(item) item:Panel():set_top(reward_title:Panel():bottom() + 20) item:Panel():set_left(reward_title:Panel():left()) end})
-
+			reward_icon = xp_icon
+			reward_loc = "beardlib_achieves_reward_exp"
 		elseif achievement:GetRewardType() == "cash" then
-			achiev_reward_panel:Image({
-				texture = cash_icon,
-				h = 64,
-				w = 64
-			})
-
-			local reward_title = achiev_reward_panel:Divider({text = managers.localization:to_upper_text("beardlib_achieves_reward_cash"), size_by_text = true})
-			achiev_reward_panel:Divider({text = "+ ".. thousand_sep(achievement:SanitizeMaxRewards(achievement:GetRewardAmount())), size_by_text = true, position = function(item) item:Panel():set_top(reward_title:Panel():bottom() + 20) item:Panel():set_left(reward_title:Panel():left()) end})
+			reward_icon = cash_icon
+			reward_loc = "beardlib_achieves_reward_cash"
 		elseif achievement:GetRewardType() == "offshore" then
-			achiev_reward_panel:Image({
-				texture = cash_icon,
-				h = 64,
-				w = 64
-			})
-
-			local reward_title = achiev_reward_panel:Divider({text = managers.localization:to_upper_text("beardlib_achieves_reward_offshore"), size_by_text = true})
-			achiev_reward_panel:Divider({text = "+ ".. thousand_sep(achievement:SanitizeMaxRewards(achievement:GetRewardAmount())), size_by_text = true, position = function(item) item:Panel():set_top(reward_title:Panel():bottom() + 20) item:Panel():set_left(reward_title:Panel():left()) end})
-
+			reward_icon = cash_icon
+			reward_loc = "beardlib_achieves_reward_offshore"
 		elseif achievement:GetRewardType() == "cc" then
-			achiev_reward_panel:Image({
-				texture = cc_icon,
-				h = 64,
-				w = 64
-			})
-
-			local reward_title = achiev_reward_panel:Divider({text = managers.localization:to_upper_text("beardlib_achieves_reward_cc"), size_by_text = true})
-			achiev_reward_panel:Divider({text = "+ ".. thousand_sep(achievement:SanitizeMaxRewards(achievement:GetRewardAmount())), size_by_text = true, position = function(item) item:Panel():set_top(reward_title:Panel():bottom() + 20) item:Panel():set_left(reward_title:Panel():left()) end})
+			reward_icon = cc_icon
+			reward_loc = "beardlib_achieves_reward_cc"
 		end
+
+		achiev_reward_panel:Image({texture = reward_icon, h = 32, w = 32})
+		achiev_reward_panel:FitDivider({text = managers.localization:to_upper_text(reward_loc) .. " + ".. rewards, offset = {6, 14}})
 	end
 
 	if achiev_details.is_unlocked then
 		panel:Divider({
 			text = managers.localization:to_upper_text("beardlib_achieves_header_unlocked"),
 			text_align = "center",
-			offset = 5,
 			background_color = Color.green
 		})
 
@@ -529,7 +482,6 @@ function BeardLibAchievementMenu:DisplayAchievementDetails(achievement)
 			text = managers.localization:text("beardlib_achieves_header_unlocked_date", {time = os.date('%d/%m/%Y @ %H:%M:%S', achievement:GetUnlockTimestamp())}),
 			foreground = Color("aaaaaa"), -- AAAAAAAA
 			text_align = "center",
-			offset = 10
 		})
 	end
 end

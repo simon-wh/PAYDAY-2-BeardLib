@@ -656,6 +656,32 @@ function MenuUI:RemoveItem(item)
     end
 end
 
+function MenuUI:ItemsWidth(n_items, offset)
+	if not alive(self) then
+		return 0
+	end
+	if n_items then
+		offset = self.offset or {6, 2}
+		offset = BeardLib.Items.Item.ConvertOffset(self, offset)
+		return (self._panel:w() - offset[1] * n_items)
+	else
+		return self._panel:w()
+	end
+end
+
+function MenuUI:ItemsHeight(n_items, offset)
+	if not alive(self) then
+		return 0
+	end
+	if n_items then
+		offset = self.offset or {6, 2}
+		offset = BeardLib.Items.Item.ConvertOffset(self, offset)
+		return (self._panel:h() - offset[2] * (n_items+1))
+	else
+		return self._panel:h()
+	end
+end
+
 function MenuUI:enable() return self:Enable() end
 function MenuUI:disable() return self:Disable() end
 function MenuUI:toggle() return self:Toggle() end
