@@ -277,6 +277,7 @@ function Item:WorkParams(params)
 	self:WorkParam("round_sliding", 0)
 	self:WorkParam("highlight_image")
 	self:WorkParam("offset_ignore_border", true)
+	self:WorkParam("img_scale")
 
     if not self.MENU then
         self:WorkParam("align_method", "grid_from_right")

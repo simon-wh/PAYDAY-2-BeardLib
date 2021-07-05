@@ -10,13 +10,23 @@ function ImageButton:InitBasicItem()
         h = self.h,
 	})
     self:InitBGs()
+    local w = self.icon_w
+    local h = self.icon_h
+    if self.img_scale then
+        w = w or self.w * self.img_scale
+        h = h or self.h * self.img_scale
+    else
+        w = w or self.w - (self.img_offset[1] * 2)
+        h = h or self.h - (self.img_offset[2] * 2)
+    end
+
     self.img = self.panel:bitmap({
         name = "img",
         texture = self.texture,
         texture_rect = self.texture_rect,
         color = self.img_color or self.foreground,
-        w = self.icon_w or self.w - (self.img_offset[1] * 2),
-        h = self.icon_h or self.h - (self.img_offset[2] * 2),
+        w = w,
+        h = h,
         halign = "center",
         valign = "center",
         layer = 5
