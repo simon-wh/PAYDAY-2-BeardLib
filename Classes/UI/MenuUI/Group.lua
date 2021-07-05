@@ -128,10 +128,11 @@ function Group:GetToolbar(opt)
             name = "Toolbar",
             label = "Toolbar",
             inherit_values = {
-                foreground = self.foreground
+                foreground = self.foreground,
             },
+            inherit = self,
             ignore_align = true,
-            position = "RightTop",
+            position = "Right",
             full_bg_color = false,
             align_method = "grid_from_right",
             h = self.highlight_bg:h(),
