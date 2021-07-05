@@ -110,8 +110,10 @@ function Slider:SetValue(value, ...)
 end
 
 function Slider:SetValueByPercentage(percent, run_callback)
-    local val = self.min + (self.max - self.min) * percent
-    self:SetValue((self.round_sliding and val ~= self.min and val ~= self.max) and math.round_with_precision(val, self.round_sliding) or val, run_callback, true)
+    local max_min_diff = self.max - self.min
+    local val = self.min + max_min_diff * percent
+    local should_round = max_min_diff > 1
+    self:SetValue((self.round_sliding and val ~= self.min and val ~= self.max) and should_round and math.round_with_precision(val, self.round_sliding) or val, run_callback, true)
 end
 
 function Slider:MouseReleased(b, x, y)
