@@ -1044,11 +1044,7 @@ function Item:_SetText(text)
 					self.panel:set_w(math.clamp(new_w, self.min_width or 0, self.max_width or new_w))
 				end
 			end
-			if self.w and not self.size_by_text then
-				title:set_w(self.panel:w() - offset_x - offset_r)
-			else
-				title:set_w(w)
-			end
+			title:set_w(self.panel:w() - offset_x - offset_r)
         end
 		
         return true
