@@ -1466,12 +1466,23 @@ function Item:MouseMovedSelfEvent(x, y)
 end
 
 function Item:MouseMovedMenuEvent(x, y)
-    if self:Enabled() and self:MouseFocused(x, y) then
-        for _, item in pairs(self._visible_items) do
-            if item:MouseMoved(x, y) then
-                return true
-            end
-        end
+    if self:Enabled() then
+		if alive(self._scroll) then
+			local hit = self._scroll:mouse_moved(nil, x, y)
+			if hit then
+				self:SetPointer("hand")
+				return true
+			else
+				self:SetPointer("arrow")
+			end
+		end
+		if self:MouseFocused(x, y) then
+			for _, item in pairs(self._visible_items) do
+				if item:MouseMoved(x, y) then
+					return true
+				end
+			end
+		end
     end
     return false
 end
