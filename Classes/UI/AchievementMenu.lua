@@ -181,7 +181,7 @@ function BeardLibAchievementMenu:InitAccount()
 				item:SetCenterY(rank_icon:CenterY())
 			end,
 			font = "fonts/font_large_mf",
-			font_size = 16
+			size = 16
 		})
 	end
 end
@@ -272,6 +272,7 @@ function BeardLibAchievementMenu:DisplayAchievementsFromPackage(package)
 		local achievement_button = panel:Button({
 			h = 48,
 			w = panel:Panel():w() - 48 - (default_margin * 3),
+			text_offset = 0,
 			text = false,
 			on_callback = ClassClbk(self, "DisplayAchievementDetails", achievement)
 		})
@@ -280,7 +281,7 @@ function BeardLibAchievementMenu:DisplayAchievementsFromPackage(package)
 		achievement_button:Image({
 			img_color = Color(achievement:GetRankColor()),
 			texture = "guis/textures/achievement_trophy_white",
-			position = "RightTop",
+			position = "RightTopOffset-xy",
 			h = 24,
 			w = 24,
 		})
@@ -288,7 +289,7 @@ function BeardLibAchievementMenu:DisplayAchievementsFromPackage(package)
 		if achievement:IsUnlocked() then
 			achievement_button:Divider({
 				text = managers.localization:to_upper_text("beardlib_achieves_unlocked", {time = os.date('%d/%m/%Y @ %H:%M:%S', achievement:GetUnlockTimestamp())}),
-				font_size = 14,
+				size = 14,
 				size_by_text = true,
 				offset_y = 1,
 				foreground = Color.white:with_alpha(0.5)
@@ -353,7 +354,7 @@ function BeardLibAchievementMenu:DisplayPackageHeader(package)
 	local package_name = banner_panel:FitDivider({
 		name = "package_name",
 		text = utf8.to_upper(name),
-		font_size = 28
+		size = 28
 	})
 
 	local current_progress = banner_panel:FitDivider({
@@ -362,7 +363,7 @@ function BeardLibAchievementMenu:DisplayPackageHeader(package)
 		position = function(item)
 			item:SetXY(package_name:X(), 30)
 		end,
-		font_size = 18,
+		size = 18,
 		foreground = Color(0.3, 0.3, 0.3),
 	})
 
@@ -375,7 +376,7 @@ function BeardLibAchievementMenu:DisplayPackageHeader(package)
 				item:Move(0, 14)
 			end
 		end,
-		font_size = 16,
+		size = 16,
 		visible = desc ~= ""
 	})
 end
