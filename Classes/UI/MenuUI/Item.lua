@@ -248,7 +248,7 @@ function Item:WorkParams(params)
 	self:WorkParam("help_localized", self.localized)
 	self:WorkParam("animate_colors")
 	self:WorkParam("context_screen_offset_y", 32)
-	self:WorkParam("context_scroll_width", 10)
+	self:WorkParam("context_scroll_width", self.scroll_width)
 	self:WorkParam("context_font_size", 20)
 
 	self:WorkParam("font_size")

@@ -36,7 +36,7 @@ function ContextMenu:init(owner, layer)
         layer = 4,
         padding = 0.0001,
         count_invisible = true,
-        scroll_width = owner.context_scroll_width or 10,
+        scroll_width = owner.context_scroll_width or 2,
         hide_shade = true,
         color = owner.scroll_color or owner.highlight_color,
         scroll_speed = owner.scroll_speed or 48
