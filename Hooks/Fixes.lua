@@ -319,6 +319,39 @@ elseif F == "elementvehiclespawner" then
         end
         return orig_on_executed(self, ...)
     end
+elseif F == "elementareatrigger" then
+    function ElementAreaTrigger:beardlib_filter_func(carry_data, is_loot)
+        local carry_id = carry_data:carry_id()
+        local carry = tweak_data.carry[carry_id]
+
+        if not carry or type(carry) ~= "table" or not carry.name_id then
+            return false
+        end
+
+        if is_loot or carry.is_unique_loot then
+            return true
+        end
+    end
+    
+    ElementAreaTrigger.beardlib_project_instigators = ElementAreaTrigger.project_instigators
+    
+    function ElementAreaTrigger:project_instigators()
+        local is_loot = self._values.instigator == "loot"
+        if not Network:is_client() and (is_loot or self._values.instigator == "unique_loot") then
+            local instigators = {}
+    
+            local all_found = World:find_units_quick("all", 14)
+            for _, unit in ipairs(all_found) do
+                local carry_data = unit:carry_data()
+    
+                if carry_data and self:beardlib_filter_func(carry_data, is_loot) then
+                    table.insert(instigators, unit)
+                end
+            end
+    
+            return instigators
+        end
+    end
 elseif F == "coresoundenvironmentmanager" then
     --From what I remember, this fixes a crash, these are useless in public.
     function CoreSoundEnvironmentManager:emitter_events(path)
