@@ -72,8 +72,7 @@ function Group:UpdateGroup()
             self.toggle:set_texture_rect(self.closed and 67 or 0, self.closed and 32 or 1, 32, 32)
         end
         self:_SetSize()
-        self:AlignItems(true)
-        self.parent:AlignItems()
+        self:AlignItems(true, nil, true)
     end
 end
 

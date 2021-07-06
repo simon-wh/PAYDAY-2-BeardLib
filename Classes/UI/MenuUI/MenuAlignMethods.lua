@@ -45,7 +45,7 @@ function Item:AlignItems(menus, no_parent, override_auto_align)
     end
 
     if self.parent.AlignItems and (override_auto_align or self.parent.auto_align) and not no_parent then
-		self.parent:AlignItems()
+		self.parent:AlignItems(nil, nil, override_auto_align)
     end
     self:CheckItems()
 end
