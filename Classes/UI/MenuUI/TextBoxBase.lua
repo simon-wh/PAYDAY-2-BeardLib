@@ -43,7 +43,7 @@ function TextBoxBase:init(parent, params)
         layer = params.layer or 5,
         padding = 0,
         scroll_width = params.lines == 1 and 0 or parent.scroll_width,
-        color = parent.scroll_color or line:color(),
+        color = parent.textbox_scroll_color or line:color(),
 		hide_shade = true,
         hide_scroll_background = true,
         scroll_speed = parent.scroll_speed

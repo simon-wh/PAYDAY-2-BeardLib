@@ -280,6 +280,7 @@ function Item:WorkParams(params)
 	self:WorkParam("img_scale")
 	self:WorkParam("slider_slice", 0.7)
 	self:WorkParam("textbox_max_h", 75)
+	self:WorkParam("textbox_scroll_color")
 
     if not self.MENU then
         self:WorkParam("align_method", "grid_from_right")
