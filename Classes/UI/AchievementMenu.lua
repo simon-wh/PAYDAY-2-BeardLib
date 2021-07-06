@@ -281,6 +281,7 @@ function BeardLibAchievementMenu:DisplayAchievementsFromPackage(package)
 		achievement_button:Image({
 			img_color = Color(achievement:GetRankColor()),
 			texture = "guis/textures/achievement_trophy_white",
+			offset = 2,
 			position = "RightTopOffset-xy",
 			h = 24,
 			w = 24,
