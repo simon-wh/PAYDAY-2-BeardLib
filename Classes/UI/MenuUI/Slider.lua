@@ -17,7 +17,7 @@ function Slider:Init()
     self.min = self.min or 0
     self.max = self.max or self.min
     local item_width = self.panel:w() * self.control_slice
-    local slider_width = item_width * 0.66
+    local slider_width = item_width * self.slider_slice
     local text_width = item_width - slider_width
 
     local fgcolor = self:GetForeground()

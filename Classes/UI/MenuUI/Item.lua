@@ -278,6 +278,7 @@ function Item:WorkParams(params)
 	self:WorkParam("highlight_image")
 	self:WorkParam("offset_ignore_border", true)
 	self:WorkParam("img_scale")
+	self:WorkParam("slider_slice", 4/5)
 
     if not self.MENU then
         self:WorkParam("align_method", "grid_from_right")
