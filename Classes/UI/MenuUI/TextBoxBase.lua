@@ -372,7 +372,7 @@ function TextBoxBase:update_caret()
     else
         text:set_h(self.panel:h() - self._text_offset - self._text_offset_b - line:h(), text:h())
     end
-    if self.parent then
+    if self.parent and (self.cantype or self.parent.auto_align) then
         self.parent:AlignItems(true, nil, true)
     end
     local s, e = text:selection()
