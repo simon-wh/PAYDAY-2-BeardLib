@@ -25,7 +25,7 @@ function Slider:Init()
         lines = 1,
         btn = "1",
         panel = self.panel,
-        align = "center",
+        text_align = "center",
         layer = 10,
         line = false,
         w = text_width,
