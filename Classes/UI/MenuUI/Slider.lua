@@ -25,6 +25,7 @@ function Slider:Init()
         lines = 1,
         btn = "1",
         panel = self.panel,
+        fit_text = true,
         text_align = "center",
         layer = 10,
         line = false,
@@ -85,7 +86,7 @@ function Slider:TextBoxSetValue(value, run_callback, reset_selection, no_format)
     end
     value = tonumber(value)
     local final_number = self.floats and string.format("%." .. self.floats .. "f", value) or tostring(value)
-    local text = self._textbox.panel:child("text")
+    local text = self._textbox.text
     self.sfg:set_w(self.sbg:w() * ((value - self.min) / (self.max - self.min)))
     self._slider:child("circle"):set_center(self.sfg:right(), self.sfg:center_y())
     if not no_format then

@@ -26,7 +26,7 @@ function Item:_AlignItems(menus, no_parent)
     end
 end
 
-function Item:AlignItems(menus, no_parent)
+function Item:AlignItems(menus, no_parent, override_auto_align)
     if self.align_method == "none" then self:CheckItems() return end
     if not self.menu_type then return end
 	if menus then
@@ -44,7 +44,7 @@ function Item:AlignItems(menus, no_parent)
         self:AlignItemsNormal()
     end
 
-    if self.parent.AlignItems and self.parent.auto_align and not no_parent then
+    if self.parent.AlignItems and (override_auto_align or self.parent.auto_align) and not no_parent then
 		self.parent:AlignItems()
     end
     self:CheckItems()

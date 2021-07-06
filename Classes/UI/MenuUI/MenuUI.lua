@@ -508,7 +508,9 @@ function MenuUI:MouseMoved(o, x, y)
         local scroll = self._scroll_hold._scroll
         local _, pointer = scroll:mouse_moved(nil, x, y)
         if pointer then
-            self._scroll_hold:CheckItems()
+            if self._scroll_hold.CheckItems then
+                self._scroll_hold:CheckItems()
+            end
             self:SetPointer(pointer)
             return true
         else

@@ -23,6 +23,7 @@ function ComboBox:Init()
         panel = self.panel,
         lines = 1,
         fit_text = true,
+        textbox_text_offset = 16,
         line_color = self.line_color or self.highlight_color,
         w = self.panel:w() * (self.text == nil and 1 or self.control_slice),
         value = self:GetValueText(),

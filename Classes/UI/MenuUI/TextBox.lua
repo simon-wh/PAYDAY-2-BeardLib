@@ -11,7 +11,8 @@ function TextBox:Init()
 	self._textbox = BeardLib.Items.TextBoxBase:new(self, {
         panel = self.panel,
 		lines = self.lines,
-		fit_text = self.fit_text,
+		fit_text = NotNil(self.fit_text, self.filter == "number"),
+		lines = self.filter == "number" and 1 or nil,
 		focus_mode = self.focus_mode,
 		auto_focus = self.auto_focus,
         line_color = self.line_color or self.highlight_color,
@@ -24,7 +25,7 @@ function TextBox:Init()
 end
 
 function TextBox:TextBoxSetValue(value, run_callback, reset_selection)
-	local text = self._textbox.panel:child("text")
+	local text = self._textbox.text
 
 	if self.filter == "number" then
 		value = tonumber(value) or 0
@@ -75,7 +76,10 @@ function TextBox:MousePressed(button, x, y)
 		return true
 	end
 
-	self._textbox:MousePressed(button, x, y)
+	if self._textbox:MousePressed(button, x, y) then
+		return true
+	end
+
 	return self._textbox.cantype, not self._textbox.cantype and state or nil
 end
 

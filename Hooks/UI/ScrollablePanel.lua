@@ -118,8 +118,8 @@ function ScrollablePanelModified:force_scroll()
 	end
 end
 
-function ScrollablePanelModified:scroll(x, y, direction)
-	if self:panel():inside(x, y) then
+function ScrollablePanelModified:scroll(x, y, direction, force)
+	if self:panel():inside(x, y) or force then
 		self:perform_scroll(self._scroll_speed * TimerManager:main():delta_time() * 200, direction)
 		return true
 	end

@@ -10,8 +10,9 @@ function TextBoxBase:init(parent, params)
     self.fit_text = params.fit_text
     self.forbidden_chars = parent.forbidden_chars or {}
     self.text_align = params.text_align or parent.text_align or "left"
-    self.font_size = params.font_size or parent.font_size or parent.size
+    self.font_size = parent.textbox_font_size or params.font_size or parent.font_size or parent.size
     self.text_vertical = params.text_vertical or parent.text_vertical
+    self.textbox_max_h = parent.textbox_max_h
     self.no_magic_chars = NotNil(parent.no_magic_chars, true)
 	self.panel = params.panel:panel({
 		name = "text_panel",
@@ -19,7 +20,7 @@ function TextBoxBase:init(parent, params)
 		h = params.h or params.size,
         layer = params.layer or 5
 	})
-	self.panel:set_right(params.panel:w())
+	self.panel:set_right(params.panel:w()-(parent.textbox_offset or 0))
     self.line_color = params.line_color
     self.foreground = params.foreground
     self.foreground_highlight = params.foreground_highlight
@@ -37,9 +38,20 @@ function TextBoxBase:init(parent, params)
     if parent.fitler == "number" and parents.floats then
         value = string.format("%." .. parent.floats .. "f", tonumber(value))
     end
-    self.text = self.panel:text({
+    self._scroll = ScrollablePanelModified:new(self.panel, "text_panel", {
+        layer = params.layer or 5,
+        padding = 0,
+        scroll_width = params.lines == 1 and 0 or parent.scroll_width,
+        color = parent.scroll_color or line:color(),
+		hide_shade = true,
+        hide_scroll_background = true,
+        scroll_speed = parent.scroll_speed
+    })
+    local canvas = self._scroll:canvas()
+    self.text = canvas:text({
         name = "text",
         text = tostring(value),
+        w = canvas:w() - 4 - (params.textbox_text_offset or 0),
         wrap = not params.lines or params.lines > 1,
         word_wrap = not params.lines or params.lines > 1,
         color = color,
@@ -85,7 +97,7 @@ function TextBoxBase:init(parent, params)
 end
 
 function TextBoxBase:PostInit()
-    self:CheckText(self.panel:child("text"), true)
+    self:CheckText(self.text, true)
     self:update_caret()
 end
 
@@ -100,12 +112,12 @@ function TextBoxBase:DoHighlight(highlight)
         if self.owner.animate_colors then
             play_color(caret, color:with_alpha(1))
             play_color(self.panel:child("line"), self.line_color or color)
-            play_anim(self.panel:child("text"), {set = {color = color, selection_color = color:with_alpha(0.5)}})
+            play_anim(self.text, {set = {color = color, selection_color = color:with_alpha(0.5)}})
         else
             caret:set_color(color:with_alpha(1))
             self.panel:child("line"):set_color(self.line_color or color)
-            self.panel:child("text"):set_color(color)
-            self.panel:child("text"):set_selection_color(color:with_alpha(0.5))
+            self.text:set_color(color)
+            self.text:set_selection_color(color:with_alpha(0.5))
         end
     end
 end
@@ -139,12 +151,16 @@ function TextBoxBase:tonumber(text)
     end
 end
 
-function TextBoxBase:remove_selected()
-    local text = self.panel:child("text")
+function TextBoxBase:remove_selected(delete_forward)
+    local text = self.text
     local s, e = text:selection()
     if not (utf8.len(self:Value()) < 1) then
         if s == e and s > 0 then
-            text:set_selection(s - 1, e)
+            if delete_forward then
+                text:set_selection(s, e + 1)
+            else
+                text:set_selection(s - 1, e)
+            end
         end
         text:replace_text("")
         self:add_history_point(self:Value())
@@ -183,9 +199,6 @@ function TextBoxBase:key_hold(text, k)
                 text:replace_text(copy)
                 self:add_history_point(self:Value())
                 self.update_text(self:Value(), true, true, true)
-            elseif shift() then
-                if KB:Down(Idstring("left")) then text:set_selection(s - 1, e)
-                elseif KB:Down(Idstring("right")) then text:set_selection(s, e + 1) end
             else
                 local z = KB:Down("z")
                 local y = KB:Down("y")
@@ -199,8 +212,14 @@ function TextBoxBase:key_hold(text, k)
                 end
             end
         else
-            if k == Idstring("backspace") or k == Idstring("delete") then
+            local s, e = text:selection()
+            if k == Idstring("backspace") or (s ~= e and k == Idstring("delete")) then
                 self:remove_selected()
+            elseif k == Idstring("delete") then
+                self:remove_selected(true)
+            elseif shift() then
+                if KB:Down(Idstring("left")) then text:set_selection(s - 1, e)
+                elseif KB:Down(Idstring("right")) then text:set_selection(s, e + 1) end
             elseif k == Idstring("left") then
                 if s < e then
                     text:set_selection(s, s)
@@ -284,7 +303,7 @@ function TextBoxBase:set_active(active)
     local cantype = self.cantype
     self.cantype = active
 
-    local text = self:alive() and self.panel:child("text") or nil
+    local text = self:alive() and self.text or nil
 
     if self.cantype then
         self.menu.active_textbox = self
@@ -304,7 +323,7 @@ function TextBoxBase:KeyPressed(o, k)
         return
     end
 
-	local text = self.panel:child("text")
+	local text = self.text
 
     if k == Idstring("enter") or k == Idstring("esc") then
         self:set_active(false)
@@ -324,31 +343,36 @@ function TextBoxBase:update_caret()
     if not self.owner:alive() or not alive(self.panel) then
         return
     end
-    local text = self.panel:child("text")
+    local text = self.text
     local line = self.panel:child("line")
+    local caret = self.panel:child("caret")
 
-    local _,_,w,h = text:text_rect()
     if self.fit_text then
         text:set_font_size(self.font_size)
-        local pw = text:parent():w() - 2
-        text:set_font_size(math.clamp(self.font_size * pw / w, 8, self.font_size))
+        local _,_,w,_ = text:text_rect()
+        text:set_font_size(math.clamp(self.font_size * text:w() / w, 8, self.font_size))
+        caret:set_h(text:font_size() - (line:h() * 2))
     end
+
+    local _,_,w,h = text:text_rect()
 
     local lines = math.max(1, text:number_of_lines())
     h = math.max(h, text:font_size())
     local old_h = self.panel:h()
     if not self.owner.h and (not self.lines or (self.lines > 1 and self.lines ~= lines)) then
-        self.panel:set_h(h + self._text_offset + self._text_offset_b + line:h())
+        self.panel:set_h(math.min(h + self._text_offset + self._text_offset_b + line:h(), self.textbox_max_h))
         text:set_h(h)
         self.owner:_SetText(self.owner.text)
         if not self.owner.SetScrollPanelSize then
             self.panel:set_h(self.panel:parent():h())
         end
         line:set_bottom(self.panel:h())
+        text:set_h(math.max(self.panel:h() - self._text_offset - self._text_offset_b - line:h(), text:h()))
+    else
+        text:set_h(self.panel:h() - self._text_offset - self._text_offset_b - line:h(), text:h())
     end
-    text:set_h(self.panel:h() - self._text_offset - self._text_offset_b)
-    if self.parent and old_h ~= self.panel:h() then
-        self.parent:AlignItems()
+    if self.parent then
+        self.parent:AlignItems(true, nil, true)
     end
     local s, e = text:selection()
     local x, y = text:character_rect(self._select_neg and s or e)
@@ -359,14 +383,17 @@ function TextBoxBase:update_caret()
             x = x + text:w() / 2
         end
     end
-    local caret = self.panel:child("caret")
     caret:set_world_position(x, y + 1)
     caret:set_visible(self.cantype)
     caret:set_color(text:color():with_alpha(1))
+    self._scroll:set_size(self.panel:w(), self.panel:h()-line:h()*2)
+	self._scroll:panel():set_bottom(self.panel:h()-line:h())
+    self._scroll:update_canvas_size()
+	self._scroll:force_scroll()
 end
 
 function TextBoxBase:alive()
-    return alive(self.panel) and alive(self.panel:child("text"))
+    return alive(self.panel) and alive(self.text)
 end
 
 function TextBoxBase:MousePressed(button, x, y)
@@ -374,8 +401,27 @@ function TextBoxBase:MousePressed(button, x, y)
         return false
     end
 
-    local text = self.panel:child("text")
+    local text = self.text
     local active = text:inside(x,y) and button == Idstring(self.btn)
+
+    if alive(self._scroll) then
+        if button == Idstring("0") then
+            if self._scroll:mouse_pressed(button, x, y) then
+                self.menu._scroll_hold = self
+                return true
+            end
+        elseif self._scroll:is_scrollable() then
+            if button == Idstring("mouse wheel down") then
+                if self._scroll:scroll(x, y, -1) then
+                    return true
+                end
+            elseif button == Idstring("mouse wheel up") then
+                if self._scroll:scroll(x, y, 1) then
+                    return true
+                end
+            end
+        end
+    end
 
     self:set_active(active)
 
@@ -387,7 +433,7 @@ function TextBoxBase:MousePressed(button, x, y)
         self:update_caret()
     end
 
-    return self.cantype
+    return self.cantype and cantype
 end
 
 function TextBoxBase:MouseMoved(x, y)
@@ -395,7 +441,7 @@ function TextBoxBase:MouseMoved(x, y)
         return false
     end
 
-    local text = self.panel:child("text")
+    local text = self.text
     if self.cantype then
         local x,y = managers.mouse_pointer:world_position()
         if x ~= self._old_x or y ~= self._old_y then
@@ -415,7 +461,14 @@ function TextBoxBase:MouseMoved(x, y)
         else
             text:set_selection(self._start_select, i + 1)
         end
-        self:update_caret()
+        if self._scroll:is_scrollable() then
+            if (self.panel:world_y() - y) > 0 then
+                self._scroll:scroll(x, y, 1, true)
+            elseif (y - self.panel:world_bottom()) > 0 then
+                self._scroll:scroll(x, y, -1, true)
+            end
+        end
+        --self:update_caret()
     end
     self._old_x = x
     self._old_y = y
