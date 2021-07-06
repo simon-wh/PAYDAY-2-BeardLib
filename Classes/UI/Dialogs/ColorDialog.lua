@@ -33,13 +33,13 @@ function ColorDialog:_Show(params)
         text = "Hex:",
         value = "",
         lines = 1,
-        offset = {8, 4},
+        offset = {8, 2},
         auto_foreground = false,
         foreground_highlight = false,
         background_color = false,
         highlight_color = false,
         on_callback = ClassClbk(self, "update_hex"),
-        w = 120,
+        w = 130,
         size = 20
     })
     if params.create_items then
