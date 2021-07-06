@@ -54,17 +54,26 @@ function Group:UpdateGroup()
         self.panel:set_h(self:TextHeight())
     end
 
+    local function fix_texts(o)
+        for _, child in pairs(o:children()) do
+            local t = type_name(child)
+            if t == "Text" then
+                local t = child:text()
+                child:set_text("")
+                child:set_text(t)
+            elseif t == "Panel" then
+                fix_texts(child)
+            end
+        end
+    end
+
     if not self.divider_type then
         for _, item in pairs(self._my_items) do
             if item:ParentPanel() == self:ItemsPanel() then
                 item._hidden_by_menu = self.closed
                 item:TryRendering()
                 -- Weird glitch that makes the title invisible. Changing its 'x' position solves it.
-                if item:title_alive() then
-                    local x = item.title:x()
-                    item.title:set_x(0)
-                    item.title:set_x(x)
-                end
+                fix_texts(self:Panel())
             end
         end
         self:CheckItems()
