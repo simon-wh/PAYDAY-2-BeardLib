@@ -24,6 +24,10 @@ function OptionModule:init(...)
         self:BuildMenuHook()
     end
 
+    if self._config.early_post_init then
+        self:PostInit()
+    end
+
     return true
 end
 
