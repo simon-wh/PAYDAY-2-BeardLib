@@ -3,7 +3,7 @@ local Toggle = BeardLib.Items.Toggle
 Toggle.type_name = "Toggle"
 function Toggle:Init()
 	Toggle.super.Init(self)
-	local s = self.size - 4
+	local s = self.size - 2
 	local fgcolor = self:GetForeground()
     self.toggle = self.panel:bitmap({
 		name = "toggle",
@@ -25,7 +25,7 @@ function Toggle:Init()
 		layer = 5,
 	})
     self.toggle:set_center_y(self.panel:h() / 2)
-    self.toggle:set_right(self.panel:w() - 2)
+    self.toggle:set_right(self.panel:w() - (self.text_offset[4] or self.text_offset[2]))
 	self.toggle_value:set_center(self.toggle:center())
 	self:UpdateToggle(true)
 end
@@ -51,7 +51,7 @@ function Toggle:UpdateToggle(value_changed, highlight)
 	local value = self.value
 	if alive(self.panel) then
 		local fgcolor = self:GetForeground(highlight)
-		local s = value and self.size - 4 or 0
+		local s = value and self.size - 2 or 0
 		if self.animate_colors then
 			play_color(self.toggle, fgcolor)
 		else

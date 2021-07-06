@@ -1021,7 +1021,7 @@ function Item:_SetText(text)
 		local offset_b = (self.text_offset[4] or self.text_offset[2]) + border_b
 
 		title:set_position(offset_x, offset_y)
-		title:set_w(self.panel:w() - offset_r)
+		title:set_w(self.panel:w() - offset_r - offset_x)
         local _,_,w,h = title:text_rect()
         if self.SetScrollPanelSize then
             title:set_size(self.panel:w() - offset_x - offset_r, h + offset_b)
@@ -1041,7 +1041,7 @@ function Item:_SetText(text)
 				end
 				self.panel:set_h(math.clamp(new_h, self.min_height or 0, self.max_height or new_h))
 				if self.size_by_text then
-					local new_w = w + offset_x + offset_r + (self.type_name == "Toggle" and self.size or 0)
+					local new_w = w + offset_x + offset_r + (self.type_name == "Toggle" and self.size + offset_r or 0)
 					self.panel:set_w(math.clamp(new_w, self.min_width or 0, self.max_width or new_w))
 				end
 			end
