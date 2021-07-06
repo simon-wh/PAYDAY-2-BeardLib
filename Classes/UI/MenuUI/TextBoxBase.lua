@@ -20,6 +20,7 @@ function TextBoxBase:init(parent, params)
 		h = params.h or params.size,
         layer = params.layer or 5
 	})
+	self.panel:set_w(self.panel:w()-(parent.textbox_offset or 0))
 	self.panel:set_right(params.panel:w()-(parent.textbox_offset or 0))
     self.line_color = params.line_color
     self.foreground = params.foreground
