@@ -1,4 +1,4 @@
-LootBagsModule = InteractionsModule or BeardLib:ModuleClass("LootBags", ItemModuleBase)
+LootBagsModule = LootBagsModule or BeardLib:ModuleClass("LootBags", ItemModuleBase)
 LootBagsModule.required_params = {}
 function LootBagsModule:AddLootbagsDataToTweak(c_self)
     for _, data in ipairs(self._config) do
@@ -13,7 +13,7 @@ function LootBagsModule:AddLootbagsDataToTweak(c_self)
     end
 end
 function LootBagsModule:RegisterHook()
-    local first = BeardLib.Utils.XML:GetNode(self._config, "interaction")
+    local first = BeardLib.Utils.XML:GetNode(self._config, "carry")
     if first then
         if tweak_data and tweak_data.carry then
             self:AddLootbagsDataToTweak(tweak_data.carry)
