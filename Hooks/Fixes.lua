@@ -352,7 +352,7 @@ elseif F == "elementareatrigger" then
     
             return instigators
         end
-        return self:beardlib_project_instigators(self, ...)
+        return ElementAreaTrigger.beardlib_project_instigators(self, ...)
     end
 elseif F == "coresoundenvironmentmanager" then
     --From what I remember, this fixes a crash, these are useless in public.
