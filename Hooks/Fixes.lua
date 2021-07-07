@@ -320,6 +320,7 @@ elseif F == "elementvehiclespawner" then
         return orig_on_executed(self, ...)
     end
 elseif F == "elementareatrigger" then
+    -- Changes ElementAreaTrigger:project_instigators to read from tweak_data.carry so the lootbags aren't hardcoded into a function
     function ElementAreaTrigger:beardlib_filter_func(carry_data, is_loot)
         local carry_id = carry_data:carry_id()
         local carry = tweak_data.carry[carry_id]
@@ -335,7 +336,7 @@ elseif F == "elementareatrigger" then
     
     ElementAreaTrigger.beardlib_project_instigators = ElementAreaTrigger.project_instigators
     
-    function ElementAreaTrigger:project_instigators()
+    function ElementAreaTrigger:project_instigators(...)
         local is_loot = self._values.instigator == "loot"
         if not Network:is_client() and (is_loot or self._values.instigator == "unique_loot") then
             local instigators = {}
@@ -351,6 +352,7 @@ elseif F == "elementareatrigger" then
     
             return instigators
         end
+        self:beardlib_project_instigators(self, ...)
     end
 elseif F == "coresoundenvironmentmanager" then
     --From what I remember, this fixes a crash, these are useless in public.
