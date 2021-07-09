@@ -276,5 +276,7 @@
 		<value_node value="XAudio"/>
 		<value_node value="BLCustomAchievement"/>
 		<value_node value="AIGroupType"/>
+		<value_node value="RelativeTeleport"/>
+		<value_node value="RelativeTeleportTarget"/>
 	</mission_elements>
 </table>
