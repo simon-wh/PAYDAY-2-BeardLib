@@ -9,7 +9,7 @@ function ElementRelativeTeleport:on_executed(instigator)
 		return
 	end
 
-	if #self._values.target > 1 then
+	if self._values.target and #self._values.target > 1 then
 		return
 	end
 
@@ -21,6 +21,8 @@ function ElementRelativeTeleport:on_executed(instigator)
 		local current_rotation = self._values.rotation
 
 		local target = self:get_mission_element(self._values.target[1])
+		if not target then return end
+
 		local target_position = target:value("position")
 		local target_rotation = target:value("rotation")
 
