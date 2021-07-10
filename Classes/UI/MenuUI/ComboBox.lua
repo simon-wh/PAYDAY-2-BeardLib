@@ -6,10 +6,6 @@ function ComboBox:Init()
     self.items = self.items or {}
     self.searchbox = false -- self.searchbox == nil and true or self.searchbox
     ComboBox.super.Init(self)
-    local text = self.items[self.value]
-    if type(text) == "table" then
-        text = text.text
-    end
     local control_size = self.panel:w() * self.control_slice
     local combo_bg = self.panel:rect({
         name = "combo_bg",
@@ -53,7 +49,12 @@ end
 
 function ComboBox:TextBoxSetValue(value, run_clbk, ...)
     if self.free_typing then
-        self:SetValue(self._textbox:Value(), run_clbk, true)
+        for i, item in pairs(self.items) do
+            if type(item) == "table" and item.text == value or item == value then
+                value = i
+            end
+        end
+        self:SetValue(value, run_clbk, true)
     end
     self._list:update_search(true)
 end

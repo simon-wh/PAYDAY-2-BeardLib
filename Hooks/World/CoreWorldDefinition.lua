@@ -69,6 +69,7 @@ function WorldDefinition:unload_packages(...)
             end
             self._custom_loaded_packages = {}
         end
+        return
     end
     if not BeardLib.current_level then
         WorldDefinitionunload_packages(self, ...)
