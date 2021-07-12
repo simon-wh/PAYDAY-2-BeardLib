@@ -9,6 +9,7 @@ function MenuDialog:init(params, menu)
     end
     self._default_width = self._default_width or 420
     self._no_blur = params.no_blur
+    self._bg_color = params.bg_color
     self._tbl = {}
     menu = menu or Managers.Dialog:Menu()
     self._menu = menu:Menu(table.merge({
@@ -95,7 +96,7 @@ function MenuDialog:CreateCustomStuff(params)
             on_callback = ClassClbk(self, "hide", false)
         })
     end
-    local scroll = self._menu:Menu({name = "MessageScroll", index = 2, private = {offset = 0}, auto_height = true, h = 0, max_height = params.content_max_h or 540})
+    local scroll = self._menu:Menu({name = "MessageScroll", index = 2, private = {offset = 0}, hide_scroll_background = true, auto_height = true, h = 0, max_height = params.content_max_h or 540})
     if params.create_items_contained then
         params.create_items_contained(scroll)
     end
@@ -117,7 +118,7 @@ function MenuDialog:show_dialog()
 end
 
 function MenuDialog:basic_show(params, force)
-    self._no_blur = params.no_blur or false
+    self._no_blur = NotNil(params.no_blur, self._no_blur, false)
     Managers.Dialog:ShowDialog(self)
     self._tbl = {}
     self._params = params

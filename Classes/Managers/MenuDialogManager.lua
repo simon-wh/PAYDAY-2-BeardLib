@@ -122,7 +122,7 @@ function MenuDialogManager:Show()
     self._menu:enable()
     local dialog = self._opened_dialogs[1]
     if dialog then
-        self._menu:ReloadInterface({background_blur = not dialog._no_blur, background_color = dialog.full_background_color or false})
+        self._menu:ReloadInterface({background_blur = not dialog._no_blur, background_color = dialog._bg_color or false})
         for _, dialog in pairs(self._opened_dialogs) do
             if dialog.ReloadInterface then
                 dialog:ReloadInterface()
