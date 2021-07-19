@@ -1355,9 +1355,15 @@ function Item:KeyPressed(o, k)
 		end
 	end
 	if k == enter_ids and self.type_name == "Button" and self.menu._highlighted == self then
+		if self.menu.active_textbox then
+			self.menu.active_textbox:set_active(false)
+		end
 		self:RunCallback()
 	end
 	if self.on_key_press then
+		if self.menu.active_textbox then
+			self.menu.active_textbox:set_active(false)
+		end
 		self.on_key_press(self, k)
 	end
 end

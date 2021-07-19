@@ -462,7 +462,7 @@ function MenuUI:MousePressed(o, button, x, y)
     if self.active_textbox and button ~= scroll_down and button ~= scroll_up then
         if self.active_textbox:MousePressed(button, x, y) then
             return
-        elseif  self.active_textbox then
+        elseif self.active_textbox then
             self.active_textbox:set_active(false)
         end
     end

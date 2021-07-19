@@ -163,6 +163,10 @@ end
 
 function MenuDialog:hide(yes, item)
     Managers.Dialog:CloseDialog(self)
+    local menu = Managers.Dialog:Menu()
+    if menu.active_textbox then
+        menu.active_textbox:set_active(false) 
+    end
     local clbk = (yes == true and self._callback) or (not yes and self._no_callback)
     if not self._no_clearing_menu then
         self._menu:ClearItems()
