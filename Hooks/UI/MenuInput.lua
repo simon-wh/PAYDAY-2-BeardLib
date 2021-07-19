@@ -60,6 +60,9 @@ function MenuInput:BeardLibMousePressed(o, button, x, y)
                     text = tostring(item._value) or item._parameters.string_value or "",
                     filter = item._value and "number",
                     floats = item._decimal_count ~= 2 and item._decimal_count or nil,
+                    max = item._max,
+                    min = item._min,
+                    step = item._step,
                     force = true,
                     no_blur = true,
                     callback = ClassClbk(self, "ValueEnteredCallback")

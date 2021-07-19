@@ -43,6 +43,9 @@ function InputDialog:_Show(params)
         control_slice = 1,
         floats = params.floats or false,
         filter = params.filter,
+        max = params.max,
+        min = params.min,
+        step = params.step,
         value = params.text
     }, params.merge_text or {}))
     self:show_dialog()
