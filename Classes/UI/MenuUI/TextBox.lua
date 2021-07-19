@@ -70,7 +70,7 @@ function TextBox:MousePressed(button, x, y)
 		return result, state
 	end
 
-	if button == Idstring("1") and self.type_name == "NumberBox" and not self.no_slide and self._textbox.panel:inside(x,y) then
+	if button == Idstring("1") and self.filter == "number" and not self.no_slide and self._textbox.panel:inside(x,y) then
 		self.menu._slider_hold = self
 		self._last_mouse_position = {managers.mouse_pointer._mouse:world_position()}
 		return true
