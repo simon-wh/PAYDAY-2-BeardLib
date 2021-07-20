@@ -4,8 +4,6 @@ function MusicModule:RegisterHook()
 	self._config.id = self._config.id or "Err"
 
 	local dir = self._config.directory
-	dir = (dir and dir .. "/") or ""
-
 	local music = {menu = self._config.menu, heist = self._config.heist, volume = self._config.volume, events = {}}
 
 	for k,v in ipairs(self._config) do
