@@ -90,7 +90,7 @@ function Slider:TextBoxSetValue(value, run_callback, reset_selection, no_format)
     self.sfg:set_w(self.sbg:w() * ((value - self.min) / (self.max - self.min)))
     self._slider:child("circle"):set_center(self.sfg:right(), self.sfg:center_y())
     if not no_format then
-        text:set_text(final_number)
+        text:set_text(final_number:gsub("%.?0+$", ""))
     end
     if reset_selection then
         text:set_selection(text:text():len())
