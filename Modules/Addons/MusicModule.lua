@@ -12,9 +12,11 @@ function MusicModule:RegisterHook()
 			-- Track handling as part of child track tags
 			for _,t in ipairs(v) do
 				if type(t) == "table" and t._meta == "track" then
+					local sauce = (t.source or v.source)
+					local start_sauce = t.start_source or v.start_source
 					table.insert(tracks, {
-						start_source = (t.start_source or v.start_source) and Path:Combine(dir, (t.start_source or v.start_source)),
-						source = (t.source or v.source) and Path:Combine(dir, (t.source or v.source)),
+						start_source = start_sauce and (dir and Path:Combine(dir, start_sauce) or start_sauce),
+						source = sauce and (dir and Path:Combine(dir, sauce) or sauce),
 						weight = t.weight or v.weight or 1,
 						volume = t.volume or v.volume or music.volume
 					})
@@ -23,15 +25,16 @@ function MusicModule:RegisterHook()
 			-- Track handling as part of event tag
 			if #tracks == 0 then
 				table.insert(tracks, {
-					start_source = v.start_source and Path:Combine(dir, v.start_source),
-					source = v.source and Path:Combine(dir, v.source),
+					start_source = v.start_source and (dir and Path:Combine(dir, v.start_source) or v.start_source),
+					source = v.source and (dir and Path:Combine(dir, v.source) or v.source),
 					weight = v.alt_chance and v.alt_chance * 100 or 1,
 					volume = v.volume or music.volume
 				})
 				if v.alt_source then -- backwards compat for old alternate track system
+					local sauce = v.alt_start_source or v.start_source
 					table.insert(tracks, {
-						start_source = (v.alt_start_source or v.start_source) and Path:Combine(dir, (v.alt_start_source or v.start_source)),
-						source = v.alt_source and Path:Combine(dir, v.alt_source),
+						start_source = (v.alt_start_source or v.start_source) and (dir and Path:Combine(dir, sauce) or sauce),
+						source = dir and Path:Combine(dir, v.alt_source) or v.alt_source,
 						weight = v.alt_chance and v.alt_chance * 100 or 1,
 						volume = v.volume or music.volume
 					})
@@ -56,8 +59,8 @@ function MusicModule:RegisterHook()
 		if not music.events[self._config.preview_event] then
 			music.events[self._config.preview_event] = {
 				tracks = {
-					start_source = self._config.start_source and Path:Combine(dir, self._config.start_source),
-					source = self._config.source and Path:Combine(dir, self._config.source),
+					start_source = self._config.start_source and (dir and Path:Combine(dir, self._config.start_source) or self._config.start_source),
+					source = dir and Path:Combine(dir, self._config.source) or self._config.source,
 					volume = music.volume
 				},
 				volume = music.volume
