@@ -18,10 +18,15 @@ function LevelModule:init(...)
         return false
     end
 
+    if self._mod:MinLibVer() >= 4.5 then
+        self.levels_folder = Path:CombineDir(self.levels_folder, self._mod.Name)
+    end
+
     self._config.id = tostring(self._config.id)
     self._addfiles_modules = {}
 
     self._inner_dir = Path:Combine(self.levels_folder, self._config.id)
+    self._levels_less_path = self._inner_dir:gsub("levels/", "")
     self._level_dir = "levels/"..self._config.id
 
     if not self._config.load_screen or self._config.load_screen == "" then
@@ -109,7 +114,7 @@ function LevelModule:AddLevelDataToTweak(l_self)
     l_self[id] = table.merge(clone(self._config), {
         name_id = self._config.name_id or ("heist_" .. id .. "_name"),
         briefing_id = self._config.brief_id or ("heist_" .. id .. "_brief"),
-        world_name = "mods/" .. self._config.id,
+        world_name = self._levels_less_path,
         ai_group_type = l_self.ai_groups[self._config.ai_group_type] or l_self.ai_groups.default,
         intro_event = self._config.intro_event or "nothing",
         outro_event = self._config.outro_event or "nothing",
@@ -194,14 +199,19 @@ function InstanceModule:init(...)
         return false
     end
 
+    if self._mod:MinLibVer() >= 4.5 then
+        self.levels_folder = Path:CombineDir(self.levels_folder, self._mod.Name)
+    end
+
     self._inner_dir = Path:Combine(self.levels_folder, self._config.id)
+    self._levels_less_path = self._inner_dir:gsub("levels/", "")
     self._level_dir = "levels/instances/"..self._config.id
     self._world_path = Path:Combine(self.levels_folder, self._config.id, "world")
     BeardLib.Frameworks.Map._loaded_instances[self._world_path] = self --long ass line
 
     --USED ONLY IN EDITOR!
     if Global.editor_loaded_instance then
-        if Global.level_data and Global.level_data.level_id == "instances/mods/"..self._config.id then
+        if Global.level_data and Global.level_data.level_id == self._levels_less_path then
             BeardLib.current_level = self
             self:Load()
         end

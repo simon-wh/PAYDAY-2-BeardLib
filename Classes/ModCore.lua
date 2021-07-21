@@ -352,6 +352,7 @@ function ModCore:Enabled() return not self._disabled end
 function ModCore:Config() return not self._config end
 function ModCore:Priority() return not self.Priority end
 function ModCore:IsBLTMod() return self._blt_mod end
+function ModCore:MinLibVer() return self._config.min_lib_ver or -1 end
 
 --BLT Keybinds support:
 
