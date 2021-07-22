@@ -1,4 +1,25 @@
 Hooks:PostHook(BLTNotificationsGui, "_setup", "BeardLibModsManagerSetup", function(self)
+    local node = MenuHelperPlus:GetNode(nil, "options")
+    if not node:item("BeardLibMenu") then
+		MenuCallbackHandler.BeardLibMenu = ClassClbk(BeardLib.Menus.Mods, "SetEnabled", true)
+        MenuHelperPlus:AddButton({
+            id = "BeardLibMenu",
+            title = "beardlib_mods_manager",
+            node = node,
+            position = managers.menu._is_start_menu and 9 or 7,
+            callback = "BeardLibMenu",
+        })
+
+        MenuCallbackHandler.BeardLibAchievementsMenu = ClassClbk(BeardLib.Menus.Achievement, "SetEnabled", true)
+        MenuHelperPlus:AddButton({
+            id = "BeardLibAchievementsMenu",
+            title = "beardlib_achieves_title",
+            node = node,
+            position = managers.menu._is_start_menu and 9 or 7,
+            callback = "BeardLibAchievementsMenu",
+        })
+    end
+
     self._beardlib_accent = BeardLib.Options:GetValue("MenuColor")
 
     self._beardlib_panel = self._panel:parent():panel({
