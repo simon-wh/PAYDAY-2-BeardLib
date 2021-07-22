@@ -33,6 +33,9 @@ end
 
 function Menu:SetScrollSpeed(speed)
     self.scroll_speed = speed
+    if not managers.menu:is_pc_controller() then
+        self.scroll_speed = self.scroll_speed * 0.5
+    end
     self._scroll._scroll_speed = self.scroll_speed
 end
 
@@ -52,7 +55,6 @@ function Menu:WorkParams(params)
     Menu.super.WorkParams(self, params)
     params = params or {}
     self:WorkParam("scroll_width", 8)
-    self:WorkParam("scroll_speed", 48)
     self.background_visible = NotNil(self.background_visible, self.type_name == "Menu" and true or false)
     self.private.background_color = NotNil(self.private.background_color, self.background_visible and self.background_color or nil)
     self.auto_height = NotNil(self.auto_height, self.h == nil or self.HYBRID and true or false)

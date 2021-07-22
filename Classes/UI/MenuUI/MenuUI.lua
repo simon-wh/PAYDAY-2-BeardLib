@@ -250,6 +250,10 @@ function MenuUI:Enable()
     end
 	self._enabled = true
     self._mouse_id = self._mouse_id or managers.mouse_pointer:get_id()
+    local active_menu = managers.menu:active_menu()
+    if active_menu and not managers.menu:is_pc_controller() then
+        active_menu.input:activate_controller_mouse()
+    end
 	managers.mouse_pointer:use_mouse({
 		mouse_move = ClassClbk(self, "MouseMoved"),
 		mouse_press = ClassClbk(self, "MousePressed"),
@@ -276,6 +280,10 @@ function MenuUI:Disable()
 	self._enabled = false
 	if self._highlighted then self._highlighted:UnHighlight() end
     self:CheckOpenedList()
+    local active_menu = managers.menu:active_menu()
+    if active_menu and not managers.menu:is_pc_controller() then
+        active_menu.input:deactivate_controller_mouse()
+    end
     managers.mouse_pointer:remove_mouse(self._mouse_id)
 	BeardLib.Managers.MenuUI:CloseMenuEvent()
 	self:RunToggleClbk()
@@ -319,6 +327,24 @@ function MenuUI:Update(t, dt)
     if self._slider_hold then self._slider_hold:SetValueByMouseXPos(x) end
     self._old_x = x
     self._old_y = y
+    -- Lazy controller support
+    if not managers.menu:is_pc_controller() and self:IsMouseActive()then
+        if BeardLib.Utils.ControllerInput:Pressed("b") then
+            self:Disable()
+        elseif BeardLib.Utils.ControllerInput:Pressed("a") then
+            self:MousePressed(nil, Idstring("0"), managers.mouse_pointer:world_position())
+        elseif BeardLib.Utils.ControllerInput:Released("a") then
+            self:MouseReleased(nil, Idstring("0"), managers.mouse_pointer:world_position())
+        elseif BeardLib.Utils.ControllerInput:Pressed("x") then
+            self:MousePressed(nil, Idstring("1"), managers.mouse_pointer:world_position())
+        elseif BeardLib.Utils.ControllerInput:Released("x") then
+            self:MouseReleased(nil, Idstring("1"), managers.mouse_pointer:world_position())
+        elseif BeardLib.Utils.ControllerInput:Down("right_trigger") then
+            self:MousePressed(nil, Idstring("mouse wheel down"), managers.mouse_pointer:world_position())
+        elseif BeardLib.Utils.ControllerInput:Down("left_trigger") then
+            self:MousePressed(nil, Idstring("mouse wheel up"), managers.mouse_pointer:world_position())
+        end
+    end
     if self._showing_help and (not alive(self._showing_help) or not self._showing_help:MouseInside(x, y)) then
         self:HideHelp()
 	end

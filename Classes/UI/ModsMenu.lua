@@ -112,6 +112,7 @@ function BeardLibModsMenu:CreateItems(menu)
         fit_width = false,
         offset = 4,
 		size = 16,
+        scroll_speed = managers.menu:is_pc_controller() and 128 or nil,
         position = "CenterxBottomOffset-y",
         auto_align = false
 	})
@@ -169,7 +170,6 @@ function BeardLibModsMenu:AddMod(mod, framework)
         highlight_color = concol,
         background_color = color:with_alpha(0.8)
     })
-    self._list:SetScrollSpeed(180)
     local text = function(n, t, opt)
         return mod_item:Divider(table.merge({name = n, text = t, max_width = mod_item:ItemsWidth(), size_by_text = true, text_offset = 1, offset = 0, localized = false}, opt))
     end

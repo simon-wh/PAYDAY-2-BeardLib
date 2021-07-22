@@ -17,7 +17,7 @@ function InputUtils:DownList()
         if device_name == "mouse" and not _key:find("mouse") then
             _key = "mouse " .. _key
         end
-        table.insert(down_list, _key)
+        table.insert(down_list, device:button_name_str(device:button_name(key)))
     end
     return down_list
 end
@@ -26,14 +26,6 @@ function InputUtils:Pressed(key) return self:Class():pressed(self:Id(key)) end
 function InputUtils:Trigger(key, clbk) return self:Class():add_trigger(self:Id(key), SafeClbk(clbk)) end
 function InputUtils:RemoveTrigger(trigger) return self:Class():remove_trigger(trigger) end
 function InputUtils:TriggerRelease(key, clbk) return self:Class():add_release_trigger(self:Id(key), SafeClbk(clbk)) end
---Mouse
-local MouseInput = clone(InputUtils)
-Utils.MouseInput = MouseInput
-function MouseInput:Class() return Input:mouse() end
---Keyboard doesn't work without Idstring however mouse works and if you don't use Idstring you can use strings like 'mouse 0' to differentiate between keyboard and mouse
---For example keyboard has the number 0 which is counted as left mouse button for mouse input, this solves it.
-function MouseInput:Id(str) return str end
-
 
 function InputUtils:GetInputDevices(no_keyboard, no_mouse)
     local input_devices = {}
@@ -41,7 +33,10 @@ function InputUtils:GetInputDevices(no_keyboard, no_mouse)
         input_devices.keyboard = self
     end
     if not no_mouse then
-        input_devices.mouse = MouseInput
+        input_devices.mouse = BeardLib.Utils.MouseInput
+    end
+    if not no_controller then
+        input_devices.controller = BeardLib.Utils.ControllerInput
     end
     return input_devices
 end
@@ -97,4 +92,23 @@ function InputUtils:Triggered(trigger, check_mouse_too)
         return true
     end
     return false
+end
+
+--Mouse
+local MouseInput = clone(InputUtils)
+BeardLib.Utils.MouseInput = MouseInput
+function MouseInput:Class() return Input:mouse() end
+--Keyboard doesn't work without Idstring however mouse works and if you don't use Idstring you can use strings like 'mouse 0' to differentiate between keyboard and mouse
+--For example keyboard has the number 0 which is counted as left mouse button for mouse input, this solves it.
+function MouseInput:Id(str) return str end
+
+--Controller
+local ControllerInput = clone(InputUtils)
+BeardLib.Utils.ControllerInput = ControllerInput
+function ControllerInput:Class() 
+    if managers.menu and managers.menu:active_menu() and managers.menu:active_menu().input then
+        return managers.menu:active_menu().input:get_controller() 
+    else
+        return Input:keyboard()
+    end
 end
