@@ -369,7 +369,7 @@ function OptionModule:Save()
 end
 
 function OptionModule:GetParameter(tbl, i)
-    if tbl[i] then
+    if tbl[i] ~= nil then
         if type(tbl[i]) == "function" then
             return tbl[i]()
         else
