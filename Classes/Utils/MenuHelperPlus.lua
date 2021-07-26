@@ -322,7 +322,9 @@ function MenuHelperPlus:AddMultipleChoice(params)
 
 	for k, v in ipairs( params.items or {} ) do
 		if type(v) == "table" then
-			table.insert(data, table.merge(v, { _meta="option" }) )
+			v._meta = "option"
+			v.localize = NotNil(v.localize, params.localized_items)
+			table.insert(data, v)
 		else
 			table.insert( data, {_meta = "option", text_id = tostring(v), value = k, localize = params.localized_items})
 		end
