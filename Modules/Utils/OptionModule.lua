@@ -16,6 +16,8 @@ function OptionModule:init(...)
         self._on_load_callback = self._mod:StringToCallback(self._config.loaded_callback)
     end
 
+    self._manual_save = NotNil(self._config.manual_save, false)
+
     if self._config.build_menu ~= nil then
         self._config.auto_build_menu = self._config.build_menu
     end
@@ -208,12 +210,12 @@ function OptionModule:_SetValue(tbl, name, value, full_name)
 end
 
 function OptionModule:SetValue(name, value)
+    local tbl = self._storage
     if string.find(name, "/") then
         local string_split = string.split(name, "/")
 
         local option_name = table.remove(string_split)
 
-        local tbl = self._storage
         for _, part in pairs(string_split) do
             if tbl[part] == nil then
                 BeardLib:log(string.format("[ERROR] Option Group of name %q does not exist in mod, %s", name, self._mod.Name))
@@ -224,10 +226,12 @@ function OptionModule:SetValue(name, value)
 
         self:_SetValue(tbl, option_name, value, name)
     else
-        self:_SetValue(self._storage, name, value, name)
+        self:_SetValue(tbl, name, value, name)
     end
 
-    self:Save()
+    if not self._manual_save then
+        self:Save()
+    end
 end
 
 function OptionModule:GetOption(name)
