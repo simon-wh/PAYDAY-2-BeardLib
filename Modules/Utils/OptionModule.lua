@@ -125,6 +125,17 @@ function OptionModule:ApplyValues(tbl, value_tbl)
                     if sub_tbl.save_value then
                         local index = table.index_of(sub_tbl.values, value)
                         value = index ~= -1 and index or self:GetOptionDefaultValue(sub_tbl)
+                    elseif sub_tbl.use_value then
+                        local found = table.find_value(sub_tbl.values, function(v)
+                            if type(v) == "table" then
+                                return v.value == value
+                            else
+                                return v == value
+                            end
+                        end)
+                        if not found then
+                            value = self:GetOptionDefaultValue(sub_tbl)
+                        end
                     else
                         if value > #sub_tbl.values then
                             value = self:GetOptionDefaultValue(sub_tbl)
@@ -259,13 +270,13 @@ function OptionModule:GetOption(name)
     end
 end
 
-function OptionModule:GetValue(name, real)
+function OptionModule:GetValue(name, converted)
     local option = self:GetOption(name)
     if option then
-        if real then
+        if converted then
             if option.converter then
                 return option.converter(option, option.value)
-            elseif option.type == "multichoice" then
+            elseif option.type == "multichoice" and not option.use_value then
                 if type(option.values[option.value]) == "table" then
                     return option.values[option.value].value
                 else
@@ -472,6 +483,7 @@ function OptionModule:CreateMultiChoice(parent_node, option_tbl, option_path)
         callback = "OptionModuleGeneric_ValueChanged",
         value = self:GetValue(option_path),
         items = options,
+        use_value = self:GetParameter(option_tbl, "use_value"),
         localized_items = self:GetParameter(option_tbl, "localized_items"),
         enabled = enabled,
         merge_data = {option_key = option_path, module = self}
