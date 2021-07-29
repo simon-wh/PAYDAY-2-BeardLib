@@ -216,4 +216,9 @@ elseif F == "dlctweakdata" then
 			content = {loot_drops = {}, upgrades = {}}
 		}
 	end)
+elseif F == "localizationmanager" then
+	-- Don't you love when you crash just for asking if this shit exist?
+	function LocalizationManager:modded_exists(str)
+		return self._custom_localizations[str] ~= nil
+	end
 end
