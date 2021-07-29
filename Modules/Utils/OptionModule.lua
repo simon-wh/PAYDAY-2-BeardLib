@@ -384,8 +384,12 @@ function OptionModule:GetParameter(tbl, i)
     return nil
 end
 
+function OptionModule:GetOptionMenuID(option_tbl)
+    return (self._config.prefix_id or self._mod.Name) .. option_tbl.name
+end
+
 function OptionModule:CreateSlider(parent_node, option_tbl, option_path)
-    local id = self._mod.Name .. option_tbl.name
+    local id = self:GetOptionMenuID(option_tbl)
 
     option_path = option_path == "" and option_tbl.name or option_path .. "/" .. option_tbl.name
 
@@ -417,7 +421,7 @@ function OptionModule:CreateSlider(parent_node, option_tbl, option_path)
 end
 
 function OptionModule:CreateToggle(parent_node, option_tbl, option_path)
-    local id = self._mod.Name .. option_tbl.name
+    local id = self:GetOptionMenuID(option_tbl)
 
     option_path = option_path == "" and option_tbl.name or option_path .. "/" .. option_tbl.name
 
@@ -444,7 +448,7 @@ function OptionModule:CreateToggle(parent_node, option_tbl, option_path)
 end
 
 function OptionModule:CreateMultiChoice(parent_node, option_tbl, option_path)
-    local id = self._mod.Name .. option_tbl.name
+    local id = self:GetOptionMenuID(option_tbl)
 
     option_path = option_path == "" and option_tbl.name or option_path .. "/" .. option_tbl.name
 
@@ -480,7 +484,7 @@ function OptionModule:CreateMultiChoice(parent_node, option_tbl, option_path)
 end
 
 function OptionModule:CreateMatrix(parent_node, option_tbl, option_path, components)
-    local id = self._mod.Name .. option_tbl.name
+    local id = self:GetOptionMenuID(option_tbl)
 
     option_path = option_path == "" and option_tbl.name or option_path .. "/" .. option_tbl.name
 
@@ -538,7 +542,7 @@ end
 
 function OptionModule:CreateColour(parent_node, option_tbl, option_path)
     local alpha = not not self:GetParameter(option_tbl, "alpha")
-    local id = self._mod.Name .. option_tbl.name
+    local id = self:GetOptionMenuID(option_tbl)
 
     option_path = option_path == "" and option_tbl.name or option_path .. "/" .. option_tbl.name
 
@@ -604,7 +608,7 @@ end
 
 function OptionModule:CreateButton(parent_node, option_tbl, option_path)
     local alpha = not not self:GetParameter(option_tbl, "alpha")
-    local id = self._mod.Name .. option_tbl.name
+    local id = self:GetOptionMenuID(option_tbl)
 
     local enabled = not self:GetParameter(option_tbl, "disabled")
 
@@ -635,7 +639,8 @@ end
 function OptionModule:CreateSubMenu(parent_node, option_tbl, option_path)
     option_path = option_path or ""
     local name = self:GetParameter(option_tbl, "name")
-    local base_name = name and self._mod.Name .. name .. self._name or self._mod.Name .. self._name
+    local prefix = self._config.prefix_id or self._mod.Name
+    local base_name = name and prefix .. name .. self._name or prefix .. self._name
     local menu_name = self:GetParameter(option_tbl, "node_name") or  base_name .. "Node"
 
     local merge_data = self:GetParameter(option_tbl, "merge_data") or {}
