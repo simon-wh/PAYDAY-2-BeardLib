@@ -125,18 +125,7 @@ function OptionModule:ApplyValues(tbl, value_tbl)
                     if sub_tbl.save_value then
                         local index = table.index_of(sub_tbl.values, value)
                         value = index ~= -1 and index or self:GetOptionDefaultValue(sub_tbl)
-                    elseif sub_tbl.use_value then
-                        local found = table.find_value(sub_tbl.values, function(v)
-                            if type(v) == "table" then
-                                return v.value == value
-                            else
-                                return v == value
-                            end
-                        end)
-                        if not found then
-                            value = self:GetOptionDefaultValue(sub_tbl)
-                        end
-                    else
+                    elseif not sub_tbl.use_value then
                         if value > #sub_tbl.values then
                             value = self:GetOptionDefaultValue(sub_tbl)
                         end
