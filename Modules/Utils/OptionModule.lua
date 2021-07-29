@@ -209,6 +209,8 @@ function OptionModule:_SetValue(tbl, name, value, full_name)
     end
 end
 
+OptionModule.Set = OptionModule.SetValue
+
 function OptionModule:SetValue(name, value)
     local tbl = self._storage
     if string.find(name, "/") then
@@ -258,6 +260,9 @@ function OptionModule:GetOption(name)
         return self._storage[name]
     end
 end
+
+-- Short variant
+OptionModule.Get = OptionModule.GetValue
 
 function OptionModule:GetValue(name, converted)
     local option = self:GetOption(name)
