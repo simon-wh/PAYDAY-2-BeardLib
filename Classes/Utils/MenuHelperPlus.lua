@@ -130,9 +130,7 @@ function MenuHelperPlus:AddButton(params)
         return
     end
 
-	local data = {type = "CoreMenuItem.Item"}
-
-	local item_params = {
+	local item = node:create_item({type = "CoreMenuItem.Item"}, table.merge({
 		name = params.id,
 		text_id = params.title,
 		help_id = params.desc,
@@ -141,25 +139,9 @@ function MenuHelperPlus:AddButton(params)
 		next_node = params.next_node,
 		localize = params.localized,
 		localize_help = params.localized_help,
-	}
+	}, params.merge_data))
 
-	if params.merge_data then
-		table.merge(item_params, params.merge_data)
-	end
-
-	local item = node:create_item(data, item_params)
-
-	if params.enabled ~= nil then
-		item:set_enabled( params.enabled )
-	end
-
-    if params.position then
-        node:insert_item(item, params.position)
-    else
-        node:add_item(item)
-    end
-
-    return item
+    return self:PostAdd(node, item, params)
 end
 
 function MenuHelperPlus:AddDivider(params)
@@ -175,21 +157,11 @@ function MenuHelperPlus:AddDivider(params)
 		no_text = params.no_text or true,
 	}
 
-	local item_params = {
+	local item = node:create_item(data, table.merge({
 		name = params.id,
-	}
+	}, params.merge_data))
 
-	if params.merge_data then
-		table.merge(item_params, params.merge_data)
-	end
-
-	local item = node:create_item( data, item_params )
-	if params.position then
-        node:insert_item(item, params.position)
-    else
-        node:add_item(item)
-    end
-    return item
+    return self:PostAdd(node, item, params)
 end
 
 function MenuHelperPlus:AddToggle(params)
@@ -231,35 +203,19 @@ function MenuHelperPlus:AddToggle(params)
 		}
 	}
 
-	local item_params = {
+	local item = node:create_item(data, table.merge({
 		name = params.id,
 		text_id = params.title,
 		help_id = params.desc,
 		callback = params.callback,
-		disabled_color = params.disabled_colour or Color( 0.25, 1, 1, 1 ),
+		disabled_color = params.disabled_colour or Color(0.25, 1, 1, 1),
 		icon_by_text = params.icon_by_text or false,
 		localize = params.localized,
 		localize_help = params.localized_help,
-	}
-
-	if params.merge_data then
-		table.merge(item_params, params.merge_data)
-	end
-
-	local item = node:create_item(data, item_params)
+	}, params.merge_data))
 	item:set_value(params.value and "on" or "off")
 
-	if params.enabled ~= nil then
-		item:set_enabled(params.enabled)
-	end
-
-	if params.position then
-        node:insert_item(item, params.position)
-    else
-        node:add_item(item)
-    end
-
-    return item
+    return self:PostAdd(node, item, params)
 end
 
 function MenuHelperPlus:AddSlider(params)
@@ -277,38 +233,21 @@ function MenuHelperPlus:AddSlider(params)
 		show_value = params.show_value or false
 	}
 
-	local item_params = {
+	local item = node:create_item(data, table.merge({
 		name = params.id,
 		text_id = params.title,
 		help_id = params.desc,
 		callback = params.callback,
-		disabled_color = params.disabled_colour or Color( 0.25, 1, 1, 1 ),
+		disabled_color = params.disabled_colour or Color(0.25, 1, 1, 1),
 		localize = params.localized,
-        localize_help = params.localized_help,
-	}
-
-	if params.merge_data then
-		table.merge(item_params, params.merge_data)
-	end
-
-	local item = node:create_item(data, item_params)
+		localize_help = params.localized_help,
+	}, params.merge_data))
 	item:set_value(math.clamp(params.value, data.min, data.max) or data.min)
-
-	if params.enabled ~= nil then
-		item:set_enabled( params.enabled )
-	end
-
 	if params.decimal_count then
 		item:set_decimal_count(params.decimal_count)
 	end
 
-	if params.position then
-        node:insert_item(item, params.position)
-    else
-        node:add_item(item)
-	end
-
-    return item
+    return self:PostAdd(node, item, params)
 end
 
 function MenuHelperPlus:AddMultipleChoice(params)
@@ -331,34 +270,18 @@ function MenuHelperPlus:AddMultipleChoice(params)
 		end
 	end
 
-	local item_params = {
+	local item = node:create_item(data, table.merge({
 		name = params.id,
 		text_id = params.title,
 		help_id = params.desc,
 		callback = params.callback,
 		filter = true,
 		localize = params.localized,
-        localize_help = params.localized_help,
-	}
+		localize_help = params.localized_help,
+	}, params.merge_data))
+	item:set_value(params.value or 1)
 
-	if params.merge_data then
-		table.merge(item_params, params.merge_data)
-	end
-
-	local item = node:create_item(data, item_params)
-	item:set_value( params.value or 1 )
-
-	if params.enabled ~= nil then
-		item:set_enabled(params.enabled)
-	end
-
-	if params.position then
-        node:insert_item(item, params.position)
-    else
-        node:add_item(item)
-    end
-
-    return item
+    return self:PostAdd(node, item, params)
 end
 
 function MenuHelperPlus:AddKeybinding(params)
@@ -368,7 +291,7 @@ function MenuHelperPlus:AddKeybinding(params)
         return
     end
 
-	local item_params = {
+	local item = node:create_item({type = "MenuItemCustomizeController"}, table.merge({
 		name = params.id,
 		text_id = params.title,
 		help_id = params.desc,
@@ -379,21 +302,9 @@ function MenuHelperPlus:AddKeybinding(params)
 		localize = params.localized,
 		localize_help = params.help_localized,
 		is_custom_keybind = true,
-	}
+	}, params.merge_data))
 
-	if params.merge_data then
-		table.merge(item_params, params.merge_data)
-	end
-
-	local item = node:create_item({type = "MenuItemCustomizeController"}, item_params)
-
-	if params.position then
-        node:insert_item(item, params.position)
-    else
-        node:add_item(item)
-    end
-
-    return item
+    return self:PostAdd(node, item, params)
 end
 
 function MenuHelperPlus:AddColorButton(params)
@@ -414,6 +325,33 @@ function MenuHelperPlus:AddColorButton(params)
 	}, params.merge_data or {}))
 
 	item:set_value(params.value or Color.white)
+
+    return self:PostAdd(node, item, params)
+end
+
+function MenuHelperPlus:AddInput(params)
+	local node = params.node or self:GetNode(params.menu, params.node_name)
+	if not node then
+        (params.mod or BeardLib):Err("Unable to find node " .. params.node_name)
+        return
+    end
+
+	local item = node:create_item({type = "MenuItemInput"}, table.merge({
+		name = params.id,
+		text_id = params.title,
+		help_id = params.desc,
+		callback = params.callback,
+		disabled_color = params.disabled_color or Color(0.25, 1, 1, 1),
+		localize = params.localized,
+		localize_help = params.localized_help,
+	}, params.merge_data or {}))
+
+	item:set_value(params.value or "")
+
+    return self:PostAdd(node, item, params)
+end
+
+function MenuHelperPlus:PostAdd(node, item, params)
 	item._priority = params.priority
 
 	if params.disabled then
@@ -425,8 +363,7 @@ function MenuHelperPlus:AddColorButton(params)
     else
         node:add_item(item)
     end
-
-    return item
+	return item
 end
 
 function MenuHelperPlus:GetMenus()
@@ -445,7 +382,7 @@ end
 function MenuHelperPlus:GetMenuDataFromHashedFilepath(HashedFilePath)
 	if self.Menus then
 		for id, Data in pairs(self.Menus) do
-			if Idstring(Data.fake_path):key() == HashedFilePath then
+			if Data.fake_path:key() == HashedFilePath then
 				return Data.menu_data
 			end
 		end
