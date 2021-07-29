@@ -131,13 +131,14 @@
 			<hook source_file="lib/managers/hud/vr/hudbelt" file="Fixes.lua"/>
 			<hook source_file="lib/managers/dialogmanager" file="Fixes.lua"/>
 			<hook source_file="lib/managers/dlcmanager" file="Fixes.lua"/>
-
+			
 			<hook source_file="lib/setups/setup" file="OtherHooks.lua"/>
 			<hook source_file="lib/setups/gamesetup" file="OtherHooks.lua"/>
 			<hook source_file="lib/tweak_data/tweakdata" file="OtherHooks.lua"/>
 			<hook source_file="lib/tweak_data/tweakdatapd2" file="OtherHooks.lua"/>
 			<hook source_file="lib/managers/missionmanager" file="OtherHooks.lua"/>
 			<hook source_file="lib/units/weapons/newraycastweaponbase" file="OtherHooks.lua"/>
+			<hook source_file="lib/managers/localizationmanager" file="OtherHooks.lua" />
 
 			<hook source_file="lib/units/beings/player/states/playerstandard" file="OtherHooks.lua"/>
 
