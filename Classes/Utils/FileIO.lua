@@ -93,7 +93,10 @@ function FileIO:ConvertToScriptData(data, typ, clean)
     end
 end
 
-function FileIO:ReadScriptData(path, typ, clean) 
+function FileIO:ReadScriptData(path, typ, clean)
+	if not FileIO:Exists(path) then
+		return false
+	end
 	local read = self:ReadFrom(path, typ == "binary" and "rb")
 	if read then
 		return self:ConvertScriptData(read, typ, clean)
