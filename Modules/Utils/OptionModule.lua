@@ -425,6 +425,33 @@ function OptionModule:CreateSlider(parent_node, option_tbl, option_path)
     }, merge_data))
 end
 
+function OptionModule:CreateInput(parent_node, option_tbl, option_path)
+    local id = self:GetOptionMenuID(option_tbl)
+
+    option_path = option_path == "" and option_tbl.name or option_path .. "/" .. option_tbl.name
+
+    local enabled = not self:GetParameter(option_tbl, "disabled")
+
+    if option_tbl.enabled_callback then
+        enabled = option_tbl:enabled_callback()
+    end
+
+    local merge_data = self:GetParameter(option_tbl, "merge_data") or {}
+    merge_data = BeardLib.Utils:RemoveAllNumberIndexes(merge_data)
+
+    self._menu_items[option_path] = MenuHelperPlus:AddInput(table.merge({
+        id = self:GetParameter(option_tbl, "name"),
+        title = self:GetParameter(option_tbl, "title_id") or id .. "TitleID",
+        desc = self:GetParameter(option_tbl, "desc_id") or id .. "DescID",
+        node = parent_node,
+        mod = self._mod,
+        callback = "OptionModuleGeneric_ValueChanged",
+        enabled = enabled,
+        value = self:GetValue(option_path),
+        merge_data = {option_key = option_path, module = self}
+    }, merge_data))
+end
+
 function OptionModule:CreateToggle(parent_node, option_tbl, option_path)
     local id = self:GetOptionMenuID(option_tbl)
 
@@ -585,6 +612,8 @@ end
 function OptionModule:CreateOption(parent_node, option_tbl, option_path)
     if option_tbl.type == "number" then
         self:CreateSlider(parent_node, option_tbl, option_path)
+    elseif  option_tbl.type == "string" then
+        self:CreateInput(parent_node, option_tbl, option_path)
     elseif option_tbl.type == "bool" or option_tbl.type == "boolean" then
         self:CreateToggle(parent_node, option_tbl, option_path)
     elseif option_tbl.type == "multichoice" then
