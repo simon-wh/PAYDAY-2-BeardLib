@@ -354,6 +354,12 @@ end
 function MenuHelperPlus:PostAdd(node, item, params)
 	item._priority = params.priority
 
+	if params.desc and not managers.localization:modded_exists(params.desc) then
+		LocalizationManager:add_localized_strings({
+			[params.desc] = "",
+		})
+	end
+
 	if params.disabled then
 		item:set_enabled(not params.disabled)
 	end
