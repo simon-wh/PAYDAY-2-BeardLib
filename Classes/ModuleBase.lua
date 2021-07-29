@@ -58,7 +58,7 @@ function ModuleBase:Err(str, ...)
     self._mod:Err(string.format("[%s] ", self._name) .. str, ...)
 end
 
-function ModCore:LogErr(str, ...)
+function ModuleBase:LogErr(str, ...)
     self._mod:LogErr(string.format("[%s] ", self._name) .. str, ...)
 end
 
