@@ -91,7 +91,7 @@
 		<Options build_menu="false">
 			<options>
 				<option name="ShowImages" type="boolean" default_value="true"/>
-				<option name="MenuColor" type="color" default_value="Color('007af3')"/>
+				<option name="MenuColor" type="color" default_value="#007af3"/>
 				<option name="ImportantNotice" type="boolean" default_value="true"/>
 				<option name="ShowErrorsDialog" type="boolean" default_value="true"/>
 				<option name="DevMode" type="boolean" default_value="false"/>
