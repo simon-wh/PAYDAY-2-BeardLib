@@ -146,7 +146,7 @@ function BeardLibModsMenu:AddMod(mod, framework)
 	local type = framework.type_name or "Base"
 	local blt_mod = type == "Base"
 	local color = framework.menu_color
-    local s = math.ceil((self._list:ItemsWidth() / 5) - self._list.offset[1] - 1)
+    local s = self._list:ItemsWidth(5) / 5
 
     if mod._config.color then
         local orig_color = color

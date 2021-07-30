@@ -18,8 +18,8 @@ function BeardLibAchievementMenu:init()
 		name = "BeardLibAchievementMenu",
 		animate_colors = true,
 		layer = 1500,
+		background_color = Color(0.8, 0.2, 0.2, 0.2),
 		use_default_close_key = true,
-		background_blur = true,
 		accent_color = accent_color,
 		inherit_values = {
 			background_color = Color.transparent,
@@ -35,28 +35,36 @@ function BeardLibAchievementMenu:init()
 end
 
 function BeardLibAchievementMenu:InitPanels(parent)
-	self._header = parent:Grid({background_color = self._menu.accent_color, auto_foreground = true, h = 32, offset = 2})
-	self._holder = parent:Holder({auto_foreground = true, auto_height = false, w = parent:ItemsWidth(1), offset = default_margin, h = parent:ItemsHeight(2) - 32, position = {0, self._header:Bottom() + default_margin}})
-	local h = self._holder:ItemsHeight(2, default_margin)
+	self._header = parent:Grid({background_color = self._menu.accent_color, auto_foreground = true, h = 36})
+	self._holder = parent:Holder({
+		auto_foreground = true,
+		auto_height = false,
+		fit_width = false,
+		w = parent:ItemsWidth(),
+		h = parent:ItemsHeight(2) - 32,
+		offset = default_margin,
+		position = {0, self._header:Bottom() + 4}
+	})
 	local w = self._holder:ItemsWidth(2, default_margin)
+	local h = self._holder:ItemsHeight(2, default_margin)
 
 	self._account_progression = self._holder:Grid({
 		background_color = Color.black:with_alpha(0.75),
-		h = h * 1/5,
 		w = w * 1/3,
+		h = h * 1/5,
 		foreground = Color("808080"),
 	})
 	self._package_list = self._holder:GridMenu({
 		background_color = Color.black:with_alpha(0.75),
-		inherit_values = {offset = 2},
-		h = h * 4/5,
+		inherit_values = {offset = 3},
 		w = w * 1/3,
+		h = h * 4/5
 	})
 
 	self._achievement_list_header = self._holder:Holder({
 		background_color = Color.black:with_alpha(0.75),
-		h = h * 1/7,
 		w = w * 2/3,
+		h = h * 1/7,
 		position = function(item)
 			item:SetXY(self._account_progression:Right() + default_margin, default_margin)
 		end
@@ -64,8 +72,8 @@ function BeardLibAchievementMenu:InitPanels(parent)
 
 	self._achievement_panel = self._holder:Grid({
 		background_color = Color.black:with_alpha(0.75),
-		h = h * 6/7,
 		w = w * 2/3,
+		h = h * 6/7,
 		position = function(item)
 			item:SetXY(self._achievement_list_header:X(), self._achievement_list_header:Bottom() + default_margin)
 		end
@@ -83,14 +91,16 @@ function BeardLibAchievementMenu:InitPanels(parent)
 
 	local ach_w = self._achievement_panel:ItemsWidth(2)
 	self._achievement_list = self._achievement_panel:GridMenu({
-		h = self._achievement_panel:Panel():h(),
 		w = ach_w * 3/5,
+		offset = 6,
+		h = self._achievement_panel:Panel():h(),
 		visible = false
 	})
 
 	self._achievement_details = self._achievement_panel:Grid({
-		h = self._achievement_panel:Panel():h(),
 		w = ach_w * 2/5,
+		offset = 6,
+		h = self._achievement_panel:Panel():h(),
 		visible = false
 	})
 end
@@ -248,10 +258,9 @@ function BeardLibAchievementMenu:DisplayAchievementsFromPackage(package)
 	for _, achievement_data in pairs(sorted_achievements) do
 		local achievement_id = achievement_data.id
 		local achievement = CustomAchievement:new(package:GetConfigOf(achievement_id), package._package_id)
-		local icon_panel
 
 		if achievement:IsDefaultIcon() then
-			icon_panel = panel:Image({
+			panel:Image({
 				texture = achievement:GetIcon(),
 				h = 48,
 				w = 48,
@@ -260,7 +269,7 @@ function BeardLibAchievementMenu:DisplayAchievementsFromPackage(package)
 				highlight_color = Color.transparent
 			})
 		else
-			icon_panel = panel:Image({
+			panel:Image({
 				texture = achievement:GetIcon(),
 				h = 48,
 				w = 48,
@@ -349,7 +358,7 @@ function BeardLibAchievementMenu:DisplayPackageHeader(package)
 		texture = icon,
 		h = 86,
 		w = 86,
-		offset = 2
+		offset = 4
 	})
 
 	local package_name = banner_panel:FitDivider({
