@@ -295,7 +295,8 @@ function Item:WorkParams(params)
 
 	self.name = NotNil(self.name, self.text, "")
 	self.text = NotNil(self.text, self.text ~= false and self.name)
-	self.fit_width = NotNil(self.fit_width, self.parent.align_method ~= "grid")
+
+	self:WorkParamPrivate("fit_width", self.parent.align_method == nil or self.parent.align_method == "normal" or self.parent.align_method == "reversed")
 	self.click_btn = self.click_btn:id()
 
 	if not self.offset then
@@ -1079,16 +1080,36 @@ function Item:SetText(text)
 	self:MakeBorder()
 end
 
+function Item:GetParentParams(param)
+	if self.private[param] ~= nil then
+		return self.private[param]
+	elseif self.inherit.inherit_values and self.inherit.inherit_values[param] ~= nil then
+		return  self.inherit.inherit_values[param]
+	elseif self.inherit.private[param] == nil and self.inherit[param] ~= nil then
+		return  self.inherit[param]
+	end
+	return nil
+end
+
+-- Makes param private if it's a default value. Useful for "computed" params.
+function Item:WorkParamPrivate(param, ...)
+	if self[param] == nil then
+		local v = self:GetParentParams(param)
+		if v == nil then
+			self.private[param] = true
+			v = NotNil(...)
+		end
+		if type(v) == "table" then
+			v = clone(v)
+		end
+		self[param] = v
+	end
+end
+
 function Item:WorkParam(param, ...)
 	if self[param] == nil then
-		local v
-		if self.private[param] ~= nil then
-			v = self.private[param]
-		elseif self.inherit.inherit_values and self.inherit.inherit_values[param] ~= nil then
-			v = self.inherit.inherit_values[param]
-		elseif self.inherit.private[param] == nil and self.inherit[param] ~= nil then
-			v = self.inherit[param]
-		else
+		local v = self:GetParentParams(param)
+		if v == nil then
 			v = NotNil(...)
 		end
 		if type(v) == "table" then
@@ -1099,6 +1120,7 @@ function Item:WorkParam(param, ...)
 end
 
 --For values that shouldn't directly inherit like width, height, border stuff, etc.
+
 function Item:WorkParamLimited(param, ...)
 	if self[param] == nil then
 		local v
