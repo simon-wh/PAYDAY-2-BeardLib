@@ -36,6 +36,7 @@ Hooks:PostHook(BLTNotificationsGui, "_setup", "BeardLibModsManagerSetup", functi
     })
     local logo = self._beardlib_updates:bitmap({
         name = "logo",
+        color = self._beardlib_accent,
         texture = "guis/textures/beardlib_logo",
         w = 28,
         h = 28
