@@ -64,6 +64,7 @@ function BeardLibModsMenu:CreateItems(menu)
     local button_holder = self._top:Holder({
         name = "button_holder",
         align_method = "grid_from_right",
+        offset = 4,
         w = 500,
         position = "RightTop"
     })
