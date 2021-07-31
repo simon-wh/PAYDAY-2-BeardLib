@@ -33,3 +33,4 @@ jobs:
           artifact: BeardLib
           name: 4.5
           tag: 4.5
+          token: ${{ secrets.GITHUB_TOKEN }}
