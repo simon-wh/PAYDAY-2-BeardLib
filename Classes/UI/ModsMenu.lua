@@ -464,9 +464,9 @@ end
 
 function BeardLibModsMenu:ResetOptions(item)
     for _, I in pairs(item.parent:Items()) do
-        local option = BeardLib.Options:GetOption(I:Name())
-        if option then
-            I:SetValue(option.default_value, true)
+        local default_value = BeardLib.Options:GetDefaultValue(I:Name())
+        if default_value then
+            I:SetValue(default_value, true)
         end
     end
 end

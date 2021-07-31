@@ -302,7 +302,15 @@ function OptionModule:_LoadDefaultValues(option_tbl)
     end
 end
 
+function OptionModule:GetDefaultValue(path)
+    local option = self:GetOption(path)
+    return self:GetOptionDefaultValue(option)
+end
+
 function OptionModule:GetOptionDefaultValue(option)
+    if not option then
+        return nil
+    end
     local default_value = option.default_value
     if option.type == "table" and default_value == nil then
         return {}
@@ -320,7 +328,7 @@ function OptionModule:ResetToDefaultValues(path, shallow, no_save)
     if option_tbl then
         local next_path = path == "" and "" or path .. "/"
         for i, sub_tbl in pairs(option_tbl) do
-            if sub_tbl._meta then
+            if type(sub_tbl) == "table" and sub_tbl._meta then
                 if sub_tbl._meta == "option" then
                     local default_value = self:GetOptionDefaultValue(sub_tbl)
                     local sub_tbl_path = next_path..sub_tbl.name
