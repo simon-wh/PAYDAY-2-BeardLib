@@ -379,6 +379,8 @@ function NetworkPeer:set_extra_outfit_string_beardlib(extra_outfit_string)
 end
 
 function NetworkPeer:done_extra_outfit_string_beardlib(section_count)
+    self._last_beardlib_extra_outfit_sections = self._last_beardlib_extra_outfit_sections or {}
+
     self._last_beardlib_extra_outfit_section_count = section_count
     self._last_beardlib_extra_outfit_done_received = true
 
