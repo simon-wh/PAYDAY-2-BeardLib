@@ -977,6 +977,10 @@ elseif F == "blackmarketgui" then
 					local glove_data = tweak_data.blackmarket.gloves[glove_id]
 					local variations = glove_data and glove_data.variations or {}
 
+					if glove_data and glove_data.force_icon then
+						new_data.bitmap_texture = glove_data.force_icon
+					end
+
 					if allow_customize then
 						local equipped_glove_variation = managers.blackmarket:get_glove_variation(glove_id) or "default"
 						if data.henchman_index then
@@ -986,21 +990,23 @@ elseif F == "blackmarketgui" then
 
 						local glove_variation_data = variations[equipped_glove_variation]
 
-						local texture_path = nil
-						if glove_variation_data.force_icon then
-							texture_path = glove_variation_data.force_icon
-						else
-							local guis_catalog = "guis/"
-							local bundle_folder = glove_variation_data and glove_variation_data.texture_bundle_folder or glove_data.texture_bundle_folder
+						if glove_variation_data then
+							
+							if glove_variation_data.force_icon then
+								texture_path = glove_variation_data.force_icon
+							else
+								local guis_catalog = "guis/"
+								local bundle_folder = glove_variation_data and glove_variation_data.texture_bundle_folder or glove_data.texture_bundle_folder
 
-							if bundle_folder then
-								guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
+								if bundle_folder then
+									guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
+								end
+
+								texture_path = guis_catalog .. "textures/pd2/blackmarket/icons/gloves/" .. glove_id .. "_" .. glove_variation
 							end
 
-							texture_path = guis_catalog .. "textures/pd2/blackmarket/icons/gloves/" .. glove_id .. "_" .. glove_variation
+							new_data.bitmap_texture = texture_path
 						end
-
-						new_data.bitmap_texture = texture_path
 					end
 				end
 
@@ -1542,12 +1548,6 @@ elseif F == "groupaistatebase" then
 		if new_unit then
 			local new_unit_ids = Idstring(new_unit)
 			crim_data.glove_unit_ids = new_unit_ids
-
-			if not managers.dyn_resource:is_resource_ready(ids_unit, new_unit_ids, DynamicResourceManager.DYN_RESOURCES_PACKAGE, true) then
-				visual_state.glove_id = managers.blackmarket:get_default_glove_id()
-				visual_state.glove_variation = "default"
-				crim_data.gloves_ready = false
-			end
 		end
 
 		managers.criminals:update_character_visual_state(character_name, visual_state)
