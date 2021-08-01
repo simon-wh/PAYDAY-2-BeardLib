@@ -304,7 +304,7 @@ function NetworkPeer:set_equipped_weapon_beardlib(weapon_string, outfit_version,
     end
 end
 
-function NetworkPeer:set_outfit_string_beardlib(outfit_string, outfit_version, extra_outfit_string)
+function NetworkPeer:set_outfit_string_beardlib(outfit_string, outfit_version)
     if outfit_version ~= SyncConsts.OutfitVersion then --Avoid sync to avoid issues.
         return
     end
@@ -352,7 +352,7 @@ function NetworkPeer:set_outfit_string_beardlib(outfit_string, outfit_version, e
     end 
 
     self._profile.outfit_string = SyncUtils:OutfitStringFromList(old_outfit)
-    if old_outfit_string ~= self._profile.outfit_string or old_extra_outfit_string ~= self._profile.beardlib_extra_outfit_string then
+    if old_outfit_string ~= self._profile.outfit_string then
         self:_reload_outfit()
     end
 
