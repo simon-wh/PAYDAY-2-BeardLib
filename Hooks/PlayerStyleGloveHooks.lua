@@ -601,7 +601,7 @@ elseif F == "menuscenemanager" then
 			local glove_id = outfit and outfit.glove_id
 			local glove_variation = extra_outfit and extra_outfit.glove_variation
 
-			if glove_id and extra_outfit then
+			if glove_id and glove_variation then
 				local unit = self._lobby_characters[i]
 				self:set_character_gloves_and_variation(glove_id, glove_variation, unit)
 			end
