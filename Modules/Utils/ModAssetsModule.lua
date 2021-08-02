@@ -91,7 +91,7 @@ end
 
 function ModAssetsModule:RetrieveCurrentVersion()
     if self.version_file and FileIO:Exists(self.version_file) then
-        local version = io.open(self.version_file):read("*all")
+        local version = FileIO:ReadFrom(self.version_file)
         if version then
             self.version = version
         end

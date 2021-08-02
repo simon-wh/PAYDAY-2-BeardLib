@@ -77,8 +77,7 @@ function ModCore:PostInit(ignored_modules)
 end
 
 function ModCore:LoadConfigFile(path)
-    local file = io.open(path, "r")
-    local config = ScriptSerializer:from_custom_xml(file:read("*all"))
+    local config = FileIO:ReadConfig(path)
 
     self.Name = config.name or tostring(table.remove(string.split(self.ModPath, "/")))
     self.Priority = tonumber(config.priority) or self.Priority

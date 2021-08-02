@@ -46,6 +46,7 @@ function FileIO:ReadConfig(path, tbl)
 				end
 			end
 		end
+		file:close()
 		return config
 	else
 		log("[FileIO][ERROR] Config at %s doesn't exist!", tostring(path))
