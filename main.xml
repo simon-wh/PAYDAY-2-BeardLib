@@ -11,7 +11,7 @@
 	auto_image_color="true"
 	mod_override_dir="assets/mod_overrides/">
 	<load_modules>
-		<AssetUpdates id="14924" version="4.52" provider="modworkshop" important="true" version_is_number="true"/>
+		<AssetUpdates id="14924" version="4.53" provider="modworkshop" important="true" version_is_number="true"/>
 		<AddFiles directory="Assets">
 			<unit path="core/units/cubemap_gizmo/cubemap_gizmo" force_if_not_loaded="true"/>
 			<object path="core/units/cubemap_gizmo/cubemap_gizmo" force_if_not_loaded="true"/>
@@ -144,6 +144,7 @@
 
 			<hook source_file="lib/tweak_data/dlctweakdata" file="OtherHooks.lua"/>
 
+			<hook source_file="lib/tweak_data/blackmarkettweakdata" file="PlayerStyleGloveHooks.lua"/>
 			<hook source_file="lib/tweak_data/blackmarket/glovestweakdata" file="PlayerStyleGloveHooks.lua"/>
 			<hook source_file="lib/managers/criminalsmanager" file="PlayerStyleGloveHooks.lua"/>
 			<hook source_file="lib/units/menu/menuarmourbase" file="PlayerStyleGloveHooks.lua"/>
