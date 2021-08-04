@@ -8,13 +8,15 @@
 local F = table.remove(RequiredScript:split("/"))
 local Hooks = Hooks
 
-if F == "glovestweakdata" then
-	Hooks:PostHook(BlackMarketTweakData, "_init_gloves", "BeardLibInitGloves", function(self, tweak_data)
+if F == "blackmarkettweakdata" then
+	Hooks:PostHook(BlackMarketTweakData, "init", "BeardLibInitGloves", function(self, tweak_data)
 		-- Move default gloves to the the player style tweak data because it makes more sense there, plus it'll allow variants to override them.
 
 		for player_style_id, glove_id in pairs(self.suit_default_gloves) do
 			local player_style_td = self.player_styles[player_style_id]
 			local glove_td = self.gloves[glove_id]
+
+			log(tostring(glove_id))
 
 			if player_style_td and glove_td then
 				player_style_td.default_glove_id = player_style_td.default_glove_id or glove_id
@@ -29,7 +31,7 @@ if F == "glovestweakdata" then
 			end
 		end
 	end)
-
+elseif F == "glovestweakdata" then
 	function BlackMarketTweakData:get_glove_value(glove_id, character_name, key, player_style, material_variation)
 		if key == nil then
 			return
