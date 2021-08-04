@@ -144,6 +144,7 @@
 
 			<hook source_file="lib/tweak_data/dlctweakdata" file="OtherHooks.lua"/>
 
+			<hook source_file="lib/tweak_data/blackmarkettweakdata" file="PlayerStyleGloveHooks.lua"/>
 			<hook source_file="lib/tweak_data/blackmarket/glovestweakdata" file="PlayerStyleGloveHooks.lua"/>
 			<hook source_file="lib/managers/criminalsmanager" file="PlayerStyleGloveHooks.lua"/>
 			<hook source_file="lib/units/menu/menuarmourbase" file="PlayerStyleGloveHooks.lua"/>
