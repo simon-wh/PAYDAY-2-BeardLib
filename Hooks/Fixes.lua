@@ -323,7 +323,7 @@ elseif F == "elementareatrigger" then
     -- Changes ElementAreaTrigger:project_instigators to read from tweak_data.carry so the lootbags aren't hardcoded into a function
     function ElementAreaTrigger:beardlib_filter_func(carry_data, is_loot)
         local carry_id = carry_data:carry_id()
-        if carry_id == "person" or carry_id == "special_person" then
+        if is_loot and (carry_id == "person" or carry_id == "special_person") then
             return false
         end
 
