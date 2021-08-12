@@ -712,6 +712,9 @@ elseif F == "blackmarketmanager" then
 
 		local glowobal_bmm = Global.blackmarket_manager.player_styles[player_style].material_variations[material_variation]
 		if material_variation ~= "default" then
+			if not tweak_data.blackmarket.player_styles[player_style].material_variations then
+				return false
+			end
 			local tweak_data = tweak_data.blackmarket.player_styles[player_style].material_variations[material_variation]
 			return (tweak_data and glowobal_bmm) and true or false
 		end
