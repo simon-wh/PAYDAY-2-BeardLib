@@ -4,15 +4,16 @@
 --the problem with the normal function is that you might have hooks with the same name so it'll remove ALL of them.
 
 function Hooks:RemovePostHookWithObject(object, id)
-    local hooks = self._posthooks[object]
+    local hooks = self._function_hooks and self._function_hooks[object] or self._posthooks[object]
     if not hooks then
         BeardLib:log("[Error] No post hooks for object '%s' while trying to remove id '%s'", tostring(object), tostring(id))
         return
     end
     for _, func in pairs(hooks) do
-        for override_i, override in ipairs(func.overrides) do
+        local tbl = func.overrides.post or func.overrides
+        for override_i, override in ipairs(tbl) do
             if override and override.id == id then
-                table.remove(func.overrides, override_i)
+                table.remove(tbl, override_i)
             end
         end
     end
@@ -21,15 +22,16 @@ end
 --Same as RemovePostHookWithObject but for pre hooks.
 
 function Hooks:RemovePreHookWithObject(object, id)
-    local hooks = self._prehooks[object]
+    local hooks = self._function_hooks and self._function_hooks[object] or self._prehooks[object]
     if not hooks then
         BeardLib:log("[Error] No pre hooks for object '%s' while trying to remove id '%s'", tostring(object), tostring(id))
         return
     end
     for func_i, func in pairs(hooks) do
-        for override_i, override in ipairs(func.overrides) do
+        local tbl = func.overrides.pre or func.overrides
+        for override_i, override in ipairs(tbl) do
             if override and override.id == id then
-                table.remove(func.overrides, override_i)
+                table.remove(tbl, override_i)
             end
         end
     end
