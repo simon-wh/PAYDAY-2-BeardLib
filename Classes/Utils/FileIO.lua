@@ -266,21 +266,26 @@ function FileIO:LoadLocalization(path, overwrite)
 		overwrite = true
 	end
 
-	local file = io.open(path, "r")
-	if file then
-		local data = file:read("*all")
-		file:close()
-		local contents
-		local passed = pcall(function()
-			if Path:GetFileExtension(path) == "yaml" then
-				contents = YAML.eval(data)
-			else
-				contents = json10.decode(data)
+	local ext = Path:GetFileExtension(path)
+	local contents
+	if ext == "lua" then
+		contents = blt.vm.dofile(path)
+	else
+		local data = FileIO:ReadFrom(path)
+		if data then
+			local passed = pcall(function()
+				if ext == "yaml" then
+					contents = YAML.eval(data)
+				else
+					contents = json09.decode(data)
+				end
+			end)
+			if not passed then
+				return false
 			end
-		end)
-		if not passed then
-			return false
 		end
+	end
+	if type(contents) == "table" then
 		LocalizationManager:add_localized_strings(contents, overwrite)
 		return true
 	end
