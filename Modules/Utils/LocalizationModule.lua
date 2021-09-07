@@ -5,16 +5,8 @@ function LocalizationModule:Load()
 	self.LocalizationDirectory = self._config.directory and Path:Combine(self._mod.ModPath, self._config.directory) or self._mod.ModPath
     self.Localizations = {}
 
-    for _, tbl in ipairs(self._config) do
-        if tbl._meta == "localization" or tbl._meta == "loc" then
-            if not self.DefaultLocalization then
-                self.DefaultLocalization = tbl.file
-            end
-            self.Localizations[Idstring(tbl.language):key()] = tbl.file
-        end
-    end
-
-    self.DefaultLocalization = self._config.default or self.DefaultLocalization
+    self.DefaultLocalization = self._config.default
+    self:LoadGroup(self._config, self.LocalizationDirectory)
 
     if managers.localization then
         self:LoadLocalization()
@@ -22,6 +14,27 @@ function LocalizationModule:Load()
         Hooks:Add("LocalizationManagerPostInit", self._mod.ModPath .. "_Localization", function(loc)
             self:LoadLocalization()
     	end)
+    end
+end
+
+function LocalizationModule:LoadGroup(data, directory, language)
+    for _, tbl in ipairs(data) do
+        local meta = tbl._meta
+        if meta == "localization" or meta == "loc" then
+            if not self.DefaultLocalization then
+                self.DefaultLocalization = tbl.file
+            end
+            local lang = (tbl.language or language):key()
+            self.Localizations[lang] = self.Localizations[lang] or {}
+            local path = Path:Combine(directory, tbl.file)
+            if FileIO:Exists(path) then
+                table.insert(self.Localizations[lang], path)
+            else
+                self:Err("Localization file with path %s for language %s doesn't exist!", tostring(path), tostring(tbl.language or language))
+            end
+        elseif meta == "group" then
+            self:LoadGroup(tbl, Path:Combine(directory, tbl.directory), tbl.language)
+        end
     end
 end
 
@@ -33,16 +46,16 @@ function LocalizationModule:LoadLocalization()
     if lang_key == latam and not self.Localizations[latam] then
         lang_key = string.key("spanish")
     end
-    if self.Localizations[lang_key] then
-        path = Path:Combine(self.LocalizationDirectory, self.Localizations[lang_key])
-    else
-        path = Path:Combine(self.LocalizationDirectory, self.DefaultLocalization)
-    end
 
-    --if it fails, just force the author to fix their errors.
-    if not FileIO:Exists(path) then
-        self:Err("Language file not found! Path %s", path)
-    elseif not FileIO:LoadLocalization(path) then
-        self:Err("Language file has errors and cannot be loaded! Path %s", path)
+    if self.Localizations[lang_key] then
+        for _, path in pairs(self.Localizations[lang_key]) do
+            if not FileIO:LoadLocalization(path) then
+                self:Err("Language file has errors and cannot be loaded! Path %s", path)
+            end
+        end
+    else
+        if not FileIO:LoadLocalization(Path:Combine(self.LocalizationDirectory, self.DefaultLocalization)) then
+            self:Err("Language file has errors and cannot be loaded! Path %s", path)
+        end
     end
 end
