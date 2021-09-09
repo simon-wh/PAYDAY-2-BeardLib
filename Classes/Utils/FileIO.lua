@@ -277,7 +277,7 @@ function FileIO:LoadLocalization(path, overwrite)
 				if ext == "yaml" then
 					contents = YAML.eval(data)
 				else
-					contents = json09.decode(data)
+					contents = json10.decode(data)
 				end
 			end)
 			if not passed then
