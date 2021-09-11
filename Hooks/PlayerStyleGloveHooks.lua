@@ -16,8 +16,6 @@ if F == "blackmarkettweakdata" then
 			local player_style_td = self.player_styles[player_style_id]
 			local glove_td = self.gloves[glove_id]
 
-			log(tostring(glove_id))
-
 			if player_style_td and glove_td then
 				player_style_td.default_glove_id = player_style_td.default_glove_id or glove_id
 			end
