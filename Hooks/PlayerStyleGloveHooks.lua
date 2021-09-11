@@ -1066,29 +1066,36 @@ elseif F == "blackmarketgui" then
 				end
 
 				new_data.bitmap_texture = texture_path
-				local is_dlc_locked = tweak_data.lootdrop.global_values[new_data.global_value] and tweak_data.lootdrop.global_values[new_data.global_value].dlc and not managers.dlc:is_dlc_unlocked(new_data.global_value)
+				local is_dlc_locked = not managers.dlc:is_global_value_unlocked(new_data.global_value)
 
-				if is_dlc_locked then
-					new_data.unlocked = false
-					new_data.lock_texture = self:get_lock_icon(new_data, "guis/textures/pd2/lock_dlc")
-					new_data.dlc_locked = tweak_data.lootdrop.global_values[new_data.global_value] and tweak_data.lootdrop.global_values[new_data.global_value].unlock_id or "bm_menu_dlc_locked"
-				elseif managers.dlc:is_content_infamy_locked("gloves", glove_id) and not new_data.unlocked then
-					new_data.lock_texture = "guis/textures/pd2/lock_infamy"
-					new_data.dlc_locked = "menu_infamy_lock_info"
-				elseif not new_data.unlocked then
-					local achievement = glove_variation_data and glove_variation_data.locks and glove_variation_data.locks.achievement
-					if glove_variation == "default" then
-						local glove_achievement_lock_id = achievement_locked_content_gloves[glove_id]
-						local dlc_tweak = glove_achievement_lock_id and tweak_data.dlc[glove_achievement_lock_id]
-						achievement = dlc_tweak and dlc_tweak.achievement_id
-					end
+				-- Inherit the locked status of the parent gloves.
+				new_data.unlocked = data.prev_node_data.unlocked
+				new_data.lock_texture = data.prev_node_data.lock_texture
+				new_data.dlc_locked = data.prev_node_data.dlc_locked
 
-					if achievement and managers.achievment:get_info(achievement) and not managers.achievment:get_info(achievement).awarded then
-						local achievement_visual = tweak_data.achievement.visual[achievement]
-						new_data.lock_texture = "guis/textures/pd2/lock_achievement"
-						new_data.dlc_locked = achievement_visual and achievement_visual.desc_id or "achievement_" .. tostring(achievement) .. "_desc"
-					else
-						new_data.lock_texture = "guis/textures/pd2/skilltree/padlock"
+				if data.prev_node_data.unlocked then
+					if is_dlc_locked then
+						new_data.unlocked = false
+						new_data.lock_texture = self:get_lock_icon(new_data, "guis/textures/pd2/lock_dlc")
+						new_data.dlc_locked = tweak_data.lootdrop.global_values[new_data.global_value] and tweak_data.lootdrop.global_values[new_data.global_value].unlock_id or "bm_menu_dlc_locked"
+					elseif managers.dlc:is_content_infamy_locked("gloves", glove_id) and not new_data.unlocked then
+						new_data.lock_texture = "guis/textures/pd2/lock_infamy"
+						new_data.dlc_locked = "menu_infamy_lock_info"
+					elseif not new_data.unlocked then
+						local achievement = glove_variation_data and glove_variation_data.locks and glove_variation_data.locks.achievement
+						if glove_variation == "default" then
+							local glove_achievement_lock_id = achievement_locked_content_gloves[glove_id]
+							local dlc_tweak = glove_achievement_lock_id and tweak_data.dlc[glove_achievement_lock_id]
+							achievement = dlc_tweak and dlc_tweak.achievement_id
+						end
+
+						if achievement and managers.achievment:get_info(achievement) and not managers.achievment:get_info(achievement).awarded then
+							local achievement_visual = tweak_data.achievement.visual[achievement]
+							new_data.lock_texture = "guis/textures/pd2/lock_achievement"
+							new_data.dlc_locked = achievement_visual and achievement_visual.desc_id or "achievement_" .. tostring(achievement) .. "_desc"
+						else
+							new_data.lock_texture = "guis/textures/pd2/skilltree/padlock"
+						end
 					end
 				end
 
