@@ -1,583 +1,774 @@
---Thanks to https://github.com/exosite/lua-yaml
---MIT License.
+-------------------------------------------------------------------------------
+-- tinyyaml - YAML subset parser
+-------------------------------------------------------------------------------
 
-local table_print_value
-table_print_value = function(value, indent, done)
-  indent = indent or 0
-  done = done or {}
-  if type(value) == "table" and not done [value] then
-    done [value] = true
+local table = table
+local string = string
+local schar = string.char
+local ssub, gsub = string.sub, string.gsub
+local sfind, smatch = string.find, string.match
+local tinsert, tremove = table.insert, table.remove
+local setmetatable = setmetatable
+local pairs = pairs
+local type = type
+local tonumber = tonumber
+local math = math
+local getmetatable = getmetatable
+local error = error
 
-    local list = {}
-    for key in pairs (value) do
-      list[#list + 1] = key
+local UNESCAPES = {
+  ['0'] = "\x00", z = "\x00", N    = "\x85",
+  a = "\x07",     b = "\x08", t    = "\x09",
+  n = "\x0a",     v = "\x0b", f    = "\x0c",
+  r = "\x0d",     e = "\x1b", ['\\'] = '\\',
+};
+
+-------------------------------------------------------------------------------
+-- utils
+local function select(list, pred)
+  local selected = {}
+  for i = 0, #list do
+    local v = list[i]
+    if v and pred(v, i) then
+      tinsert(selected, v)
     end
-    table.sort(list, function(a, b) return tostring(a) < tostring(b) end)
-    local last = list[#list]
-
-    local rep = "{\n"
-    local comma
-    for _, key in ipairs (list) do
-      if key == last then
-        comma = ''
-      else
-        comma = ','
-      end
-      local keyRep
-      if type(key) == "number" then
-        keyRep = key
-      else
-        keyRep = string.format("%q", tostring(key))
-      end
-      rep = rep .. string.format(
-        "%s[%s] = %s%s\n",
-        string.rep(" ", indent + 2),
-        keyRep,
-        table_print_value(value[key], indent + 2, done),
-        comma
-      )
-    end
-
-    rep = rep .. string.rep(" ", indent) -- indent it
-    rep = rep .. "}"
-
-    done[value] = false
-    return rep
-  elseif type(value) == "string" then
-    return string.format("%q", value)
-  else
-    return tostring(value)
   end
+  return selected
 end
 
-local table_print = function(tt)
-  print('return '..table_print_value(tt))
+local function startswith(haystack, needle)
+  return ssub(haystack, 1, #needle) == needle
 end
 
-local table_clone = function(t)
-  local clone = {}
-  for k,v in pairs(t) do
-    clone[k] = v
+local function ltrim(str)
+  return smatch(str, "^%s*(.-)$")
+end
+
+local function rtrim(str)
+  return smatch(str, "^(.-)%s*$")
+end
+
+-------------------------------------------------------------------------------
+-- Implementation.
+--
+local class = {__meta={}}
+function class.__meta.__call(cls, ...)
+  local self = setmetatable({}, cls)
+  if cls.__init then
+    cls.__init(self, ...)
   end
-  return clone
-end
-
-local string_trim = function(s, what)
-  what = what or " "
-  return s:gsub("^[" .. what .. "]*(.-)["..what.."]*$", "%1")
-end
-
-local push = function(stack, item)
-  stack[#stack + 1] = item
-end
-
-local pop = function(stack)
-  local item = stack[#stack]
-  stack[#stack] = nil
-  return item
-end
-
-local context = function (str)
-  if type(str) ~= "string" then
-    return ""
-  end
-
-  str = str:sub(0,25):gsub("\n","\\n"):gsub("\"","\\\"");
-  return ", near \"" .. str .. "\""
-end
-
-local Parser = {}
-function Parser.new (self, tokens)
-  self.tokens = tokens
-  self.parse_stack = {}
-  self.refs = {}
-  self.current = 0
   return self
 end
 
-YAML = {version = "1.2"}
+function class.def(base, typ, cls)
+  base = base or class
+  local mt = {__metatable=base, __index=base}
+  for k, v in pairs(base.__meta) do mt[k] = v end
+  cls = setmetatable(cls or {}, mt)
+  cls.__index = cls
+  cls.__metatable = cls
+  cls.__type = typ
+  cls.__meta = mt
+  return cls
+end
 
-local word = function(w) return "^("..w..")([%s$%c])" end
 
-local tokens = {
-  {"comment",   "^#[^\n]*"},
-  {"indent",    "^\n( *)"},
-  {"space",     "^ +"},
-  {"true",      word("enabled"),  const = true, value = true},
-  {"true",      word("true"),     const = true, value = true},
-  {"true",      word("yes"),      const = true, value = true},
-  {"true",      word("on"),      const = true, value = true},
-  {"false",     word("disabled"), const = true, value = false},
-  {"false",     word("false"),    const = true, value = false},
-  {"false",     word("no"),       const = true, value = false},
-  {"false",     word("off"),      const = true, value = false},
-  {"null",      word("null"),     const = true, value = nil},
-  {"null",      word("Null"),     const = true, value = nil},
-  {"null",      word("NULL"),     const = true, value = nil},
-  {"null",      word("~"),        const = true, value = nil},
-  {"id",    "^\"([^\"]-)\" *(:[%s%c])"},
-  {"id",    "^'([^']-)' *(:[%s%c])"},
-  {"string",    "^\"([^\"]-)\"",  force_text = true},
-  {"string",    "^'([^']-)'",    force_text = true},
-  {"timestamp", "^(%d%d%d%d)-(%d%d?)-(%d%d?)%s+(%d%d?):(%d%d):(%d%d)%s+(%-?%d%d?):(%d%d)"},
-  {"timestamp", "^(%d%d%d%d)-(%d%d?)-(%d%d?)%s+(%d%d?):(%d%d):(%d%d)%s+(%-?%d%d?)"},
-  {"timestamp", "^(%d%d%d%d)-(%d%d?)-(%d%d?)%s+(%d%d?):(%d%d):(%d%d)"},
-  {"timestamp", "^(%d%d%d%d)-(%d%d?)-(%d%d?)%s+(%d%d?):(%d%d)"},
-  {"timestamp", "^(%d%d%d%d)-(%d%d?)-(%d%d?)%s+(%d%d?)"},
-  {"timestamp", "^(%d%d%d%d)-(%d%d?)-(%d%d?)"},
-  {"doc",       "^%-%-%-[^%c]*"},
-  {",",         "^,"},
-  {"string",    "^%b{} *[^,%c]+", noinline = true},
-  {"{",         "^{"},
-  {"}",         "^}"},
-  {"string",    "^%b[] *[^,%c]+", noinline = true},
-  {"[",         "^%["},
-  {"]",         "^%]"},
-  {"-",         "^%-", noinline = true},
-  {":",         "^:"},
-  {"pipe",      "^(|)(%d*[+%-]?)", sep = "\n"},
-  {"pipe",      "^(>)(%d*[+%-]?)", sep = " "},
-  {"id",        "^([%w][%w %-_]*)(:[%s%c])"},
-  {"string",    "^[^%c]+", noinline = true},
-  {"string",    "^[^,%]}%c ]+"}
-};
-YAML.tokenize = function (str)
-  local token
-  local row = 0
-  local ignore
-  local indents = 0
-  local lastIndents
-  local stack = {}
-  local indentAmount = 0
-  local inline = false
-  str = str:gsub("\r\n","\010")
+local types = {
+  null = class:def('null'),
+  map = class:def('map'),
+  omap = class:def('omap'),
+  pairs = class:def('pairs'),
+  set = class:def('set'),
+  seq = class:def('seq'),
+  timestamp = class:def('timestamp'),
+}
 
-  while #str > 0 do
-    for i in ipairs(tokens) do
-      local captures = {}
-      if not inline or tokens[i].noinline == nil then
-        captures = {str:match(tokens[i][2])}
-      end
+local Null = types.null
+function Null.__tostring() return 'yaml.null' end
+function Null.isnull(v)
+  if v == nil then return true end
+  if type(v) == 'table' and getmetatable(v) == Null then return true end
+  return false
+end
+local null = Null()
 
-      if #captures > 0 then
-        captures.input = str:sub(0, 25)
-        token = table_clone(tokens[i])
-        token[2] = captures
-        local str2 = str:gsub(tokens[i][2], "", 1)
-        token.raw = str:sub(1, #str - #str2)
-        str = str2
+function types.timestamp:__init(y, m, d, h, i, s, f, z)
+  self.year = tonumber(y)
+  self.month = tonumber(m)
+  self.day = tonumber(d)
+  self.hour = tonumber(h or 0)
+  self.minute = tonumber(i or 0)
+  self.second = tonumber(s or 0)
+  if type(f) == 'string' and sfind(f, '^%d+$') then
+    self.fraction = tonumber(f) * math.pow(10, 3 - #f)
+  elseif f then
+    self.fraction = f
+  else
+    self.fraction = 0
+  end
+  self.timezone = z
+end
 
-        if token[1] == "{" or token[1] == "[" then
-          inline = true
-        elseif token.const then
-          -- Since word pattern contains last char we're re-adding it
-          str = token[2][2] .. str
-          token.raw = token.raw:sub(1, #token.raw - #token[2][2])
-        elseif token[1] == "id" then
-          -- Since id pattern contains last semi-colon we're re-adding it
-          str = token[2][2] .. str
-          token.raw = token.raw:sub(1, #token.raw - #token[2][2])
-          -- Trim
-          token[2][1] = string_trim(token[2][1])
-        elseif token[1] == "string" then
-          -- Finding numbers
-          local snip = token[2][1]
-          if not token.force_text then
-            if snip:match("^(-?%d+%.%d+)$") or snip:match("^(-?%d+)$") then
-              token[1] = "number"
-            end
-          end
+function types.timestamp:__tostring()
+  return string.format(
+    '%04d-%02d-%02dT%02d:%02d:%02d.%03d%s',
+    self.year, self.month, self.day,
+    self.hour, self.minute, self.second, self.fraction,
+    self:gettz())
+end
 
-        elseif token[1] == "comment" then
-          ignore = true;
-        elseif token[1] == "indent" then
-          row = row + 1
-          inline = false
-          lastIndents = indents
-          if indentAmount == 0 then
-            indentAmount = #token[2][1]
-          end
+function types.timestamp:gettz()
+  if not self.timezone then
+    return ''
+  end
+  if self.timezone == 0 then
+    return 'Z'
+  end
+  local sign = self.timezone > 0
+  local z = sign and self.timezone or -self.timezone
+  local zh = math.floor(z)
+  local zi = (z - zh) * 60
+  return string.format(
+    '%s%02d:%02d', sign and '+' or '-', zh, zi)
+end
 
-          if indentAmount ~= 0 then
-            indents = (#token[2][1] / indentAmount);
+
+local function countindent(line)
+  local _, j = sfind(line, '^%s+')
+  if not j then
+    return 0, line
+  end
+  return j, ssub(line, j+1)
+end
+
+local function parsestring(line, stopper)
+  stopper = stopper or ''
+  local q = ssub(line, 1, 1)
+  if q == ' ' or q == '\t' then
+    return parsestring(ssub(line, 2))
+  end
+  if q == "'" then
+    local i = sfind(line, "'", 2, true)
+    if not i then
+      return nil, line
+    end
+    return ssub(line, 2, i-1), ssub(line, i+1)
+  end
+  if q == '"' then
+    local i, buf = 2, ''
+    while i < #line do
+      local c = ssub(line, i, i)
+      if c == '\\' then
+        local n = ssub(line, i+1, i+1)
+        if UNESCAPES[n] ~= nil then
+          buf = buf..UNESCAPES[n]
+        elseif n == 'x' then
+          local h = ssub(i+2,i+3)
+          if sfind(h, '^[0-9a-fA-F]$') then
+            buf = buf..schar(tonumber(h, 16))
+            i = i + 2
           else
-            indents = 0
+            buf = buf..'x'
           end
-
-          if indents == lastIndents then
-            ignore = true;
-          elseif indents > lastIndents + 2 then
-            error("SyntaxError: invalid indentation, got " .. tostring(indents)
-              .. " instead of " .. tostring(lastIndents) .. context(token[2].input))
-          elseif indents > lastIndents + 1 then
-            push(stack, token)
-          elseif indents < lastIndents then
-            local input = token[2].input
-            token = {"dedent", {"", input = ""}}
-            token.input = input
-            while lastIndents > indents + 1 do
-              lastIndents = lastIndents - 1
-              push(stack, token)
-            end
-          end
-        end -- if token[1] == XXX
-        token.row = row
+        else
+          buf = buf..n
+        end
+        i = i + 1
+      elseif c == q then
         break
-      end -- if #captures > 0
-    end
-
-    if not ignore then
-      if token then
-        push(stack, token)
-        token = nil
       else
-        error("SyntaxError " .. context(str))
+        buf = buf..c
       end
+      i = i + 1
     end
-
-    ignore = false;
+    return buf, ssub(line, i+1)
   end
-
-  return stack
-end
-
-Parser.peek = function (self, offset)
-  offset = offset or 1
-  return self.tokens[offset + self.current]
-end
-
-Parser.advance = function (self)
-  self.current = self.current + 1
-  return self.tokens[self.current]
-end
-
-Parser.advanceValue = function (self)
-  return self:advance()[2][1]
-end
-
-Parser.accept = function (self, type)
-  if self:peekType(type) then
-    return self:advance()
+  if q == '{' or q == '[' then  -- flow style
+    return nil, line
   end
-end
-
-Parser.expect = function (self, type, msg)
-  return self:accept(type) or
-    error(msg .. context(self:peek()[1].input))
-end
-
-Parser.expectDedent = function (self, msg)
-  return self:accept("dedent") or (self:peek() == nil) or
-    error(msg .. context(self:peek()[2].input))
-end
-
-Parser.peekType = function (self, val, offset)
-  return self:peek(offset) and self:peek(offset)[1] == val
-end
-
-Parser.ignore = function (self, items)
-  local advanced
-  repeat
-    advanced = false
-    for _,v in pairs(items) do
-      if self:peekType(v) then
-        self:advance()
-        advanced = true
-      end
-    end
-  until advanced == false
-end
-
-Parser.ignoreSpace = function (self)
-  self:ignore{"space"}
-end
-
-Parser.ignoreWhitespace = function (self)
-  self:ignore{"space", "indent", "dedent"}
-end
-
-Parser.parse = function (self)
-
-  local ref = nil
-  if self:peekType("string") and not self:peek().force_text then
-    local char = self:peek()[2][1]:sub(1,1)
-    if char == "&" then
-      ref = self:peek()[2][1]:sub(2)
-      self:advanceValue()
-      self:ignoreSpace()
-    elseif char == "*" then
-      ref = self:peek()[2][1]:sub(2)
-      return self.refs[ref]
+  if q == '|' or q == '>' then  -- block
+    return nil, line
+  end
+  if q == '-' or q == ':' then
+    if ssub(line, 2, 2) == ' ' or #line == 1 then
+      return nil, line
     end
   end
-
-  local result
-  local c = {
-    indent = self:accept("indent") and 1 or 0,
-    token = self:peek()
-  }
-  push(self.parse_stack, c)
-
-  if c.token[1] == "doc" then
-    result = self:parseDoc()
-  elseif c.token[1] == "-" then
-    result = self:parseList()
-  elseif c.token[1] == "{" then
-    result = self:parseInlineHash()
-  elseif c.token[1] == "[" then
-    result = self:parseInlineList()
-  elseif c.token[1] == "id" then
-    result = self:parseHash()
-  elseif c.token[1] == "string" then
-    result = self:parseString("\n")
-  elseif c.token[1] == "timestamp" then
-    result = self:parseTimestamp()
-  elseif c.token[1] == "number" then
-    result = tonumber(self:advanceValue())
-  elseif c.token[1] == "pipe" then
-    result = self:parsePipe()
-  elseif c.token.const == true then
-    self:advanceValue();
-    result = c.token.value
-  else
-    error("ParseError: unexpected token '" .. c.token[1] .. "'" .. context(c.token.input))
-  end
-
-  pop(self.parse_stack)
-  while c.indent > 0 do
-    c.indent = c.indent - 1
-    local term = "term "..c.token[1]..": '"..c.token[2][1].."'"
-    self:expectDedent("last ".. term .." is not properly dedented")
-  end
-
-  if ref then
-    self.refs[ref] = result
-  end
-  return result
-end
-
-Parser.parseDoc = function (self)
-  self:accept("doc")
-  return self:parse()
-end
-
-Parser.inline = function (self)
-  local current = self:peek(0)
-  if not current then
-    return {}, 0
-  end
-
-  local inline = {}
-  local i = 0
-
-  while self:peek(i) and not self:peekType("indent", i) and current.row == self:peek(i).row do
-    inline[self:peek(i)[1]] = true
-    i = i - 1
-  end
-  return inline, -i
-end
-
-Parser.isInline = function (self)
-  local _, i = self:inline()
-  return i > 0
-end
-
-Parser.parent = function(self, level)
-  level = level or 1
-  return self.parse_stack[#self.parse_stack - level]
-end
-
-Parser.parentType = function(self, type, level)
-  return self:parent(level) and self:parent(level).token[1] == type
-end
-
-Parser.parseString = function (self)
-  if self:isInline() then
-    local result = self:advanceValue()
-
-    --[[
-      - a: this looks
-        flowing: but is
-        no: string
-    --]]
-    local types = self:inline()
-    if types["id"] and types["-"] then
-      if not self:peekType("indent") or not self:peekType("indent", 2) then
-        return result
-      end
-    end
-
-    --[[
-      a: 1
-      b: this is
-        a flowing string
-        example
-      c: 3
-    --]]
-    if self:peekType("indent") then
-      self:expect("indent", "text block needs to start with indent")
-      local addtl = self:accept("indent")
-
-      result = result .. "\n" .. self:parseTextBlock("\n")
-
-      self:expectDedent("text block ending dedent missing")
-      if addtl then
-        self:expectDedent("text block ending dedent missing")
-      end
-    end
-    return result
-  else
-    --[[
-      a: 1
-      b:
-        this is also
-        a flowing string
-        example
-      c: 3
-    --]]
-    return self:parseTextBlock("\n")
-  end
-end
-
-Parser.parsePipe = function (self)
-  local pipe = self:expect("pipe")
-  self:expect("indent", "text block needs to start with indent")
-  local result = self:parseTextBlock(pipe.sep)
-  self:expectDedent("text block ending dedent missing")
-  return result
-end
-
-Parser.parseTextBlock = function (self, sep)
-  local token = self:advance()
-  local result = string_trim(token.raw, "\n")
-  local indents = 0
-  while self:peek() ~= nil and ( indents > 0 or not self:peekType("dedent") ) do
-    local newtoken = self:advance()
-    while token.row < newtoken.row do
-      result = result .. sep
-      token.row = token.row + 1
-    end
-    if newtoken[1] == "indent" then
-      indents = indents + 1
-    elseif newtoken[1] == "dedent" then
-      indents = indents - 1
+  local buf = ''
+  while #line > 0 do
+    local c = ssub(line, 1, 1)
+    if sfind(stopper, c, 1, true) then
+      break
+    elseif c == ':' and (ssub(line, 2, 2) == ' ' or #line == 1) then
+      break
+    elseif c == '#' and (ssub(buf, #buf, #buf) == ' ') then
+      break
     else
-      result = result .. string_trim(newtoken.raw, "\n")
+      buf = buf..c
     end
+    line = ssub(line, 2)
   end
-  return result
+  return rtrim(buf), line
 end
 
-Parser.parseHash = function (self, hash)
-  hash = hash or {}
-  local indents = 0
+local function isemptyline(line)
+  return line == '' or sfind(line, '^%s*$') or sfind(line, '^%s*#')
+end
 
-  if self:isInline() then
-    local id = self:advanceValue()
-    self:expect(":", "expected semi-colon after id")
-    self:ignoreSpace()
-    if self:accept("indent") then
-      indents = indents + 1
-      hash[id] = self:parse()
+local function equalsline(line, needle)
+  return startswith(line, needle) and isemptyline(ssub(line, #needle+1))
+end
+
+local function checkdupekey(map, key)
+  if map[key] ~= nil then
+    -- print("found a duplicate key '"..key.."' in line: "..line)
+    local suffix = 1
+    while map[key..'_'..suffix] do
+      suffix = suffix + 1
+    end
+    key = key ..'_'..suffix
+  end
+  return key
+end
+
+local function parseflowstyle(line, lines)
+  local stack = {}
+  while true do
+    if #line == 0 then
+      if #lines == 0 then
+        break
+      else
+        line = tremove(lines, 1)
+      end
+    end
+    local c = ssub(line, 1, 1)
+    if c == '#' then
+      line = ''
+    elseif c == ' ' or c == '\t' or c == '\r' or c == '\n' then
+      line = ssub(line, 2)
+    elseif c == '{' or c == '[' then
+      tinsert(stack, {v={},t=c})
+      line = ssub(line, 2)
+    elseif c == ':' then
+      local s = tremove(stack)
+      tinsert(stack, {v=s.v, t=':'})
+      line = ssub(line, 2)
+    elseif c == ',' then
+      local value = tremove(stack)
+      if value.t == ':' or value.t == '{' or value.t == '[' then error() end
+      if stack[#stack].t == ':' then
+        -- map
+        local key = tremove(stack)
+        key.v = checkdupekey(stack[#stack].v, key.v)
+        stack[#stack].v[key.v] = value.v
+      elseif stack[#stack].t == '{' then
+        -- set
+        stack[#stack].v[value.v] = true
+      elseif stack[#stack].t == '[' then
+        -- seq
+        tinsert(stack[#stack].v, value.v)
+      end
+      line = ssub(line, 2)
+    elseif c == '}' then
+      if stack[#stack].t == '{' then
+        if #stack == 1 then break end
+        stack[#stack].t = '}'
+        line = ssub(line, 2)
+      else
+        line = ','..line
+      end
+    elseif c == ']' then
+      if stack[#stack].t == '[' then
+        if #stack == 1 then break end
+        stack[#stack].t = ']'
+        line = ssub(line, 2)
+      else
+        line = ','..line
+      end
     else
-      hash[id] = self:parse()
-      if self:accept("indent") then
-        indents = indents + 1
+      local s, rest = parsestring(line, ',{}[]')
+      if not s then
+        error('invalid flowstyle line: '..line)
+      end
+      tinsert(stack, {v=s, t='s'})
+      line = rest
+    end
+  end
+  return stack[1].v, line
+end
+
+local function parseblockstylestring(line, lines, indent)
+  if #lines == 0 then
+    error("failed to find multi-line scalar content")
+  end
+  local s = {}
+  local firstindent = -1
+  local endline = -1
+  for i = 1, #lines do
+    local ln = lines[i]
+    local idt = countindent(ln)
+    if idt <= indent then
+      break
+    end
+    if ln == '' then
+      tinsert(s, '')
+    else
+      if firstindent == -1 then
+        firstindent = idt
+      elseif idt < firstindent then
+        break
+      end
+      tinsert(s, ssub(ln, firstindent + 1))
+    end
+    endline = i
+  end
+
+  local striptrailing = true
+  local sep = '\n'
+  local newlineatend = true
+  line = line:trim()
+  if line == '|'  then
+    striptrailing = true
+    sep = '\n'
+    newlineatend = true
+  elseif line == '|+' then
+    striptrailing = false
+    sep = '\n'
+    newlineatend = true
+  elseif line == '|-' then
+    striptrailing = true
+    sep = '\n'
+    newlineatend = false
+  elseif line == '>' then
+    striptrailing = true
+    sep = ' '
+    newlineatend = true
+  elseif line == '>+' then
+    striptrailing = false
+    sep = ' '
+    newlineatend = true
+  elseif line == '>-' then
+    striptrailing = true
+    sep = ' '
+    newlineatend = false
+  else
+    error('invalid blockstyle string:"'..line..'"')
+  end
+  local eonl = 0
+  for i = #s, 1, -1 do
+    if s[i] == '' then
+      tremove(s, i)
+      eonl = eonl + 1
+    end
+  end
+  if striptrailing then
+    eonl = 0
+  end
+  if newlineatend then
+    eonl = eonl + 1
+  end
+  for i = endline, 1, -1 do
+    tremove(lines, i)
+  end
+  return table.concat(s, sep)..string.rep('\n', eonl)
+end
+
+local function parsetimestamp(line)
+  local _, p1, y, m, d = sfind(line, '^(%d%d%d%d)%-(%d%d)%-(%d%d)')
+  if not p1 then
+    return nil, line
+  end
+  if p1 == #line then
+    return types.timestamp(y, m, d), ''
+  end
+  local _, p2, h, i, s = sfind(line, '^[Tt ](%d+):(%d+):(%d+)', p1+1)
+  if not p2 then
+    return types.timestamp(y, m, d), ssub(line, p1+1)
+  end
+  if p2 == #line then
+    return types.timestamp(y, m, d, h, i, s), ''
+  end
+  local _, p3, f = sfind(line, '^%.(%d+)', p2+1)
+  if not p3 then
+    p3 = p2
+    f = 0
+  end
+  local zc = ssub(line, p3+1, p3+1)
+  local _, p4, zs, z = sfind(line, '^ ?([%+%-])(%d+)', p3+1)
+  if p4 then
+    z = tonumber(z)
+    local _, p5, zi = sfind(line, '^:(%d+)', p4+1)
+    if p5 then
+      z = z + tonumber(zi) / 60
+    end
+    z = zs == '-' and -tonumber(z) or tonumber(z)
+  elseif zc == 'Z' then
+    p4 = p3 + 1
+    z = 0
+  else
+    p4 = p3
+    z = false
+  end
+  return types.timestamp(y, m, d, h, i, s, f, z), ssub(line, p4+1)
+end
+
+local function parsescalar(line, lines, indent)
+  line = ltrim(line)
+  line = gsub(line, '^%s*#.*$', '')  -- comment only -> ''
+  line = gsub(line, '^%s*', '')  -- trim head spaces
+
+  if line == '' or line == '~' then
+    return null
+  end
+
+  local ts, _ = parsetimestamp(line)
+  if ts then
+    return ts
+  end
+
+  local s, _ = parsestring(line)
+  -- startswith quote ... string
+  -- not startswith quote ... maybe string
+  if s and (startswith(line, '"') or startswith(line, "'")) then
+    return s
+  end
+
+  if startswith('!', line) then  -- unexpected tagchar
+    error('unsupported line: '..line)
+  end
+
+  if equalsline(line, '{}') then
+    return {}
+  end
+  if equalsline(line, '[]') then
+    return {}
+  end
+
+  if startswith(line, '{') or startswith(line, '[') then
+    return parseflowstyle(line, lines)
+  end
+
+  if startswith(line, '|') or startswith(line, '>') then
+    return parseblockstylestring(line, lines, indent)
+  end
+
+  -- Regular unquoted string
+  line = gsub(line, '%s*#.*$', '')  -- trim tail comment
+  local v = line
+  if v == 'null' or v == 'Null' or v == 'NULL'then
+    return null
+  elseif v == 'true' or v == 'True' or v == 'TRUE' then
+    return true
+  elseif v == 'false' or v == 'False' or v == 'FALSE' then
+    return false
+  elseif v == '.inf' or v == '.Inf' or v == '.INF' then
+    return math.huge
+  elseif v == '+.inf' or v == '+.Inf' or v == '+.INF' then
+    return math.huge
+  elseif v == '-.inf' or v == '-.Inf' or v == '-.INF' then
+    return -math.huge
+  elseif v == '.nan' or v == '.NaN' or v == '.NAN' then
+    return 0 / 0
+  elseif sfind(v, '^[%+%-]?[0-9]+$') or sfind(v, '^[%+%-]?[0-9]+%.$')then
+    return tonumber(v)  -- : int
+  elseif sfind(v, '^[%+%-]?[0-9]+%.[0-9]+$') then
+    return tonumber(v)
+  end
+  return s or v
+end
+
+local parsemap;  -- : func
+
+local function parseseq(line, lines, indent)
+  local seq = setmetatable({}, types.seq)
+  if line ~= '' then
+    error()
+  end
+  while #lines > 0 do
+    -- Check for a new document
+    line = lines[1]
+    if startswith(line, '---') then
+      while #lines > 0 and not startswith(lines, '---') do
+        tremove(lines, 1)
+      end
+      return seq
+    end
+
+    -- Check the indent level
+    local level = countindent(line)
+    if level < indent then
+      return seq
+    elseif level > indent then
+      error("found bad indenting in line: ".. line)
+    end
+
+    local i, j = sfind(line, '%-%s+')
+    if not i then
+      i, j = sfind(line, '%-$')
+      if not i then
+        return seq
       end
     end
-    self:ignoreSpace();
-  end
+    local rest = ssub(line, j+1)
 
-  while self:peekType("id") do
-    local id = self:advanceValue()
-    self:expect(":","expected semi-colon after id")
-    self:ignoreSpace()
-    hash[id] = self:parse()
-    self:ignoreSpace();
+    if sfind(rest, '^[^\'\"%s]*:') then
+      -- Inline nested hash
+      local indent2 = j
+      lines[1] = string.rep(' ', indent2)..rest
+      tinsert(seq, parsemap('', lines, indent2))
+    elseif sfind(rest, '^%-%s+') then
+      -- Inline nested seq
+      local indent2 = j
+      lines[1] = string.rep(' ', indent2)..rest
+      tinsert(seq, parseseq('', lines, indent2))
+    elseif isemptyline(rest) then
+      tremove(lines, 1)
+      if #lines == 0 then
+        tinsert(seq, null)
+        return seq
+      end
+      if sfind(lines[1], '^%s*%-') then
+        local nextline = lines[1]
+        local indent2 = countindent(nextline)
+        if indent2 == indent then
+          -- Null seqay entry
+          tinsert(seq, null)
+        else
+          tinsert(seq, parseseq('', lines, indent2))
+        end
+      else
+        -- - # comment
+        --   key: value
+        local nextline = lines[1]
+        local indent2 = countindent(nextline)
+        tinsert(seq, parsemap('', lines, indent2))
+      end
+    elseif rest then
+      -- Array entry with a value
+      tremove(lines, 1)
+      tinsert(seq, parsescalar(rest, lines))
+    end
   end
-
-  while indents > 0 do
-    self:expectDedent("expected dedent")
-    indents = indents - 1
-  end
-
-  return hash
+  return seq
 end
 
-Parser.parseInlineHash = function (self)
-  local id
-  local hash = {}
-  local i = 0
-
-  self:accept("{")
-  while not self:accept("}") do
-    self:ignoreSpace()
-    if i > 0 then
-      self:expect(",","expected comma")
+local function parseset(line, lines, indent)
+  if not isemptyline(line) then
+    error('not seq line: '..line)
+  end
+  local set = setmetatable({}, types.set)
+  while #lines > 0 do
+    -- Check for a new document
+    line = lines[1]
+    if startswith(line, '---') then
+      while #lines > 0 and not startswith(lines, '---') do
+        tremove(lines, 1)
+      end
+      return set
     end
 
-    self:ignoreWhitespace()
-    if self:peekType("id") then
-      id = self:advanceValue()
-      if id then
-        self:expect(":","expected semi-colon after id")
-        self:ignoreSpace()
-        hash[id] = self:parse()
-        self:ignoreWhitespace()
+    -- Check the indent level
+    local level = countindent(line)
+    if level < indent then
+      return set
+    elseif level > indent then
+      error("found bad indenting in line: ".. line)
+    end
+
+    local i, j = sfind(line, '%?%s+')
+    if not i then
+      i, j = sfind(line, '%?$')
+      if not i then
+        return set
       end
     end
+    local rest = ssub(line, j+1)
 
-    i = i + 1
+    if sfind(rest, '^[^\'\"%s]*:') then
+      -- Inline nested hash
+      local indent2 = j
+      lines[1] = string.rep(' ', indent2)..rest
+      set[parsemap('', lines, indent2)] = true
+    elseif sfind(rest, '^%s+$') then
+      tremove(lines, 1)
+      if #lines == 0 then
+        tinsert(set, null)
+        return set
+      end
+      if sfind(lines[1], '^%s*%?') then
+        local indent2 = countindent(lines[1])
+        if indent2 == indent then
+          -- Null array entry
+          set[null] = true
+        else
+          set[parseseq('', lines, indent2)] = true
+        end
+      end
+
+    elseif rest then
+      tremove(lines, 1)
+      set[parsescalar(rest, lines)] = true
+    else
+      error("failed to classify line: "..line)
+    end
   end
-  return hash
+  return set
 end
 
-Parser.parseList = function (self)
-  local list = {}
-  while self:accept("-") do
-    self:ignoreSpace()
-    list[#list + 1] = self:parse()
-
-    self:ignoreSpace()
+function parsemap(line, lines, indent)
+  if not isemptyline(line) then
+    error('not map line: '..line)
   end
-  return list
-end
-
-Parser.parseInlineList = function (self)
-  local list = {}
-  local i = 0
-  self:accept("[")
-  while not self:accept("]") do
-    self:ignoreSpace()
-    if i > 0 then
-      self:expect(",","expected comma")
+  local map = setmetatable({}, types.map)
+  while #lines > 0 do
+    -- Check for a new document
+    line = lines[1]
+    if startswith(line, '---') then
+      while #lines > 0 and not startswith(lines, '---') do
+        tremove(lines, 1)
+      end
+      return map
     end
 
-    self:ignoreSpace()
-    list[#list + 1] = self:parse()
-    self:ignoreSpace()
-    i = i + 1
+    -- Check the indent level
+    local level, _ = countindent(line)
+    if level < indent then
+      return map
+    elseif level > indent then
+      error("found bad indenting in line: ".. line)
+    end
+
+    -- Find the key
+    local key
+    local s, rest = parsestring(line)
+
+    -- Quoted keys
+    if s and startswith(rest, ':') then
+      local sc = parsescalar(s, {}, 0)
+      if sc and type(sc) ~= 'string' then
+        key = sc
+      else
+        key = s
+      end
+      line = ssub(rest, 2)
+    else
+      error("failed to classify line: "..line)
+    end
+
+    key = checkdupekey(map, key)
+    line = ltrim(line)
+
+    if ssub(line, 1, 1) == '!' then
+      -- ignore type
+      local rh = ltrim(ssub(line, 3))
+      local typename = smatch(rh, '^!?[^%s]+')
+      line = ltrim(ssub(rh, #typename+1))
+    end
+
+    if not isemptyline(line) then
+      tremove(lines, 1)
+      line = ltrim(line)
+      map[key] = parsescalar(line, lines, indent)
+    else
+      -- An indent
+      tremove(lines, 1)
+      if #lines == 0 then
+        map[key] = null
+        return map;
+      end
+      if sfind(lines[1], '^%s*%-') then
+        local indent2 = countindent(lines[1])
+        map[key] = parseseq('', lines, indent2)
+      elseif sfind(lines[1], '^%s*%?') then
+        local indent2 = countindent(lines[1])
+        map[key] = parseset('', lines, indent2)
+      else
+        local indent2 = countindent(lines[1])
+        if indent >= indent2 then
+          -- Null hash entry
+          map[key] = null
+        else
+          map[key] = parsemap('', lines, indent2)
+        end
+      end
+    end
+  end
+  return map
+end
+
+
+-- : (list<str>)->dict
+local function parsedocuments(lines)
+  lines = select(lines, function(s) return not isemptyline(s) end)
+
+  if sfind(lines[1], '^%%YAML') then tremove(lines, 1) end
+
+  local root = {}
+  local in_document = false
+  while #lines > 0 do
+    local line = lines[1]
+    -- Do we have a document header?
+    local docright;
+    if sfind(line, '^%-%-%-') then
+      -- Handle scalar documents
+      docright = ssub(line, 4)
+      tremove(lines, 1)
+      in_document = true
+    end
+    if docright then
+      if (not sfind(docright, '^%s+$') and
+          not sfind(docright, '^%s+#')) then
+        tinsert(root, parsescalar(docright, lines))
+      end
+    elseif #lines == 0 or startswith(line, '---') then
+      -- A naked document
+      tinsert(root, null)
+      while #lines > 0 and not sfind(lines[1], '---') do
+        tremove(lines, 1)
+      end
+      in_document = false
+    -- XXX The final '-+$' is to look for -- which ends up being an
+    -- error later.
+    elseif not in_document and #root > 0 then
+      -- only the first document can be explicit
+      error('parse error: '..line)
+    elseif sfind(line, '^%s*%-') then
+      -- An array at the root
+      tinsert(root, parseseq('', lines, 0))
+    elseif sfind(line, '^%s*[^%s]') then
+      -- A hash at the root
+      local level = countindent(line)
+      tinsert(root, parsemap('', lines, level))
+    else
+      -- Shouldn't get here.  @lines have whitespace-only lines
+      -- stripped, and previous match is a line with any
+      -- non-whitespace.  So this clause should only be reachable via
+      -- a perlbug where \s is not symmetric with \S
+
+      -- uncoverable statement
+      error('parse error: '..line)
+    end
+  end
+  if #root > 1 and Null.isnull(root[1]) then
+    tremove(root, 1)
+    return root
+  end
+  return root
+end
+
+--- Parse yaml string into table.
+local function parse(source)
+  local lines = {}
+  for line in string.gmatch(source .. '\n', '(.-)\r?\n') do
+    tinsert(lines, line)
   end
 
-  return list
+  local docs = parsedocuments(lines)
+  if #docs == 1 then
+    return docs[1]
+  end
+
+  return docs
 end
 
-Parser.parseTimestamp = function (self)
-  local capture = self:advance()[2]
-
-  return os.time{
-    year  = capture[1],
-    month = capture[2],
-    day   = capture[3],
-    hour  = capture[4] or 0,
-    min   = capture[5] or 0,
-    sec   = capture[6] or 0,
-    isdst = false,
-  } - os.time{year=1970, month=1, day=1, hour=8}
-end
-
-YAML.eval = function(str)
-  return Parser:new(YAML.tokenize(str)):parse()
-end
-
-YAML.dump = table_print
+YAML = {eval = parse}
