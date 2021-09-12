@@ -625,7 +625,13 @@ elseif F == "menuscenemanager" then
 	end)
 
 	Hooks:PostHook(MenuSceneManager, "set_character_gloves", "BeardLibSetGlovesGloveVars", function(self, glove_id, unit)
-		self:set_character_gloves_and_variation(glove_id, managers.blackmarket:get_glove_variation(), unit)
+		local glove_variation = managers.blackmarket:get_glove_variation(glove_id) or "default"
+		if self._henchmen_player_override then
+			local loadout = managers.blackmarket:henchman_loadout(self._henchmen_player_override)
+			glove_variation = loadout.glove_variation or "default"
+		end
+
+		self:set_character_gloves_and_variation(glove_id, glove_variation, unit)
 	end)
 
 	function MenuSceneManager:set_character_gloves_and_variation(glove_id, material_variation, unit)
