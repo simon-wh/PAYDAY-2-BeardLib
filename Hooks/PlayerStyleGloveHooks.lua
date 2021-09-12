@@ -624,6 +624,10 @@ elseif F == "menuscenemanager" then
 		end
 	end)
 
+	Hooks:PostHook(MenuSceneManager, "set_character_gloves", "BeardLibSetGlovesGloveVars", function(self, glove_id, unit)
+		self:set_character_gloves_and_variation(glove_id, managers.blackmarket:get_glove_variation(), unit)
+	end)
+
 	function MenuSceneManager:set_character_gloves_and_variation(glove_id, material_variation, unit)
 		unit = unit or self._character_unit
 
