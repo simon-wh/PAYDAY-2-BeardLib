@@ -235,7 +235,7 @@ function MusicManager:play(src, use_xaudio, custom_volume)
 				self._xa_source:set_volume(custom_volume)
 			end
 		else
-			BeardLib:log("XAduio was not found, cannot play music.")
+			BeardLib:log("XAudio was not found, cannot play music.")
 		end
 	elseif managers.menu_component._main_panel then
 		self._player = managers.menu_component._main_panel:video({
