@@ -16,24 +16,25 @@ function ElementExecuteCode:on_executed(instigator)
 
     local mod = BeardLib.current_level.mod
     local file = self._values.file
+
     if file then
         local path = Path:Combine(mod.ModPath, file)
         if FileIO:Exists(path) then
-            local ret = pcall(function()
+            local ran, ret = blt.vm.pcall(function()
                 local func = blt.vm.dofile(Path:Combine(mod.ModPath, file))
                 if func then
-                    if func(instigator) then
+                    if func(instigator) ~= false then
                         return true
                     end
+                    return false
                 else
-                    self:error("The file must return a function to execute!")
-                    return
+                    error("The file must return a function to execute!")
                 end
             end)
-            if ret then
+            if ran and ret then
                 ElementExecuteWithCode.super.on_executed(self, instigator)
-            else
-                self:error("An error has occurred while executing the element's code")
+            elseif not ran then
+                self:error("An error has occurred while executing the element's code: %s", tostring(ret))
             end
         else
             self:error("File doesn't exist")
