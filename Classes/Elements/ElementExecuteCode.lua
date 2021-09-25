@@ -32,7 +32,7 @@ function ElementExecuteCode:on_executed(instigator)
             local ran, ret = pcall(function()
                 local func = blt.vm.dofile(path)
                 if func then
-                    if func(instigator) ~= false then
+                    if func(instigator, mod) ~= false then
                         return true
                     end
                     return false
