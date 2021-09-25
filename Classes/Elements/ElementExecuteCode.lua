@@ -14,11 +14,11 @@ function ElementExecuteCode:on_executed(instigator)
         return
     end
 
-    local mod = BeardLib.current_level.mod
+    local mod = BeardLib.current_level._mod
     local file = self._values.file
     local use_path = self._values.use_path
 
-    if file then
+    if not string.is_nil_or_empty(file) then
         local path
         if use_path == "mod" then
             path = Path:Combine(mod.ModPath, file)
@@ -29,8 +29,8 @@ function ElementExecuteCode:on_executed(instigator)
         end
 
         if path and FileIO:Exists(path) then
-            local ran, ret = blt.vm.pcall(function()
-                local func = blt.vm.dofile(Path:Combine(mod.ModPath, file))
+            local ran, ret = pcall(function()
+                local func = blt.vm.dofile(path)
                 if func then
                     if func(instigator) ~= false then
                         return true
@@ -42,11 +42,9 @@ function ElementExecuteCode:on_executed(instigator)
             end)
             if ran and ret then
                 ElementExecuteWithCode.super.on_executed(self, instigator)
-            elseif not ran then
-                self:error("An error has occurred while executing the element's code: %s", tostring(ret))
             end
         else
-            self:error("File doesn't exist")
+            self:error("File '%s' doesn't exist", path)
         end
     else
         self:error("No file was defined")
@@ -54,8 +52,8 @@ function ElementExecuteCode:on_executed(instigator)
 end
 
 function ElementExecuteCode:error(s, ...)
-    local mod = BeardLib.current_level.mod
-    mod:LogErr('[ElementExecuteCode ID %s Name %s]', tostring(self._values.id), tostring(self._values.editor_name), ...)
+    local mod = BeardLib.current_level._mod
+    mod:LogErr('[ElementExecuteCode ID %s Name %s] ' .. s, tostring(self._id), tostring(self._editor_name), ...)
 end
 
 function ElementExecuteCode:save(data)
