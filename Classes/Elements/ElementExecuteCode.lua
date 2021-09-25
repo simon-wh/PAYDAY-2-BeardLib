@@ -16,10 +16,19 @@ function ElementExecuteCode:on_executed(instigator)
 
     local mod = BeardLib.current_level.mod
     local file = self._values.file
+    local use_path = self._values.use_path
 
     if file then
-        local path = Path:Combine(mod.ModPath, file)
-        if FileIO:Exists(path) then
+        local path
+        if use_path == "mod" then
+            path = Path:Combine(mod.ModPath, file)
+        elseif use_path == "level" then
+            path = Path:Combine(mod.ModPath, BeardLib.current_level._inner_dir, file)
+        elseif use_path == "full" then
+            path = file
+        end
+
+        if path and FileIO:Exists(path) then
             local ran, ret = blt.vm.pcall(function()
                 local func = blt.vm.dofile(Path:Combine(mod.ModPath, file))
                 if func then
