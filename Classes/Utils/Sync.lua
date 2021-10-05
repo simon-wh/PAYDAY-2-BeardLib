@@ -29,7 +29,7 @@ function Sync:DownloadMap(level_name, job_id, udata, done_callback)
 			title = managers.localization:text("custom_map_alert"),
 			message = managers.localization:text("custom_map_needs_download", {url = download_url}),
 			no = "No",
-			no_callback = SimpleClbk(done_callback, false),
+			no_callback = SimpleClbk(done_callback, false, true),
 			items = {
 				{"Yes", function(dialog)
 					local map = DownloadCustomMap:new()
