@@ -1,74 +1,75 @@
---Why so many parameters aaa
-Hooks:PreHook(ClientNetworkSession, "on_join_request_reply", "BeardLib_on_join_request_reply_fix_levels", function(self, r, pid, char, lix, dix, od, si, sc, uid, ms, jix, js, alt_js, int_js, xuid, at, s)
-    if r == 1 then
-        local cb = self._cb_find_game
+local FAILED_CONNECT = 0
 
-        self._cb_find_game = function(state, ...)
-            local function orig_cb(state, ...)
-                if cb then
-                    cb(state, ...)
-                else
-                    log("no cb")
+local orig_join_request_reply = ClientNetworkSession.on_join_request_reply
+--- This handles 1 of 3 places in which custom maps are downloaded from (via the ingame downloader)
+--- When the heist is a vanilla heist, it falls back to the original function without attempting to do anything
+--- When the map is already downloaded, this function only corrects the indices based on the IDs that are sent by the xuid parameter.
+function ClientNetworkSession:on_join_request_reply(
+    reply, my_peer_id, my_character, level_index,
+    difficulty_index, one_down, state_index, server_character, user_id,
+    mission, job_id_index, job_stage, alternative_job_stage,
+    interupt_job_stage_level_index, xuid, ...)
+
+    local params = table.pack(...)
+
+    local function orig(override_reply)
+        orig_join_request_reply(self, override_reply or reply, my_peer_id, my_character, level_index,
+        difficulty_index, one_down, state_index, server_character, user_id,
+        mission, job_id_index, job_stage, alternative_job_stage,
+        interupt_job_stage_level_index, xuid, unpack(params, 1, params.n))
+    end
+
+    if reply == 1 and string.find(xuid, "|") then
+        local split_data = string.split(xuid, "|")
+        local job_id, level_id, difficulty, level_name = unpack(split_data)
+
+        local function fix_clbk(success, cancelled)
+            if not success then
+                if not cancelled then
+                    QuickMenuPlus:new(managers.localization:text("mod_assets_error"), managers.localization:text("custom_map_failed"))
                 end
+                return orig(FAILED_CONNECT)
             end
-            if (state == "JOINED_LOBBY" or state == "JOINED_GAME") and string.find(xuid, "|") then
-                local split_data = string.split(xuid, "|")
-                local function continue_load(params, success)
-                    if not success then
-                        QuickMenuPlus:new(managers.localization:text("mod_assets_error"), managers.localization:text("custom_map_failed"))
-                        orig_cb("CANCELLED")
-                        return
-                    end
-                    if jix ~= 0 then
-                        managers.job:activate_job(split_data[1], js)
-                        if alt_js ~= 0 then
-                            managers.job:synced_alternative_stage(alt_js)
-                        end
-                        if int_js ~= 0 then
-                            local interupt_level = tweak_data.levels:get_level_name_from_index(int_js)
-                            managers.job:synced_interupt_stage(interupt_level)
-                        end
-                        Global.game_settings.world_setting = managers.job:current_world_setting()
-                        self._server_peer:verify_job(job_id)
-                    end
-                    orig_cb(state, unpack(params))
-                    Global.game_settings.level_id = split_data[2]
-                    Global.game_settings.difficulty = split_data[3]
-                    self._ignore_load = nil
-                    if self._ignored_load then
-                        self:ok_to_load_level(unpack(self._ignored_load))
-                    end
-                end
-                local level_name = split_data[4]
-                local job_id = split_data[1]
-                if tweak_data.narrative.jobs[job_id] then
-                    continue_load({...}, true)
-                else
-                    local update_data = BeardLib.Utils.Sync:GetUpdateData(split_data)
-                    if level_name and update_data then
-                        self._ignore_load = true
-                        BeardLib.Utils.Sync:DownloadMap(level_name, job_id, update_data, SimpleClbk(continue_load, {...}))
-                    elseif not level_name then
-                        QuickMenuPlus:new(managers.localization:text("mod_assets_error"), managers.localization:text("custom_map_host_old_version"))
-                        orig_cb("CANCELLED")
-                        return
-                    else
-                        QuickMenuPlus:new(managers.localization:text("mod_assets_error"), managers.localization:text("custom_map_missing_updater"))
-                        orig_cb("CANCELLED")
-                        return
-                    end
-                end
-			else
-				orig_cb(state, ...)
+
+            job_id_index = tweak_data.narrative:get_index_from_job_id(job_id)
+            level_index = tweak_data.levels:get_index_from_level_id(level_id)
+            difficulty_index = tweak_data:difficulty_to_index(difficulty)
+            if self._ignored_load then
+                orig()
+                self:ok_to_load_level(unpack(self._ignored_load, 1, self._ignored_load.n))
+            end
+        end
+        local job = tweak_data.narrative.jobs[job_id]
+        if job then
+            if job.custom then --Run this only with custom maps
+                fix_clbk(true)
+            end
+        else
+            local update_data = BeardLib.Utils.Sync:GetUpdateData(split_data)
+            if level_name and update_data then
+                self._ignore_load = true
+                self._last_join_request_t = nil -- Avoid time out
+                BeardLib.Utils.Sync:DownloadMap(level_name, job_id, update_data, fix_clbk)
+                return
+            elseif not level_name then
+                QuickMenuPlus:new(managers.localization:text("mod_assets_error"), managers.localization:text("custom_map_host_old_version"))
+                return orig(FAILED_CONNECT)
+            else
+                QuickMenuPlus:new(managers.localization:text("mod_assets_error"), managers.localization:text("custom_map_missing_updater"))
+                return orig(FAILED_CONNECT)
             end
         end
     end
-end)
+    return orig()
+end
 
 local orig_load_level = ClientNetworkSession.ok_to_load_level
+--- When downloading, we need to actually avoid loading the level as it's called from somewhere else
+--- After we finish downloading we call fix_clbk and there we call this function again and pass unpacked self._ignored_load
+--- to it and thsi way be able to load the custom hesit that has been just downloaded. 
 function ClientNetworkSession:ok_to_load_level(...)
     if self._ignore_load then
-        self._ignored_load = {...}
+        self._ignored_load = table.pack(...)
         self._ignore_load = nil
     else
         self._ignored_load = nil
