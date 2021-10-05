@@ -246,14 +246,14 @@ function FileBrowserDialog:FileDoubleClick(item, key)
             local path = self._current_dir and Path:Combine(self._current_dir, self._file_name:Value()) or self._file_name:Value()
             if FileIO:Exists(path) then
                 if self._save then
-                    QuickDialog({force = true, dialog = BLE.Dialog, title = "Alert", message = "File already exists, replace the file?", no = "No"}, {{"Yes", SimpleClbk(self._file_click, path)}})
+                    QuickDialog({force = true, title = "Alert", message = "File already exists, replace the file?", no = "No"}, {{"Yes", SimpleClbk(self._file_click, path)}})
                 else
                     self._file_click(path)
                 end
             elseif self._save then
                 self._file_click(path)
             else
-                BLE.Dialog:Show({force = true, title = "Error", message = "File does not exist!"})
+                QuickDialog({force = true, title = "Error", message = "File does not exist!"})
             end
         end
     end
