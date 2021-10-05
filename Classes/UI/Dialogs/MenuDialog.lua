@@ -203,17 +203,19 @@ function QuickDialog(opt, items)
     items = items or opt.items
     dialog:Show(table.merge({no = managers.localization:text("beardlib_close"), yes = false, create_items = function(menu)
         for _, item in ipairs(items) do
-            if item[3] == true then
-                dialog._no_callback = item[2]
+            --close_mode: 
+            local name, clbk, is_no = unpack(item)
+            if is_no == true then
+                dialog._no_callback = clbk
             end
-            menu:Button({highlight = true, reachable = true, name =  type_name(item) == "table" and item[1] or item, on_callback = function()
-                if type(item[2]) == "function" then
-                    item[2]()
+            menu:Button({highlight = true, reachable = true, name = type_name(item) == "table" and name or item, on_callback = function()
+                if type(clbk) == "function" then
+                    clbk(dialog)
                 end
-                if item[3] ~= false then
+                if is_no == true then
                     dialog:hide(false)
                 end
-            end, type_name(item) == "table" and item[2]})
+            end, type_name(item) == "table" and clbk})
         end
     end}, opt))
 end
