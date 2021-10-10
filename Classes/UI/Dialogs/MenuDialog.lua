@@ -167,6 +167,7 @@ function MenuDialog:hide(yes, item)
     if menu.active_textbox then
         menu.active_textbox:set_active(false) 
     end
+    --TODO: allow for multiple no functions
     local clbk = (yes == true and self._callback) or (not yes and self._no_callback)
     if not self._no_clearing_menu then
         self._menu:ClearItems()
@@ -203,8 +204,8 @@ function QuickDialog(opt, items)
     items = items or opt.items
     dialog:Show(table.merge({no = managers.localization:text("beardlib_close"), yes = false, create_items = function(menu)
         for _, item in ipairs(items) do
-            --close_mode: 
-            local name, clbk, is_no = unpack(item)
+            local name, clbk, should_close, is_no = unpack(item)
+            should_close = NotNil(should_close, true)
             if is_no == true then
                 dialog._no_callback = clbk
             end
@@ -212,8 +213,8 @@ function QuickDialog(opt, items)
                 if type(clbk) == "function" then
                     clbk(dialog)
                 end
-                if is_no == true then
-                    dialog:hide(false)
+                if should_close then
+                    dialog:hide(not is_no)
                 end
             end, type_name(item) == "table" and clbk})
         end

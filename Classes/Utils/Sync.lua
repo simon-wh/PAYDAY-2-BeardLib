@@ -46,7 +46,6 @@ function Sync:DownloadMap(level_name, job_id, udata, done_callback)
 							done_callback(tweak_data.narrative.jobs[job_id] ~= nil)
 						end
 					end
-					dialog:hide(true)
 					map:DownloadAssets()
 				end},
 				string.len(download_url) > 0 and {"Visit Page", function()
