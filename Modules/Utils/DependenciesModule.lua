@@ -10,16 +10,34 @@ function DependenciesModule:Load(config)
             local type = dep.type and dep.type:lower() or "blt"
             if meta == "dependency" then
                 if type == "mod_overrides" or type == "map" then
-                    if not BeardLib.Utils:ModExists(dep.name) then
+                    local beardlib_check = BeardLib.Utils:ModExists(dep.name)
+                    if not beardlib_check then
                         missing_dep = true
 
                         self:CreateErrorDialog(dep)
+                    elseif dep.version and beardlib_check then
+                        local beardlib_mod = BeardLib.Utils:FindMod(dep.name)
+                        local mod_asset = beardlib_mod:GetModule(ModAssetsModule.type_name)
+
+                        self:CompareVersion(dep, mod_asset and mod_asset.version)
                     end
                 elseif type == "blt" then
-                    if not BeardLib.Utils:ModExists(dep.name) and not self:CheckBLTMod(dep.name) then
+                    local beardlib_check = BeardLib.Utils:ModExists(dep.name)
+                    local blt_check, blt_mod = self:CheckBLTMod(dep.name)
+
+                    if not beardlib_check and not blt_check then
                         missing_dep = true
 
                         self:CreateErrorDialog(dep)
+                    elseif dep.version then
+                        if beardlib_check then
+                            local beardlib_mod = BeardLib.Utils:FindMod(dep.name)
+                            local mod_asset = beardlib_mod:GetModule(ModAssetsModule.type_name)
+
+                            self:CompareVersion(dep, mod_asset and mod_asset.version)
+                        elseif blt_mod and blt_mod:GetVersion() then
+                            self:CompareVersion(dep, blt_mod:GetVersion())
+                        end
                     end
                 else
                     self:Err("Dependency for '%s' has an invalid type: '%s'", tostring(self._mod.mod), tostring(type))
@@ -40,8 +58,26 @@ end
 function DependenciesModule:CheckBLTMod(name)
     for _, v in ipairs(BLT.Mods.mods) do
         if v:GetName() == name then
-            return true
+            return true, v
         end
+    end
+end
+
+function DependenciesModule:CompareVersion(dep, mod)
+    --Round to get correct versions for 1.1 instead of 1.000001234
+    if tonumber(dep.version) then
+        dep.version = math.round_with_precision(dep.version, 4)
+    end
+
+    if tonumber(mod) then
+        mod = math.round_with_precision(mod, 4)
+    end
+
+    local dep_version = Version:new(dep.version)
+    local mod_version = Version:new(mod)
+
+    if mod_version._value ~= "nil" and dep_version > mod_version then
+        self._mod:ModError("The mod requires %s version %s or higher in order to run", tostring(dep.name), tostring(dep_version))
     end
 end
 
