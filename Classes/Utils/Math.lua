@@ -61,7 +61,7 @@ function Vector3:color()
 	return Color(self:unpack())
 end
 
---Color() now supports this aside the '#' tag.
+---Color() Just adds support for #
 function Color:from_hex(hex)
     if type_name(hex) == "Color" then
         return hex
@@ -69,17 +69,7 @@ function Color:from_hex(hex)
     if not hex or type(hex) ~= "string" then
         return Color()
     end
-    if hex:find("#") then
-        hex = hex:sub(2)
-    end
-    local col = {}
-    for i=1,8,2 do
-        local num = tonumber(hex:sub(i, i+1), 16)
-        if num then
-            table.insert(col, num / 255)
-        end
-    end
-    return Color(unpack(col))
+    return Color(hex:sub(2))
 end
 
 function Color:to_hex()
