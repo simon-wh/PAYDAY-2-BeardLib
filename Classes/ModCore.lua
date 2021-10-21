@@ -132,7 +132,7 @@ function ModCore:PreInitModules()
 	end
 end
 
-local load_first = {Hooks = true, Classes = true}
+local load_first = {Dependencies = true, Hooks = true, Classes = true}
 local updates = "AssetUpdates"
 
 function ModCore:InitModules()
