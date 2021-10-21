@@ -201,6 +201,7 @@
 		<class file="Deprecated.lua"/>
 
 		<classes directory="Utils">
+			<class file="Version.lua"/>
 			<class file="TweakDataHelper.lua"/>
 			<class file="CRC32.lua"/>
 			<class file="Table.lua"/>
