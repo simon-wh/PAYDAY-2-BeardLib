@@ -15,11 +15,11 @@ function DependenciesModule:Load(config)
                         missing_dep = true
 
                         self:CreateErrorDialog(dep)
-                    elseif dep.version and beardlib_check then
+                    elseif dep.min_ver and beardlib_check then
                         local beardlib_mod = BeardLib.Utils:FindMod(dep.name)
                         local mod_asset = beardlib_mod:GetModule(ModAssetsModule.type_name)
 
-                        self:CompareVersion(dep, mod_asset and mod_asset.version)
+                        self:CompareVersion(dep, mod_asset and mod_asset.min_ver)
                     end
                 elseif type == "blt" then
                     local beardlib_check = BeardLib.Utils:ModExists(dep.name)
@@ -29,12 +29,12 @@ function DependenciesModule:Load(config)
                         missing_dep = true
 
                         self:CreateErrorDialog(dep)
-                    elseif dep.version then
+                    elseif dep.min_ver then
                         if beardlib_check then
                             local beardlib_mod = BeardLib.Utils:FindMod(dep.name)
                             local mod_asset = beardlib_mod:GetModule(ModAssetsModule.type_name)
 
-                            self:CompareVersion(dep, mod_asset and mod_asset.version)
+                            self:CompareVersion(dep, mod_asset and mod_asset.min_ver)
                         elseif blt_mod and blt_mod:GetVersion() then
                             self:CompareVersion(dep, blt_mod:GetVersion())
                         end
