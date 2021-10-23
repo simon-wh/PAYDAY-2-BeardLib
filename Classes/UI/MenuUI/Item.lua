@@ -439,7 +439,6 @@ function Item:NoteBook(params) return self:NewItem(BeardLib.Items.NoteBook:new(s
 function Item:PopupMenu(params) return self:NewItem(BeardLib.Items.PopupMenu:new(self:ConfigureItem(params, true))) end
 function Item:Menu(params) return self:NewItem(BeardLib.Items.Menu:new(self:ConfigureItem(params, true))) end
 function Item:Holder(params) return self:NewItem(BeardLib.Items.Holder:new(self:ConfigureItem(params, true))) end
-function Item:ComboBox(params) return self:NewItem(BeardLib.Items.ComboBox:new(self:ConfigureItem(params))) end
 function Item:TextBox(params) return self:NewItem(BeardLib.Items.TextBox:new(self:ConfigureItem(params))) end
 function Item:ComboBox(params) return self:NewItem(BeardLib.Items.ComboBox:new(self:ConfigureItem(params))) end
 function Item:Slider(params) return self:NewItem(BeardLib.Items.Slider:new(self:ConfigureItem(params))) end
