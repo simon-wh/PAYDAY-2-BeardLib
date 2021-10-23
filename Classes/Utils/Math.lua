@@ -69,7 +69,10 @@ function Color:from_hex(hex)
     if not hex or type(hex) ~= "string" then
         return Color()
     end
-    return Color(hex:sub(2))
+    if hex:find("#") then
+        hex = hex:sub(2)
+    end
+    return Color(hex)
 end
 
 function Color:to_hex()
