@@ -282,7 +282,7 @@ function BeardLibFileManager:Update(t, dt)
 	end
 
 	for _, unload in pairs(self._files_to_unload) do
-		self:_LoadAsset(unload)
+		self:_UnloadAsset(unload)
 	end
 
 	self._files_to_load = {}
