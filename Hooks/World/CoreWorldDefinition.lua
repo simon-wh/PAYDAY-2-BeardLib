@@ -71,7 +71,9 @@ function WorldDefinition:unload_packages(...)
         end
     end
     if not BeardLib.current_level then
-        WorldDefinitionunload_packages(self, ...)
+        if self._continent_packages then
+            WorldDefinitionunload_packages(self, ...)
+        end
     end
 end
 
