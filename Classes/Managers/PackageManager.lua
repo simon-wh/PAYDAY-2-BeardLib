@@ -298,18 +298,21 @@ function BeardLibPackageManager:UnloadConfig(config)
         if type(child) == "table" then
             local typ = child._meta
             local path = child.path
-            if typ and path then
+            if typ == "unit_load" or typ == "add" then
+                self:UnloadConfig(child)
+            elseif typ and path then
                 path = Path:Normalize(path)
                 local ids_ext = Idstring(self.EXT_CONVERT[typ] or typ)
                 local ids_path = Idstring(path)
+                if path == "units/pd2_mod_craft/props/prop_cube_bedrock" then
+                    log("Hello??", tostring(typ),  tostring(path), tostring(DB:has(ids_ext, ids_path)))
+                end
                 if DB:has(ids_ext, ids_path) then
                     if child.unload ~= false then
                         Managers.File:UnloadAsset(ids_ext, ids_path)
                     end
                     Managers.File:RemoveFile(ids_ext, ids_path)
                 end
-            elseif typ == "unit_load" or typ == "add" then
-                self:UnloadConfig(child)
             else
                 self:Err("Some node does not contain a definition for both type and path")
             end
