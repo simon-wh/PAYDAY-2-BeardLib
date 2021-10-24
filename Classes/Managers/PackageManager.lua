@@ -244,7 +244,7 @@ function BeardLibPackageManager:LoadConfig(directory, config, mod, settings)
                             else
                                 Managers.File:AddFile(ids_ext, ids_path, file_path_ext)
                             end
-                            if child.reload then
+                            if reload then
                                 PackageManager:reload(ids_ext, ids_path)
                             end
                             if dyn_load or (dyn_load_game and ingame) or (dyn_load_menu and not inmenu) then
