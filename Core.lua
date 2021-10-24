@@ -253,7 +253,7 @@ function BeardLib:PausedUpdate(t, dt)
 end
 
 function BeardLib:DevLog(str, ...)
-	if false then
+	if false and self.log then
 		self:log(str, ...)
 	end
 end
