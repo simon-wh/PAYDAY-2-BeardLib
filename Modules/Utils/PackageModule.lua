@@ -1,3 +1,4 @@
+---@class PackageModule : ModuleBase
 PackageModule = PackageModule or BeardLib:ModuleClass("Package", ModuleBase)
 PackageModule._loose = true
 PackageModule.auto_load = false
@@ -15,6 +16,10 @@ function PackageModule:init(...)
     if not Managers.Package:RegisterPackage(self._config.id, directory, self._config) then
         self:Err("Package with key '%s' already exists!", self._config.name)
         return false
+    end
+
+    if self._config.unload_on_restart then
+        Managers.Package:AddUnloadOnRestart(self)
     end
 
     return true

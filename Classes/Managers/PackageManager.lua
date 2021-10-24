@@ -6,6 +6,7 @@ local Managers = BeardLib.Managers
 function BeardLibPackageManager:init()
     self.custom_packages = {}
     self.unload_on_restart = {}
+    self.unload_on_restart_packages = {}
 
      -- Deprecated, try not to use.
     CustomPackageManager = self
@@ -265,7 +266,7 @@ function BeardLibPackageManager:LoadConfig(directory, config, mod, settings)
         end
     end
 
-    if config.unload_on_restart or temp then
+    if temp and not skip_use_clbk then
         table.insert(self.unload_on_restart, config)
     end
 
@@ -318,8 +319,24 @@ end
 
 BeardLibPackageManager.UnloadPackageConfig = BeardLibPackageManager.UnloadConfig
 
+--- Registers a package to unload on restart
+---@param package PackageModule
+function BeardLibPackageManager:AddUnloadOnRestart(package)
+    table.insert(self.unload_on_restart_packages, package)
+end
+
+--- Unregisters a package that was supposed to unload on restart
+---@param package PackageModule
+function BeardLibPackageManager:RemoveUnloadOnRestart(package)
+    table.delete(self.unload_on_restart_packages, package)
+end
+
 function BeardLibPackageManager:Unload()
     for _, v in pairs(self.unload_on_restart) do
         self:UnloadConfig(v)
+    end
+
+    for _, package in pairs(self.unload_on_restart_packages) do
+        package:Unload()
     end
 end

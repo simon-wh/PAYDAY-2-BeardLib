@@ -1,3 +1,4 @@
+---@class ModuleBase
 ModuleBase = ModuleBase or class()
 ModuleBase.type_name = "ModuleBase"
 ModuleBase.required_params = {}
