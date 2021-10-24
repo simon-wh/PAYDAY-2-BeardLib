@@ -304,9 +304,6 @@ function BeardLibPackageManager:UnloadConfig(config)
                 path = Path:Normalize(path)
                 local ids_ext = Idstring(self.EXT_CONVERT[typ] or typ)
                 local ids_path = Idstring(path)
-                if path == "units/pd2_mod_craft/props/prop_cube_bedrock" then
-                    log("Hello??", tostring(typ),  tostring(path), tostring(DB:has(ids_ext, ids_path)))
-                end
                 if DB:has(ids_ext, ids_path) then
                     if child.unload ~= false then
                         Managers.File:UnloadAsset(ids_ext, ids_path)
