@@ -61,11 +61,11 @@ function WorldDefinition:unload_packages(...)
         if self._custom_loaded_packages then
             for _, package in pairs(self._custom_loaded_packages) do
                 --BeardLib:log("Unloaded package: "..package)
-                --Disabled for the time being. This will crash certain custom maps after reloading them.
+                --Disabled vanilla package unloading for the time being. This will crash certain custom maps after reloading them.
                 --The exact reason is unknown.
-                --[[if PackageManager:loaded(package) then
+                if PackageManager:loaded(package) and BeardLib.Managers.Package:HasPackage(package) then
                     PackageManager:unload(package)
-                end]]
+                end
             end
             self._custom_loaded_packages = {}
         end
