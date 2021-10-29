@@ -146,7 +146,7 @@ end
 function TextBoxBase:tonumber(text)
     text = text or 0
     if self.owner.floats then
-        return tonumber(string.format("%." .. self.owner.floats .. "f", text))
+        return tonumber(string.format("%." .. self.owner.floats .. "f", tonumber(text) or 0))
     else
         return tonumber(text)
     end
