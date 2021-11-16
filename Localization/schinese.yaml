@@ -6,7 +6,7 @@ custom_map_title: "自定义劫案: $map"
 custom_map_download_available: "下载可用"
 custom_map_alert: "自定义劫案警告"
 custom_map_needs_download: |
-    您需要下载该劫案才能继续, 是否要开始下载？
+    您需要下载 $name 劫案才能继续, 是否要开始下载？
     $url
 custom_map_host_old_version: "无法下载该自定义劫案，因为主机运行的是旧版本的 BeardLib！"
 custom_map_failed_download: "无法下载该自定义劫案"
