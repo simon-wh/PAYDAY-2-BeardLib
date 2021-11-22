@@ -514,7 +514,7 @@ elseif F == "networkpeer" then
     function NetworkPeer:tradable_verify_outfit(signature)
         local outfit = self:blackmarket_outfit()
 
-        if outfit.primary and outfit.primary.cosmetics then
+        if outfit.primary and outfit.primary.cosmetics and tweak_data.blackmarket.weapon_skins[outfit.primary.cosmetics.id] then
             if tweak_data.blackmarket.weapon_skins[outfit.primary.cosmetics.id].is_a_unlockable  then
                 return
             end
@@ -522,7 +522,7 @@ elseif F == "networkpeer" then
             return
         end
 
-        if outfit.secondary and outfit.secondary.cosmetics then
+        if outfit.secondary and outfit.secondary.cosmetics and tweak_data.blackmarket.weapon_skins[outfit.secondary.cosmetics.id] then
             if tweak_data.blackmarket.weapon_skins[outfit.secondary.cosmetics.id].is_a_unlockable  then
                 return
             end
