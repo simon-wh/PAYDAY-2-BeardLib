@@ -17,9 +17,10 @@ function DependenciesModule:Load(config)
                         self:CreateErrorDialog(dep)
                     elseif dep.min_ver and beardlib_check then
                         local beardlib_mod = BeardLib.Utils:FindMod(dep.name)
-                        local mod_asset = beardlib_mod:GetModule(ModAssetsModule.type_name)
+                        --With the loading change (#502), Modules are not loaded yet, so need to get the version from the config.
+                        local mod_asset = beardlib_mod._config[ModAssetsModule.type_name]
 
-                        self:CompareVersion(dep, mod_asset and mod_asset.min_ver)
+                        self:CompareVersion(dep, mod_asset and mod_asset.version)
                     end
                 elseif type == "blt" then
                     local beardlib_check = BeardLib.Utils:ModExists(dep.name)
@@ -32,9 +33,9 @@ function DependenciesModule:Load(config)
                     elseif dep.min_ver then
                         if beardlib_check then
                             local beardlib_mod = BeardLib.Utils:FindMod(dep.name)
-                            local mod_asset = beardlib_mod:GetModule(ModAssetsModule.type_name)
+                            local mod_asset = beardlib_mod._config[ModAssetsModule.type_name]
 
-                            self:CompareVersion(dep, mod_asset and mod_asset.min_ver)
+                            self:CompareVersion(dep, mod_asset and mod_asset.version)
                         elseif blt_mod and blt_mod:GetVersion() then
                             self:CompareVersion(dep, blt_mod:GetVersion())
                         end
@@ -65,18 +66,22 @@ end
 
 function DependenciesModule:CompareVersion(dep, mod)
     --Round to get correct versions for 1.1 instead of 1.000001234
-    if tonumber(dep.version) then
-        dep.version = math.round_with_precision(dep.version, 4)
+    if tonumber(dep.min_ver) then
+        dep.min_ver = math.round_with_precision(dep.min_ver, 4)
     end
 
     if tonumber(mod) then
         mod = math.round_with_precision(mod, 4)
     end
 
-    local dep_version = Version:new(dep.version)
+    local dep_version = Version:new(dep.min_ver)
     local mod_version = Version:new(mod)
 
     if mod_version._value ~= "nil" and dep_version > mod_version then
+        if dep.id and dep.provider then
+            self:AddDepDownload(dep)
+        end
+
         self._mod:ModError("The mod requires %s version %s or higher in order to run", tostring(dep.name), tostring(dep_version))
     end
 end
