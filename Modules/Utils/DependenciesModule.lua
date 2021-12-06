@@ -78,6 +78,10 @@ function DependenciesModule:CompareVersion(dep, mod)
     local mod_version = Version:new(mod)
 
     if mod_version._value ~= "nil" and dep_version > mod_version then
+        if dep.id and dep.provider then
+            self:AddDepDownload(dep)
+        end
+
         self._mod:ModError("The mod requires %s version %s or higher in order to run", tostring(dep.name), tostring(dep_version))
     end
 end
