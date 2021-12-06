@@ -77,6 +77,8 @@ function BeardLib:Init()
 		end
 	end
 
+	self:FullyLoadFrameworks()
+
 	self._classes_to_init = nil
 
 	Hooks:Call("BeardLibPostInit")
@@ -93,6 +95,14 @@ function BeardLib:LoadClasses(config, prev_dir)
 			self:LoadClasses(c, dir)
         end
     end
+end
+
+--- Fully loads the frameworks after they're initalized and know their own mods so they can interact with each other better
+--- Fixes #502
+function BeardLib:FullyLoadFrameworks()
+	for _, framework in pairs(self.Frameworks) do
+		framework:InitMods()
+	end
 end
 
 function BeardLib:LoadModules(dir)

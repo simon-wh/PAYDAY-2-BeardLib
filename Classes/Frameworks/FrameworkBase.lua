@@ -75,7 +75,6 @@ function FrameworkBase:Load()
 	Hooks:Call("BeardLibFrameworksLoad", self)
 	self:FindMods()
 	self:SortMods()
-	self:InitMods()
 end
 
 function FrameworkBase:FindMods()
