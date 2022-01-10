@@ -36,6 +36,7 @@ function BeardLib:Init()
 	self.config = self._config
 
 	FileIO:MakeDir(self._config.maps_dir)
+	FileIO:MakeDir(self._config.mod_override_dir)
 
 	self:LoadClasses()
 	self:LoadModules()
