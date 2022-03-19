@@ -720,7 +720,7 @@ function Item:GetItemValue(name, shallow)
 	if item then
 		return item:Value()
 	else
-		BeardLib:DevLog("[ERROR] GetItemValue didn't find item named %s")
+		BeardLib:DevLog("[ERROR] GetItemValue didn't find item named %s" , name)
 		return nil
 	end
 end
@@ -942,7 +942,7 @@ function Item:SetItemValue(name, ...)
 	if item then
 		item:SetValue(...)
 	else
-		BeardLib:DevLog("[ERROR] SetItemValue didn't find item named %s")
+		BeardLib:DevLog("[ERROR] SetItemValue didn't find item named %s", name)
 	end
 end
 
