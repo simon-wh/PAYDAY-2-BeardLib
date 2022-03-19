@@ -45,15 +45,16 @@ function KeyBindItem:GetPressedKeys()
     for device_name, device in pairs(input_devices) do
         local down_list = device:DownList()
         for _, key in pairs(down_list) do
-            table.insert(keys, key)
-            if not self.supports_additional then
-                return keys
-            elseif #keys == 4 then
-                break
+            if not table.contains(keys, key) then
+                table.insert(keys, key)
+                if not self.supports_additional then
+                    return keys
+                elseif #keys >= 4 then
+                    break
+                end
             end
         end
     end
-
     local special_keys = {ctrl = 3, shift = 2, alt = 1}
     table.sort(keys, function(a,b)
         local actual_a = string.split(a, " ")[2] or ""
@@ -64,7 +65,6 @@ function KeyBindItem:GetPressedKeys()
             return false
         end
     end)
-
     return keys
 end
 
