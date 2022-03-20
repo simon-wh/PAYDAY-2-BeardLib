@@ -54,6 +54,16 @@ function ImageButton:DoHighlight(highlight)
     end
 end
 
+---Sets a texture and texture rectangle for the item
+---@param texture string
+---@param texture_rect? table @Optional, {x, y, w, h}
 function ImageButton:SetImage(texture, texture_rect)
-    self.img:set_image(texture, texture_rect)
+    texture_rect = texture_rect or {}
+    self.img:set_image(texture, unpack(texture_rect))
+end
+
+---Sets the texture rectangle for the item.
+---@param texture_rect table @{x, y, w, h}
+function ImageButton:SetTextureRect(texture_rect)
+    self.img:set_texture_rect(unpack(texture_rect))
 end
