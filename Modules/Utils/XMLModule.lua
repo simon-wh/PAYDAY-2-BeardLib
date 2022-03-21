@@ -1,5 +1,6 @@
 XMLModule = XMLModule or BeardLib:ModuleClass("XML", ModuleBase)
 XMLModule.required_params = {"path"}
+XMLModule._loose = true
 
 local load_first = {Hooks = true, Classes = true}
 
