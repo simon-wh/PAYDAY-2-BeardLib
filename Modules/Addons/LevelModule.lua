@@ -234,8 +234,8 @@ function InstanceModule:RegisterHook()
 end
 
 function InstanceModule:Load()
-    if self._config.package then
-        for _, package in pairs(self._config.packages or self._config.custom_packages) do
+    if self._config.packages or self._config.custom_packages then
+        for _, package in ipairs(self._config.packages or self._config.custom_packages) do
             self:LoadPackage(package)
         end
     end

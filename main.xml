@@ -193,78 +193,82 @@
 		</Hooks>
 	</load_modules>
 	<classes>
-		<class file="Constants.lua"/>
-		<class file="ModCore.lua"/>
-		<class file="MixedSoundSource.lua"/>
-		<class file="ModuleBase.lua"/>
-		<class file="WeaponSkinExtension.lua"/>
-		<class file="Deprecated.lua"/>
-
-		<classes directory="Utils">
-			<class file="Version.lua"/>
-			<class file="TweakDataHelper.lua"/>
-			<class file="CRC32.lua"/>
-			<class file="Table.lua"/>
-			<class file="String.lua"/>
-			<class file="Math.lua"/>
-			<class file="Input.lua"/>
-			<class file="Hooks.lua"/>
-			<class file="MenuHelperPlus.lua"/>
-			<class file="JSON.lua"/>
-			<class file="YAML.lua"/>
-			<class file="XML.lua"/>
-			<class file="Builders.lua"/>
-			<class file="Sync.lua"/>
-		</classes>
-
-		<classes directory="Managers">
-			<class file="AchievementManager.lua"/>
-			<class file="MenuUIManager.lua"/>
-			<class file="MenuDialogManager.lua"/>
-			<class file="PackageManager.lua"/>
-			<class file="SoundManager.lua"/>
-			<class file="FileManager.lua"/>
-		</classes>
-
-		<classes directory="Frameworks">
-			<class file="FrameworkBase.lua"/>
-			<class file="MapFramework.lua"/>
-			<class file="AddFramework.lua"/>
-		</classes>
-
-		<classes directory="UI">
-			<class file="AchievementMenu.lua"/>
-			<class file="ModsMenu.lua"/>
-
-			<classes directory="Dialogs">
-				<class file="MenuDialog.lua"/>
-				<class file="FileBrowserDialog.lua"/>
-				<class file="ColorDialog.lua"/>
-				<class file="ListDialog.lua"/>
-				<class file="InputDialog.lua"/>
-				<class file="SelectListDialog.lua"/>
-				<class file="SimpleListDialog.lua"/>
-				<class file="DownloadDialog.lua"/>
-				<class file="SimpleSelectListDialog.lua"/>
+		<!-- Not really a class, but since BeardLib starts with CoreSystem, we want to hook into this a bit earlier, so modules can start using stuff -->
+		<class file="Hooks/CoreSystem.lua"/>
+		<classes directory="Classes">
+			<class file="Constants.lua"/>
+			<class file="ModCore.lua"/>
+			<class file="MixedSoundSource.lua"/>
+			<class file="ModuleBase.lua"/>
+			<class file="WeaponSkinExtension.lua"/>
+			<class file="Deprecated.lua"/>
+	
+			<classes directory="Utils">
+				<class file="Version.lua"/>
+				<class file="TweakDataHelper.lua"/>
+				<class file="CRC32.lua"/>
+				<class file="Table.lua"/>
+				<class file="String.lua"/>
+				<class file="Math.lua"/>
+				<class file="Input.lua"/>
+				<class file="Hooks.lua"/>
+				<class file="MenuHelperPlus.lua"/>
+				<class file="JSON.lua"/>
+				<class file="YAML.lua"/>
+				<class file="XML.lua"/>
+				<class file="Builders.lua"/>
+				<class file="Sync.lua"/>
 			</classes>
-			<classes directory="MenuUI">
-				<class file="MenuUI.lua"/>
-				<class file="TextBoxBase.lua"/>
-				<class file="ContextMenu.lua"/>
-				<class file="Item.lua"/>
-				<class file="Menu.lua"/>
-				<class file="Holder.lua"/>
-				<class file="MenuAlignMethods.lua"/>
-				<class file="KeyBind.lua"/>
-				<class file="Group.lua"/>
-				<class file="NoteBook.lua"/>
-				<class file="PopupMenu.lua"/>
-				<class file="ImageButton.lua"/>
-				<class file="Toggle.lua"/>
-				<class file="ComboBox.lua"/>
-				<class file="Slider.lua"/>
-				<class file="TextBox.lua"/>
-				<class file="ColorTextBox.lua"/>
+	
+			<classes directory="Managers">
+				<class file="AchievementManager.lua"/>
+				<class file="MenuUIManager.lua"/>
+				<class file="MenuDialogManager.lua"/>
+				<class file="PackageManager.lua"/>
+				<class file="SoundManager.lua"/>
+				<class file="FileManager.lua"/>
+			</classes>
+	
+			<classes directory="Frameworks">
+				<class file="FrameworkBase.lua"/>
+				<class file="MapFramework.lua"/>
+				<class file="AddFramework.lua"/>
+			</classes>
+	
+			<classes directory="UI">
+				<class file="AchievementMenu.lua"/>
+				<class file="ModsMenu.lua"/>
+	
+				<classes directory="Dialogs">
+					<class file="MenuDialog.lua"/>
+					<class file="FileBrowserDialog.lua"/>
+					<class file="ColorDialog.lua"/>
+					<class file="ListDialog.lua"/>
+					<class file="InputDialog.lua"/>
+					<class file="SelectListDialog.lua"/>
+					<class file="SimpleListDialog.lua"/>
+					<class file="DownloadDialog.lua"/>
+					<class file="SimpleSelectListDialog.lua"/>
+				</classes>
+				<classes directory="MenuUI">
+					<class file="MenuUI.lua"/>
+					<class file="TextBoxBase.lua"/>
+					<class file="ContextMenu.lua"/>
+					<class file="Item.lua"/>
+					<class file="Menu.lua"/>
+					<class file="Holder.lua"/>
+					<class file="MenuAlignMethods.lua"/>
+					<class file="KeyBind.lua"/>
+					<class file="Group.lua"/>
+					<class file="NoteBook.lua"/>
+					<class file="PopupMenu.lua"/>
+					<class file="ImageButton.lua"/>
+					<class file="Toggle.lua"/>
+					<class file="ComboBox.lua"/>
+					<class file="Slider.lua"/>
+					<class file="TextBox.lua"/>
+					<class file="ColorTextBox.lua"/>
+				</classes>
 			</classes>
 		</classes>
 	</classes>

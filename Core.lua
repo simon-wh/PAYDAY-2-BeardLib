@@ -87,11 +87,11 @@ end
 
 function BeardLib:LoadClasses(config, prev_dir)
 	config = config or self._config.classes
-	local dir = Path:Combine(prev_dir or self._config.classes_dir, config.directory)
+	local dir = Path:Combine(prev_dir or self.ModPath, config.directory)
     for _, c in ipairs(config) do
 		if c._meta == "class" then
 			self:DevLog("Loading class", tostring(p))
-			dofile(Path:Combine(dir, c.file))
+			dofile(dir and Path:Combine(dir, c.file) or file)
 		elseif c._meta == "classes" then
 			self:LoadClasses(c, dir)
         end
