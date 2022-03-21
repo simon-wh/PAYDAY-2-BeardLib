@@ -168,7 +168,7 @@ function BeardLibPackageManager:LoadConfig(directory, config, mod, settings)
             end
             if not use_clbk or use_clbk(path, typ) then
                 if typ == UNIT_LOAD or typ == ADD then
-                    self:LoadConfig(directory, child, mod, {skip_use_clbk = true, temp = temp})
+                    self:LoadConfig(child.directory and Path:Combine(directory, child.directory) or directory, child, mod, {skip_use_clbk = true, temp = temp})
                 elseif BeardLibPackageManager.UNIT_SHORTCUTS[typ] then
                     local ids_path = Idstring(path)
                     local file_path = child.full_path or Path:Combine(directory, child.file_path or path)
