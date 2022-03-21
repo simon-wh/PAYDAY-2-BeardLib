@@ -343,12 +343,7 @@ function BeardLibAchievementMenu:DisplayPackageHeader(package)
 		banner_panel:Panel():bitmap({
 			texture = banner,
 			w = banner_panel:Panel():w(),
-			h = banner_panel:Panel():h()
-		})
-		banner_panel:Panel():bitmap({
-			w = banner_panel:Panel():w(),
 			h = banner_panel:Panel():h(),
-			color = Color.black,
 			layer = 2
 		})
 	end
