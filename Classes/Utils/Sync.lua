@@ -245,7 +245,7 @@ function Sync:CleanOutfitString(str, is_henchman)
 			end
 		end
 
-        --list.grenade = self:GetSpoofedGrenade(list.grenade)
+        list.grenade = self:GetSpoofedGrenade(list.grenade)
     end
 
     local player_style = tweak_data.blackmarket.player_styles[list.player_style]
