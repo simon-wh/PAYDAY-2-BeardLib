@@ -209,6 +209,10 @@ function InstanceModule:init(...)
     self._world_path = Path:Combine(self.levels_folder, self._config.id, "world")
     BeardLib.Frameworks.Map._loaded_instances[self._world_path] = self --long ass line
 
+    return true
+end
+
+function InstanceModule:PostInit()
     --USED ONLY IN EDITOR!
     if Global.editor_loaded_instance then
         if Global.level_data and Global.level_data.level_id == self._levels_less_path then
@@ -216,13 +220,16 @@ function InstanceModule:init(...)
             self:Load()
         end
     end
-    return true
 end
 
 function InstanceModule:LoadPackage(package)
-    if PackageManager:package_exists(package) and not PackageManager:loaded(package) then
-        PackageManager:load(package)
-        table.insert(self._loaded_packages, package)
+    if PackageManager:package_exists(package) then
+        if not PackageManager:loaded(package) then
+            PackageManager:load(package)
+            table.insert(self._loaded_packages, package)
+        end
+    else
+        self:Warn("Attempted to load package %s, but it doesn't exist!", tostring(package))
     end
 end
 
