@@ -57,6 +57,7 @@ function BeardLibAchievementMenu:InitPanels(parent)
 	self._package_list = self._holder:GridMenu({
 		background_color = Color.black:with_alpha(0.75),
 		inherit_values = {offset = 3},
+		auto_align = false,
 		w = w * 1/3,
 		h = h * 4/5
 	})
@@ -91,6 +92,7 @@ function BeardLibAchievementMenu:InitPanels(parent)
 
 	local ach_w = self._achievement_panel:ItemsWidth(2)
 	self._achievement_list = self._achievement_panel:GridMenu({
+		auto_align = false,
 		w = ach_w * 3/5,
 		offset = 6,
 		h = self._achievement_panel:Panel():h(),
@@ -236,6 +238,8 @@ function BeardLibAchievementMenu:InitPackages()
 			w = 82
 		})
 	end
+
+	panel:AlignItems(true)
 end
 
 function BeardLibAchievementMenu:DisplayAchievementsFromPackage(package)
@@ -315,6 +319,8 @@ function BeardLibAchievementMenu:DisplayAchievementsFromPackage(package)
 			}, {font = "fonts/font_medium_mf", font_size = 16}, progress)
 		end
 	end
+
+	panel:AlignItems(true)
 
 	self:DisplayPackageHeader(package)
 end
