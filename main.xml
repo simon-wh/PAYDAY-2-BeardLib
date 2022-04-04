@@ -160,6 +160,8 @@
 
 			<hook source_file="lib/managers/musicmanager" file="MusicManager.lua"/>
 
+			<hook source_file="lib/managers/dialogmanager" file="DialogManager.lua"/>
+
 			<hooks directory="Network">
 				<hook source_file="lib/units/beings/player/huskplayermovement" file="NetworkHooks.lua"/>
 				<hook source_file="lib/units/beings/player/playerinventory" file="NetworkHooks.lua"/>

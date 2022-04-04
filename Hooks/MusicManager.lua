@@ -227,13 +227,12 @@ function MusicManager:play(src, use_xaudio, custom_volume)
 			else
 				self._last_module = nil
 			end
+			self._xa_volume = custom_volume or 1
 			self._xa_source = XAudio.Source:new(src)
 			self._xa_source:set_type("music")
 			self._xa_source:set_relative(true)
 			self._xa_source:set_looping(not self._switch_at_end)
-			if custom_volume then
-				self._xa_source:set_volume(custom_volume)
-			end
+			self._xa_source:set_volume(self._xa_volume)
 		else
 			BeardLib:log("XAudio was not found, cannot play music.")
 		end
