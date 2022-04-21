@@ -96,7 +96,7 @@ elseif F == "blackmarketmanager" then
     --Fixes sorting for custom melee.
     function BlackMarketManager:get_sorted_melee_weapons(hide_locked, id_list_only)
         local items = {}
-        local global_value, td, category = nil
+        local global_value, td, category
 
         for id, item in pairs(Global.blackmarket_manager.melee_weapons) do
             td = tweak_data.blackmarket.melee_weapons[id]
@@ -112,7 +112,7 @@ elseif F == "blackmarketmanager" then
             end
         end
 
-        local xd, yd, x_td, y_td, x_sn, y_sn, x_gv, y_gv = nil
+        local xd, yd, x_td, y_td, x_sn, y_sn, x_gv, y_gv
         local m_tweak_data = tweak_data.blackmarket.melee_weapons
         local l_tweak_data = tweak_data.lootdrop.global_values
 
@@ -669,7 +669,7 @@ elseif F == "blackmarketgui" then
         local crafted_category = managers.blackmarket:get_crafted_category(category) or {}
 
         for i, index in pairs(data.on_create_data) do
-            crafted = crafted_category[index]
+            local crafted = crafted_category[index]
 
             if crafted then
                 local equipped_cosmetic_id = crafted and crafted.cosmetics and crafted.cosmetics.id
@@ -708,7 +708,7 @@ elseif F == "menunodecustomizeweaponcolorgui" then
     -- Universal icon backwards compatibility.
     Hooks:PreHook(MenuCustomizeWeaponColorInitiator, "create_grid", "BeardLibUniversalIconGridFix", function(self, node, colors_data)
         for _, color_data in pairs(colors_data) do
-            color_tweak = tweak_data.blackmarket.weapon_skins[color_data.value]
+            local color_tweak = tweak_data.blackmarket.weapon_skins[color_data.value]
 
             if color_tweak and color_tweak.universal then
                 local guis_catalog = "guis/"

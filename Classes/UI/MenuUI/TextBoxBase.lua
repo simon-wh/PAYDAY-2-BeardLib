@@ -393,10 +393,6 @@ function TextBoxBase:update_caret()
 	self._scroll:force_scroll()
 end
 
-function TextBoxBase:alive()
-    return alive(self.panel) and alive(self.text)
-end
-
 function TextBoxBase:MousePressed(button, x, y)
     if not self:alive() then
         return false
