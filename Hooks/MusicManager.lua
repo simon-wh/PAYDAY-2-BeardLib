@@ -247,11 +247,34 @@ function MusicManager:play(src, use_xaudio, custom_volume)
 	end
 end
 
+function MusicManager:set_volume_multiplier(volume, fade)
+	fade = fade or 0
+	self._volume_mul = fade <= 0 and volume or self._volume_mul or 1
+	self._volume_mul_data = {
+		a = self._volume_mul,
+		b = volume,
+		fade = fade,
+		t = TimerManager:game():time()
+	}
+end
+
 function MusicManager:custom_update(t, dt, paused)
+	local volume_data = not paused and self._volume_mul_data
+	if volume_data then
+		local lerp_t = volume_data.fade > 0 and math.clamp((t - volume_data.t) / volume_data.fade, 0, 1) or 1
+		self._volume_mul = math.clamp(math.lerp(volume_data.a, volume_data.b, lerp_t), 0, 1)
+		if lerp_t >= 1 then
+			self._volume_mul_data = nil
+		end
+	end
+
 	local gui_ply = alive(self._player) and self._player or nil
 	if gui_ply then
-		gui_ply:set_volume_gain(Global.music_manager.volume)
+		gui_ply:set_volume_gain(Global.music_manager.volume * (self._volume_mul or 1))
+	elseif volume_data and self._xa_source then
+		self._xa_source:set_volume(self._xa_volume * (self._volume_mul or 1))
 	end
+
 	if paused then
 		--xaudio already pauses itself.
 		if gui_ply then
