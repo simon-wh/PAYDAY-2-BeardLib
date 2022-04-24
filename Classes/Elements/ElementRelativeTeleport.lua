@@ -8,7 +8,7 @@ function ElementRelativeTeleport:client_on_executed(...)
 	self:on_executed(...)
 end
 
-function ElementRelativeTeleport:on_executed(instigator)
+function ElementRelativeTeleport:on_executed(instigator, ...)
 	if not self._values.enabled then
 		return
 	end
