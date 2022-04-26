@@ -10,7 +10,6 @@ function TextBox:Init()
     end
 	self._textbox = BeardLib.Items.TextBoxBase:new(self, {
         panel = self.panel,
-		lines = self.lines,
 		fit_text = NotNil(self.fit_text, self.filter == "number"),
 		lines = self.filter == "number" and 1 or nil,
 		focus_mode = self.focus_mode,

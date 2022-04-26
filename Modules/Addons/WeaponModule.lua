@@ -292,7 +292,7 @@ function WeaponModule:ConvertOldToNew()
     self._config.damage_melee  = nil
     self._config.damage_melee_effect_mul = nil
     self._config.global_value = nil
-    self._config.merge_data,
+    self._config.merge_data = nil
     self._config.muzzleflash = nil
     self._config.shell_ejection = nil
     self._config.use_data = nil

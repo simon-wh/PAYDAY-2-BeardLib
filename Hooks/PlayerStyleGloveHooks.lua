@@ -150,7 +150,7 @@ elseif F == "glovestweakdata" then
 			end
 		end
 
-		local x_prio, y_prio = nil
+		local x_prio, y_prio
 		table.sort(variations, function (x, y)
 			if x == "default" then
 				return true
@@ -572,7 +572,7 @@ elseif F == "menuscenemanager" then
 			return
 		end
 
-		local glove_id, glove_variation = nil
+		local glove_id, glove_variation
 		if self._henchmen_player_override then
 			local loadout = managers.blackmarket:henchman_loadout(self._henchmen_player_override)
 			glove_id = loadout.glove_id 
@@ -784,7 +784,7 @@ elseif F == "blackmarketmanager" then
 
 	function BlackMarketManager:set_glove_variations(glove_variations, loading)
 		local equipped_glove_id = self:equipped_glove_id()
-		local equipped_variation, variation = nil
+		local equipped_variation, variation
 
 		for glove_id, data in pairs(Global.blackmarket_manager.gloves) do
 			variation = glove_variations[glove_id] or "default"
@@ -883,7 +883,7 @@ elseif F == "blackmarketmanager" then
 	end
 
 	function BlackMarketManager:_verify_dlc_items()
-		local achievement, glove_tweak, glove_variation_tweak, glove_variation_dlc = nil
+		local achievement, glove_tweak, glove_variation_tweak, glove_variation_dlc
 
 		for glove_id, glove_data in pairs(Global.blackmarket_manager.gloves or {}) do
 			glove_tweak = tweak_data.blackmarket.gloves[glove_id]
@@ -969,12 +969,6 @@ elseif F == "blackmarketgui" then
 						table.insert(new_data, "hnd_customize")
 					end
 
-					if allow_customize then
-						customize_alpha = 0.8
-					else
-						customize_alpha = 0.4
-					end
-
 					new_data.mini_icons = {}
 					table.insert(new_data.mini_icons, {
 						texture = "guis/dlcs/trd/textures/pd2/blackmarket/paintbrush_icon",
@@ -984,7 +978,7 @@ elseif F == "blackmarketgui" then
 						w = 16,
 						blend_mode = "add",
 						right = 5,
-						alpha = customize_alpha
+						alpha = allow_customize and 0.8 or 0.4
 					})
 
 					local glove_data = tweak_data.blackmarket.gloves[glove_id]
@@ -1005,6 +999,7 @@ elseif F == "blackmarketgui" then
 
 						if glove_variation_data then
 							
+							local texture_path
 							if glove_variation_data.force_icon then
 								texture_path = glove_variation_data.force_icon
 							else
@@ -1042,7 +1037,7 @@ elseif F == "blackmarketgui" then
 		local mannequin_glove_variation = managers.menu_scene and managers.menu_scene:get_glove_variation() or "default"
 		local equipped_glove_variation = data.glove_variation or managers.blackmarket:get_glove_variation(glove_id)
 
-		local new_data, allow_preview, guis_catalog, bundle_folder, texture_path, glove_variation, glove_variation_data = nil
+		local new_data, allow_preview, guis_catalog, bundle_folder, texture_path, glove_variation, glove_variation_data
 		local sort_data = managers.blackmarket:get_all_glove_variations(glove_id)
 
 		local max_items = self:calc_max_items(#sort_data, data.override_slots)
@@ -1269,7 +1264,7 @@ elseif F == "dlcmanager" then
 				local loot_drops = data.content and data.content.loot_drops or {}
 
 				for index, loot_drop in ipairs(loot_drops) do
-					check_loot_drop = #loot_drop == 0
+					local check_loot_drop = #loot_drop == 0
 
 					if check_loot_drop and loot_drop.type_items == "glove_variations" then
 						if not managers.blackmarket:glove_variation_unlocked(loot_drop.item_entry[1], loot_drop.item_entry[2]) then
