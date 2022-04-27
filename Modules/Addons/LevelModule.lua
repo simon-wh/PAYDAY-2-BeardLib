@@ -106,6 +106,18 @@ function LevelModule:Load()
     if self._config.hooks then
         HooksModule:new(self._mod, self._config.hooks)
     end
+
+    if self._config.classes then
+        ClassesModule:new(self._mod, self._config.classes)
+    end
+
+    if self._config.xml then
+        for _, xml in ipairs(self._config.xml) do
+            if xml.path then
+                XMLModule:new(self._mod, xml)
+            end
+        end
+    end
 end
 
 function LevelModule:AddLevelDataToTweak(l_self)
@@ -170,6 +182,16 @@ function LevelModule:RegisterHook()
         if self._config.interactions then
             local interactions = InteractionsModule:new(self._mod, self._config.interactions)
             interactions:RegisterHook()
+        end
+
+        if self._config.equipments then
+            local equipments = EquipmentsModule:new(self._mod, self._config.equipments)
+            equipments:RegisterHook()
+        end
+
+        if self._config.lootbags then
+            local lootbags = LootBagsModule:new(self._mod, self._config.lootbags)
+            lootbags:RegisterHook()
         end
 
         if self._config.assets then
@@ -238,6 +260,17 @@ function InstanceModule:RegisterHook()
         local interactions = InteractionsModule:new(self._mod, self._config.interactions)
         interactions:RegisterHook()
     end
+
+    if self._config.equipments then
+        local equipments = EquipmentsModule:new(self._mod, self._config.equipments)
+        equipments:RegisterHook()
+    end
+
+    if self._config.lootbags then
+        local lootbags = LootBagsModule:new(self._mod, self._config.lootbags)
+        lootbags:RegisterHook()
+    end
+    
 end
 
 function InstanceModule:Load()
