@@ -232,7 +232,7 @@ function MusicManager:play(src, use_xaudio, custom_volume)
 			self._xa_source:set_type("music")
 			self._xa_source:set_relative(true)
 			self._xa_source:set_looping(not self._switch_at_end)
-			self._xa_source:set_volume(self._xa_volume)
+			self._xa_source:set_volume(self._xa_volume * self._volume_mul)
 		else
 			BeardLib:log("XAudio was not found, cannot play music.")
 		end
@@ -243,36 +243,50 @@ function MusicManager:play(src, use_xaudio, custom_volume)
 			visible = false,
 			loop = not self._switch_at_end,
 		})
-		self._player:set_volume_gain(custom_volume or Global.music_manager.volume)
+		self._player_volume = custom_volume or 1
+		self._player:set_volume_gain(self._player_volume * Global.music_manager.volume * self._volume_mul)
 	end
 end
 
-function MusicManager:set_volume_multiplier(volume, fade)
-	fade = fade or 0
-	self._volume_mul = fade <= 0 and volume or self._volume_mul or 1
-	self._volume_mul_data = {
-		a = self._volume_mul,
+function MusicManager:volume_multiplier(id)
+	return self._volume_mul_data[id] and self._volume_mul_data[id].current or 1
+end
+
+function MusicManager:set_volume_multiplier(id, volume, fade)
+	local current = (not fade or fade <= 0) and volume or self._volume_mul_data[id] and self._volume_mul_data[id].current or 1
+	self._volume_mul_data[id] = {
+		current = current,
+		a = current,
 		b = volume,
-		fade = fade,
+		fade = fade or 0,
 		t = TimerManager:game():time()
 	}
 end
 
 function MusicManager:custom_update(t, dt, paused)
-	local volume_data = not paused and self._volume_mul_data
-	if volume_data then
-		local lerp_t = volume_data.fade > 0 and math.clamp((t - volume_data.t) / volume_data.fade, 0, 1) or 1
-		self._volume_mul = math.clamp(math.lerp(volume_data.a, volume_data.b, lerp_t), 0, 1)
-		if lerp_t >= 1 then
-			self._volume_mul_data = nil
+	if not paused then
+		self._volume_mul = 1
+		for id, volume_data in pairs(self._volume_mul_data) do
+			if not volume_data.done then
+				local lerp_t = volume_data.fade > 0 and math.clamp((t - volume_data.t) / volume_data.fade, 0, 1) or 1
+				volume_data.current = math.clamp(math.lerp(volume_data.a, volume_data.b, lerp_t), 0, 1)
+				if lerp_t >= 1 then
+					if volume_data.b == 1 then
+						self._volume_mul_data[id] = nil
+					else
+						volume_data.done = true
+					end
+				end
+			end
+			self._volume_mul = self._volume_mul * volume_data.current
 		end
 	end
 
 	local gui_ply = alive(self._player) and self._player or nil
 	if gui_ply then
-		gui_ply:set_volume_gain(Global.music_manager.volume * (self._volume_mul or 1))
-	elseif volume_data and self._xa_source then
-		self._xa_source:set_volume(self._xa_volume * (self._volume_mul or 1))
+		gui_ply:set_volume_gain(self._player_volume * Global.music_manager.volume * self._volume_mul)
+	elseif self._xa_source then
+		self._xa_source:set_volume(self._xa_volume * self._volume_mul)
 	end
 
 	if paused then
@@ -299,6 +313,12 @@ end
 
 --Hooks
 Hooks:PostHook(MusicManager, "init", "BeardLibMusicManagerInit", function(self)
+	self._volume_mul = 1
+	self._volume_mul_data = {}
+
+	self._player_volume = 1
+	self._xa_volume = 1
+
 	for id, music in pairs(BeardLib.MusicMods) do
 		if music.heist then
 			table.insert(tweak_data.music.track_list, {track = id})
@@ -333,7 +353,7 @@ end)
 Hooks:PostHook(MusicManager, "set_volume", "BeardLibMusicManagerSetVolume", function(self, volume)
 	--xaudio sets its own volume
 	if alive(self._player) then
-		self._player:set_volume_gain(volume)
+		self._player:set_volume_gain(self._player_volume * volume * self._volume_mul)
 	end
 end)
 
