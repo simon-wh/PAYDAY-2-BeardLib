@@ -209,14 +209,16 @@ function MusicManager:play(src, use_xaudio, custom_volume)
 	self:stop_custom()
 	Global.music_manager.source:post_event("stop_all_music")
 	
-	if type(src) == "table" and src.module and self._last_module and self._last_module ~= src.module then
-		self._last_module:UnloadBuffers()
-		self._last_module = nil
-	end
-	
 	if use_xaudio then
 		if XAudio then
+
+
 			if type(src) == "table" and src.module then
+				if self._last_module and self._last_module ~= src.module then
+					self._last_module:UnloadBuffers()
+					self._last_module = nil
+				end
+
 				if not src.buffer then
 					src.module:LoadBuffers()
 				end
