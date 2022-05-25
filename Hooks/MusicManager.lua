@@ -211,8 +211,6 @@ function MusicManager:play(src, use_xaudio, custom_volume)
 	
 	if use_xaudio then
 		if XAudio then
-
-
 			if type(src) == "table" and src.module then
 				if self._last_module and self._last_module ~= src.module then
 					self._last_module:UnloadBuffers()
