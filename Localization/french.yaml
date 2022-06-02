@@ -100,7 +100,7 @@ beardlib_show_errors_dialog_help: |
     Donc vous pouvez soit la mettre à jour ou la supprimer
     Note : Vous devriez faire ça avec le mode développeur
 beardlib_mod_develop_mode: "Develop Mode"
-beardlib_mod_developer_mode: "By activating develop mode for the mod, auto uppdates will be disabled and things such as auto generated addfiles will refresh each reload."
+beardlib_mod_develop_mode_help: "By activating develop mode for the mod, auto uppdates will be disabled and things such as auto generated addfiles will refresh each reload."
 beardlib_achieves_no_pkg: "Select a package on the left panel to show the achievements related to it."
 beardlib_log_init: "Log initialization of mods"
 beardlib_log_init_help: "Logs initialization of mods when they are initialized."
