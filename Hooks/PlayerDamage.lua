@@ -30,7 +30,7 @@ Hooks:PostHook(PlayerDamage, "pause_downed_timer", "BeardLibPlayerDamagePauseDow
 end)
 
 Hooks:PostHook(PlayerDamage, "unpause_downed_timer", "BeardLibPlayerDamageUnpauseDownedTimer", function (self)
-	if self._downed_paused_counter <= 0 then
+	if self._downed_timer and self._downed_paused_counter <= 0 then
 		managers.music:set_volume_multiplier("downed", 0, math.max(self._downed_timer - self:down_time() * 0.35, 0))
 	end
 end)
