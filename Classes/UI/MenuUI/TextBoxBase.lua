@@ -308,9 +308,11 @@ function TextBoxBase:set_active(active)
 
     if self.cantype then
         self.menu.active_textbox = self
+        TextBoxBase.active_textbox = self
     else
         if self.menu.active_textbox == self then
             self.menu.active_textbox = nil
+            TextBoxBase.active_textbox = nil
         end
         if text and cantype then
             self:CheckText(text)
@@ -478,4 +480,12 @@ end
 
 function TextBoxBase:alive()
     return alive(self.panel)
+end
+
+-- Stop BLT Keybinds from executing while we are typing in a BeardLib textbox
+local o_update = BLTKeybindsManager.update
+function BLTKeybindsManager:update(...)
+    if not alive(TextBoxBase.active_textbox) then
+        o_update(self, ...)
+    end
 end
