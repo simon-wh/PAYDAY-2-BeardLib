@@ -105,5 +105,9 @@ beardlib_achieves_no_pkg: "在左侧面板选择一个成就包以显示其相�
 beardlib_log_init: "模组日志初始化"
 beardlib_log_init_help: "当模组初始化时初始化模组的日志。"
 beardlib_custom_maps_only: "仅自定义劫案"
+beardlib_github_updates: "GitHub / Beta Updates"
+beardlib_github_updates_help": |
+ By enabling this, you will get updates from GitHub rather than modworkshop.
+ The GitHub version is in an experimental state and may have new features and bugs.
 bm_menu_glove_variations: "自定义手套"
 bm_menu_btn_customize_gloves: "自定义手套"
