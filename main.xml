@@ -9,7 +9,8 @@
 	image="guis/textures/beardlib_logo"
 	color="Color(0.8,0.8,0.8)"
 	auto_image_color="true"
-	mod_override_dir="assets/mod_overrides/">
+	mod_override_dir="assets/mod_overrides/"
+	version="4.7">
 	<load_modules>
 		<AddFiles directory="Assets">
 			<unit path="core/units/cubemap_gizmo/cubemap_gizmo" force_if_not_loaded="true"/>
