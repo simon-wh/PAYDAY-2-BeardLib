@@ -11,7 +11,7 @@
 	auto_image_color="true"
 	mod_override_dir="assets/mod_overrides/">
 	<load_modules>
-		<AssetUpdates id="14924" version="4.6" provider="modworkshop" important="true" version_is_number="true"/>
+		<AssetUpdates id="14924" version="4.7" provider="modworkshop" important="true" version_is_number="true"/>
 		<AddFiles directory="Assets">
 			<unit path="core/units/cubemap_gizmo/cubemap_gizmo" force_if_not_loaded="true"/>
 			<object path="core/units/cubemap_gizmo/cubemap_gizmo" force_if_not_loaded="true"/>
