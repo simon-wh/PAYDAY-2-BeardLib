@@ -12,7 +12,7 @@ function github:check_func()
     end
 
     -- If we cloned the mod ignore this procedure entirely. We are most likely developers/know how to use git.
-    if self._mod and FileIO:Exists(Path:CombineDir(self._mod.ModPath, ".git")) then
+    if self._mod and FileIO:Exists(self._mod.ModPath .. ".git/") then
         return
     end
 
