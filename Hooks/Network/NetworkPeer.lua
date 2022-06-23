@@ -50,7 +50,7 @@ Hooks:Add(peer_send_hook, "BeardLibCustomWeaponFix", function(self, func_name, p
         if func_name == "sync_outfit" then
             params[1] = SyncUtils:CleanOutfitString(params[1])
         elseif string.ends(func_name, "set_unit") then
-			params[3] = SyncUtils:CleanOutfitString(params[3], params[4] == 0)
+            params[3] = SyncUtils:CleanOutfitString(params[3], params[4] == 0)
         elseif func_name == "set_equipped_weapon" then
             if params[2] == -1 then
                 local index, data, selection_index = SyncUtils:GetCleanedWeaponData()
@@ -58,11 +58,11 @@ Hooks:Add(peer_send_hook, "BeardLibCustomWeaponFix", function(self, func_name, p
                 params[3] = data
                 self:beardlib_send_modded_weapon(selection_index)
             else
-				local factory_id = PlayerInventory._get_weapon_name_from_sync_index(params[2])
-				local blueprint = managers.weapon_factory:unpack_blueprint_from_string(factory_id, params[3])
-				local wep = tweak_data.weapon[managers.weapon_factory:get_weapon_id_by_factory_id(factory_id)]
+                local factory_id = PlayerInventory._get_weapon_name_from_sync_index(params[2])
+                local blueprint = managers.weapon_factory:unpack_blueprint_from_string(factory_id, params[3])
+                local wep = tweak_data.weapon[managers.weapon_factory:get_weapon_id_by_factory_id(factory_id)]
 
-				params[3] = managers.weapon_factory:blueprint_to_string(factory_id, SyncUtils:GetCleanedBlueprint(blueprint, factory_id))
+                params[3] = managers.weapon_factory:blueprint_to_string(factory_id, SyncUtils:GetCleanedBlueprint(blueprint, factory_id))
 
                 if wep then
                     self:beardlib_send_modded_weapon(wep.use_data.selection_index)
@@ -94,10 +94,10 @@ function NetworkPeer:beardlib_send_modded_weapon(selection_index)
 end
 
 function NetworkPeer:send(func_name, ...)
-	if not self._ip_verified then
-		return
-	end
-	local params = table.pack(...)
+    if not self._ip_verified then
+        return
+    end
+    local params = table.pack(...)
     Hooks:Call(peer_send_hook, self, func_name, params)
     NetworkPeerSend(self, func_name, unpack(params, 1, params.n))
 end
@@ -235,7 +235,7 @@ function NetworkPeer:set_equipped_weapon_beardlib(weapon_string, outfit_version,
         return
     end
 
-	local weapon = SyncUtils:UnpackBeardLibWeaponString(weapon_string)
+    local weapon = SyncUtils:UnpackBeardLibWeaponString(weapon_string)
     if weapon.id then
         local id = weapon.id.."_npc"
         local fac = tweak_data.weapon.factory
@@ -257,7 +257,7 @@ function NetworkPeer:set_equipped_weapon_beardlib(weapon_string, outfit_version,
                         for i, blueprint_part in pairs(blueprint) do
                             if blueprint_part == uses_part then
                                 ins = false
-							elseif (fac.parts[blueprint_part] and fac.parts[uses_part]) and fac.parts[blueprint_part].type == fac.parts[uses_part].type then
+                            elseif (fac.parts[blueprint_part] and fac.parts[uses_part]) and fac.parts[blueprint_part].type == fac.parts[uses_part].type then
                                 blueprint[i] = uses_part
                                 ins = false
                             end
@@ -277,17 +277,19 @@ function NetworkPeer:set_equipped_weapon_beardlib(weapon_string, outfit_version,
                 local i = self._id
                 local unit = scene._lobby_characters[self._id]
                 if alive(unit) then
-					local rank = self:rank()
+                    local local_peer = managers.network:session() and managers.network:session():local_peer()
+                    local rank = self == local_peer and managers.experience:current_rank() or self:rank()
+
                     if rank > 0 and math.random(1,5) == 1 then
-						scene:_delete_character_weapon(unit, "all")
+                        scene:_delete_character_weapon(unit, "all")
                         scene:set_character_card(i, rank, unit)
                     else
-						local guess_id = id:gsub("_npc", "")
+                        local guess_id = id:gsub("_npc", "")
                         if fac[guess_id] ~= nil then
-							scene:_delete_character_weapon(unit, "all")
-							scene:_select_lobby_character_pose(i, unit, {factory_id = id:gsub("_npc", "")})
-							scene:set_character_equipped_weapon(unit, guess_id, blueprint, "primary", weapon.cosmetics)
-						end
+                            scene:_delete_character_weapon(unit, "all")
+                            scene:_select_lobby_character_pose(i, unit, {factory_id = id:gsub("_npc", "")})
+                            scene:set_character_equipped_weapon(unit, guess_id, blueprint, "primary", weapon.cosmetics)
+                        end
                     end
                 end
             elseif alive(self._unit) then
@@ -411,24 +413,26 @@ function NetworkPeer:check_extra_outfit_string_sections()
 end
 
 function NetworkPeer:beardlib_reload_outfit()
-	local local_peer = managers.network:session() and managers.network:session():local_peer()
+    local local_peer = managers.network:session() and managers.network:session():local_peer()
     local in_lobby = local_peer and local_peer:in_lobby() and game_state_machine:current_state_name() ~= "ingame_lobby_menu" and not setup:is_unloading()
 
-	if managers.menu_scene and in_lobby then
-        managers.menu_scene:set_lobby_character_out_fit(self:id(), self._profile.outfit_string, self:rank())
+    if managers.menu_scene and in_lobby then
+        local rank = self == local_peer and managers.experience:current_rank() or self:rank()
+        managers.menu_scene:set_lobby_character_out_fit(self:id(), self._profile.outfit_string, rank)
+
         if self._last_beardlib_weapon_string ~= nil then
             self:set_equipped_weapon_beardlib(self._last_beardlib_weapon_string, SyncConsts.WeaponVersion)
         end
-	end
-
-	local kit_menu = managers.menu:get_menu("kit_menu")
-
-    if kit_menu then
-		kit_menu.renderer:set_slot_outfit(self:id(), self:character(), self._profile.outfit_string)
     end
 
-	if managers.menu_component then
-		managers.menu_component:peer_outfit_updated(self:id())
+    local kit_menu = managers.menu:get_menu("kit_menu")
+
+    if kit_menu then
+        kit_menu.renderer:set_slot_outfit(self:id(), self:character(), self._profile.outfit_string)
+    end
+
+    if managers.menu_component then
+        managers.menu_component:peer_outfit_updated(self:id())
     end
 end
 
