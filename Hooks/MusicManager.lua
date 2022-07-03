@@ -263,13 +263,16 @@ function MusicManager:set_volume_multiplier(id, volume, fade)
 	}
 end
 
+local math_clamp = math.clamp
+local math_lerp = math.lerp
+local math_min = math.min
 function MusicManager:custom_update(t, dt, paused)
 	if not paused then
 		self._volume_mul = 1
 		for id, volume_data in pairs(self._volume_mul_data) do
 			if not volume_data.done then
-				local lerp_t = volume_data.fade > 0 and math.clamp((t - volume_data.t) / volume_data.fade, 0, 1) or 1
-				volume_data.current = math.clamp(math.lerp(volume_data.a, volume_data.b, lerp_t), 0, 1)
+				local lerp_t = volume_data.fade > 0 and math_clamp((t - volume_data.t) / volume_data.fade, 0, 1) or 1
+				volume_data.current = math_clamp(math_lerp(volume_data.a, volume_data.b, lerp_t), 0, 1)
 				if lerp_t >= 1 then
 					if volume_data.b == 1 then
 						self._volume_mul_data[id] = nil
@@ -278,7 +281,7 @@ function MusicManager:custom_update(t, dt, paused)
 					end
 				end
 			end
-			self._volume_mul = self._volume_mul * volume_data.current
+			self._volume_mul = math_min(self._volume_mul, volume_data.current)
 		end
 	end
 
