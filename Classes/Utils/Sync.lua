@@ -276,8 +276,7 @@ function Sync:IsCurrentJobCustom()
 end
 
 function Sync:Send(peer, name, msg)
-    local data_string = LuaNetworking.AllPeersString:gsub("{1}", LuaNetworking.AllPeers):gsub("{2}", name):gsub("{3}", msg)
-    peer:send("send_chat_message", LuaNetworking.HiddenChannel, data_string)
+    LuaNetworking:SendToPeer(peer:id(), name, msg)
 end
 
 local STRING_TO_INDEX = {
