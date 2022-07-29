@@ -192,7 +192,7 @@ function MusicManager:attempt_play(track, event, stop)
 			end
 		end
 		local volume = next_track.volume or next.volume or next_music.volume
-		self._switch_at_end = (next_track.start_source or next.allow_switch) and {
+		self._switch_at_end = (next_track.start_source or next.allow_switch and #next.tracks > 1) and {
 			tracks = next.tracks,
 			track_index = next_track.start_source and track_index or self:pick_track_index(next.tracks),
 			allow_switch = next.allow_switch,
@@ -208,7 +208,7 @@ end
 function MusicManager:play(src, use_xaudio, custom_volume)
 	self:stop_custom()
 	Global.music_manager.source:post_event("stop_all_music")
-	
+
 	if use_xaudio then
 		if XAudio then
 			if type(src) == "table" and src.module then
@@ -303,7 +303,7 @@ function MusicManager:custom_update(t, dt, paused)
 			local switch = self._switch_at_end
 			local source = switch.tracks[switch.track_index].source
 			local volume = switch.tracks[switch.track_index].volume or switch.volume
-			if switch.allow_switch then
+			if switch.allow_switch and #switch.tracks > 1 then
 				switch.track_index = self:pick_track_index(switch.tracks)
 				switch.volume = volume
 			else
