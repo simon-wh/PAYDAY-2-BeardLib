@@ -4,7 +4,7 @@ ComboBox.type_name = "ComboBox"
 function ComboBox:Init()
     self.size_by_text = false
     self.items = self.items or {}
-    self.searchbox = false -- self.searchbox == nil and true or self.searchbox
+    self.searchbox = self.searchbox == nil and false or self.searchbox
     ComboBox.super.Init(self)
     local control_size = self.panel:w() * self.control_slice
     local combo_bg = self.panel:rect({

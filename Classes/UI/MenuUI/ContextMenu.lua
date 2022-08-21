@@ -6,6 +6,8 @@ function ContextMenu:init(owner, layer)
     self.menu = owner.menu
     local control_size = owner.bigger_context_menu and owner:Panel():w() or owner.panel:w() * owner.control_slice
     local bgcolor = self.owner.context_background_color or self.parent.background_color or Color.white
+    local font_size = self.owner.context_font_size or self.owner.font_size or self.owner.size
+    local offset_y = (self.owner.context_text_offset or self.owner.text_offset)[2]
     bgcolor = bgcolor:with_alpha(math.max(bgcolor.a, 0.75))
     self.panel = self.menu._panel:panel({
         name = owner.name.."list",
@@ -25,10 +27,14 @@ function ContextMenu:init(owner, layer)
     if owner.searchbox then
         self._textbox = BeardLib.Items.TextBoxBase:new(self, {
             foreground = bgcolor:contrast(),
+            line_color = owner.line_color or owner.highlight_color,
+            fit_text = owner.fit_text,
             panel = self.panel,
             align = "center",
+            text_vertical = "center",
             lines = 1,
-            size = owner.size,
+            size = font_size + offset_y,
+            font_size = font_size,
             update_text = ClassClbk(self, "update_search"),
         })
     end
@@ -134,6 +140,7 @@ function ContextMenu:CreateItems()
 end
 
 function ContextMenu:hide()
+    if self.owner.close_callback then self.owner:RunCallback(self.owner.close_callback) end   
     if self:alive() then
         self.panel:hide()
     end
@@ -145,8 +152,11 @@ end
 function ContextMenu:reposition()
 	local size = self.owner.context_font_size or self.owner.font_size or self.owner.size
 	local offset_y = self.owner.context_screen_offset_y or 32
+    local text_offset_y = (self.owner.context_text_offset or self.owner.text_offset)[2]
     local bottom_h = (self.menu._panel:world_bottom() - self.owner.panel:world_bottom()) - offset_y
 	local top_h = (self.owner.panel:world_y() - self.menu._panel:world_y()) - offset_y
+    local right_w = self.owner.panel:world_right()
+    local items_w = self._widest_boi + self._scroll._scroll_bar:w()
 	local items_h = (#self._my_items * size) + (self.owner.searchbox and self.owner.size or 0)
 
 	local normal_pos
@@ -164,8 +174,13 @@ function ContextMenu:reposition()
 		best_h = top_h
 	end
 
-	self.panel:set_size(self._widest_boi + self._scroll._scroll_bar:w(), best_h)
-	self.panel:set_world_right(self.owner.panel:world_right())
+	self.panel:set_size(items_w, best_h)
+
+    if right_w - items_w < 0 then
+        self.panel:set_world_left(self.owner.panel:world_left())
+    else
+        self.panel:set_world_right(right_w)
+    end
 
     if normal_pos then
         self.panel:set_world_y(self.owner.panel:world_bottom())
@@ -173,10 +188,18 @@ function ContextMenu:reposition()
         self.panel:set_world_bottom(self.owner.panel:world_y())
 	end
 
-    self._scroll:panel():set_y(self.owner.searchbox and self.owner.size or 0)
-    self._scroll:set_size(self.panel:w(), self.panel:h() - (self.owner.searchbox and self.owner.size or 0))
-
+    self._scroll:panel():set_y(self.owner.searchbox and size + text_offset_y or 0)
+    self._scroll:set_size(self.panel:w(), self.panel:h() - (self.owner.searchbox and size + text_offset_y or 0))
     self._scroll:update_canvas_size()
+
+    if self._textbox then
+        self._textbox._scroll:set_size(self.panel:w(), size + text_offset_y)
+        self._textbox._scroll:update_canvas_size()
+
+	    self._textbox.panel:set_w(self._scroll:panel():w())
+        self._textbox.text:set_x(4)
+	    self._textbox.text:set_w(self._textbox._scroll:canvas():w() - 8)
+    end
 end
 
 function ContextMenu:showing()
@@ -196,11 +219,12 @@ function ContextMenu:show()
 end
 
 function ContextMenu:MousePressed(button, x, y)
-    if self:textbox() then
-        if self:textbox():MousePressed(button, x, y) then
-            return true
-        end
+    if self.owner._textbox and self.owner._textbox:MousePressed(button, x, y) then
+        return true
+    elseif self._textbox and self._textbox:MousePressed(button, x, y) then
+        return true
     end
+
     if self.panel:inside(x,y) then
         if button == Idstring("mouse wheel down") or button == Idstring("mouse wheel up") then
             if self._scroll:scroll(x, y, button == Idstring("mouse wheel up") and 1 or -1) then
@@ -222,7 +246,9 @@ function ContextMenu:MousePressed(button, x, y)
                     else
                         if item.on_callback then self.owner:RunCallback(item.on_callback, item) end
                     end
-                    self:hide()
+                    if not self.owner.not_close then
+                        self:hide()
+                    end
                     return true
                 end
             end
@@ -244,8 +270,12 @@ function ContextMenu:KeyPressed(o, k)
 end
 
 function ContextMenu:textbox()
-	local t = self.owner._textbox or self._textbox
+	local t = self.owner.searchbox and self._textbox or self.owner._textbox
     return t and alive(t) and t or nil
+end
+
+function ContextMenu:GetForeground()
+    return self.owner:GetForeground()
 end
 
 function ContextMenu:Update(t, dt, force)
@@ -341,9 +371,13 @@ function ContextMenu:MouseMoved(x, y)
 end
 
 function ContextMenu:MouseReleased(button, x, y)
-    if self:textbox() then
-        self:textbox():MouseReleased(button, x, y)
+    if self.owner._textbox then
+        self.owner._textbox:MouseReleased(button, x, y)
     end
+    if self._textbox then
+        self._textbox:MouseReleased(button, x, y)
+    end
+
     self._scroll:mouse_released(button, x, y)
     self:CheckItems()
 end
