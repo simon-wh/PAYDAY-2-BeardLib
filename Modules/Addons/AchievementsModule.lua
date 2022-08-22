@@ -74,13 +74,7 @@ function AchievementsModule:RegisterHook()
                     end
 
                     i_self[icon_path] = {
-                        texture = icon_path,
-                        texture_rect = {
-                            0,
-                            0,
-                            128,
-                            128
-                        }
+                        texture = icon_path
                     }
                 end
             end
