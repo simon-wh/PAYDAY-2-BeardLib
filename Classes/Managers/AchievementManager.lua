@@ -186,13 +186,16 @@ CustomAchievementPackage = CustomAchievementPackage or class()
 function CustomAchievementPackage:init(package_id)
     tweak_data.achievement.custom_achievements_packages = tweak_data.achievement.custom_achievements_packages or {}
     local tweak = tweak_data.achievement.custom_achievements_packages[package_id]
+    if not tweak then
+      BeardLib:Err("[CustomAchievementPackage] Achievement package '%s' does not exist", package_id)
+    end
 
     self._package_id = package_id
-    self._achievements = tweak_data.achievement.custom_achievements[package_id]
-    self._name_id = tweak.name or package_id .. "_name"
-    self._desc_id = tweak.desc
-    self._icon = tweak.icon or "guis/textures/achievement_package_default"
-    self._banner = tweak.banner
+    self._achievements = tweak_data.achievement.custom_achievements[package_id] or {}
+    self._name_id = tweak and tweak.name or package_id .. "_name"
+    self._desc_id = tweak and tweak.desc
+    self._icon = tweak and tweak.icon or "guis/textures/achievement_package_default"
+    self._banner = tweak and tweak.banner
 end
 
 function CustomAchievementPackage:GetName()
