@@ -117,9 +117,16 @@ BeardLibPackageManager.UNIT_SHORTCUTS = {
 
 BeardLibPackageManager.TEXTURE_SHORTCUTS = {
     df_nm = {"_df", "_nm"},
+    df_op = {"_df", "_op"},
+    df_il = {"_df", "_il"},
+    df_nm_mask = {"_df", "_nm", "_mask"},
+    df_nm_il = {"_df", "_nm", "_il"},
+    df_nm_op = {"_df", "_nm", "_op"},
     df_nm_cc = {"_df", "_nm", "_df_cc"},
     df_nm_cc_gsma = {"_df", "_nm", "_df_cc", "_gsma"},
     df_nm_gsma = {"_df", "_nm", "_gsma"},
+    df_nm_gsma_op = {"_df", "_nm", "_gsma", "_op"},
+    df_nm_gsma_il = {"_df", "_nm", "_gsma", "_il"},
 }
 
 BeardLibPackageManager.EXT_CONVERT = {dds = "texture", png = "texture", tga = "texture", jpg = "texture", bik = "movie"}
