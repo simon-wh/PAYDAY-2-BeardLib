@@ -61,10 +61,20 @@ function BeardLib:Init()
 		end
 	end
 
-	self.Version = tonumber(self.AssetUpdates.version)
+	self.Version = tonumber(self.config.version)
 	self.DevMode = self.Options:GetValue("DevMode")
 	self.LogSounds = self.Options:GetValue("LogSounds")
 	self.OptimizedMusicLoad = BeardLib.Options:GetValue("OptimizedMusicLoad")
+
+	if self.Options:GetValue("GithubUpdates") then
+		local module = ModAssetsModule:new(self, {id = "simon-wh/PAYDAY-2-BeardLib", _meta = "AssetUpdates", important = true, provider = "github", branch = "master"})
+		self[module._name] = module
+		table.insert(self._modules, module)
+	else
+		local module = ModAssetsModule:new(self, {id = 14924, version = self.config.version, _meta = "AssetUpdates", important = true, provider = "modworkshop"})
+		self[module._name] = module
+		table.insert(self._modules, module)
+	end
 
 	self:MigrateModSettings()
 
