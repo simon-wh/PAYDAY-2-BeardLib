@@ -141,6 +141,11 @@ function BeardLibFileManager:AddFile(ext, path, file)
 end
 
 function BeardLibFileManager:LoadFileFromDB(ext, path)
+	if PackageManager:has(Idstring(ext), Idstring(path)) then
+		BeardLib:DevLog("Skipping DB load of already loaded file '%s.%s'", path, ext)
+		return
+	end
+
 	if self:Has(ext, path) then
 		return
 	end
