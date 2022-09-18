@@ -101,13 +101,17 @@ beardlib_show_errors_dialog_help: |
     Hinweis: Du solltest dies aktiviert lassen, wenn du den Entwickler Modus verwendest.
 beardlib_mod_develop_mode: "Develop Mode"
 beardlib_mod_develop_mode_help: "By activating develop mode for the mod, auto uppdates will be disabled and things such as auto generated addfiles will refresh each reload."
+beardlib_mod_optional_version: "Optional Version"
+beardlib_mod_optional_version_help: | 
+    Selecting a optional version will switch your auto updates to that version.
+    These are likely in an expermiental state and may contain new features and bugs.
 beardlib_achieves_no_pkg: "Select a package on the left panel to show the achievements related to it."
 beardlib_log_init: "Log initialization of mods"
 beardlib_log_init_help: "Logs initialization of mods when they are initialized."
 beardlib_custom_maps_only: "Custom Maps Only"
 beardlib_github_updates: "GitHub / Beta Updates"
 beardlib_github_updates_help: |
- By enabling this, you will get updates from GitHub rather than modworkshop.
- The GitHub version is in an experimental state and may have new features and bugs.
+    By enabling this, you will get updates from GitHub rather than modworkshop.
+    The GitHub version is in an experimental state and may have new features and bugs.
 bm_menu_glove_variations: "Customize Gloves"
 bm_menu_btn_customize_gloves: "Customize Gloves"
