@@ -1,0 +1,117 @@
+mod_assets_error: "에러!"
+menu_ok: 확인
+bm_global_value_mod: 모드
+menu_l_global_value_mod: "이 상품은 모딩 커뮤니티 아이템입니다!"
+custom_map_title: "커스텀 하이스트: $map"
+custom_map_download_available: "다운로드가 가능합니다."
+custom_map_alert: "커스텀 하이스트 경고"
+custom_map_needs_download: |
+  이 하이스트를 계속할려면 $name을(를) 다운로드 하셔야 합니다, 다운로드 하시겠습니까?
+  $url
+custom_map_host_old_version: "호스트가 이전 버전의 BeardLib을 실행하고 있어 커스텀 하이스트를 다운로드 할 수 없습니다!"
+custom_map_failed_download: "커스텀 하이스트를 다운로드하지 못했습니다."
+custom_map_missing_updater: "해당 맵에 업데이터가 없기 때문에 커스텀 하이스트 다운로드를 시작 할 수 없습니다!"
+heist_contact_custom: "커스텀 하이스트"
+heist_contact_custom_description: "커스텀 하이스트는 게임에 추가되는 완전히 새로운 하이스트이며 커뮤니티에서 만듭니다."
+custom_map_cant_download: "호스트가 설정한 하이스트를 다운로드할 수 없습니다. 연결이 끊겼습니다."
+custom_map_failed: "하이스트를 다운로드하는 동안 문제가 발생했습니다."
+beardlib_mods_manager: "BeardLib 모드 매니저"
+beardlib_updates_available: "BeardLib 모드 매니저: 업데이트가 가능한 항목이 있습니다!"
+beardlib_updates_available_desc: "BeardLib 모드 매니저에 들어가 업데이트하십시오."
+beardlib_visit_page: "페이지 방문."
+beardlib_update_all: "전부 업데이트 하기"
+beardlib_updated: "최신 버전입니다!"
+beardlib_waiting: "응답을 기다리는 중.."
+beardlib_download_complete: "다운로드 완료, 설치 중.."
+beardlib_download_failed: "다운로드가 실패했습니다."
+beardlib_no_change: "최신 버전이 설치되어있습니다!"
+beardlib_no_change_desc: "최신 버전의 업데이트가 이미 설치되어 있습니다!"
+beardlib_mod_type: "타입: %type"
+beardlib_mod_type_base: BLT
+beardlib_downloading: "다운로드중 "
+beardlib_done: "완료!"
+beardlib_close: 닫기
+beardlib_mods_manager_important_title: "$mod에 새 버전이 있습니다!"
+beardlib_mods_manager_important_help: "BeardLib 모드 매니저로 이동하여 업데이트 하시겠습니까?"
+beardlib_search: 찾기
+beardlib_important_notice: "업데이트 알림 표시"
+beardlib_match_case: "대소문자 구분"
+beardlib_limit_results: "제한 결과"
+beardlib_tick_all: "현재 모든 항목 선택"
+beardlib_untick_all: "현재 모든 항목 선택 취소"
+beardlib_settings: 설정
+beardlib_b_settings: "BeardLib 설정"
+beardlib_menu_color: "메뉴 색상"
+beardlib_show_images: "모드 이미지 표시"
+beardlib_reset_settings: "모든 설정을 재설정하기"
+beardlib_dev_mode: "개발자 모드"
+beardlib_dev_mode_help: |
+  개발자 모드는 오류 다이로그에 표시할 오류를 더 추가합니다 (파일 로드 실패 시처럼).
+  모든 유형의 BeardLib 모드를 개발할 때 쉽게 문제를 해결할 수 있도록 이 모드를 사용해야 합니다.
+  오류는 보통 BLT 로그에 기록됩니다.
+beardlib_important_notice_help: "중요 모드에 대한 업데이트가 있을 때 BeardLib가 알리겠습니까?"
+beardlib_write_failed: "경로를 쓸 수 없습니다. :/"
+beardlib_achieves_title: "커스텀 도전과제"
+beardlib_achieves_desc: "현재 설치된 커스텀 도전과제를 추적하고 확인합니다."
+beardlib_achieves_packages_installed: "패키지 $nbpackages 개가 설치되어있습니다."
+beardlib_achieves_completed_achievements: "$completed / $total 완료된 도전과제 ($percent%)"
+beardlib_achieves_unlocked: "달성된 날짜: $time"
+beardlib_achieves_header_objectives: 목표
+beardlib_achieves_header_rewards: 보상
+beardlib_achieves_header_unlocked: 달성됨
+beardlib_achieves_header_unlocked_date: "날짜: $time"
+beardlib_achieves_reward_exp: 경험치
+beardlib_achieves_reward_cash: "사용 가능한 현금"
+beardlib_achieves_reward_offshore: "해외계좌 현금"
+beardlib_achieves_reward_cc: "컨티넨탈 코인"
+beardlib_achieves_hidden: "숨겨진 도전과제"
+beardlib_achieves_hidden_desc: "해당 도전과제를 달성하면 자세한 내용을 볼 수 있습니다."
+beardlib_log_sounds: "사운드 ID 기록"
+beardlib_log_sounds_help: "들리는 각 사운드 ID를 기록합니다. 기존 소리를 바꾸고 싶은데 해당 소리 ID가 무엇인지 모를 때 유용합니다."
+beardlib_found_errors: "하나 이상의 BeardLib 모드에 오류가 발생했습니다."
+beardlib_errors_tip: |
+  당신의 모드에서 발생한 오류들을 제거하는 것은 당신의 몫입니다.
+  만약 모드 제작자가 아닌 경우 해당 오류를 모드 작성자에게 보고할 수 있습니다. 보고 하기 전에 모드들이 최신으로 업데이트 되어있는지 확인하십시오. 
+beardlib_optimized_music_load: "음악 로드 최적화"
+beardlib_optimized_music_load_help: |
+  커스텀 음악을 재생할 때만 로드하게 합니다. 커스텀 음악 전환 시 약간의 지연이 발생할 수 있습니다.
+  다만 32비트 램 제한에 도달해서 충돌이 발생하지 않게 조심하십시오.
+beardlib_errors_dialog: "오류 다이로그 표시"
+beardlib_update: Update
+beardlib_waiting_updates: "업데이트(들) 가능함 "
+beardlib_mod_enabled: 활성화
+beardlib_mod_enabled_help: |
+  모드 활성화 여부를 결정합니다.
+  모드가 비활성화 되어있으면 해당 모드의 코드가 실행되지 않습니다.
+  BLT 모드는 BeardLib에 의해 비활성화될 수 없습니다. 비활성화 할려면 BLT 자체를 통해 비활성화할 수 있습니다.
+beardlib_mod_ignore_updates: "업데이트 무시"
+beardlib_mod_ignore_updates_help: "BeardLib이 이 모드의 향후 업데이트를 무시합니까?"
+beardlib_mod_settings: "모드 설정 - $mod"
+beardlib_mod_by: "작성자 $author"
+beardlib_updates_download_now: 다운로드
+beardlib_mod_type_Add: 애드온
+beardlib_mod_type_Map: 맵
+beardlib_mod_type_Base: "기반"
+beardlib_mod_disabled: "비활성화"
+beardlib_waiting_update: "업데이트 가능함"
+beardlib_show_errors_dialog: "메인 메뉴로 들어갈 때 오류 다이로그 표시"
+beardlib_show_errors_dialog_help: |
+  로드하는 동안 모드가 심각한 오류(예: 오래된 BeardLib)에 발생하면 일반적으로 이를 알려줍니다.
+  따라서 모드를 업데이트하거나 제거할 수 있습니다.
+  참고: 개발자 모드를 사용할 때는 이 설정을 유지해야 합니다.
+beardlib_mod_develop_mode: "개발 모드"
+beardlib_mod_develop_mode_help: "해당 모드에 개발 모드를 활성화하면 자동 업데이트가 비활성화되고 자동 생성된 추가 파일과 같은 항목이 다시 로드될 때마다 새로 고쳐집니다."
+beardlib_mod_optional_version: "버전 선택"
+beardlib_mod_optional_version_help: | 
+  버전 선택을 선택하면 자동 업데이트가 해당 버전으로 전환됩니다.
+  이 기능들은 실험 상태일 가능성이 높으며 새로운 기능과 버그가 포함되어 있을 수 있습니다.
+beardlib_achieves_no_pkg: "왼쪽 패널에 있는 패키지를 선택하여 관련 도전과제를 표시합니다."
+beardlib_log_init: "모드 로그 초기화"
+beardlib_log_init_help: "해당 모드가 초기화 할 시 모드의 로그를 초기화 합니다."
+beardlib_custom_maps_only: "커스텀 맵만 표시"
+beardlib_github_updates: "깃헙 / 베타 업데이트"
+beardlib_github_updates_help: |
+  이를 활성화하면 모드워크샵이 아닌 깃헙에서 업데이트를 받을 수 있습니다.
+  깃헙 버전은 실험 상태이며 새로운 기능과 버그가 있을 수 있습니다.
+bm_menu_glove_variations: "커스터마이즈 장갑"
+bm_menu_btn_customize_gloves: "커스터마이즈 장갑"
