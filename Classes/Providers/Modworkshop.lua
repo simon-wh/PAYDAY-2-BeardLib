@@ -1,9 +1,9 @@
 ModAssetsModule._providers.modworkshop = {}
 local mws = ModAssetsModule._providers.modworkshop
-mws.check_url = "https://api.modwork.shop/api.php?command=CompareVersion&did=$id$&vid=$version$&token=Je3KeUETqqym6V8b5T7nFdudz74yWXgU"
-mws.get_files_url = "https://api.modwork.shop/api.php?command=AssocFiles&did=$id$&token=Je3KeUETqqym6V8b5T7nFdudz74yWXgU"
-mws.download_url = "https://api.modwork.shop/api.php?command=DownloadFile&fid=$fid$&token=Je3KeUETqqym6V8b5T7nFdudz74yWXgU"
-mws.page_url = "https://modwork.shop/$id$"
+mws.check_url = "https://api.modworkshop.net/api.php?command=CompareVersion&did=$id$&vid=$version$&token=Je3KeUETqqym6V8b5T7nFdudz74yWXgU"
+mws.get_files_url = "https://api.modworkshop.net/api.php?command=AssocFiles&did=$id$&token=Je3KeUETqqym6V8b5T7nFdudz74yWXgU"
+mws.download_url = "https://api.modworkshop.net/api.php?command=DownloadFile&fid=$fid$&token=Je3KeUETqqym6V8b5T7nFdudz74yWXgU"
+mws.page_url = "https://modworkshop.net/mod/$id$"
 function mws:check_func()
     local id = tonumber(self.id)
     if not id or id <= 0 then
