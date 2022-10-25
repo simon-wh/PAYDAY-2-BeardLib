@@ -1,59 +1,59 @@
-mod_assets_error: "ERROR!"
-menu_ok: OK
+mod_assets_error: "¡ERROR!"
+menu_ok: ACEPTAR
 bm_global_value_mod: MODS
-menu_l_global_value_mod: "Este es un objeto de la Comunidad!"
-custom_map_title: "Mapa Personalizado: $map"
+menu_l_global_value_mod: "¡Objeto de la Comunidad!"
+custom_map_title: "Mapa personalizado: $map"
 custom_map_download_available: "Descarga disponible"
-custom_map_alert: "Alerta de Mapa Personalizado"
+custom_map_alert: "Alerta de Mapa personalizado"
 custom_map_needs_download: |
-    Necesitas descargar este mapa antes de unirte, descargar ahora?
+    Necesitas descargar este mapa antes de poder unirte. ¿Quieres descargarlo ahora?
     $url
-custom_map_host_old_version: "La descarga no puede iniciar debido a que el anfitrion esta usando una version antigua de BeardLib!"
+custom_map_host_old_version: "¡No se puede iniciar la descarga porque el anfitrión esta usando una versión antigua de BeardLib!"
 custom_map_failed_download: "Descarga fallida"
-custom_map_missing_updater: "La descarga no se puede iniciar debido a que el mapa no posee informacion de descarga!"
-heist_contact_custom: "Mapa Personalizados"
-heist_contact_custom_description: "Los Mapas personalizados son atracos creados completamente por la Comunidad"
-custom_map_cant_download: "El Mapa del anfitrion no pudo ser descargado, desconectando..."
-custom_map_failed: "Algo salio mal al intentar descargar el mapa"
-beardlib_mods_manager: "Administrador de Modulos de BeardLib"
-beardlib_updates_available: "Administrador del Modulo de BeardLib: Actualizaciones disponibles!"
-beardlib_updates_available_desc: "Visita el Administrador de descargas de BeardLib para descargarlo"
-beardlib_visit_page: "Visitar pagina"
+custom_map_missing_updater: "¡No se puede iniciar la descarga porque el mapa no tiene un actualizador!"
+heist_contact_custom: "Mapas personalizados"
+heist_contact_custom_description: "Los 'Mapas personalizados' son atracos creados completamente por la Comunidad de PAYDAY 2"
+custom_map_cant_download: "El mapa del anfitrión no pudo ser descargado. Desconectando..."
+custom_map_failed: "Algo salió mal al intentar descargar el mapa."
+beardlib_mods_manager: "Administrador de Módulos de BeardLib"
+beardlib_updates_available: "Administrador de Módulos de BeardLib: ¡Actualizaciones disponibles!"
+beardlib_updates_available_desc: "Visita el 'Administrador de Módulos de BeardLib' para actualizar tus mods."
+beardlib_visit_page: "Visitar página"
 beardlib_update_all: "Actualizar todo"
-beardlib_updated: "Actualizado!"
-beardlib_waiting: "Esperando respuesta.."
-beardlib_download_complete: "Descarga completa, instalando.."
-beardlib_download_failed: "Algo fallo :("
-beardlib_no_change: "Ultima version instalada!"
-beardlib_no_change_desc: "Ya posees la ultima version de este mod!"
+beardlib_updated: "¡Actualizado!"
+beardlib_waiting: "Esperando respuesta..."
+beardlib_download_complete: "Descarga completa, instalando..."
+beardlib_download_failed: "Algo salió mal :("
+beardlib_no_change: "¡Última versión instalada!"
+beardlib_no_change_desc: "¡Ya tienes la última versión de este mod!"
 beardlib_mod_type: "Tipo: %type"
 beardlib_mod_type_base: BLT
-beardlib_downloading: "Descargando "
-beardlib_done: "Listo!"
+beardlib_downloading: "Descargando..."
+beardlib_done: "¡Listo!"
 beardlib_close: Cerrar
-beardlib_mods_manager_important_title: "$mod tiene una nueva version!"
-beardlib_mods_manager_important_help: "Desea ir al Administrador de descargas para actualizar?"
+beardlib_mods_manager_important_title: "¡'$mod' tiene una nueva versión!"
+beardlib_mods_manager_important_help: "¿Quieres ir al 'Administrador de Módulos de BeardLib' para actualizarlo?"
 beardlib_search: Buscar
-beardlib_important_notice: "Mostrar aviso de actualizacion"
-beardlib_match_case: "Coincidir mayusculas/minusculas"
+beardlib_important_notice: "Mostrar aviso de actualización"
+beardlib_match_case: "Coincidir mayúsculas/minúsculas"
 beardlib_limit_results: "Limitar resultados"
-beardlib_tick_all: "Marcar todos los objetos"
-beardlib_untick_all: "Desmarcar todos los objetos"
+beardlib_tick_all: "Marcar todo"
+beardlib_untick_all: "Desmarcar todo"
 beardlib_settings: Ajustes
-beardlib_b_settings: "Ajustes de Beardlib"
-beardlib_menu_color: "Color del menu"
-beardlib_show_images: "Mostrar imagenes de mods"
+beardlib_b_settings: "Ajustes de BeardLib"
+beardlib_menu_color: "Color del menú"
+beardlib_show_images: "Mostrar carátulas de mods"
 beardlib_reset_settings: "Restablecer ajustes"
-beardlib_dev_mode: "Modo de desarrollador"
+beardlib_dev_mode: "Modo desarrollador"
 beardlib_dev_mode_help: |
-    El modo Desarollador mostrar mas errores en la ventana de errores (EJ:Un archivo no se pudo cargar).
-    Deberias de usar este modo cuando estas desarollando cualquier tipo de BeardLib Mod asi puedes solucionar sus errores.
-    Normalmente, estos errores son cargados al BLT Log.
-beardlib_important_notice_help: "Deberia notificarte Beardlib cuando haya una actualizacion disponible para un mod importante?"
+    El 'Modo Desarrollador' muestra más errores en la ventana de errores (Por ejemplo: un archivo que no se pudo cargar).
+    Deberías activarlo si estás desarrollando cualquier tipo de mod BeardLib para así poder solucionar posibles errores.
+    Normalmente, estos errores son cargados al archivo de BLT Logs.
+beardlib_important_notice_help: "BeardLib te avisará cuando haya una nueva actualización para un mod importante."
 beardlib_write_failed: "No se pudo escribir en el directorio :/"
-beardlib_achieves_title: "Logros Personalizados"
-beardlib_achieves_desc: "Mira y sigue los logros personalizados actualmente instalados"
-beardlib_achieves_packages_installed: "$nbpackages Paquete instalado"
+beardlib_achieves_title: "Logros personalizados"
+beardlib_achieves_desc: "Comprueba los logros personalizados actualmente instalados."
+beardlib_achieves_packages_installed: "$nbpackages paquete/s instalado/s"
 beardlib_achieves_completed_achievements: "$completed / $total logros completados ( $percent % )"
 beardlib_achieves_unlocked: "Desbloqueados: $time"
 beardlib_achieves_header_objectives: Objectivos
@@ -61,57 +61,57 @@ beardlib_achieves_header_rewards: Recompensas
 beardlib_achieves_header_unlocked: Desbloqueados
 beardlib_achieves_header_unlocked_date: "Fecha: $time"
 beardlib_achieves_reward_exp: Experiencia
-beardlib_achieves_reward_cash: "Dinero Disponible"
-beardlib_achieves_reward_offshore: "Dinero en Paraiso Fiscal"
+beardlib_achieves_reward_cash: "Dinero en efectivo"
+beardlib_achieves_reward_offshore: "Dinero en el extranjero"
 beardlib_achieves_reward_cc: "Monedas del Continental"
-beardlib_achieves_hidden: "Hidden Achievement"
-beardlib_achieves_hidden_desc: "Details will be revealed once the achievement is unlocked."
-beardlib_log_sounds: "Documentacion de las IDs de Sonido"
-beardlib_log_sounds_help: "Documenta cada Sonido con su ID. Ayudara cuando quieras reemplazar sonidos ya existentes y no sepas sus ID's"
-beardlib_found_errors: "Uno o mas BeardLib Mods se han encontrado con un error"
+beardlib_achieves_hidden: "Logro oculto"
+beardlib_achieves_hidden_desc: "Los detalles de este logro serán visibles una vez que haya sido desbloqueado."
+beardlib_log_sounds: "Registrar las IDs de los sonidos"
+beardlib_log_sounds_help: "Registra cada sonido con su ID correspondiente. Esto puede ser útil cuando quieras reemplazar sonidos ya existentes y no sepas sus IDs."
+beardlib_found_errors: "Uno o más mods de BeardLib han tenido un error"
 beardlib_errors_tip: |
     Es tu deber lanzar mods libres de errores.
-    Si tu no eres un desarrollador de mods puedes reportar estos problemas al creador del mod. Claro, asegurate que todo este actualizado.
-beardlib_optimized_music_load: "Opmitizacion de carga de musica"
+    Si no eres desarrollador de mods, puedes reportar estos problemas a su respectivo creador. Antes, por supuesto, asegúrate de que todo esté actualizado.
+beardlib_optimized_music_load: "Carga de música optimizada"
 beardlib_optimized_music_load_help: |
-    Cargar musica personalizada solo cuando se esta jugando.
-    Podria causar un poco de lag al cambiar canciones pero dentro de todo deberia evitar la posibilidad de crashear al llegar al limite de 32bit de ram
-beardlib_errors_dialog: "Mostar ventana de errores"
+    Carga la música personalizada solo cuando se está jugando.
+    Puede causar un poco de lag al cambiar de canción. Sin embargo, esto debe suceder para evitar posibles crasheos por alcanzar el límite de 32 bits de la RAM.
+beardlib_errors_dialog: "Mostrar ventana de errores"
 beardlib_update: Actualizar
-beardlib_waiting_updates: "Actualizacion(es) Disponibles "
-beardlib_mod_enabled: Habilitado
+beardlib_waiting_updates: "Actualizaciones disponibles"
+beardlib_mod_enabled: Activado
 beardlib_mod_enabled_help: |
-    Determina si este mod debe ser habilitado.
-    Si este mod es desahabilitado no ejecutara ningun codigo.
-    Mod de BLT no pueden ser desahabilitados. Puedes desahabilitarlos a travez del propio BLT
-beardlib_mod_ignore_updates: "Ignorar Actualizaciones"
-beardlib_mod_ignore_updates_help: "¿Deberia BeardLib ignorar todas las posibles actualizaciones de este mod?"
-beardlib_mod_settings: "Ajustes del Mod - $mod"
-beardlib_mod_by: "Por $author"
+    Activar / desactivar este mod.
+    Si un mod está desactivado, no ejecutará ningún código.
+    BeardLib no puede desactivar mods BLT. Para eso, deberás hacerlo a través del propio BLT.
+beardlib_mod_ignore_updates: "Ignorar actualizaciones"
+beardlib_mod_ignore_updates_help: "BeardLib ignorará todas las actualizaciones nuevas de este mod."
+beardlib_mod_settings: "Ajustes de '$mod'"
+beardlib_mod_by: "Hecho por: $author"
 beardlib_updates_download_now: Descarga
-beardlib_mod_type_Add: Addon
+beardlib_mod_type_Add: Añadido
 beardlib_mod_type_Map: Mapa
 beardlib_mod_type_Base: "Base"
-beardlib_mod_disabled: "Disabled"
-beardlib_waiting_update: "Actualizacion Disponible"
-beardlib_show_errors_dialog: "Mostrar ventana de errores cuando se entra al menu principal"
+beardlib_mod_disabled: "Desactivado"
+beardlib_waiting_update: "Actualización disponible"
+beardlib_show_errors_dialog: "Mostrar ventana de errores en el menú principal"
 beardlib_show_errors_dialog_help: |
-    Si a un mod le sale un error critico (EJ: Version vieja de BeardLib) mientras carga, usualmente te informara de ello.
-    Puedes actualizar el mod o eliminarlo.
-    Nota: Deberias mantenener esta opcion habilitada mientras usas modo Desarollador.
-beardlib_mod_develop_mode: "Develop Mode"
-beardlib_mod_develop_mode_help: "By activating develop mode for the mod, auto uppdates will be disabled and things such as auto generated addfiles will refresh each reload."
-beardlib_mod_optional_version: "Optional Version"
+    Si un mod tiene un error crítico (Por ejemplo: por tener BeardLib desactualizado) mientras carga, generalmente se te informará al respecto.
+    De esta forma, puedes elegir actualizar el mod o eliminarlo.
+    Nota: Deberías mantenener esta opción activada mientras usas el 'Modo desarrollador'.
+beardlib_mod_develop_mode: "Modo de desarrollo"
+beardlib_mod_develop_mode_help: "Al activar el 'Modo de desarrollo' para este mod, se desactivarán las actualizaciones automáticas, y cosas como los archivos agregados generados automáticamente se actualizarán después de cada reinicio."
+beardlib_mod_optional_version: "Versión opcional"
 beardlib_mod_optional_version_help: | 
-    Selecting a optional version will switch your auto updates to that version.
-    These are likely in an expermiental state and may contain new features and bugs.
-beardlib_achieves_no_pkg: "Select a package on the left panel to show the achievements related to it."
-beardlib_log_init: "Log initialization of mods"
-beardlib_log_init_help: "Logs initialization of mods when they are initialized."
-beardlib_custom_maps_only: "Custom Maps Only"
-beardlib_github_updates: "GitHub / Beta Updates"
+    Elegir una versión opcional cambiará tus actualizaciones automáticas a esa versión en específico.
+    Es probable que éstas se encuentren en una fase experimental, por lo que pueden contener nuevas funciones y errores.
+beardlib_achieves_no_pkg: "Elige un paquete en el panel izquierdo para mostrar sus logros."
+beardlib_log_init: "Registro de inicialización de mods"
+beardlib_log_init_help: "Registra la inicialización de mods cuando son iniciados."
+beardlib_custom_maps_only: "Solo partidas en Mapas personalizados"
+beardlib_github_updates: "GitHub / Actualizaciones beta"
 beardlib_github_updates_help: |
-    By enabling this, you will get updates from GitHub rather than modworkshop.
-    The GitHub version is in an experimental state and may have new features and bugs.
-bm_menu_glove_variations: "Customize Gloves"
-bm_menu_btn_customize_gloves: "Customize Gloves"
+    Al activar esto, recibirás actualizaciones directamente desde GitHub en lugar de Modworkshop.
+    Las versiones de GitHub están en una fase experimental, por lo que pueden contener nuevas funciones y errores..
+bm_menu_glove_variations: "Personalizar guantes"
+bm_menu_btn_customize_gloves: "Personalizar guantes"
