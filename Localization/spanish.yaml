@@ -88,8 +88,8 @@ beardlib_mod_ignore_updates: "Ignorar actualizaciones"
 beardlib_mod_ignore_updates_help: "BeardLib ignorará todas las actualizaciones nuevas de este mod."
 beardlib_mod_settings: "Ajustes de '$mod'"
 beardlib_mod_by: "Hecho por: $author"
-beardlib_updates_download_now: Descarga
-beardlib_mod_type_Add: Añadido
+beardlib_updates_download_now: Descargar
+beardlib_mod_type_Add: Add-on
 beardlib_mod_type_Map: Mapa
 beardlib_mod_type_Base: "Base"
 beardlib_mod_disabled: "Desactivado"
