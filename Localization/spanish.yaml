@@ -112,6 +112,6 @@ beardlib_custom_maps_only: "Solo partidas en Mapas personalizados"
 beardlib_github_updates: "GitHub / Actualizaciones beta"
 beardlib_github_updates_help: |
     Al activar esto, recibirás actualizaciones directamente desde GitHub en lugar de Modworkshop.
-    Las versiones de GitHub están en una fase experimental, por lo que pueden contener nuevas funciones y errores..
+    Las versiones de GitHub están en una fase experimental, por lo que pueden contener nuevas funciones y errores.
 bm_menu_glove_variations: "Personalizar guantes"
 bm_menu_btn_customize_gloves: "Personalizar guantes"
