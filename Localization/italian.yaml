@@ -10,7 +10,7 @@ custom_map_needs_download: |
     $url
 custom_map_host_old_version: "Impossibile iniziare il download del colpo perché l'host sta utilizzando una versione datata di BeardLib!"
 custom_map_failed_download: "Download del colpo personalizzato fallito"
-custom_map_missing_updater: "Impossibile iniziare il downlaod del colpo personalizzato poiché la mappa non ha un ID per l'aggiornamento!"
+custom_map_missing_updater: "Impossibile iniziare il download del colpo personalizzato poiché la mappa non ha un ID per l'aggiornamento!"
 heist_contact_custom: "Colpi personalizzati"
 heist_contact_custom_description: "I colpi personalizzati sono delle aggiunte al gioco totalmente nuove e sono creati dalla comunità"
 custom_map_cant_download: "Il colpo che ha impostato l'host non può essere scaricato, sarai disconnesso."
@@ -46,10 +46,10 @@ beardlib_show_images: "Mostra immagini delle mod"
 beardlib_reset_settings: "Resetta impostazioni"
 beardlib_dev_mode: "Modalità sviluppatore"
 beardlib_dev_mode_help: |
-    Developer mode adds more errors to show in the errors dialog (Like if a file failed to load).
-    You should use this mode when developing any type of BeardLib mod so you can resolve the issues.
-    Normally, this is logged into the BLT log.
-beardlib_important_notice_help: "BeardLib deve informarti se è presente un'aggiornamento importante per una mod?"
+    La modalità sviluppatore mostra più errori nei dialoghi di errore (come quando un file non viene caricato correttamente).
+    Dovresti usare questa modalità quando sviluppi un qualsiasi tipo di mod di BeardLib così da risolvere più facilmente i problemi.
+    Normalmente gli errori vengono salvati nel log di BLT.
+beardlib_important_notice_help: "Vuoi che BeardLib ti informi se è presente un'aggiornamento importante per una mod?"
 beardlib_write_failed: "Errore di scrittura nel percorso :/"
 beardlib_achieves_title: "Achievement personalizzati"
 beardlib_achieves_desc: "Guarda e tieni traccia degli achievement attualmente installati."
@@ -75,7 +75,7 @@ beardlib_errors_tip: |
 beardlib_optimized_music_load: "Caricamento musica ottimizzato"
 beardlib_optimized_music_load_help: |
     Carica la musica personalizzata solo quando utilizzata. Potrebbe causare un leggero lag quando avvii la canzone
-    ma in generale dovrebbe rendere più stabile l'applicazione e impedire il raggiungimento dei 32bit di ram limite.
+    ma in generale dovrebbe rendere più stabile l'applicazione e impedire il raggiungimento dei 32bit di limite della ram.
 beardlib_errors_dialog: "Mostra dialogo di errore"
 beardlib_update: Aggiornamento
 beardlib_waiting_updates: "Aggiornamento/i disponibile/i"
@@ -92,26 +92,26 @@ beardlib_updates_download_now: Download
 beardlib_mod_type_Add: Addon
 beardlib_mod_type_Map: Mappa
 beardlib_mod_type_Base: "Base"
-beardlib_mod_disabled: "Disabled"
+beardlib_mod_disabled: "Disabilitato"
 beardlib_waiting_update: "Aggiornamento disponibile"
 beardlib_show_errors_dialog: "Mostra il dialogo di errore quando si accede al menu principale"
 beardlib_show_errors_dialog_help: |
     Se una mod riscontra un errore critico (es. BeardLib non aggiornato) mentre carica, solitamente ti informerà.
     Cosi potrai scegliere se rimuoverla o aggiornarla.
     Nota: Dovresti tenere questa impostazione attivata in modalità sviluppatore.
-beardlib_mod_develop_mode: "Develop Mode"
-beardlib_mod_develop_mode_help: "By activating develop mode for the mod, auto uppdates will be disabled and things such as auto generated addfiles will refresh each reload."
-beardlib_mod_optional_version: "Optional Version"
+beardlib_mod_develop_mode: "Modalità di sviluppo"
+beardlib_mod_develop_mode_help: "Attivare la modalità di sviluppo per la mod disattiverà gli aggiornamenti automatici e cose come gli addfile auto generati verranno aggiornati ad ogni ricarica."
+beardlib_mod_optional_version: "Versione opzionale"
 beardlib_mod_optional_version_help: | 
-    Selecting a optional version will switch your auto updates to that version.
-    These are likely in an expermiental state and may contain new features and bugs.
-beardlib_achieves_no_pkg: "Select a package on the left panel to show the achievements related to it."
-beardlib_log_init: "Log initialization of mods"
-beardlib_log_init_help: "Logs initialization of mods when they are initialized."
-beardlib_custom_maps_only: "Custom Maps Only"
-beardlib_github_updates: "GitHub / Beta Updates"
+    Selezionare una versione opzionale cambierà le tue opzioni di aggiornamento automatico a quella versione.
+    Le mod in quella versione sono probabilmente in uno stato sperimentale e potrebbero contenere nuove funzionalità e bug.
+beardlib_achieves_no_pkg: "Seleziona un pacchetto nel pannello a sinistra per mostrare gli achievement ad esso associati."
+beardlib_log_init: "Inizializzazione del Log delle mod"
+beardlib_log_init_help: "Inizializzazione del Log delle mod quando vengono inizializzate."
+beardlib_custom_maps_only: "Solo Mappe Personalizzate"
+beardlib_github_updates: "Aggiornamenti di GitHub / Beta"
 beardlib_github_updates_help: |
-    By enabling this, you will get updates from GitHub rather than modworkshop.
-    The GitHub version is in an experimental state and may have new features and bugs.
-bm_menu_glove_variations: "Customize Gloves"
-bm_menu_btn_customize_gloves: "Customize Gloves"
+    Abilitando questa opzione riceverai gli aggiornamenti da GitHub piuttosto che dal modworkshop.
+    La versione di GitHub è in uno stato sperimentale e potrebbe avere nuove funzionalità e bug.
+bm_menu_glove_variations: "Personalizza Guanti"
+bm_menu_btn_customize_gloves: "Personalizza Guanti"
