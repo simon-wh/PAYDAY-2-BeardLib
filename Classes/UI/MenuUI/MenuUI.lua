@@ -179,15 +179,15 @@ function MenuUI:Menu(params)
 end
 
 function MenuUI:Holder(params)
-    return self:AddMenu(BeardLib.Items.Holder:new(self:ConfigureMenu(params, true)))
+    return self:AddMenu(BeardLib.Items.Holder:new(self:ConfigureMenu(params)))
 end
 
 function MenuUI:NoteBook(params)
-    return self:AddMenu(BeardLib.Items.NoteBook:new(self:ConfigureMenu(params, true)))
+    return self:AddMenu(BeardLib.Items.NoteBook:new(self:ConfigureMenu(params)))
 end
 
 function MenuUI:PopupMenu(params)
-    return self:AddMenu(BeardLib.Items.PopupMenu:new(self:ConfigureMenu(params, true)))
+    return self:AddMenu(BeardLib.Items.PopupMenu:new(self:ConfigureMenu(params)))
 end
 
 function MenuUI:Grid(params)

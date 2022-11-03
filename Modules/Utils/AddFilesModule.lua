@@ -61,7 +61,8 @@ end
 ---Loops through all files of a path and adds them to the files table.
 ---Uses the module's config to set or ignore files.
 --- @param path string
---- @param files table
+--- @param files? table
+--- @return table
 function AddFilesModule:LoopFiles(path, files)
     files = files or {}
 

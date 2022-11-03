@@ -185,7 +185,7 @@ function MenuDialog:hide(yes, item)
     self._no_callback = nil
     self._params = nil
     if type(clbk) == "function" then
-        self:run_callback(clbk, yes)
+        self:run_callback(clbk)
     end
     self._tbl = {}
     return true
