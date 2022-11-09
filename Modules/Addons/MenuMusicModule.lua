@@ -1,43 +1,4 @@
-MenuMusicModule = MenuMusicModule or BeardLib:ModuleClass("MenuMusic", ItemModuleBase)
-
-function MenuMusicModule:LoadBuffers()
-	for _, track in pairs(BeardLib.MusicMods[self._config.id].tracks) do
-		if track.source and track.source.module then
-			track.source.buffer = XAudio.Buffer:new(track.source.path)
-		end
-		if track.start_source and track.start_source.module then
-			track.start_source.buffer = XAudio.Buffer:new(track.start_source.path)
-		end
-	end
-end
-
-function MenuMusicModule:UnloadBuffers()
-	for _, track in pairs(BeardLib.MusicMods[self._config.id].tracks) do
-		if track.source and track.source.module then
-			if track.source.buffer then
-				track.source.buffer:close(true)
-			end
-			track.source.buffer = nil
-		end
-		if track.start_source and track.start_source.module then
-			if track.start_source.buffer then
-				track.start_source.buffer:close(true)
-			end
-			track.start_source.buffer = nil
-		end
-	end
-end
-
-function MenuMusicModule:MakeBuffer(source)
-	if source then
-		if FileIO:Exists(source) then
-			return BeardLib.OptimizedMusicLoad and {path = source, module = self} or XAudio.Buffer:new(source)
-		else
-			self:Err("Source file '%s' does not exist, music id '%s'", tostring(source), tostring(self._config.id))
-			return nil
-		end
-	end
-end
+MenuMusicModule = MenuMusicModule or BeardLib:ModuleClass("MenuMusic", HeistMusic)
 
 function MenuMusicModule:RegisterHook()
 	if not XAudio then

@@ -2,20 +2,50 @@ HeistMusic = HeistMusic or BeardLib:ModuleClass("HeistMusic", ItemModuleBase)
 StealthMusic = StealthMusic or BeardLib:ModuleClass("StealthMusic", HeistMusic)
 StealthMusic.is_stealth = true
 
-function HeistMusic:LoadBuffers()
-	for _, event in pairs(BeardLib.MusicMods[self._config.id].events) do
-		for _, track in pairs(event.tracks) do
-			if track.start_source and track.start_source.module then
+-- Resume buffer loading coroutine
+Hooks:Add("GameSetupUpdate", "GameSetupUpdateBeardLibMusicLoad", function ()
+	if HeistMusic.buffer_load_co and not coroutine.resume(HeistMusic.buffer_load_co) then
+		HeistMusic.buffer_load_id = nil
+		HeistMusic.buffer_load_co = nil
+	end
+end)
+
+function HeistMusic:LoadBuffers(wanted_source)
+	-- Load wanted source first
+	if wanted_source and wanted_source.module and not wanted_source.buffer then
+		wanted_source.buffer = XAudio.Buffer:new(wanted_source.path)
+	end
+
+	-- If we are already loading tracks for this music id, return
+	if HeistMusic.buffer_load_id == self._config.id then
+		return
+	end
+
+	-- Create a coroutine that loads one source each time it is resumed so loading stutter and resulting issues are reduced
+	HeistMusic.buffer_load_id = self._config.id
+	HeistMusic.buffer_load_co = coroutine.create(function ()
+		for _, event in pairs(BeardLib.MusicMods[self._config.id].events) do
+			for _, track in pairs(event.tracks) do
+				if track.start_source and track.start_source.module and not track.start_source.buffer then
 					track.start_source.buffer = XAudio.Buffer:new(track.start_source.path)
-			end
-			if track.source and track.source.module then
-				track.source.buffer = XAudio.Buffer:new(track.source.path)
+					coroutine.yield()
+				end
+				if track.source and track.source.module and not track.source.buffer then
+					track.source.buffer = XAudio.Buffer:new(track.source.path)
+					coroutine.yield()
+				end
 			end
 		end
-	end
+	end)
 end
 
 function HeistMusic:UnloadBuffers()
+	-- If for some reason we are still loading tracks of the current music id, stop loading them
+	if HeistMusic.buffer_load_id == self._config.id then
+		HeistMusic.buffer_load_id = nil
+		HeistMusic.buffer_load_co = nil
+	end
+
 	for _, event in pairs(BeardLib.MusicMods[self._config.id].events) do
 		for _, track in pairs(event.tracks) do
 			if track.start_source and track.start_source.module then

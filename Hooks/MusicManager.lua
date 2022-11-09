@@ -218,7 +218,7 @@ function MusicManager:play(src, use_xaudio, custom_volume)
 				end
 
 				if not src.buffer then
-					src.module:LoadBuffers()
+					src.module:LoadBuffers(src)
 				end
 				if not src.buffer then
 					BeardLib:log("Something went wrong while trying to play the source")
