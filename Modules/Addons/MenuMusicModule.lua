@@ -23,12 +23,21 @@ function MenuMusicModule:RegisterHook()
 	end
 
 	BeardLib.Utils:SetupXAudio()
-	local music = {menu = true, volume = self._config.volume, xaudio = true}
-	music.tracks = {
-		{
-			source = self:MakeBuffer(self._config.source),
-			start_source = self:MakeBuffer(self._config.start_source)
+	local music = {
+		menu = true,
+		xaudio = true,
+		volume = self._config.volume,
+		events = {
+			menu = {
+				tracks = {
+					{
+						source = self:MakeBuffer(self._config.source),
+						start_source = self:MakeBuffer(self._config.start_source)
+					}
+				}
+			}
 		}
 	}
+	music.tracks = music.events.menu.tracks -- workaround for menu music being structured slightly different, should cleanup code at some point
 	BeardLib.MusicMods[self._config.id] = music
 end
