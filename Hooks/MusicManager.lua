@@ -162,14 +162,14 @@ function MusicManager:attempt_play(track, event, stop)
 			if music.tracks and (self._current_custom_track ~= id or id == event) then
 				next_music = music
 				self._current_custom_track = id
-			end
-			if music.events and event then
+			elseif music.events and event then
 				-- Try finding the right event to play
 				for modded_event, event_tbl in pairs(music.events) do
 					if event == modded_event or event:ends(modded_event) then
 						next_music = music
 						next_event = event_tbl
 						self._current_custom_track = id
+						break
 					end
 				end
 			end
@@ -218,7 +218,7 @@ function MusicManager:play(src, use_xaudio, custom_volume)
 				end
 
 				if not src.buffer then
-					src.module:LoadBuffers()
+					src.module:LoadBuffers(src)
 				end
 				if not src.buffer then
 					BeardLib:log("Something went wrong while trying to play the source")
