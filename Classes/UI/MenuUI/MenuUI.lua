@@ -373,7 +373,14 @@ function MenuUI:SetPointer(state)
 	end
 end
 
+function MenuUI:InputAllowed()
+    return self:Enabled() or not (managers.hud and managers.hud:chat_focus() or managers.menu_component and managers.menu_component:input_focut_game_chat_gui())
+end
+
 function MenuUI:KeyReleased(o, k)
+    if not self:InputAllowed() then
+        return
+    end
     if self.pre_key_released then
         if self.pre_key_released(o, k) == false then
             return
@@ -396,6 +403,9 @@ function MenuUI:MouseInside(excluded_label)
 end
 
 function MenuUI:KeyPressed(o, k)
+    if not self:InputAllowed() then
+        return
+    end
     if self.pre_key_press then
         if self.pre_key_press(o, k) == false then
             return
