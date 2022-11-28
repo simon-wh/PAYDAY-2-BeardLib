@@ -70,7 +70,7 @@ function NarrativeModule:AddNarrativeData(narr_self, tweak_data)
             max_mission_xp = data.max_mission_xp or {0.001,0.001,0.001,0.001,0.001},
             preview_image = data.preview_image or {icon = icon_id}
         },
-        ignore_heat = true,
+        ignore_heat = false,
         mod_path = self._mod.ModPath,
         custom = true
     })
