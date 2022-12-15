@@ -321,10 +321,14 @@ elseif F == "elementvehiclespawner" then
     end
 elseif F == "elementareatrigger" then
     -- Changes ElementAreaTrigger:project_instigators to read from tweak_data.carry so the lootbags aren't hardcoded into a function
+    -- This should REALLY be changed cause the current solution frequently causes bags that are not meant to be secured to be securable
     local blocked_carry_ids = {
         person = true,
         special_person = true,
-        piggy_feed = true
+        pda9_feed = true,
+        cg22_bag = true,
+        cg22_bag_green = true,
+        cg22_bag_yellow = true
     }
     function ElementAreaTrigger:beardlib_filter_func(carry_data, is_loot)
         local carry_id = carry_data:carry_id()
