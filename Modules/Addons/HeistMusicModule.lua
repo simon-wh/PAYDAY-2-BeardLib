@@ -141,8 +141,7 @@ function HeistMusic:RegisterHook()
 		end
 	end
 
-	local event = music.events[self._config.preview_event or (self.is_stealth and "suspense_4" or "assault")]
-	music.tracks = event and event.tracks
+	music.preview_event = music.events[self._config.preview_event or (self.is_stealth and "suspense_4" or "assault")] or music.events[next(music.events)]
 
 	BeardLib.MusicMods[self._config.id] = music
 end
