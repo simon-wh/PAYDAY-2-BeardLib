@@ -151,18 +151,13 @@ function MusicManager:attempt_play(track, event, stop)
 		self:stop_custom()
 	end
 
-	-- If a new track is set reset the current custom track
-	if track and track ~= self._current_custom_track then
-		self._current_custom_track = nil
-	end
-
 	local next_music
 	local next_event
 	for id, music in pairs(BeardLib.MusicMods) do
 		if track == id then
-			-- Set current custom heist track, can break out of the loop here since track and event are never set at the same time
+			-- Set current custom heist track, can return here since track and event are never set at the same time
 			self._current_custom_track = id
-			break
+			return true
 		elseif event == id then
 			-- If event matches music id it's menu music and we can also break out of the loop
 			next_music = music
@@ -186,6 +181,8 @@ function MusicManager:attempt_play(track, event, stop)
 	end
 
 	if not next_event then
+		-- If there's no event (= none of the custom music matched the requested track/event) clear the current custom track
+		self._current_custom_track = nil
 		return
 	end
 
