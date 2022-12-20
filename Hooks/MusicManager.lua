@@ -53,17 +53,6 @@ function MusicManager:post_event(name, ...)
 	end
 end
 
-local orig_check = MusicManager.check_music_switch
-function MusicManager:check_music_switch(...)
-	local switches = tweak_data.levels:get_music_switches()
-	if switches and #switches > 0 then
-		Global.music_manager.current_track = switches[math.random(#switches)]
-		if not self:attempt_play(Global.music_manager.current_track) then
-			return orig_check(self, ...)
-		end
-	end
-end
-
 local orig_stop_all = MusicManager.stop_listen_all
 function MusicManager:stop_listen_all(...)
 	if self._current_music_ext or self._current_event then
@@ -343,6 +332,12 @@ Hooks:PostHook(MusicManager, "init", "BeardLibMusicManagerInit", function(self)
 		if music.stealth then
 			table.insert(tweak_data.music.track_ghost_list, {track = id})
 		end
+	end
+end)
+
+Hooks:PostHook(MusicManager, "check_music_switch", "BeardLibMusicManagerCheckMusicSwitch", function (self)
+	if self:attempt_play(Global.music_manager.current_track) then
+		Global.music_manager.source:stop()
 	end
 end)
 
