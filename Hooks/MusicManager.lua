@@ -193,7 +193,7 @@ function MusicManager:attempt_play(track, event, stop)
 	if next_music.xaudio then
 		if not source then
 			BeardLib:Err("No buffer found to play for music '%s'", tostring(self._current_custom_track))
-			return
+			return true
 		end
 	else
 		if not source or not DB:has(movie_ids, source:id()) then
