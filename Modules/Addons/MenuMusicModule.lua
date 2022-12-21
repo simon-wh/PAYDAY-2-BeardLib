@@ -38,6 +38,8 @@ function MenuMusicModule:RegisterHook()
 			}
 		}
 	}
-	music.tracks = music.events.menu.tracks -- workaround for menu music being structured slightly different, should cleanup code at some point
+
+	music.preview_event = music.events.menu
+
 	BeardLib.MusicMods[self._config.id] = music
 end
