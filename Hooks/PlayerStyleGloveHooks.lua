@@ -464,6 +464,14 @@ elseif F == "criminalsmanager" then
 				end
 			end
 		end
+
+		if unit:interaction() then
+			unit:interaction():refresh_material()
+		end
+
+		if unit:contour() then
+			unit:contour():update_materials()
+		end
 	end
 elseif F == "menuarmourbase" then
 	function MenuArmourBase:set_gloves(glove_id, glove_variation)
