@@ -893,7 +893,7 @@ elseif F == "blackmarketmanager" then
 		end
 	end
 
-	function BlackMarketManager:_verify_dlc_items()
+	Hooks:PostHook(BlackMarketManager, "_verify_dlc_items", "BeardLibVerifyDLCGloveVariations", function(self)
 		local achievement, glove_tweak, glove_variation_tweak, glove_variation_dlc
 
 		for glove_id, glove_data in pairs(Global.blackmarket_manager.gloves or {}) do
@@ -921,7 +921,7 @@ elseif F == "blackmarketmanager" then
 				end
 			end
 		end
-	end
+	end)
 elseif F == "blackmarketgui" then
 	Hooks:PostHook(BlackMarketGui, "_setup", "BeardLibSetupBMG", function(self, is_start_page, component_data)
 		local BTNS = {
