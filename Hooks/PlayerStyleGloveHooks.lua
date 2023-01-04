@@ -151,7 +151,7 @@ elseif F == "glovestweakdata" then
 		end
 
 		local x_prio, y_prio
-		table.sort(variations, function (x, y)
+		table.sort(variations, function(x, y)
 			if x == "default" then
 				return true
 			end
@@ -289,6 +289,10 @@ elseif F == "criminalsmanager" then
 		local unit_damage = unit:damage()
 		if not unit_damage then return end
 
+		if unit:inventory() and unit:inventory().mask_visibility and not unit:inventory():mask_visibility() then
+			mask_id = nil
+		end
+
 		local function run_sequence_safe(sequence, sequence_unit)
 			if not sequence then
 				return
@@ -362,17 +366,16 @@ elseif F == "criminalsmanager" then
 			end
 		end
 
-		if unit:spawn_manager() then
-			local spawn_man = unit:spawn_manager()
-
+		local spawn_manager = unit:spawn_manager()
+		if spawn_manager then
 			-- Player Style
-			spawn_man:remove_unit("char_mesh")
+			spawn_manager:remove_unit("char_mesh")
 
 			local unit_name = get_player_style_value("unit", true)
 			local char_mesh_unit = nil
 			if unit_name then
-				spawn_man:spawn_and_link_unit("_char_joint_names", "char_mesh", unit_name)
-				char_mesh_unit = spawn_man:get_unit("char_mesh")
+				spawn_manager:spawn_and_link_unit("_char_joint_names", "char_mesh", unit_name)
+				char_mesh_unit = spawn_manager:get_unit("char_mesh")
 			end
 
 			if alive(char_mesh_unit) then
@@ -394,12 +397,12 @@ elseif F == "criminalsmanager" then
 			end
 
 			-- Gloves
-			spawn_man:remove_unit("char_gloves")
+			spawn_manager:remove_unit("char_gloves")
 
 			local char_gloves_unit = nil
 			if gloves_unit_name then
-				spawn_man:spawn_and_link_unit("_char_joint_names", "char_gloves", gloves_unit_name)
-				char_gloves_unit = spawn_man:get_unit("char_gloves")
+				spawn_manager:spawn_and_link_unit("_char_joint_names", "char_gloves", gloves_unit_name)
+				char_gloves_unit = spawn_manager:get_unit("char_gloves")
 			end
 
 			if alive(char_gloves_unit) then
@@ -421,7 +424,7 @@ elseif F == "criminalsmanager" then
 			end
 
 			-- Glove Adapter
-			spawn_man:remove_unit("char_glove_adapter")
+			spawn_manager:remove_unit("char_glove_adapter")
 
 			local default_adapter_data = tweak_data.blackmarket.glove_adapter
 
@@ -460,6 +463,14 @@ elseif F == "criminalsmanager" then
 					end
 				end
 			end
+		end
+
+		if unit:interaction() then
+			unit:interaction():refresh_material()
+		end
+
+		if unit:contour() then
+			unit:contour():update_materials()
 		end
 	end
 elseif F == "menuarmourbase" then
@@ -882,7 +893,7 @@ elseif F == "blackmarketmanager" then
 		end
 	end
 
-	function BlackMarketManager:_verify_dlc_items()
+	Hooks:PostHook(BlackMarketManager, "_verify_dlc_items", "BeardLibVerifyDLCGloveVariations", function(self)
 		local achievement, glove_tweak, glove_variation_tweak, glove_variation_dlc
 
 		for glove_id, glove_data in pairs(Global.blackmarket_manager.gloves or {}) do
@@ -910,7 +921,7 @@ elseif F == "blackmarketmanager" then
 				end
 			end
 		end
-	end
+	end)
 elseif F == "blackmarketgui" then
 	Hooks:PostHook(BlackMarketGui, "_setup", "BeardLibSetupBMG", function(self, is_start_page, component_data)
 		local BTNS = {
