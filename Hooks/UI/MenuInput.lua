@@ -101,7 +101,7 @@ function MenuInput:ValueEnteredCallback(value)
         if self._current_item.set_value then
             self._current_item:set_value(value)
         end
-        self._current_item:trigger()
+        self._logic:trigger_item(true, self._current_item)
         self._current_item = nil
     end
 end
