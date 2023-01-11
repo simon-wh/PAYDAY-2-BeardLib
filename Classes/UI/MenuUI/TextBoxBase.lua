@@ -14,37 +14,37 @@ function TextBoxBase:init(parent, params)
     self.text_vertical = params.text_vertical or parent.text_vertical
     self.textbox_max_h = parent.textbox_max_h
     self.no_magic_chars = NotNil(parent.no_magic_chars, true)
-	self.panel = params.panel:panel({
-		name = "text_panel",
-		w = params.w,
-		h = params.h or params.size,
+    self.panel = params.panel:panel({
+        name = "text_panel",
+        w = params.w,
+        h = params.h or params.size,
         layer = params.layer or 5
-	})
-	self.panel:set_w(self.panel:w()-(parent.textbox_offset or 0))
-	self.panel:set_right(params.panel:w()-(parent.textbox_offset or 0))
+    })
+    self.panel:set_w(self.panel:w()-(parent.textbox_offset or 0))
+    self.panel:set_right(params.panel:w()-(parent.textbox_offset or 0))
     self.line_color = params.line_color
     self.foreground = params.foreground
     self.foreground_highlight = params.foreground_highlight
     local color = self:GetForeground()
-	local line = self.panel:rect({
+    local line = self.panel:rect({
         name = "line",
-		halign = "grow",
-		visible = params.line,
+        halign = "grow",
+        visible = params.line,
         h = 2,
         layer = -1,
         color = self.line_color or color,
     })
     line:set_bottom(self.panel:h())
     local value = params.value or ""
-    if parent.fitler == "number" and parents.floats then
-        value = string.format("%." .. parent.floats .. "f", tonumber(value))
+    if parent.filter == "number" then
+        value = self:tonumber(value)
     end
     self._scroll = ScrollablePanelModified:new(self.panel, "text_panel", {
         layer = params.layer or 5,
         padding = 0,
         scroll_width = params.lines == 1 and 0 or parent.scroll_width,
         color = parent.textbox_scroll_color or line:color(),
-		hide_shade = true,
+        hide_shade = true,
         hide_scroll_background = true,
         scroll_speed = parent.scroll_speed
     })
@@ -59,8 +59,8 @@ function TextBoxBase:init(parent, params)
         align = self.text_align,
         vertical = self.text_vertical or nil,
         selection_color = color:with_alpha(0.5), --I fucking wish there was something better..
-		font = parent.font or "fonts/font_medium_mf",
-		font_size = self.font_size
+        font = parent.font or "fonts/font_medium_mf",
+        font_size = self.font_size
     })
     if self.fit_text then
         self.text:set_vertical("center")
@@ -90,10 +90,10 @@ function TextBoxBase:init(parent, params)
         self:set_active(true)
     end
 
-	self.lines = params.lines
-	self.btn = params.btn or "0"
+    self.lines = params.lines
+    self.btn = params.btn or "0"
     self.history = {params.value and self:Value()}
- 	self.text:enter_text(ClassClbk(self, "enter_text"))
+    self.text:enter_text(ClassClbk(self, "enter_text"))
     self.update_text = params.update_text or ClassClbk(self.owner, "TextBoxSetValue")
 end
 
@@ -133,6 +133,15 @@ end
 
 function TextBoxBase:CheckText(text, no_clbk)
     if self.owner.filter == "number" then
+        if self.owner.allow_expressions then
+            local f = loadstring("return " .. self:Value())
+            local val = f and f()
+            if val and tonumber(val) ~= nil then
+                self.update_text(self:tonumber(val), not no_clbk, true)
+                return
+            end
+        end
+
         if tonumber(self:Value()) ~= nil then
             self.update_text(self:tonumber(self:Value()), not no_clbk, true)
         else
@@ -265,8 +274,8 @@ function TextBoxBase:add_history_point(text)
 end
 
 function TextBoxBase:fixed_text(text)
-	if self.owner.filter == "number" then
-		local num = tonumber(text)
+    if self.owner.filter == "number" then
+        local num = tonumber(text)
         if num then
             local clamp = math.clamp(num, self.owner.min or num, self.owner.max or num)
             if self.owner.floats then
@@ -277,12 +286,26 @@ function TextBoxBase:fixed_text(text)
         end
     else
         return text
-	end
+    end
 end
 
+local allowed_number_text = {
+    ["-"] = true,
+    ["."] = true
+}
+local allowed_expression_text = {
+    ["("] = true,
+    [")"] = true,
+    ["+"] = true,
+    ["*"] = true,
+    ["/"] = true
+}
 function TextBoxBase:enter_text(text, s)
+    if not self.cantype or not self.menu:IsMouseActive() then
+        return
+    end
     local number = self.owner.filter == "number"
-    if not self.cantype or not self.menu:IsMouseActive() or (number and (tonumber(s) == nil and s ~= "-" and s ~= ".")) then
+    if number and not tonumber(s) and not allowed_number_text[s] and (not self.owner.allow_expressions or not allowed_expression_text[s]) then
         return
     end
     for _, c in pairs(self.forbidden_chars) do
@@ -326,20 +349,20 @@ function TextBoxBase:KeyPressed(o, k)
         return
     end
 
-	local text = self.text
+    local text = self.text
 
     if k == Idstring("enter") or k == Idstring("esc") then
         self:set_active(false)
         text:stop()
- 		self:CheckText(text)
+         self:CheckText(text)
         return true
- 	end
+     end
     if self.cantype then
         text:stop()
         text:animate(ClassClbk(self, "key_hold"), k)
         return true
     end
-	self:update_caret()
+    self:update_caret()
 end
 
 function TextBoxBase:update_caret()
@@ -390,9 +413,9 @@ function TextBoxBase:update_caret()
     caret:set_visible(self.cantype)
     caret:set_color(text:color():with_alpha(1))
     self._scroll:set_size(self.panel:w(), self.panel:h()-line:h()*2)
-	self._scroll:panel():set_bottom(self.panel:h()-line:h())
+    self._scroll:panel():set_bottom(self.panel:h()-line:h())
     self._scroll:update_canvas_size()
-	self._scroll:force_scroll()
+    self._scroll:force_scroll()
 end
 
 function TextBoxBase:MousePressed(button, x, y)

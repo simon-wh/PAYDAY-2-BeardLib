@@ -6,20 +6,21 @@ function TextBox:Init()
 	TextBox.super.Init(self)
 	self:WorkParam("floats", 3)
 	if self.filter == "number" then
-    	self.value = tonumber(self.value) or 0
-    end
+		self.value = tonumber(self.value) or 0
+		self.allow_expressions = NotNil(self.allow_expressions, true)
+	end
 	self._textbox = BeardLib.Items.TextBoxBase:new(self, {
-        panel = self.panel,
+		panel = self.panel,
 		fit_text = NotNil(self.fit_text, self.filter == "number"),
 		lines = self.filter == "number" and 1 or nil,
 		focus_mode = self.focus_mode,
 		auto_focus = self.auto_focus,
-        line_color = self.line_color or self.highlight_color,
-        w = self.panel:w() * (not self.text and 1 or self.control_slice),
-        value = self.value,
+		line_color = self.line_color or self.highlight_color,
+		w = self.panel:w() * (not self.text and 1 or self.control_slice),
+		value = self.value,
 	})
 	self.auto_focus = nil
-    self.value = self.value or ""
+	self.value = self.value or ""
 	self._textbox:PostInit()
 end
 
