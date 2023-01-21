@@ -53,7 +53,7 @@ Hooks:Add(peer_send_hook, "BeardLibCustomWeaponFix", function(self, func_name, p
             params[3] = SyncUtils:CleanOutfitString(params[3], params[4] == 0)
         elseif func_name == "set_equipped_weapon" then
             if params[2] == -1 then
-                local index, data, selection_index = SyncUtils:GetCleanedWeaponData()
+                local index, data, selection_index = SyncUtils:GetCleanedWeaponData(params[1])
                 params[2] = index
                 params[3] = data
                 self:beardlib_send_modded_weapon(selection_index)
