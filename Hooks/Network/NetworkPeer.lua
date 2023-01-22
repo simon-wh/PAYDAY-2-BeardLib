@@ -25,40 +25,45 @@ Hooks:Add(peer_send_hook, "BeardLibCustomHeistFix", function(self, func_name, pa
 end)
 
 Hooks:Add(peer_send_hook, "BeardLibCustomWeaponFix", function(self, func_name, params)
-    if self ~= managers.network:session():local_peer() then
-        if func_name == "sync_outfit" or string.ends(func_name, "set_unit") then
-            SyncUtils:Send(self, SyncConsts.SendOutfit, SyncUtils:CompactOutfit() .. "|" .. SyncConsts.OutfitVersion)
-            local in_lobby = self:in_lobby() and game_state_machine:current_state_name() ~= "ingame_lobby_menu" and not setup:is_unloading()
-            if in_lobby then
-                self:beardlib_send_modded_weapon(math.random(1, 2)) --Send a random weapon instead of based on weapon skin rarity.
-            end
+    if self == managers.network:session():local_peer() then
+        return
+    end
 
-            local extra_outfit_string = SyncUtils:ExtraOutfitString()
-            local split_number = SyncConsts.ExtraOutfitSplitSize
-            local current_sub_start = 1
-            local data_length = #extra_outfit_string
-            local index = 0
-            while current_sub_start <= data_length do
-                index = index + 1
-                SyncUtils:Send(self, SyncConsts.SendExtraOutfit .. "|" .. tostring(index), extra_outfit_string:sub(current_sub_start, current_sub_start + (split_number - 1)))
-
-                current_sub_start = current_sub_start + split_number
-            end
-
-            SyncUtils:Send(self, SyncConsts.SendExtraOutfitDone, tostring(index))
+    if func_name == "sync_outfit" or string.ends(func_name, "set_unit") then
+        SyncUtils:Send(self, SyncConsts.SendOutfit, SyncUtils:CompactOutfit() .. "|" .. SyncConsts.OutfitVersion)
+        local in_lobby = self:in_lobby() and game_state_machine:current_state_name() ~= "ingame_lobby_menu" and not setup:is_unloading()
+        if in_lobby then
+            self:beardlib_send_modded_weapon(math.random(1, 2)) --Send a random weapon instead of based on weapon skin rarity.
         end
-        if func_name == "sync_outfit" then
-            params[1] = SyncUtils:CleanOutfitString(params[1])
-        elseif string.ends(func_name, "set_unit") then
-            params[3] = SyncUtils:CleanOutfitString(params[3], params[4] == 0)
-        elseif func_name == "set_equipped_weapon" then
-            if params[2] == -1 then
-                local index, data, selection_index = SyncUtils:GetCleanedWeaponData(params[1])
-                params[2] = index
-                params[3] = data
-                self:beardlib_send_modded_weapon(selection_index)
-            else
-                local factory_id = PlayerInventory._get_weapon_name_from_sync_index(params[2])
+
+        local extra_outfit_string = SyncUtils:ExtraOutfitString()
+        local split_number = SyncConsts.ExtraOutfitSplitSize
+        local current_sub_start = 1
+        local data_length = #extra_outfit_string
+        local index = 0
+        while current_sub_start <= data_length do
+            index = index + 1
+            SyncUtils:Send(self, SyncConsts.SendExtraOutfit .. "|" .. tostring(index), extra_outfit_string:sub(current_sub_start, current_sub_start + (split_number - 1)))
+
+            current_sub_start = current_sub_start + split_number
+        end
+
+        SyncUtils:Send(self, SyncConsts.SendExtraOutfitDone, tostring(index))
+    end
+    if func_name == "sync_outfit" then
+        params[1] = SyncUtils:CleanOutfitString(params[1])
+    elseif string.ends(func_name, "set_unit") then
+        params[3] = SyncUtils:CleanOutfitString(params[3], params[4] == 0)
+    elseif func_name == "set_equipped_weapon" then
+        if params[2] == -1 then
+            local index, data, selection_index = SyncUtils:GetCleanedWeaponData(params[1])
+            params[2] = index
+            params[3] = data
+            self:beardlib_send_modded_weapon(selection_index)
+        else
+            local factory_id = PlayerInventory._get_weapon_name_from_sync_index(params[2])
+            -- Don't care about npc weapons, they dont have a blueprint
+            if type(factory_id) == "string" then
                 local blueprint = managers.weapon_factory:unpack_blueprint_from_string(factory_id, params[3])
                 local wep = tweak_data.weapon[managers.weapon_factory:get_weapon_id_by_factory_id(factory_id)]
 
