@@ -59,7 +59,9 @@ Hooks:Add(peer_send_hook, "BeardLibCustomWeaponFix", function(self, func_name, p
             local index, data, selection_index = SyncUtils:GetCleanedWeaponData(params[1])
             params[2] = index
             params[3] = data
-            self:beardlib_send_modded_weapon(selection_index)
+            if params[1] == managers.player:local_player() then
+                self:beardlib_send_modded_weapon(selection_index)
+            end
         else
             local factory_id = PlayerInventory._get_weapon_name_from_sync_index(params[2])
             -- Don't care about npc weapons, they dont have a blueprint
@@ -69,7 +71,7 @@ Hooks:Add(peer_send_hook, "BeardLibCustomWeaponFix", function(self, func_name, p
 
                 params[3] = managers.weapon_factory:blueprint_to_string(factory_id, SyncUtils:GetCleanedBlueprint(blueprint, factory_id))
 
-                if wep then
+                if wep and params[1] == managers.player:local_player() then
                     self:beardlib_send_modded_weapon(wep.use_data.selection_index)
                 end
             end
