@@ -61,10 +61,10 @@ elseif F == "playerinventory" then
 
     Hooks:PostHook(PlayerInventory, "save", "BeardLib.Save", function(self, data)
         if self._equipped_selection then
-            if data.equipped_weapon_index == -1 then
+            if data.inventory and data.inventory.equipped_weapon_index == -1 then
                 local new_index, blueprint = SyncUtils:GetCleanedWeaponData(self._unit)
-                data.equipped_weapon_index = new_index
-                data.blueprint_string = blueprint
+                data.inventory.equipped_weapon_index = new_index
+                data.inventory.blueprint_string = blueprint
             end
         end
     end)
