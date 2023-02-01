@@ -43,9 +43,31 @@ elseif F == "tweakdatapd2" then
 		Hooks:Call("BeardLibCreateCustomWeaponMods", self)
 	end)
 
-	Hooks:PostHook(BlackMarketTweakData, "init", "CallAddCustomWeaponModsToWeapons", function(self, tweak_data)
-		Hooks:Call("BeardLibAddCustomWeaponModsToWeapons", tweak_data.weapon.factory, tweak_data)
+	Hooks:PostHook(BlackMarketTweakData, "init", "CallAddCustomProjectiles", function(self, tweak_data)
 		Hooks:Call("BeardLibCreateCustomProjectiles", self, tweak_data)
+	end)
+
+	-- Store all the part types that are getting cloned so we can redo them to account for modded parts.
+	-- I'd store them under WFTD but code expects weapon data to be stored there.
+	local clone_part_type_for_weapon = WeaponFactoryTweakData._clone_part_type_for_weapon
+	function WeaponFactoryTweakData:_clone_part_type_for_weapon(...)
+		BeardLibTemporaryTypeClonesToRedo = BeardLibTemporaryTypeClonesToRedo or {}
+		table.insert(BeardLibTemporaryTypeClonesToRedo, {...})
+	end
+
+	Hooks:PreHook(BlackMarketTweakData, "_init_weapon_mods", "CallAddCustomWeaponModsToWeapons", function(self, tweak_data)
+		Hooks:Call("BeardLibAddCustomWeaponModsToWeapons", tweak_data.weapon.factory, tweak_data)
+
+		-- This only gets used for one weapon and attachment type for now, but who knows what else will end up using it.
+		-- Don't have to worry about setting custom as they are only `adds` which isn't synced.
+		if BeardLibTemporaryTypeClonesToRedo then
+			for _, clone_data in pairs(BeardLibTemporaryTypeClonesToRedo) do
+				clone_part_type_for_weapon(tweak_data.weapon.factory, unpack(clone_data))
+			end
+
+			-- Cleanup after ourselves.
+			BeardLibTemporaryTypeClonesToRedo = nil
+		end
 	end)
 
 	--Big brain.
