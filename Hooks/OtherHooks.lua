@@ -56,7 +56,18 @@ elseif F == "tweakdatapd2" then
 	end
 
 	Hooks:PreHook(BlackMarketTweakData, "_init_weapon_mods", "CallAddCustomWeaponModsToWeapons", function(self, tweak_data)
+		-- Temporarily pre-generate this data as some custom stuff might rely on it.
+		-- It'll get redone by vanilla anyway.
+		if self.weapon_skins then
+			tweak_data.weapon.factory:create_bonuses(tweak_data, self.weapon_skins)
+		end
+		self.weapon_charms = tweak_data.weapon.factory:create_charms(tweak_data)
+
 		Hooks:Call("BeardLibAddCustomWeaponModsToWeapons", tweak_data.weapon.factory, tweak_data)
+
+		-- This has to go after our BeardLib hook so any clone related tweak data doesn't get inherited weirdly.
+		-- But it also has to go before "_init_weapon_mods" so that it's blackmarket data gets generated correctly.
+		-- Frustrating...
 
 		-- This only gets used for one weapon and attachment type for now, but who knows what else will end up using it.
 		-- Don't have to worry about setting custom as they are only `adds` which isn't synced.
