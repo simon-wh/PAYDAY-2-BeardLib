@@ -104,7 +104,7 @@ beardlib_mod_develop_mode_help: "若要为此模组激活开发模式，则自�
 beardlib_mod_optional_version: "可选版本"
 beardlib_mod_optional_version_help: | 
     选择可选版本会自动更新并切换至该版本。
-    这些版本可能会类似处于试验状态的版本并且可能会包含新内容和错误漏洞。
+    这些版本会类似处于试验状态的版本并且可能会包含新内容和错误漏洞。
 beardlib_achieves_no_pkg: "在左侧面板选择一个成就包以显示其相关的成就。"
 beardlib_log_init: "模组日志初始化"
 beardlib_log_init_help: "当模组初始化时初始化模组的日志。"
