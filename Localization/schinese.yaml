@@ -101,17 +101,17 @@ beardlib_show_errors_dialog_help: |
     注意: 您需要启用开发者模式才能使用该功能。
 beardlib_mod_develop_mode: "开发模式"
 beardlib_mod_develop_mode_help: "若要为此模组激活开发模式，则自动更新将被禁用，并且诸如自动生成的附加文件将在每次重载时刷新。"
-beardlib_mod_optional_version: "Optional Version"
+beardlib_mod_optional_version: "可选版本"
 beardlib_mod_optional_version_help: | 
-    Selecting a optional version will switch your auto updates to that version.
-    These are likely in an expermiental state and may contain new features and bugs.
+    选择可选版本会自动更新并切换至该版本。
+    这些版本会类似处于试验状态的版本并且可能会包含新内容和错误漏洞。
 beardlib_achieves_no_pkg: "在左侧面板选择一个成就包以显示其相关的成就。"
 beardlib_log_init: "模组日志初始化"
 beardlib_log_init_help: "当模组初始化时初始化模组的日志。"
 beardlib_custom_maps_only: "仅自定义劫案"
-beardlib_github_updates: "GitHub / Beta Updates"
+beardlib_github_updates: "GitHub/Beta 更新"
 beardlib_github_updates_help: |
-    By enabling this, you will get updates from GitHub rather than modworkshop.
-    The GitHub version is in an experimental state and may have new features and bugs.
+    通过启动该功能，你将从GitHub获得最新更新而不是从modworkshop。
+    GitHub版本是处于试验状态的版本并且可能会包含新内容和错误漏洞。
 bm_menu_glove_variations: "自定义手套"
 bm_menu_btn_customize_gloves: "自定义手套"
