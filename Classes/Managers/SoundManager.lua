@@ -383,9 +383,9 @@ function BeardLibSoundManager:Open()
 		return self:get_data().linking
 	end
 
-	--If no position is set or is not linking to anything then we can assume it's a 2D sound.
+	--If no position is set or if first person switch is set we can assume it's a 2D sound.
 	function SoundSource:is_relative()
-		return self:get_position() == nil
+		return self:get_position() == nil or self:get_switch() and self:get_switch().int_ext == "first"
 	end
 
 	function SoundSource:get_position()
