@@ -140,39 +140,34 @@ function MusicManager:attempt_play(track, event, stop)
 		self:stop_custom()
 	end
 
+	if track then
+		-- Set or clear custom track if track matches any custom music
+		self._current_custom_track = BeardLib.MusicMods[track] and track or nil
+	end
+
 	local next_music
 	local next_event
-	for id, music in pairs(BeardLib.MusicMods) do
-		if track == id then
-			-- Set current custom heist track, can return here since track and event are never set at the same time
-			self._current_custom_track = id
-			return true
-		elseif event == id then
+
+	if event then
+		if BeardLib.MusicMods[event] then
 			-- If event matches music id it's menu music and we can also break out of the loop
-			next_music = music
-			next_event = music.preview_event
-			break
-		elseif event and self._current_custom_track == id then
-			-- If we have an event and currently playing custom music, check if it matches any music event
-			next_music = music
-			for modded_event, event_tbl in pairs(music.events) do
+			next_music = BeardLib.MusicMods[event]
+			next_event = next_music.preview_event
+		elseif self._current_custom_track then
+			-- Otherwise check the events of the currently playing custom music
+			next_music = BeardLib.MusicMods[self._current_custom_track]
+			for modded_event, event_tbl in pairs(next_music.events) do
 				if event == modded_event or event:ends(modded_event) then
 					next_event = event_tbl
 					break
 				end
 			end
-
-			-- If we found a matching event we can break out of the loop, we found what to play
-			if next_event then
-				break
-			end
 		end
 	end
 
 	if not next_event then
-		-- If there's no event (= none of the custom music matched the requested track/event) clear the current custom track
-		self._current_custom_track = nil
-		return
+		-- If we set a custom track return true to stop vanilla music checks
+		return track and self._current_custom_track ~= nil
 	end
 
 	local track_index = self:pick_track_index(next_event.tracks)
