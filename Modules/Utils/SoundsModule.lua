@@ -4,12 +4,12 @@ SoundsModule.auto_load = false
 local Managers = BeardLib.Managers
 
 function SoundsModule:init(...)
-    if not SoundsModule.super.init(self, ...) then
-        return false
+	if not SoundsModule.super.init(self, ...) then
+		return false
 	end
 	BeardLib.Utils:SetupXAudio()
-    self:ReadSounds(self._config)
-    return true
+	self:ReadSounds(self._config)
+	return true
 end
 
 --:shrug:
@@ -34,7 +34,7 @@ function SoundsModule:ReadSounds(data, prev_dir)
 
 	local dir = self:GetPath(data.directory, prev_dir)
 	local prefix = data.prefix
-	local prefixes = data.prefixes or data.prefix and {data.prefix}
+	local prefixes = data.prefixes or data.prefix and { data.prefix }
 	if prefix == "global" then
 		prefix = nil
 		prefixes = nil
@@ -49,15 +49,17 @@ function SoundsModule:ReadSounds(data, prev_dir)
 	local stop_id = data.stop_id
 	local wait = data.wait
 	local volume = data.volume
+	local min_distance = data.min_distance
+	local max_distance = data.max_distance
 
 	if prefixes then
 		prefixes._meta = nil
 	end
 
-    for k, v in ipairs(data) do
+	for k, v in ipairs(data) do
 		if type(v) == "table" then
 			local meta = v._meta
-			v.prefixes = v.prefixes or (v.prefix and {v.prefix} or prefixes)
+			v.prefixes = v.prefixes or (v.prefix and { v.prefix } or prefixes)
 			if v.prefixes then
 				v.prefixes._meta = nil
 			end
@@ -70,7 +72,9 @@ function SoundsModule:ReadSounds(data, prev_dir)
 				stop_id = stop_id,
 				relative = relative,
 				wait = wait,
-				volume = volume
+				volume = volume,
+				min_distance = min_distance,
+				max_distance = max_distance
 			}, v)
 
 			if v.subtitle_id then
@@ -89,11 +93,11 @@ function SoundsModule:ReadSounds(data, prev_dir)
 			if (meta == redirect_s or meta == Redirect_s) then
 				Managers.Sound:AddRedirect(v)
 			elseif (meta == sound_s or meta == Sound_s) and v.id then
-				v.path = v.path or v.id..".ogg"
+				v.path = v.path or v.id .. ".ogg"
 				Managers.Sound:AddBuffer(table.merge({
 					full_path = Path:Combine(dir, v.path),
 					load_on_play = load_on_play,
-					stop_id = stop_id or v.id.."_stop",
+					stop_id = stop_id or v.id .. "_stop",
 					unload = unload,
 				}, v))
 			elseif (meta == sounds_s or meta == Sounds_s) then
@@ -129,12 +133,12 @@ function SoundsModule:ReadSounds(data, prev_dir)
 					local splt = string.split(file, "%.")
 					local id, ext = splt[1], splt[2]
 					if ext == "ogg" then
-						local file_path = id..".ogg"
+						local file_path = id .. ".ogg"
 						Managers.Sound:AddBuffer(table.merge({
 							id = id,
 							full_path = Path:Combine(scan_dir, file_path),
 							load_on_play = load_on_play,
-							stop_id = stop_id or id.."_stop",
+							stop_id = stop_id or id .. "_stop",
 							unload = unload,
 						}, v))
 					end

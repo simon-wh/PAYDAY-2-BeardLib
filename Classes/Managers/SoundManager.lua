@@ -218,6 +218,15 @@ function BeardLibSoundManager:AddSource(sound_id, prefixes, engine_source, clbk,
 		source:set_volume(sound.volume)
 	end
 
+	-- check for set_min_distance and set_max_distance existing on source for now since it's a new feature
+	if sound.min_distance and source.set_min_distance then
+		source:set_min_distance(sound.min_distance)
+	end
+
+	if sound.max_distance and source.set_max_distance then
+		source:set_max_distance(sound.max_distance)
+	end
+
 	table.insert(self.sources, source)
 
 	return source
