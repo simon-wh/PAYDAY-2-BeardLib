@@ -1,7 +1,6 @@
 BeardLibModPath = ModPath
 
 _G.Global = {}
-
 _G.Application = {}
 _G.Application.ews_enabled = function() return false end
 setmetatable(_G.Application, _G.Application)
@@ -26,3 +25,8 @@ function Idstring(string)
 end
 
 dofile(BeardLibModPath .. "Core.lua")
+
+-- Cleanup most of important globals that might accidentally trigger something else.
+_G.core = nil
+_G.Global = nil
+_G.Application = nil
