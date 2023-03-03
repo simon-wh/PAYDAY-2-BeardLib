@@ -1,3 +1,24 @@
+if CoreLoadingSetup then
+    LevelModule = LevelModule or BeardLib:ModuleClass("level", ItemModuleBase)
+    LevelModule.levels_folder = "levels/mods/"
+
+    function LevelModule:init(...)
+        if not LevelModule.super.init(self, ...) then  return false end
+
+        if arg and arg.load_level_data and arg.load_level_data.level_data and arg.load_level_data.level_data.level_id == self._config.id then
+            self:Load()
+        end
+    end
+
+    function LevelModule:Load()
+        if self._config.hooks then
+            HooksModule:new(self._mod, self._config.hooks)
+        end
+    end
+
+    return
+end
+
 LevelModule = LevelModule or BeardLib:ModuleClass("level", ItemModuleBase)
 LevelModule.levels_folder = "levels/mods/"
 
