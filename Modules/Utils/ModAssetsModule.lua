@@ -227,8 +227,7 @@ function ModAssetsModule:StoreDownloadedAssets(data, id)
             return
         end
 
-        --Without the "nice path" some games have trouble saving the temp file.
-        local temp_zip_path = Application:nice_path(os.tmpname() .. ".zip")
+        local temp_zip_path = Application:nice_path(BLTModManager.Constants:DownloadsDirectory() .. id .. ".zip")
         local file = io.open(temp_zip_path, "wb+")
 
         if file then
