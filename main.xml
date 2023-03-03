@@ -269,6 +269,29 @@
 			</classes>
 		</classes>
 	</classes>
+	<loading_classes>
+		<classes directory="Classes">
+			<class file="Constants.lua"/>
+			<class file="ModCore.lua"/>
+			<class file="ModuleBase.lua"/>
+			<class file="Deprecated.lua"/>
+
+			<classes directory="Utils">
+				<class file="Table.lua"/>
+				<class file="Hooks.lua"/>
+				<class file="JSON.lua"/>
+			</classes>
+
+			<classes directory="Frameworks">
+				<class file="FrameworkBase.lua"/>
+				<class file="MapFramework.lua"/>
+			</classes>
+		</classes>
+	</loading_classes>
+	<load_enabled_modules>
+		<value_node value="HooksModule"/>
+		<value_node value="OptionModule"/>
+	</load_enabled_modules>
 	<mission_elements>
 		<value_node value="MoveUnit"/>
 		<value_node value="RotateUnit"/>

@@ -35,10 +35,56 @@ function FileIO:ReadFrom(path, flags, method)
 	end
 end
 
+local function BLTXMLParseData(input)
+	if input == "true" then
+		return true
+	elseif input == "false" then
+		return false
+	elseif tonumber(input) then
+		return tonumber(input)
+	end
+
+	return input
+end
+
+local function BLTXMLToScriptSerializerOutput(input)
+	if input.name == "value_node" then
+		return input.params and BLTXMLParseData(input.params.value)
+	end
+
+	local output = {}
+	output._meta = input.name
+
+	for index, data in ipairs(input) do
+		local converted = BLTXMLToScriptSerializerOutput(data)
+		output[index] = converted
+		output[data.name] = converted
+	end
+
+	for parameter, value in pairs(input.params) do
+		output[parameter] = BLTXMLParseData(value)
+	end
+
+	return output
+end
+
+local function BLTXMLReadConfig(input)
+	input = input:gsub("<!%-%-%s*(.-)%-%->", "") -- Strip any comments just in case one is at the start causing the BLT parser to fail.
+	input = input:gsub("^%s*(.-)%s*$", "%1") -- Trim surrounding white space.
+	return BLTXMLToScriptSerializerOutput(blt.parsexml(input))
+end
+
 function FileIO:ReadConfig(path, tbl)
 	local file = self:Open(path, "r")
 	if file then
-		local config = ScriptSerializer:from_custom_xml(file:read("*all"))
+		local config
+
+		if ScriptSerializer then
+			config = ScriptSerializer:from_custom_xml(file:read("*all"))
+		else
+			config = BLTXMLReadConfig(file:read("*all"))
+		end
+
 		if tbl then
 			for i, var in pairs(config) do
 				if type(var) == "string" then
@@ -46,6 +92,7 @@ function FileIO:ReadConfig(path, tbl)
 				end
 			end
 		end
+
 		file:close()
 		return config
 	else

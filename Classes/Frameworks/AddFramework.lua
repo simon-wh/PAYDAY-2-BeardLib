@@ -31,8 +31,7 @@ function AddFramework:FindMods()
                 BeardLib:Err("Could not read %s", main_file)
             end
 			if FileIO:Exists(add_file) then
-                local data = FileIO:ReadFrom(add_file)
-                local config = ScriptSerializer:from_custom_xml(data)
+                local config = FileIO:ReadConfig(add_file)
                 local directory = config.full_directory or Path:Combine(p, config.directory)
                 BeardLib.Managers.Package:LoadConfig(directory, config)
                 self.add_configs[p] = config

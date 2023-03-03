@@ -34,8 +34,6 @@ function ModCore:init(config_path, load_modules)
     end
 end
 
-local TEXTURE = Idstring("texture")
-
 function ModCore:PostInit(ignored_modules)
     if self._post_init_done then
         return
@@ -76,6 +74,7 @@ function ModCore:PostInit(ignored_modules)
 	self._post_init_done = true
 end
 
+local TEXTURE = Idstring("texture")
 function ModCore:LoadConfigFile(path)
     local config = FileIO:ReadConfig(path)
 
@@ -101,20 +100,21 @@ function ModCore:LoadConfigFile(path)
         end
     end
 
-
-    local icon = Path:Combine(self.ModPath, "icon")
-    local icon_png = icon..".png"
-    local icon_texture = icon..".texture"
-    local found_icon
-    if FileIO:Exists(icon_png) then
-        found_icon = icon_png
-    elseif FileIO:Exists(icon_texture) then
-        found_icon = icon_texture
-    end
-    if found_icon then
-        local ingame_path = Path:Combine("guis/textures/mods/icons", "mod_"..self.ModPath:key())
-        BeardLib.Managers.File:AddFile(TEXTURE, Idstring(ingame_path), found_icon)
-        config.image = ingame_path
+    if not CoreLoadingSetup then
+        local icon = Path:Combine(self.ModPath, "icon")
+        local icon_png = icon..".png"
+        local icon_texture = icon..".texture"
+        local found_icon
+        if FileIO:Exists(icon_png) then
+            found_icon = icon_png
+        elseif FileIO:Exists(icon_texture) then
+            found_icon = icon_texture
+        end
+        if found_icon then
+            local ingame_path = Path:Combine("guis/textures/mods/icons", "mod_"..self.ModPath:key())
+            BeardLib.Managers.File:AddFile(TEXTURE, Idstring(ingame_path), found_icon)
+            config.image = ingame_path
+        end
     end
 
     self._clean_config = deep_clone(config)
@@ -197,7 +197,7 @@ function ModCore:AddModule(module_tbl)
                 else
                     self:Err("An error occurred on initilization of module: %s. Error:\n%s", meta, tostring(node_obj))
                 end
-            elseif not self._config.ignore_errors then
+            elseif not (self._config.ignore_errors or CoreLoadingSetup) then
                 self:Err("Unable to find module with key %s", meta)
             end
         end
