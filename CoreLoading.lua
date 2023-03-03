@@ -20,7 +20,7 @@ core:_copy_module_to_global("CoreTable")
 core:_copy_module_to_global("CoreString")
 core:_copy_module_to_global("CoreApp")
 
-function Idstring(string)
+function Idstring(str)
 	return str
 end
 
