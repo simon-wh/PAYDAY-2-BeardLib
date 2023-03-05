@@ -30,7 +30,7 @@ function FrameworkBase:init()
 	self._log_init = BeardLib.Options:GetValue("LogInit")
 
 	-- Deprecated, try not to use.
-	if self.type_name == AddFramework.type_name then
+	if AddFramework and self.type_name == AddFramework.type_name then
 		BeardLib.Frameworks.base = self
 		BeardLib.managers.BaseFramework = self
 	end

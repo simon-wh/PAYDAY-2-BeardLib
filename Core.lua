@@ -4,12 +4,15 @@ end
 
 BeardLib = {
 	Name = "BeardLib",
-	ModPath = ModPath,
+	ModPath = BeardLibModPath or ModPath,
 	SavePath = SavePath
 }
 
+BeardLibModPath = nil
+
 function BeardLib:Init()
 	Hooks:Call("BeardLibPreInit")
+
 	Global.beardlib_checked_updates = Global.beardlib_checked_updates or {}
 
 	self._call_next_update = {}
@@ -29,10 +32,10 @@ function BeardLib:Init()
 
 	self._classes_to_init = {}
 
-	dofile(ModPath.."Classes/Utils/FileIO.lua")
-	dofile(ModPath.."Classes/Utils/Utils.lua")
-	dofile(ModPath.."Classes/Utils/Path.lua")
-	self._config = FileIO:ReadConfig(ModPath.."main.xml", self)
+	dofile(self.ModPath.."Classes/Utils/FileIO.lua")
+	dofile(self.ModPath.."Classes/Utils/Utils.lua")
+	dofile(self.ModPath.."Classes/Utils/Path.lua")
+	self._config = FileIO:ReadConfig(self.ModPath.."main.xml", self)
 	self.config = self._config
 
 	FileIO:MakeDir(self._config.maps_dir)
@@ -66,14 +69,16 @@ function BeardLib:Init()
 	self.LogSounds = self.Options:GetValue("LogSounds")
 	self.OptimizedMusicLoad = BeardLib.Options:GetValue("OptimizedMusicLoad")
 
-	if self.Options:GetValue("GithubUpdates") then
-		local module = ModAssetsModule:new(self, {id = "simon-wh/PAYDAY-2-BeardLib", _meta = "AssetUpdates", important = true, provider = "github", branch = "master"})
-		self[module._name] = module
-		table.insert(self._modules, module)
-	else
-		local module = ModAssetsModule:new(self, {id = 14924, version = self.config.version, _meta = "AssetUpdates", important = true, provider = "modworkshop"})
-		self[module._name] = module
-		table.insert(self._modules, module)
+	if ModAssetsModule then
+		if self.Options:GetValue("GithubUpdates") then
+			local module = ModAssetsModule:new(self, {id = "simon-wh/PAYDAY-2-BeardLib", _meta = "AssetUpdates", important = true, provider = "github", branch = "master"})
+			self[module._name] = module
+			table.insert(self._modules, module)
+		else
+			local module = ModAssetsModule:new(self, {id = 14924, version = self.config.version, _meta = "AssetUpdates", important = true, provider = "modworkshop"})
+			self[module._name] = module
+			table.insert(self._modules, module)
+		end
 	end
 
 	self:MigrateModSettings()
@@ -96,7 +101,9 @@ function BeardLib:Init()
 end
 
 function BeardLib:LoadClasses(config, prev_dir)
-	config = config or self._config.classes
+	local wanted_meta = CoreLoadingSetup and "loading_classes" or "classes"
+
+	config = config or self._config[wanted_meta]
 	local dir = Path:Combine(prev_dir or self.ModPath, config.directory)
     for _, c in ipairs(config) do
 		if c._meta == "class" then
@@ -116,21 +123,32 @@ function BeardLib:FullyLoadFrameworks()
 	end
 end
 
-function BeardLib:LoadModules(dir)
+function BeardLib:LoadModules(config, dir)
+	config = config or table.list_to_set(self._config.load_enabled_modules)
 	dir = dir or self._config.modules_dir
 	local modules = FileIO:GetFiles(dir)
 	if modules then
 		for _, mdle in pairs(modules) do
-			dofile(Path:Combine(dir, mdle))
+			local dopath = Path:Combine(dir, mdle)
+			if CoreLoadingSetup then
+				local module_name = mdle:match("(.+)%..+")
+				if config[module_name] then
+					dofile(dopath)
+				end
+			else
+				dofile(dopath)
+			end
 		end
 		local folders = FileIO:GetFolders(dir)
 		for _, cat in pairs(folders) do
-			self:LoadModules(Path:CombineDir(dir, cat))
+			self:LoadModules(config, Path:CombineDir(dir, cat))
 		end
 	end
 end
 
 function BeardLib:LoadLocalization()
+	if not LocalizationModule then return end
+
 	local languages = {default = "english.yaml"}
 	for _, file in pairs(FileIO:GetFiles(self._config.localization_dir)) do
 		table.insert(languages, {_meta = "localization", file = file, language = Path:GetFileNameWithoutExtension(file)})
