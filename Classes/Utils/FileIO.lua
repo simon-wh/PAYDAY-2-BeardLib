@@ -271,18 +271,14 @@ function FileIO:DeleteEmptyFolders(path, delete_current)
 	end
 end
 
-function FileIO:MakeDir(path) 
-    if SystemFS and SystemFS.make_dir then
-    	local p
-    	for _, s in pairs(string.split(path, "/")) do
-    		p = p and p .. "/" .. s  or s
-    		if not self:Exists(p) then
-    			SystemFS:make_dir(p)
-    		end
-    	end
-    else
-        os.execute(string.format("mkdir \"%s\"", path))
-    end
+function FileIO:MakeDir(path)
+	local p
+	for _, s in pairs(string.split(path, "/")) do
+		p = p and p .. "/" .. s  or s
+		if not self:Exists(p) then
+			file.CreateDirectory(p)
+		end
+	end
 end
 
 --Changed to SystemFS because blt's one sometimes fucks up the strings.
