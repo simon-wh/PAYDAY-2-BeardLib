@@ -30,26 +30,36 @@ Hooks:Add(peer_send_hook, "BeardLibCustomWeaponFix", function(self, func_name, p
     end
 
     if func_name == "sync_outfit" or string.ends(func_name, "set_unit") then
-        SyncUtils:Send(self, SyncConsts.SendOutfit, SyncUtils:CompactOutfit() .. "|" .. SyncConsts.OutfitVersion)
-        local in_lobby = self:in_lobby() and game_state_machine:current_state_name() ~= "ingame_lobby_menu" and not setup:is_unloading()
-        if in_lobby then
-            self:beardlib_send_modded_weapon(math.random(1, 2)) --Send a random weapon instead of based on weapon skin rarity.
+        local outfit_string = SyncUtils:CompactOutfit()
+        if self._last_sent_beardlib_outfit ~= outfit_string then
+            self._last_sent_beardlib_outfit = outfit_string
+
+            SyncUtils:Send(self, SyncConsts.SendOutfit, outfit_string .. "|" .. SyncConsts.OutfitVersion)
+            local in_lobby = self:in_lobby() and game_state_machine:current_state_name() ~= "ingame_lobby_menu" and not setup:is_unloading()
+            if in_lobby then
+                self:beardlib_send_modded_weapon(math.random(1, 2)) --Send a random weapon instead of based on weapon skin rarity.
+            end
         end
 
         local extra_outfit_string = SyncUtils:ExtraOutfitString()
-        local split_number = SyncConsts.ExtraOutfitSplitSize
-        local current_sub_start = 1
-        local data_length = #extra_outfit_string
-        local index = 0
-        while current_sub_start <= data_length do
-            index = index + 1
-            SyncUtils:Send(self, SyncConsts.SendExtraOutfit .. "|" .. tostring(index), extra_outfit_string:sub(current_sub_start, current_sub_start + (split_number - 1)))
+        if self._last_sent_beardlib_extra_outfit ~= extra_outfit_string then
+            self._last_sent_beardlib_extra_outfit = extra_outfit_string
 
-            current_sub_start = current_sub_start + split_number
+            local split_number = SyncConsts.ExtraOutfitSplitSize
+            local current_sub_start = 1
+            local data_length = #extra_outfit_string
+            local index = 0
+            while current_sub_start <= data_length do
+                index = index + 1
+                SyncUtils:Send(self, SyncConsts.SendExtraOutfit .. "|" .. tostring(index), extra_outfit_string:sub(current_sub_start, current_sub_start + (split_number - 1)))
+
+                current_sub_start = current_sub_start + split_number
+            end
+
+            SyncUtils:Send(self, SyncConsts.SendExtraOutfitDone, tostring(index))
         end
-
-        SyncUtils:Send(self, SyncConsts.SendExtraOutfitDone, tostring(index))
     end
+
     if func_name == "sync_outfit" then
         params[1] = SyncUtils:CleanOutfitString(params[1])
     elseif string.ends(func_name, "set_unit") then
@@ -318,6 +328,10 @@ function NetworkPeer:set_outfit_string_beardlib(outfit_string, outfit_version)
         return
     end
 
+    if self._last_beardlib_outfit == outfit_string then
+        return
+    end
+
     self._last_beardlib_outfit = outfit_string
 
     local old_outfit_string = self._profile.outfit_string
@@ -376,6 +390,10 @@ function NetworkPeer:add_extra_outfit_string_beardlib(section_number, extra_outf
 end
 
 function NetworkPeer:set_extra_outfit_string_beardlib(extra_outfit_string)
+    if self._last_beardlib_extra_outfit == extra_outfit_string then
+        return
+    end
+
     self._last_beardlib_extra_outfit = extra_outfit_string
 
     if extra_outfit_string then
