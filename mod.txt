@@ -10,7 +10,6 @@
 	"color" : "0 0.44 1",
 	"image" : "Assets/guis/textures/beardlib_logo.texture",
 	"hooks" : [
-		{"hook_id" : "core/lib/system/coresystem", "script_path" : "Core.lua"},
-		{"hook_id" : "core/lib/setups/coreloadingsetup", "script_path" : "CoreLoading.lua"}
+		{"hook_id" : "core/lib/system/coresystem", "script_path" : "Core.lua"}
 	]
 }
