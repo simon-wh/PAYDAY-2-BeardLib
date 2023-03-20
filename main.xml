@@ -109,7 +109,6 @@
 		<Hooks directory="Hooks">
 			<hook source_file="core/lib/managers/coresoundenvironmentmanager" file="Fixes.lua"/>
 			<hook source_file="core/lib/managers/coreworldinstancemanager" file="Fixes.lua"/>
-			<hook source_file="core/lib/managers/menu/items/coremenuitemslider" file="Fixes.lua"/>
 			<hook source_file="core/lib/managers/mission/coreelementinstance" file="Fixes.lua"/>
 			<hook source_file="lib/managers/blackmarketmanager" file="Fixes.lua"/>
 			<hook source_file="lib/managers/blackmarketmanager" file="PlayerStyleGloveHooks.lua"/>

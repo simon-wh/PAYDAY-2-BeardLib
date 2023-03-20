@@ -344,19 +344,6 @@ elseif F == "coreelementshape"  or F == "coreelementarea" then
             }))
         end
     end)
-elseif F == "coremenuitemslider" then
-    core:module("CoreMenuItemSlider")
-    --Although slider is supposed to have 5 decimal points(based on decomp), it's 2 by default.
-    Hooks:PostHook(ItemSlider, "init", "BeardLibSliderInit", function(self, row_item)
-        self._decimal_count = 2
-    end)
-
-    --Weirdly the decimal count value is broken, this fixes it.
-    Hooks:PostHook(ItemSlider, "reload", "BeardLibSliderReload", function(self, row_item)
-        if row_item then
-            row_item.gui_slider_text:set_text(self:show_value() and self:value_string() or string.format("%.0f", self:percentage()) .. "%")
-        end
-    end)
 elseif F == "raycastweaponbase" then
     if RaycastWeaponBase._soundfix_should_play_normal then
         return --Don't run if fix installed.

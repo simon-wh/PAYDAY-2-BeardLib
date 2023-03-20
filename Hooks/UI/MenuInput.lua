@@ -55,14 +55,14 @@ function MenuInput:BeardLibMousePressed(o, button, x, y)
             if (item.TYPE == slider or item._parameters.input) then
                 self._current_item = item
                 local title = item._parameters.text_id
+                local value_scale = item._show_scale or 1
                 BeardLib.Managers.Dialog:Input():Show({
                     title = item._parameters.override_title or item._parameters.localize ~= false and managers.localization:text(title) or title,
-                    text = tostring(item._value) or item._parameters.string_value or "",
+                    text = tostring(item._value * value_scale) or item._parameters.string_value or "",
                     filter = item._value and "number",
-                    floats = item._decimal_count ~= 2 and item._decimal_count or nil,
-                    max = item._max,
-                    min = item._min,
-                    step = item._step,
+                    max = item._max * value_scale,
+                    min = item._min * value_scale,
+                    step = item._step * value_scale,
                     force = true,
                     no_blur = true,
                     callback = ClassClbk(self, "ValueEnteredCallback")
@@ -99,7 +99,7 @@ end
 function MenuInput:ValueEnteredCallback(value)
     if self._current_item then
         if self._current_item.set_value then
-            self._current_item:set_value(value)
+            self._current_item:set_value(value / (self._current_item._show_scale or 1))
         end
         self._logic:trigger_item(true, self._current_item)
         self._current_item = nil
