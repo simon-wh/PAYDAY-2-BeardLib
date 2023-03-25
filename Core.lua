@@ -130,6 +130,7 @@ function BeardLib:LoadModules(config, dir)
 	dir = dir or self._config.modules_dir
 	local modules = FileIO:GetFiles(dir)
 	if modules then
+		table.sort(modules) -- Sort for predicatable order on different file systems
 		for _, mdle in pairs(modules) do
 			local dopath = Path:Combine(dir, mdle)
 			if CoreLoadingSetup then
@@ -142,6 +143,7 @@ function BeardLib:LoadModules(config, dir)
 			end
 		end
 		local folders = FileIO:GetFolders(dir)
+		table.sort(folders) -- Sort for predicatable order on different file systems
 		for _, cat in pairs(folders) do
 			self:LoadModules(config, Path:CombineDir(dir, cat))
 		end
