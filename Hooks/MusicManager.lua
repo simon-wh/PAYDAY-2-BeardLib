@@ -187,10 +187,10 @@ function MusicManager:attempt_play(track, event, stop)
 	end
 
 	local volume = next_track.volume or next_event.volume or next_music.volume
-	self._switch_at_end = (next_track.start_source or next_event.allow_switch and #next_event.tracks > 1) and {
+	self._switch_at_end = (next_track.start_source or next_track.allow_switch and #next_event.tracks > 1) and {
 		tracks = next_event.tracks,
 		track_index = next_track.start_source and track_index or self:pick_track_index(next_event.tracks),
-		allow_switch = next_event.allow_switch,
+		allow_switch = next_track.allow_switch,
 		xaudio = next_music.xaudio,
 		volume = volume
 	}

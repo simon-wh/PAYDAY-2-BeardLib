@@ -93,7 +93,13 @@ function HeistMusic:RegisterHook()
 	else
 		dir = self._mod.ModPath
 	end
-	local music = {[self.is_stealth and "stealth" or "heist"] = true, volume = self._config.volume, xaudio = true, events = {}}
+	local music = {
+		[self.is_stealth and "stealth" or "heist"] = true,
+		volume = self._config.volume,
+		allow_switch = NotNil(self._config.allow_switch, true),
+		xaudio = true,
+		events = {}
+	}
 	BeardLib.Utils:SetupXAudio()
 
 	for k,v in ipairs(self._config) do
@@ -106,7 +112,8 @@ function HeistMusic:RegisterHook()
 						start_source = (t.start_source or v.start_source) and self:MakeBuffer(Path:Combine(dir, (t.start_source or v.start_source))),
 						source = (t.source or v.source) and self:MakeBuffer(Path:Combine(dir, (t.source or v.source))),
 						weight = t.weight or v.weight or 1,
-						volume = t.volume or v.volume or music.volume
+						volume = t.volume or v.volume or music.volume,
+						allow_switch = NotNil(t.allow_switch, v.allow_switch, music.allow_switch)
 					})
 				end
 			end
@@ -116,14 +123,16 @@ function HeistMusic:RegisterHook()
 					start_source = v.start_source and self:MakeBuffer(Path:Combine(dir, v.start_source)),
 					source = v.source and self:MakeBuffer(Path:Combine(dir, v.source)),
 					weight = v.alt_chance and (1 - v.alt_chance) * 100 or 1,
-					volume = v.volume or music.volume
+					volume = v.volume or music.volume,
+					allow_switch = NotNil(v.allow_switch, music.allow_switch)
 				})
 				if v.alt_source then -- backwards compat for old alternate track system
 					table.insert(tracks, {
 						start_source = (v.alt_start_source or v.start_source) and self:MakeBuffer(Path:Combine(dir, (v.alt_start_source or v.start_source))),
 						source = v.alt_source and self:MakeBuffer(Path:Combine(dir, v.alt_source)),
 						weight = v.alt_chance and v.alt_chance * 100 or 1,
-						volume = v.volume or music.volume
+						volume = v.volume or music.volume,
+						allow_switch = NotNil(v.allow_switch, music.allow_switch)
 					})
 				end
 			end
@@ -136,7 +145,7 @@ function HeistMusic:RegisterHook()
 			music.events[v.name] = {
 				tracks = tracks,
 				volume = v.volume or music.volume,
-				allow_switch = NotNil(v.allow_switch, true)
+				allow_switch = NotNil(v.allow_switch, music.allow_switch)
 			}
 		end
 	end

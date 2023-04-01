@@ -4,7 +4,13 @@ function MusicModule:RegisterHook()
 	self._config.id = self._config.id or "Err"
 
 	local dir = self._config.directory
-	local music = {menu = self._config.menu, heist = self._config.heist, volume = self._config.volume, events = {}}
+	local music = {
+		menu = self._config.menu,
+		heist = self._config.heist,
+		volume = self._config.volume,
+		allow_switch = NotNil(self._config.allow_switch, true),
+		events = {}
+	}
 
 	for k,v in ipairs(self._config) do
 		if type(v) == "table" and v._meta == "event" then
@@ -18,7 +24,8 @@ function MusicModule:RegisterHook()
 						start_source = start_sauce and (dir and Path:Combine(dir, start_sauce) or start_sauce),
 						source = sauce and (dir and Path:Combine(dir, sauce) or sauce),
 						weight = t.weight or v.weight or 1,
-						volume = t.volume or v.volume or music.volume
+						volume = t.volume or v.volume or music.volume,
+						allow_switch = NotNil(t.allow_switch, v.allow_switch, music.allow_switch)
 					})
 				end
 			end
@@ -28,7 +35,8 @@ function MusicModule:RegisterHook()
 					start_source = v.start_source and (dir and Path:Combine(dir, v.start_source) or v.start_source),
 					source = v.source and (dir and Path:Combine(dir, v.source) or v.source),
 					weight = v.alt_chance and v.alt_chance * 100 or 1,
-					volume = v.volume or music.volume
+					volume = v.volume or music.volume,
+					allow_switch = NotNil(v.allow_switch, music.allow_switch)
 				})
 				if v.alt_source then -- backwards compat for old alternate track system
 					local sauce = v.alt_start_source or v.start_source
@@ -36,7 +44,8 @@ function MusicModule:RegisterHook()
 						start_source = (v.alt_start_source or v.start_source) and (dir and Path:Combine(dir, sauce) or sauce),
 						source = dir and Path:Combine(dir, v.alt_source) or v.alt_source,
 						weight = v.alt_chance and v.alt_chance * 100 or 1,
-						volume = v.volume or music.volume
+						volume = v.volume or music.volume,
+						allow_switch = NotNil(v.allow_switch, music.allow_switch)
 					})
 				end
 			end
@@ -49,7 +58,7 @@ function MusicModule:RegisterHook()
 			music.events[v.name] = {
 				tracks = tracks,
 				volume = v.volume or music.volume,
-				allow_switch = NotNil(v.allow_switch, true)
+				allow_switch = NotNil(v.allow_switch, music.allow_switch)
 			}
 		end
 	end
