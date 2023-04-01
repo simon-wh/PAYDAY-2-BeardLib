@@ -1009,7 +1009,7 @@ elseif F == "blackmarketgui" then
 						local glove_variation_data = variations[equipped_glove_variation]
 
 						if glove_variation_data then
-							
+
 							local texture_path
 							if glove_variation_data.force_icon then
 								texture_path = glove_variation_data.force_icon
@@ -1021,7 +1021,7 @@ elseif F == "blackmarketgui" then
 									guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
 								end
 
-								texture_path = guis_catalog .. "textures/pd2/blackmarket/icons/gloves/" .. glove_id .. "_" .. glove_variation
+								texture_path = guis_catalog .. "textures/pd2/blackmarket/icons/gloves/" .. glove_id .. "_" .. equipped_glove_variation
 							end
 
 							new_data.bitmap_texture = texture_path

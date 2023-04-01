@@ -7,6 +7,15 @@
 
 GlovesModule = GlovesModule or BeardLib:ModuleClass("Gloves", ItemModuleBase)
 
+function GlovesModule:init(...)
+    self.clean_table = table.add(clone(self.clean_table), {
+        {param = "variations", action = "remove_metas"},
+        {param = "variations", action = "no_number_indexes"}
+    })
+
+    return GlovesModule.super.init(self, ...)
+end
+
 function GlovesModule:RegisterHook()
     if not self._config.id then
         self:Err("Cannot add Gloves, no ID specified.")
