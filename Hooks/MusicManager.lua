@@ -186,16 +186,13 @@ function MusicManager:attempt_play(track, event, stop)
 		end
 	end
 
-	local volume = next_track.volume or next_event.volume or next_music.volume
 	self._switch_at_end = (next_track.start_source or next_track.allow_switch and #next_event.tracks > 1) and {
 		tracks = next_event.tracks,
 		track_index = next_track.start_source and track_index or self:pick_track_index(next_event.tracks),
-		allow_switch = next_track.allow_switch,
-		xaudio = next_music.xaudio,
-		volume = volume
+		xaudio = next_music.xaudio
 	}
 
-	self:play(source, next_music.xaudio, volume)
+	self:play(source, next_music.xaudio, next_track.volume)
 
 	return true
 end
@@ -296,15 +293,13 @@ function MusicManager:custom_update(t, dt, paused)
 	elseif self._switch_at_end then
 		if (self._xa_source and self._xa_source:is_closed()) or (gui_ply and gui_ply:current_frame() >= gui_ply:frames()) then
 			local switch = self._switch_at_end
-			local source = switch.tracks[switch.track_index].source
-			local volume = switch.tracks[switch.track_index].volume or switch.volume
-			if switch.allow_switch and #switch.tracks > 1 then
+			local track = switch.tracks[switch.track_index]
+			if track.allow_switch and #switch.tracks > 1 then
 				switch.track_index = self:pick_track_index(switch.tracks)
-				switch.volume = volume
 			else
 				self._switch_at_end = nil
 			end
-			self:play(source, switch.xaudio, volume)
+			self:play(track.source, switch.xaudio, track.volume)
 		end
 	end
 end
