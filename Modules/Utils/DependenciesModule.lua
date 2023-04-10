@@ -109,6 +109,8 @@ function DependenciesModule:AddDepDownload(dep)
         _meta = "AssetUpdates",
         id = dep.id,
         provider = dep.provider,
+        branch = dep.branch,
+        release = dep.release,
         install_directory = dep.install_directory or install_directory[dep.type],
         custom_name = dep.name,
         dont_delete = true
