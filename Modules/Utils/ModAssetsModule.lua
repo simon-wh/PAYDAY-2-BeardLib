@@ -228,8 +228,10 @@ function ModAssetsModule:StoreDownloadedAssets(data, id)
         end
 
         local temp_zip_path = Application:nice_path(BLTModManager.Constants:DownloadsDirectory() .. id .. ".zip")
+        local temp_extract_path = Application:nice_path(BLTModManager.Constants:DownloadsDirectory() .. id)
         local file = io.open(temp_zip_path, "wb+")
 
+        -- Write downloaded data to file
         if file then
             file:write(data)
             file:close()
@@ -238,6 +240,28 @@ function ModAssetsModule:StoreDownloadedAssets(data, id)
             return
         end
 
+        -- Create temporary extract dir, extract there and delete zip
+        if FileIO:DirectoryExists(temp_extract_path) then
+            FileIO:Delete(temp_extract_path)
+        end
+        FileIO:MakeDir(temp_extract_path)
+        unzip(temp_zip_path, temp_extract_path)
+        FileIO:Delete(temp_zip_path)
+
+        -- Check if extraction succeeded
+        local extracted_folders = FileIO:GetFolders(temp_extract_path)
+        local extracted_files = FileIO:GetFiles(temp_extract_path)
+        if not extracted_folders[1] and not extracted_files[1] then
+            BeardLib:log("[ERROR] Assets extraction failed")
+            if config.failed then
+                config.failed()
+            elseif self._mod then
+                mods_menu:SetModFailedWrite(self)
+            end
+            return
+        end
+
+        -- Delete old mod
         if self.config and not self.config.dont_delete and type(self.folder_names) == "table" then
             for _, dir in pairs(self.folder_names) do
                 local path = Path:Combine(self.install_directory, dir)
@@ -257,13 +281,20 @@ function ModAssetsModule:StoreDownloadedAssets(data, id)
             end
         end
 
+        -- Create install dir if needed
         local dir = config.custom_install_directory or self.install_directory
-        if not dir then
+        if not FileIO:DirectoryExists(dir) then
             FileIO:MakeDir(dir)
         end
-        unzip(temp_zip_path, dir)
 
-        FileIO:Delete(temp_zip_path)
+        -- Move extracted assets from temp dir to install dir and delete temp dir
+        for _, v in pairs(extracted_folders) do
+            FileIO:MoveTo(Application:nice_path(temp_extract_path .. "/" .. v), Application:nice_path(dir .. "/" .. v))
+        end
+        for _, v in pairs(extracted_files) do
+            FileIO:MoveTo(Application:nice_path(temp_extract_path .. "/" .. v), Application:nice_path(dir .. "/" .. v))
+        end
+        FileIO:Delete(temp_extract_path)
 
         if config.done_callback then
             config.done_callback()
