@@ -297,7 +297,8 @@ function ModAssetsModule:StoreDownloadedAssets(data, id)
         FileIO:Delete(temp_extract_path)
 
         if config.done_callback then
-            config.done_callback()
+            --Provide the directory of extracted folder
+            config.done_callback(dir .. "/" .. extracted_folders[1])
         end
         self.version = self._new_version
         if config.finish then

@@ -74,8 +74,8 @@ function github:download_file_func(data)
 end
 
 --Callback for updating with the downloaded hash, to not have it show as needing update everytime.
-function github:done_callback()
+function github:done_callback(folder_dir)
     if self.version_file then
-        FileIO:WriteTo(self.version_file, self._new_version)
+        FileIO:WriteTo(folder_dir .. "/" .. "version.txt", self._new_version)
     end
 end
