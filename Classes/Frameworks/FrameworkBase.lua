@@ -15,6 +15,7 @@ FrameworkBase._ignore_folders = {["base"] = true, ["BeardLib"] = true, ["PAYDAY-
 FrameworkBase._ignore_detection_errors = true
 
 FrameworkBase.main_file_name = "main.xml"
+FrameworkBase.loading_scene_file_name = "enable_in_loading_scene"
 FrameworkBase.auto_init_modules = true
 FrameworkBase.type_name = "Base"
 FrameworkBase.menu_color = Color(0.6, 0, 1)
@@ -88,7 +89,16 @@ function FrameworkBase:FindMods()
                 local directory = path:CombineDir(self._directory, folder_name)
                 local main_file = path:Combine(directory, self.main_file_name)
                 if FileIO:Exists(main_file) then
-					if not self._loaded_mods[folder_name] then
+                    local do_load = not self._loaded_mods[folder_name]
+
+                    if CoreLoadingSetup then
+                        local loading_scene_file = path:Combine(directory, self.loading_scene_file_name)
+                        if not FileIO:Exists(loading_scene_file) then
+                            do_load = false
+                        end
+                    end
+
+                    if do_load then
                         self:LoadMod(folder_name, directory, main_file)
                     end
                 elseif not self._ignore_detection_errors and not self._ignored_configs[main_file] then
