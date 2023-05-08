@@ -25,16 +25,28 @@ function AddFramework:FindMods()
             local p = path:CombineDir(self._directory, dir)
             local main_file = path:Combine(p, self.main_file_name)
             local add_file = path:Combine(p, self.add_file)
-            if FileIO:Exists(main_file) then
-                self:LoadMod(dir, p, main_file)
-            elseif not self._ignore_detection_errors then
-                BeardLib:Err("Could not read %s", main_file)
+
+            local do_load = true
+            if CoreLoadingSetup then
+                local loading_scene_file = path:Combine(directory, self.loading_scene_file_name)
+                if not FileIO:Exists(loading_scene_file) then
+                    do_load = false
+                end
             end
-			if FileIO:Exists(add_file) then
-                local config = FileIO:ReadConfig(add_file)
-                local directory = config.full_directory or Path:Combine(p, config.directory)
-                BeardLib.Managers.Package:LoadConfig(directory, config)
-                self.add_configs[p] = config
+
+            if do_load then
+                if FileIO:Exists(main_file) then
+                    self:LoadMod(dir, p, main_file)
+                elseif not self._ignore_detection_errors then
+                    BeardLib:Err("Could not read %s", main_file)
+                end
+
+    			if FileIO:Exists(add_file) then
+                    local config = FileIO:ReadConfig(add_file)
+                    local directory = config.full_directory or Path:Combine(p, config.directory)
+                    BeardLib.Managers.Package:LoadConfig(directory, config)
+                    self.add_configs[p] = config
+                end
             end
         end
     end
