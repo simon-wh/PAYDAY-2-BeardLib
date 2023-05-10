@@ -72,7 +72,7 @@ end
 
 function Path:CombineDir(...)
 	local s = self:Combine(...)
-	if string.ends(s) ~= "/" then
+	if not string.ends(s, "/") then
 		s = s .. "/"
 	end
 	return s
