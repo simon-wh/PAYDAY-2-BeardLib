@@ -124,8 +124,8 @@ function MusicManager:pick_track_index(tracks)
 	local roll = math.random(total_w)
 	local index = 0
 	while roll > 0 do
-		index = index + 1
-		roll = roll - (tracks[(index % #tracks) + 1].weight or 1)
+		index = ((index + 1) % #tracks) + 1
+		roll = roll - (tracks[index].weight or 1)
 	end
 	return index
 end
