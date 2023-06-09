@@ -11,7 +11,7 @@ function Sync:SyncGameSettings(peer_id)
         else
             LuaNetworking:SendToPeers(sync_game_settings_id, data)
         end
-	managers.platform:refresh_rich_presence()
+		managers.platform:refresh_rich_presence_state()
     end
 end
 
