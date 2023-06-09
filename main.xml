@@ -26,10 +26,6 @@
 			<add from_db="true" unload="true">
 				<physic_effect path="physic_effects/push_sphere"/>
 
-				<unit path="core/units/run_sequence_dummy/run_sequence_dummy"/>
-				<object path="core/units/run_sequence_dummy/run_sequence_dummy"/>
-				<sequence_manager path="core/units/run_sequence_dummy/run_sequence_dummy"/>
-
 				<object path="units/dev_tools/mission_elements/point_interaction/interaction_dummy"/>
 				<sequence_manager path="units/dev_tools/mission_elements/point_interaction/interaction_dummy"/>
 				<unit path="units/dev_tools/mission_elements/point_interaction/interaction_dummy"/>
