@@ -188,9 +188,9 @@ function ModAssetsModule:DownloadFailed()
 end
 
 function ModAssetsModule:ViewMod()
-    local url = ModCore:GetRealFilePath(self.provider.page_url, self)
-    if Steam:overlay_enabled() then
-		Steam:overlay_activate("url", url)
+	local url = ModCore:GetRealFilePath(self.provider.page_url, self)
+	if managers.network and managers.network.account and managers.network.account:is_overlay_enabled() then
+		managers.network.account:overlay_activate("url", url)
 	else
 		os.execute("cmd /c start " .. url)
 	end
