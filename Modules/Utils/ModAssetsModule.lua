@@ -114,7 +114,7 @@ function ModAssetsModule:RetrieveCurrentVersion()
 end
 
 function ModAssetsModule:CheckVersion(force)
-    if not force and self._mod:GetSettings("IgnoreUpdates") == true then
+    if not force and self._mod:GetSetting("IgnoreUpdates") == true then
         return
     end
 
