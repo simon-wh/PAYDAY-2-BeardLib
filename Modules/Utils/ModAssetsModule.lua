@@ -202,7 +202,7 @@ function ModAssetsModule:_DownloadAssets(data)
     dohttpreq(download_url, ClassClbk(self, "StoreDownloadedAssets"), self._mod and ClassClbk(BeardLib.Menus.Mods, "SetModProgress", self) or nil)
 end
 
-function ModAssetsModule:StoreDownloadedAssets(data, id)
+function ModAssetsModule:StoreDownloadedAssets(data, id, request_info)
     local config = self.config
     local mods_menu = BeardLib.Menus.Mods
     local coroutine = mods_menu._menu._ws:panel():panel({})
@@ -217,7 +217,7 @@ function ModAssetsModule:StoreDownloadedAssets(data, id)
 
         BeardLib:log("[INFO] Finished downloading assets")
 
-        if string.is_nil_or_empty(data) then
+        if not request_info.querySucceeded or string.is_nil_or_empty(data) then
             BeardLib:log("[ERROR] Assets download failed, received data was invalid")
             if config.failed then
                 config.failed()

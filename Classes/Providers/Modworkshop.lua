@@ -19,8 +19,8 @@ function mws:check_func()
         return
     end
     local check_url = ModCore:GetRealFilePath(mws.check_url, self)
-    dohttpreq(check_url, function(data, id)
-        if data then
+    dohttpreq(check_url, function(data, id, request_info)
+        if request_info.querySucceeded and data then
             data = string.sub(data, 0, #data - 1)
             local not_bool = (data ~= "false" and data ~= "true")
             local length_acceptable = (string.len(data) > 0 and string.len(data) <= 64)
