@@ -309,6 +309,10 @@ function ModAssetsModule:StoreDownloadedAssets(data, id, request_info)
         if alive(coroutine) then
             coroutine:parnet():remove(coroutine)
         end
+
+        if self.id then
+            Global.beardlib_checked_updates[self.id] = nil --check again later for hotfixes.
+        end
     end)
 end
 
