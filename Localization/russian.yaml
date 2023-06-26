@@ -64,8 +64,8 @@ beardlib_achieves_reward_exp: "Опыт"
 beardlib_achieves_reward_cash: "Наличные"
 beardlib_achieves_reward_offshore: "Офшорный счет"
 beardlib_achieves_reward_cc: "Монеты Континенталя"
-beardlib_achieves_hidden: "Hidden Achievement"
-beardlib_achieves_hidden_desc: "Details will be revealed once the achievement is unlocked."
+beardlib_achieves_hidden: "Скрытое достижение"
+beardlib_achieves_hidden_desc: "Подробности будут видны, когда достижение будет разблокировано."
 beardlib_log_sounds: "Регистрировать ID звуков"
 beardlib_log_sounds_help: "Регистрировать каждый проигрываемый звуковой ID. Может быть полезно в ситуации, когда вы хотите заменить существующий звук, но не знаете его ID."
 beardlib_found_errors: "Данные моды имеют ошибки"
@@ -91,27 +91,27 @@ beardlib_mod_by: "От $author"
 beardlib_updates_download_now: "Загрузить"
 beardlib_mod_type_Add: "Аддон"
 beardlib_mod_type_Map: "Карта"
-beardlib_mod_type_Base: "Base"
-beardlib_mod_disabled: "Disabled"
+beardlib_mod_type_Base: "База"
+beardlib_mod_disabled: "Отключено"
 beardlib_waiting_update: "Доступно обновление"
 beardlib_show_errors_dialog: "Показывать диалоговое окно ошибок при входе в главное меню"
 beardlib_show_errors_dialog_help: |
     Если в моде будут какие-либо критические ошибки при загрузке (например, из-за устаревшей версии BeardLib), он проинформирует вас об этом,
     чтобы вы могли или обновить мод, или удалить его.
     Примечание: не выключайте данную опцию, если вы используете режим разрабочика.
-beardlib_mod_develop_mode: "Develop Mode"
-beardlib_mod_develop_mode_help: "By activating develop mode for the mod, auto uppdates will be disabled and things such as auto generated addfiles will refresh each reload."
-beardlib_mod_optional_version: "Optional Version"
+beardlib_mod_develop_mode: "Режим разработчика"
+beardlib_mod_develop_mode_help: "При активации режима разработчика для мода автоматические обновления будут отключены, а такие вещи, как автоматически сгенерированные файлы дополнений, будут обновляться при каждой перезагрузке."
+beardlib_mod_optional_version: "Дополнительная версия"
 beardlib_mod_optional_version_help: | 
-    Selecting a optional version will switch your auto updates to that version.
-    These are likely in an expermiental state and may contain new features and bugs.
-beardlib_achieves_no_pkg: "Select a package on the left panel to show the achievements related to it."
-beardlib_log_init: "Log initialization of mods"
-beardlib_log_init_help: "Logs initialization of mods when they are initialized."
-beardlib_custom_maps_only: "Custom Maps Only"
-beardlib_github_updates: "GitHub / Beta Updates"
+    Выбор дополнительной версии переключит ваши автоматические обновления на эту версию.
+    Вероятно, они находятся в экспериментальном состоянии и могут содержать новые функции и ошибки.
+beardlib_achieves_no_pkg: "Выберите позицию на панели слева, чтобы отобразить связанные с ним достижения."
+beardlib_log_init: "Лог инициализации модов"
+beardlib_log_init_help: "Записывает в лог инициализацию модов при их инициализации."
+beardlib_custom_maps_only: "Только пользовательские карты"
+beardlib_github_updates: "GitHub / Beta обновления"
 beardlib_github_updates_help: |
-    By enabling this, you will get updates from GitHub rather than modworkshop.
-    The GitHub version is in an experimental state and may have new features and bugs.
-bm_menu_glove_variations: "Customize Gloves"
-bm_menu_btn_customize_gloves: "Customize Gloves"
+    Включив это, вы будете получать обновления с GitHub, а не с modworkshop.
+    Версия GitHub находится в экспериментальном состоянии и может содержать новые функции и ошибки.
+bm_menu_glove_variations: "Настраиваемые перчатки"
+bm_menu_btn_customize_gloves: "Настраиваемые перчатки"

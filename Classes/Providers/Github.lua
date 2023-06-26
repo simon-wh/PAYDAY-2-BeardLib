@@ -28,8 +28,8 @@ function github:check_func()
     end
 
     local check_url = ModCore:GetRealFilePath(check_url, self.config)
-    dohttpreq(check_url, function(data, id)
-        if data then
+    dohttpreq(check_url, function(data, id, request_info)
+        if request_info.querySucceeded and data then
             data = json.decode(data)
             if data.message == "Not Found" then
                 self:Err("GitHub provider not setup properly. Check if the branch and ID are correct")

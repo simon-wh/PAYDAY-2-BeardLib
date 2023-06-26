@@ -144,8 +144,8 @@ function ModAssetsModule:_CheckVersion(force)
     end
     local version_url = ModCore:GetRealFilePath(self.provider.version_api_url, self)
     local loc = managers.localization
-    dohttpreq(version_url, function(data, id)
-        if data and (not self.provider.version_is_number or tonumber(data)) and tostring(data):len() <= 64 then --Limiting versions to 64 characters so errors won't show as versions
+    dohttpreq(version_url, function(data, id, request_info)
+        if request_info.querySucceeded and (data and (not self.provider.version_is_number or tonumber(data)) and tostring(data):len() <= 64) then --Limiting versions to 64 characters so errors won't show as versions
             local version_check = not self.config.version_is_number or ((tonumber(self.version) and tonumber(data)) and tonumber(self.version) < tonumber(data))
             if version_check then
                 self._new_version = data
@@ -156,7 +156,7 @@ function ModAssetsModule:_CheckVersion(force)
                 end
             end
         else
-            self:Err("Unable to parse string '%s' as a version number", data)
+            self:Err("Unable to parse version of mod %s. Provider %s, Id: %s", self._mod.Name, self.config.provider, self.id)
         end
     end)
 end
@@ -202,7 +202,7 @@ function ModAssetsModule:_DownloadAssets(data)
     dohttpreq(download_url, ClassClbk(self, "StoreDownloadedAssets"), self._mod and ClassClbk(BeardLib.Menus.Mods, "SetModProgress", self) or nil)
 end
 
-function ModAssetsModule:StoreDownloadedAssets(data, id)
+function ModAssetsModule:StoreDownloadedAssets(data, id, request_info)
     local config = self.config
     local mods_menu = BeardLib.Menus.Mods
     local coroutine = mods_menu._menu._ws:panel():panel({})
@@ -217,7 +217,7 @@ function ModAssetsModule:StoreDownloadedAssets(data, id)
 
         BeardLib:log("[INFO] Finished downloading assets")
 
-        if string.is_nil_or_empty(data) then
+        if not request_info.querySucceeded or string.is_nil_or_empty(data) then
             BeardLib:log("[ERROR] Assets download failed, received data was invalid")
             if config.failed then
                 config.failed()
@@ -308,6 +308,10 @@ function ModAssetsModule:StoreDownloadedAssets(data, id)
         end
         if alive(coroutine) then
             coroutine:parnet():remove(coroutine)
+        end
+
+        if self.id then
+            Global.beardlib_checked_updates[self.id] = nil --check again later for hotfixes.
         end
     end)
 end
