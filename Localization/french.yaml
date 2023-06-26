@@ -65,9 +65,9 @@ beardlib_achieves_reward_cash: "Monnaie dépensable"
 beardlib_achieves_reward_offshore: "Monnaie offshore"
 beardlib_achieves_reward_cc: "Pièces Continentaux" @TODO Vérifier la trad offi
 beardlib_achieves_hidden: "Succès cachés"
-beardlib_achieves_hidden_desc: "Details will be revealed once the achievement is unlocked."
-beardlib_log_sounds: "Inscrit les ID des sons"
-beardlib_log_sounds_help: "Inscrit chaque ID de son arrivant. Cela est utile quand vous voulez remplacer les sons existant mais vous ne savez pas l'ID"
+beardlib_achieves_hidden_desc: "Les détails seront révélés une fois le succès débloqué."
+beardlib_log_sounds: "Log les ID des sons"
+beardlib_log_sounds_help: "Log chaque ID de son arrivant. Cela est utile quand vous voulez remplacer les sons existant mais vous ne savez pas l'ID"
 beardlib_found_errors: "Un ou plusieurs mods Beardlib ont atteint une erreur"
 beardlib_errors_tip: |
     C'est votre devoir de sortir vos mods vide d'erreurs
@@ -76,7 +76,7 @@ beardlib_optimized_music_load: "Chargement de musique optimisée"
 beardlib_optimized_music_load_help: |
     Charge la musique personnalisée uniquement si jouée.
     Peut provoquer un léger ralentissement en changeant de chanson mais cela aidera pour les crashs dû à la limite de ram de 32bit.
-beardlib_errors_dialog: "Montrer la boîte de dialogue"
+beardlib_errors_dialog: "Montrer la boîte de dialogue des erreurs"
 beardlib_update: "Mise à jour"
 beardlib_waiting_updates: "Mise(s) à jour disponible"
 beardlib_mod_enabled: "Activé"
@@ -85,23 +85,23 @@ beardlib_mod_enabled_help: |
     Si un mod est désactivé aucun code sera effectué.
     Les mods BLT ne peuvent pas être désactivés par Beardlib. Vous devez les désactiver par BLT
 beardlib_mod_ignore_updates: "Ignorer les mises à jour"
-beardlib_mod_ignore_updates_help: "Doit Beardlib ignorer les mises à jour entrants de ce mod ?"
+beardlib_mod_ignore_updates_help: "Beardlib devrait ignorer les mises à jour entrants de ce mod ?"
 beardlib_mod_settings: "Paramètres du mod - $mod"
 beardlib_mod_by: "Par $author"
 beardlib_updates_download_now: "Téléchargement"
 beardlib_mod_type_Add: Ajout
 beardlib_mod_type_Map: Carte
 beardlib_mod_type_Base: "Base"
-beardlib_mod_disabled: "Disabled"
+beardlib_mod_disabled: "Désactivé"
 beardlib_waiting_update: "Mise à jour disponible"
 beardlib_show_errors_dialog: "Montrer les dialogues d'erreur en entrant dans le menu principal"
 beardlib_show_errors_dialog_help: |
     Si le mod atteint une erreur fatale (e.g. BeardLib obsolète) en chargeant, normalement cela vous en informera
     Donc vous pouvez soit la mettre à jour ou la supprimer
     Note : Vous devriez faire ça avec le mode développeur
-beardlib_mod_develop_mode: "Develop Mode"
-beardlib_mod_develop_mode_help: "By activating develop mode for the mod, auto uppdates will be disabled and things such as auto generated addfiles will refresh each reload."
-beardlib_mod_optional_version: "Optional Version"
+beardlib_mod_develop_mode: "Mode Développeur"
+beardlib_mod_develop_mode_help: "En activant le mode développeur, les mises à jour automatique seront désactivées et la génération des fichiers addfiles sera rafraichi à chaque rechargement."
+beardlib_mod_optional_version: "Version Optionnelle"
 beardlib_mod_optional_version_help: | 
     Selecting a optional version will switch your auto updates to that version.
     These are likely in an expermiental state and may contain new features and bugs.
