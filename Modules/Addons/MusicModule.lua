@@ -58,7 +58,8 @@ function MusicModule:RegisterHook()
 			music.events[v.name] = {
 				tracks = tracks,
 				volume = v.volume or music.volume,
-				allow_switch = NotNil(v.allow_switch, music.allow_switch)
+				allow_switch = NotNil(v.allow_switch, music.allow_switch),
+				play_order = NotNil(v.play_order, music.play_order, "random")
 			}
 		end
 	end
