@@ -24,6 +24,10 @@ function Idstring(str)
 	return str
 end
 
+function string:id()
+	return Idstring(self)
+end
+
 dofile(BeardLibModPath .. "Core.lua")
 
 -- Cleanup most of important globals that might accidentally trigger something else.

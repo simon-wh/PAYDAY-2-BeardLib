@@ -250,7 +250,7 @@ function InstanceModule:init(...)
     self._levels_less_path = self._inner_dir:gsub("levels/", "")
     self._level_dir = "levels/instances/"..self._config.id
     self._world_path = Path:Combine(self.levels_folder, self._config.id, "world")
-    BeardLib.Frameworks.Map._loaded_instances[self._world_path] = self --long ass line
+    BeardLib.Frameworks.Base._loaded_instances[self._world_path] = self --long ass line
 
     return true
 end

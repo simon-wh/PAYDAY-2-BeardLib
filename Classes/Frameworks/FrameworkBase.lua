@@ -15,10 +15,13 @@ FrameworkBase._ignore_folders = {["base"] = true, ["BeardLib"] = true, ["PAYDAY-
 FrameworkBase._ignore_detection_errors = true
 
 FrameworkBase.main_file_name = "main.xml"
+FrameworkBase.add_file = "add.xml"
 FrameworkBase.loading_scene_file_name = "enable_in_loading_scene"
 FrameworkBase.auto_init_modules = true
 FrameworkBase.type_name = "Base"
 FrameworkBase.menu_color = Color(0.6, 0, 1)
+FrameworkBase.add_configs = {}
+FrameworkBase._loaded_instances = {}
 
 function FrameworkBase:init()
 	Hooks:Call("BeardLibFrameworksInit", self)
@@ -88,6 +91,8 @@ function FrameworkBase:FindMods()
             if not self._ignore_folders[folder_name] then
                 local directory = path:CombineDir(self._directory, folder_name)
                 local main_file = path:Combine(directory, self.main_file_name)
+				local add_file = path:Combine(directory, self.add_file)
+
                 if FileIO:Exists(main_file) then
                     local do_load = not self._loaded_mods[folder_name]
 
@@ -101,6 +106,14 @@ function FrameworkBase:FindMods()
                     if do_load then
                         self:LoadMod(folder_name, directory, main_file)
                     end
+
+
+					if FileIO:Exists(add_file) then
+						local config = FileIO:ReadConfig(add_file)
+						local directory = config.full_directory or Path:Combine(directory, config.directory)
+						BeardLib.Managers.Package:LoadConfig(directory, config)
+						self.add_configs[directory] = config
+					end
                 elseif not self._ignore_detection_errors and not self._ignored_configs[main_file] then
                     self:log("Could not read %s", main_file)
                     self._ignored_configs[main_file] = true
@@ -138,6 +151,7 @@ function FrameworkBase:InitMods()
 end
 
 function FrameworkBase:RegisterHooks()
+	self:AddCustomContact()
 	self:SortMods()
     for _, mod in pairs(self._sorted_mods) do
         if not mod._disabled and mod._modules then
@@ -152,6 +166,7 @@ function FrameworkBase:RegisterHooks()
             end
         end
     end
+    Hooks:PostHook(NarrativeTweakData, "init", "MapFrameworkAddFinalNarrativeData", SimpleClbk(NarrativeTweakData.set_job_wrappers))
 end
 
 local cap = string.capitalize
@@ -224,5 +239,18 @@ function FrameworkBase:RemoveMod(folder_name)
 		table.delete(self._waiting_to_load, mod)
 		self._loaded_mods[folder_name] = nil
 		mod._framework = nil
+	end
+end
+
+function FrameworkBase:AddCustomContact()
+	if not FrameworkBase._added_contact then
+		FrameworkBase._added_contact = true
+		ContactModule:new(BeardLib, {
+			id = "custom",
+			name_id = "heist_contact_custom",
+			description_id = "heist_contact_custom_description",
+			package = "packages/contact_bain",
+			assets_gui = "guis/mission_briefing/preload_contact_bain"
+		}):RegisterHook()
 	end
 end

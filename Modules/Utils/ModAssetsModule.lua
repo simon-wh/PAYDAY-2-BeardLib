@@ -329,7 +329,7 @@ end
 
 DownloadCustomMap = DownloadCustomMap or class(ModAssetsModule)
 function DownloadCustomMap:init()
-    self.config = {custom_install_directory = BeardLib.Frameworks.Map._directory, dont_delete = true}
+    self.config = {custom_install_directory = BeardLib.Frameworks.Base._directory, dont_delete = true}
 end
 
 function DownloadCustomMap:DownloadFailed()

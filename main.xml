@@ -275,6 +275,10 @@
 			<class file="ModuleBase.lua"/>
 			<class file="Deprecated.lua"/>
 
+			<classes directory="Managers">
+				<class file="PackageManager.lua"/>
+			</classes>
+
 			<classes directory="Utils">
 				<class file="Table.lua"/>
 				<class file="Hooks.lua"/>
