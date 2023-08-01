@@ -54,7 +54,7 @@ function BeardLibModsMenu:CreateItems(menu)
         count_as_aligned = true,
         size = 32
     })
-    local text =  self._top:FitDivider({
+    self._top:FitDivider({
         name = "title",
         size = 24,
         position = "Centery",
@@ -273,6 +273,9 @@ function BeardLibModsMenu:AddMod(mod, framework)
             })
         end
     else
+        if updates[1] then
+            text("Title", loc:text("beardlib_version", {version = tostring(updates[1].version)}), {text_align = "center"})
+        end
         mod_item:Button({
             name = "Download",
             on_callback = ClassClbk(self, "BeginModDownload", updates[1]),
@@ -600,7 +603,7 @@ function BeardLibModsMenu:SetModNeedsUpdate(module, new_version)
                 if item.update == module then
                     item:SetIndex(1)
                     local download = item:GetItem("Download")
-                    download.help = new_version
+                    download.help = tostring(new_version)
                     download:SetEnabled(true)
                 end
             end

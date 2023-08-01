@@ -26,9 +26,13 @@ function Version:init(parse)
 end
 
 function Version:VersionTable(ver)
+	if not ver and not self._value then
+		return { numbers = { 1 } }
+	end
+
 	ver = ver or self
 	local str = type_name(ver) == "Version" and ver._value or tostring(ver)
-	if string.begins(str, "v") then --v1 = 1
+	if string.begins(str, "v") or string.begins(str, "r") then --v1 = 1 / r1 = 1
 		str = str:sub(2)
 	end
 	if string.begins(str, ".") then -- .1 = 0.1
@@ -50,8 +54,9 @@ function Version:VersionTable(ver)
 	return tbl
 end
 
-function Version:VersionTables(a, b)
-	return self:VersionTable(a), self:VersionTable(b)
+---@deprecated
+function Version:VersionTables(b)
+	return self:VersionTable(), b:VersionTable()
 end
 
 function Version:__tostring()
@@ -59,7 +64,7 @@ function Version:__tostring()
 end
 
 function Version:Compare(other, ret_clbk, default_ret)
-	local other_tbl, tbl = self:VersionTables(other)
+	local tbl, other_tbl = self:VersionTable(), other:VersionTable()
 
 	local largest_len = math.max(#tbl.numbers, #other_tbl.numbers)
 
@@ -91,7 +96,7 @@ end
 
 function Version:__le(other)
 	return self:Compare(other, function(a, b)
-		return a < b
+		return a <= b
 	end, true)
 end
 

@@ -35,6 +35,7 @@ function BeardLib:Init()
 	dofile(self.ModPath.."Classes/Utils/FileIO.lua")
 	dofile(self.ModPath.."Classes/Utils/Utils.lua")
 	dofile(self.ModPath.."Classes/Utils/Path.lua")
+	dofile(self.ModPath.."Classes/Utils/Version.lua")
 	self._config = FileIO:ReadConfig(self.ModPath.."main.xml", self)
 	self.config = self._config
 
@@ -66,7 +67,7 @@ function BeardLib:Init()
 		end
 	end
 
-	self.Version = tonumber(self.config.version)
+	self.Version = Version:new(self.config.version)
 	self.DevMode = self.Options:GetValue("DevMode")
 	self.LogSounds = self.Options:GetValue("LogSounds")
 	self.OptimizedMusicLoad = BeardLib.Options:GetValue("OptimizedMusicLoad")
@@ -77,7 +78,7 @@ function BeardLib:Init()
 			self[module._name] = module
 			table.insert(self._modules, module)
 		else
-			local module = ModAssetsModule:new(self, {id = 14924, version = self.config.version, _meta = "AssetUpdates", important = true, provider = "modworkshop"})
+			local module = ModAssetsModule:new(self, {id = 14924, semantic_version = true, version = self.config.version, _meta = "AssetUpdates", important = true, provider = "modworkshop"})
 			self[module._name] = module
 			table.insert(self._modules, module)
 		end
