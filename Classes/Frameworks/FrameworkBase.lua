@@ -93,6 +93,7 @@ function FrameworkBase:FindMods()
                 local main_file = path:Combine(directory, self.main_file_name)
 				local add_file = path:Combine(directory, self.add_file)
 
+				-- Prevent loading when DB isn't available
 				if DB then
 					self:FindOverrides(directory)
 				end
@@ -145,6 +146,21 @@ FrameworkBase._overrides_folders_of_interest = {
 	units = true
 }
 
+FrameworkBase._default_overrides_extensions = {
+	material_config = true,
+	texture = true,
+	unit = true,
+	object = true,
+	merged_font = true,
+	font = true,
+	model = true,
+	bnk = true,
+	stream = true,
+	animation = true,
+	strings = true,
+	effect = true
+}
+
 --- Attempts to load overrides from all mods in the framework.
 --- It doesn't require the mod to be specifically made for BeardLib so it attempts to load regular mod_overrides mods
 function FrameworkBase:FindOverrides(mod_path, path, check_all)
@@ -153,12 +169,16 @@ function FrameworkBase:FindOverrides(mod_path, path, check_all)
 	if path and check_all then
 		for _, file in pairs(FileIO:GetFiles(full_path)) do
 			local file_path = Path:Combine(mod_path, path, file)
+			local ext = Path:GetFileExtension(file_path):id()
 
-			local file_id = Path:Combine(path, Path:GetFileNameNoExt(file)):id()
-			local ext_id = Path:GetFileExtension(file_path):id()
+			-- Avoid loading things that are already handled by the game
+			if self.type_name ~= AddFramework.type_name or not self._default_overrides_extensions[ext] then
+				local file_id = Path:Combine(path, Path:GetFileNameNoExt(file)):id()
+				local ext_id = ext:id()
 
-			if DB:has(ext_id, file_id) then
-				BLT.AssetManager:CreateEntry(file_id, ext_id, file_path)
+				if DB:has(ext_id, file_id) then
+					BLT.AssetManager:CreateEntry(file_id, _id, file_path)
+				end
 			end
 		end
 	end
