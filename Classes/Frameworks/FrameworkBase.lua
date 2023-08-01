@@ -93,6 +93,10 @@ function FrameworkBase:FindMods()
                 local main_file = path:Combine(directory, self.main_file_name)
 				local add_file = path:Combine(directory, self.add_file)
 
+				if DB then
+					self:FindOverrides(directory)
+				end
+
                 if FileIO:Exists(main_file) then
                     local do_load = not self._loaded_mods[folder_name]
 
@@ -120,6 +124,47 @@ function FrameworkBase:FindMods()
                 end
             end
         end
+	end
+end
+
+-- Folders the function should look in
+FrameworkBase._overrides_folders_of_interest = {
+	anims = true,
+	core = true,
+	environments = true,
+	fonts = true,
+	gamedata = true,
+	guis = true,
+	movies = true,
+	physic_effects = true,
+	settings = true,
+	shaders = true,
+	soundbanks = true,
+	strings = true,
+	units = true
+}
+
+--- Attempts to load overrides from all mods in the framework.
+--- It doesn't require the mod to be specifically made for BeardLib so it attempts to load regular mod_overrides mods
+function FrameworkBase:FindOverrides(mod_path, path, check_all)
+	local full_path = Path:Combine(mod_path, path)
+
+	if path and check_all then
+		for _, file in pairs(FileIO:GetFiles(full_path)) do
+			local file_path = Path:Combine(mod_path, path, file)
+
+			local file_id = Path:Combine(path, Path:GetFileNameNoExt(file)):id()
+			local ext_id = Path:GetFileExtension(file_path):id()
+
+			if DB:has(ext_id, file_id) then
+				BLT.AssetManager:CreateEntry(file_id, ext_id, file_path)
+			end
+		end
+	end
+	for _, folder in pairs(FileIO:GetFolders(full_path)) do
+		if check_all or self._overrides_folders_of_interest[folder] then
+			self:FindOverrides(mod_path, path and Path:Combine(path, folder) or folder, true)
+		end
 	end
 end
 
