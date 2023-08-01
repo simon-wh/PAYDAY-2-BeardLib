@@ -177,7 +177,7 @@ function FrameworkBase:FindOverrides(mod_path, path, check_all)
 				local ext_id = ext:id()
 
 				if DB:has(ext_id, file_id) then
-					BLT.AssetManager:CreateEntry(file_id, _id, file_path)
+					BLT.AssetManager:CreateEntry(file_id, ext_id, file_path)
 				end
 			end
 		end
