@@ -97,6 +97,7 @@ function FrameworkBase:FindMods()
 					self:FindOverrides(directory)
 				end
 
+				-- Read main.xml
                 if FileIO:Exists(main_file) then
                     local do_load = not self._loaded_mods[folder_name]
 
@@ -110,18 +111,18 @@ function FrameworkBase:FindMods()
                     if do_load then
                         self:LoadMod(folder_name, directory, main_file)
                     end
-
-
-					if FileIO:Exists(add_file) then
-						local config = FileIO:ReadConfig(add_file)
-						local directory = config.full_directory or Path:Combine(directory, config.directory)
-						BeardLib.Managers.Package:LoadConfig(directory, config)
-						self.add_configs[directory] = config
-					end
                 elseif not self._ignore_detection_errors and not self._ignored_configs[main_file] then
                     self:log("Could not read %s", main_file)
                     self._ignored_configs[main_file] = true
                 end
+
+				-- Read add.xml
+				if FileIO:Exists(add_file) then
+					local config = FileIO:ReadConfig(add_file)
+					local directory = config.full_directory or Path:Combine(directory, config.directory)
+					BeardLib.Managers.Package:LoadConfig(directory, config)
+					self.add_configs[directory] = config
+				end
             end
         end
 	end
