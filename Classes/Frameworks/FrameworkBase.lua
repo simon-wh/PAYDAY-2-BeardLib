@@ -31,6 +31,7 @@ function FrameworkBase:init()
 	self._loaded_mods = {}
 	self._sorted_mods = {}
 	self._waiting_to_load = {}
+	self._overridden_files = {}
 	self._log_init = BeardLib.Options:GetValue("LogInit")
 
 	-- Deprecated, try not to use.
@@ -77,8 +78,22 @@ end
 
 function FrameworkBase:Load()
 	Hooks:Call("BeardLibFrameworksLoad", self)
+	if DB then
+		self:FindAlreadyOverriden()
+	end
 	self:FindMods()
 	self:SortMods()
+end
+
+--- Search for files that were overriden by mod_overrides and ignore them in other folders
+function FrameworkBase:FindAlreadyOverriden()
+	for _, mod in pairs(DB:mods()) do
+		if mod.enabled then
+			for _, file in pairs(mod.files) do
+				self._overridden_files[file] = true
+			end
+		end
+	end
 end
 
 function FrameworkBase:FindMods()
@@ -158,11 +173,14 @@ function FrameworkBase:FindOverrides(mod_path, path, check_all)
 
 			-- Avoid loading things that are already handled by the game
 			if self.type_name ~= AddFramework.type_name then
-				local file_id = Path:Combine(path, Path:GetFileNameNoExt(file)):id()
+				local file_id =  Path:Combine(path, Path:GetFileNameNoExt(file)):id()
 				local ext_id = ext:id()
 
-				if DB:has(ext_id, file_id) then
+				local file_key = Path:Combine(path, file)
+				-- Only override once
+				if not self._overridden_files[file_key] and DB:has(ext_id, file_id) then
 					BLT.AssetManager:CreateEntry(file_id, ext_id, file_path)
+					self._overridden_files[file_key] = true
 				end
 			end
 		end
