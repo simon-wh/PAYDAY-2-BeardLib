@@ -146,21 +146,6 @@ FrameworkBase._overrides_folders_of_interest = {
 	units = true
 }
 
-FrameworkBase._default_overrides_extensions = {
-	material_config = true,
-	texture = true,
-	unit = true,
-	object = true,
-	merged_font = true,
-	font = true,
-	model = true,
-	bnk = true,
-	stream = true,
-	animation = true,
-	strings = true,
-	effect = true
-}
-
 --- Attempts to load overrides from all mods in the framework.
 --- It doesn't require the mod to be specifically made for BeardLib so it attempts to load regular mod_overrides mods
 function FrameworkBase:FindOverrides(mod_path, path, check_all)
@@ -172,7 +157,7 @@ function FrameworkBase:FindOverrides(mod_path, path, check_all)
 			local ext = Path:GetFileExtension(file_path):id()
 
 			-- Avoid loading things that are already handled by the game
-			if self.type_name ~= AddFramework.type_name or not self._default_overrides_extensions[ext] then
+			if self.type_name ~= AddFramework.type_name then
 				local file_id = Path:Combine(path, Path:GetFileNameNoExt(file)):id()
 				local ext_id = ext:id()
 
