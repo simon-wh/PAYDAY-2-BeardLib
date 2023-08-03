@@ -425,7 +425,7 @@ function OptionModule:CreateItem(type_name, parent_node, option_tbl, option_path
 
     params = table.merge(params, merge_data)
 
-    self._menu_items[option_path] = MenuHelperPlus["Add"..type_name](params)
+    self._menu_items[option_path] = MenuHelperPlus["Add"..type_name](self, params)
 end
 
 function OptionModule:CreateSlider(parent_node, option_tbl, option_path)
