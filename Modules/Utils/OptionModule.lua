@@ -540,7 +540,7 @@ function OptionModule:CreateOption(parent_node, option_tbl, option_path)
     }
 
     if switch[option_tbl.type] then
-        self["Create"..switch[option_tbl.type]](parent_node, option_tbl, option_path)
+        self["Create"..switch[option_tbl.type]](self, parent_node, option_tbl, option_path)
     else
         self:Err("No supported type for option " .. tostring(option_tbl.name) .. " in mod " .. self._mod.Name)
     end
