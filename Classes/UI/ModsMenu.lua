@@ -614,7 +614,7 @@ function BeardLibModsMenu:SetModNeedsUpdate(module, new_version)
     else
         mod.NeedsUpdate = true
     end
-    if not table.has(self._waiting_for_update, mod) then
+    if not table.contains(self._waiting_for_update, mod) then
         table.insert(self._waiting_for_update, mod)
     end
     self._notif_id = self._notif_id or BLT.Notifications:add_notification({title = loc:text("beardlib_updates_available"), text = loc:text("beardlib_updates_available_desc"), priority = 1})

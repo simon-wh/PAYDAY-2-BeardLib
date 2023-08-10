@@ -131,7 +131,7 @@ function ItemModuleBase:DoCleanTable(config)
     end
 end
 
-function ItemModuleBase:RegisterHook() end
+function ItemModuleBase:RegisterHook(...) end
 
 function ItemModuleBase:DoRegisterHook(...)
     local register_hook = self._config.register_hook or self._config.register_hook_clbk

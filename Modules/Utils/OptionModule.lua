@@ -409,7 +409,7 @@ function OptionModule:CreateItem(type_name, parent_node, option_tbl, option_path
     end
 
     local merge_data = BeardLib.Utils:RemoveAllNumberIndexes(self:GetParameter(option_tbl, "merge_data") or {})
-
+    merge_data = table.merge({option_key = option_path, module = self}, merge_data)
     params = table.merge({
         id = self:GetParameter(option_tbl, "name"),
         title = self:GetParameter(option_tbl, "title_id") or id .. "TitleID",
@@ -419,13 +419,10 @@ function OptionModule:CreateItem(type_name, parent_node, option_tbl, option_path
         mod = self._mod,
         callback = "OptionModuleGeneric_ValueChanged",
         value = self:GetValue(option_path),
-        merge_data = {option_key = option_path, module = self},
         show_value = self:GetParameter(option_tbl, "show_value"),
-    }, params)
+    }, table.merge(merge_data, params))
 
-    params = table.merge(params, merge_data)
-
-    self._menu_items[option_path] = MenuHelperPlus["Add"..type_name](self, params)
+    self._menu_items[option_path] = MenuHelperPlus["Add"..type_name](MenuHelperPlus, params)
 end
 
 function OptionModule:CreateSlider(parent_node, option_tbl, option_path)
