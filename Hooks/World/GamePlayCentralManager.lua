@@ -1,49 +1,27 @@
 function GamePlayCentralManager:add_move_unit(unit, from, to, speed, done_callback)
-	self._move_units = self._move_units or {}
-    for k, move_unit in pairs(self._move_units) do
-        if move_unit.unit == unit then
-			table.remove(self._move_units, k)
-        end
+	if alive(unit) then
+		from = from or unit:position()
+		speed = speed or 1
+		local total_time = mvector3.distance(from, to) / speed
+		self._move_units[unit:key()] = {unit = unit, from = from, to = to, speed = speed, done_callback = done_callback, t = 0, total_time = total_time}
     end
-
-	if not alive(unit) then
-        return
-    end
-	from = from or unit:position()
-	speed = speed or 1
-	local total_time = mvector3.distance(from, to) / speed
-
-	table.insert(self._move_units, {unit = unit, from = from, to = to, speed = speed, done_callback = done_callback, t = 0, total_time = total_time})
 end
 
 function GamePlayCentralManager:add_rotate_unit(unit, from, to, speed, done_callback)
-	self._rotate_units = self._rotate_units or {}
-    for k, move_unit in pairs(self._rotate_units) do
-        if move_unit.unit == unit then
-			table.remove(self._rotate_units, k)
-        end
+	if alive(unit) then
+		from = from or unit:rotation()
+		speed = speed or 1
+		local temp_rot = Rotation:rotation_difference(from, to)
+		local total_time = math.abs((temp_rot:yaw() + temp_rot:pitch() + temp_rot:roll())) / speed
+		self._rotate_units[unit:key()] = {unit = unit, to = to, from = from, speed = speed, done_callback = done_callback, t = 0, total_time = total_time}
     end
-
-	if not alive(unit) then
-        return
-    end
-	from = from or unit:rotation()
-	speed = speed or 1
-
-	local temp_rot = Rotation()
-
-	mrotation.rotation_difference(temp_rot, from, to)
-
-	local total_time = math.abs((temp_rot:yaw() + temp_rot:pitch() + temp_rot:roll())) / speed
-
-	table.insert(self._rotate_units, {unit = unit, to = to, from = from, speed = speed, done_callback = done_callback, t = 0, total_time = total_time})
 end
 
 Hooks:PostHook(GamePlayCentralManager, "update", "BeardLibGamePlayCentralManagerpost_update", function(self, t, dt)
 	if self._rotate_units then
-		for k, task in pairs(self._rotate_units) do
+		for unit_k, task in pairs(self._rotate_units) do
 			if task.t == task.total_time then
-				table.remove(self._rotate_units, k)
+				self._rotate_units[unit_k] = nil
 				if task.done_callback then
 					task.done_callback()
 				end
@@ -52,7 +30,7 @@ Hooks:PostHook(GamePlayCentralManager, "update", "BeardLibGamePlayCentralManager
 				task.t = math.min(task.t + dt, task.total_time)
 				mrotation.step(rot, task.from, task.to, task.speed * task.t)
 				if not alive(task.unit) then
-					table.remove(self._rotate_units, k)
+					self._rotate_units[unit_k] = nil
 				else
 					self:set_position(task.unit, nil, rot)
 				end
@@ -61,9 +39,9 @@ Hooks:PostHook(GamePlayCentralManager, "update", "BeardLibGamePlayCentralManager
 	end
 
 	if self._move_units then
-		for k, task in pairs(self._move_units) do
+		for unit_k, task in pairs(self._move_units) do
 			if task.t == task.total_time then
-				table.remove(self._move_units, k)
+				self._move_units[unit_k] = nil
 				if task.done_callback then
 					task.done_callback()
 				end
@@ -72,7 +50,7 @@ Hooks:PostHook(GamePlayCentralManager, "update", "BeardLibGamePlayCentralManager
 				task.t = math.min(task.t + dt, task.total_time)
 				mvector3.step(pos, task.from, task.to, task.speed * task.t)
 				if not alive(task.unit) then
-					table.remove(self._move_units, k)
+					self._move_units[unit_k] = nil
 				else
 					self:set_position(task.unit, pos)
 				end
@@ -82,23 +60,10 @@ Hooks:PostHook(GamePlayCentralManager, "update", "BeardLibGamePlayCentralManager
 end)
 
 function GamePlayCentralManager:is_unit_moving(unit)
-	if self._move_units then
-		for k, task in pairs(self._move_units) do
-			if task.unit == unit then
-				return
-			end
-		end
-	end
-	if self._rotate_units then
-		for k, task in pairs(self._rotate_units) do
-			if task.unit == unit then
-				return
-			end
-		end
-	end
+	return alive(unit) and (self._move_units and self._move_units[unit:key()] or self._rotate_units and self._rotate_units[unit:key()])
 end
 
-function GamePlayCentralManager:set_position(unit, position, rotation, offset)
+function GamePlayCentralManager:set_position(unit, position, rotation)
 	if position then
 		unit:set_position(position)
 	end
