@@ -105,7 +105,7 @@
                 <post hook_id="lib/utils/easing" :script_path="Easing.lua"/>
             </group>
 
-            <group :script_path="GeneralHooks.lua" game="pd2">
+            <group :script_path="GeneralHooks.lua">
                 <post hook_id="lib/setups/gamesetup"/>
                 <post hook_id="lib/setups/setup"/>    
                 <post hook_id="lib/managers/localizationmanager"/>
