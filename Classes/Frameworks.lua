@@ -243,7 +243,6 @@ function FrameworkBase:RegisterHooks()
             end
         end
     end
-    Hooks:PostHook(NarrativeTweakData, "init", "MapFrameworkAddFinalNarrativeData", SimpleClbk(NarrativeTweakData.set_job_wrappers))
 end
 
 local cap = string.capitalize

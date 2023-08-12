@@ -48,7 +48,7 @@ elseif F == "networkpeer" then
 	end
 elseif F == "tweakdata" then
 	TweakDataHelper:Apply()
-elseif F == "hudiconstweakdata" then
+elseif F == "networktweakdata" then
 	for _, framework in pairs(BeardLib.Frameworks) do framework:RegisterHooks() end
 	--Makes sure that rect can be returned as a null if it's a custom icon
 	local get_icon = HudIconsTweakData.get_icon_data
