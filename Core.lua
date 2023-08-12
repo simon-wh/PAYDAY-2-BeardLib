@@ -39,11 +39,6 @@ function BeardLib:Init()
 	self._config = FileIO:ReadConfig(self.ModPath.."main.xml", self)
 	self.config = self._config
 
-	if not CoreLoadingSetup then
-		FileIO:MakeDir(self._config.maps_dir)
-		FileIO:MakeDir(self._config.mod_override_dir)
-	end
-
 	self:LoadClasses()
 
 	local modules = self._config.modules_dir
