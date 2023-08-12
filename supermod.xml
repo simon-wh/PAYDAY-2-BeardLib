@@ -46,11 +46,11 @@
                     <post hook_id="lib/managers/blackmarketmanager"/>
                     <post hook_id="lib/managers/menu/blackmarketgui"/>
                     <post hook_id="lib/managers/dlcmanager"/>
-                    <post hook_id="infamymanagernew"/>
-                    <post hook_id="multiprofilemanager"/>
-                    <post hook_id="menu/crewmanagementgui"/>
+                    <post hook_id="lib/managers/infamymanagernew"/>
+                    <post hook_id="lib/managers/multiprofilemanager"/>
+                    <post hook_id="lib/managers/menu/crewmanagementgui"/>
                     <post hook_id="lib/network/base/networkpeer"/>
-                    <post hook_id="group_ai_states/groupaistatebase"/>
+                    <post hook_id="lib/managers/group_ai_states/groupaistatebase"/>
                 </group>
                 <post hook_id="lib/network/base/networkpeer" :script_path="NetworkPeer.lua"/>
             </group>
@@ -71,9 +71,9 @@
                     <post hook_id="core/lib/managers/mission/coreelementshape"/>
                     <post hook_id="core/lib/managers/mission/coreelementarea"/>
                     <post hook_id="core/lib/managers/coreworldinstancemanager"/>
-                    <post hook_id="mission/elementinteraction"/>
-                    <post hook_id="mission/elementvehiclespawner"/>
-                    <post hook_id="mission/elementfilter"/>
+                    <post hook_id="lib/managers/mission/elementinteraction"/>
+                    <post hook_id="lib/managers/mission/elementvehiclespawner"/>
+                    <post hook_id="lib/managers/mission/elementfilter"/>
                     <post hook_id="core/lib/managers/viewport/environment/coreenvironmentmanager"/>
                 </group>
                 <group :script_path="NetworkHooks.lua">
@@ -81,7 +81,7 @@
                     <post hook_id="lib/network/base/networkpeer"/>
                     <post hook_id="lib/network/base/clientnetworksession"/>
                     <post hook_id="lib/network/base/handlers/connectionnetworkhandler"/>
-                    <post hook_id="platformmanager"/>
+                    <post hook_id="lib/managers/menumanager/platformmanager"/>
                     <post hook_id="lib/managers/menumanager"/>
                 </group>
                 <post hook_id="lib/network/matchmaking/networkmatchmakingsteam" :script_path="NetworkMatchmakingSteam.lua"/>
