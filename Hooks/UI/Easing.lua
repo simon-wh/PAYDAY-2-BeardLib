@@ -5,7 +5,7 @@ function Easing._linear(a, b, t)
 	return mlerp(a, b, t)
 end
 
-if BLT:GetGame() ~= "raid" then
+if blt.blt_info().game ~= "raid" then
     return
 end
 
