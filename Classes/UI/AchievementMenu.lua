@@ -139,7 +139,7 @@ function BeardLibAchievementMenu:InitAccount()
 	})
 	local steam_name = managers.network.account:username()
 
-	if Steam then
+	if Steam and Steam.friend_avatar then
 		Steam:friend_avatar(2, Steam:userid(), function (texture)
 			local avatar = texture or "guis/textures/pd2/none_icon"
 			steam_avatar:SetImage(avatar)
