@@ -4,13 +4,7 @@ ModAssetsModule._providers = {}
 ModAssetsModule._loose = true
 
 --Load the providers
-local providers_dir = BeardLib.config.classes_dir.."/Providers/"
-local providers = FileIO:GetFiles(providers_dir)
-if providers then
-    for _, provider in pairs(providers) do
-        dofile(providers_dir..provider)
-    end
-end
+dofile(BeardLib.config.classes_dir.."Providers.lua")
 
 function ModAssetsModule:Load()
     self.config = self._config
@@ -326,6 +320,9 @@ function ModAssetsModule:StoreDownloadedAssets(data, id, request_info)
         end
     end)
 end
+
+UpdatesModule = ModAssetsModule
+BeardLib:RegisterModule("Updates", UpdatesModule)
 
 DownloadCustomMap = DownloadCustomMap or class(ModAssetsModule)
 function DownloadCustomMap:init()

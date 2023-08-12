@@ -1,9 +1,35 @@
-ModAssetsModule._providers.github = {}
+--- Example: <AssetUpdates provider="modworkshop" version="1.0" id="12345"/> with ID being the ID in the mod page URL. 
+--- Version belongs to the mod.
+ModAssetsModule._providers.modworkshop = {
+    version_api_url = "https://api.modworkshop.net/mods/$id$/version",
+    download_url = "https://api.modworkshop.net/mods/$id$/download",
+    page_url = "https://modworkshop.net/mod/$id$"
+}
+
+--- Example: <AssetUpdates provider="modworkshop_file" id="123" version="1.0" mod_id="12345"/> with ID being the file ID in the site.
+--- Version belongs to the file.
+ModAssetsModule._providers.modworkshop_file = {
+    version_api_url = "https://api.modworkshop.net/files/$id$/version",
+    download_url = "https://api.modworkshop.net/files/$id$/download",
+    page_url = "https://modworkshop.net/mod/$mod_id$"
+}
+
+--support for old mods
+ModAssetsModule._providers.lastbullet = clone(ModAssetsModule._providers.modworkshop)
+
+ModAssetsModule._providers.payday2concepts = {
+    version_api_url = "http://payday2maps.net/crimenet/checkversion/$id$.txt",
+    download_url = "http://payday2maps.net/crimenet/downloads/$id$.zip",
+    version_is_number = true
+}
+
+ModAssetsModule._providers.github = {
+    check_url = "https://api.github.com/repos/$id$/commits/$branch$",
+    check_url_release = "https://api.github.com/repos/$id$/releases/latest",
+    download_url = "https://github.com/$id$/archive/$branch$.zip",
+    page_url = "https://github.com/$id$"
+}
 local github = ModAssetsModule._providers.github
-github.check_url = "https://api.github.com/repos/$id$/commits/$branch$"
-github.check_url_release = "https://api.github.com/repos/$id$/releases/latest"
-github.download_url = "https://github.com/$id$/archive/$branch$.zip"
-github.page_url = "https://github.com/$id$"
 
 function github:check_func()
     local id = self.id
