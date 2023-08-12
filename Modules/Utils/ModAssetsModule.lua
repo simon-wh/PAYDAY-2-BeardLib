@@ -322,7 +322,7 @@ function ModAssetsModule:StoreDownloadedAssets(data, id, request_info)
 end
 
 UpdatesModule = ModAssetsModule
-BeardLib:RegisterModule("Updates", UpdatesModule)
+BeardLib:RegisterModule("AutoUpdates", UpdatesModule)
 
 DownloadCustomMap = DownloadCustomMap or class(ModAssetsModule)
 function DownloadCustomMap:init()
