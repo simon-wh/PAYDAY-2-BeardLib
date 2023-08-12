@@ -196,7 +196,7 @@
 			<class file="ModCore.lua"/>
 			<class file="MixedSoundSource.lua"/>
 			<class file="ModuleBase.lua"/>
-			<class file="WeaponSkinExtension.lua"/>
+			<class game="pd2" file="WeaponSkinExtension.lua"/>
 			<class file="Deprecated.lua"/>
 			<class file="Frameworks.lua"/>
 
