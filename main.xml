@@ -17,11 +17,11 @@
 			<object path="core/units/cubemap_gizmo/cubemap_gizmo" force_if_not_loaded="true"/>
 			<model path="core/units/cubemap_gizmo/cubemap_gizmo" force_if_not_loaded="true"/>
 			<cooked_physics path="core/units/cubemap_gizmo/cubemap_gizmo" force_if_not_loaded="true"/>
-			<texture path="guis/textures/menu_ui_icons"/>
-			<texture path="guis/textures/beardlib_logo"/>
-			<texture path="guis/textures/achievement_trophy_white"/>
-			<texture path="guis/textures/achievement_package_default"/>
-			<texture path="guis/textures/checkmark"/>
+			<png path="guis/textures/menu_ui_icons"/>
+			<png path="guis/textures/beardlib_logo"/>
+			<png path="guis/textures/achievement_trophy_white"/>
+			<png path="guis/textures/achievement_package_default"/>
+			<png path="guis/textures/checkmark"/>
 			<!-- These units are used by many maps, they don't fully load unless used -->
 			<add from_db="true" unload="true">
 				<physic_effect path="physic_effects/push_sphere"/>
