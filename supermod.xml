@@ -62,6 +62,7 @@
                     <post hook_id="lib/units/beings/player/playermovement"/>
                     <post hook_id="lib/units/beings/player/playerdamage"/>
                     <post hook_id="lib/tweak_data/groupaitweakdata"/>
+                    <post hook_id="lib/tweak_data/narrativetweakdata"/>
                     <post hook_id="lib/managers/menumanager"/>
                     <post hook_id="lib/managers/gameplaycentralmanager"/>
                     <post hook_id="core/lib/managers/coresequencemanager"/>

@@ -288,6 +288,10 @@ elseif F == "groupaitweakdata" then
         return _read_mission_preset(self, tweak_data, ...)
     end
 ----------------------------------------------------------------
+elseif F == "narrativetweakdata" then
+	-- Not sure about this, could be pointless.
+	Hooks:PostHook(NarrativeTweakData, "init", "MapFrameworkAddFinalNarrativeData", SimpleClbk(NarrativeTweakData.set_job_wrappers))
+----------------------------------------------------------------
 elseif F == "elementfilter" then
     --Overkill decided not to add a one down check alongside the difficulties, so here's one, because why not.
 
