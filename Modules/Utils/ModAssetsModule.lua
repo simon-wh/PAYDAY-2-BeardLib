@@ -2,6 +2,7 @@ ModAssetsModule = ModAssetsModule or BeardLib:ModuleClass("AssetUpdates", Module
 ModAssetsModule._default_version_file = "version.txt"
 ModAssetsModule._providers = {}
 ModAssetsModule._loose = true
+BeardLib:RegisterModule("AutoUpdates", ModAssetsModule)
 
 --Load the providers
 dofile(BeardLib.config.classes_dir.."Providers.lua")
@@ -320,9 +321,6 @@ function ModAssetsModule:StoreDownloadedAssets(data, id, request_info)
         end
     end)
 end
-
-UpdatesModule = ModAssetsModule
-BeardLib:RegisterModule("AutoUpdates", UpdatesModule)
 
 DownloadCustomMap = DownloadCustomMap or class(ModAssetsModule)
 function DownloadCustomMap:init()
