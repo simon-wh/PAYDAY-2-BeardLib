@@ -115,12 +115,14 @@ function BeardLib:LoadClasses(config, prev_dir)
 	config = config or self._config[wanted_meta]
 	local dir = Path:Combine(prev_dir or self.ModPath, config.directory)
     for _, c in ipairs(config) do
-		if c._meta == "class" then
-			self:DevLog("Loading class", tostring(p))
-			dofile(dir and Path:Combine(dir, c.file) or file)
-		elseif c._meta == "classes" then
-			self:LoadClasses(c, dir)
-        end
+        if not c.game or (BLT:GetGame() or "pd2") == c.game then
+			if c._meta == "class" then
+				self:DevLog("Loading class", tostring(p))
+				dofile(dir and Path:Combine(dir, c.file) or file)
+			elseif c._meta == "classes" then
+				self:LoadClasses(c, dir)
+			end
+		end
     end
 end
 
@@ -133,7 +135,6 @@ function BeardLib:FullyLoadFrameworks()
 end
 
 function BeardLib:LoadModules(config, dir)
-	config = config or table.list_to_set(self._config.load_enabled_modules)
 	dir = dir or self._config.modules_dir
 	local modules = FileIO:GetFiles(dir)
 	if modules then
@@ -436,23 +437,25 @@ Hooks:Add("MenuManagerOnOpenMenu", "BeardLibShowErrors", function(self, menu)
 			BeardLib:ShowErrorsDialog()
 		end
 
-		-- Add Crime.Net custo maps only button to the filters
-		function MenuCallbackHandler:beardlib_custom_maps_only(item)
-			local val = item:value() == "on"
-			BeardLib.Options:SetValue("CustomMapsOnlyFilter", val)
-			Global.game_settings.custom_maps_only = val
-			managers.network.matchmake:search_lobby(managers.network.matchmake:search_friends_only())
+		if (blt.blt_info().game or "pd2") == "pd2" then
+			-- Add Crime.Net custom maps only button to the filters
+			function MenuCallbackHandler:beardlib_custom_maps_only(item)
+				local val = item:value() == "on"
+				BeardLib.Options:SetValue("CustomMapsOnlyFilter", val)
+				Global.game_settings.custom_maps_only = val
+				managers.network.matchmake:search_lobby(managers.network.matchmake:search_friends_only())
+			end
+
+
+			local node = MenuHelperPlus:GetNode(nil, "crimenet_filters")
+			MenuHelperPlus:AddToggle({
+				id = "beardlib_custom_maps_only",
+				title = "beardlib_custom_maps_only",
+				node = node,
+				value = Global.game_settings.custom_maps_only,
+				position = 13,
+				callback = "beardlib_custom_maps_only",
+			})
 		end
-
-
-		local node = MenuHelperPlus:GetNode(nil, "crimenet_filters")
-		MenuHelperPlus:AddToggle({
-			id = "beardlib_custom_maps_only",
-			title = "beardlib_custom_maps_only",
-			node = node,
-			value = Global.game_settings.custom_maps_only,
-			position = 13,
-			callback = "beardlib_custom_maps_only",
-		})
 	end
 end)
