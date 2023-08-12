@@ -1,8 +1,11 @@
+-- Contains a bunch of hooks to make custom items work. Mostly networking code.
+
 local F = table.remove(RequiredScript:split("/"))
 local SyncUtils = BeardLib.Utils.Sync
 local SyncConsts = BeardLib.Constants.Sync
 
 if F == "huskplayermovement" then
+----------------------------------------------------------------
     Hooks:PostHook(PlayerMovement, "save", "BeardLib.Save", function(self, data)
         data.movement.outfit = SyncUtils:CleanOutfitString(data.movement.outfit)
     end)
@@ -42,7 +45,9 @@ if F == "huskplayermovement" then
             end
         end
     end)
+----------------------------------------------------------------
 elseif F == "playerinventory" then
+----------------------------------------------------------------
     Hooks:PostHook(PlayerInventory, "_chk_create_w_factory_indexes", "CheckParts", function()
         local tbl = PlayerInventory._weapon_factory_indexed
         if tbl then
@@ -68,12 +73,14 @@ elseif F == "playerinventory" then
             end
         end
     end)
+----------------------------------------------------------------
 elseif F == "newraycastweaponbase" then
     --Gotta replace it all sadly.
     function NewRaycastWeaponBase:blueprint_to_string()
         local new_blueprint = SyncUtils:GetCleanedBlueprint(self._blueprint, self._factory_id)
         return managers.weapon_factory:blueprint_to_string(self._factory_id, new_blueprint)
     end
+----------------------------------------------------------------
 elseif F == "unitnetworkhandler" then
     local set_equipped_weapon = UnitNetworkHandler.set_equipped_weapon
     function UnitNetworkHandler:set_equipped_weapon(unit, item_index, blueprint_string, cosmetics_string, sender)
@@ -94,6 +101,7 @@ elseif F == "unitnetworkhandler" then
             set_equipped_weapon(self, unit, item_index, blueprint_string, cosmetics_string, sender)
         end
     end
+----------------------------------------------------------------
 elseif F == "groupaistatebase" then
     Hooks:PreHook(GroupAIStateBase, "set_unit_teamAI", "BeardLibSetUnitTeamAIExtraLoadout", function(self, unit, character_name, team_id, visual_seed, loadout)
         if unit and alive(unit) then
@@ -106,6 +114,7 @@ elseif F == "groupaistatebase" then
             end
         end
     end)
+----------------------------------------------------------------
 elseif F == "teamaibase" then
     function TeamAIBase:beardlib_extra_loadout()
         return self._beardlib_extra_loadout
@@ -125,6 +134,7 @@ elseif F == "teamaibase" then
             end
         end
     end)
+----------------------------------------------------------------
 elseif F == "huskteamaibase" then
     HuskTeamAIBase.beardlib_extra_loadout = TeamAIBase.beardlib_extra_loadout
     HuskTeamAIBase.set_beardlib_extra_loadout = TeamAIBase.set_beardlib_extra_loadout
@@ -139,5 +149,59 @@ elseif F == "huskteamaibase" then
                 self:set_beardlib_extra_loadout(SyncUtils:BeardLibJSONToData(data.base.beardlib_extra_loadout))
             end
         end
+    end)
+----------------------------------------------------------------
+elseif F == "basenetworksession" then
+    Hooks:PostHook(BaseNetworkSession, "create_local_peer", "BeardLibExtraOutfitCreateLocal", function(self, load_outfit)
+        if load_outfit then
+            self._local_peer:set_extra_outfit_string_beardlib(BeardLib.Utils.Sync:ExtraOutfitString())
+        end
+    end)
+----------------------------------------------------------------
+elseif F == "networkpeer" then
+    local tradable_item_verif = NetworkPeer.tradable_verify_outfit
+    function NetworkPeer:tradable_verify_outfit(signature)
+        local outfit = self:blackmarket_outfit()
+
+        if outfit.primary and outfit.primary.cosmetics and tweak_data.blackmarket.weapon_skins[outfit.primary.cosmetics.id] then
+            if tweak_data.blackmarket.weapon_skins[outfit.primary.cosmetics.id].is_a_unlockable  then
+                return
+            end
+        else
+            return
+        end
+
+        if outfit.secondary and outfit.secondary.cosmetics and tweak_data.blackmarket.weapon_skins[outfit.secondary.cosmetics.id] then
+            if tweak_data.blackmarket.weapon_skins[outfit.secondary.cosmetics.id].is_a_unlockable  then
+                return
+            end
+        else
+            return
+        end
+
+        return tradable_item_verif(self, signature)
+    end
+----------------------------------------------------------------
+elseif F == "menumanager" then
+    Hooks:PostHook(MenuManager, "setup_local_lobby_character", "BeardLibExtraOutfitSetupLocalLobby", function(self)
+        managers.network:session():local_peer():set_extra_outfit_string_beardlib(SyncUtils:ExtraOutfitString())
+    end)
+
+    Hooks:PostHook(MenuCallbackHandler, "_update_outfit_information", "BeardLibExtraOutfitUpdateLocalOutfit", function(self)
+        if managers.network:session() then
+            managers.network:session():local_peer():set_extra_outfit_string_beardlib(SyncUtils:ExtraOutfitString())
+        end
+    end)
+----------------------------------------------------------------
+----------------------------------------------------------------
+elseif F == "connectionnetworkhandler" then
+    --Sets the correct data out of NetworkPeer instead of straight from the parameters
+    Hooks:PostHook(ConnectionNetworkHandler, "sync_outfit", "BeardLibSyncOutfitProperly", function(self, outfit_string, outfit_version, outfit_signature, sender)
+        local peer = self._verify_sender(sender)
+        if not peer then
+            return
+        end
+
+        peer:beardlib_reload_outfit()
     end)
 end

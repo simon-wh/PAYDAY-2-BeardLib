@@ -1,4 +1,118 @@
 <?xml version="1.0"?>
 <mod>
+    <hooks>
+        <post hook_id="core/lib/system/coresystem" script_path="Core.lua"/>
+        <post hook_id="core/lib/setups/coreloadingsetup" script_path="CoreLoading.lua"/>
+        <post hook_id="lib/entry" script_path="Classes/Utils/Menu.lua"/>
+
+        <group script_path="Hooks/">
+            <group :script_path="Items/" game="pd2">
+                <group :script_path="Hooks.lua">
+                    <post hook_id="lib/managers/weaponfactorymanager"/>
+                    <post hook_id="lib/managers/blackmarketmanager"/>
+                    <post hook_id="lib/managers/dlcmanager"/>
+                    <post hook_id="lib/managers/menu/crewmanagementgui"/>
+                    <post hook_id="lib/managers/hud/vr/hudbelt"/>
+                    <post hook_id="lib/managers/menu/blackmarketgui"/>
+                    <post hook_id="lib/managers/menu/renderers/menunodecustomizeweaponcolorgui"/>
+                    <post hook_id="lib/units/weapons/raycastweaponbase"/>
+                    <post hook_id="lib/units/beings/player/playerdamage"/>
+                    <post hook_id="lib/units/beings/player/states/vr/hand/playerhandstatemelee"/>
+                    <post hook_id="lib/tweak_data/tweakdata"/>
+                    <post hook_id="lib/tweak_data/tweakdatapd2"/>
+                    <post hook_id="lib/tweak_data/dlctweakdata"/>
+                    <post hook_id="lib/units/beings/player/states/playerstandard"/>
+                    <post hook_id="lib/units/weapons/newraycastweaponbase"/>
+                </group>
+                <group :script_path="NetworkHooks.lua">
+                    <post hook_id="lib/units/beings/player/huskplayermovement"/>
+                    <post hook_id="lib/units/beings/player/playerinventory"/>
+                    <post hook_id="lib/units/weapons/newraycastweaponbase"/>
+                    <post hook_id="lib/units/player_team/huskteamaibase"/>
+                    <post hook_id="lib/units/player_team/teamaibase"/>
+                    <post hook_id="lib/network/base/basenetworksession"/>
+                    <post hook_id="lib/network/base/networkpeer"/>
+                    <post hook_id="lib/network/base/handlers/connectionnetworkhandler"/>
+                    <post hook_id="lib/network/handlers/unitnetworkhandler"/>
+                    <post hook_id="lib/managers/group_ai_states/groupaistatebase"/>
+                    <post hook_id="lib/managers/menumanager"/>
+                </group>
+                <group :script_path="PlayerStyleGloveHooks.lua">
+                    <post hook_id="lib/tweak_data/blackmarkettweakdata"/>
+                    <post hook_id="lib/tweak_data/blackmarket/glovestweakdata"/>
+                    <post hook_id="lib/managers/criminalsmanager"/>
+                    <post hook_id="lib/units/menu/menuarmourbase"/>
+                    <post hook_id="lib/managers/menu/menuscenemanager"/>
+                    <post hook_id="lib/managers/blackmarketmanager"/>
+                    <post hook_id="lib/managers/menu/blackmarketgui"/>
+                    <post hook_id="lib/managers/dlcmanager"/>
+                    <post hook_id="infamymanagernew"/>
+                    <post hook_id="multiprofilemanager"/>
+                    <post hook_id="menu/crewmanagementgui"/>
+                    <post hook_id="lib/network/base/networkpeer"/>
+                    <post hook_id="group_ai_states/groupaistatebase"/>
+                </group>
+                <post hook_id="lib/network/base/networkpeer" :script_path="NetworkPeer.lua"/>
+            </group>
+
+            <group :script_path="Maps/" game="pd2">
+                <group :script_path="Hooks.lua">
+                    <post hook_id="lib/managers/missionmanager"/>
+                    <post hook_id="lib/managers/killzonemanager"/>
+                    <post hook_id="lib/units/beings/player/playermovement"/>
+                    <post hook_id="lib/units/beings/player/playerdamage"/>
+                    <post hook_id="lib/tweak_data/groupaitweakdata"/>
+                    <post hook_id="lib/managers/menumanager"/>
+                    <post hook_id="lib/managers/gameplaycentralmanager"/>
+                    <post hook_id="core/lib/managers/coresequencemanager"/>
+                    <post hook_id="core/lib/managers/coresoundenvironmentmanager"/>
+                    <post hook_id="core/lib/managers/mission/coreelementinstance"/>
+                    <post hook_id="core/lib/managers/mission/coreelementshape"/>
+                    <post hook_id="core/lib/managers/mission/coreelementarea"/>
+                    <post hook_id="core/lib/managers/coreworldinstancemanager"/>
+                    <post hook_id="mission/elementinteraction"/>
+                    <post hook_id="mission/elementvehiclespawner"/>
+                    <post hook_id="mission/elementfilter"/>
+                    <post hook_id="core/lib/managers/viewport/environment/coreenvironmentmanager"/>
+                </group>
+                <group :script_path="NetworkHooks.lua">
+                    <post hook_id="lib/managers/crimenetmanager"/>
+                    <post hook_id="lib/network/base/networkpeer"/>
+                    <post hook_id="lib/network/base/clientnetworksession"/>
+                    <post hook_id="lib/network/base/handlers/connectionnetworkhandler"/>
+                    <post hook_id="platformmanager"/>
+                    <post hook_id="lib/managers/menumanager"/>
+                </group>
+                <post hook_id="lib/network/matchmaking/networkmatchmakingsteam" :script_path="NetworkMatchmakingSteam.lua"/>
+                <post hook_id="core/lib/utils/dev/editor/coreworlddefinition" :script_path="CoreWorldDefinition.lua"/>
+            </group>
+
+            <group :script_path="Music/" game="pd2">
+                <group :script_path="Hooks.lua">
+                    <post hook_id="lib/units/beings/player/playerdamage"/>
+                    <post hook_id="lib/managers/dialogmanager"/>
+                </group>
+                <post hook_id="lib/managers/musicmanager" :script_path="MusicManager.lua"/>
+            </group>
+
+            <group :script_path="UI/">
+                <post hook_id="lib/managers/menu/menucomponentmanager" :script_path="BeardLibModsMenuButton.lua"/>
+                <post hook_id="lib/managers/menu/menuinput" :script_path="MenuInput.lua"/>
+                <post hook_id="lib/managers/menu/scrollablepanel" :script_path="ScrollablePanel.lua"/>
+                <post hook_id="lib/managers/systemmenumanager" :script_path="Hooks.lua"/>
+                <post hook_id="lib/managers/menumanager" :script_path="Hooks.lua"/>
+                <post hook_id="core/lib/managers/coreguidatamanager" :script_path="Hooks.lua"/>
+            </group>
+
+            <group :script_path="GeneralHooks.lua" game="pd2">
+                <post hook_id="lib/setups/gamesetup"/>
+                <post hook_id="lib/setups/setup"/>    
+                <post hook_id="lib/managers/localizationmanager"/>
+                <post hook_id="lib/network/base/networkpeer"/>
+                <post hook_id="lib/tweak_data/tweakdata"/>
+                <post hook_id="lib/tweak_data/tweakdatapd2"/>
+            </group>
+        </group>
+    </hooks>
     <wren scripts-root="Wren" init-file="AssetLoader"/>
 </mod>

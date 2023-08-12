@@ -1,6 +1,11 @@
+-- Contains a bunch of hooks to make custom items work. Mostly client-side code
+-- Anything >100 lines of code should be its own file.
+
 local F = table.remove(RequiredScript:split("/"))
 local Hooks = Hooks
+
 if F == "weaponfactorymanager" then
+----------------------------------------------------------------
     --Custom weapons crash fix based of Rokk's mod.
     --I wish I could make a warning dialog for custom weapon crash fix but you'd need to pause the save manager or something..
     local orig_unpack = WeaponFactoryManager.unpack_blueprint_from_string
@@ -11,7 +16,7 @@ if F == "weaponfactorymanager" then
         end
         return orig_unpack(self, factory_id, ...)
     end
-    
+
 
     local orig_has = WeaponFactoryManager.has_perk
     function WeaponFactoryManager:has_perk(perk_name, factory_id, blueprint, ...)
@@ -47,6 +52,7 @@ if F == "weaponfactorymanager" then
             end
         end
     end)
+----------------------------------------------------------------
 elseif F == "blackmarketmanager" then
     local orig_get = BlackMarketManager.get_silencer_concealment_modifiers
     function BlackMarketManager:get_silencer_concealment_modifiers(weapon, ...)
@@ -224,6 +230,7 @@ elseif F == "blackmarketmanager" then
     function BlackMarketManager:verfify_recived_crew_loadout(loadout, mark_host_as_cheater)
         return true
     end
+----------------------------------------------------------------
 elseif F == "crewmanagementgui" then
     local orig = CrewManagementGui.populate_primaries
     --Blocks out custom weapons that don't have support for AI.
@@ -243,107 +250,7 @@ elseif F == "crewmanagementgui" then
         end
         return res
     end
-elseif F == "connectionnetworkhandler" then
-    --Fixes level id being set wrong with custom maps
-    function ConnectionNetworkHandler:sync_stage_settings_ignore_once(...)
-        self:sync_stage_settings(...)
-        self._ignore_stage_settings_once = true
-    end
-
-    --Sets the correct data out of NetworkPeer instead of straight from the parameters
-    Hooks:PostHook(ConnectionNetworkHandler, "sync_outfit", "BeardLibSyncOutfitProperly", function(self, outfit_string, outfit_version, outfit_signature, sender)
-        local peer = self._verify_sender(sender)
-        if not peer then
-            return
-        end
-
-        peer:beardlib_reload_outfit()
-    end)
-
-    local orig_sync_stage_settings = ConnectionNetworkHandler.sync_stage_settings
-    function ConnectionNetworkHandler:sync_stage_settings(level_id_index, ...)
-        if self._ignore_stage_settings_once then
-            self._ignore_stage_settings_once = nil
-            return
-        end
-        return orig_sync_stage_settings(self, level_id_index, ...)
-    end
-
-    function ConnectionNetworkHandler:lobby_sync_update_level_id_ignore_once(...)
-        self:lobby_sync_update_level_id(...)
-        self._ignore_update_level_id_once = true
-    end
-
-    local orig_lobby_sync_update_level_id = ConnectionNetworkHandler.lobby_sync_update_level_id
-    function ConnectionNetworkHandler:lobby_sync_update_level_id(level_id_index, ...)
-        if self._ignore_update_level_id_once then
-            self._ignore_update_level_id_once = nil
-            return
-        end
-        return orig_lobby_sync_update_level_id(self, level_id_index, ...)
-    end
-elseif F == "elementinteraction" then
-    --Checks if the interaction unit is loaded to avoid crashes
-    --Checks if interaction tweak id exists
-    core:import("CoreMissionScriptElement")
-    ElementInteraction = ElementInteraction or class(CoreMissionScriptElement.MissionScriptElement)
-    local orig_init = ElementInteraction.init
-    local unit_ids = Idstring("unit")
-    local norm_ids = Idstring("units/dev_tools/mission_elements/point_interaction/interaction_dummy")
-    local nosync_ids = Idstring("units/dev_tools/mission_elements/point_interaction/interaction_dummy_nosync")
-    function ElementInteraction:init(mission_script, data, ...)
-        if not PackageManager:has(unit_ids, norm_ids) or not PackageManager:has(unit_ids, nosync_ids) then
-            return ElementInteraction.super.init(self, mission_script, data, ...)
-        end
-        if data and data.values and not tweak_data.interaction[data.values.tweak_data_id] then
-            return ElementInteraction.super.init(self, mission_script, data, ...)
-        end
-        return orig_init(self, mission_script, data, ...)
-    end
-
-    function MissionScriptElement:init(mission_script, data)
-        self._mission_script = mission_script
-        self._id = data.id
-        self._editor_name = data.editor_name
-        self._values = data.values
-    end
-elseif F == "elementvehiclespawner" then
-    --Same as interaction element but checks the selected vehicle
-    core:import("CoreMissionScriptElement")
-    ElementVehicleSpawner = ElementVehicleSpawner or class(CoreMissionScriptElement.MissionScriptElement)
-    local orig_on_executed = ElementVehicleSpawner.on_executed
-    local unit_ids = Idstring("unit")
-    function ElementVehicleSpawner:on_executed(...)
-        if not PackageManager:has(unit_ids, Idstring(self._vehicles[self._values.vehicle] or "")) then
-            return
-        end
-        return orig_on_executed(self, ...)
-    end
-elseif F == "coresoundenvironmentmanager" then
-    --From what I remember, this fixes a crash, these are useless in public.
-    function CoreSoundEnvironmentManager:emitter_events(path)
-        return {""}
-    end
-    function CoreSoundEnvironmentManager:ambience_events()
-        return {""}
-    end
-elseif F == "coreelementinstance" then
-    core:module("CoreElementInstance")
-    core:import("CoreMissionScriptElement")
-    function ElementInstancePoint:client_on_executed(...)
-        self:on_executed(...)
-    end
-elseif F == "coreelementshape"  or F == "coreelementarea" then
-    Hooks:PostHook(F == "coreelementshape" and ElementShape or ElemetArea, "init", "BeardLibAddSphereShape", function(self)
-        if self._values.shape_type == "sphere" then
-            self:_add_shape(CoreShapeManager.ShapeSphere:new({
-                position = self._values.position,
-                rotation = self._values.rotation,
-                height = self._values.height,
-                radius = self._values.radius
-            }))
-        end
-    end)
+----------------------------------------------------------------
 elseif F == "raycastweaponbase" then
     if RaycastWeaponBase._soundfix_should_play_normal then
         return --Don't run if fix installed.
@@ -399,95 +306,7 @@ elseif F == "raycastweaponbase" then
             self._name_id = self._name_id or "amcar"
         end
     end)
-elseif F == "playermovement" then
-    --VR teleporation fix
-    if _G.IS_VR then
-        function PlayerMovement:trigger_teleport(data)
-            if game_state_machine and game_state_machine:current_state() then
-                self._vr_has_teleported = data
-            end
-        end
-
-        function PlayerMovement:update(unit, t, dt)
-            if _G.IS_VR then
-                self:_update_vr(unit, t, dt)
-            end
-
-            self:_calculate_m_pose()
-
-            if self:_check_out_of_world(t) then
-                return
-            end
-
-            if self._vr_has_teleported then
-                managers.player:warp_to(self._vr_has_teleported.position or Vector3(), self._vr_has_teleported.rotation or Rotation())
-                self._vr_has_teleported = nil
-                return
-            end
-
-            self:_upd_underdog_skill(t)
-
-            if self._current_state then
-                self._current_state:update(t, dt)
-            end
-
-            self:update_stamina(t, dt)
-            self:update_teleport(t, dt)
-        end
-    else
-        local trigger = PlayerMovement.trigger_teleport
-        function PlayerMovement:trigger_teleport(data, ...)
-            data.fade_in = data.fade_in or 0
-            data.sustain = data.sustain or 0
-            data.fade_out = data.fade_out or 0
-            return trigger(self, data, ...)
-        end
-    end
-elseif F == "dialogmanager" then
-	Hooks:PreHook(DialogManager, "queue_dialog", "BeardLibQueueDialogFixIds", function(self, id)
-		if id and not managers.dialog._dialog_list[id] then
-			local sound = BeardLib.Managers.Sound:GetSound(id)
-			if sound then
-				managers.dialog._dialog_list[id] = {
-					id = id,
-					sound = id,
-					priority = sound.priority and tonumber(sound.priority) or tweak_data.dialog.DEFAULT_PRIORITY
-				}
-			end
-		end
-    end)
-elseif F == "networkpeer" then
-    local tradable_item_verif = NetworkPeer.tradable_verify_outfit
-    function NetworkPeer:tradable_verify_outfit(signature)
-        local outfit = self:blackmarket_outfit()
-
-        if outfit.primary and outfit.primary.cosmetics and tweak_data.blackmarket.weapon_skins[outfit.primary.cosmetics.id] then
-            if tweak_data.blackmarket.weapon_skins[outfit.primary.cosmetics.id].is_a_unlockable  then
-                return
-            end
-        else
-            return
-        end
-
-        if outfit.secondary and outfit.secondary.cosmetics and tweak_data.blackmarket.weapon_skins[outfit.secondary.cosmetics.id] then
-            if tweak_data.blackmarket.weapon_skins[outfit.secondary.cosmetics.id].is_a_unlockable  then
-                return
-            end
-        else
-            return
-        end
-
-        return tradable_item_verif(self, signature)
-    end
-elseif F == 'ingamewaitingforplayers' then
-    --[[--Fixes custom weapon not appearing at first
-    Hooks:PostHook(IngameWaitingForPlayersState, "_start_audio", "BeardLib.StartAudio", function()
-        DelayedCalls:Add("PleaseShowCorrectWeaponBrokenPieceOf", 1, function()
-            if managers.player:player_unit() then
-                managers.player:player_unit():inventory():_send_equipped_weapon()
-            end
-        end)
-    end)]]
+----------------------------------------------------------------
 elseif F == "playerdamage" then
     Hooks:PostHook(PlayerDamage, "init", "BeardLibPlyDmgInit", function(self)
         local level_tweak = tweak_data.levels[managers.job:current_level_id()]
@@ -497,6 +316,7 @@ elseif F == "playerdamage" then
             self:set_mission_damage_blockers("invulnerable", true)
         end
     end)
+----------------------------------------------------------------
 elseif F == "dlcmanager" then
     --Fixes parts receiving global value doing a check here using global values and disregarding if the global value is not a DLC. https://github.com/simon-wh/PAYDAY-2-BeardLib/issues/237
     function GenericDLCManager:is_dlc_unlocked(dlc)
@@ -508,6 +328,7 @@ elseif F == "dlcmanager" then
         end
         return tweak_data.dlc[dlc] and tweak_data.dlc[dlc].free or self:has_dlc(dlc)
     end
+----------------------------------------------------------------
 elseif F == "playerhandstatemelee" then
     --Removes the need of having a thq material config for custom melee in VR.
     local mtr_cubemap = Idstring("mtr_cubemap")
@@ -527,6 +348,7 @@ elseif F == "playerhandstatemelee" then
             end
         end
     end)
+----------------------------------------------------------------
 elseif F == "hudbelt" then
     local function scale_by_aspect(gui_obj, max_size)
         local w = gui_obj:texture_width()
@@ -569,46 +391,7 @@ elseif F == "hudbelt" then
             end
         end
     end)
-elseif F == "coreworldinstancemanager" then
-    --Fixes #252
-    local prepare = CoreWorldInstanceManager.prepare_mission_data
-    function CoreWorldInstanceManager:prepare_mission_data(instance, ...)
-        local instance_data = prepare(self, instance, ...)
-        for _, script_data in pairs(instance_data) do
-            for _, element in ipairs(script_data.elements) do
-                local vals = element.values
-                if element.class == "ElementMoveUnit" then
-                    if vals.start_pos then
-                        vals.start_pos = instance.position + element.values.start_pos:rotate_with(instance.rotation)
-                    end
-                    if vals.end_pos then
-                        vals.end_pos = instance.position + element.values.end_pos:rotate_with(instance.rotation)
-                    end
-                elseif element.class == "ElementRotateUnit" then
-                    vals.end_rot = instance.rotation * vals.end_rot
-                end
-            end
-        end
-        return instance_data
-    end
-elseif F == "groupaitweakdata" then
-    --Fixes a weird crash when exiting instance levels or in general the game not having a sanity check for having the level.
-    local _read_mission_preset = GroupAITweakData._read_mission_preset
-
-    function GroupAITweakData:_read_mission_preset(tweak_data, ...)
-        if not Global.game_settings or not Global.game_settings.level_id or not tweak_data.levels[Global.game_settings.level_id] then
-            return
-        end
-        return _read_mission_preset(self, tweak_data, ...)
-    end
-elseif F == "elementfilter" then
-    --Overkill decided not to add a one down check alongside the difficulties, so here's one, because why not.
-
-    Hooks:PostHook(ElementFilter, "_check_difficulty", "BeardLibFilterOneDownCheck", function(self)
-        if self._values.one_down and Global.game_settings.one_down then
-            return true
-        end
-    end)
+----------------------------------------------------------------
 elseif F == "blackmarketgui" then
     -- Universal icon backwards compatibility.
     Hooks:PostHook(BlackMarketGui, "populate_weapon_category_new", "BeardLibUniversalIconMiniIconFix", function(self, data)
@@ -651,6 +434,7 @@ elseif F == "blackmarketgui" then
             data[1].bitmap_texture = guis_catalog .. "weapon_skins/" .. equipped_cosmetic_id
         end
     end)
+----------------------------------------------------------------
 elseif F == "menunodecustomizeweaponcolorgui" then
     -- Universal icon backwards compatibility.
     Hooks:PreHook(MenuCustomizeWeaponColorInitiator, "create_grid", "BeardLibUniversalIconGridFix", function(self, node, colors_data)
@@ -668,15 +452,204 @@ elseif F == "menunodecustomizeweaponcolorgui" then
             end
         end
     end)
-elseif F == "platformmanager" then
-    core:module("PlatformManager")
-    -- Fixes rich presence to work with custom heists by forcing raw status.
-    Hooks:PostHook(WinPlatformManager, "set_rich_presence", "FixCustomHeistStatus", function(self)
-        if not Global.game_settings.single_player and Global.game_settings.permission ~= "private" and name ~= "Idle" and managers.network and managers.network.matchmake.lobby_handler  then
-            local job = managers.job:current_job_data()
-            if job and job.custom and Steam then
-                Steam:set_rich_presence("steam_display", "#raw_status")
-            end
-        end
-    end)
+----------------------------------------------------------------
+elseif F == "tweakdata" then
+	local function icon_and_unit_check(list, folder, friendly_name, uses_texture_val, only_check_units)
+		for id, thing in pairs(list) do
+			if thing.custom and not id:ends("_npc") and not id:ends("_crew") then
+				if not only_check_units and not thing.hidden then
+					if folder ~= "mods" or thing.pcs then
+						local guis_catalog = "guis/"
+						local bundle_folder = thing.texture_bundle_folder
+						if bundle_folder then
+							guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
+						end
+
+						guis_catalog = guis_catalog .. "textures/pd2/blackmarket/icons/"..folder.."/"
+						local tex = uses_texture_val and thing.texture or guis_catalog .. id
+						if not DB:has(Idstring("texture"), tex) then
+							local mod = BeardLib.Utils:FindModWithPath(thing.mod_path) or BeardLib
+							mod:Err("Icon for %s %s doesn't exist path: %s", tostring(friendly_name), tostring(id), tostring(tex))
+						end
+					end
+				end
+				if thing.unit then
+					if not DB:has(Idstring("unit"), thing.unit) then
+						local mod = BeardLib.Utils:FindModWithPath(thing.mod_path) or BeardLib
+						mod:Err("Unit for %s %s doesn't exist path: %s", tostring(friendly_name), tostring(id), tostring(thing.unit))
+					end
+				end
+			end
+		end
+	end
+	icon_and_unit_check(tweak_data.weapon, "weapons", "weapon")
+	icon_and_unit_check(tweak_data.weapon.factory, "weapons", "weapon", false, true)
+	icon_and_unit_check(tweak_data.weapon.factory.parts, "mods", "weapon mod")
+	icon_and_unit_check(tweak_data.blackmarket.melee_weapons, "melee_weapons", "melee weapon")
+	icon_and_unit_check(tweak_data.blackmarket.textures, "textures", "mask pattern", true)
+	icon_and_unit_check(tweak_data.blackmarket.materials, "materials", "mask material")
+----------------------------------------------------------------
+elseif F == "tweakdatapd2" then
+	Hooks:PostHook(WeaponFactoryTweakData, "_init_content_unfinished", "CallWeaponFactoryAdditionHooks", function(self)
+		Hooks:Call("BeardLibCreateCustomWeapons", self)
+		Hooks:Call("BeardLibCreateCustomWeaponMods", self)
+	end)
+
+	Hooks:PostHook(BlackMarketTweakData, "init", "CallAddCustomProjectiles", function(self, tweak_data)
+		Hooks:Call("BeardLibCreateCustomProjectiles", self, tweak_data)
+	end)
+
+	-- Store all the part types that are getting cloned so we can redo them to account for modded parts.
+	-- I'd store them under WFTD but code expects weapon data to be stored there.
+	local clone_part_type_for_weapon = WeaponFactoryTweakData._clone_part_type_for_weapon
+	function WeaponFactoryTweakData:_clone_part_type_for_weapon(...)
+		BeardLibTemporaryTypeClonesToRedo = BeardLibTemporaryTypeClonesToRedo or {}
+		table.insert(BeardLibTemporaryTypeClonesToRedo, {...})
+	end
+
+	Hooks:PreHook(BlackMarketTweakData, "_init_weapon_mods", "CallAddCustomWeaponModsToWeapons", function(self, tweak_data)
+		-- Temporarily pre-generate this data as some custom stuff might rely on it.
+		-- It'll get redone by vanilla anyway.
+		if self.weapon_skins then
+			tweak_data.weapon.factory:create_bonuses(tweak_data, self.weapon_skins)
+		end
+		self.weapon_charms = tweak_data.weapon.factory:create_charms(tweak_data)
+
+		Hooks:Call("BeardLibAddCustomWeaponModsToWeapons", tweak_data.weapon.factory, tweak_data)
+
+		-- This has to go after our BeardLib hook so any clone related tweak data doesn't get inherited weirdly.
+		-- But it also has to go before "_init_weapon_mods" so that it's blackmarket data gets generated correctly.
+		-- Frustrating...
+
+		-- This only gets used for one weapon and attachment type for now, but who knows what else will end up using it.
+		-- Don't have to worry about setting custom as they are only `adds` which isn't synced.
+		if BeardLibTemporaryTypeClonesToRedo then
+			for _, clone_data in pairs(BeardLibTemporaryTypeClonesToRedo) do
+				clone_part_type_for_weapon(tweak_data.weapon.factory, unpack(clone_data))
+			end
+
+			-- Cleanup after ourselves.
+			BeardLibTemporaryTypeClonesToRedo = nil
+		end
+	end)
+
+	--Big brain.
+	Hooks:PostHook(BlackMarketTweakData, "_init_weapon_mods", "FixGlobalValueWeaponMods", function(self, tweak_data)
+		local parts = tweak_data.weapon.factory.parts
+		for id, mod in pairs(self.weapon_mods) do
+			local gv = parts[id] and parts[id].global_value
+			if gv then
+				mod.global_value = gv
+			end
+		end
+	end)
+
+	Hooks:PreHook(WeaponTweakData, "init", "BeardLibWeaponTweakDataPreInit", function(self, tweak_data)
+		_tweakdata = tweak_data
+	end)
+
+	Hooks:PostHook(WeaponTweakData, "init", "BeardLibWeaponTweakDataInit", function(self, tweak_data)
+		Hooks:Call("BeardLibPostCreateCustomProjectiles", tweak_data)
+	end)
+
+	Hooks:PostHook(BlackMarketTweakData, "init", "CallPlayerStyleAdditionHooks", function(self)
+		Hooks:Call("BeardLibCreateCustomPlayerStyles", self)
+		Hooks:Call("BeardLibCreateCustomPlayerStyleVariants", self)
+	end)
+----------------------------------------------------------------
+elseif F == "playerstandard" then
+	--Ignores full or regular reload for weapons that have the tweakdata value set to true. Otherwise, continues with the original function.
+	--Based on Custom Weapon Animations Fixes by Pawcio
+	local _start_action_reload = PlayerStandard._start_action_reload
+	function PlayerStandard:_start_action_reload(t, ...)
+		local weapon = self._equipped_unit:base()
+		if weapon then
+			local weapon_tweak = weapon:weapon_tweak_data()
+			local anims_tweak = weapon_tweak.animations or {}
+			local ignore_fullreload = anims_tweak.ignore_fullreload
+			local ignore_nonemptyreload = anims_tweak.ignore_nonemptyreload
+			local clip_empty = weapon:clip_empty()
+			if ((ignore_fullreload and clip_empty) or (ignore_nonemptyreload and not clip_empty)) and weapon:can_reload() then
+				weapon:tweak_data_anim_stop("fire")
+
+				local speed_multiplier = weapon:reload_speed_multiplier()
+				local reload_prefix = weapon:reload_prefix() or ""
+				local reload_name_id = anims_tweak.reload_name_id or weapon.name_id
+
+				local expire_t = weapon_tweak.timers.reload_not_empty or weapon:reload_expire_t() or (ignore_fullreload and 2.2 or 2.8)
+				local reload_anim = ignore_fullreload and "reload_not_empty" or "reload"
+
+				self._ext_camera:play_redirect(Idstring(reload_prefix .. reload_anim .. "_" .. reload_name_id), speed_multiplier)
+				self._state_data.reload_expire_t = t + expire_t / speed_multiplier
+
+				weapon:start_reload()
+
+				if not weapon:tweak_data_anim_play(reload_anim, speed_multiplier) then
+					weapon:tweak_data_anim_play("reload", speed_multiplier)
+				end
+
+				self._ext_network:send("reload_weapon", ignore_fullreload and 0 or 1, speed_multiplier)
+
+				return
+			end
+		end
+		return _start_action_reload(self, t, ...)
+	end
+
+	--Reload shell by shell.
+	--Based on Custom Weapon Animations Fixes by Pawcio
+	local _start_action_reload_enter = PlayerStandard._start_action_reload_enter
+	function PlayerStandard:_start_action_reload_enter(t, ...)
+		if self._equipped_unit:base():can_reload() then
+			local weapon = self._equipped_unit:base()
+			local tweak_data = weapon:weapon_tweak_data()
+			self:_interupt_action_steelsight(t)
+			if not self.RUN_AND_RELOAD then
+				self:_interupt_action_running(t)
+			end
+			if tweak_data.animations.reload_shell_by_shell and  self._equipped_unit:base():reload_enter_expire_t()  then
+				local speed_multiplier = self._equipped_unit:base():reload_speed_multiplier()
+				self._ext_camera:play_redirect(Idstring("reload_enter_" .. tweak_data.animations.reload_name_id), speed_multiplier)
+				self._state_data.reload_enter_expire_t = t + self._equipped_unit:base():reload_enter_expire_t() / speed_multiplier
+				self._equipped_unit:base():tweak_data_anim_play("reload_enter", speed_multiplier)
+				return
+			end
+		end
+		return _start_action_reload_enter(self, t, ...)
+	end
+----------------------------------------------------------------
+elseif F == "newraycastweaponbase" then
+	--Related to top hook ^
+	--Based on Custom Weapon Animations Fixes by Pawcio
+	local started_reload_empty = NewRaycastWeaponBase.started_reload_empty
+	function NewRaycastWeaponBase:started_reload_empty(...)
+		if self:weapon_tweak_data().animations.ignore_fullreload then
+			return self._started_reload_empty
+		else
+			return started_reload_empty(self, ...)
+		end
+	end
+----------------------------------------------------------------
+elseif F == "dlctweakdata" then
+	Hooks:PostHook(DLCTweakData, "init", "BeardLibModDLCGlobalValue", function(self, tweak_data)
+		tweak_data.lootdrop.global_values.mod = {
+			name_id = "bm_global_value_mod",
+			desc_id = "menu_l_global_value_mod",
+			color = Color(255, 59, 174, 254) / 255,
+			dlc = false,
+			chance = 1,
+			value_multiplier = 1,
+			durability_multiplier = 1,
+			track = false,
+			sort_number = -10
+		}
+
+		table.insert(tweak_data.lootdrop.global_value_list_index, "mod")
+
+		self.mod = {
+			free = true,
+			content = {loot_drops = {}, upgrades = {}}
+		}
+	end)
+----------------------------------------------------------------
 end

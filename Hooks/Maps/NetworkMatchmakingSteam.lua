@@ -139,19 +139,8 @@ end)
 -- If they add any new interest keys, just make sure to update these.
 -- If your mod adds any keys, you can extend this list.
 NetworkMatchMakingSTEAM.DEFAULT_KEYS = {
-	"owner_id",
-	"owner_name",
-	"level",
-	"difficulty",
-	"permission",
-	"state",
-	"num_players",
-	"drop_in",
-	"min_level",
-	"kick_option",
-	"job_class_min",
-	"job_class_max",
-	"allow_mods",
+	"owner_id", "owner_name", "level", "difficulty", "permission", "state", "num_players",
+	"drop_in", "min_level", "kick_option", "job_class_min", "job_class_max", "allow_mods", 
 	"custom_map"
 }
 Hooks:PostHook(NetworkMatchMakingSTEAM, "search_lobby", "CustomMapFilter", function(self, friends_only, no_filters)
