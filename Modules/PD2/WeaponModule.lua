@@ -1,4 +1,5 @@
 WeaponModule = WeaponModule or BeardLib:ModuleClass("Weapon", ItemModuleBase)
+
 function WeaponModule:init(...)
     self.required_params = {}
     self.clean_table = table.add(clone(self.clean_table), {

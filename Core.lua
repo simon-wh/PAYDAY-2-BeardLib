@@ -45,7 +45,18 @@ function BeardLib:Init()
 	end
 
 	self:LoadClasses()
-	self:LoadModules()
+
+	local modules = self._config.modules_dir
+
+	local modules_config = table.list_to_set(self._config.load_enabled_modules)
+	self:LoadModules(modules_config, modules.."Addons/")
+	self:LoadModules(modules_config, modules.."Utils/")
+
+	if blt.blt_info().game == "raid" then
+		self:LoadModules(modules_config, modules.."Raid/")
+	else
+		self:LoadModules(modules_config, modules.."PD2/")
+	end
 	self:LoadLocalization()
 
 	for _, init in pairs(self._classes_to_init) do
