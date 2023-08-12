@@ -102,6 +102,7 @@
                 <post hook_id="lib/managers/systemmenumanager" :script_path="Hooks.lua"/>
                 <post hook_id="lib/managers/menumanager" :script_path="Hooks.lua"/>
                 <post hook_id="core/lib/managers/coreguidatamanager" :script_path="Hooks.lua"/>
+                <post hook_id="lib/utils/easing" :script_path="Easing.lua"/>
             </group>
 
             <group :script_path="GeneralHooks.lua" game="pd2">
