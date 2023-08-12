@@ -2,6 +2,8 @@ if CoreLoadingSetup then
     LevelModule = LevelModule or BeardLib:ModuleClass("level", ItemModuleBase)
     LevelModule.levels_folder = "levels/mods/"
 
+    BeardLib:RegisterModule("Level", LevelModule)
+
     function LevelModule:init(...)
         if not LevelModule.super.init(self, ...) then  return false end
 
@@ -21,6 +23,8 @@ end
 
 LevelModule = LevelModule or BeardLib:ModuleClass("level", ItemModuleBase)
 LevelModule.levels_folder = "levels/mods/"
+
+BeardLib:RegisterModule("Level", LevelModule)
 
 local TEXTURE = Idstring("texture")
 
@@ -236,6 +240,8 @@ end
 InstanceModule = InstanceModule or BeardLib:ModuleClass("instance", LevelModule)
 InstanceModule.levels_folder = "levels/instances/mods/"
 InstanceModule._loaded_packages = {}
+
+BeardLib:RegisterModule("Instance", InstanceModule)
 
 function InstanceModule:init(...)
     if not LevelModule.super.init(self, ...) then

@@ -1,5 +1,8 @@
 NarrativeModule = NarrativeModule or BeardLib:ModuleClass("narrative", ItemModuleBase)
 NarrativeModule._loose = true
+
+BeardLib:RegisterModule("Narrative", NarrativeModule)
+
 local TEXTURE = Idstring("texture")
 
 function NarrativeModule:init(...)

@@ -1,6 +1,8 @@
 ContactModule = ContactModule or BeardLib:ModuleClass("contact", ItemModuleBase)
 ContactModule._loose = true
 
+BeardLib:RegisterModule("Contact", ContactModule)
+
 function ContactModule:AddContactData(narr_self)
     if not self._config.id then
         self:Err("Contact does not contain a definition for id!")
