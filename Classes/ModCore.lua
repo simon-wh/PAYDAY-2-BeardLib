@@ -177,7 +177,7 @@ end
 
 function ModCore:AddModule(module_tbl)
     if type(module_tbl) == "table" then
-        local meta = module_tbl._meta
+        local meta = string.PascalCase(module_tbl._meta)
         if (not self._disabled or (not self._config.no_disabled_updates and meta == updates)) and self._config.auto_init ~= false and not (self._config.ignored_modules and table.contains(self._config.ignored_modules, meta)) then
             local node_class = BeardLib.modules[meta]
 
