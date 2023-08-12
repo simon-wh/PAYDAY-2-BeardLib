@@ -99,6 +99,8 @@ end
 function FrameworkBase:FindMods()
 	Hooks:Call("BeardLibFrameworksFindMods", self)
 
+	local is_raid = blt.blt_info().game == "raid"
+
 	local dirs = FileIO:GetFolders(self._directory)
     if dirs then
 		for _, folder_name in pairs(dirs) do
@@ -106,11 +108,17 @@ function FrameworkBase:FindMods()
             if not self._ignore_folders[folder_name] then
                 local directory = path:CombineDir(self._directory, folder_name)
                 local main_file = path:Combine(directory, self.main_file_name)
+                local mod_file = path:Combine(directory, "mod.xml")
 				local add_file = path:Combine(directory, self.add_file)
 
 				-- Prevent loading when DB isn't available
 				if DB then
 					self:FindOverrides(directory)
+				end
+
+				-- If a raid mod has a mod.xml, read that instead.
+				if is_raid and FileIO:Exists(mod_file) then
+					main_file = mod_file
 				end
 
 				-- Read main.xml
