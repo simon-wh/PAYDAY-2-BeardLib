@@ -198,7 +198,8 @@
 			<class file="ModuleBase.lua"/>
 			<class file="WeaponSkinExtension.lua"/>
 			<class file="Deprecated.lua"/>
-	
+			<class file="Frameworks.lua"/>
+
 			<classes directory="Utils">
 				<class file="Version.lua"/>
 				<class file="TweakDataHelper.lua"/>
@@ -223,12 +224,6 @@
 				<class file="PackageManager.lua"/>
 				<class file="SoundManager.lua"/>
 				<class file="FileManager.lua"/>
-			</classes>
-	
-			<classes directory="Frameworks">
-				<class file="FrameworkBase.lua"/>
-				<class file="MapFramework.lua"/>
-				<class file="AddFramework.lua"/>
 			</classes>
 	
 			<classes directory="UI">
@@ -274,6 +269,7 @@
 			<class file="ModCore.lua"/>
 			<class file="ModuleBase.lua"/>
 			<class file="Deprecated.lua"/>
+			<class file="Frameworks.lua"/>
 
 			<classes directory="Managers">
 				<class file="PackageManager.lua"/>
@@ -283,11 +279,6 @@
 				<class file="Table.lua"/>
 				<class file="Hooks.lua"/>
 				<class file="JSON.lua"/>
-			</classes>
-
-			<classes directory="Frameworks">
-				<class file="FrameworkBase.lua"/>
-				<class file="MapFramework.lua"/>
 			</classes>
 		</classes>
 	</loading_classes>
