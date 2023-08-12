@@ -374,7 +374,7 @@ function MenuUI:SetPointer(state)
 end
 
 function MenuUI:InputAllowed()
-    return self:Enabled() or not (managers.hud and managers.hud:chat_focus() or managers.menu_component and managers.menu_component:input_focut_game_chat_gui())
+    return self:Enabled() or not (managers.hud and managers.hud:chat_focus() or (managers.menu_component and blt.blt_info().game ~= "raid" and managers.menu_component:input_focut_game_chat_gui()))
 end
 
 function MenuUI:KeyReleased(o, k)
