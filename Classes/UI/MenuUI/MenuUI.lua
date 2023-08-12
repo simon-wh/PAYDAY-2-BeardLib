@@ -42,7 +42,7 @@ function MenuUI:init(params)
     })
     self._help:text({
         name = "text",
-        font = self.help_font or "fonts/font_large_mf",
+        font = self.help_font or tweak_data.menu.pd2_large_font,
         font_size = self.help_font_size or 16,
         layer = 2,
         wrap = true,
@@ -101,7 +101,7 @@ function MenuUI:ReloadInterface(params, shallow)
         alpha = self.help_background_alpha or self.background_alpha,
     })
     self._help:child("text"):configure({
-        font = self.help_font or "fonts/font_large_mf",
+        font = self.help_font or tweak_data.menu.pd2_large_font,
         font_size = self.help_font_size or 16,
         color = self.help_color or Color.black
     })
