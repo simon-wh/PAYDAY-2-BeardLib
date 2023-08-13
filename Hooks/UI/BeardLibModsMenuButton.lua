@@ -124,8 +124,14 @@ function BLTNotificationsGui:mouse_moved(o, x, y)
     return mouse_move(self, x, y)
 end
 
-local mouse_press = BLTNotificationsGui._mouse_pressed
-function BLTNotificationsGui:_mouse_pressed(button, x, y)
+local mouse_press = BLTNotificationsGui.mouse_pressed
+function BLTNotificationsGui:mouse_pressed(o, button, x, y)
+    if tonumber(button) then -- Handle RAID difference
+		y = x
+		x = button
+		button = o
+	end
+
     if not self._enabled or button ~= Idstring("0") then
         return
     end
