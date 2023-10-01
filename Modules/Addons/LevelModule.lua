@@ -214,6 +214,11 @@ function LevelModule:RegisterHook()
             local lootbags = LootBagsModule:new(self._mod, self._config.lootbags)
             lootbags:RegisterHook()
         end
+		
+		if self._config.hudicon then
+            local hudicon = HUDIconModule:new(self._mod, self._config.hudicon)
+            hudicon:RegisterHook()
+        end
 
         if self._config.assets then
             if tweak_data and tweak_data.assets then
