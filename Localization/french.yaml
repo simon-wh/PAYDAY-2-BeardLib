@@ -1,4 +1,4 @@
-mod_assets_error: "ERREUR!"
+mod_assets_error: "ERREUR !"
 menu_ok: OK
 bm_global_value_mod: MODS
 menu_l_global_value_mod: "Ceci est un objet des moddeurs !"
@@ -16,7 +16,7 @@ heist_contact_custom_description: "Les braquages personnalisés sont des tout no
 custom_map_cant_download: "Le braquage que l'hôte a choisi n'a pa pu être téléchargé. Déconnexion..."
 custom_map_failed: "Quelque chose s'est mal passé pendant le téléchargement du braquage."
 beardlib_mods_manager: "Gestionnaire des mods BeardLib"
-beardlib_updates_available: "Gestionnaire des mods BeardLib: Des mises à jour sont disponibles!"
+beardlib_updates_available: "Gestionnaire des mods BeardLib: Des mises à jour sont disponibles !"
 beardlib_updates_available_desc: "Visitez le gestionnaire des mods BeardLib pour les mettre à jour"
 beardlib_visit_page: "Visiter la page"
 beardlib_update_all: "Tout mettre à jour"
@@ -36,9 +36,9 @@ beardlib_mods_manager_important_help: "Aller au gestionnaire des mods BeardLib p
 beardlib_search: Rechercher
 beardlib_important_notice: "Montrer les notifications de mise à jour"
 beardlib_match_case: Correspondance
-beardlib_limit_results: "Limiter les résulats"
-beardlib_tick_all: "Cocher toute les options"
-beardlib_untick_all: "Décocher toute les options"
+beardlib_limit_results: "Limiter les résultats"
+beardlib_tick_all: "Cocher toutes les options"
+beardlib_untick_all: "Décocher toutes les options"
 beardlib_settings: "Paramètres"
 beardlib_b_settings: "Paramètres de BeardLib"
 beardlib_menu_color: "Couleur du menu"
@@ -61,9 +61,9 @@ beardlib_achieves_header_rewards: "Récompenses"
 beardlib_achieves_header_unlocked: "Débloqué"
 beardlib_achieves_header_unlocked_date: "Date: $time"
 beardlib_achieves_reward_exp: "Expérience"
-beardlib_achieves_reward_cash: "Monnaie dépensable"
+beardlib_achieves_reward_cash: "Monnaie liquide"
 beardlib_achieves_reward_offshore: "Monnaie offshore"
-beardlib_achieves_reward_cc: "Pièces Continentaux" @TODO Vérifier la trad offi
+beardlib_achieves_reward_cc: "Pièces Continental"
 beardlib_achieves_hidden: "Succès cachés"
 beardlib_achieves_hidden_desc: "Les détails seront révélés une fois le succès débloqué."
 beardlib_log_sounds: "Log les ID des sons"
@@ -81,11 +81,11 @@ beardlib_update: "Mise à jour"
 beardlib_waiting_updates: "Mise(s) à jour disponible"
 beardlib_mod_enabled: "Activé"
 beardlib_mod_enabled_help: |
-    Determine si le mod est activé.
+    Détermine si le mod est activé.
     Si un mod est désactivé aucun code sera effectué.
     Les mods BLT ne peuvent pas être désactivés par Beardlib. Vous devez les désactiver par BLT
 beardlib_mod_ignore_updates: "Ignorer les mises à jour"
-beardlib_mod_ignore_updates_help: "Beardlib devrait ignorer les mises à jour entrants de ce mod ?"
+beardlib_mod_ignore_updates_help: "Beardlib devrait ignorer les mises à jour entrantes de ce mod ?"
 beardlib_mod_settings: "Paramètres du mod - $mod"
 beardlib_mod_by: "Par $author"
 beardlib_updates_download_now: "Téléchargement"
@@ -100,18 +100,18 @@ beardlib_show_errors_dialog_help: |
     Donc vous pouvez soit la mettre à jour ou la supprimer
     Note : Vous devriez faire ça avec le mode développeur
 beardlib_mod_develop_mode: "Mode Développeur"
-beardlib_mod_develop_mode_help: "En activant le mode développeur, les mises à jour automatique seront désactivées et la génération des fichiers addfiles sera rafraichi à chaque rechargement."
+beardlib_mod_develop_mode_help: "En activant le mode développeur, les mises à jour automatique seront désactivées et la génération des fichiers addfiles sera rafraîchi à chaque rechargement."
 beardlib_mod_optional_version: "Version Optionnelle"
 beardlib_mod_optional_version_help: | 
-    Selecting a optional version will switch your auto updates to that version.
-    These are likely in an expermiental state and may contain new features and bugs.
-beardlib_achieves_no_pkg: "Select a package on the left panel to show the achievements related to it."
-beardlib_log_init: "Log initialization of mods"
-beardlib_log_init_help: "Logs initialization of mods when they are initialized."
-beardlib_custom_maps_only: "Custom Maps Only"
-beardlib_github_updates: "GitHub / Beta Updates"
+    Sélectionner une version optionnelle va basculer vos mises à jour automatique vers cette version.
+    Il s'agit en général d'un état expérimental et peut contenir des nouveautés et des bugs.
+beardlib_achieves_no_pkg: "Sélectionnez un paquet dans le panel de gauche pour voir les succès associés."
+beardlib_log_init: "Initialisation des logs des mods"
+beardlib_log_init_help: "Initialisation des logs des mods quand ils sont initialisés."
+beardlib_custom_maps_only: "Cartes personnalisées uniquement"
+beardlib_github_updates: "GitHub / Mises à jour Beta"
 beardlib_github_updates_help: |
-    By enabling this, you will get updates from GitHub rather than modworkshop.
-    The GitHub version is in an experimental state and may have new features and bugs.
-bm_menu_glove_variations: "Customize Gloves"
-bm_menu_btn_customize_gloves: "Customize Gloves"
+    En activant ceci, vous recevrez les mises à jour depuis GitHub au lieu du modworkshop.
+    Les versions de GitHub sont expérimentales et peuvent contenir des nouveautés et des bugs
+bm_menu_glove_variations: "Personnaliser les Gants"
+bm_menu_btn_customize_gloves: "Personnaliser les Gants"
