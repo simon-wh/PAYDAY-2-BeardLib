@@ -1,4 +1,5 @@
 HUDIconModule = HUDIconModule or BeardLib:ModuleClass("HUDIcon", ModuleBase)
+HUDIconModule._loose = true
 
 -- Adds an icon to tweak_data.hud_icons
 
