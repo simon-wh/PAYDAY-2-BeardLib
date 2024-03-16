@@ -259,6 +259,21 @@ function Sync:CleanOutfitString(str, is_henchman)
 
         list.grenade = self:GetSpoofedGrenade(list.grenade)
     end
+	
+	local skills = list.skills
+	if skills then
+		-- Perk deck id spoofing
+		local specializations = skills and skills.specializations
+		local current_specialization_index = specializations[1] and tonumber(specializations[1])
+		if tweak_data.skilltree and current_specialization_index then
+			local specialization_data = tweak_data.skilltree.specializations[current_specialization_index]
+			if specialization_data and specialization_data.based_on and type(specialization_data.based_on) == "number" then
+				-- Spoof the sent specialization id 
+				list.skills.specializations[1] = tonumber(specialization_data.based_on)
+			end
+		end
+	end
+	
 
     local player_style = tweak_data.blackmarket.player_styles[list.player_style]
     if player_style then
