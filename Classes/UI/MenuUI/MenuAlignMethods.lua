@@ -262,7 +262,7 @@ function Item:AlignItemsGridFromRight(reversed, dbg)
         return
     end
     local items_w = self:ItemsWidth()
-    local prev_item, last_positioned_item
+    local prev_item
     local max_h, max_right, max_y = 0, items_w, 0
 
     local function align(item)
@@ -277,10 +277,7 @@ function Item:AlignItemsGridFromRight(reversed, dbg)
                     end
                     panel:set_righttop(max_right - offset[1], max_y + offset[2])
                 end
-                if repos then
-                    last_positioned_item = item
-                end
-                local count = (not repos and not item.ignore_align) or item.count_as_aligned
+                local count = not item.ignore_align or item.count_as_aligned
                 local panel = item:Panel()
                 item:DelayLifted()
 
