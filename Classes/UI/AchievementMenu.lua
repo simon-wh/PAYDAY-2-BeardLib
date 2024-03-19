@@ -139,7 +139,7 @@ function BeardLibAchievementMenu:InitAccount()
 	})
 	local steam_name = managers.network.account:username()
 
-	if Steam then
+	if Steam and Steam.friend_avatar then
 		Steam:friend_avatar(2, Steam:userid(), function (texture)
 			local avatar = texture or "guis/textures/pd2/none_icon"
 			steam_avatar:SetImage(avatar)
@@ -194,7 +194,7 @@ function BeardLibAchievementMenu:InitAccount()
 			position = function(item)
 				item:SetCenterY(rank_icon:CenterY())
 			end,
-			font = "fonts/font_large_mf",
+			font = tweak_data.menu.pd2_large_font,
 			size = 16
 		})
 	end
@@ -318,7 +318,7 @@ function BeardLibAchievementMenu:DisplayAchievementsFromPackage(package)
 				w = achievement_button:Panel():w(),
 				y = achievement_button:Panel():h() - 16,
 				back_color = Color(255, 60, 60, 65) / 255,
-			}, {font = "fonts/font_medium_mf", font_size = 16}, progress)
+			}, {font = tweak_data.menu.pd2_medium_font, font_size = 16}, progress)
 		end
 	end
 

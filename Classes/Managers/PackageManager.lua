@@ -162,6 +162,8 @@ function BeardLibPackageManager:LoadConfig(directory, config, mod, settings)
     local ingame = Global.level_data and Global.level_data.level_id ~= nil
     local inmenu = not ingame
 
+    local game = blt.blt_info().game or "pd2"
+
     local loading = {}
     for _, child in ipairs(config) do
         if type(child) == "table" then
@@ -173,7 +175,10 @@ function BeardLibPackageManager:LoadConfig(directory, config, mod, settings)
             if use_clbk and mod then
                 use_clbk = mod:StringToCallback(use_clbk) or nil
             end
-            if not use_clbk or use_clbk(path, typ) then
+
+            local c_game = child.game or config.game
+
+            if (not c_game or c_game == game) and (not use_clbk or use_clbk(path, typ)) then
                 if typ == UNIT_LOAD or typ == ADD then
                     self:LoadConfig(child.directory and Path:Combine(directory, child.directory) or directory, child, mod, {skip_use_clbk = true, temp = temp})
                 elseif BeardLibPackageManager.UNIT_SHORTCUTS[typ] then
@@ -305,7 +310,7 @@ function BeardLibPackageManager:UnloadConfig(config)
         if type(child) == "table" then
             local typ = child._meta
             local path = child.path
-            if typ == "unit_load" or typ == "add" then
+            if typ == UNIT_LOAD or typ == ADD then
                 self:UnloadConfig(child)
             elseif BeardLibPackageManager.UNIT_SHORTCUTS[typ] then
                 local function unload(ids_ext, ids_path)

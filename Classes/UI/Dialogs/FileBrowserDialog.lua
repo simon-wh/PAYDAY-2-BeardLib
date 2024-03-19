@@ -36,7 +36,6 @@ function FileBrowserDialog:init(params, menu)
     self._menu:Button({
         name = "Backward",
         w = 30,
-        h = s,
         text = "<",
         on_callback = ClassClbk(self, "FolderBack"),
         label = "temp"

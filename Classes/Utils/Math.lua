@@ -149,7 +149,7 @@ end
 function play_anim_thread(params, o)
 	o:script().animating = true
 
-    local easing = Easing[params.easing or "linear"]
+    local easing = Easing[params.easing or "_linear"]
     local time = params.time or 0.25
     local clbk = params.callback
     local wait_time = params.wait
@@ -233,7 +233,7 @@ function play_color(o, color, params)
     if playing_anim(o) and params.stop ~= false then
         stop_anim(o)
     end
-    local easing = Easing[params.easing or "linear"]
+    local easing = Easing[params.easing or "_linear"]
     local time = params.time or 0.25
     local clbk = params.callback
     local wait_time = params.wait
@@ -263,7 +263,7 @@ function play_value(o, value_name, value, params)
     if playing_anim(o) and params.stop ~= false then
         stop_anim(o)
     end
-    local easing = Easing[params.easing or "linear"]
+    local easing = Easing[params.easing or "_linear"]
     local time = params.time or 0.25
     local clbk = params.callback
     local wait_time = params.wait

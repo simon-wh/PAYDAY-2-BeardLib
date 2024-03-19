@@ -28,3 +28,13 @@ function prntf(s, ...)
     end
     log(string.format(s, unpack(strs)))
 end
+
+function string.upper_first(s)
+	return string.gsub(s, "(%w)(%w*)", function(first_letter, remaining_letters)
+		return string.upper(first_letter) .. remaining_letters
+	end)
+end
+
+function string.PascalCase(s) -- see what I did there
+    return s:gsub("%W", " "):upper_first():gsub("%s", "")
+end

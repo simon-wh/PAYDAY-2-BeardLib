@@ -4,7 +4,7 @@ Holder.type_name = "Holder"
 Holder.HOLDER = true
 Holder.MENU = true
 
-function Holder:Init()
+function Holder:Init(params)
     self:WorkParams(params)
     self:InitBasicMenu()
     self:Menuify()

@@ -81,8 +81,12 @@ function ModCore:LoadConfigFile(path)
     self.Name = config.name or tostring(table.remove(string.split(self.ModPath, "/")))
     self.Priority = tonumber(config.priority) or self.Priority
 
-    if config.min_lib_ver then
-        local ver = math.round_with_precision(tonumber(config.min_lib_ver), 4)
+    local lib_ver = config.min_lib_ver
+    if lib_ver then
+        if tonumber(lib_ver) then
+            lib_ver = math.round_with_precision(tonumber(config.min_lib_ver), 4)
+        end
+        local ver = Version:new(lib_ver)
         if ver > BeardLib.Version then
             if config.notify_about_version ~= false then
                 self:ModError("The mod requires BeardLib version %s or higher in order to run", tostring(ver))
@@ -173,7 +177,7 @@ end
 
 function ModCore:AddModule(module_tbl)
     if type(module_tbl) == "table" then
-        local meta = module_tbl._meta
+        local meta = string.PascalCase(module_tbl._meta)
         if (not self._disabled or (not self._config.no_disabled_updates and meta == updates)) and self._config.auto_init ~= false and not (self._config.ignored_modules and table.contains(self._config.ignored_modules, meta)) then
             local node_class = BeardLib.modules[meta]
 

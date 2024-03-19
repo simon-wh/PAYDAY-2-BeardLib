@@ -282,8 +282,6 @@ function OptionModule:GetValue(name, converted)
     else
         return nil
     end
-
-    return option.value or nil
 end
 
 function OptionModule:LoadDefaultValues()
@@ -303,8 +301,7 @@ function OptionModule:_LoadDefaultValues(option_tbl)
 end
 
 function OptionModule:GetDefaultValue(path)
-    local option = self:GetOption(path)
-    return self:GetOptionDefaultValue(option)
+    return self:GetOptionDefaultValue(self:GetOption(path))
 end
 
 function OptionModule:GetOptionDefaultValue(option)
@@ -401,126 +398,60 @@ function OptionModule:GetOptionMenuID(option_tbl)
     return (self._config.prefix_id or self._mod.Name) .. option_tbl.name
 end
 
-function OptionModule:CreateSlider(parent_node, option_tbl, option_path)
+function OptionModule:CreateItem(type_name, parent_node, option_tbl, option_path, params)
     local id = self:GetOptionMenuID(option_tbl)
 
     option_path = option_path == "" and option_tbl.name or option_path .. "/" .. option_tbl.name
 
     local enabled = not self:GetParameter(option_tbl, "disabled")
-
     if option_tbl.enabled_callback then
         enabled = option_tbl:enabled_callback()
     end
 
-    local merge_data = self:GetParameter(option_tbl, "merge_data") or {}
-    merge_data = BeardLib.Utils:RemoveAllNumberIndexes(merge_data)
-
-    self._menu_items[option_path] = MenuHelperPlus:AddSlider(table.merge({
+    local merge_data = BeardLib.Utils:RemoveAllNumberIndexes(self:GetParameter(option_tbl, "merge_data") or {})
+    merge_data = table.merge({option_key = option_path, module = self}, merge_data)
+    params = table.merge({
         id = self:GetParameter(option_tbl, "name"),
         title = self:GetParameter(option_tbl, "title_id") or id .. "TitleID",
-        node = parent_node,
-        mod = self._mod,
         desc = self:GetParameter(option_tbl, "desc_id") or id .. "DescID",
+        node = parent_node,
+        enabled = enabled,
+        mod = self._mod,
         callback = "OptionModuleGeneric_ValueChanged",
+        value = self:GetValue(option_path),
+        show_value = self:GetParameter(option_tbl, "show_value"),
+    }, table.merge(merge_data, params))
+
+    self._menu_items[option_path] = MenuHelperPlus["Add"..type_name](MenuHelperPlus, params)
+end
+
+function OptionModule:CreateSlider(parent_node, option_tbl, option_path)
+    self:CreateItem("Slider", parent_node, option_tbl, option_path, {
         min = self:GetParameter(option_tbl, "min"),
         max = self:GetParameter(option_tbl, "max"),
         step = self:GetParameter(option_tbl, "step"),
         decimal_count = self:GetParameter(option_tbl, "decimal_count"),
-        enabled = enabled,
-        value = self:GetValue(option_path),
-        show_value = self:GetParameter(option_tbl, "show_value"),
-        merge_data = {option_key = option_path, module = self}
-    }, merge_data))
+    })
 end
 
-function OptionModule:CreateInput(parent_node, option_tbl, option_path)
-    local id = self:GetOptionMenuID(option_tbl)
-
-    option_path = option_path == "" and option_tbl.name or option_path .. "/" .. option_tbl.name
-
-    local enabled = not self:GetParameter(option_tbl, "disabled")
-
-    if option_tbl.enabled_callback then
-        enabled = option_tbl:enabled_callback()
-    end
-
-    local merge_data = self:GetParameter(option_tbl, "merge_data") or {}
-    merge_data = BeardLib.Utils:RemoveAllNumberIndexes(merge_data)
-
-    self._menu_items[option_path] = MenuHelperPlus:AddInput(table.merge({
-        id = self:GetParameter(option_tbl, "name"),
-        title = self:GetParameter(option_tbl, "title_id") or id .. "TitleID",
-        desc = self:GetParameter(option_tbl, "desc_id") or id .. "DescID",
-        node = parent_node,
-        mod = self._mod,
-        callback = "OptionModuleGeneric_ValueChanged",
-        enabled = enabled,
-        value = self:GetValue(option_path),
-        merge_data = {option_key = option_path, module = self}
-    }, merge_data))
+function OptionModule:CreateInput(...)
+    self:CreateItem("Input", ...)
 end
 
-function OptionModule:CreateToggle(parent_node, option_tbl, option_path)
-    local id = self:GetOptionMenuID(option_tbl)
-
-    option_path = option_path == "" and option_tbl.name or option_path .. "/" .. option_tbl.name
-
-    local enabled = not self:GetParameter(option_tbl, "disabled")
-
-    if option_tbl.enabled_callback then
-        enabled = option_tbl:enabled_callback()
-    end
-
-    local merge_data = self:GetParameter(option_tbl, "merge_data") or {}
-    merge_data = BeardLib.Utils:RemoveAllNumberIndexes(merge_data)
-
-    self._menu_items[option_path] = MenuHelperPlus:AddToggle(table.merge({
-        id = self:GetParameter(option_tbl, "name"),
-        title = self:GetParameter(option_tbl, "title_id") or id .. "TitleID",
-        node = parent_node,
-        mod = self._mod,
-        desc = self:GetParameter(option_tbl, "desc_id") or id .. "DescID",
-        callback = "OptionModuleGeneric_ValueChanged",
-        value = self:GetValue(option_path),
-        enabled = enabled,
-        merge_data = {option_key = option_path, module = self}
-    }, merge_data))
+function OptionModule:CreateToggle(...)
+    self:CreateItem("Toggle", ...)
 end
 
 function OptionModule:CreateMultiChoice(parent_node, option_tbl, option_path)
-    local id = self:GetOptionMenuID(option_tbl)
-
-    option_path = option_path == "" and option_tbl.name or option_path .. "/" .. option_tbl.name
-
     local options = self:GetParameter(option_tbl, "values")
-
     if not options then
         self:Err("Unable to get an option table for option " .. option_tbl.name)
     end
-
-    local enabled = not self:GetParameter(option_tbl, "disabled")
-
-    if option_tbl.enabled_callback then
-        enabled = option_tbl:enabled_callback()
-    end
-
-    local merge_data = self:GetParameter(option_tbl, "merge_data") or {}
-    merge_data = BeardLib.Utils:RemoveAllNumberIndexes(merge_data)
-
-    self._menu_items[option_path] = MenuHelperPlus:AddMultipleChoice(table.merge({
-        id = self:GetParameter(option_tbl, "name"),
-        title = self:GetParameter(option_tbl, "title_id") or id .. "TitleID",
-        node = parent_node,
-        mod = self._mod,
-        desc = self:GetParameter(option_tbl, "desc_id") or id .. "DescID",
-        callback = "OptionModuleGeneric_ValueChanged",
-        value = self:GetValue(option_path),
+    self:CreateItem("MultipleChoice", parent_node, option_tbl, option_path, {
         items = options,
         use_value = self:GetParameter(option_tbl, "use_value"),
         localized_items = self:GetParameter(option_tbl, "localized_items"),
-        enabled = enabled,
-        merge_data = {option_key = option_path, module = self}
-    }, merge_data))
+    })
 end
 
 function OptionModule:CreateMatrix(parent_node, option_tbl, option_path, components)
@@ -580,33 +511,8 @@ function OptionModule:CreateMatrix(parent_node, option_tbl, option_path, compone
     end
 end
 
-function OptionModule:CreateColour(parent_node, option_tbl, option_path)
-    local alpha = not not self:GetParameter(option_tbl, "alpha")
-    local id = self:GetOptionMenuID(option_tbl)
-
-    option_path = option_path == "" and option_tbl.name or option_path .. "/" .. option_tbl.name
-
-    local enabled = not self:GetParameter(option_tbl, "disabled")
-
-    if option_tbl.enabled_callback then
-        enabled = option_tbl:enabled_callback()
-    end
-
-    local merge_data = self:GetParameter(option_tbl, "merge_data") or {}
-    merge_data = BeardLib.Utils:RemoveAllNumberIndexes(merge_data)
-
-    self._menu_items[option_path] = MenuHelperPlus:AddColorButton(table.merge({
-        id = self:GetParameter(option_tbl, "name"),
-        title = self:GetParameter(option_tbl, "title_id") or id .. "TitleID",
-        node = parent_node,
-        mod = self._mod,
-        desc = self:GetParameter(option_tbl, "desc_id") or id .. "DescID",
-        callback = "OptionModuleGeneric_ValueChanged",
-        enabled = enabled,
-        value = self:GetValue(option_path),
-        show_value = self:GetParameter(option_tbl, "show_value"),
-        merge_data = {option_key = option_path, module = self}
-    }, merge_data))
+function OptionModule:CreateColour(...)
+    self:CreateItem("ColorButton", ...)
 end
 
 function OptionModule:CreateVector(parent_node, option_tbl, option_path)
@@ -618,20 +524,20 @@ function OptionModule:CreateRotation(parent_node, option_tbl, option_path)
 end
 
 function OptionModule:CreateOption(parent_node, option_tbl, option_path)
-    if option_tbl.type == "number" then
-        self:CreateSlider(parent_node, option_tbl, option_path)
-    elseif  option_tbl.type == "string" then
-        self:CreateInput(parent_node, option_tbl, option_path)
-    elseif option_tbl.type == "bool" or option_tbl.type == "boolean" then
-        self:CreateToggle(parent_node, option_tbl, option_path)
-    elseif option_tbl.type == "multichoice" then
-        self:CreateMultiChoice(parent_node, option_tbl, option_path)
-    elseif option_tbl.type == "colour" or option_tbl.type == "color" then
-        self:CreateColour(parent_node, option_tbl, option_path)
-    elseif option_tbl.type == "vector" then
-        self:CreateVector(parent_node, option_tbl, option_path)
-    elseif option_tbl.type == "rotation" then
-        self:CreateRotation(parent_node, option_tbl, option_path)
+    local switch = {
+        number = "Slider",
+        string = "Input",
+        bool = "Toggle",
+        boolean = "Toggle",
+        multichoice = "MultiChoice",
+        color = "Colour",
+        colour = "Colour",
+        vector = "Vector",
+        rotation = "Rotation",
+    }
+
+    if switch[option_tbl.type] then
+        self["Create"..switch[option_tbl.type]](self, parent_node, option_tbl, option_path)
     else
         self:Err("No supported type for option " .. tostring(option_tbl.name) .. " in mod " .. self._mod.Name)
     end
@@ -649,33 +555,16 @@ function OptionModule:CreateDivider(parent_node, tbl)
 end
 
 function OptionModule:CreateButton(parent_node, option_tbl, option_path)
-    local alpha = not not self:GetParameter(option_tbl, "alpha")
-    local id = self:GetOptionMenuID(option_tbl)
-
-    local enabled = not self:GetParameter(option_tbl, "disabled")
-
-    if option_tbl.enabled_callback then
-        enabled = option_tbl:enabled_callback()
-    end
-
     local clbk = self:GetParameter(option_tbl, "clicked")
-    local merge_data = self:GetParameter(option_tbl, "merge_data") or {}
-    merge_data = BeardLib.Utils:RemoveAllNumberIndexes(merge_data)
-    MenuHelperPlus:AddButton(table.merge({
-        id = self:GetParameter(option_tbl, "name"),
-        title = self:GetParameter(option_tbl, "title_id") or id .. "TitleID",
-        node = parent_node,
-        mod = self._mod,
-        desc = self:GetParameter(option_tbl, "desc_id") or id .. "DescID",
-        callback = self:GetParameter(option_tbl, "reset_button") and "OptionModuleGeneric_ResetOptions" or "OptionModuleGeneric_ButtonPressed",
-        enabled = enabled,
+    self:CreateItem("Button", parent_node, option_tbl, option_path, {
         merge_data = {
+        callback = self:GetParameter(option_tbl, "reset_button") and "OptionModuleGeneric_ResetOptions" or "OptionModuleGeneric_ButtonPressed",
             option_path = option_path,
             shallow_reset = self:GetParameter(option_tbl, "shallow_reset"),
             clicked = clbk and self._mod:StringToCallback(clbk) or nil,
             module = self
         }
-    }, merge_data))
+    })
 end
 
 function OptionModule:CreateSubMenu(parent_node, option_tbl, option_path)
