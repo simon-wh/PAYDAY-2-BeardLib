@@ -141,7 +141,7 @@ function FrameworkBase:FindMods()
                 end
 
 				-- Read add.xml
-				if FileIO:Exists(add_file) then
+				if FileIO:Exists(add_file) and SystemFS then
 					local config = FileIO:ReadConfig(add_file)
 					local directory = config.full_directory or Path:Combine(directory, config.directory)
 					BeardLib.Managers.Package:LoadConfig(directory, config)
