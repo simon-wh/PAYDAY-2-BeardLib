@@ -490,6 +490,8 @@ elseif F == "tweakdata" then
 	icon_and_unit_check(tweak_data.blackmarket.materials, "materials", "mask material")
 ----------------------------------------------------------------
 elseif F == "tweakdatapd2" then
+    for _, framework in pairs(BeardLib.Frameworks) do framework:RegisterHooks() end
+
 	Hooks:PostHook(WeaponFactoryTweakData, "_init_content_unfinished", "CallWeaponFactoryAdditionHooks", function(self)
 		Hooks:Call("BeardLibCreateCustomWeapons", self)
 		Hooks:Call("BeardLibCreateCustomWeaponMods", self)
