@@ -47,7 +47,7 @@ function BeardLib:Init()
 	self:LoadModules(modules_config, modules.."Addons/")
 	self:LoadModules(modules_config, modules.."Utils/")
 
-	if blt.blt_info().game == "raid" then
+	if BeardLib:GetGame() == "raid" then
 		self:LoadModules(modules_config, modules.."Raid/")
 	else
 		self:LoadModules(modules_config, modules.."PD2/")
@@ -109,13 +109,18 @@ function BeardLib:Init()
 	Hooks:Call("BeardLibPostInit")
 end
 
+--- Returns the name of the current game. If BLT is not setup to do so, assume we are in PD2.
+function BeardLib:GetGame()
+	return blt.blt_info().game or 'pd2'
+end
+
 function BeardLib:LoadClasses(config, prev_dir)
 	local wanted_meta = CoreLoadingSetup and "loading_classes" or "classes"
 
 	config = config or self._config[wanted_meta]
 	local dir = Path:Combine(prev_dir or self.ModPath, config.directory)
     for _, c in ipairs(config) do
-        if not c.game or (blt.blt_info().game or "pd2") == c.game then
+        if not c.game or (BeardLib:GetGame() or "pd2") == c.game then
 			if c._meta == "class" then
 				self:DevLog("Loading class", tostring(c.file))
 				dofile(dir and Path:Combine(dir, c.file) or c.file)
@@ -437,7 +442,7 @@ Hooks:Add("MenuManagerOnOpenMenu", "BeardLibShowErrors", function(self, menu)
 			BeardLib:ShowErrorsDialog()
 		end
 
-		if (blt.blt_info().game or "pd2") == "pd2" then
+		if (BeardLib:GetGame() or "pd2") == "pd2" then
 			-- Add Crime.Net custom maps only button to the filters
 			function MenuCallbackHandler:beardlib_custom_maps_only(item)
 				local val = item:value() == "on"

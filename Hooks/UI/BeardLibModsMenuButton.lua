@@ -1,5 +1,5 @@
 Hooks:Add("MenuManagerInitialize", "BeardLibModsManagerButtons", function()
-    if blt.blt_info().game ~= "raid" then
+    if BeardLib:GetGame() ~= "raid" then
         local node = MenuHelperPlus:GetNode(nil, "options")
         if not node:item("BeardLibMenu") then
             MenuCallbackHandler.BeardLibMenu = ClassClbk(BeardLib.Menus.Mods, "SetEnabled", true)

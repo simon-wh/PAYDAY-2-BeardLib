@@ -6,7 +6,7 @@ function ClassesModule:Load(config, prev_dir)
 
     local dir = self:GetPath(config.directory, prev_dir)
     for _, c in ipairs(config) do
-        if not c.game or (blt.blt_info().game or "pd2") == c.game then
+        if not c.game or (BeardLib:GetGame() or "pd2") == c.game then
             if c._meta == "class" then
                 local class_file = Path:Combine(dir, c.file)
                 if FileIO:Exists(class_file) then

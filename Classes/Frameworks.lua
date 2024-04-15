@@ -99,7 +99,7 @@ end
 function FrameworkBase:FindMods()
 	Hooks:Call("BeardLibFrameworksFindMods", self)
 
-	local is_raid = blt.blt_info().game == "raid"
+	local is_raid = BeardLib:GetGame() == "raid"
 
 	local dirs = FileIO:GetFolders(self._directory)
     if dirs then

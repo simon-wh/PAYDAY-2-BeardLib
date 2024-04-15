@@ -162,7 +162,7 @@ function BeardLibPackageManager:LoadConfig(directory, config, mod, settings)
     local ingame = Global.level_data and Global.level_data.level_id ~= nil
     local inmenu = not ingame
 
-    local game = blt.blt_info().game or "pd2"
+    local game = BeardLib:GetGame() or "pd2"
 
     local loading = {}
     for _, child in ipairs(config) do

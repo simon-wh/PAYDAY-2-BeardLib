@@ -49,7 +49,7 @@ elseif F == "networkpeer" then
 elseif F == "tweakdata" then
 	TweakDataHelper:Apply()
 elseif F == "networktweakdata" then
-	if blt.blt_info().game ~= "pd2" then
+	if BeardLib:GetGame() ~= "pd2" then
 		for _, framework in pairs(BeardLib.Frameworks) do framework:RegisterHooks() end
 	end
 	--Makes sure that rect can be returned as a null if it's a custom icon

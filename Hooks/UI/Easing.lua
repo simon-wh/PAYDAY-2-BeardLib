@@ -5,7 +5,7 @@ function Easing._linear(a, b, t)
 	return mlerp(a, b, t)
 end
 
-if blt.blt_info().game ~= "raid" then
+if BeardLib:GetGame() ~= "raid" then
     return
 end
 
