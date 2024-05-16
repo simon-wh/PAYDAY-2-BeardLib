@@ -59,7 +59,7 @@ function TextBoxBase:init(parent, params)
         align = self.text_align,
         vertical = self.text_vertical or nil,
         selection_color = color:with_alpha(0.5), --I fucking wish there was something better..
-        font = parent.font or "fonts/font_medium_mf",
+        font = parent.font or tweak_data.menu.pd2_medium_font,
         font_size = self.font_size
     })
     if self.fit_text then

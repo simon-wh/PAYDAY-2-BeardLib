@@ -38,8 +38,8 @@ function Sync:DownloadMap(level_name, job_id, udata, done_callback)
 					map.level_name = level_name
 					map.failed_map_downloaed = SimpleClbk(done_callback, false)
 					map.done_map_download = function()
-						BeardLib.Frameworks.Map:Load()
-						BeardLib.Frameworks.Map:RegisterHooks()
+						BeardLib.Frameworks.Base:Load()
+						BeardLib.Frameworks.Base:RegisterHooks()
 						managers.job:_check_add_heat_to_jobs()
 						managers.crimenet:find_online_games(Global.game_settings.search_friends_only)
 						if done_callback then
@@ -75,7 +75,7 @@ function Sync:GetJobString()
     local job_id = managers.job:current_job_id()
     local level = tweak_data.levels[level_id]
     local level_name = managers.localization:to_upper_text(level and level.name_id or "")
-    local mod = BeardLib.Frameworks.Map:GetMapByJobId(job_id)
+    local mod = BeardLib.Utils:GetMapByJobId(job_id)
     local update = {}
     if mod then
         local mod_assets = mod:GetModule(ModAssetsModule.type_name)

@@ -2,15 +2,10 @@ ModAssetsModule = ModAssetsModule or BeardLib:ModuleClass("AssetUpdates", Module
 ModAssetsModule._default_version_file = "version.txt"
 ModAssetsModule._providers = {}
 ModAssetsModule._loose = true
+BeardLib:RegisterModule("AutoUpdates", ModAssetsModule)
 
 --Load the providers
-local providers_dir = BeardLib.config.classes_dir.."/Providers/"
-local providers = FileIO:GetFiles(providers_dir)
-if providers then
-    for _, provider in pairs(providers) do
-        dofile(providers_dir..provider)
-    end
-end
+dofile(BeardLib.config.classes_dir.."Providers.lua")
 
 function ModAssetsModule:Load()
     self.config = self._config
@@ -65,8 +60,6 @@ function ModAssetsModule:Load()
 		self.version_file = Path:Combine(self.install_directory, self.folder_names[1], self._default_version_file)
 	end
 
-    self.version = 0
-
     self._update_manager_id = self._mod.ModPath .."-".. self._name
 
     local download_url = self.config.download_url or (self.config.custom_provider and self.config.custom_provider.download_url) or nil
@@ -100,16 +93,20 @@ function ModAssetsModule:RegisterAutoUpdateCheckHook()
 end
 
 function ModAssetsModule:RetrieveCurrentVersion()
+    local version
     if self.version_file and FileIO:Exists(self.version_file) then
-        local version = FileIO:ReadFrom(self.version_file)
-        if version then
-            self.version = version
-        end
+        version = FileIO:ReadFrom(self.version_file)
     elseif self.config.version then
-        self.version = self.config.version
+        version = self.config.version
     end
-    if tonumber(self.version) then -- has to be here, xml seems to fuckup numbers.
-        self.version = math.round_with_precision(tonumber(self.version), 4)
+    if tonumber(version) then -- has to be here, xml seems to fuckup numbers.
+        version = math.round_with_precision(tonumber(version), 4)
+    end
+
+    if self.config.semantic_version then
+        self.version = Version:new(version)
+    else
+        self.version = version
     end
 end
 
@@ -152,10 +149,13 @@ function ModAssetsModule:_CheckVersion(force)
         local is_new_version = false
         local current_version_number = tonumber(self.version)
         local new_version_number = tonumber(data)
-        if current_version_number and new_version_number then -- if both versions can be converted into a number, compare numbers
-            is_new_version = new_version_number > current_version_number
+        if self.config.semantic_version then
+            self._new_version = Version:new(data)
+            is_new_version = self._new_version > self.version
+        elseif current_version_number then -- if both versions can be converted into a number, compare numbers
+            is_new_version = current_version_number < new_version_number
         else
-            is_new_version = data ~= tostring(self.version)
+            is_new_version = tostring(self.version) ~= tostring(data)
         end
 
         if is_new_version then
@@ -324,7 +324,7 @@ end
 
 DownloadCustomMap = DownloadCustomMap or class(ModAssetsModule)
 function DownloadCustomMap:init()
-    self.config = {custom_install_directory = BeardLib.Frameworks.Map._directory, dont_delete = true}
+    self.config = {custom_install_directory = BeardLib.Frameworks.Base._directory, dont_delete = true}
 end
 
 function DownloadCustomMap:DownloadFailed()

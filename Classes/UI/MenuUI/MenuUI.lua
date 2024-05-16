@@ -2,7 +2,7 @@ MenuUI = MenuUI or class()
 function MenuUI:init(params)
     local UniqueID = tostring(self)
     if not managers.gui_data then
-        Hooks:Add("MenuManagerSetupCustomMenus", "CreateMenuUI"..UniqueID, function()
+        Hooks:Add("MenuManagerInitialize", "CreateMenuUI"..UniqueID, function()
             self:init(params)
         end)
         return
@@ -42,7 +42,7 @@ function MenuUI:init(params)
     })
     self._help:text({
         name = "text",
-        font = self.help_font or "fonts/font_large_mf",
+        font = self.help_font or tweak_data.menu.pd2_large_font,
         font_size = self.help_font_size or 16,
         layer = 2,
         wrap = true,
@@ -101,7 +101,7 @@ function MenuUI:ReloadInterface(params, shallow)
         alpha = self.help_background_alpha or self.background_alpha,
     })
     self._help:child("text"):configure({
-        font = self.help_font or "fonts/font_large_mf",
+        font = self.help_font or tweak_data.menu.pd2_large_font,
         font_size = self.help_font_size or 16,
         color = self.help_color or Color.black
     })
@@ -374,7 +374,7 @@ function MenuUI:SetPointer(state)
 end
 
 function MenuUI:InputAllowed()
-    return self:Enabled() or not (managers.hud and managers.hud:chat_focus() or managers.menu_component and managers.menu_component:input_focut_game_chat_gui())
+    return self:Enabled() or not (managers.hud and managers.hud:chat_focus() or (managers.menu_component and BeardLib:GetGame() ~= "raid" and managers.menu_component:input_focut_game_chat_gui()))
 end
 
 function MenuUI:KeyReleased(o, k)
