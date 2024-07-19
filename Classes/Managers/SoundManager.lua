@@ -278,6 +278,9 @@ end
 
 function BeardLibSoundManager:Close()
 	if not self:IsClosed() then
+		for _, source in pairs(self.sources) do
+			source:close()
+		end
 		for _, buffer in pairs(self.buffers) do
 			if buffer.close then
 				buffer:close(not not buffer.data.unload)
