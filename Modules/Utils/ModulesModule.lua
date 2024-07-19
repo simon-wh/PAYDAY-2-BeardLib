@@ -1,4 +1,5 @@
 ModulesModule = ModulesModule or BeardLib:ModuleClass("Modules", ModuleBase)
+ModulesModule._loose = true
 
 function ModulesModule:Load(config, prev_dir)
 	config = config or self._config
@@ -28,7 +29,7 @@ function ModulesModule:Load(config, prev_dir)
 				self:Err("'%s' tried to create module with no 'file' specified!", self._mod.Name)
 			end
 		elseif moodule._meta == "modules" then
-			self:Load(hook, dir)
+			self:Load(moodule, dir)
 		end
 	end
 end
