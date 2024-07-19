@@ -313,6 +313,7 @@ elseif F == "menumanager" then
 ----------------------------------------------------------------
 elseif F == "gameplaycentralmanager" then
 	function GamePlayCentralManager:add_move_unit(unit, from, to, speed, done_callback)
+		self._move_units = self._move_units or {}
 		if alive(unit) then
 			from = from or unit:position()
 			speed = speed or 1
@@ -322,6 +323,7 @@ elseif F == "gameplaycentralmanager" then
 	end
 
 	function GamePlayCentralManager:add_rotate_unit(unit, from, to, speed, done_callback)
+		self._rotate_units = self._rotate_units or {}
 		if alive(unit) then
 			from = from or unit:rotation()
 			speed = speed or 1
