@@ -122,7 +122,7 @@ function BeardLib:LoadClasses(config, prev_dir)
     for _, c in ipairs(config) do
         if not c.game or (BeardLib:GetGame() or "pd2") == c.game then
 			if c._meta == "class" then
-				self:DevLog("Loading class", tostring(c.file))
+				self:DevLog("Loading class %s", tostring(c.file))
 				dofile(dir and Path:Combine(dir, c.file) or c.file)
 			elseif c._meta == "classes" then
 				self:LoadClasses(c, dir)
