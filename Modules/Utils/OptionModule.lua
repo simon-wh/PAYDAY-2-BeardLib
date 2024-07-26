@@ -409,18 +409,20 @@ function OptionModule:CreateItem(type_name, parent_node, option_tbl, option_path
     end
 
     local merge_data = BeardLib.Utils:RemoveAllNumberIndexes(self:GetParameter(option_tbl, "merge_data") or {})
-    params = table.merge({
-        id = self:GetParameter(option_tbl, "name"),
-        title = self:GetParameter(option_tbl, "title_id") or id .. "TitleID",
-        desc = self:GetParameter(option_tbl, "desc_id") or id .. "DescID",
-        node = parent_node,
-        enabled = enabled,
-        mod = self._mod,
-        callback = "OptionModuleGeneric_ValueChanged",
-        value = self:GetValue(option_path),
-        show_value = self:GetParameter(option_tbl, "show_value"),
-        merge_data = {option_key = option_path, module = self, mod = self._mod},
-    }, table.merge(merge_data, params))
+    params = table.merge(
+        table.merge({
+            id = self:GetParameter(option_tbl, "name"),
+            title = self:GetParameter(option_tbl, "title_id") or id .. "TitleID",
+            desc = self:GetParameter(option_tbl, "desc_id") or id .. "DescID",
+            node = parent_node,
+            enabled = enabled,
+            mod = self._mod,
+            callback = "OptionModuleGeneric_ValueChanged",
+            value = self:GetValue(option_path),
+            show_value = self:GetParameter(option_tbl, "show_value"),
+            merge_data = {option_key = option_path, module = self},
+        }, params)
+    , merge_data)
 
     self._menu_items[option_path] = MenuHelperPlus["Add"..type_name](MenuHelperPlus, params)
 end
