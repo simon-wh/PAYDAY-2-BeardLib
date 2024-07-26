@@ -560,11 +560,10 @@ function OptionModule:CreateButton(parent_node, option_tbl, option_path)
     local clbk = self:GetParameter(option_tbl, "clicked")
     self:CreateItem("Button", parent_node, option_tbl, option_path, {
         merge_data = {
-        callback = self:GetParameter(option_tbl, "reset_button") and "OptionModuleGeneric_ResetOptions" or "OptionModuleGeneric_ButtonPressed",
+            callback = self:GetParameter(option_tbl, "reset_button") and "OptionModuleGeneric_ResetOptions" or "OptionModuleGeneric_ButtonPressed",
             option_path = option_path,
             shallow_reset = self:GetParameter(option_tbl, "shallow_reset"),
-            clicked = clbk and self._mod:StringToCallback(clbk) or nil,
-            module = self
+            clicked = clbk and self._mod:StringToCallback(clbk) or nil
         }
     })
 end
