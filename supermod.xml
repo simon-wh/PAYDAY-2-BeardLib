@@ -75,6 +75,7 @@
                     <post hook_id="lib/managers/mission/elementvehiclespawner"/>
                     <post hook_id="lib/managers/mission/elementfilter"/>
                     <post hook_id="core/lib/managers/viewport/environment/coreenvironmentmanager"/>
+                    <post hook_id="lib/managers/dialogmanager"/>
                 </group>
                 <group :script_path="NetworkHooks.lua">
                     <post hook_id="lib/managers/crimenetmanager"/>
