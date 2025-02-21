@@ -21,6 +21,7 @@ beardlib_updates_available_desc: "Besök Beardlib-modhanteraren för att uppdate
 beardlib_visit_page: "Besök sidan"
 beardlib_update_all: "Uppdatera alla"
 beardlib_updated: "Uppdaterad!"
+beardlib_version: "Version: $version"
 beardlib_waiting: "Väntar på svar.."
 beardlib_download_complete: "Nedladdning klar, installerar.."
 beardlib_download_failed: "Något gick fel :("

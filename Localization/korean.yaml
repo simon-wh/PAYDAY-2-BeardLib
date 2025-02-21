@@ -21,6 +21,7 @@ beardlib_updates_available_desc: "BeardLib 모드 매니저에 들어가 업데�
 beardlib_visit_page: "페이지 방문."
 beardlib_update_all: "전부 업데이트 하기"
 beardlib_updated: "최신 버전입니다!"
+beardlib_version: "Version: $version"
 beardlib_waiting: "응답을 기다리는 중.."
 beardlib_download_complete: "다운로드 완료, 설치 중.."
 beardlib_download_failed: "다운로드가 실패했습니다."

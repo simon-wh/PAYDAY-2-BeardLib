@@ -21,6 +21,7 @@ beardlib_updates_available_desc: "Visita il gestore delle mod di BeardLib per ag
 beardlib_visit_page: "Visita la pagina"
 beardlib_update_all: "Aggiorna tutto"
 beardlib_updated: "Aggiornata!"
+beardlib_version: "Version: $version"
 beardlib_waiting: "In attesa di risposta..."
 beardlib_download_complete: "Download completato, installazione..."
 beardlib_download_failed: "Qualcosa è andato storto :("

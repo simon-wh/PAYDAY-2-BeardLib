@@ -21,6 +21,7 @@ beardlib_updates_available_desc: "Посетите менеджер модов B
 beardlib_visit_page: "Посетить страницу"
 beardlib_update_all: "Обновить все"
 beardlib_updated: "Обновлено!"
+beardlib_version: "Version: $version"
 beardlib_waiting: "Ожидание ответа.."
 beardlib_download_complete: "Загрузка завершена, идет установка.."
 beardlib_download_failed: "Не удалось завершить загрузку"
