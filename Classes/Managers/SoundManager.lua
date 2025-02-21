@@ -150,7 +150,7 @@ function BeardLibSoundManager:ComparePrefixes(data, sound_id, prefixes)
 	if data.id == sound_id then
 		if data.prefixes and prefixes then
 			if data.prefixes_strict then
-				return table.contains_all(data.prefixes, prefixes)
+				return table.contains_all(prefixes, data.prefixes)
 			else
 				return table.contains_any(data.prefixes, prefixes)
 			end
