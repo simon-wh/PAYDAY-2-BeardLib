@@ -17,6 +17,7 @@ function ElementExecuteCode:on_executed(instigator)
     local mod = BeardLib.current_level._mod
     local file = self._values.file
     local use_path = self._values.use_path
+    local argument = self._values.argument
 
     if not string.is_nil_or_empty(file) then
         local path
@@ -32,7 +33,7 @@ function ElementExecuteCode:on_executed(instigator)
             local ran, ret = pcall(function()
                 local func = blt.vm.dofile(path)
                 if func then
-                    if func(instigator, mod) ~= false then
+                    if func(instigator, mod, argument) ~= false then
                         return true
                     end
                     return false
