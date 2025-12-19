@@ -109,6 +109,7 @@
 
             <group :script_path="GeneralHooks.lua">
                 <post hook_id="lib/setups/gamesetup"/>
+                <post hook_id="lib/setups/menusetup"/>
                 <post hook_id="lib/setups/setup"/>    
                 <post hook_id="lib/managers/localizationmanager"/>
                 <post hook_id="lib/network/base/networkpeer"/>
