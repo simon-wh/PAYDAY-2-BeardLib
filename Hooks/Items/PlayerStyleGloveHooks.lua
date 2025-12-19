@@ -1271,18 +1271,20 @@ elseif F == "dlcmanager" then
 
 	Hooks:PreHook(GenericDLCManager, "give_missing_package", "BeardLibGiveMissingDLCGlovesVariations", function(self)
 		for package_id, data in pairs(tweak_data.dlc) do
-			if Global.dlc_save.packages[package_id] and self:is_dlc_unlocked(package_id) then
-				local loot_drops = data.content and data.content.loot_drops or {}
+			if package_id ~= "freed_old_hoxton" then
+				if Global.dlc_save.packages[package_id] and self:is_dlc_unlocked(package_id) then
+					local loot_drops = data.content and data.content.loot_drops or {}
 
-				for index, loot_drop in ipairs(loot_drops) do
-					local check_loot_drop = #loot_drop == 0
+					for index, loot_drop in ipairs(loot_drops) do
+						local check_loot_drop = #loot_drop == 0
 
-					if check_loot_drop and loot_drop.type_items == "glove_variations" then
-						if not managers.blackmarket:glove_variation_unlocked(loot_drop.item_entry[1], loot_drop.item_entry[2]) then
-							managers.blackmarket:on_aquired_glove_variation(loot_drop.item_entry[1], loot_drop.item_entry[2])
+						if check_loot_drop and loot_drop.type_items == "glove_variations" then
+							if not managers.blackmarket:glove_variation_unlocked(loot_drop.item_entry[1], loot_drop.item_entry[2]) then
+								managers.blackmarket:on_aquired_glove_variation(loot_drop.item_entry[1], loot_drop.item_entry[2])
+							end
+
+							loot_drops[index] = nil
 						end
-
-						loot_drops[index] = nil
 					end
 				end
 			end
