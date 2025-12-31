@@ -898,19 +898,21 @@ function Item:ParentPanel() return self.panel:parent() end
 	function Item:Y() return alive(self) and self:Panel():y() or 0 end
 	function Item:W() return alive(self) and self:Panel():w() or 0 end
 	function Item:H() return alive(self) and self:Panel():h() or 0 end
+	function Item:Left() return alive(self) and self:Panel():x() or 0 end
+	function Item:Top() return alive(self) and self:Panel():y() or 0 end
 	function Item:Right() return alive(self) and self:Panel():right() or 0 end
 	function Item:Bottom() return alive(self) and self:Panel():bottom() or 0 end
 function Item:AdoptedItems() return {} end
 function Item:Position() return self.position end
-function Item:Location() return alive(self) and self:Panel():position() or 0  end
-function Item:XY() return self:Panel():position() end
-function Item:LeftTop() return alive(self) and self:Panel():lefttop() or 0  end
-function Item:RightTop() return alive(self) and self:Panel():righttop() or 0  end
-function Item:LeftBottom() return alive(self) and self:Panel():leftbottom() or 0  end
-function Item:RightBottom() return alive(self) and self:Panel():rightbottom() or 0  end
+function Item:XY() return {self:X(), self:Y()} end
+function Item:Location() return self:XY() end
+function Item:LeftTop() return {self:Left(), self:Top()}  end
+function Item:LeftBottom() return {self:Left(), self:Bottom()} end
+function Item:RightTop() return {self:Right(), self:Top()} end
+function Item:RightBottom() return {self:Right(), self:Bottom()} end
 function Item:CenterX() return alive(self) and self:Panel():center_x() or 0  end
 function Item:CenterY() return alive(self) and self:Panel():center_y() or 0 end
-function Item:Center() return alive(self) and self:Panel():center() or 0 end
+function Item:Center() return {self:CenterX(), self:CenterY()} end
 function Item:Name() return self.name end
 function Item:Label() return self.label end
 function Item:Text() return type(self.text) == "string" and self.text or "" end
