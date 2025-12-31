@@ -8,15 +8,25 @@ if F == "gamesetup" then
 	Hooks:PostHook(GameSetup, "paused_update", "GameSetupPausedUpdateBase", function(self, t, dt)
         Hooks:Call("GameSetupPauseUpdate", t, dt)
 	end)
+	Hooks:PostHook(GameSetup, "init_managers", "BeardLibAddMissingDLCPackagesGameSetup", function(self)
+		if managers.dlc.give_missing_package then
+			managers.dlc:give_missing_package()
+		end
+		Hooks:Call("GameSetupInitManagers", self)
+	end)
+elseif F == "menusetup" then
+	Hooks:PostHook(MenuSetup, "init_managers", "BeardLibAddMissingDLCPackagesMenuSetup", function(self)
+		if managers.dlc.give_missing_package then
+			managers.dlc:give_missing_package()
+		end
+		Hooks:Call("MenuSetupInitManagers", self)
+	end)
 elseif F == "setup" then
 	Hooks:PreHook(Setup, "update", "BeardLibSetupPreUpdate", function(self, t, dt)
         Hooks:Call("SetupPreUpdate", t, dt)
 	end)
 
 	Hooks:PostHook(Setup, "init_managers", "BeardLibAddMissingDLCPackages", function(self)
-		if managers.dlc.give_missing_package then
-			managers.dlc:give_missing_package()
-		end
 		Hooks:Call("SetupInitManagers", self)
 	end)
 
