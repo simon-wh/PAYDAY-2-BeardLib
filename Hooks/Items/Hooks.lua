@@ -509,9 +509,22 @@ elseif F == "tweakdatapd2" then
 		table.insert(BeardLibTemporaryTypeClonesToRedo, {...})
 	end
 
+    local create_bonuses = WeaponFactoryTweakData.create_bonuses
+    function WeaponFactoryTweakData:create_bonuses(tweak_data, weapon_skins)
+        if self.parts.wpn_fps_upg_bonus_concealment_p1 then return end
+        create_bonuses(self, tweak_data, weapon_skins)
+    end
+
+    local _add_charms_to_all_weapons = WeaponFactoryTweakData._add_charms_to_all_weapons
+    function WeaponFactoryTweakData:_add_charms_to_all_weapons(tweak_data, weapon_charms, weapon_overrides, part_overrides, weapon_exclude_list)
+        if self.parts.wpn_fps_upg_charm_bag then return table.map_keys(weapon_charms) end
+        return _add_charms_to_all_weapons(self, tweak_data, weapon_charms, weapon_overrides, part_overrides, weapon_exclude_list)
+    end
+
 	Hooks:PreHook(BlackMarketTweakData, "_init_weapon_mods", "CallAddCustomWeaponModsToWeapons", function(self, tweak_data)
-		-- Temporarily pre-generate this data as some custom stuff might rely on it.
-		-- It'll get redone by vanilla anyway.
+		-- Pre-generate boosts and charms as some custom stuff might rely on them.
+        -- Make sure to only run these two once (see soft hooks above).
+        -- https://github.com/simon-wh/PAYDAY-2-BeardLib/issues/651
 		if self.weapon_skins then
 			tweak_data.weapon.factory:create_bonuses(tweak_data, self.weapon_skins)
 		end
