@@ -231,6 +231,12 @@ function BeardLibPackageManager:LoadConfig(directory, config, mod, settings)
                     if typ == "bnk" and from_db and not blt.asset_db.has_file(path, typ) then 
                         language = "english" -- has_file requires language for localized soundbanks. As of U240.6, base game soundbanks are only in english.
                     end
+                      
+                    if typ == "bnk" and not DB:has(ids_ext, ids_path) then
+                      if blt.asset_db.register_custom_soundbank then
+                          blt.asset_db.register_custom_soundbank(path)
+                      end
+                    end
 
                     if (from_db and blt.asset_db.has_file(path, typ, language and {language = language})) or (not from_db and FileIO:Exists(file_path_ext)) then
                         local load = force
@@ -363,6 +369,9 @@ function BeardLibPackageManager:UnloadConfig(config)
                 end
             elseif typ and path then
                 path = Path:Normalize(path)
+                if typ == "bnk" and blt.asset_db.unregister_custom_soundbank then
+                  blt.asset_db.unregister_custom_soundbank(path)
+                end
                 local ids_ext = Idstring(self.EXT_CONVERT[typ] or typ)
                 local ids_path = Idstring(path)
                 if DB:has(ids_ext, ids_path) then
