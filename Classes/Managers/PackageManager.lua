@@ -382,6 +382,12 @@ function BeardLibPackageManager:UnloadConfig(config)
                 if typ == "bnk" and blt.asset_db.unregister_custom_soundbank then
                   blt.asset_db.unregister_custom_soundbank(path)
                 end
+                if typ == "stream" and blt.asset_db.unregister_custom_streamed_wem then
+                  local wem_id = child.wem_id or path:match("[^/]*$")
+                  if wem_id then
+                    blt.asset_db.unregister_custom_streamed_wem(wem_id)
+                  end
+                end
                 local ids_ext = Idstring(self.EXT_CONVERT[typ] or typ)
                 local ids_path = Idstring(path)
                 if DB:has(ids_ext, ids_path) then
