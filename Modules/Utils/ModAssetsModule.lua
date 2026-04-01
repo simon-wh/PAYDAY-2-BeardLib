@@ -248,7 +248,7 @@ function ModAssetsModule:StoreDownloadedAssets(data, id, request_info)
 
         -- Create temporary extract dir, extract there and delete zip
         if FileIO:DirectoryExists(temp_extract_path) then
-            FileIO:Delete(temp_extract_path)
+            io.remove_directory_and_files(temp_extract_path)
         end
         FileIO:MakeDir(temp_extract_path)
         unzip(temp_zip_path, temp_extract_path)
@@ -283,7 +283,7 @@ function ModAssetsModule:StoreDownloadedAssets(data, id, request_info)
                     return
                 end
                 if FileIO:Exists(path) then
-                    FileIO:Delete(path)
+                    io.remove_directory_and_files(path)
                 end
             end
             delete_old = true
@@ -321,7 +321,7 @@ function ModAssetsModule:StoreDownloadedAssets(data, id, request_info)
         for _, v in pairs(extracted_files) do
             FileIO:MoveTo(Application:nice_path(temp_extract_path .. "/" .. v), Application:nice_path(dir .. "/" .. v))
         end
-        FileIO:Delete(temp_extract_path)
+        io.remove_directory_and_files(temp_extract_path)
 
         if config.done_callback then
             --Provide the directory of extracted folder
