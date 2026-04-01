@@ -268,6 +268,7 @@ function ModAssetsModule:StoreDownloadedAssets(data, id, request_info)
         end
 
         -- Delete old mod
+        local delete_old = false
         if self.config and not self.config.dont_delete and type(self.folder_names) == "table" then
             for _, dir in pairs(self.folder_names) do
                 local path = Path:Combine(self.install_directory, dir)
@@ -285,6 +286,7 @@ function ModAssetsModule:StoreDownloadedAssets(data, id, request_info)
                     FileIO:Delete(path)
                 end
             end
+            delete_old = true
         end
 
         -- Create install dir if needed
@@ -293,9 +295,28 @@ function ModAssetsModule:StoreDownloadedAssets(data, id, request_info)
             FileIO:MakeDir(dir)
         end
 
+        -- Janky way to move extracted files to the install directory if dont_delete is enabled, will merge folders instead of just moving
+        local function MergeFolder(src, dest)
+            for _, file in pairs(FileIO:GetFiles(src)) do
+                local content = FileIO:ReadFrom(Application:nice_path(src .. "/" .. file), "rb")
+                if content then
+                    FileIO:WriteTo(Application:nice_path(dest .. "/" .. file), content, "wb")
+                end
+            end
+            for _, folder in pairs(FileIO:GetFolders(src)) do
+                MergeFolder(Application:nice_path(src .. "/" .. folder), Application:nice_path(dest .. "/" .. folder))
+            end
+        end
+
         -- Move extracted assets from temp dir to install dir and delete temp dir
         for _, v in pairs(extracted_folders) do
-            FileIO:MoveTo(Application:nice_path(temp_extract_path .. "/" .. v), Application:nice_path(dir .. "/" .. v))
+            local src = Application:nice_path(temp_extract_path .. "/" .. v)
+            local dest = Application:nice_path(dir .. "/" .. v)
+            if delete_old then
+                FileIO:MoveTo(src, dest)
+            else
+                MergeFolder(src, dest)
+            end
         end
         for _, v in pairs(extracted_files) do
             FileIO:MoveTo(Application:nice_path(temp_extract_path .. "/" .. v), Application:nice_path(dir .. "/" .. v))
