@@ -232,7 +232,9 @@ function ModCore:LogErr(str, ...)
 end
 
 function ModCore:Warn(str, ...)
-    log("[" .. self.Name .. "][WARN] " .. string.format(str, ...))
+	if BeardLib.DevMode then
+		log("[" .. self.Name .. "][WARN] " .. string.format(str, ...))
+	end
 end
 
 function ModCore:StringToValue(str)
