@@ -1,23 +1,43 @@
 BeardLibAchievementManager = BeardLibAchievementManager or BeardLib:ManagerClass("Achievement")
 
 function BeardLibAchievementManager:init()
-    -- Support multiple user on same PC, tracking each progress
-    local user_id = Steam and Steam:userid() or EpicEntitlements and EpicEntitlements:get_account_id() or "unknown"
-    self._achievements_folder = SavePath .. "CustomAchievements/" ..tostring(user_id).."/"
+    self._achievements_folder = nil
     self._achievement_icons_spoofer = {}
     self._ranks = {
         [1] = {name = "Bronze", color = "CD7F32"},
         [2] = {name = "Silver", color = "C0C0C0"},
         [3] = {name = "Gold", color = "FFD700"},
         [4] = {name = "Platinum", color = "42d9f4"},
-        [0] = {name = "Hidden Rank", color = "000000"} -- Don't define the rank 0 yourself, that's used by me.
+        [0] = {name = "Hidden Rank", color = "000000"}
     }
 
-    -- Deprecated, try not to use.
     BeardLib.managers.custom_achievement = self
     CustomAchievementManager = self
 
     Hooks:Add("SetupInitManagers", "PostInitTweakData_BeardLibAchievementManager", ClassClbk(self, "SetupAchievements"))
+end
+
+function BeardLibAchievementManager:ResolveUserId()
+    if self._user_id then
+        return self._user_id
+    end
+    local user_id = "unknown"
+    if Steam and type(Steam.userid) == "function" then
+        local ok, result = pcall(Steam.userid, Steam)
+        user_id = (ok and result) and result or "unknown"
+    elseif EpicEntitlements and type(EpicEntitlements.get_account_id) == "function" then
+        local ok, result = pcall(EpicEntitlements.get_account_id, EpicEntitlements)
+        user_id = (ok and result) and result or "unknown"
+    end
+    self._user_id = user_id
+    return user_id
+end
+
+function BeardLibAchievementManager:Folder()
+    if not self._achievements_folder then
+        self._achievements_folder = SavePath .. "CustomAchievements/" .. tostring(self:ResolveUserId()) .. "/"
+    end
+    return self._achievements_folder
 end
 
 function BeardLibAchievementManager:GetRankDetails(rank_id)
@@ -57,7 +77,7 @@ function BeardLibAchievementManager:SetupAchievements()
     self._tweak_data = tweak_data.achievement.custom_achievements or {}
 
     -- I --     Make the base directory.
-    FileIO:MakeDir(self._achievements_folder)
+    FileIO:MakeDir(self:Folder())
 
     -- II --    Read Packages, create folders.
     for package_id, _ in pairs(self._tweak_data) do
@@ -327,7 +347,7 @@ function CustomAchievement:init(config, package)
         return
     end
 
-    local folder = BeardLib.Managers.Achievement._achievements_folder
+    local folder = BeardLib.Managers.Achievement:Folder()
     self._progress_file = folder .. "/" .. tostring(package) .. "/" .. tostring(config.id) .. ".json"
 
     self._package_id = package
