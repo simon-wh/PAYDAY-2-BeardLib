@@ -56,11 +56,18 @@ function BeardLib:Init()
 
 	for _, init in pairs(self._classes_to_init) do
 		if not init.done and init.type == self.Constants.ClassTypes.Manager then
-			local obj = init.class:new()
-			if obj.type_name then
-				self:RegisterClass(obj.type_name, obj, init.type)
+			local ok, err = pcall(function()
+				local obj = init.class:new()
+				if obj.type_name then
+					self:RegisterClass(obj.type_name, obj, init.type)
+				end
+				init.done = true
+			end)
+			if not ok then
+				self:Err("Failed to init manager %s: %s", tostring(init.class.type_name), tostring(err))
+				init.done = true
+				init.failed = true
 			end
-			init.done = true
 		end
 	end
 
@@ -94,11 +101,18 @@ function BeardLib:Init()
 
 	for _, init in pairs(self._classes_to_init) do
 		if not init.done then
-			local obj = init.class:new()
-			if obj.type_name then
-				self:RegisterClass(obj.type_name, obj, init.type)
+			local ok, err = pcall(function()
+				local obj = init.class:new()
+				if obj.type_name then
+					self:RegisterClass(obj.type_name, obj, init.type)
+				end
+				init.done = true
+			end)
+			if not ok then
+				self:Err("Failed to init class %s: %s", tostring(init.class.type_name), tostring(err))
+				init.done = true
+				init.failed = true
 			end
-			init.done = true
 		end
 	end
 
