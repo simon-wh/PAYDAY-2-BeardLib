@@ -140,13 +140,16 @@ function BeardLibAchievementMenu:InitAccount()
 	local steam_name = managers.network.account:username()
 
 	if Steam and Steam.friend_avatar then
-		Steam:friend_avatar(2, Steam:userid(), function (texture)
+		local large = Distribution.ProfilePictureSize_Large
+
+		Distribution:request_user_profile_picture(large, Distribution:local_user_id(), function (texture)
 			local avatar = texture or "guis/textures/pd2/none_icon"
 			steam_avatar:SetImage(avatar)
 		end)
 
+		-- TODO: Might be unecessary now
 		BeardLib:AddDelayedCall("BeardLib_Recheck_Account_Avatar", 2, function()
-			Steam:friend_avatar(2, Steam:userid(), function (texture)
+			Distribution:request_user_profile_picture(large, Distribution:local_user_id(), function (texture)
 				local avatar = texture or "guis/textures/pd2/none_icon"
 				if alive(steam_avatar) then
 					steam_avatar:SetImage(avatar)

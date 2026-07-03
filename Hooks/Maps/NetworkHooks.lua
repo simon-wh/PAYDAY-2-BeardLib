@@ -290,8 +290,8 @@ elseif F == "platformmanager" then
     Hooks:PostHook(WinPlatformManager, "set_rich_presence", "FixCustomHeistStatus", function(self)
         if not Global.game_settings.single_player and Global.game_settings.permission ~= "private" and self._current_presence ~= "Idle" and managers.network and managers.network.matchmake.lobby_handler  then
             local job = managers.job:current_job_data()
-            if job and job.custom and Steam then
-                Steam:set_rich_presence("steam_display", "#raw_status")
+            if job and job.custom and Distribution then
+                Distribution:set_rich_presence("steam_display", "#raw_status")
             end
         end
     end)
